@@ -176,7 +176,7 @@ contain all otherwise matching databoxes.</string>
     </widget>
    </item>
    <item>
-    <widget class="LoweredTableWidget" name="resultsTableWidget">
+    <widget class="LoweredTableWidget" name="contactTableWidget">
      <property name="enabled">
       <bool>false</bool>
      </property>

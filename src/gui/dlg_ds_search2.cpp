@@ -30,11 +30,11 @@
 /*
  * Column indexes into recipient table widget.
  */
-#define RTW_CHECK 0
-#define RTW_ID 1
-#define RTW_TYPE 2
-#define RTW_NAME 3
-#define RTW_ADDR 4
+#define CON_COL_CHECKBOX 0
+#define CON_COL_BOX_ID 1
+#define CON_COL_BOX_TYPE 2
+#define CON_COL_BOX_NAME 3
+#define CON_COL_ADDRESS 4
 
 DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
     const QString &userName)
@@ -52,17 +52,17 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
 	/* Set default line height for table views/widgets. */
 	this->contactTableWidget->setEnabled(false);
 	this->contactTableWidget->setNarrowedLineHeight();
-	this->contactTableWidget->setColumnWidth(RTW_CHECK,20);
-	this->contactTableWidget->setColumnWidth(RTW_ID,70);
-	this->contactTableWidget->setColumnWidth(RTW_TYPE,70);
-	this->contactTableWidget->setColumnWidth(RTW_NAME,200);
+	this->contactTableWidget->setColumnWidth(CON_COL_CHECKBOX, 20);
+	this->contactTableWidget->setColumnWidth(CON_COL_BOX_ID, 70);
+	this->contactTableWidget->setColumnWidth(CON_COL_BOX_TYPE, 70);
+	this->contactTableWidget->setColumnWidth(CON_COL_BOX_NAME, 200);
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	this->searchPushButton->setEnabled(false);
 	this->resultGroupBox->hide();
 
 	if (this->contactTableWidget->rowCount() > 0) {
-		this->contactTableWidget->selectColumn(0);
+		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
 		this->contactTableWidget->selectRow(0);
 	}
 
@@ -102,7 +102,7 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
 void DlgSearch2::setFirtsColumnActive(void)
 /* ========================================================================= */
 {
-	this->contactTableWidget->selectColumn(0);
+	this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
 	this->contactTableWidget->selectRow(
 	    this->contactTableWidget->currentRow());
 }
@@ -185,7 +185,7 @@ isds_DbType box_type, const QString &phrase)
 	this->resultGroupBox->setEnabled(true);
 
 	if (ret != IE_SUCCESS) {
-		delete task;
+		delete task; task = NULL;
 		this->searchResultText->setText(resultString);
 		return;
 	}
@@ -242,19 +242,19 @@ isds_DbType box_type, const QString &phrase)
 		this->contactTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setCheckState(Qt::Unchecked);
-		this->contactTableWidget->setItem(row, RTW_CHECK, item);
+		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
 		item = new QTableWidgetItem;
 		item->setText(dbID);
-		this->contactTableWidget->setItem(row, RTW_ID, item);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
 		item = new QTableWidgetItem;
 		item->setText(convertDbTypeToString(dbType));
-		this->contactTableWidget->setItem(row, RTW_TYPE, item);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_TYPE, item);
 		item = new QTableWidgetItem;
 		item->setText(name);
-		this->contactTableWidget->setItem(row, RTW_NAME, item);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
 		item = new QTableWidgetItem;
 		item->setText(address);
-		this->contactTableWidget->setItem(row, RTW_ADDR, item);
+		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
 		//this->contactTableWidget->resizeColumnsToContents();
 
 		box = box->next;
@@ -285,8 +285,8 @@ void DlgSearch2::enableOkButton(void)
 /* ========================================================================= */
 {
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-		if (this->contactTableWidget->item(i,RTW_CHECK)->checkState()) {
+	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
+		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
 			this->buttonBox->button(QDialogButtonBox::Ok)->
 			    setEnabled(true);
 		}
@@ -302,10 +302,10 @@ void DlgSearch2::enableOkButton(void)
 void DlgSearch2::addSelectedDbIDs(void)
 /* ========================================================================= */
 {
-	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-		if (this->contactTableWidget->item(i,RTW_CHECK)->checkState()) {
+	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
+		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
 			m_dbIdList.append(this->contactTableWidget->
-			    item(i, RTW_ID)->text());
+			    item(i, CON_COL_BOX_ID)->text());
 		}
 	}
 }
@@ -324,6 +324,6 @@ void DlgSearch2::contactItemDoubleClicked(const QModelIndex &index)
 	}
 
 	m_dbIdList.append(this->contactTableWidget->
-	    item(index.row(), RTW_ID)->text());
+	    item(index.row(), CON_COL_BOX_ID)->text());
 	this->close();
 }

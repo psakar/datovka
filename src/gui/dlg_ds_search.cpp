@@ -30,6 +30,13 @@
 #include "src/worker/pool.h"
 #include "src/worker/task_search_owner.h"
 
+#define CON_COL_CHECKBOX 0
+#define CON_COL_BOX_ID 1
+#define CON_COL_BOX_NAME 2
+#define CON_COL_ADDRESS 3
+#define CON_COL_POST_CODE 4
+#define CON_COL_PDZ 5
+
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
     const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QWidget *parent, const QString &userName)
@@ -45,7 +52,7 @@ DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 {
 	setupUi(this);
 	/* Set default line height for table views/widgets. */
-	resultsTableWidget->setNarrowedLineHeight();
+	contactTableWidget->setNarrowedLineHeight();
 
 	initSearchWindow();
 }
@@ -57,7 +64,7 @@ DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 void DlgDsSearch::initSearchWindow(void)
 /* ========================================================================= */
 {
-	this->resultsTableWidget->setColumnHidden(5, true);
+	this->contactTableWidget->setColumnHidden(CON_COL_PDZ, true);
 
 	QString dbOpenAddressing = "";
 	QString toolTipInfo = "";
@@ -99,12 +106,12 @@ void DlgDsSearch::initSearchWindow(void)
 	this->dataBoxTypeCBox->addItem(tr("PFO – Podnikající fyzická osoba"));
 	this->dataBoxTypeCBox->addItem(tr("FO – Fyzická osoba"));
 
-	this->resultsTableWidget->setColumnWidth(0,20);
-	this->resultsTableWidget->setColumnWidth(1,60);
-	this->resultsTableWidget->setColumnWidth(2,120);
-	this->resultsTableWidget->setColumnWidth(3,100);
+	this->contactTableWidget->setColumnWidth(CON_COL_CHECKBOX, 20);
+	this->contactTableWidget->setColumnWidth(CON_COL_BOX_ID, 60);
+	this->contactTableWidget->setColumnWidth(CON_COL_BOX_NAME, 120);
+	this->contactTableWidget->setColumnWidth(CON_COL_ADDRESS, 100);
 
-	connect(this->resultsTableWidget,
+	connect(this->contactTableWidget,
 	    SIGNAL(itemSelectionChanged()), this,
 	    SLOT(setFirtsColumnActive()));
 
@@ -118,25 +125,25 @@ void DlgDsSearch::initSearchWindow(void)
 	    this, SLOT(checkInputFields()));
 	connect(this->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
 	    this, SLOT(checkInputFields()));
-	connect(this->resultsTableWidget,SIGNAL(itemClicked(QTableWidgetItem*)),
+	connect(this->contactTableWidget,SIGNAL(itemClicked(QTableWidgetItem*)),
 	    this, SLOT(enableOkButton()));
-	connect(this->resultsTableWidget,
+	connect(this->contactTableWidget,
 	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
 	    SLOT(enableOkButton()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(insertDsItems()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
 	    SLOT(searchDataBox()));
-	connect(this->resultsTableWidget, SIGNAL(doubleClicked(QModelIndex)),
+	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	this->resultsTableWidget->
+	this->contactTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	this->resultsTableWidget->installEventFilter(
+	this->contactTableWidget->installEventFilter(
 	    new TableHomeEndFilter(this));
-	this->resultsTableWidget->installEventFilter(
+	this->contactTableWidget->installEventFilter(
 	    new TableSpaceSelectionFilter(this));
 
 	pingTimer = new QTimer(this);
@@ -156,9 +163,9 @@ void DlgDsSearch::initSearchWindow(void)
 void DlgDsSearch::setFirtsColumnActive(void)
 /* ========================================================================= */
 {
-	this->resultsTableWidget->selectColumn(0);
-	this->resultsTableWidget->selectRow(
-	    this->resultsTableWidget->currentRow());
+	this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
+	this->contactTableWidget->selectRow(
+	    this->contactTableWidget->currentRow());
 }
 
 
@@ -286,8 +293,8 @@ void DlgDsSearch::checkInputFields(void)
 void DlgDsSearch::searchDataBox(void)
 /* ========================================================================= */
 {
-	this->resultsTableWidget->setRowCount(0);
-	this->resultsTableWidget->setEnabled(false);
+	this->contactTableWidget->setRowCount(0);
+	this->contactTableWidget->setEnabled(false);
 
 	if (this->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
 		QMessageBox::information(this, tr("Search result"),
@@ -400,7 +407,7 @@ void DlgDsSearch::searchDataBox(void)
 
 	while (0 != box) {
 
-		this->resultsTableWidget->setEnabled(true);
+		this->contactTableWidget->setEnabled(true);
 		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
 		Q_ASSERT(0 != item);
 		QVector<QString> contact;
@@ -466,7 +473,7 @@ void DlgDsSearch::searchDataBox(void)
 		box = box->next;
 	}
 
-	this->resultsTableWidget->resizeColumnsToContents();
+	this->contactTableWidget->resizeColumnsToContents();
 
 fail:
 	isds_PersonName_free(&personName);
@@ -484,8 +491,8 @@ void DlgDsSearch::enableOkButton(void)
 /* ========================================================================= */
 {
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
-		if (this->resultsTableWidget->item(i,0)->checkState()) {
+	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
+		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
 			this->buttonBox->button(QDialogButtonBox::Ok)->
 			    setEnabled(true);
 		}
@@ -501,36 +508,36 @@ void DlgDsSearch::addContactsToTable(
     const QList< QVector<QString> > &contactList)
 /* ========================================================================= */
 {
-	this->resultsTableWidget->setRowCount(0);
+	this->contactTableWidget->setRowCount(0);
 
-	this->resultsTableWidget->setEnabled(true);
+	this->contactTableWidget->setEnabled(true);
 	for (int i = 0; i < contactList.count(); i++) {
 
-		int row = this->resultsTableWidget->rowCount();
-		this->resultsTableWidget->insertRow(row);
+		int row = this->contactTableWidget->rowCount();
+		this->contactTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setCheckState(Qt::Unchecked);
-		this->resultsTableWidget->setItem(row,0,item);
+		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
 		item = new QTableWidgetItem;
 		item->setText(contactList[i].at(0));
-		this->resultsTableWidget->setItem(row,1,item);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
 		item = new QTableWidgetItem;
 		item->setText(contactList[i].at(1));
-		this->resultsTableWidget->setItem(row,2,item);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
 		item = new QTableWidgetItem;
 		item->setText(contactList[i].at(2));
-		this->resultsTableWidget->setItem(row,3,item);
+		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
 		item = new QTableWidgetItem;
 		item->setText(contactList[i].at(3));
-		this->resultsTableWidget->setItem(row,4,item);
+		this->contactTableWidget->setItem(row, CON_COL_POST_CODE, item);
 		item = new QTableWidgetItem;
 		item->setText(contactList[i].at(4));
-		this->resultsTableWidget->setItem(row,5,item);
+		this->contactTableWidget->setItem(row, CON_COL_PDZ, item);
 	}
 
-	if (this->resultsTableWidget->rowCount() > 0) {
-		this->resultsTableWidget->selectColumn(0);
-		this->resultsTableWidget->selectRow(0);
+	if (this->contactTableWidget->rowCount() > 0) {
+		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
+		this->contactTableWidget->selectRow(0);
 	}
 
 }
@@ -563,8 +570,8 @@ void DlgDsSearch::insertDsItems(void)
 {
 	if (ACT_ADDNEW == m_action) {
 		Q_ASSERT(0 != m_recipientTableWidget);
-		for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
-			if (this->resultsTableWidget->item(i,0)->checkState()) {
+		for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
+			if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
 				insertContactToRecipentTable(i);
 			}
 		}
@@ -601,26 +608,26 @@ void DlgDsSearch::insertContactToRecipentTable(int selRow)
 /* ========================================================================= */
 {
 	if (!isInRecipientTable(
-	    this->resultsTableWidget->item(selRow, 1)->text())) {
+	        this->contactTableWidget->item(selRow, 1)->text())) {
 
 		int row = m_recipientTableWidget->rowCount();
 		m_recipientTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(this->resultsTableWidget->
-		    item(selRow, 1)->text());
+		item->setText(this->contactTableWidget->
+		    item(selRow, CON_COL_BOX_ID)->text());
 		this->m_recipientTableWidget->setItem(row,0,item);
 		item = new QTableWidgetItem;
-		item->setText(this->resultsTableWidget->
-		    item(selRow, 2)->text());
+		item->setText(this->contactTableWidget->
+		    item(selRow, CON_COL_BOX_NAME)->text());
 		this->m_recipientTableWidget->setItem(row,1,item);
 		item = new QTableWidgetItem;
-		item->setText(this->resultsTableWidget->
-		    item(selRow, 3)->text() + " " +
-		    this->resultsTableWidget->item(selRow, 4)->text());
+		item->setText(this->contactTableWidget->
+		    item(selRow, CON_COL_ADDRESS)->text() + " " +
+		    this->contactTableWidget->item(selRow, CON_COL_POST_CODE)->text());
 		this->m_recipientTableWidget->setItem(row, 2, item);
 		item = new QTableWidgetItem;
 		item->setText(m_dbEffectiveOVM ? tr("no") :
-		    this->resultsTableWidget->item(selRow, 5)->text());
+		    this->contactTableWidget->item(selRow, CON_COL_PDZ)->text());
 		item->setTextAlignment(Qt::AlignCenter);
 		this->m_recipientTableWidget->setItem(row, 3, item);
 	}
