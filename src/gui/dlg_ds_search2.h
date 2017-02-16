@@ -27,7 +27,7 @@
 #include <QDialog>
 
 #include "src/common.h"
-#include "src/io/isds_sessions.h"
+#include "src/worker/task_search_owner_fulltext.h"
 #include "ui_dlg_ds_search2.h"
 
 class DlgSearch2 : public QDialog, public Ui::Search2 {
@@ -51,8 +51,10 @@ private slots:
 	void contactItemDoubleClicked(const QModelIndex &index);
 
 private:
-	void findDataboxes(quint64 pageNumber, isds_fulltext_target target,
-	    isds_DbType box_type, const QString &phrase);
+	void findDataboxes(quint64 pageNumber,
+	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	    enum TaskSearchOwnerFulltext::BoxType boxType,
+	    const QString &phrase);
 
 	Action m_action;
 	QStringList &m_dbIdList;
@@ -60,10 +62,9 @@ private:
 
 	// hold some search settings for showing of next results
 	quint64 m_currentPage;
-	isds_fulltext_target m_target;
-	isds_DbType m_box_type;
+	enum TaskSearchOwnerFulltext::FulltextTarget m_target;
+	enum TaskSearchOwnerFulltext::BoxType m_boxType;
 	QString m_phrase;
 };
-
 
 #endif /* _DLG_DS_SEARCH2_H_ */

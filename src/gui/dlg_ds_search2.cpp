@@ -22,10 +22,10 @@
  */
 
 #include "src/gui/dlg_ds_search2.h"
+#include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
-#include "src/worker/task_search_owner_fulltext.h"
 
 /*
  * Column indexes into recipient table widget.
@@ -43,8 +43,8 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
     m_dbIdList(dbIdList),
     m_userName(userName),
     m_currentPage(0),
-    m_target(FULLTEXT_ALL),
-    m_box_type(DBTYPE_SYSTEM),
+    m_target(TaskSearchOwnerFulltext::FT_ALL),
+    m_boxType(TaskSearchOwnerFulltext::BT_ALL),
     m_phrase()
 {
 	setupUi(this);
@@ -118,27 +118,33 @@ void DlgSearch2::searchNewDataboxes()
 	m_phrase = this->textLineEdit->text();
 	m_currentPage = 0;
 
-	if (this->dbIDRadioButton->isChecked()) {
-		m_target = FULLTEXT_BOX_ID;
+	if (this->generalRadioButton->isChecked()) {
+		m_target = TaskSearchOwnerFulltext::FT_ALL;
+	} else if (this->dbIDRadioButton->isChecked()) {
+		m_target = TaskSearchOwnerFulltext::FT_BOX_ID;
 	} else if (this->icRadioButton->isChecked()) {
-		m_target = FULLTEXT_IC;
+		m_target = TaskSearchOwnerFulltext::FT_IC;
 	} else if (this->addressRadioButton->isChecked()) {
-		m_target = FULLTEXT_ADDRESS;
-	}
-
-	if (this->ovmRadioButton->isChecked()) {
-		m_box_type = DBTYPE_OVM;
-	} else if (this->poRadioButton->isChecked()) {
-		m_box_type = DBTYPE_PO;
-	} else if (this->pfoRadioButton->isChecked()) {
-		m_box_type = DBTYPE_PFO;
-	} else if (this->foRradioButton->isChecked()) {
-		m_box_type = DBTYPE_FO;
+		m_target = TaskSearchOwnerFulltext::FT_ADDRESS;
 	} else {
-		m_box_type = DBTYPE_SYSTEM;
+		m_target = TaskSearchOwnerFulltext::FT_ALL;
 	}
 
-	findDataboxes(m_currentPage, m_target, m_box_type , m_phrase);
+	if (this->allRadioButton->isChecked()) {
+		m_boxType = TaskSearchOwnerFulltext::BT_ALL;
+	} else  if (this->ovmRadioButton->isChecked()) {
+		m_boxType = TaskSearchOwnerFulltext::BT_OVM;
+	} else if (this->poRadioButton->isChecked()) {
+		m_boxType = TaskSearchOwnerFulltext::BT_PO;
+	} else if (this->pfoRadioButton->isChecked()) {
+		m_boxType = TaskSearchOwnerFulltext::BT_PFO;
+	} else if (this->foRradioButton->isChecked()) {
+		m_boxType = TaskSearchOwnerFulltext::BT_FO;
+	} else {
+		m_boxType = TaskSearchOwnerFulltext::BT_ALL;
+	}
+
+	findDataboxes(m_currentPage, m_target, m_boxType , m_phrase);
 }
 
 
@@ -150,7 +156,7 @@ void DlgSearch2::showNextDataboxes()
 /* ========================================================================= */
 {
 	++m_currentPage;
-	findDataboxes(m_currentPage, m_target, m_box_type , m_phrase);
+	findDataboxes(m_currentPage, m_target, m_boxType , m_phrase);
 }
 
 
@@ -158,8 +164,9 @@ void DlgSearch2::showNextDataboxes()
 /*
  * Search databoxes on ISDS
  */
-void DlgSearch2::findDataboxes(quint64 pageNumber, isds_fulltext_target target,
-isds_DbType box_type, const QString &phrase)
+void DlgSearch2::findDataboxes(quint64 pageNumber,
+    enum TaskSearchOwnerFulltext::FulltextTarget target,
+    enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
 /* ========================================================================= */
 {
 	this->contactTableWidget->setRowCount(0);
@@ -172,8 +179,8 @@ isds_DbType box_type, const QString &phrase)
 
 	TaskSearchOwnerFulltext *task;
 	task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
-	    phrase, &target, &box_type,
-	    TaskSearchOwnerFulltext::maxResponseSize, pageNumber);
+	    phrase, target, boxType, TaskSearchOwnerFulltext::maxResponseSize,
+	    pageNumber);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 

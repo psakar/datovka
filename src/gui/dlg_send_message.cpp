@@ -1529,11 +1529,10 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 		}
 
 		// search dbID only
-		const isds_fulltext_target target = FULLTEXT_BOX_ID;
-
 		TaskSearchOwnerFulltext *task =
-		    new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
-		        dbID, &target, NULL);
+		    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, dbID,
+		        TaskSearchOwnerFulltext::FT_BOX_ID,
+		        TaskSearchOwnerFulltext::BT_ALL);
 		task->setAutoDelete(false);
 		globWorkPool.runSingle(task);
 

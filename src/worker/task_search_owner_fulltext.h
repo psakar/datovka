@@ -36,6 +36,21 @@ class TaskSearchOwnerFulltext : public Task {
 public:
 	static const quint64 maxResponseSize; /*!< Maximal response size. */
 
+	enum FulltextTarget {
+		FT_ALL, /*!< Search in all fields. */
+		FT_ADDRESS, /*!< Search in address. */
+		FT_IC, /* Search in organization identifier. */
+		FT_BOX_ID /* Search in box ID. */
+	};
+
+	enum BoxType {
+		BT_ALL, /*!< Search all types. */
+		BT_OVM,
+		BT_PO,
+		BT_PFO,
+		BT_FO
+	};
+
 	/*!
 	 * @brief Describes a data box.
 	 */
@@ -64,8 +79,7 @@ public:
 	 * @param[in] info     Sought box identifiers.
 	 */
 	explicit TaskSearchOwnerFulltext(const QString &userName,
-	    const QString &query, const isds_fulltext_target *target,
-	    const isds_DbType *box_typ,
+	    const QString &query, enum FulltextTarget target, enum BoxType type,
 	    quint64 pageSize = maxResponseSize, quint64 pageNumber = 0);
 
 	/*!
@@ -100,16 +114,15 @@ private:
 	 */
 	static
 	int isdsSearch2(const QString &userName,
-	    const QString &query, const isds_fulltext_target *target,
-	    const isds_DbType *box_type, quint64 pageSize, quint64 pageNumber,
-	    quint64 &totalMatchingBoxes, quint64 &currentPageStart,
-	    quint64 &currentPageSize, bool &isLastPage,
-	    QList<BoxEntry> &foundBoxes);
+	    const QString &query, enum FulltextTarget target, enum BoxType type,
+	    quint64 pageSize, quint64 pageNumber, quint64 &totalMatchingBoxes,
+	    quint64 &currentPageStart, quint64 &currentPageSize,
+	    bool &isLastPage, QList<BoxEntry> &foundBoxes);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
-	const QString m_query; /*!< search phrase. */
-	const isds_fulltext_target *m_target; /*!< Sought box identifiers. */
-	const isds_DbType *m_box_type;
+	const QString m_query; /*!< Search phrase. */
+	const enum FulltextTarget m_target; /*!< Full-text search target. */
+	const enum BoxType m_boxType; /*!< Sought box type. */
 };
 
 #endif /* _TASK_SEARCH_OWNER_FULLTEXT_H_ */
