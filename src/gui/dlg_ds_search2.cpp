@@ -170,7 +170,6 @@ isds_DbType box_type, const QString &phrase)
 
 	QString resultString = tr("Total found: 0") ;
 
-	struct isds_list *boxes = NULL;
 	TaskSearchOwnerFulltext *task;
 	task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
 	    phrase, &target, &box_type,
@@ -179,7 +178,6 @@ isds_DbType box_type, const QString &phrase)
 	globWorkPool.runSingle(task);
 
 	int ret = task->m_isdsRetError;
-	boxes = task->m_results; task->m_results = NULL;
 
 	this->resultGroupBox->show();
 	this->resultGroupBox->setEnabled(true);
@@ -194,16 +192,9 @@ isds_DbType box_type, const QString &phrase)
 	quint64 currentPageStart = task->m_currentPageStart;
 	quint64 currentPageSize = task->m_currentPageSize;
 	bool isLastPage = task->m_isLastPage;
+	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
 
 	delete task; task = NULL;
-
-	struct isds_list *box;
-	box = boxes;
-
-	QString name = tr("Unknown");
-	QString address = tr("Unknown");
-	QString dbID = "n/a";
-	isds_DbType dbType;
 
 	if (isLastPage) {
 		this->nextPushButton->setEnabled(false);
@@ -220,48 +211,27 @@ isds_DbType box_type, const QString &phrase)
 
 	this->searchResultText->setText(resultString);
 
-	while (0 != box) {
-
-		this->contactTableWidget->setEnabled(true);
-
-		isds_fulltext_result *boxdata =
-		    (isds_fulltext_result *) box->data;
-		Q_ASSERT(0 != boxdata);
-		if (NULL != boxdata->dbID) {
-			dbID = boxdata->dbID;
-		}
-		dbType = boxdata->dbType;
-		if (NULL != boxdata->name) {
-			name = boxdata->name;
-		}
-		if (NULL != boxdata->address) {
-			address = boxdata->address;
-		}
-
+	this->contactTableWidget->setEnabled(!foundBoxes.isEmpty());
+	foreach (const TaskSearchOwnerFulltext::BoxEntry &entry, foundBoxes) {
 		int row = this->contactTableWidget->rowCount();
 		this->contactTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
 		item->setCheckState(Qt::Unchecked);
 		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
 		item = new QTableWidgetItem;
-		item->setText(dbID);
+		item->setText(entry.id);
 		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
 		item = new QTableWidgetItem;
-		item->setText(convertDbTypeToString(dbType));
+		item->setText(convertDbTypeToString(entry.type));
 		this->contactTableWidget->setItem(row, CON_COL_BOX_TYPE, item);
 		item = new QTableWidgetItem;
-		item->setText(name);
+		item->setText(entry.name);
 		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
 		item = new QTableWidgetItem;
-		item->setText(address);
+		item->setText(entry.address);
 		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
 		//this->contactTableWidget->resizeColumnsToContents();
-
-		box = box->next;
 	}
-
-	isds_list_free(&boxes);
-
 }
 
 

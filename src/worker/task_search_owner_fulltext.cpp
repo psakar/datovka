@@ -32,6 +32,19 @@
 /* ISDS limits the response size to 100 entries. */
 const quint64 TaskSearchOwnerFulltext::maxResponseSize = 100;
 
+TaskSearchOwnerFulltext::BoxEntry::BoxEntry(const QString &i, int t,
+    const QString &n, const QString &ad, bool ovm, bool ac, bool ps, bool cs)
+    : id(i),
+    type(t),
+    name(n),
+    address(ad),
+    effectiveOVM(ovm),
+    active(ac),
+    publicSending(ps),
+    commercialSending(cs)
+{
+}
+
 TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
     const QString &query, const isds_fulltext_target *target,
     const isds_DbType *box_type, quint64 pageSize, quint64 pageNumber)
@@ -42,7 +55,7 @@ TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
     m_currentPageStart(0),
     m_currentPageSize(0),
     m_isLastPage(false),
-    m_results(NULL),
+    m_foundBoxes(),
     m_userName(userName),
     m_query(query),
     m_target(target),
@@ -50,11 +63,6 @@ TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
 {
 	Q_ASSERT(!m_userName.isEmpty());
 	Q_ASSERT(NULL != m_query);
-}
-
-TaskSearchOwnerFulltext::~TaskSearchOwnerFulltext(void)
-{
-	isds_list_free(&m_results);
 }
 
 void TaskSearchOwnerFulltext::run(void)
@@ -76,7 +84,7 @@ void TaskSearchOwnerFulltext::run(void)
 
 	m_isdsRetError = isdsSearch2(m_userName, m_query, m_target, m_box_type,
 	    m_pageSize, m_pageNumber, m_totalMatchingBoxes, m_currentPageStart,
-	    m_currentPageSize, m_isLastPage, &m_results);
+	    m_currentPageSize, m_isLastPage, m_foundBoxes);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -86,15 +94,47 @@ void TaskSearchOwnerFulltext::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
+/*!
+ * @brief Adds entries from libisds list into antry list.
+ *
+ * @param[out] boxList List of boxes to append data to.
+ * @param[in]  boxes List of boxes to copy data from.
+ */
+static
+void appendBoxEntries(QList<TaskSearchOwnerFulltext::BoxEntry> &foundBoxes,
+    const struct isds_list *boxes)
+{
+	while (boxes != NULL) {
+		const struct isds_fulltext_result *result =
+		    (struct isds_fulltext_result *)boxes->data;
+		if (result == NULL) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		if (result->dbID == NULL) {
+			Q_ASSERT(0);
+			return;
+		}
+		foundBoxes.append(
+		    TaskSearchOwnerFulltext::BoxEntry(result->dbID,
+		        result->dbType, result->name, result->address,
+		        result->dbEffectiveOVM, result->active,
+		        result->public_sending, result->commercial_sending));
+
+		boxes = boxes->next;
+	}
+}
+
 int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
     const QString &query, const isds_fulltext_target *target,
     const isds_DbType *box_type, quint64 pageSize, quint64 pageNumber,
     quint64 &totalMatchingBoxes, quint64 &currentPageStart,
-    quint64 &currentPageSize, bool &isLastPage, struct isds_list **results)
+    quint64 &currentPageSize, bool &isLastPage, QList<BoxEntry> &foundBoxes)
 {
 	isds_error ret = IE_ERROR;
 
-	if ((NULL == results) || (NULL == query)) {
+	if (NULL == query) {
 		Q_ASSERT(0);
 		return IE_ERROR;
 	}
@@ -112,11 +152,12 @@ int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
 	unsigned long int *iCurrentPageStart = NULL;
 	unsigned long int *iCurentPageSize = NULL;
 	_Bool *iIsLastPage = NULL;
+	struct isds_list *iFoundBoxes = NULL;
 
 	ret = isds_find_box_by_fulltext(session, query.toStdString().c_str(),
 	    target, box_type, &iPageSize, &iPageNumber,
 	    NULL, &iTotalMatchingBoxes, &iCurrentPageStart, &iCurentPageSize,
-	    &iIsLastPage, results);
+	    &iIsLastPage, &iFoundBoxes);
 
 	/* Free allocated stuff. */
 	if (iTotalMatchingBoxes != NULL) {
@@ -134,6 +175,10 @@ int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
 	if (iIsLastPage != NULL) {
 		isLastPage = *iIsLastPage;
 		free(iIsLastPage); iIsLastPage = NULL;
+	}
+	if (iFoundBoxes != NULL) {
+		appendBoxEntries(foundBoxes, iFoundBoxes);
+		isds_list_free(&iFoundBoxes);
 	}
 
 	logDebugLv1NL("Find databox returned '%d': '%s'.",

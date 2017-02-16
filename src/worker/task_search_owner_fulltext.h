@@ -24,6 +24,7 @@
 #ifndef _TASK_SEARCH_OWNER_FULLTEXT_H_
 #define _TASK_SEARCH_OWNER_FULLTEXT_H_
 
+#include <QList>
 #include <QString>
 
 #include "src/worker/task.h"
@@ -36,6 +37,27 @@ public:
 	static const quint64 maxResponseSize; /*!< Maximal response size. */
 
 	/*!
+	 * @brief Describes a data box.
+	 */
+	class BoxEntry {
+	public:
+		/*!
+		 *  @brief Constructor.
+		 */
+		BoxEntry(const QString &i, int t, const QString &n,
+		    const QString &ad, bool ovm, bool ac, bool ps, bool cs);
+
+		QString id; /*!< Data box id. */
+		int type; /*!< Data box type (as specified in libisds). */
+		QString name; /*!< Data box name. */
+		QString address; /*!< Post address. */
+		bool effectiveOVM; /*!< Box has effective OVM role. */
+		bool active; /*!< Box is active. */
+		bool publicSending; /*!< Accepts non-commercial messages. */
+		bool commercialSending; /*!< Box can receive PDZ from current box. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account identifier (user login name).
@@ -45,12 +67,6 @@ public:
 	    const QString &query, const isds_fulltext_target *target,
 	    const isds_DbType *box_typ,
 	    quint64 pageSize = maxResponseSize, quint64 pageNumber = 0);
-
-	/*!
-	 * @brief Destructor.
-	 */
-	virtual
-	~TaskSearchOwnerFulltext(void);
 
 	/*!
 	 * @brief Performs action.
@@ -65,7 +81,7 @@ public:
 	quint64 m_currentPageStart; /*!< Index of the first entry on the page. */
 	quint64 m_currentPageSize; /*!< Size of the actual page. */
 	bool m_isLastPage; /*!< Set true if last page acquired. */
-	struct isds_list *m_results; /*!< List of found data boxes. */
+	QList<BoxEntry> m_foundBoxes; /*!< List of found boxes. */
 
 private:
 	/*!
@@ -88,7 +104,7 @@ private:
 	    const isds_DbType *box_type, quint64 pageSize, quint64 pageNumber,
 	    quint64 &totalMatchingBoxes, quint64 &currentPageStart,
 	    quint64 &currentPageSize, bool &isLastPage,
-	    struct isds_list **results);
+	    QList<BoxEntry> &foundBoxes);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	const QString m_query; /*!< search phrase. */

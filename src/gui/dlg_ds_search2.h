@@ -38,8 +38,8 @@ public:
 		ACT_ADDNEW
 	};
 
-	DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent = 0,
-	    const QString &userName = QString());
+	DlgSearch2(Action action, QStringList &dbIdList,
+	    QWidget *parent = Q_NULLPTR, const QString &userName = QString());
 
 private slots:
 	void enableOkButton(void);

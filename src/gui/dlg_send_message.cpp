@@ -1528,36 +1528,32 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 			}
 		}
 
-		struct isds_list *box = NULL;
-		TaskSearchOwnerFulltext *task;
 		// search dbID only
 		const isds_fulltext_target target = FULLTEXT_BOX_ID;
 
-		task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
-		    dbID, &target, NULL);
+		TaskSearchOwnerFulltext *task =
+		    new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
+		        dbID, &target, NULL);
 		task->setAutoDelete(false);
 		globWorkPool.runSingle(task);
 
-		box = task->m_results; task->m_results = NULL;
-		delete task;
+		QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(
+		    task->m_foundBoxes);
+		delete task; task = Q_NULLPTR;
 
 		QString name = tr("Unknown");
 		QString address = tr("Unknown");
 		QString pdz = "n/a";
 		QString dbType = "n/a";
 
-		if (box != 0) {
-			isds_fulltext_result *item =
-			    (isds_fulltext_result *) box->data;
-			Q_ASSERT(0 != item);
-			if (NULL != item->name) {
-				name = item->name;
-			}
-			if (NULL != item->address) {
-				address = item->address;
-			}
-			dbType = convertDbTypeToString(item->dbType);
-			if (!item->active) {
+		if (foundBoxes.size() == 1) {
+			const TaskSearchOwnerFulltext::BoxEntry &entry(
+			    foundBoxes.first());
+
+			name = entry.name;
+			address = entry.address;
+			dbType = convertDbTypeToString(entry.type);
+			if (!entry.active) {
 				QMessageBox msgBox;
 				msgBox.setIcon(QMessageBox::Warning);
 				msgBox.setWindowTitle(tr("Data box is not active"));
@@ -1570,11 +1566,11 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 				msgBox.exec();
 				continue;
 			}
-			if (item->public_sending) {
+			if (entry.publicSending) {
 				pdz = tr("no");
-			} else if (item->commercial_sending) {
+			} else if (entry.commercialSending) {
 				pdz = tr("yes");
-			} else if (item->dbEffectiveOVM) {
+			} else if (entry.effectiveOVM) {
 				pdz = tr("no");
 			} else {
 				QMessageBox msgBox;
@@ -1590,7 +1586,7 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 				msgBox.exec();
 				continue;
 			}
-		} else {
+		} else if (foundBoxes.isEmpty()) {
 			QMessageBox msgBox;
 			msgBox.setIcon(QMessageBox::Critical);
 			msgBox.setWindowTitle(tr("Wrong recipient"));
@@ -1600,9 +1596,10 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 			msgBox.setDefaultButton(QMessageBox::Ok);
 			msgBox.exec();
 			continue;
+		} else {
+			Q_ASSERT(0);
+			continue;
 		}
-
-		isds_list_free(&box);
 
 		this->recipientTableWidget->insertRow(row);
 		QTableWidgetItem *item = new QTableWidgetItem;
