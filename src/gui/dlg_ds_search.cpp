@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,22 +21,20 @@
  * the two.
  */
 
-
-#include <cstddef>
 #include <QMessageBox>
 
-#include "dlg_ds_search.h"
+#include "src/gui/dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_search_owner.h"
 
-
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
     const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QWidget *parent, const QString &userName)
     : QDialog(parent),
+    pingTimer(Q_NULLPTR),
     m_action(action),
     m_recipientTableWidget(recipientTableWidget),
     m_dbType(dbType),
@@ -51,7 +49,6 @@ DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 
 	initSearchWindow();
 }
-
 
 /* ========================================================================= */
 /*

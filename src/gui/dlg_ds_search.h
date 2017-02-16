@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,8 @@
  * the two.
  */
 
-
 #ifndef _DLG_DS_SEARCH_H_
 #define _DLG_DS_SEARCH_H_
-
 
 #include <QDialog>
 #include <QTimer>
@@ -32,10 +30,8 @@
 #include "src/common.h"
 #include "ui_dlg_ds_search.h"
 
-
 class DlgDsSearch : public QDialog, public Ui::DsSearch {
 	Q_OBJECT
-
 public:
 	enum Action {
 		ACT_BLANK,
@@ -44,7 +40,7 @@ public:
 
 	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 	    const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-	    QWidget *parent = 0, const QString &userName = QString());
+	    QWidget *parent = Q_NULLPTR, const QString &userName = QString());
 
 private slots:
 	void checkInputFields(void);
@@ -70,6 +66,5 @@ private:
 	const QString m_userName;
 	bool m_showInfoLabel;
 };
-
 
 #endif /* DLG_DS_SEARCH_H */
