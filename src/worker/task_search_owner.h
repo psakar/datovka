@@ -34,6 +34,16 @@
 class TaskSearchOwner : public Task {
 public:
 	/*!
+	 * @Brief Return state describing what happened.
+	 */
+	enum Result {
+		SO_SUCCESS, /*!< Operation was successful. */
+		SO_BAD_DATA, /*!< Data related error, non-existent data. */
+		SO_COM_ERROR, /*!< Communication error. */
+		SO_ERROR /*!< Other type of error occurred. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account identifier (user login name).
@@ -62,13 +72,18 @@ public:
 	 * @param[in]  userName Account identifier (user login name).
 	 * @param[in]  info     Sought box identifiers.
 	 * @param[out] results  List of found data boxes.
-	 * @return Value of isds_error.
+	 * @param[out] error Short error description.
+	 * @param[out] longError Long error description.
+	 * @return Error value.
 	 */
 	static
-	int isdsSearch(const QString &userName,
-	    const struct isds_DbOwnerInfo *info, struct isds_list **results);
+	enum Result isdsSearch(const QString &userName,
+	    const struct isds_DbOwnerInfo *info, struct isds_list **results,
+	    QString &error, QString &longError);
 
-	int m_isdsRetError; /*!< Returned error code. */
+	enum Result m_result; /*!< Return state. */
+	QString m_isdsError; /*!< Error description.  */
+	QString m_isdsLongError; /*!< Long error description. */
 	struct isds_list *m_results; /*!< List of found data boxes. */
 
 private:

@@ -305,7 +305,9 @@ void DlgDsSearch::searchDataBox(void)
 		return;
 	}
 
-	struct isds_ctx *session;
+	enum TaskSearchOwner::Result result = TaskSearchOwner::SO_ERROR;
+	QString errMsg;
+	QString longErrMsg;
 	struct isds_PersonName *personName = NULL;
 	struct isds_Address *address = NULL;
 	struct isds_DbOwnerInfo *ownerInfo = NULL;
@@ -350,49 +352,35 @@ void DlgDsSearch::searchDataBox(void)
 		goto fail;
 	}
 
-	int status;
 	TaskSearchOwner *task;
 
 	task = new (std::nothrow) TaskSearchOwner(m_userName, ownerInfo);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
-	status = task->m_isdsRetError;
+	result = task->m_result;
+	errMsg = task->m_isdsError;
+	longErrMsg = task->m_isdsLongError;
 	boxes = task->m_results; task->m_results = NULL;
 
 	delete task;
 	isds_DbOwnerInfo_free(&ownerInfo);
 
-	session = globIsdsSessions.session(m_userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-
-	switch (status) {
-	case IE_SUCCESS:
+	switch (result) {
+	case TaskSearchOwner::SO_SUCCESS:
 		break;
-	case IE_2BIG:
-	case IE_NOEXIST:
-	case IE_INVAL:
-	case IE_INVALID_CONTEXT:
+	case TaskSearchOwner::SO_BAD_DATA:
 		QMessageBox::information(this, tr("Search result"),
-		    isdsLongMessage(session), QMessageBox::Ok);
+		    longErrMsg, QMessageBox::Ok);
 		goto fail;
 		break;
-	case IE_ISDS:
-	case IE_NOT_LOGGED_IN:
-	case IE_CONNECTION_CLOSED:
-	case IE_TIMED_OUT:
-	case IE_NETWORK:
-	case IE_HTTP:
-	case IE_SOAP:
-	case IE_XML:
+	case TaskSearchOwner::SO_COM_ERROR:
 		QMessageBox::information(this, tr("Search result"),
 		    tr("It is not possible find databox because") + ":\n\n" +
-		    isdsLongMessage(session), QMessageBox::Ok);
+		    longErrMsg, QMessageBox::Ok);
 		goto fail;
 		break;
+	case TaskSearchOwner::SO_ERROR:
 	default:
 		QMessageBox::critical(this, tr("Search error"),
 		    tr("It is not possible find databox because "

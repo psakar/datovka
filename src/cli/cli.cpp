@@ -614,7 +614,6 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 	qDebug() << CLI_PREFIX << "find info about databox from username"
 	    <<  username;
 
-	struct isds_ctx *session;
 	struct isds_PersonName *personName = NULL;
 	struct isds_Address *address = NULL;
 	struct isds_DbOwnerInfo *ownerInfo = NULL;
@@ -681,20 +680,14 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 		return CLI_ERROR;
 	}
 
-	int status = TaskSearchOwner::isdsSearch(username, ownerInfo, &boxes);
+	QString errMsg;
+	QString longErrMsg;
+	enum TaskSearchOwner::Result result = TaskSearchOwner::isdsSearch(
+	    username, ownerInfo, &boxes, errMsg, longErrMsg);
 	isds_DbOwnerInfo_free(&ownerInfo);
 
-	session = globIsdsSessions.session(username);
-	if (NULL == session) {
-		errmsg = "Error while create find databox request";
-		isds_PersonName_free(&personName);
-		isds_Address_free(&address);
-		isds_DbOwnerInfo_free(&ownerInfo);
-		return CLI_ERROR;
-	}
-
-	if (IE_SUCCESS != status) {
-		errmsg = isdsLongMessage(session);
+	if (TaskSearchOwner::SO_SUCCESS != result) {
+		errmsg = longErrMsg;
 		isds_PersonName_free(&personName);
 		isds_Address_free(&address);
 		isds_DbOwnerInfo_free(&ownerInfo);
