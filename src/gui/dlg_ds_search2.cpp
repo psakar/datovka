@@ -41,7 +41,6 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
     m_action(action),
     m_dbIdList(dbIdList),
     m_userName(userName),
-    m_currentPage(0),
     m_target(TaskSearchOwnerFulltext::FT_ALL),
     m_boxType(TaskSearchOwnerFulltext::BT_ALL),
     m_phrase()
@@ -78,8 +77,6 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
 	    SLOT(enableOkButton()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
 	    SLOT(searchNewDataboxes()));
-	connect(this->nextPushButton, SIGNAL(clicked()), this,
-	    SLOT(showNextDataboxes()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(addSelectedDbIDs()));
 	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
@@ -115,7 +112,6 @@ void DlgSearch2::searchNewDataboxes()
 /* ========================================================================= */
 {
 	m_phrase = this->textLineEdit->text();
-	m_currentPage = 0;
 
 	if (this->generalRadioButton->isChecked()) {
 		m_target = TaskSearchOwnerFulltext::FT_ALL;
@@ -143,19 +139,7 @@ void DlgSearch2::searchNewDataboxes()
 		m_boxType = TaskSearchOwnerFulltext::BT_ALL;
 	}
 
-	findDataboxes(m_currentPage, m_target, m_boxType , m_phrase);
-}
-
-
-/* ========================================================================= */
-/*
- * Show next page from result
- */
-void DlgSearch2::showNextDataboxes()
-/* ========================================================================= */
-{
-	++m_currentPage;
-	findDataboxes(m_currentPage, m_target, m_boxType , m_phrase);
+	findDataboxes(m_target, m_boxType, m_phrase);
 }
 
 
@@ -163,23 +147,20 @@ void DlgSearch2::showNextDataboxes()
 /*
  * Search databoxes on ISDS
  */
-void DlgSearch2::findDataboxes(quint64 pageNumber,
+void DlgSearch2::findDataboxes(
     enum TaskSearchOwnerFulltext::FulltextTarget target,
     enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
 /* ========================================================================= */
 {
 	this->contactTableWidget->setRowCount(0);
 	this->contactTableWidget->setEnabled(false);
-	this->nextPushButton->setEnabled(false);
-	this->nextPushButton->hide();
 	this->resultGroupBox->hide();
 
 	QString resultString = tr("Total found: 0") ;
 
 	TaskSearchOwnerFulltext *task;
 	task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
-	    phrase, target, boxType, TaskSearchOwnerFulltext::maxResponseSize,
-	    pageNumber);
+	    phrase, target, boxType);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
@@ -195,25 +176,11 @@ void DlgSearch2::findDataboxes(quint64 pageNumber,
 	}
 
 	quint64 totalDb = task->m_totalMatchingBoxes;
-	quint64 currentPageStart = task->m_currentPageStart;
-	quint64 currentPageSize = task->m_currentPageSize;
-	bool isLastPage = task->m_isLastPage;
 	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
 
 	delete task; task = NULL;
 
-	if (isLastPage) {
-		this->nextPushButton->setEnabled(false);
-		this->nextPushButton->hide();
-	} else {
-		this->nextPushButton->setEnabled(true);
-		this->nextPushButton->show();
-	}
-
-	QString interval = QString::number(currentPageStart) + "-" +
-	    QString::number(currentPageStart + currentPageSize);
-	resultString = tr("Total found: ") + QString::number(totalDb);
-	resultString += "; " + tr("Shown: ") + interval;
+	resultString = tr("Total found") + ": " + QString::number(totalDb);
 
 	this->searchResultText->setText(resultString);
 

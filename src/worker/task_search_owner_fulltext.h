@@ -34,8 +34,6 @@
  */
 class TaskSearchOwnerFulltext : public Task {
 public:
-	static const quint64 maxResponseSize; /*!< Maximal response size. */
-
 	/*!
 	 * @brief Return state describing what happened.
 	 */
@@ -86,11 +84,13 @@ public:
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account identifier (user login name).
-	 * @param[in] info     Sought box identifiers.
+	 * @param[in] query Sought string.
+	 * @param[in] target Type of information to search the string in.
+	 * @param[in] type Type of data box to search for.
 	 */
 	explicit TaskSearchOwnerFulltext(const QString &userName,
-	    const QString &query, enum FulltextTarget target, enum BoxType type,
-	    quint64 pageSize = maxResponseSize, quint64 pageNumber = 0);
+	    const QString &query, enum FulltextTarget target,
+	    enum BoxType type);
 
 	/*!
 	 * @brief Performs action.
@@ -101,12 +101,7 @@ public:
 	enum Result m_result; /*!< Return state. */
 	QString m_isdsError; /*!< Error description.  */
 	QString m_isdsLongError; /*!< Long error description. */
-	quint64 m_pageSize; /*!< Actual requested page size. */
-	quint64 m_pageNumber; /*!< Requested page number. */
 	quint64 m_totalMatchingBoxes; /*!< Set to number of boxes matching request. */
-	quint64 m_currentPageStart; /*!< Index of the first entry on the page. */
-	quint64 m_currentPageSize; /*!< Size of the actual page. */
-	bool m_isLastPage; /*!< Set true if last page acquired. */
 	QList<BoxEntry> m_foundBoxes; /*!< List of found boxes. */
 
 private:
@@ -120,9 +115,19 @@ private:
 	 * @brief Search for data boxes matching supplied criteria.
 	 *
 	 * @param[in]  userName Account identifier (user login name).
-	 * @param[in]  info     Sought box identifiers.
-	 * @param[out] results  List of found data boxes.
-	 * @return Return code.
+	 * @param[in]  query Sought string.
+	 * @param[in]  target Type of information to search the string in.
+	 * @param[in]  type Type of data box to search for.
+	 * @patam[in]  pageSize Desired page size.
+	 * @param[in]  pageNumber Index of page to download.
+	 * @param[out] totalMatchingBoxes Total number of found boxes.
+	 * @param[out] currentPageStart Index of first box in the found page.
+	 * @param[out] currentPageSize Size of current page.
+	 * @param[out] isLastPage True if last page downloaded.
+	 * @param[out] foundBoxes List of found boxes to append search results to.
+	 * @param[out] error Short error description.
+	 * @param[out] longError Long error description.
+	 * @return Return error code.
 	 */
 	static
 	enum Result isdsSearch2(const QString &userName,
@@ -132,10 +137,31 @@ private:
 	    bool &isLastPage, QList<BoxEntry> &foundBoxes,
 	    QString &error, QString &longError);
 
+	/*!
+	 * @brief Search for all data boxes matching supplied criteria.
+	 *
+	 * @param[in]  userName Account identifier (user login name).
+	 * @param[in]  query Sought string.
+	 * @param[in]  target Type of information to search the string in.
+	 * @param[in]  type Type of data box to search for.
+	 * @param[out] totalMatchingBoxes Total number of found boxes.
+	 * @param[out] foundBoxes List of found boxes to append search results to.
+	 * @param[out] error Short error description.
+	 * @param[out] longError Long error description.
+	 * @return Return error code.
+	 */
+	static
+	enum Result isdsSearch2All(const QString &userName,
+	    const QString &query, enum FulltextTarget target, enum BoxType type,
+	    quint64 &totalMatchingBoxes, QList<BoxEntry> &foundBoxes,
+	    QString &error, QString &longError);
+
 	const QString m_userName; /*!< Account identifier (user login name). */
 	const QString m_query; /*!< Search phrase. */
 	const enum FulltextTarget m_target; /*!< Full-text search target. */
 	const enum BoxType m_boxType; /*!< Sought box type. */
+
+	static const quint64 maxResponseSize; /*!< Maximal response size. */
 };
 
 #endif /* _TASK_SEARCH_OWNER_FULLTEXT_H_ */

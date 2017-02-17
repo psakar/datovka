@@ -45,14 +45,12 @@ private slots:
 	void enableOkButton(void);
 	void enableSearchButton(const QString &text);
 	void searchNewDataboxes(void);
-	void showNextDataboxes(void);
 	void addSelectedDbIDs(void);
 	void setFirtsColumnActive(void);
 	void contactItemDoubleClicked(const QModelIndex &index);
 
 private:
-	void findDataboxes(quint64 pageNumber,
-	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	void findDataboxes(enum TaskSearchOwnerFulltext::FulltextTarget target,
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase);
 
@@ -61,7 +59,6 @@ private:
 	const QString m_userName;
 
 	// hold some search settings for showing of next results
-	quint64 m_currentPage;
 	enum TaskSearchOwnerFulltext::FulltextTarget m_target;
 	enum TaskSearchOwnerFulltext::BoxType m_boxType;
 	QString m_phrase;
