@@ -55,7 +55,6 @@ private:
 	QTimer *pingTimer;
 	bool isInRecipientTable(const QString &idDs) const;
 	void initSearchWindow(void);
-	void addContactsToTable(const QList< QVector<QString> > &contactList);
 	void insertContactToRecipentTable(int selRow);
 
 	Action m_action;

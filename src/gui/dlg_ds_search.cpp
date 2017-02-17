@@ -309,7 +309,6 @@ void DlgDsSearch::searchDataBox(void)
 	QString errMsg;
 	QString longErrMsg;
 
-	struct isds_list *boxes = NULL;
 	QList<QVector<QString>> list_contacts;
 
 	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
@@ -342,9 +341,9 @@ void DlgDsSearch::searchDataBox(void)
 	result = task->m_result;
 	errMsg = task->m_isdsError;
 	longErrMsg = task->m_isdsLongError;
-	boxes = task->m_results; task->m_results = NULL;
+	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
 
-	delete task;
+	delete task; task = Q_NULLPTR;
 
 	switch (result) {
 	case TaskSearchOwner::SO_SUCCESS:
@@ -352,13 +351,13 @@ void DlgDsSearch::searchDataBox(void)
 	case TaskSearchOwner::SO_BAD_DATA:
 		QMessageBox::information(this, tr("Search result"),
 		    longErrMsg, QMessageBox::Ok);
-		goto fail;
+		return;
 		break;
 	case TaskSearchOwner::SO_COM_ERROR:
 		QMessageBox::information(this, tr("Search result"),
 		    tr("It is not possible find databox because") + ":\n\n" +
 		    longErrMsg, QMessageBox::Ok);
-		goto fail;
+		return;
 		break;
 	case TaskSearchOwner::SO_ERROR:
 	default:
@@ -366,85 +365,41 @@ void DlgDsSearch::searchDataBox(void)
 		    tr("It is not possible find databox because "
 		         "error occurred during search process!"),
 		    QMessageBox::Ok);
-		goto fail;
+		return;
 		break;
 	}
 
-	struct isds_list *box;
-	box = boxes;
+	this->contactTableWidget->setRowCount(0);
+	this->contactTableWidget->setEnabled(true);
+	foreach (const TaskSearchOwner::BoxEntry &entry, foundBoxes) {
+		int row = this->contactTableWidget->rowCount();
+		this->contactTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setCheckState(Qt::Unchecked);
+		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.id);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.name);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.address);
+		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.zipCode);
+		this->contactTableWidget->setItem(row, CON_COL_POST_CODE, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.effectiveOVM ? tr("no") : tr("yes"));
+		this->contactTableWidget->setItem(row, CON_COL_PDZ, item);
+	}
 
-	while (0 != box) {
-
-		this->contactTableWidget->setEnabled(true);
-		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
-		Q_ASSERT(0 != item);
-		QVector<QString> contact;
-		contact.append(item->dbID);
-
-		QString name;
-
-		if ((item->dbType != NULL) && (*item->dbType == DBTYPE_FO)) {
-			name = QString(item->personName->pnFirstName) +
-			    " " + QString(item->personName->pnLastName);
-		} else if ((item->dbType != NULL) &&
-		           (*item->dbType == DBTYPE_PFO)) {
-			QString firmName = item->firmName;
-			if (firmName.isEmpty() || firmName == " ") {
-				name = QString(item->personName->pnFirstName) +
-				    " " + QString(item->personName->pnLastName);
-			} else {
-				name = item->firmName;
-			}
-		} else {
-			name = item->firmName;
-		}
-
-		QString address, street, adNumberInStreet, adNumberInMunicipality;
-		if (NULL != item->address) {
-
-			street = item->address->adStreet;
-			adNumberInStreet = item->address->adNumberInStreet;
-			adNumberInMunicipality = item->address->adNumberInMunicipality;
-
-			if (street.isEmpty() || street == " ") {
-				address = item->address->adCity;
-			} else {
-				address = street;
-				if (adNumberInStreet.isEmpty() ||
-				    adNumberInStreet == " ") {
-					address += + " " +
-					    adNumberInMunicipality +
-					    ", " + QString(item->address->adCity);
-				} else if (adNumberInMunicipality.isEmpty() ||
-				    adNumberInMunicipality == " ") {
-					address += + " " +
-					    adNumberInStreet +
-					    ", " + QString(item->address->adCity);
-				} else {
-					address += + " "+
-					    adNumberInMunicipality
-					    + "/" +
-					    adNumberInStreet +
-					", " + QString(item->address->adCity);
-				}
-			}
-
-			contact.append(name);
-			contact.append(address);
-			contact.append(QString(item->address->adZipCode));
-			contact.append(*item->dbEffectiveOVM ? tr("no") : tr("yes"));
-
-			list_contacts.append(contact);
-			addContactsToTable(list_contacts);
-		}
-
-		box = box->next;
+	if (this->contactTableWidget->rowCount() > 0) {
+		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
+		this->contactTableWidget->selectRow(0);
 	}
 
 	this->contactTableWidget->resizeColumnsToContents();
-
-fail:
-	isds_list_free(&boxes);
 }
 
 
@@ -462,49 +417,6 @@ void DlgDsSearch::enableOkButton(void)
 			    setEnabled(true);
 		}
 	}
-}
-
-
-/* ========================================================================= */
-/*
- * At contact list from ISDS into search result table widget
- */
-void DlgDsSearch::addContactsToTable(
-    const QList< QVector<QString> > &contactList)
-/* ========================================================================= */
-{
-	this->contactTableWidget->setRowCount(0);
-
-	this->contactTableWidget->setEnabled(true);
-	for (int i = 0; i < contactList.count(); i++) {
-
-		int row = this->contactTableWidget->rowCount();
-		this->contactTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setCheckState(Qt::Unchecked);
-		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(0));
-		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(1));
-		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(2));
-		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(3));
-		this->contactTableWidget->setItem(row, CON_COL_POST_CODE, item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(4));
-		this->contactTableWidget->setItem(row, CON_COL_PDZ, item);
-	}
-
-	if (this->contactTableWidget->rowCount() > 0) {
-		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
-		this->contactTableWidget->selectRow(0);
-	}
-
 }
 
 

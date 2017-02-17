@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,6 +70,25 @@ public:
 	};
 
 	/*!
+	 * @brief Describes found data box.
+	 */
+	class BoxEntry {
+	public:
+		/*!
+		 *  @brief Constructor.
+		 */
+		BoxEntry(const QString &i, int t, const QString &n,
+		    const QString &ad, const QString &zc, bool &ovm);
+
+		QString id; /*!< Data box id. */
+		int type; /*!< Data box type (as specified in libisds). */
+		QString name; /*!< Data box name. */
+		QString address; /*!< Post address. */
+		QString zipCode; /*!< ZIP code. */
+		bool effectiveOVM; /*!< Box has OVM role. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account identifier (user login name).
@@ -77,12 +96,6 @@ public:
 	 */
 	explicit TaskSearchOwner(const QString &userName,
 	    const SoughtOwnerInfo &soughtInfo);
-
-	/*!
-	 * @brief Destructor.
-	 */
-	virtual
-	~TaskSearchOwner(void);
 
 	/*!
 	 * @brief Performs action.
@@ -97,20 +110,20 @@ public:
 	 *
 	 * @param[in]  userName Account identifier (user login name).
 	 * @param[in]  soughtInfo Sought box identifiers.
-	 * @param[out] results  List of found data boxes.
+	 * @param[out] foundBoxes List of found data boxes to append data to.
 	 * @param[out] error Short error description.
 	 * @param[out] longError Long error description.
 	 * @return Error value.
 	 */
 	static
 	enum Result isdsSearch(const QString &userName,
-	    const SoughtOwnerInfo &soughtInfo, struct isds_list **results,
+	    const SoughtOwnerInfo &soughtInfo, QList<BoxEntry> &foundBoxes,
 	    QString &error, QString &longError);
 
 	enum Result m_result; /*!< Return state. */
 	QString m_isdsError; /*!< Error description.  */
 	QString m_isdsLongError; /*!< Long error description. */
-	struct isds_list *m_results; /*!< List of found data boxes. */
+	QList<BoxEntry> m_foundBoxes; /*!< List of found boxes. */
 
 private:
 	/*!

@@ -1680,7 +1680,6 @@ QString DlgSendMessage::getUserInfoFromIsds(const QString &userName,
 /* ========================================================================= */
 {
 	QString str = tr("no");
-	struct isds_list *box = NULL;
 
 	TaskSearchOwner::SoughtOwnerInfo soughtInfo(
 	    idDbox, TaskSearchOwner::BT_FO, QString(), QString(), QString(),
@@ -1691,18 +1690,15 @@ QString DlgSendMessage::getUserInfoFromIsds(const QString &userName,
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
-	box = task->m_results; task->m_results = NULL;
+	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
 
 	delete task; task = Q_NULLPTR;
 
-	if (NULL != box) {
-		const struct isds_DbOwnerInfo *item = (isds_DbOwnerInfo *)
-		    box->data;
-		Q_ASSERT(NULL != item);
-		str = *item->dbEffectiveOVM ? tr("no") : tr("yes");
-	}
+	if (foundBoxes.size() == 1) {
+		const TaskSearchOwner::BoxEntry &entry(foundBoxes.first());
 
-	isds_list_free(&box);
+		str = entry.effectiveOVM ? tr("no") : tr("yes");
+	}
 
 	return str;
 }

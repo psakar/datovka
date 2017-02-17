@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -614,7 +614,6 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 	qDebug() << CLI_PREFIX << "find info about databox from username"
 	    <<  username;
 
-	struct isds_list *boxes = NULL;
 	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
 
 	/* set type of search databox */
@@ -638,82 +637,24 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 	    map.contains("firmName") ? map.value("firmName").toString() : QString(),
 	    map.contains("adZipCode") ? map.value("adZipCode").toString() : QString());
 
+	QList<TaskSearchOwner::BoxEntry> foundBoxes;
 	QString errMsg;
 	QString longErrMsg;
 	enum TaskSearchOwner::Result result = TaskSearchOwner::isdsSearch(
-	    username, soughtInfo, &boxes, errMsg, longErrMsg);
+	    username, soughtInfo, foundBoxes, errMsg, longErrMsg);
 
 	if (TaskSearchOwner::SO_SUCCESS != result) {
 		errmsg = longErrMsg;
 		return CLI_ERROR;
 	}
 
-	struct isds_list *box;
-	box = boxes;
-
-	while (0 != box) {
-		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
+	foreach (const TaskSearchOwner::BoxEntry &entry, foundBoxes) {
 		QStringList contact;
-		contact.clear();
-		contact.append(item->dbID);
-		QString name;
-
-		if ((item->dbType != NULL) && (*item->dbType == DBTYPE_FO)) {
-			name = QString(item->personName->pnFirstName) +
-			    " " + QString(item->personName->pnLastName);
-		} else if ((item->dbType != NULL) &&
-		    (*item->dbType == DBTYPE_PFO)) {
-			QString firmName = item->firmName;
-			if (firmName.isEmpty() || firmName == " ") {
-				name = QString(item->personName->pnFirstName) +
-				    " " + QString(item->personName->pnLastName);
-			} else {
-				name = item->firmName;
-			}
-		} else {
-			name = item->firmName;
-		}
-
-		QString address,street,adNumberInStreet,adNumberInMunicipality;
-		if (NULL != item->address) {
-
-			street = item->address->adStreet;
-			adNumberInStreet = item->address->adNumberInStreet;
-			adNumberInMunicipality =
-			     item->address->adNumberInMunicipality;
-
-			if (street.isEmpty() || street == " ") {
-				address = item->address->adCity;
-			} else {
-				address = street;
-				if (adNumberInStreet.isEmpty() ||
-				    adNumberInStreet == " ") {
-					address += + " " +
-					    adNumberInMunicipality +
-					    ", " + QString(item->address->adCity);
-				} else if (adNumberInMunicipality.isEmpty() ||
-				    adNumberInMunicipality == " ") {
-					address += + " " +
-					    adNumberInStreet +
-					    ", " + QString(item->address->adCity);
-				} else {
-					address += + " "+
-					    adNumberInMunicipality
-					    + "/" +
-					    adNumberInStreet +
-					", " + QString(item->address->adCity);
-				}
-			}
-
-			contact.append("|" + name + "|" + address + "|" +
-			     QString(item->address->adZipCode)) ;
-			printDataToStdOut(contact);
-
-		}
-		box = box->next;
+		contact.append(entry.id);
+		contact.append("|" + entry.name + "|" + entry.address +
+		    "|" + entry.zipCode);
+		printDataToStdOut(contact);
 	}
-
-	isds_list_free(&boxes);
 
 	return CLI_SUCCESS;
 }
