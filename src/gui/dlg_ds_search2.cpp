@@ -22,7 +22,6 @@
  */
 
 #include "src/gui/dlg_ds_search2.h"
-#include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
@@ -184,12 +183,12 @@ void DlgSearch2::findDataboxes(quint64 pageNumber,
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
-	int ret = task->m_isdsRetError;
+	enum TaskSearchOwnerFulltext::Result ret = task->m_result;
 
 	this->resultGroupBox->show();
 	this->resultGroupBox->setEnabled(true);
 
-	if (ret != IE_SUCCESS) {
+	if (ret != TaskSearchOwnerFulltext::SOF_SUCCESS) {
 		delete task; task = NULL;
 		this->searchResultText->setText(resultString);
 		return;

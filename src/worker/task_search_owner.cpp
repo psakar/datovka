@@ -318,7 +318,7 @@ enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(
 
 	if (IE_SUCCESS != status) {
 		logErrorNL(
-		    "Downloading delivery information returned status %d: '%s'.",
+		    "Searching for data box returned status %d: '%s'.",
 		    status, isdsStrError(status).toUtf8().constData());
 		error = isds_error(status);
 		longError = isdsLongMessage(session);

@@ -36,6 +36,16 @@ class TaskSearchOwnerFulltext : public Task {
 public:
 	static const quint64 maxResponseSize; /*!< Maximal response size. */
 
+	/*!
+	 * @brief Return state describing what happened.
+	 */
+	enum Result {
+		SOF_SUCCESS, /*!< Operation was successful. */
+		SOF_BAD_DATA, /*!< Data related error, non-existent data. */
+		SOF_COM_ERROR, /*!< Communication error. */
+		SOF_ERROR /*!< Other type of error occurred. */
+	};
+
 	enum FulltextTarget {
 		FT_ALL, /*!< Search in all fields. */
 		FT_ADDRESS, /*!< Search in address. */
@@ -88,7 +98,9 @@ public:
 	virtual
 	void run(void) Q_DECL_OVERRIDE;
 
-	int m_isdsRetError; /*!< Returned error code. */
+	enum Result m_result; /*!< Return state. */
+	QString m_isdsError; /*!< Error description.  */
+	QString m_isdsLongError; /*!< Long error description. */
 	quint64 m_pageSize; /*!< Actual requested page size. */
 	quint64 m_pageNumber; /*!< Requested page number. */
 	quint64 m_totalMatchingBoxes; /*!< Set to number of boxes matching request. */
@@ -110,14 +122,15 @@ private:
 	 * @param[in]  userName Account identifier (user login name).
 	 * @param[in]  info     Sought box identifiers.
 	 * @param[out] results  List of found data boxes.
-	 * @return Value of isds_error.
+	 * @return Return code.
 	 */
 	static
-	int isdsSearch2(const QString &userName,
+	enum Result isdsSearch2(const QString &userName,
 	    const QString &query, enum FulltextTarget target, enum BoxType type,
 	    quint64 pageSize, quint64 pageNumber, quint64 &totalMatchingBoxes,
 	    quint64 &currentPageStart, quint64 &currentPageSize,
-	    bool &isLastPage, QList<BoxEntry> &foundBoxes);
+	    bool &isLastPage, QList<BoxEntry> &foundBoxes,
+	    QString &error, QString &longError);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	const QString m_query; /*!< Search phrase. */

@@ -48,7 +48,9 @@ TaskSearchOwnerFulltext::BoxEntry::BoxEntry(const QString &i, int t,
 TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
     const QString &query, enum FulltextTarget target, enum BoxType type,
     quint64 pageSize, quint64 pageNumber)
-    : m_isdsRetError(IE_ERROR),
+    : m_result(SOF_ERROR),
+    m_isdsError(),
+    m_isdsLongError(),
     m_pageSize((pageSize <= maxResponseSize) ? pageSize: maxResponseSize),
     m_pageNumber(pageNumber),
     m_totalMatchingBoxes(0),
@@ -82,9 +84,10 @@ void TaskSearchOwnerFulltext::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_isdsRetError = isdsSearch2(m_userName, m_query, m_target, m_boxType,
+	m_result = isdsSearch2(m_userName, m_query, m_target, m_boxType,
 	    m_pageSize, m_pageNumber, m_totalMatchingBoxes, m_currentPageStart,
-	    m_currentPageSize, m_isLastPage, m_foundBoxes);
+	    m_currentPageSize, m_isLastPage, m_foundBoxes,
+	    m_isdsError, m_isdsLongError);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -188,23 +191,59 @@ void appendBoxEntries(QList<TaskSearchOwnerFulltext::BoxEntry> &foundBoxes,
 	}
 }
 
-int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
-    const QString &query, enum FulltextTarget target, enum BoxType type,
-    quint64 pageSize, quint64 pageNumber, quint64 &totalMatchingBoxes,
-    quint64 &currentPageStart, quint64 &currentPageSize, bool &isLastPage,
-    QList<BoxEntry> &foundBoxes)
+/*!
+ * @brief Converts libisds error code into task error code.
+ *
+ * @param[in] status Libisds error status.
+ * @return Task error code.
+ */
+static
+enum TaskSearchOwnerFulltext::Result convertError(int status)
 {
-	isds_error ret = IE_ERROR;
+	switch (status) {
+	case IE_SUCCESS:
+		return TaskSearchOwnerFulltext::SOF_SUCCESS;
+		break;
+	case IE_2BIG:
+	case IE_NOEXIST:
+	case IE_INVAL:
+	case IE_INVALID_CONTEXT:
+		return TaskSearchOwnerFulltext::SOF_BAD_DATA;
+		break;
+	case IE_ISDS:
+	case IE_NOT_LOGGED_IN:
+	case IE_CONNECTION_CLOSED:
+	case IE_TIMED_OUT:
+	case IE_NETWORK:
+	case IE_HTTP:
+	case IE_SOAP:
+	case IE_XML:
+		return TaskSearchOwnerFulltext::SOF_COM_ERROR;
+		break;
+	default:
+		return TaskSearchOwnerFulltext::SOF_ERROR;
+		break;
+	}
+}
+
+enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
+    const QString &userName, const QString &query, enum FulltextTarget target,
+    enum BoxType type, quint64 pageSize, quint64 pageNumber,
+    quint64 &totalMatchingBoxes, quint64 &currentPageStart,
+    quint64 &currentPageSize, bool &isLastPage, QList<BoxEntry> &foundBoxes,
+    QString &error, QString &longError)
+{
+	isds_error status = IE_ERROR;
 
 	if (NULL == query) {
 		Q_ASSERT(0);
-		return IE_ERROR;
+		return SOF_ERROR;
 	}
 
 	struct isds_ctx *session = globIsdsSessions.session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
-		return IE_ERROR;
+		return SOF_ERROR;
 	}
 
 	/* For conversion purposes. */
@@ -218,7 +257,7 @@ int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
 	_Bool *iIsLastPage = NULL;
 	struct isds_list *iFoundBoxes = NULL;
 
-	ret = isds_find_box_by_fulltext(session, query.toUtf8().constData(),
+	status = isds_find_box_by_fulltext(session, query.toUtf8().constData(),
 	    &iTarget, &iType, &iPageSize, &iPageNumber,
 	    NULL, &iTotalMatchingBoxes, &iCurrentPageStart, &iCurentPageSize,
 	    &iIsLastPage, &iFoundBoxes);
@@ -245,7 +284,16 @@ int TaskSearchOwnerFulltext::isdsSearch2(const QString &userName,
 		isds_list_free(&iFoundBoxes);
 	}
 
-	logDebugLv1NL("Find databox returned '%d': '%s'.",
-	    ret, isdsStrError(ret).toUtf8().constData());
-	return ret;
+	if (IE_SUCCESS != status) {
+		logErrorNL(
+		    "Searching for data box returned status %d: '%s'.",
+		    status, isdsStrError(status).toUtf8().constData());
+		error = isds_error(status);
+		longError = isdsLongMessage(session);
+	} else {
+		logDebugLv1NL("Find databox returned '%d': '%s'.",
+		    status, isdsStrError(status).toUtf8().constData());
+	}
+
+	return convertError(status);
 }
