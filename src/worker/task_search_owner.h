@@ -34,7 +34,7 @@
 class TaskSearchOwner : public Task {
 public:
 	/*!
-	 * @Brief Return state describing what happened.
+	 * @brief Return state describing what happened.
 	 */
 	enum Result {
 		SO_SUCCESS, /*!< Operation was successful. */
@@ -43,14 +43,40 @@ public:
 		SO_ERROR /*!< Other type of error occurred. */
 	};
 
+	enum BoxType {
+		BT_OVM,
+		BT_PO,
+		BT_PFO,
+		BT_FO
+	};
+
+	/*!
+	 * @brief Structure encapsulating parts of isds_DbOwnerInfo.
+	 */
+	class SoughtOwnerInfo {
+	public:
+		SoughtOwnerInfo(const QString &_id, enum BoxType _type,
+		    const QString &_ic, const QString &_firstName,
+		    const QString &_lastName, const QString &_firmName,
+		    const QString &_zipCode);
+
+		QString id; /*!< Box identifier. */
+		enum BoxType type; /*!< Box type. */
+		QString ic; /*!< Subject identifier number. */
+		QString firstName; /*!< Person first name. */
+		QString lastName; /*!< Person last name, also last name at birth. */
+		QString firmName; /*!< Firm name. */
+		QString zipCode; /*!< ZIP code. */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account identifier (user login name).
-	 * @param[in] info     Sought box identifiers.
+	 * @param[in] soughtInfo Sought box identifiers.
 	 */
 	explicit TaskSearchOwner(const QString &userName,
-	    const struct isds_DbOwnerInfo *info);
+	    const SoughtOwnerInfo &soughtInfo);
 
 	/*!
 	 * @brief Destructor.
@@ -70,7 +96,7 @@ public:
 	 * TODO -- This method must be private.
 	 *
 	 * @param[in]  userName Account identifier (user login name).
-	 * @param[in]  info     Sought box identifiers.
+	 * @param[in]  soughtInfo Sought box identifiers.
 	 * @param[out] results  List of found data boxes.
 	 * @param[out] error Short error description.
 	 * @param[out] longError Long error description.
@@ -78,7 +104,7 @@ public:
 	 */
 	static
 	enum Result isdsSearch(const QString &userName,
-	    const struct isds_DbOwnerInfo *info, struct isds_list **results,
+	    const SoughtOwnerInfo &soughtInfo, struct isds_list **results,
 	    QString &error, QString &longError);
 
 	enum Result m_result; /*!< Return state. */
@@ -94,7 +120,7 @@ private:
 	TaskSearchOwner &operator=(const TaskSearchOwner &);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
-	const struct isds_DbOwnerInfo *m_info; /*!< Sought box identifiers. */
+	const SoughtOwnerInfo m_soughtInfo; /*!< Sought box identifiers. */
 };
 
 #endif /* _TASK_SEARCH_OWNER_H_ */

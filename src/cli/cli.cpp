@@ -614,83 +614,37 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 	qDebug() << CLI_PREFIX << "find info about databox from username"
 	    <<  username;
 
-	struct isds_PersonName *personName = NULL;
-	struct isds_Address *address = NULL;
-	struct isds_DbOwnerInfo *ownerInfo = NULL;
 	struct isds_list *boxes = NULL;
-	isds_DbType dbType;
+	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
 
 	/* set type of search databox */
 	QString dbTypeTmp = map.value("dbType").toString();
 	if (dbTypeTmp == DB_FO) {
-		dbType = DBTYPE_FO;
+		boxType = TaskSearchOwner::BT_FO;
 	} else if (dbTypeTmp == DB_PFO) {
-		dbType = DBTYPE_PFO;
+		boxType = TaskSearchOwner::BT_PFO;
 	} else if (dbTypeTmp == DB_PO) {
-		dbType = DBTYPE_PO;
+		boxType = TaskSearchOwner::BT_PO;
 	} else {
-		dbType = DBTYPE_OVM;
+		boxType = TaskSearchOwner::BT_OVM;
 	}
 
-	/* set person firt and last name */
-	personName = isds_PersonName_create(
-	    map.contains("pnFirstName") ?
-	        map.value("pnFirstName").toString() : QString(),
-	    QString(),
-	    map.contains("pnLastName") ?
-	        map.value("pnLastName").toString() : QString(),
-	    QString());
-	if (NULL == personName) {
-		errmsg = "Error while create find databox request";
-		isds_PersonName_free(&personName);
-		return CLI_ERROR;
-	}
-	/* set PSC */
-	address = isds_Address_create(QString(), QString(), QString(),
-	    QString(),
-	    map.contains("adZipCode") ?
-	         map.value("adZipCode").toString() : QString(),
-	    QString());
-	if (NULL == address) {
-		errmsg = "Error while create find databox request";
-		isds_PersonName_free(&personName);
-		isds_Address_free(&address);
-		return CLI_ERROR;
-	}
-
-	ownerInfo = isds_DbOwnerInfo_createConsume(
-	    map.contains("dbID") ?
-	        map.value("dbID").toString() : QString(),
-	    dbType,
-	    map.contains("ic") ?
-	        map.value("ic").toString() : QString(),
-	    personName,
-	    map.contains("firmName") ?
-	        map.value("firmName").toString() : QString(),
-	    NULL, address, QString(), QString(),
-	    QString(), QString(), QString(), 0, false, false);
-	if (NULL != ownerInfo) {
-		personName = NULL;
-		address = NULL;
-	} else {
-		errmsg = "Error while create find databox request";
-		isds_PersonName_free(&personName);
-		isds_Address_free(&address);
-		isds_DbOwnerInfo_free(&ownerInfo);
-		return CLI_ERROR;
-	}
+	TaskSearchOwner::SoughtOwnerInfo soughtInfo(
+	    map.contains("dbID") ? map.value("dbID").toString() : QString(),
+	    boxType,
+	    map.contains("ic") ? map.value("ic").toString() : QString(),
+	    map.contains("pnFirstName") ? map.value("pnFirstName").toString() : QString(),
+	    map.contains("pnLastName") ? map.value("pnLastName").toString() : QString(),
+	    map.contains("firmName") ? map.value("firmName").toString() : QString(),
+	    map.contains("adZipCode") ? map.value("adZipCode").toString() : QString());
 
 	QString errMsg;
 	QString longErrMsg;
 	enum TaskSearchOwner::Result result = TaskSearchOwner::isdsSearch(
-	    username, ownerInfo, &boxes, errMsg, longErrMsg);
-	isds_DbOwnerInfo_free(&ownerInfo);
+	    username, soughtInfo, &boxes, errMsg, longErrMsg);
 
 	if (TaskSearchOwner::SO_SUCCESS != result) {
 		errmsg = longErrMsg;
-		isds_PersonName_free(&personName);
-		isds_Address_free(&address);
-		isds_DbOwnerInfo_free(&ownerInfo);
 		return CLI_ERROR;
 	}
 
@@ -759,9 +713,6 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 		box = box->next;
 	}
 
-	isds_PersonName_free(&personName);
-	isds_Address_free(&address);
-	isds_DbOwnerInfo_free(&ownerInfo);
 	isds_list_free(&boxes);
 
 	return CLI_SUCCESS;

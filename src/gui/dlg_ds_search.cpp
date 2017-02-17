@@ -308,53 +308,34 @@ void DlgDsSearch::searchDataBox(void)
 	enum TaskSearchOwner::Result result = TaskSearchOwner::SO_ERROR;
 	QString errMsg;
 	QString longErrMsg;
-	struct isds_PersonName *personName = NULL;
-	struct isds_Address *address = NULL;
-	struct isds_DbOwnerInfo *ownerInfo = NULL;
+
 	struct isds_list *boxes = NULL;
 	QList<QVector<QString>> list_contacts;
 
-	isds_DbType dbType;
-
+	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
 	switch (this->dataBoxTypeCBox->currentIndex()) {
 	case 3:
-		dbType = DBTYPE_FO;
+		boxType = TaskSearchOwner::BT_FO;
 		break;
 	case 2:
-		dbType = DBTYPE_PFO;
+		boxType = TaskSearchOwner::BT_PFO;
 		break;
 	case 1:
-		dbType = DBTYPE_PO;
+		boxType = TaskSearchOwner::BT_PO;
 		break;
+	case 0:
 	default:
-		dbType = DBTYPE_OVM;
+		boxType = TaskSearchOwner::BT_OVM;
 		break;
 	}
 
-	personName = isds_PersonName_create(QString(), QString(),
-	    this->nameLineEdit->text(), this->nameLineEdit->text());
-	if (NULL == personName) {
-		goto fail;
-	}
-	address = isds_Address_create(QString(), QString(), QString(),
-	    QString(), this->pscLineEdit->text(), QString());
-	if (NULL == address) {
-		goto fail;
-	}
-	ownerInfo = isds_DbOwnerInfo_createConsume(this->iDLineEdit->text(),
-	    dbType, this->iCLineEdit->text(), personName,
-	    this->nameLineEdit->text(), NULL, address, QString(), QString(),
-	    QString(), QString(), QString(), 0, false, false);
-	if (NULL != ownerInfo) {
-		personName = NULL;
-		address = NULL;
-	} else {
-		goto fail;
-	}
+	TaskSearchOwner::SoughtOwnerInfo soughtInfo(
+	    this->iDLineEdit->text(), boxType, this->iCLineEdit->text(),
+	    this->nameLineEdit->text(), this->nameLineEdit->text(),
+	    this->nameLineEdit->text(), this->pscLineEdit->text());
 
-	TaskSearchOwner *task;
-
-	task = new (std::nothrow) TaskSearchOwner(m_userName, ownerInfo);
+	TaskSearchOwner *task =
+	    new (std::nothrow) TaskSearchOwner(m_userName, soughtInfo);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
@@ -364,7 +345,6 @@ void DlgDsSearch::searchDataBox(void)
 	boxes = task->m_results; task->m_results = NULL;
 
 	delete task;
-	isds_DbOwnerInfo_free(&ownerInfo);
 
 	switch (result) {
 	case TaskSearchOwner::SO_SUCCESS:
@@ -464,9 +444,6 @@ void DlgDsSearch::searchDataBox(void)
 	this->contactTableWidget->resizeColumnsToContents();
 
 fail:
-	isds_PersonName_free(&personName);
-	isds_Address_free(&address);
-	isds_DbOwnerInfo_free(&ownerInfo);
 	isds_list_free(&boxes);
 }
 

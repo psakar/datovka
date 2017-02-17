@@ -30,17 +30,30 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_search_owner.h"
 
+TaskSearchOwner::SoughtOwnerInfo::SoughtOwnerInfo(const QString &_id,
+    enum BoxType _type, const QString &_ic, const QString &_firstName,
+    const QString &_lastName, const QString &_firmName,
+    const QString &_zipCode)
+    : id(_id),
+    type(_type),
+    ic(_ic),
+    firstName(_firstName),
+    lastName(_lastName),
+    firmName(_firmName),
+    zipCode(_zipCode)
+{
+}
+
 TaskSearchOwner::TaskSearchOwner(const QString &userName,
-    const struct isds_DbOwnerInfo *info)
+    const SoughtOwnerInfo &soughtInfo)
     : m_result(SO_ERROR),
     m_isdsError(),
     m_isdsLongError(),
     m_results(NULL),
     m_userName(userName),
-    m_info(info)
+    m_soughtInfo(soughtInfo)
 {
 	Q_ASSERT(!m_userName.isEmpty());
-	Q_ASSERT(NULL != m_info);
 }
 
 TaskSearchOwner::~TaskSearchOwner(void)
@@ -55,17 +68,12 @@ void TaskSearchOwner::run(void)
 		return;
 	}
 
-	if (NULL == m_info) {
-		Q_ASSERT(0);
-		return;
-	}
-
 	logDebugLv0NL("Starting search owner task in thread '%p'",
 	    (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
 
-	m_result = isdsSearch(m_userName, m_info, &m_results,
+	m_result = isdsSearch(m_userName, m_soughtInfo, &m_results,
 	    m_isdsError, m_isdsLongError);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
@@ -74,6 +82,81 @@ void TaskSearchOwner::run(void)
 
 	logDebugLv0NL("Search owner task finished in thread '%p'",
 	    (void *) QThread::currentThreadId());
+}
+
+/*!
+ * @brief Convert box type from task to libisds enum.
+ *
+ * @param[in] type Task enum type representation.
+ * @return Libisds enum representation.
+ */
+static
+isds_DbType convertType(enum TaskSearchOwner::BoxType type)
+{
+	switch (type) {
+	case TaskSearchOwner::BT_OVM:
+		return DBTYPE_OVM;
+		break;
+	case TaskSearchOwner::BT_PO:
+		return DBTYPE_PO;
+		break;
+	case TaskSearchOwner::BT_PFO:
+		return DBTYPE_PFO;
+		break;
+	case TaskSearchOwner::BT_FO:
+		return DBTYPE_FO;
+		break;
+	default:
+		Q_ASSERT(0);
+		return DBTYPE_OVM;
+		break;
+	}
+}
+
+/*!
+ * @brief Creates a new owner info structure used for data box searching.
+ *
+ * @param[in] soughtInfo Sought data.
+ * @return Newly allocated structure set according to input.
+ */
+static
+struct isds_DbOwnerInfo *ownerInfoFromSoughtInfo(
+    const TaskSearchOwner::SoughtOwnerInfo &soughtInfo)
+{
+	struct isds_PersonName *personName = NULL;
+	struct isds_Address *address = NULL;
+	struct isds_DbOwnerInfo *ownerInfo = NULL;
+
+	personName = isds_PersonName_create(soughtInfo.firstName, QString(),
+	    soughtInfo.lastName, soughtInfo.lastName);
+	if (NULL == personName) {
+		goto fail;
+	}
+
+	address = isds_Address_create(QString(), QString(), QString(),
+	    QString(), soughtInfo.zipCode, QString());
+	if (NULL == address) {
+		goto fail;
+	}
+
+	ownerInfo = isds_DbOwnerInfo_createConsume(soughtInfo.id,
+	    convertType(soughtInfo.type), soughtInfo.ic, personName,
+	    soughtInfo.firmName, NULL, address, QString(), QString(),
+	    QString(), QString(), QString(), 0, false, false);
+	if (NULL != ownerInfo) {
+		personName = NULL;
+		address = NULL;
+	} else {
+		goto fail;
+	}
+
+	return ownerInfo;
+
+fail:
+	isds_PersonName_free(&personName);
+	isds_Address_free(&address);
+	isds_DbOwnerInfo_free(&ownerInfo);
+	return NULL;
 }
 
 /*!
@@ -112,12 +195,12 @@ enum TaskSearchOwner::Result convertError(int status)
 }
 
 enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(
-    const QString &userName, const struct isds_DbOwnerInfo *info,
+    const QString &userName, const SoughtOwnerInfo &soughtInfo,
     struct isds_list **results, QString &error, QString &longError)
 {
 	isds_error status = IE_ERROR;
 
-	if ((NULL == results) || (NULL == info)) {
+	if (NULL == results) {
 		Q_ASSERT(0);
 		return SO_ERROR;
 	}
@@ -128,7 +211,14 @@ enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(
 		return SO_ERROR;
 	}
 
+	struct isds_DbOwnerInfo *info = ownerInfoFromSoughtInfo(soughtInfo);
+	if (info == NULL) {
+		return SO_ERROR;
+	}
+
 	status = isds_FindDataBox(session, info, results);
+
+	isds_DbOwnerInfo_free(&info);
 
 	if (IE_SUCCESS != status) {
 		logErrorNL(

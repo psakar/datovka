@@ -49,6 +49,7 @@
 #include "src/worker/task_download_credit_info.h"
 #include "src/worker/task_keep_alive.h"
 #include "src/worker/task_send_message.h"
+#include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
 #include "src/worker/task_send_message_mojeid.h"
 #include "src/worker/task_search_owner.h"
@@ -1679,27 +1680,20 @@ QString DlgSendMessage::getUserInfoFromIsds(const QString &userName,
 /* ========================================================================= */
 {
 	QString str = tr("no");
-	struct isds_DbOwnerInfo *doi = NULL;
 	struct isds_list *box = NULL;
-	isds_DbType dbType = DBTYPE_FO;
 
-	doi = isds_DbOwnerInfo_createConsume(idDbox, dbType, QString(),
-	    NULL, QString(), NULL, NULL, QString(), QString(), QString(),
-	    QString(), QString(), 0, false, false);
-	if (NULL == doi) {
-		return str;
-	}
+	TaskSearchOwner::SoughtOwnerInfo soughtInfo(
+	    idDbox, TaskSearchOwner::BT_FO, QString(), QString(), QString(),
+	    QString(), QString());
 
-	TaskSearchOwner *task;
-
-	task = new (std::nothrow) TaskSearchOwner(userName, doi);
+	TaskSearchOwner *task =
+	    new (std::nothrow) TaskSearchOwner(userName, soughtInfo);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
 	box = task->m_results; task->m_results = NULL;
 
-	delete task;
-	isds_DbOwnerInfo_free(&doi);
+	delete task; task = Q_NULLPTR;
 
 	if (NULL != box) {
 		const struct isds_DbOwnerInfo *item = (isds_DbOwnerInfo *)
