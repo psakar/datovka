@@ -594,43 +594,6 @@ private slots:
 	void showImportZFOActionDialog(void);
 
 	/*!
-	 * @brief Create ZFO file(s) list for import into database.
-	 */
-	void createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
-	    enum ImportZFODialog::ZFOaction importType, bool checkOnServer);
-
-	/*!
-	 * @brief Collects information about import status.
-	 */
-	void collectImportZfoStatus(const QString &fileName, int result,
-	    const QString &resultDesc);
-
-	/*!
-	 * @brief Create account info list for ZFO files import into database.
-	 *
-	 * @note The user if going to be prompted about missing password.
-	 *
-	 * @param[in] activeOnly Whether to list only active accounts.
-	 * @return List of accounts.
-	 */
-	QList<Task::AccountDescr> createAccountInfoForZFOImport(
-	    bool activeOnly);
-
-	/*!
-	 * @brief Prepare import ZFO file(s) into database by ZFO type.
-	 */
-	void prepareZFOImportIntoDatabase(const QStringList &files,
-	    enum ImportZFODialog::ZFOtype zfoType, bool authenticate);
-
-	/*!
-	 * @brief Show ZFO import notification dialog with results of import.
-	 */
-	void showImportZfoResultDialogue(int filesCnt,
-	    const QList<QPair<QString,QString>> &successFilesList,
-	    const QList<QPair<QString,QString>> &existFilesList,
-	    const QList<QPair<QString,QString>> &errorFilesList);
-
-	/*!
 	 * @brief About application dialog.
 	 */
 	void aboutApplication(void);
@@ -1230,12 +1193,6 @@ private:
 	    m_lastStoredAccountNodeType; /*!< Last stored account position. */
 
 	bool m_searchDlgActive; /*!< True if search dialogue is active. */
-
-	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
-	int m_numFilesToImport;
-	QList< QPair<QString, QString> > m_importSucceeded,
-	                                 m_importExisted,
-	                                 m_importFailed;
 
 	int m_received_1;
 	int m_received_2;

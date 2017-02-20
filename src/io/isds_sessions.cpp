@@ -29,6 +29,7 @@
 #include <QObject>
 
 #include "isds_sessions.h"
+#include "src/common.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"

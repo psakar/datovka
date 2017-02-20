@@ -21,13 +21,16 @@
  * the two.
  */
 
-
-#include "dlg_import_zfo.h"
-#include "src/common.h"
+#include "src/gui/dlg_import_zfo.h"
 
 
-ImportZFODialog::ImportZFODialog(QWidget *parent) :
-    QDialog(parent)
+ImportZFODialog::ImportZFODialog(enum ImportZFODialog::ZFOtype &zfoType,
+    enum ImportZFODialog::ZFOlocation &locationType, bool &checkZfoOnServer,
+    QWidget *parent) :
+    QDialog(parent),
+    m_zfoType(zfoType),
+    m_locationType(locationType),
+    m_checkZfoOnServer(checkZfoOnServer)
 {
 	setupUi(this);
 	this->info->setText(tr("Here you can import whole messages and "
@@ -59,27 +62,23 @@ void ImportZFODialog::ChangeRadioBox(void)
 
 void ImportZFODialog::ImportFiles(void)
 {
-	enum ZFOtype zfoType = IMPORT_MESSAGE_ZFO;
-	enum ZFOaction zfoAaction = IMPORT_FROM_DIR;
-
 	if (this->messageZFO->isChecked()) {
-		zfoType = IMPORT_MESSAGE_ZFO;
+		m_zfoType = IMPORT_MESSAGE_ZFO;
 	} else if (this->deliveryZFO->isChecked()) {
-		zfoType = IMPORT_DELIVERY_ZFO;
+		m_zfoType = IMPORT_DELIVERY_ZFO;
 	} else {
-		zfoType = IMPORT_ALL_ZFO;
+		m_zfoType = IMPORT_ALL_ZFO;
 	}
 
 	if (this->radioImportAll->isChecked()) {
 		if (this->includeSubDir->isChecked()) {
-			zfoAaction = IMPORT_FROM_SUBDIR;
+			m_locationType = IMPORT_FROM_SUBDIR;
 		} else {
-			zfoAaction = IMPORT_FROM_DIR;
+			m_locationType = IMPORT_FROM_DIR;
 		}
 	} else if (this->radioImportSelected->isChecked()) {
-		zfoAaction = IMPORT_SEL_FILES;
+		m_locationType = IMPORT_SEL_FILES;
 	}
 
-	emit returnZFOAction(zfoType, zfoAaction,
-	    Qt::Unchecked != checkOnServer->checkState());
+	m_checkZfoOnServer = Qt::Unchecked != checkOnServer->checkState();
 }

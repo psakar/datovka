@@ -350,7 +350,8 @@ SOURCES += \
     src/io/wd_sessions.cpp \
     src/io/tag_db_container.cpp \
     src/worker/task_tag_sync_mojeid.cpp \
-    src/gui/dlg_login_mojeid.cpp
+    src/gui/dlg_login_mojeid.cpp \
+    src/io/import_zfo.cpp
 
 HEADERS += \
     src/cli/cli.h \
@@ -449,7 +450,8 @@ HEADERS += \
     src/io/wd_sessions.h \
     src/io/tag_db_container.h \
     src/worker/task_tag_sync_mojeid.h \
-    src/gui/dlg_login_mojeid.h
+    src/gui/dlg_login_mojeid.h \
+    src/io/import_zfo.h
 
 FORMS += \
     src/gui/ui/datovka.ui \

@@ -65,21 +65,21 @@
 #include "src/gui/dlg_view_zfo.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_timestamp_expir.h"
-#include "src/gui/dlg_import_zfo_result.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
 #include "src/gui/dlg_tags.h"
 #include "src/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
+#include "src/io/filesystem.h"
 #include "src/io/isds_helper.h"
 #include "src/io/isds_login.h"
 #include "src/io/isds_sessions.h"
-#include "src/io/wd_sessions.h"
-#include "src/io/filesystem.h"
+#include "src/io/import_zfo.h"
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
 #include "src/io/tag_db_container.h"
+#include "src/io/wd_sessions.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
@@ -97,7 +97,6 @@
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
-#include "src/worker/task_import_zfo.h"
 #include "src/worker/task_vacuum_db_set.h"
 #include "src/worker/task_verify_message.h"
 #include "src/worker/task_get_account_list_mojeid.h"
@@ -312,9 +311,6 @@ MainWindow::MainWindow(QWidget *parent)
 	        bool, int, int, int, int)), this,
 	    SLOT(collectDownloadMessageListStatus(QString, int, int, QString,
 	        bool, int, int, int, int)));
-	connect(&globMsgProcEmitter,
-	    SIGNAL(importZfoFinished(QString, int, QString)), this,
-	    SLOT(collectImportZfoStatus(QString, int, QString)));
 	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
 	    this, SLOT(updateProgressBar(QString, int)));
 	connect(&globMsgProcEmitter,
@@ -6227,35 +6223,45 @@ void MainWindow::showImportZFOActionDialog(void)
 {
 	debugSlotCall();
 
+	// webdatovka account cannot import ZFO files
 	const QString userName =
 	    m_accountModel.userName(currentAccountModelIndex());
-
 	if (isWebDatovkaAccount(userName)) {
 		showWebDatovkaInfoDialog(userName, "");
 		return;
 	}
 
-	QDialog *importZfo = new ImportZFODialog(this);
-	connect(importZfo,
-	    SIGNAL(returnZFOAction(enum ImportZFODialog::ZFOtype,
-	        enum ImportZFODialog::ZFOaction, bool)),
-	    this,
-	    SLOT(createZFOListForImport(enum ImportZFODialog::ZFOtype,
-	        enum ImportZFODialog::ZFOaction, bool)));
+	enum ImportZFODialog::ZFOtype zfoType =
+	    ImportZFODialog::IMPORT_MESSAGE_ZFO;
+	enum ImportZFODialog::ZFOlocation locationType =
+	    ImportZFODialog::IMPORT_FROM_DIR;
+	bool checkZfoOnServer = false;
+
+	/* import setting dialog */
+	QDialog *importZfo = new ImportZFODialog(zfoType, locationType,
+	   checkZfoOnServer, this);
 	importZfo->exec();
 	importZfo->deleteLater();
-}
 
+	// get userName and pointer to database for all accounts from settings
+	QList<Task::AccountDescr> accountList;
+	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 
-/* ========================================================================= */
-/*
- * Func: Create ZFO file(s) list for import into database.
- */
-void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
-    enum ImportZFODialog::ZFOaction importType, bool checkOnServer)
-/* ========================================================================= */
-{
-	debugSlotCall();
+		QModelIndex index = m_accountModel.index(i, 0);
+		QString userName(m_accountModel.userName(index));
+		Q_ASSERT(!userName.isEmpty());
+
+		if ((!checkZfoOnServer) ||
+		    globIsdsSessions.isConnectedToIsds(userName) ||
+		    connectToIsds(userName)) {
+			MessageDbSet *dbSet = accountDbSet(userName, this);
+			if (0 == dbSet) {
+				Q_ASSERT(0);
+				continue;
+			}
+			accountList.append(Task::AccountDescr(userName, dbSet));
+		}
+	}
 
 	bool includeSubdir = false;
 	QString importDir;
@@ -6263,7 +6269,8 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 	QStringList nameFilter("*.zfo");
 	QDir directory(QDir::home());
 
-	switch (importType) {
+	// dialog select zfo files or directory
+	switch (locationType) {
 	case ImportZFODialog::IMPORT_FROM_SUBDIR:
 		includeSubdir = true;
 	case ImportZFODialog::IMPORT_FROM_DIR:
@@ -6329,133 +6336,13 @@ void MainWindow::createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
 		break;
 	}
 
-	prepareZFOImportIntoDatabase(filePathList, zfoType, checkOnServer);
+	logInfo("Trying to import %d ZFO files.\n", filePathList.count());
 
-	clearProgressBar();
-}
-
-/* ========================================================================= */
-void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
-    const QString &resultDesc)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	logDebugLv0NL("Received import ZFO finished for file '%s' %d: '%s'",
-	    fileName.toUtf8().constData(), result,
-	    resultDesc.toUtf8().constData());
-
-	switch (result) {
-	case TaskImportZfo::IMP_SUCCESS:
-		m_importSucceeded.append(
-		    QPair<QString, QString>(fileName, resultDesc));
-		break;
-	case TaskImportZfo::IMP_DB_EXISTS:
-		m_importExisted.append(
-		    QPair<QString, QString>(fileName, resultDesc));
-		break;
-	default:
-		m_importFailed.append(
-		    QPair<QString, QString>(fileName, resultDesc));
-		break;
-	}
-
-	if (!m_zfoFilesToImport.remove(fileName)) {
-		logErrorNL("Processed ZFO file that '%s' the application "
-		    "has not been aware of.", fileName.toUtf8().constData());
-	}
-
-	if (m_zfoFilesToImport.isEmpty()) {
-		showImportZfoResultDialogue(m_numFilesToImport,
-		    m_importSucceeded, m_importExisted, m_importFailed);
-
-		m_numFilesToImport = 0;
-		m_importSucceeded.clear();
-		m_importExisted.clear();
-		m_importFailed.clear();
-
-		/* Activate import buttons. */
-		ui->actionImport_messages_from_database->setEnabled(true);
-		ui->actionImport_ZFO_file_into_database->setEnabled(true);
-	}
-}
-
-/* ========================================================================= */
-/*
- * Func: Create account info for ZFO file(s) import into database.
- */
-QList<Task::AccountDescr> MainWindow::createAccountInfoForZFOImport(
-    bool activeOnly)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	QList<Task::AccountDescr> accountList;
-
-	/* get userName and pointer to database
-	 * for all accounts from settings */
-	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
-		QModelIndex index = m_accountModel.index(i, 0);
-
-		QString userName(m_accountModel.userName(index));
-		Q_ASSERT(!userName.isEmpty());
-
-		if ((!activeOnly) ||
-		    globIsdsSessions.isConnectedToIsds(userName) ||
-		    connectToIsds(userName)) {
-			MessageDbSet *dbSet = accountDbSet(userName, this);
-			if (0 == dbSet) {
-				Q_ASSERT(0);
-				continue;
-			}
-
-			accountList.append(Task::AccountDescr(userName, dbSet));
-		}
-	}
-
-	return accountList;
-}
-
-
-/* ========================================================================= */
-/*
- * Func: Prepare import ZFO file(s) into database by ZFO type.
- */
-void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
-    enum ImportZFODialog::ZFOtype zfoType, bool authenticate)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	const QString progressBarTitle = "ZFOImport";
-	QPair<QString,QString> impZFOInfo;
-	QList<QPair<QString,QString>> errorFilesList; // red
-	QList<QPair<QString,QString>> existFilesList; // black
-	QList<QPair<QString,QString>> successFilesList; // green
-	QSet<QString> messageZfoFiles;
-	QSet<QString> deliveryZfoFiles;
-	int zfoCnt = files.size();
-
-	m_zfoFilesToImport.clear();
-	m_importSucceeded.clear();
-	m_importExisted.clear();
-	m_importFailed.clear();
-
-	logInfo("Trying to import %d ZFO files.\n", zfoCnt);
-
-	if (zfoCnt == 0) {
+	if (filePathList.count() == 0) {
 		logInfo("%s\n", "No *.zfo files in received file list.");
 		showStatusTextWithTimeout(tr("No ZFO files to import."));
 		return;
 	}
-
-	/*
-	 * If there is no authentication request, the all account are going to
-	 * be processed. It authentication is required then only active
-	 * accounts are going to be selected.
-	 */
-	const QList<Task::AccountDescr> accountList(
-	    createAccountInfoForZFOImport(authenticate));
 
 	if (accountList.isEmpty()) {
 		logInfo("%s\n", "No accounts to import into.");
@@ -6464,92 +6351,24 @@ void MainWindow::prepareZFOImportIntoDatabase(const QStringList &files,
 		return;
 	}
 
-	updateProgressBar(progressBarTitle, 5);
-
-	/* Sort ZFOs by format types. */
-	foreach (const QString &file, files) {
-		switch (TaskImportZfo::determineFileType(file)) {
-		case TaskImportZfo::ZT_UKNOWN:
-			impZFOInfo.first = file;
-			impZFOInfo.second = tr("Wrong ZFO format. This "
-			    "file does not contain correct data for import.");
-			errorFilesList.append(impZFOInfo);
-			break;
-		case TaskImportZfo::ZT_MESSAGE:
-			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
-			    (ImportZFODialog::IMPORT_MESSAGE_ZFO == zfoType)) {
-				messageZfoFiles.insert(file);
-				m_zfoFilesToImport.insert(file);
-			}
-			break;
-		case TaskImportZfo::ZT_DELIVERY_INFO:
-			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
-			    (ImportZFODialog::IMPORT_DELIVERY_ZFO == zfoType)) {
-				deliveryZfoFiles.insert(file);
-				m_zfoFilesToImport.insert(file);
-			}
-			break;
-		default:
-			break;
-		}
-	}
-
-	m_numFilesToImport = m_zfoFilesToImport.size();
-
-	updateProgressBar(progressBarTitle, 10);
-
-	if (messageZfoFiles.isEmpty() && deliveryZfoFiles.isEmpty()) {
-		QMessageBox::warning(this, tr("No ZFO file(s)"),
-		    tr("The selection does not contain any valid ZFO files."),
-		    QMessageBox::Ok);
-		return;
-	}
-
-	/* Block import buttons. */
+	/* Block import gui buttons. */
 	ui->actionImport_messages_from_database->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
 
-	updateProgressBar(progressBarTitle, 100);
+	QString errTxt;
+	globImportZfo.importZfoIntoDatabase(filePathList, accountList,
+	    zfoType, checkZfoOnServer, errTxt);
 
-	showStatusTextWithTimeout(tr("Import of ZFO files ... Planned"));
-
-	/* First, import messages. */
-	foreach (const QString &fileName, messageZfoFiles) {
-		TaskImportZfo *task;
-
-		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
-		    TaskImportZfo::ZT_MESSAGE, authenticate);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task);
+	if (!errTxt.isEmpty()) {
+		logInfo("%s\n", errTxt);
+		showStatusTextWithTimeout(errTxt);
 	}
-	/* Second, import delivery information. */
-	foreach (const QString &fileName, deliveryZfoFiles) {
-		TaskImportZfo *task;
 
-		task = new (std::nothrow) TaskImportZfo(accountList, fileName,
-		    TaskImportZfo::ZT_DELIVERY_INFO, authenticate);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task);
-	}
-}
+	/* Unblock import gui buttons. */
+	ui->actionImport_messages_from_database->setEnabled(true);
+	ui->actionImport_ZFO_file_into_database->setEnabled(true);
 
-
-/* ========================================================================= */
-/*
- * Show ZFO import notification dialog with results of import
- */
-void MainWindow::showImportZfoResultDialogue(int filesCnt,
-    const QList<QPair<QString,QString>> &successFilesList,
-    const QList<QPair<QString,QString>> &existFilesList,
-    const QList<QPair<QString,QString>> &errorFilesList)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	QDialog *importZfoResult = new ImportZFOResultDialog(filesCnt,
-	    errorFilesList, successFilesList, existFilesList, this);
-	importZfoResult->exec();
-	importZfoResult->deleteLater();
+	clearProgressBar();
 }
 
 
