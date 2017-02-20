@@ -6360,7 +6360,7 @@ void MainWindow::showImportZFOActionDialog(void)
 	    zfoType, checkZfoOnServer, errTxt);
 
 	if (!errTxt.isEmpty()) {
-		logInfo("%s\n", errTxt);
+		logInfo("%s\n", errTxt.toUtf8().constData());
 		showStatusTextWithTimeout(errTxt);
 	}
 
