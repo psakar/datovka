@@ -29,8 +29,6 @@
 #include "src/worker/task_import_zfo.h"
 #include "src/worker/message_emitter.h"
 
-ImportZfo globImportZfo;
-
 ImportZfo::ImportZfo(QObject *parent)
     : QObject(parent),
     m_zfoFilesToImport(QSet<QString>()),
@@ -39,17 +37,17 @@ ImportZfo::ImportZfo(QObject *parent)
     m_importExisted(QList<QPair<QString, QString>>()),
     m_importFailed(QList<QPair<QString, QString>>())
 {
-	connect(&globMsgProcEmitter,
-	    SIGNAL(importZfoFinished(QString, int, QString)), this,
-	    SLOT(collectImportZfoStatus(QString, int, QString)));
 }
-
 
 void ImportZfo::importZfoIntoDatabase(const QStringList &files,
     const QList<Task::AccountDescr> &accountList,
     enum ImportZFODialog::ZFOtype zfoType, bool authenticate, QString &errTxt)
 {
 	debugFuncCall();
+
+	connect(&globMsgProcEmitter,
+	    SIGNAL(importZfoFinished(QString, int, QString)), this,
+	    SLOT(collectImportZfoStatus(QString, int, QString)));
 
 	QPair<QString,QString> impZFOInfo;
 	QSet<QString> messageZfoFiles;
@@ -115,7 +113,6 @@ void ImportZfo::importZfoIntoDatabase(const QStringList &files,
 	}
 }
 
-
 void ImportZfo::collectImportZfoStatus(const QString &fileName, int result,
     const QString &resultDesc)
 {
@@ -156,7 +153,6 @@ void ImportZfo::collectImportZfoStatus(const QString &fileName, int result,
 	}
 }
 
-
 void ImportZfo::showImportZfoResultDialogue(int filesCnt,
     const QList<QPair<QString,QString>> &successFilesList,
     const QList<QPair<QString,QString>> &existFilesList,
@@ -169,3 +165,5 @@ void ImportZfo::showImportZfoResultDialogue(int filesCnt,
 	importZfoResult->exec();
 	importZfoResult->deleteLater();
 }
+
+ImportZfo globImportZfo;

@@ -40,7 +40,7 @@ public:
 	/*!
 	 * @brief Constructor.
 	 */
-	explicit ImportZfo(QObject *parent = 0);
+	explicit ImportZfo(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Import ZFO file(s) into database by ZFO type.
@@ -72,9 +72,12 @@ private:
 
 	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
 	int m_numFilesToImport; /*!< Input ZFO count. */
-	QList< QPair<QString, QString> > m_importSucceeded,
-	                                 m_importExisted,
-	                                 m_importFailed; /*!< Import resulty lists. */
+	/*!< QPair in following lists means:
+	 * first string - zfo file name,
+	 * second = import result text */
+	QList< QPair<QString, QString> > m_importSucceeded; /*!< Success import resulty lists. */
+	QList< QPair<QString, QString> > m_importExisted; /*!< Import exists resulty lists. */
+	QList< QPair<QString, QString> > m_importFailed; /*!< Import error resulty lists. */
 
 	/*!
 	 * @brief Show ZFO import notification dialog with results of imports.
