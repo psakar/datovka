@@ -90,7 +90,7 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
 	    SIGNAL(itemSelectionChanged()), this,
 	    SLOT(setFirtsColumnActive()));
 	connect(this->textLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(enableSearchButton(QString)));
+	    this, SLOT(checkInputFields()));
 	connect(this->contactTableWidget,
 	    SIGNAL(itemClicked(QTableWidgetItem*)), this,
 	    SLOT(enableOkButton()));
@@ -131,6 +131,11 @@ void DlgSearch2::setFirtsColumnActive(void)
 	    this->contactTableWidget->currentRow());
 }
 
+void DlgSearch2::checkInputFields(void)
+{
+	this->searchPushButton->setEnabled(
+	    this->textLineEdit->text().size() > 2);
+}
 
 void DlgSearch2::searchDataBoxFulltext(void)
 {
@@ -174,17 +179,6 @@ void DlgSearch2::searchDataBoxFulltext(void)
 
 	queryBoxFulltext(m_target, m_boxType, m_phrase);
 }
-
-/* ========================================================================= */
-/*
- * Enable ok (add) button if some contact was selected
- */
-void DlgSearch2::enableSearchButton(const QString &text)
-/* ========================================================================= */
-{
-	this->searchPushButton->setEnabled(text.count() > 2);
-}
-
 
 /* ========================================================================= */
 /*

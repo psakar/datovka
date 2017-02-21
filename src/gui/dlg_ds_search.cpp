@@ -80,6 +80,99 @@ void DlgDsSearch::setFirtsColumnActive(void)
 	    this->contactTableWidget->currentRow());
 }
 
+void DlgDsSearch::checkInputFields(void)
+{
+	this->nameLineEdit->setEnabled(true);
+	this->pscLineEdit->setEnabled((true));
+	this->iCLineEdit->setEnabled((true));
+	this->iDLineEdit->setEnabled((true));
+
+	switch (this->dataBoxTypeCBox->currentIndex()) {
+	case CBOX_TYPE_OVM:
+		this->iCLineEdit->setEnabled(true);
+		this->labelName->setText(tr("Subject Name:"));
+		this->labelName->setToolTip(tr("Enter name of subject"));
+		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
+		this->infoLabel->hide();
+		break;
+	case CBOX_TYPE_PO:
+		this->iCLineEdit->setEnabled(true);
+		this->labelName->setText(tr("Subject Name:"));
+		this->labelName->setToolTip(tr("Enter name of subject"));
+		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
+		if (m_showInfoLabel) {
+			this->infoLabel->show();
+		} else {
+			this->infoLabel->hide();
+		}
+		break;
+	case CBOX_TYPE_PFO:
+		this->iCLineEdit->setEnabled(true);
+		this->labelName->setText(tr("Name:"));
+		this->labelName->setToolTip(tr("Enter PFO last name or company name."));
+		this->nameLineEdit->setToolTip(tr("Enter PFO last name or company name."));
+		if (m_showInfoLabel) {
+			this->infoLabel->show();
+		} else {
+			this->infoLabel->hide();
+		}
+		break;
+	case CBOX_TYPE_FO:
+		this->iCLineEdit->setEnabled(false);
+		this->labelName->setText(tr("Last Name:"));
+		this->labelName->setToolTip(tr("Enter last name or "
+		    "birth last name of FO."));
+		this->nameLineEdit->setToolTip(tr("Enter last name or "
+		    "birth last name of FO."));
+		if (m_showInfoLabel) {
+			this->infoLabel->show();
+		} else {
+			this->infoLabel->hide();
+		}
+		break;
+	default:
+		break;
+	}
+
+	if (!this->iDLineEdit->text().isEmpty()) {
+		this->nameLineEdit->setEnabled(false);
+		this->pscLineEdit->setEnabled(false);
+		this->iCLineEdit->setEnabled(false);
+
+		if (this->iDLineEdit->text().length() == 7) {
+			this->searchPushButton->setEnabled(true);
+		}
+		else {
+			this->searchPushButton->setEnabled(false);
+		}
+	} else if (!this->iCLineEdit->text().isEmpty()) {
+		this->iDLineEdit->setEnabled(false);
+		this->nameLineEdit->setEnabled(false);
+		this->pscLineEdit->setEnabled(false);
+
+		if (this->iCLineEdit->text().length() == 8) {
+			this->searchPushButton->setEnabled(true);
+		}
+		else {
+			this->searchPushButton->setEnabled(false);
+		}
+	} else if (!this->nameLineEdit->text().isEmpty()) {
+		this->iDLineEdit->setEnabled(false);
+
+		if (this->nameLineEdit->text().length() > 2) {
+			this->searchPushButton->setEnabled(true);
+		}
+		else {
+			this->searchPushButton->setEnabled(false);
+		}
+	} else {
+		this->searchPushButton->setEnabled(false);
+		this->iDLineEdit->setEnabled(true);
+		this->nameLineEdit->setEnabled(true);
+		this->pscLineEdit->setEnabled(true);
+	}
+}
+
 void DlgDsSearch::searchDataBox(void)
 {
 	if (this->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
@@ -224,105 +317,6 @@ void DlgDsSearch::pingIsdsServer(void)
 		qDebug() << "Connection to ISDS is dead :(";
 	}
 }
-
-/* ========================================================================= */
-/*
- * Check input fields in the dialog
- */
-void DlgDsSearch::checkInputFields(void)
-/* ========================================================================= */
-{
-	this->nameLineEdit->setEnabled(true);
-	this->pscLineEdit->setEnabled((true));
-	this->iCLineEdit->setEnabled((true));
-	this->iDLineEdit->setEnabled((true));
-
-	switch (this->dataBoxTypeCBox->currentIndex()) {
-	case CBOX_TYPE_OVM:
-		this->iCLineEdit->setEnabled(true);
-		this->labelName->setText(tr("Subject Name:"));
-		this->labelName->setToolTip(tr("Enter name of subject"));
-		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
-		this->infoLabel->hide();
-		break;
-	case CBOX_TYPE_PO:
-		this->iCLineEdit->setEnabled(true);
-		this->labelName->setText(tr("Subject Name:"));
-		this->labelName->setToolTip(tr("Enter name of subject"));
-		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
-		if (m_showInfoLabel) {
-			this->infoLabel->show();
-		} else {
-			this->infoLabel->hide();
-		}
-		break;
-	case CBOX_TYPE_PFO:
-		this->iCLineEdit->setEnabled(true);
-		this->labelName->setText(tr("Name:"));
-		this->labelName->setToolTip(tr("Enter PFO last name or company name."));
-		this->nameLineEdit->setToolTip(tr("Enter PFO last name or company name."));
-		if (m_showInfoLabel) {
-			this->infoLabel->show();
-		} else {
-			this->infoLabel->hide();
-		}
-		break;
-	case CBOX_TYPE_FO:
-		this->iCLineEdit->setEnabled(false);
-		this->labelName->setText(tr("Last Name:"));
-		this->labelName->setToolTip(tr("Enter last name or "
-		    "birth last name of FO."));
-		this->nameLineEdit->setToolTip(tr("Enter last name or "
-		    "birth last name of FO."));
-		if (m_showInfoLabel) {
-			this->infoLabel->show();
-		} else {
-			this->infoLabel->hide();
-		}
-		break;
-	default:
-		break;
-	}
-
-	if (!this->iDLineEdit->text().isEmpty()) {
-		this->nameLineEdit->setEnabled(false);
-		this->pscLineEdit->setEnabled(false);
-		this->iCLineEdit->setEnabled(false);
-
-		if (this->iDLineEdit->text().length() == 7) {
-			this->searchPushButton->setEnabled(true);
-		}
-		else {
-			this->searchPushButton->setEnabled(false);
-		}
-	} else if (!this->iCLineEdit->text().isEmpty()) {
-		this->iDLineEdit->setEnabled(false);
-		this->nameLineEdit->setEnabled(false);
-		this->pscLineEdit->setEnabled(false);
-
-		if (this->iCLineEdit->text().length() == 8) {
-			this->searchPushButton->setEnabled(true);
-		}
-		else {
-			this->searchPushButton->setEnabled(false);
-		}
-	} else if (!this->nameLineEdit->text().isEmpty()) {
-		this->iDLineEdit->setEnabled(false);
-
-		if (this->nameLineEdit->text().length() > 2) {
-			this->searchPushButton->setEnabled(true);
-		}
-		else {
-			this->searchPushButton->setEnabled(false);
-		}
-	} else {
-		this->searchPushButton->setEnabled(false);
-		this->iDLineEdit->setEnabled(true);
-		this->nameLineEdit->setEnabled(true);
-		this->pscLineEdit->setEnabled(true);
-	}
-}
-
 
 /* ========================================================================= */
 /*

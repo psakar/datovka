@@ -62,11 +62,15 @@ private slots:
 	void setFirtsColumnActive(void);
 
 	/*!
+	 * @brief Check input fields sanity and activate search button.
+	 */
+	void checkInputFields(void);
+
+	/*!
 	 * @brief Full-text search for data boxes according given criteria.
 	 */
 	void searchDataBoxFulltext(void);
 
-	void enableSearchButton(const QString &text);
 	void addSelectedDbIDs(void);
 	void contactItemDoubleClicked(const QModelIndex &index);
 
