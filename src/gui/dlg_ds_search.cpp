@@ -28,7 +28,6 @@
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
-#include "src/worker/task_search_owner.h"
 
 #define CON_COL_CHECKBOX 0
 #define CON_COL_BOX_ID 1
@@ -60,6 +59,57 @@ DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 	contactTableWidget->setNarrowedLineHeight();
 
 	initSearchWindow();
+}
+
+void DlgDsSearch::enableOkButton(void)
+{
+	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
+		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
+			this->buttonBox->button(QDialogButtonBox::Ok)->
+			    setEnabled(true);
+			return;
+		}
+	}
+}
+
+void DlgDsSearch::setFirtsColumnActive(void)
+{
+	this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
+	this->contactTableWidget->selectRow(
+	    this->contactTableWidget->currentRow());
+}
+
+void DlgDsSearch::searchDataBox(void)
+{
+	if (this->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
+		QMessageBox::information(this, tr("Search result"),
+		    tr("This is a special ID for system databox of "
+		    "Datové schránky. You can't use this ID for "
+		    "message delivery. Try again."),
+		    QMessageBox::Ok);
+		return;
+	}
+
+	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
+	switch (this->dataBoxTypeCBox->currentIndex()) {
+	case CBOX_TYPE_FO:
+		boxType = TaskSearchOwner::BT_FO;
+		break;
+	case CBOX_TYPE_PFO:
+		boxType = TaskSearchOwner::BT_PFO;
+		break;
+	case CBOX_TYPE_PO:
+		boxType = TaskSearchOwner::BT_PO;
+		break;
+	case CBOX_TYPE_OVM:
+	default:
+		boxType = TaskSearchOwner::BT_OVM;
+		break;
+	}
+
+	queryBox(this->iDLineEdit->text(), boxType, this->iCLineEdit->text(),
+	    this->nameLineEdit->text(), this->pscLineEdit->text());
 }
 
 /* ========================================================================= */
@@ -158,19 +208,6 @@ void DlgDsSearch::initSearchWindow(void)
 	    SLOT(pingIsdsServer()));
 
 	checkInputFields();
-}
-
-
-/* ========================================================================= */
-/*
- * Set first column with checkbox active if item was changed
- */
-void DlgDsSearch::setFirtsColumnActive(void)
-/* ========================================================================= */
-{
-	this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
-	this->contactTableWidget->selectRow(
-	    this->contactTableWidget->currentRow());
 }
 
 
@@ -289,140 +326,6 @@ void DlgDsSearch::checkInputFields(void)
 
 /* ========================================================================= */
 /*
- * Call ISDS and find data boxes with given criteria
- */
-void DlgDsSearch::searchDataBox(void)
-/* ========================================================================= */
-{
-	this->contactTableWidget->setRowCount(0);
-	this->contactTableWidget->setEnabled(false);
-
-	if (this->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
-		QMessageBox::information(this, tr("Search result"),
-		    tr("This is a special ID for system databox of "
-		    "Datové schránky. You can't use this ID for "
-		    "message delivery. Try again."),
-		    QMessageBox::Ok);
-		return;
-	}
-
-	enum TaskSearchOwner::Result result = TaskSearchOwner::SO_ERROR;
-	QString errMsg;
-	QString longErrMsg;
-
-	QList<QVector<QString>> list_contacts;
-
-	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
-	switch (this->dataBoxTypeCBox->currentIndex()) {
-	case CBOX_TYPE_FO:
-		boxType = TaskSearchOwner::BT_FO;
-		break;
-	case CBOX_TYPE_PFO:
-		boxType = TaskSearchOwner::BT_PFO;
-		break;
-	case CBOX_TYPE_PO:
-		boxType = TaskSearchOwner::BT_PO;
-		break;
-	case CBOX_TYPE_OVM:
-	default:
-		boxType = TaskSearchOwner::BT_OVM;
-		break;
-	}
-
-	TaskSearchOwner::SoughtOwnerInfo soughtInfo(
-	    this->iDLineEdit->text(), boxType, this->iCLineEdit->text(),
-	    this->nameLineEdit->text(), this->nameLineEdit->text(),
-	    this->nameLineEdit->text(), this->pscLineEdit->text());
-
-	TaskSearchOwner *task =
-	    new (std::nothrow) TaskSearchOwner(m_userName, soughtInfo);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-
-	result = task->m_result;
-	errMsg = task->m_isdsError;
-	longErrMsg = task->m_isdsLongError;
-	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
-
-	delete task; task = Q_NULLPTR;
-
-	switch (result) {
-	case TaskSearchOwner::SO_SUCCESS:
-		break;
-	case TaskSearchOwner::SO_BAD_DATA:
-		QMessageBox::information(this, tr("Search result"),
-		    longErrMsg, QMessageBox::Ok);
-		return;
-		break;
-	case TaskSearchOwner::SO_COM_ERROR:
-		QMessageBox::information(this, tr("Search result"),
-		    tr("It is not possible find databox because") + ":\n\n" +
-		    longErrMsg, QMessageBox::Ok);
-		return;
-		break;
-	case TaskSearchOwner::SO_ERROR:
-	default:
-		QMessageBox::critical(this, tr("Search error"),
-		    tr("It is not possible find databox because "
-		         "error occurred during search process!"),
-		    QMessageBox::Ok);
-		return;
-		break;
-	}
-
-	this->contactTableWidget->setRowCount(0);
-	this->contactTableWidget->setEnabled(true);
-	foreach (const TaskSearchOwner::BoxEntry &entry, foundBoxes) {
-		int row = this->contactTableWidget->rowCount();
-		this->contactTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setCheckState(Qt::Unchecked);
-		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.id);
-		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.name);
-		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.address);
-		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.zipCode);
-		this->contactTableWidget->setItem(row, CON_COL_POST_CODE, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.effectiveOVM ? tr("no") : tr("yes"));
-		this->contactTableWidget->setItem(row, CON_COL_PDZ, item);
-	}
-
-	if (this->contactTableWidget->rowCount() > 0) {
-		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
-		this->contactTableWidget->selectRow(0);
-	}
-
-	this->contactTableWidget->resizeColumnsToContents();
-}
-
-
-/* ========================================================================= */
-/*
- * Enable action button
- */
-void DlgDsSearch::enableOkButton(void)
-/* ========================================================================= */
-{
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
-		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
-			this->buttonBox->button(QDialogButtonBox::Ok)->
-			    setEnabled(true);
-		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
  * Test if the selected item is not in recipient list
  */
 bool DlgDsSearch::isInRecipientTable(const QString &idDs) const
@@ -509,4 +412,83 @@ void DlgDsSearch::insertContactToRecipentTable(int selRow)
 		item->setTextAlignment(Qt::AlignCenter);
 		this->m_recipientTableWidget->setItem(row, 3, item);
 	}
+}
+
+void DlgDsSearch::queryBox(const QString &boxId,
+    enum TaskSearchOwner::BoxType boxType, const QString &ic,
+    const QString &name, const QString &zipCode)
+{
+	this->contactTableWidget->setRowCount(0);
+	this->contactTableWidget->setEnabled(false);
+
+	TaskSearchOwner::SoughtOwnerInfo soughtInfo(boxId, boxType, ic, name,
+	    name, name, zipCode);
+
+	TaskSearchOwner *task =
+	    new (std::nothrow) TaskSearchOwner(m_userName, soughtInfo);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	enum TaskSearchOwner::Result result = task->m_result;
+	QString errMsg = task->m_isdsError;
+	QString longErrMsg = task->m_isdsLongError;
+	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
+
+	delete task; task = Q_NULLPTR;
+
+	switch (result) {
+	case TaskSearchOwner::SO_SUCCESS:
+		break;
+	case TaskSearchOwner::SO_BAD_DATA:
+		QMessageBox::information(this, tr("Search result"),
+		    longErrMsg, QMessageBox::Ok);
+		return;
+		break;
+	case TaskSearchOwner::SO_COM_ERROR:
+		QMessageBox::information(this, tr("Search result"),
+		    tr("It is not possible find databox because") + ":\n\n" +
+		    longErrMsg, QMessageBox::Ok);
+		return;
+		break;
+	case TaskSearchOwner::SO_ERROR:
+	default:
+		QMessageBox::critical(this, tr("Search error"),
+		    tr("It is not possible find databox because "
+		         "error occurred during search process!"),
+		    QMessageBox::Ok);
+		return;
+		break;
+	}
+
+	this->contactTableWidget->setRowCount(0);
+	this->contactTableWidget->setEnabled(true);
+	foreach (const TaskSearchOwner::BoxEntry &entry, foundBoxes) {
+		int row = this->contactTableWidget->rowCount();
+		this->contactTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setCheckState(Qt::Unchecked);
+		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.id);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.name);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.address);
+		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.zipCode);
+		this->contactTableWidget->setItem(row, CON_COL_POST_CODE, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.effectiveOVM ? tr("no") : tr("yes"));
+		this->contactTableWidget->setItem(row, CON_COL_PDZ, item);
+	}
+
+	if (this->contactTableWidget->rowCount() > 0) {
+		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
+		this->contactTableWidget->selectRow(0);
+	}
+
+	this->contactTableWidget->resizeColumnsToContents();
 }

@@ -98,7 +98,7 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
 	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
 	    SLOT(enableOkButton()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
-	    SLOT(searchNewDataboxes()));
+	    SLOT(searchDataBoxFulltext()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(addSelectedDbIDs()));
 	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
@@ -112,13 +112,19 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
 	    new TableSpaceSelectionFilter(this));
 }
 
+void DlgSearch2::enableOkButton(void)
+{
+	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
+		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
+			this->buttonBox->button(QDialogButtonBox::Ok)->
+			    setEnabled(true);
+			return;
+		}
+	}
+}
 
-/* ========================================================================= */
-/*
- * Set first column with checkbox active if item was changed
- */
 void DlgSearch2::setFirtsColumnActive(void)
-/* ========================================================================= */
 {
 	this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
 	this->contactTableWidget->selectRow(
@@ -126,12 +132,7 @@ void DlgSearch2::setFirtsColumnActive(void)
 }
 
 
-/* ========================================================================= */
-/*
- * Start new search and show first page of results
- */
-void DlgSearch2::searchNewDataboxes(void)
-/* ========================================================================= */
+void DlgSearch2::searchDataBoxFulltext(void)
 {
 	m_target = TaskSearchOwnerFulltext::FT_ALL;
 	switch (this->fulltextTargetCBox->currentIndex()) {
@@ -171,74 +172,8 @@ void DlgSearch2::searchNewDataboxes(void)
 
 	m_phrase = this->textLineEdit->text();
 
-	findDataboxes(m_target, m_boxType, m_phrase);
+	queryBoxFulltext(m_target, m_boxType, m_phrase);
 }
-
-
-/* ========================================================================= */
-/*
- * Search databoxes on ISDS
- */
-void DlgSearch2::findDataboxes(
-    enum TaskSearchOwnerFulltext::FulltextTarget target,
-    enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
-/* ========================================================================= */
-{
-	this->contactTableWidget->setRowCount(0);
-	this->contactTableWidget->setEnabled(false);
-	this->resultGroupBox->hide();
-
-	QString resultString = tr("Total found: 0") ;
-
-	TaskSearchOwnerFulltext *task;
-	task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
-	    phrase, target, boxType);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-
-	enum TaskSearchOwnerFulltext::Result ret = task->m_result;
-
-	this->resultGroupBox->show();
-	this->resultGroupBox->setEnabled(true);
-
-	if (ret != TaskSearchOwnerFulltext::SOF_SUCCESS) {
-		delete task; task = NULL;
-		this->searchResultText->setText(resultString);
-		return;
-	}
-
-	quint64 totalDb = task->m_totalMatchingBoxes;
-	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
-
-	delete task; task = NULL;
-
-	resultString = tr("Total found") + ": " + QString::number(totalDb);
-
-	this->searchResultText->setText(resultString);
-
-	this->contactTableWidget->setEnabled(!foundBoxes.isEmpty());
-	foreach (const TaskSearchOwnerFulltext::BoxEntry &entry, foundBoxes) {
-		int row = this->contactTableWidget->rowCount();
-		this->contactTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setCheckState(Qt::Unchecked);
-		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.id);
-		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
-		item = new QTableWidgetItem;
-		item->setText(convertDbTypeToString(entry.type));
-		this->contactTableWidget->setItem(row, CON_COL_BOX_TYPE, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.name);
-		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.address);
-		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
-		//this->contactTableWidget->resizeColumnsToContents();
-	}
-}
-
 
 /* ========================================================================= */
 /*
@@ -249,25 +184,6 @@ void DlgSearch2::enableSearchButton(const QString &text)
 {
 	this->searchPushButton->setEnabled(text.count() > 2);
 }
-
-
-
-/* ========================================================================= */
-/*
- * Enable ok (add) button if some contact was selected
- */
-void DlgSearch2::enableOkButton(void)
-/* ========================================================================= */
-{
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
-		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
-			this->buttonBox->button(QDialogButtonBox::Ok)->
-			    setEnabled(true);
-		}
-	}
-}
-
 
 
 /* ========================================================================= */
@@ -301,4 +217,62 @@ void DlgSearch2::contactItemDoubleClicked(const QModelIndex &index)
 	m_dbIdList.append(this->contactTableWidget->
 	    item(index.row(), CON_COL_BOX_ID)->text());
 	this->close();
+}
+
+void DlgSearch2::queryBoxFulltext(
+    enum TaskSearchOwnerFulltext::FulltextTarget target,
+    enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
+{
+	this->contactTableWidget->setRowCount(0);
+	this->contactTableWidget->setEnabled(false);
+	this->resultGroupBox->hide();
+
+	QString resultString = tr("Total found: 0") ;
+
+	TaskSearchOwnerFulltext *task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
+	    phrase, target, boxType);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	enum TaskSearchOwnerFulltext::Result result = task->m_result;
+
+	this->resultGroupBox->show();
+	this->resultGroupBox->setEnabled(true);
+
+	if (result != TaskSearchOwnerFulltext::SOF_SUCCESS) {
+		delete task; task = Q_NULLPTR;
+		this->searchResultText->setText(resultString);
+		return;
+	}
+
+	quint64 totalDb = task->m_totalMatchingBoxes;
+	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
+
+	delete task; task = Q_NULLPTR;
+
+	resultString = tr("Total found") + ": " + QString::number(totalDb);
+
+	this->searchResultText->setText(resultString);
+
+	this->contactTableWidget->setEnabled(!foundBoxes.isEmpty());
+	foreach (const TaskSearchOwnerFulltext::BoxEntry &entry, foundBoxes) {
+		int row = this->contactTableWidget->rowCount();
+		this->contactTableWidget->insertRow(row);
+		QTableWidgetItem *item = new QTableWidgetItem;
+		item->setCheckState(Qt::Unchecked);
+		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.id);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
+		item = new QTableWidgetItem;
+		item->setText(convertDbTypeToString(entry.type));
+		this->contactTableWidget->setItem(row, CON_COL_BOX_TYPE, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.name);
+		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
+		item = new QTableWidgetItem;
+		item->setText(entry.address);
+		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
+		//this->contactTableWidget->resizeColumnsToContents();
+	}
 }

@@ -28,34 +28,70 @@
 #include <QTimer>
 
 #include "src/common.h"
+#include "src/worker/task_search_owner.h"
 #include "ui_dlg_ds_search.h"
 
+/*!
+ * @brief Data box search dialogue.
+ */
 class DlgDsSearch : public QDialog, public Ui::DsSearch {
 	Q_OBJECT
 public:
+	/*!
+	 * @brief Dialogue action.
+	 */
 	enum Action {
 		ACT_BLANK,
 		ACT_ADDNEW
 	};
 
+	/*!
+	 * @brief Constructor.
+	 */
 	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
 	    const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QWidget *parent = Q_NULLPTR, const QString &userName = QString());
 
 private slots:
+	/*!
+	 * @brief Activates confirmation button.
+	 */
+	void enableOkButton(void);
+
+	/*!
+	 * @brief Set first column containing checkboxes active.
+	 */
+	void setFirtsColumnActive(void);
+
+	/*!
+	 * @brief Search for data boxes according given criteria.
+	 */
+	void searchDataBox(void);
+
 	void checkInputFields(void);
 	void insertDsItems(void);
-	void enableOkButton(void);
-	void searchDataBox(void);
 	void pingIsdsServer(void);
-	void setFirtsColumnActive(void);
 	void contactItemDoubleClicked(const QModelIndex &index);
 
 private:
-	QTimer *pingTimer;
 	bool isInRecipientTable(const QString &idDs) const;
 	void initSearchWindow(void);
 	void insertContactToRecipentTable(int selRow);
+
+	/*!
+	 * @brief Encapsulates query.
+	 *
+	 * @param[in] boxId Data box identifier.
+	 * @param[in] boxTye Type of sought data box.
+	 * @param[in] ic Identifier number.
+	 * @param[in] name Name to search for.
+	 * @param[in] zipCode ZIP code.
+	 */
+	void queryBox(const QString &boxId,
+	    enum TaskSearchOwner::BoxType boxType, const QString &ic,
+	    const QString &name, const QString &zipCode);
+
+	QTimer *pingTimer;
 
 	Action m_action;
 	QTableWidget *m_recipientTableWidget;

@@ -30,27 +30,56 @@
 #include "src/worker/task_search_owner_fulltext.h"
 #include "ui_dlg_ds_search2.h"
 
+/*!
+ * @brief Data box search dialogue.
+ */
 class DlgSearch2 : public QDialog, public Ui::Search2 {
 	Q_OBJECT
 public:
+	/*!
+	 * @brief Dialogue action.
+	 */
 	enum Action {
 		ACT_BLANK,
 		ACT_ADDNEW
 	};
 
+	/*!
+	 * @brief Constructor.
+	 */
 	DlgSearch2(Action action, QStringList &dbIdList,
 	    QWidget *parent = Q_NULLPTR, const QString &userName = QString());
 
 private slots:
+	/*!
+	 * @brief Activates confirmation button.
+	 */
 	void enableOkButton(void);
-	void enableSearchButton(const QString &text);
-	void searchNewDataboxes(void);
-	void addSelectedDbIDs(void);
+
+	/*!
+	 * @brief Set first column containing checkboxes active.
+	 */
 	void setFirtsColumnActive(void);
+
+	/*!
+	 * @brief Full-text search for data boxes according given criteria.
+	 */
+	void searchDataBoxFulltext(void);
+
+	void enableSearchButton(const QString &text);
+	void addSelectedDbIDs(void);
 	void contactItemDoubleClicked(const QModelIndex &index);
 
 private:
-	void findDataboxes(enum TaskSearchOwnerFulltext::FulltextTarget target,
+	/*!
+	 * @brief Encapsulated full-text query.
+	 *
+	 * @param[in] target Which field to search in.
+	 * @param[in] boxType Type of data box to search for.
+	 * @param[in] phrase Text phrase to search for.
+	 */
+	void queryBoxFulltext(
+	    enum TaskSearchOwnerFulltext::FulltextTarget target,
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase);
 
