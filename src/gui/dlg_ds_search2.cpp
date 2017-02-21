@@ -35,6 +35,17 @@
 #define CON_COL_BOX_NAME 3
 #define CON_COL_ADDRESS 4
 
+#define CBOX_TYPE_ALL 0
+#define CBOX_TYPE_OVM 1
+#define CBOX_TYPE_PO 2
+#define CBOX_TYPE_PFO 3
+#define CBOX_TYPE_FO 4
+
+#define CBOX_TARGET_ALL 0
+#define CBOX_TARGET_ADDRESS 1
+#define CBOX_TARGET_IC 2
+#define CBOX_TARGET_BOX_ID 3
+
 DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
     const QString &userName)
     : QDialog(parent),
@@ -58,6 +69,17 @@ DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	this->searchPushButton->setEnabled(false);
 	this->resultGroupBox->hide();
+
+	this->dataBoxTypeCBox->addItem(tr("All") + QStringLiteral(" - ") + tr("All types"));
+	this->dataBoxTypeCBox->addItem(tr("OVM") + QStringLiteral(" - ") + tr("Orgán veřejné moci"));
+	this->dataBoxTypeCBox->addItem(tr("PO") + QStringLiteral(" - ") + tr("Právnická osoba"));
+	this->dataBoxTypeCBox->addItem(tr("PFO") + QStringLiteral(" - ") + tr("Podnikající fyzická osoba"));
+	this->dataBoxTypeCBox->addItem(tr("FO") + QStringLiteral(" - ") + tr("Fyzická osoba"));
+
+	this->fulltextTargetCBox->addItem(tr("All") + QStringLiteral(" - ") + tr("Search in all fields"));
+	this->fulltextTargetCBox->addItem(tr("Address") + QStringLiteral(" - ") + tr(""));
+	this->fulltextTargetCBox->addItem(tr("IC") + QStringLiteral(" - ") + tr("Identification number"));
+	this->fulltextTargetCBox->addItem(tr("ID") + QStringLiteral(" - ") + tr("Box identifier"));
 
 	if (this->contactTableWidget->rowCount() > 0) {
 		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
@@ -108,36 +130,46 @@ void DlgSearch2::setFirtsColumnActive(void)
 /*
  * Start new search and show first page of results
  */
-void DlgSearch2::searchNewDataboxes()
+void DlgSearch2::searchNewDataboxes(void)
 /* ========================================================================= */
 {
-	m_phrase = this->textLineEdit->text();
-
-	if (this->generalRadioButton->isChecked()) {
+	m_target = TaskSearchOwnerFulltext::FT_ALL;
+	switch (this->fulltextTargetCBox->currentIndex()) {
+	case CBOX_TARGET_ALL:
 		m_target = TaskSearchOwnerFulltext::FT_ALL;
-	} else if (this->dbIDRadioButton->isChecked()) {
-		m_target = TaskSearchOwnerFulltext::FT_BOX_ID;
-	} else if (this->icRadioButton->isChecked()) {
-		m_target = TaskSearchOwnerFulltext::FT_IC;
-	} else if (this->addressRadioButton->isChecked()) {
+		break;
+	case CBOX_TARGET_ADDRESS:
 		m_target = TaskSearchOwnerFulltext::FT_ADDRESS;
-	} else {
-		m_target = TaskSearchOwnerFulltext::FT_ALL;
+		break;
+	case CBOX_TARGET_IC:
+		m_target = TaskSearchOwnerFulltext::FT_IC;
+		break;
+	case CBOX_TARGET_BOX_ID:
+	default:
+		m_target = TaskSearchOwnerFulltext::FT_BOX_ID;
+		break;
 	}
 
-	if (this->allRadioButton->isChecked()) {
-		m_boxType = TaskSearchOwnerFulltext::BT_ALL;
-	} else  if (this->ovmRadioButton->isChecked()) {
-		m_boxType = TaskSearchOwnerFulltext::BT_OVM;
-	} else if (this->poRadioButton->isChecked()) {
-		m_boxType = TaskSearchOwnerFulltext::BT_PO;
-	} else if (this->pfoRadioButton->isChecked()) {
-		m_boxType = TaskSearchOwnerFulltext::BT_PFO;
-	} else if (this->foRradioButton->isChecked()) {
+	switch (this->dataBoxTypeCBox->currentIndex()) {
+	case CBOX_TYPE_FO:
 		m_boxType = TaskSearchOwnerFulltext::BT_FO;
-	} else {
+		break;
+	case CBOX_TYPE_PFO:
+		m_boxType = TaskSearchOwnerFulltext::BT_PFO;
+		break;
+	case CBOX_TYPE_PO:
+		m_boxType = TaskSearchOwnerFulltext::BT_PO;
+		break;
+	case CBOX_TYPE_OVM:
+		m_boxType = TaskSearchOwnerFulltext::BT_OVM;
+		break;
+	case CBOX_TYPE_ALL:
+	default:
 		m_boxType = TaskSearchOwnerFulltext::BT_ALL;
+		break;
 	}
+
+	m_phrase = this->textLineEdit->text();
 
 	findDataboxes(m_target, m_boxType, m_phrase);
 }

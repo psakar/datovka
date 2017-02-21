@@ -37,6 +37,11 @@
 #define CON_COL_POST_CODE 4
 #define CON_COL_PDZ 5
 
+#define CBOX_TYPE_OVM 0
+#define CBOX_TYPE_PO 1
+#define CBOX_TYPE_PFO 2
+#define CBOX_TYPE_FO 3
+
 DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
     const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
     QWidget *parent, const QString &userName)
@@ -196,16 +201,14 @@ void DlgDsSearch::checkInputFields(void)
 	this->iDLineEdit->setEnabled((true));
 
 	switch (this->dataBoxTypeCBox->currentIndex()) {
-	/* OVM */
-	case 0:
+	case CBOX_TYPE_OVM:
 		this->iCLineEdit->setEnabled(true);
 		this->labelName->setText(tr("Subject Name:"));
 		this->labelName->setToolTip(tr("Enter name of subject"));
 		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
 		this->infoLabel->hide();
 		break;
-	/* PO */
-	case 1:
+	case CBOX_TYPE_PO:
 		this->iCLineEdit->setEnabled(true);
 		this->labelName->setText(tr("Subject Name:"));
 		this->labelName->setToolTip(tr("Enter name of subject"));
@@ -216,8 +219,7 @@ void DlgDsSearch::checkInputFields(void)
 			this->infoLabel->hide();
 		}
 		break;
-	/* FPO */
-	case 2:
+	case CBOX_TYPE_PFO:
 		this->iCLineEdit->setEnabled(true);
 		this->labelName->setText(tr("Name:"));
 		this->labelName->setToolTip(tr("Enter PFO last name or company name."));
@@ -228,8 +230,7 @@ void DlgDsSearch::checkInputFields(void)
 			this->infoLabel->hide();
 		}
 		break;
-	/* FO */
-	case 3:
+	case CBOX_TYPE_FO:
 		this->iCLineEdit->setEnabled(false);
 		this->labelName->setText(tr("Last Name:"));
 		this->labelName->setToolTip(tr("Enter last name or "
@@ -313,16 +314,16 @@ void DlgDsSearch::searchDataBox(void)
 
 	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
 	switch (this->dataBoxTypeCBox->currentIndex()) {
-	case 3:
+	case CBOX_TYPE_FO:
 		boxType = TaskSearchOwner::BT_FO;
 		break;
-	case 2:
+	case CBOX_TYPE_PFO:
 		boxType = TaskSearchOwner::BT_PFO;
 		break;
-	case 1:
+	case CBOX_TYPE_PO:
 		boxType = TaskSearchOwner::BT_PO;
 		break;
-	case 0:
+	case CBOX_TYPE_OVM:
 	default:
 		boxType = TaskSearchOwner::BT_OVM;
 		break;
