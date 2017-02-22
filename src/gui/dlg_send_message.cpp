@@ -1002,8 +1002,8 @@ void DlgSendMessage::findAndAddRecipient(void)
 	QStringList dbIDs;
 	QDialog *dsSearch = NULL;
 	if (!m_isWebDatovkaAccount) {
-		dsSearch = new DlgSearch2(DlgSearch2::ACT_ADDNEW, dbIDs, this,
-		    m_userName);
+		dsSearch = new DlgSearch2(m_userName, m_dbType,
+		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
 	} else {
 		dsSearch = new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_ADDNEW,
 		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,

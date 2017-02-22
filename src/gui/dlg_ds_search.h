@@ -38,19 +38,11 @@ class DlgDsSearch : public QDialog, public Ui::DsSearch {
 	Q_OBJECT
 public:
 	/*!
-	 * @brief Dialogue action.
-	 */
-	enum Action {
-		ACT_BLANK,
-		ACT_ADDNEW
-	};
-
-	/*!
 	 * @brief Constructor.
 	 */
-	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-	    const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-	    QWidget *parent = Q_NULLPTR, const QString &userName = QString());
+	DlgDsSearch(const QString &userName, const QString &dbType,
+	    bool dbEffectiveOVM, bool dbOpenAddressing,
+	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -78,13 +70,15 @@ private slots:
 	 */
 	void contactItemDoubleClicked(const QModelIndex &index);
 
-	void insertDsItems(void);
+	/*!
+	 * @brief Appends selected box identifiers into identifier list.
+	 */
+	void addSelectedDbIDs(void);
+
 	void pingIsdsServer(void);
 
 private:
-	bool isInRecipientTable(const QString &idDs) const;
 	void initSearchWindow(void);
-	void insertContactToRecipentTable(int selRow);
 
 	/*!
 	 * @brief Encapsulates query.
@@ -99,14 +93,14 @@ private:
 	    enum TaskSearchOwner::BoxType boxType, const QString &ic,
 	    const QString &name, const QString &zipCode);
 
-	QTimer *pingTimer;
+	const QString m_userName; /*!< User name used for searching. */
+	const QString m_dbType; /*!< Data box type used for searching.  */
+	const bool m_dbEffectiveOVM;
+	const bool m_dbOpenAddressing;
 
-	Action m_action;
-	QTableWidget *m_recipientTableWidget;
-	QString m_dbType;
-	bool m_dbEffectiveOVM;
-	bool m_dbOpenAddressing;
-	const QString m_userName;
+	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
+
+	QTimer *pingTimer;
 	bool m_showInfoLabel;
 };
 

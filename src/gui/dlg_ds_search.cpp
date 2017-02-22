@@ -41,17 +41,16 @@
 #define CBOX_TYPE_PFO 2
 #define CBOX_TYPE_FO 3
 
-DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-    const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-    QWidget *parent, const QString &userName)
+DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
+    bool dbEffectiveOVM, bool dbOpenAddressing, QStringList *dbIdList,
+    QWidget *parent)
     : QDialog(parent),
-    pingTimer(Q_NULLPTR),
-    m_action(action),
-    m_recipientTableWidget(recipientTableWidget),
+    m_userName(userName),
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
-    m_userName(userName),
+    m_dbIdList(dbIdList),
+    pingTimer(Q_NULLPTR),
     m_showInfoLabel(false)
 {
 	setupUi(this);
@@ -207,14 +206,29 @@ void DlgDsSearch::searchDataBox(void)
 
 void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
 {
-	if (ACT_ADDNEW == m_action) {
-		if (!index.isValid()) {
-			this->close();
-			return;
-		}
-
-		insertContactToRecipentTable(index.row());
+	if (!index.isValid()) {
 		this->close();
+		return;
+	}
+
+	if (m_dbIdList != Q_NULLPTR) {
+		m_dbIdList->append(this->contactTableWidget->
+		    item(index.row(), CON_COL_BOX_ID)->text());
+	}
+	this->close();
+}
+
+void DlgDsSearch::addSelectedDbIDs(void)
+{
+	if (m_dbIdList == Q_NULLPTR) {
+		return;
+	}
+
+	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
+		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
+			m_dbIdList->append(this->contactTableWidget->
+			    item(i, CON_COL_BOX_ID)->text());
+		}
 	}
 }
 
@@ -292,7 +306,7 @@ void DlgDsSearch::initSearchWindow(void)
 	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
 	    SLOT(enableOkButton()));
 	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(insertDsItems()));
+	    SLOT(addSelectedDbIDs()));
 	connect(this->searchPushButton, SIGNAL(clicked()), this,
 	    SLOT(searchDataBox()));
 	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
@@ -316,7 +330,6 @@ void DlgDsSearch::initSearchWindow(void)
 	checkInputFields();
 }
 
-
 /* ========================================================================= */
 /*
  * Ping isds server, test if connection on isds server is active
@@ -328,75 +341,6 @@ void DlgDsSearch::pingIsdsServer(void)
 		qDebug() << "Connection to ISDS is alive :)";
 	} else {
 		qDebug() << "Connection to ISDS is dead :(";
-	}
-}
-
-/* ========================================================================= */
-/*
- * Test if the selected item is not in recipient list
- */
-bool DlgDsSearch::isInRecipientTable(const QString &idDs) const
-/* ========================================================================= */
-{
-	Q_ASSERT(0 != m_recipientTableWidget);
-
-	for (int i = 0; i < this->m_recipientTableWidget->rowCount(); i++) {
-		if (this->m_recipientTableWidget->item(i,0)->text() == idDs) {
-			return true;
-		}
-	}
-	return false;
-}
-
-
-/* ========================================================================= */
-/*
- * Insert selected contacts into recipient list of the sent message dialog.
- */
-void DlgDsSearch::insertDsItems(void)
-/* ========================================================================= */
-{
-	if (ACT_ADDNEW == m_action) {
-		Q_ASSERT(0 != m_recipientTableWidget);
-		for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
-			if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
-				insertContactToRecipentTable(i);
-			}
-		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Insert contact into recipient list of the sent message dialog.
- */
-void DlgDsSearch::insertContactToRecipentTable(int selRow)
-/* ========================================================================= */
-{
-	if (!isInRecipientTable(
-	        this->contactTableWidget->item(selRow, 1)->text())) {
-
-		int row = m_recipientTableWidget->rowCount();
-		m_recipientTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(this->contactTableWidget->
-		    item(selRow, CON_COL_BOX_ID)->text());
-		this->m_recipientTableWidget->setItem(row,0,item);
-		item = new QTableWidgetItem;
-		item->setText(this->contactTableWidget->
-		    item(selRow, CON_COL_BOX_NAME)->text());
-		this->m_recipientTableWidget->setItem(row,1,item);
-		item = new QTableWidgetItem;
-		item->setText(this->contactTableWidget->
-		    item(selRow, CON_COL_ADDRESS)->text() + " " +
-		    this->contactTableWidget->item(selRow, CON_COL_POST_CODE)->text());
-		this->m_recipientTableWidget->setItem(row, 2, item);
-		item = new QTableWidgetItem;
-		item->setText(m_dbEffectiveOVM ? tr("no") :
-		    this->contactTableWidget->item(selRow, CON_COL_PDZ)->text());
-		item->setTextAlignment(Qt::AlignCenter);
-		this->m_recipientTableWidget->setItem(row, 3, item);
 	}
 }
 

@@ -37,18 +37,11 @@ class DlgSearch2 : public QDialog, public Ui::Search2 {
 	Q_OBJECT
 public:
 	/*!
-	 * @brief Dialogue action.
-	 */
-	enum Action {
-		ACT_BLANK,
-		ACT_ADDNEW
-	};
-
-	/*!
 	 * @brief Constructor.
 	 */
-	DlgSearch2(Action action, QStringList &dbIdList,
-	    QWidget *parent = Q_NULLPTR, const QString &userName = QString());
+	DlgSearch2(const QString &userName, const QString &dbType,
+	    bool dbEffectiveOVM, bool dbOpenAddressing,
+	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -76,6 +69,9 @@ private slots:
 	 */
 	void contactItemDoubleClicked(const QModelIndex &index);
 
+	/*!
+	 * @brief Appends selected box identifiers into identifier list.
+	 */
 	void addSelectedDbIDs(void);
 
 private:
@@ -91,9 +87,12 @@ private:
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase);
 
-	Action m_action;
-	QStringList &m_dbIdList;
-	const QString m_userName;
+	const QString m_userName; /*!< User name used for searching. */
+	const QString m_dbType; /*!< Data box type used for searching.  */
+	const bool m_dbEffectiveOVM;
+	const bool m_dbOpenAddressing;
+
+	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
 
 	// hold some search settings for showing of next results
 	enum TaskSearchOwnerFulltext::FulltextTarget m_target;

@@ -46,17 +46,23 @@
 #define CBOX_TARGET_IC 2
 #define CBOX_TARGET_BOX_ID 3
 
-DlgSearch2::DlgSearch2(Action action, QStringList &dbIdList, QWidget *parent,
-    const QString &userName)
+DlgSearch2::DlgSearch2(const QString &userName, const QString &dbType,
+    bool dbEffectiveOVM, bool dbOpenAddressing, QStringList *dbIdList,
+    QWidget *parent)
     : QDialog(parent),
-    m_action(action),
-    m_dbIdList(dbIdList),
     m_userName(userName),
+    m_dbType(dbType),
+    m_dbEffectiveOVM(dbEffectiveOVM),
+    m_dbOpenAddressing(dbOpenAddressing),
+    m_dbIdList(dbIdList),
     m_target(TaskSearchOwnerFulltext::FT_ALL),
     m_boxType(TaskSearchOwnerFulltext::BT_ALL),
     m_phrase()
 {
 	setupUi(this);
+
+	this->accountInfo->setText("<strong>" + m_userName +
+	    "</strong>" + " - " + m_dbType);
 
 	/* Set default line height for table views/widgets. */
 	this->contactTableWidget->setEnabled(false);
@@ -187,21 +193,22 @@ void DlgSearch2::contactItemDoubleClicked(const QModelIndex &index)
 		return;
 	}
 
-	m_dbIdList.append(this->contactTableWidget->
-	    item(index.row(), CON_COL_BOX_ID)->text());
+	if (m_dbIdList != Q_NULLPTR) {
+		m_dbIdList->append(this->contactTableWidget->
+		    item(index.row(), CON_COL_BOX_ID)->text());
+	}
 	this->close();
 }
 
-/* ========================================================================= */
-/*
- * Add selected recipient databox IDs into recipient list
- */
 void DlgSearch2::addSelectedDbIDs(void)
-/* ========================================================================= */
 {
+	if (m_dbIdList == Q_NULLPTR) {
+		return;
+	}
+
 	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
 		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
-			m_dbIdList.append(this->contactTableWidget->
+			m_dbIdList->append(this->contactTableWidget->
 			    item(i, CON_COL_BOX_ID)->text());
 		}
 	}
