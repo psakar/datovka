@@ -65,7 +65,7 @@
       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="dataBoxTypeLabel">
        <property name="text">
         <string>Data box type:</string>
        </property>
@@ -99,7 +99,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_4">
+      <widget class="QLabel" name="fulltextTargetLabel">
        <property name="text">
         <string>Search in fields:</string>
        </property>

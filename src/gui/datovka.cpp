@@ -56,7 +56,7 @@
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
-//#include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_ds_search.h"
 #include "src/gui/dlg_ds_search2.h"
 #include "src/gui/dlg_search_mojeid.h"
 #include "src/gui/dlg_msg_search.h"
@@ -5407,10 +5407,10 @@ void MainWindow::findDatabox(void)
 		dsSearch->exec();
 		dsSearch->deleteLater();
 	} else {
-		//QDialog *dsSearch = new DlgDsSearch(DlgDsSearch::ACT_BLANK, 0,
-		//    dbType, dbEffectiveOVM, dbOpenAddressing, this, userName);
-		QDialog *dsSearch = new DlgSearch2(userName, dbType,
+		QDialog *dsSearch = new DlgDsSearch(userName, dbType,
 		    dbEffectiveOVM, dbOpenAddressing, Q_NULLPTR, this);
+//		QDialog *dsSearch = new DlgSearch2(userName, dbType,
+//		    dbEffectiveOVM, dbOpenAddressing, Q_NULLPTR, this);
 		dsSearch->exec();
 		dsSearch->deleteLater();
 	}

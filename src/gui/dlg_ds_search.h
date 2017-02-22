@@ -29,6 +29,7 @@
 
 #include "src/common.h"
 #include "src/worker/task_search_owner.h"
+#include "src/worker/task_search_owner_fulltext.h"
 #include "ui_dlg_ds_search.h"
 
 /*!
@@ -81,10 +82,43 @@ private slots:
 	 */
 	void addSelectedDbIDs(void);
 
+	/*!
+	 * @brief Ping the ISDS server, test whether connection is active.
+	 */
 	void pingIsdsServer(void);
 
+	/*!
+	 * @brief Displays elements relevant for normal or full-text search.
+	 *
+	 * @param[in] fulltextCheckState STate of full-text checkbox state.
+	 */
+	void makeSearchElelementsVisible(int fulltextState);
+
 private:
-	void initSearchWindow(void);
+	/*!
+	 * @brief Initialise dialogue content.
+	 */
+	void initContent(void);
+
+	/*!
+	 * @brief Check input field sanity for normal search.
+	 */
+	void checkInputFieldsNormal(void);
+
+	/*!
+	 * @brief Check input field sanity for full-text search.
+	 */
+	void checkInputFieldsFulltext(void);
+
+	/*!
+	 * @brief Normal search for data boxes according given criteria.
+	 */
+	void searchDataBoxNormal(void);
+
+	/*!
+	 * @brief Full-text search for data boxes according given criteria.
+	 */
+	void searchDataBoxFulltext(void);
 
 	/*!
 	 * @brief Encapsulates query.
@@ -95,9 +129,21 @@ private:
 	 * @param[in] name Name to search for.
 	 * @param[in] zipCode ZIP code.
 	 */
-	void queryBox(const QString &boxId,
+	void queryBoxNormal(const QString &boxId,
 	    enum TaskSearchOwner::BoxType boxType, const QString &ic,
 	    const QString &name, const QString &zipCode);
+
+	/*!
+	 * @brief Encapsulated full-text query.
+	 *
+	 * @param[in] target Which field to search in.
+	 * @param[in] boxType Type of data box to search for.
+	 * @param[in] phrase Text phrase to search for.
+	 */
+	void queryBoxFulltext(
+	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	    enum TaskSearchOwnerFulltext::BoxType boxType,
+	    const QString &phrase);
 
 	const QString m_userName; /*!< User name used for searching. */
 	const QString m_dbType; /*!< Data box type used for searching.  */

@@ -21,7 +21,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="label_7">
+      <widget class="QLabel" name="labelAccount">
        <property name="text">
         <string>Current account:</string>
        </property>
@@ -57,38 +57,47 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Enter the ID, IČ or at least three letters from the name of the data box you look for:</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="infoLabel">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="font">
-      <font>
-       <weight>50</weight>
-       <italic>true</italic>
-       <bold>false</bold>
-      </font>
-     </property>
-     <property name="toolTip">
-      <string>Your account is not of type OVM or ne-OVM. You have Post Data Messages activated.
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QCheckBox" name="useFulltextCheckBox">
+       <property name="text">
+        <string>Use full-text search similar to the ISDS client portal.</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelSearchDescr">
+       <property name="text">
+        <string>Enter the ID, IČ or at least three letters from the name of the data box you look for:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="labelSearchInfo">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="font">
+        <font>
+         <italic>true</italic>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Your account is not of type OVM or ne-OVM. You have Post Data Messages activated.
 This means you can only search for accounts of type OVM and accounts
 that have Post Data Messages delivery activated.
 Because of this limitation the results of your current search might not 
 contain all otherwise matching databoxes.</string>
-     </property>
-     <property name="text">
-      <string>Note: Your search results will be limited. See tooltip for more information.</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
+       </property>
+       <property name="text">
+        <string>Note: Your search results will be limited. See tooltip for more information.</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QFormLayout" name="formLayout">
@@ -96,7 +105,7 @@ contain all otherwise matching databoxes.</string>
       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="dataBoxTypeLabel">
        <property name="text">
         <string>Databox type:</string>
        </property>
@@ -104,6 +113,16 @@ contain all otherwise matching databoxes.</string>
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="dataBoxTypeCBox"/>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="fulltextTargetLabel">
+       <property name="text">
+        <string>Search in fileds:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="fulltextTargetCBox"/>
      </item>
      <item row="2" column="0" colspan="2">
       <widget class="Line" name="line">
@@ -113,43 +132,53 @@ contain all otherwise matching databoxes.</string>
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="textLineLabel">
+       <property name="text">
+        <string>Text:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="textLineEdit"/>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="iDLineLabel">
        <property name="text">
         <string>ID:</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <widget class="QLineEdit" name="iDLineEdit"/>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="label_4">
+     <item row="5" column="0">
+      <widget class="QLabel" name="iCLineLabel">
        <property name="text">
         <string>IČ:</string>
        </property>
       </widget>
      </item>
-     <item row="4" column="1">
+     <item row="5" column="1">
       <widget class="QLineEdit" name="iCLineEdit"/>
      </item>
-     <item row="5" column="0">
-      <widget class="QLabel" name="labelName">
+     <item row="6" column="0">
+      <widget class="QLabel" name="nameLineLabel">
        <property name="text">
         <string>Name:</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="6" column="1">
       <widget class="QLineEdit" name="nameLineEdit"/>
      </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="label_6">
+     <item row="7" column="0">
+      <widget class="QLabel" name="pscLineLabel">
        <property name="text">
         <string>Postal code:</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
+     <item row="7" column="1">
       <widget class="QLineEdit" name="pscLineEdit"/>
      </item>
     </layout>
@@ -212,6 +241,11 @@ contain all otherwise matching databoxes.</string>
      <column>
       <property name="text">
        <string>ID</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Type</string>
       </property>
      </column>
      <column>
