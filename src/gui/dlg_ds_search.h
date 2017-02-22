@@ -44,6 +44,12 @@ public:
 	    bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
+	/*!
+	 * @brief Destructor.
+	 */
+	virtual
+	~DlgDsSearch(void);
+
 private slots:
 	/*!
 	 * @brief Activates confirmation button.
@@ -100,7 +106,7 @@ private:
 
 	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
 
-	QTimer *pingTimer;
+	QTimer *m_pingTimer;
 	bool m_showInfoLabel;
 };
 

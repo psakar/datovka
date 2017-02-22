@@ -50,7 +50,7 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
     m_dbIdList(dbIdList),
-    pingTimer(Q_NULLPTR),
+    m_pingTimer(Q_NULLPTR),
     m_showInfoLabel(false)
 {
 	setupUi(this);
@@ -58,6 +58,13 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	contactTableWidget->setNarrowedLineHeight();
 
 	initSearchWindow();
+}
+
+DlgDsSearch::~DlgDsSearch(void)
+{
+	if (m_pingTimer != Q_NULLPTR) {
+		delete m_pingTimer;
+	}
 }
 
 void DlgDsSearch::enableOkButton(void)
@@ -321,11 +328,10 @@ void DlgDsSearch::initSearchWindow(void)
 	this->contactTableWidget->installEventFilter(
 	    new TableSpaceSelectionFilter(this));
 
-	pingTimer = new QTimer(this);
-	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
+	m_pingTimer = new QTimer(this);
+	m_pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
 
-	connect(pingTimer, SIGNAL(timeout()), this,
-	    SLOT(pingIsdsServer()));
+	connect(m_pingTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
 
 	checkInputFields();
 }
