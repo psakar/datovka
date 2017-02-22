@@ -70,7 +70,13 @@ bool Exports::exportAs(QWidget *parent, const MessageDbSet &dbSet,
 		fileTypeStr = QObject::tr("delivery info");
 		fileSufix = ".zfo";
 		fileNameformat = globPref.delivery_filename_format;
-		base64 = messageDb->msgsMessageBase64(msgId.dmId);
+		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
+		break;
+	case ZFO_DELIV_ATTACH:
+		fileTypeStr = QObject::tr("delivery info");
+		fileSufix = ".zfo";
+		fileNameformat = globPref.delivery_filename_format_all_attach;
+		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_DELIVERY:
 		fileTypeStr = QObject::tr("delivery info");
@@ -78,11 +84,17 @@ bool Exports::exportAs(QWidget *parent, const MessageDbSet &dbSet,
 		fileNameformat = globPref.delivery_filename_format;
 		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
+	case PDF_DELIV_ATTACH:
+		fileTypeStr = QObject::tr("delivery info");
+		fileSufix = ".pdf";
+		fileNameformat = globPref.delivery_filename_format_all_attach;
+		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
+		break;
 	case PDF_ENVELOPE:
 		fileTypeStr = QObject::tr("message envelope");
 		fileSufix = ".pdf";
 		fileNameformat = globPref.message_filename_format;
-		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
+		base64 = "n/a";
 		break;
 	default:
 		Q_ASSERT(0);
@@ -124,11 +136,13 @@ bool Exports::exportAs(QWidget *parent, const MessageDbSet &dbSet,
 	lastPath = QFileInfo(fileName).absoluteDir().absolutePath();
 
 	switch (fileType) {
+	case ZFO_DELIV_ATTACH:
 	case ZFO_DELIVERY:
 	case ZFO_MESSAGE:
 		ret = writeZFO(fileName, QByteArray::fromBase64(base64));
 		break;
 	case PDF_DELIVERY:
+	case PDF_DELIV_ATTACH:
 		ret = printPDF(fileName,
 		    messageDb->deliveryInfoHtmlToPdf(msgId.dmId));
 		break;

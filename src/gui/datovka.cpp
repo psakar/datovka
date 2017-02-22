@@ -2108,20 +2108,20 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	Q_ASSERT(!userName.isEmpty());
 	const QString dbId(globAccountDbPtr->dbId(userName + "___True"));
 	MessageDb::FilenameEntry entry;
-	//{
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		if (Q_NULLPTR == dbSet) {
-			Q_ASSERT(0);
-			return;
-		}
-		MessageDb *messageDb = dbSet->accessMessageDb(
-		    msgId.deliveryTime, false);
-		if (Q_NULLPTR == messageDb) {
-			Q_ASSERT(0);
-			return;
-		}
-		entry = messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-	//}
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (Q_NULLPTR == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+	MessageDb *messageDb = dbSet->accessMessageDb(
+	    msgId.deliveryTime, false);
+	if (Q_NULLPTR == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+	entry = messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
+
 
 	QList<QString> unsuccessfulAtts;
 	bool existenceWarningDisplayed = false; /* Display only once. */
@@ -2162,12 +2162,14 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		if (globPref.delivery_info_for_every_file) {
 			if (globPref.all_attachments_save_zfo_delinfo) {
-				Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE,
+
+				Exports::exportAs(this, *dbSet, Exports::ZFO_DELIV_ATTACH,
 				    attSaveDir, attName, userName, dbId, msgId,
 				    false, lastPath, errrStr);
 			}
 			if (globPref.all_attachments_save_pdf_delinfo) {
-				Exports::exportAs(this, *dbSet, Exports::PDF_DELIVERY,
+
+				Exports::exportAs(this, *dbSet, Exports::PDF_DELIV_ATTACH,
 				    attSaveDir, attName, userName, dbId, msgId,
 				    false, lastPath, errrStr);
 			}

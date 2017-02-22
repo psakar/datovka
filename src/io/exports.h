@@ -49,8 +49,10 @@ public:
 	enum ExportFileType {
 		ZFO_MESSAGE = 0,
 		ZFO_DELIVERY,
+		ZFO_DELIV_ATTACH,
 		PDF_ENVELOPE,
-		PDF_DELIVERY
+		PDF_DELIVERY,
+		PDF_DELIV_ATTACH
 	};
 
 public:
