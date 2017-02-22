@@ -865,8 +865,9 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 /* ========================================================================= */
 {
 	QStringList dbIDs;
-	QDialog *dlg_cont = new DlgContacts(*m_dbSet, m_dbId, dbIDs, this);
-	dlg_cont->exec();
+	QDialog *dlgCont = new DlgContacts(*m_dbSet, m_dbId, dbIDs, this);
+	dlgCont->exec();
+	dlgCont->deleteLater();
 	insertDataboxesToRecipientList(dbIDs);
 }
 
@@ -1000,7 +1001,7 @@ void DlgSendMessage::findAndAddRecipient(void)
 /* ========================================================================= */
 {
 	QStringList dbIDs;
-	QDialog *dsSearch = NULL;
+	QDialog *dsSearch = Q_NULLPTR;
 	if (!m_isWebDatovkaAccount) {
 		dsSearch = new DlgSearch2(m_userName, m_dbType,
 		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
@@ -1010,6 +1011,7 @@ void DlgSendMessage::findAndAddRecipient(void)
 		    this, m_userName);
 	}
 	dsSearch->exec();
+	dsSearch->deleteLater();
 	insertDataboxesToRecipientList(dbIDs);
 }
 
