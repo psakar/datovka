@@ -180,6 +180,18 @@ void DlgSearch2::searchDataBoxFulltext(void)
 	queryBoxFulltext(m_target, m_boxType, m_phrase);
 }
 
+void DlgSearch2::contactItemDoubleClicked(const QModelIndex &index)
+{
+	if (!index.isValid()) {
+		this->close();
+		return;
+	}
+
+	m_dbIdList.append(this->contactTableWidget->
+	    item(index.row(), CON_COL_BOX_ID)->text());
+	this->close();
+}
+
 /* ========================================================================= */
 /*
  * Add selected recipient databox IDs into recipient list
@@ -193,24 +205,6 @@ void DlgSearch2::addSelectedDbIDs(void)
 			    item(i, CON_COL_BOX_ID)->text());
 		}
 	}
-}
-
-
-/* ========================================================================= */
-/*
- * Add selected recipient databox ID into recipient list
- */
-void DlgSearch2::contactItemDoubleClicked(const QModelIndex &index)
-/* ========================================================================= */
-{
-	if (!index.isValid()) {
-		this->close();
-		return;
-	}
-
-	m_dbIdList.append(this->contactTableWidget->
-	    item(index.row(), CON_COL_BOX_ID)->text());
-	this->close();
 }
 
 void DlgSearch2::queryBoxFulltext(

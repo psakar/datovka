@@ -73,9 +73,13 @@ private slots:
 	 */
 	void searchDataBox(void);
 
+	/*!
+	 * @brief Makes a selection and closes the dialogue.
+	 */
+	void contactItemDoubleClicked(const QModelIndex &index);
+
 	void insertDsItems(void);
 	void pingIsdsServer(void);
-	void contactItemDoubleClicked(const QModelIndex &index);
 
 private:
 	bool isInRecipientTable(const QString &idDs) const;

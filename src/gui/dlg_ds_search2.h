@@ -71,8 +71,12 @@ private slots:
 	 */
 	void searchDataBoxFulltext(void);
 
-	void addSelectedDbIDs(void);
+	/*!
+	 * @brief Makes a selection and closes the dialogue.
+	 */
 	void contactItemDoubleClicked(const QModelIndex &index);
+
+	void addSelectedDbIDs(void);
 
 private:
 	/*!

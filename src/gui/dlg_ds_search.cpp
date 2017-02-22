@@ -205,6 +205,19 @@ void DlgDsSearch::searchDataBox(void)
 	    this->nameLineEdit->text(), this->pscLineEdit->text());
 }
 
+void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
+{
+	if (ACT_ADDNEW == m_action) {
+		if (!index.isValid()) {
+			this->close();
+			return;
+		}
+
+		insertContactToRecipentTable(index.row());
+		this->close();
+	}
+}
+
 /* ========================================================================= */
 /*
  * Init ISDS search dialog
@@ -350,27 +363,6 @@ void DlgDsSearch::insertDsItems(void)
 				insertContactToRecipentTable(i);
 			}
 		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Doubleclick of selected contact.
- */
-void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
-/* ========================================================================= */
-{
-	if (ACT_ADDNEW == m_action) {
-
-		if (!index.isValid()) {
-			this->close();
-			return;
-		}
-
-		insertContactToRecipentTable(index.row());
-
-		this->close();
 	}
 }
 
