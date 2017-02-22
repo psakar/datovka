@@ -38,6 +38,7 @@
 
 #include "src/common.h"
 #include "src/io/account_db.h"
+#include "src/io/exports.h"
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
 #include "src/gui/dlg_import_zfo.h"
@@ -806,39 +807,6 @@ private:
 	void viewSelectedMessageViaFilter(QObject *mwPtr);
 
 	/*!
-	 * @brief Export message into ZFO file dialogue.
-	 */
-	void exportMessageAsZFO(const QString &attachPath,
-	    const QString &userName, MessageDb::MsgId msgId, bool askLocation);
-
-	/*!
-	 * @brief Export delivery information as ZFO file dialogue.
-	 */
-	void exportDeliveryInfoAsZFO(const QString &attachPath,
-	    const QString &attachFileName, const QString &formatString,
-	    const QString &userName, MessageDb::MsgId msgId,
-	    bool askLocation);
-
-	/*!
-	 * @brief Export delivery information as PDF file dialogue.
-	 */
-	void exportDeliveryInfoAsPDF(const QString &attachPath,
-	    const QString &attachFileName, const QString &formatString,
-	    const QString &userName, MessageDb::MsgId msgId, bool askLocation);
-
-	/*!
-	 * @brief Export selected message envelope as PDF file dialogue.
-	 */
-	void exportMessageEnvelopeAsPDF(const QString &attachPath,
-	    const QString &userName, MessageDb::MsgId msgId, bool askLocation);
-
-	/*!
-	 * @brief Export selected message envelope as PDF and attachment files.
-	 */
-	void exportMessageEnvelopeAttachments(const QString &attachPath,
-	    const QString &userName, MessageDb::MsgId msgId, bool askLocation);
-
-	/*!
 	 * @brief Set info status bar from worker.
 	 */
 	void dataFromWorkerToStatusBarInfo(bool add,
@@ -1237,6 +1205,14 @@ private:
 	 * @return true if any account exists
 	 */
 	bool existsAnotherMojeIdAccountWithSameUserId(const QString &userName);
+
+	/*!
+	 * @brief Export selected messages to disk.
+	 *
+	 * @param[in] expFileType - export file type.
+	 */
+	void doExportOfSelectedFiles(Exports::ExportFileType expFileType);
+
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */

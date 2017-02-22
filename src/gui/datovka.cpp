@@ -2020,6 +2020,9 @@ void MainWindow::saveAllAttachmentsToDir(void)
 {
 	debugSlotCall();
 
+	QString lastPath;
+	QString errrStr;
+
 	MessageDb::MsgId msgId;
 	{
 		const QModelIndex messageIndex(currentSingleMessageIndex());
@@ -2105,7 +2108,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	Q_ASSERT(!userName.isEmpty());
 	const QString dbId(globAccountDbPtr->dbId(userName + "___True"));
 	MessageDb::FilenameEntry entry;
-	{
+	//{
 		MessageDbSet *dbSet = accountDbSet(userName, this);
 		if (Q_NULLPTR == dbSet) {
 			Q_ASSERT(0);
@@ -2118,7 +2121,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 			return;
 		}
 		entry = messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-	}
+	//}
 
 	QList<QString> unsuccessfulAtts;
 	bool existenceWarningDisplayed = false; /* Display only once. */
@@ -2159,14 +2162,14 @@ void MainWindow::saveAllAttachmentsToDir(void)
 
 		if (globPref.delivery_info_for_every_file) {
 			if (globPref.all_attachments_save_zfo_delinfo) {
-				exportDeliveryInfoAsZFO(attSaveDir, attName,
-				    globPref.delivery_filename_format_all_attach,
-				    userName, msgId, false);
+				Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE,
+				    attSaveDir, attName, userName, dbId, msgId,
+				    false, lastPath, errrStr);
 			}
 			if (globPref.all_attachments_save_pdf_delinfo) {
-				exportDeliveryInfoAsPDF(attSaveDir, attName,
-				    globPref.delivery_filename_format_all_attach,
-				    userName, msgId, false);
+				Exports::exportAs(this, *dbSet, Exports::PDF_DELIVERY,
+				    attSaveDir, attName, userName, dbId, msgId,
+				    false, lastPath, errrStr);
 			}
 		}
 	}
@@ -2177,23 +2180,27 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	}
 
 	if (globPref.all_attachments_save_zfo_msg) {
-		exportMessageAsZFO(attSaveDir, userName, msgId, false);
+		Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE,
+		    attSaveDir, QString(), userName, dbId, msgId, false,
+		    lastPath, errrStr);
 	}
 
 	if (globPref.all_attachments_save_pdf_msgenvel) {
-		exportMessageEnvelopeAsPDF(attSaveDir, userName, msgId, false);
+		Exports::exportAs(this, *dbSet, Exports::PDF_ENVELOPE,
+		    attSaveDir, QString(), userName, dbId, msgId, false,
+		    lastPath, errrStr);
 	}
 
 	if (!globPref.delivery_info_for_every_file) {
 		if (globPref.all_attachments_save_zfo_delinfo) {
-			exportDeliveryInfoAsZFO(attSaveDir, QString(),
-			    globPref.delivery_filename_format,
-			    userName, msgId, false);
+			Exports::exportAs(this, *dbSet, Exports::ZFO_DELIVERY,
+			    attSaveDir, QString(), userName, dbId, msgId, false,
+			    lastPath, errrStr);
 		}
 		if (globPref.all_attachments_save_pdf_delinfo) {
-			exportDeliveryInfoAsPDF(attSaveDir, QString(),
-			    globPref.delivery_filename_format,
-			    userName, msgId, false);
+			Exports::exportAs(this, *dbSet, Exports::PDF_DELIVERY,
+			    attSaveDir, QString(), userName, dbId, msgId,
+			    false, lastPath, errrStr);
 		}
 	}
 
@@ -6778,111 +6785,6 @@ void MainWindow::viewSelectedMessageViaFilter(QObject *mwPtr)
 	mw->viewSelectedMessage();
 }
 
-/* ========================================================================= */
-/*
- * Export message into as ZFO file dialogue.
- */
-void MainWindow::exportMessageAsZFO(const QString &attachPath,
-    const QString &userName, MessageDb::MsgId msgId, bool askLocation)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(msgId.dmId >= 0);
-	/* Delivery time can be invalid. */
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
-	    false);
-	if (0 == messageDb) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb::FilenameEntry entry =
-	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-
-	QByteArray base64 = messageDb->msgsMessageBase64(msgId.dmId);
-	if (base64.isEmpty()) {
-
-		if (!messageMissingOfferDownload(msgId,
-		        tr("Message export error!"))) {
-			return;
-		}
-
-		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
-		if (0 == messageDb) {
-			Q_ASSERT(0);
-			logErrorNL(
-			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-			    msgId.dmId);
-			return;
-		}
-
-		base64 = messageDb->msgsMessageBase64(msgId.dmId);
-		if (base64.isEmpty()) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-
-	QString fileName = fileNameFromFormat(globPref.message_filename_format,
-	    msgId.dmId, dbId, userName, "", entry.dmDeliveryTime,
-	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-	if (attachPath.isEmpty()) {
-		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    fileName + ".zfo";
-	} else {
-		fileName = attachPath + QDir::separator() + fileName + ".zfo";
-	}
-
-	Q_ASSERT(!fileName.isEmpty());
-
-	if (askLocation) {
-		fileName = QFileDialog::getSaveFileName(this,
-		    tr("Save message as ZFO file"), fileName,
-		    tr("ZFO file (*.zfo)"));
-	}
-
-	if (fileName.isEmpty()) {
-		showStatusTextWithTimeout(
-		    tr("Export of message \"%1\" to ZFO was not successful!")
-		        .arg(msgId.dmId));
-		return;
-	}
-
-	/* remember path for settings if attachPath was not set */
-	if (attachPath.isEmpty()) {
-		m_on_export_zfo_activate =
-		    QFileInfo(fileName).absoluteDir().absolutePath();
-		storeExportPath();
-	}
-
-	QByteArray data = QByteArray::fromBase64(base64);
-
-	enum WriteFileState ret = writeFile(fileName, data);
-	if (WF_SUCCESS == ret) {
-		showStatusTextWithTimeout(
-		    tr("Export of message \"%1\" to ZFO was successful!")
-		        .arg(msgId.dmId));
-	} else {
-		showStatusTextWithTimeout(
-		    tr("Export of message \"%1\" to ZFO was not successful.")
-		        .arg(msgId.dmId));
-		QMessageBox::warning(this,
-		    tr("Error exporting message '%1'.").arg(msgId.dmId),
-		    tr("Cannot write file '%1'.").arg(fileName),
-		    QMessageBox::Ok);
-	}
-}
-
 
 /* ========================================================================= */
 /*
@@ -6997,476 +6899,6 @@ bool MainWindow::messageMissingOfferDownload(MessageDb::MsgId &msgId,
 	}
 }
 
-/* ========================================================================= */
-/*
- * Export delivery information as ZFO file dialog.
- */
-void MainWindow::exportDeliveryInfoAsZFO(const QString &attachPath,
-    const QString &attachFileName, const QString &formatString,
-    const QString &userName, MessageDb::MsgId msgId,
-    bool askLocation)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(msgId.dmId >= 0);
-	/* Delivery time can be invalid. */
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
-	if (0 == messageDb) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb::FilenameEntry entry =
-	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-
-	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
-	if (base64.isEmpty()) {
-
-		if (!messageMissingOfferDownload(msgId,
-		        tr("Delivery info export error!"))) {
-			return;
-		}
-
-		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
-		if (0 == messageDb) {
-			Q_ASSERT(0);
-			logErrorNL("Could not access database of freshly downloaded message '%" PRId64 "'.",
-			    msgId.dmId);
-			return;
-		}
-
-		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
-		if (base64.isEmpty()) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-
-	QString fileName = fileNameFromFormat(formatString, msgId.dmId, dbId,
-	    userName, attachFileName, entry.dmDeliveryTime,
-	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-	if (attachPath.isEmpty()) {
-		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    fileName + ".zfo";
-	} else {
-		fileName = attachPath + QDir::separator() + fileName + ".zfo";
-	}
-
-	Q_ASSERT(!fileName.isEmpty());
-
-	if (askLocation) {
-		fileName = QFileDialog::getSaveFileName(this,
-		    tr("Save delivery info as ZFO file"), fileName,
-		    tr("ZFO file (*.zfo)"));
-	}
-
-	if (fileName.isEmpty()) {
-		showStatusTextWithTimeout(
-		    tr("Export of message delivery info \"%1\" to ZFO was not successful!")
-		        .arg(msgId.dmId));
-		return;
-	}
-
-	/* remember path for settings if attachPath was not set */
-	if (attachPath.isEmpty()) {
-		m_on_export_zfo_activate =
-		    QFileInfo(fileName).absoluteDir().absolutePath();
-		storeExportPath();
-	}
-
-	QByteArray data = QByteArray::fromBase64(base64);
-
-	enum WriteFileState ret = writeFile(fileName, data);
-	if (WF_SUCCESS == ret) {
-		showStatusTextWithTimeout(
-		    tr("Export of message delivery info \"%1\" to ZFO was successful.")
-		        .arg(msgId.dmId));
-	} else {
-		showStatusTextWithTimeout(
-		    tr("Export of message delivery info \"%1\" to ZFO was not successful!")
-		        .arg(msgId.dmId));
-		QMessageBox::warning(this,
-		    tr("Error exporting message delivery info '%1'.")
-		        .arg(msgId.dmId),
-		    tr("Cannot write file '%1'.").arg(fileName),
-		    QMessageBox::Ok);
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Export delivery information as PDF file dialogue.
- */
-void MainWindow::exportDeliveryInfoAsPDF(const QString &attachPath,
-    const QString &attachFileName, const QString &formatString,
-    const QString &userName, MessageDb::MsgId msgId, bool askLocation)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(msgId.dmId >= 0);
-	/* Delivery time can be invalid. */
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
-	if (0 == messageDb) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb::FilenameEntry entry =
-	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-
-	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
-	if (base64.isEmpty()) {
-
-		if (!messageMissingOfferDownload(msgId,
-		        tr("Delivery info export error!"))) {
-			return;
-		}
-
-		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
-		if (0 == messageDb) {
-			Q_ASSERT(0);
-			logErrorNL(
-			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-			    msgId.dmId);
-			return;
-		}
-
-		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
-		if (base64.isEmpty()) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-
-	QString fileName = fileNameFromFormat(formatString, msgId.dmId, dbId,
-	    userName, attachFileName, entry.dmDeliveryTime,
-	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-	if (attachPath.isEmpty()) {
-		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    fileName + ".pdf";
-	} else {
-		fileName = attachPath + QDir::separator() + fileName + ".pdf";
-	}
-
-	if (askLocation) {
-		fileName = QFileDialog::getSaveFileName(this,
-		    tr("Save delivery info as PDF file"), fileName,
-		    tr("PDF file (*.pdf)"));
-	}
-
-	if (fileName.isEmpty()) {
-		showStatusTextWithTimeout(
-		    tr("Export of message delivery info \"%1\" to PDF was not successful!")
-		        .arg(msgId.dmId));
-		return;
-	}
-
-	/* remember path for settings if attachPath was not set */
-	if (attachPath.isEmpty()) {
-		m_on_export_zfo_activate =
-		    QFileInfo(fileName).absoluteDir().absolutePath();
-		storeExportPath();
-	}
-
-	QTextDocument doc;
-	doc.setHtml(messageDb->deliveryInfoHtmlToPdf(msgId.dmId));
-
-	showStatusTextPermanently(
-	    tr("Printing of delivery info \"%1\" to PDF. Please wait...")
-	        .arg(msgId.dmId));
-
-	QPrinter printer;
-	printer.setOutputFileName(fileName);
-	printer.setOutputFormat(QPrinter::PdfFormat);
-	doc.print(&printer);
-
-	showStatusTextWithTimeout(
-	    tr("Export of message delivery info \"%1\" to PDF was successful.")
-	        .arg(msgId.dmId));
-}
-
-
-/* ========================================================================= */
-/*
- * Export selected message envelope as PDF file dialog.
- */
-void MainWindow::exportMessageEnvelopeAsPDF(const QString &attachPath,
-    const QString &userName, MessageDb::MsgId msgId, bool askLocation)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(msgId.dmId >= 0);
-	/* Delivery time can be invalid. */
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
-	    false);
-	if (0 == messageDb) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb::FilenameEntry entry =
-	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-
-	QByteArray base64 = messageDb->msgsMessageBase64(msgId.dmId);
-	if (base64.isEmpty()) {
-
-		if (!messageMissingOfferDownload(msgId,
-		        tr("Message export error!"))) {
-			return;
-		}
-
-		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
-		if (0 == messageDb) {
-			Q_ASSERT(0);
-			logErrorNL(
-			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-			    msgId.dmId);
-			return;
-		}
-
-		base64 = messageDb->msgsMessageBase64(msgId.dmId);
-		if (base64.isEmpty()) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-
-	QString fileName = fileNameFromFormat(globPref.message_filename_format,
-	    msgId.dmId, dbId, userName, "", entry.dmDeliveryTime,
-	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-	if (attachPath.isEmpty()) {
-		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    fileName + ".pdf";
-	} else {
-		fileName = attachPath + QDir::separator() + fileName + ".pdf";
-	}
-
-	if (askLocation) {
-		fileName = QFileDialog::getSaveFileName(this,
-		    tr("Save message envelope as PDF file"), fileName,
-		    tr("PDF file (*.pdf)"));
-	}
-
-	if (fileName.isEmpty()) {
-		showStatusTextWithTimeout(
-		    tr("Export of message envelope \"%1\" to PDF was not successful!")
-		        .arg(msgId.dmId));
-		return;
-	}
-
-	/* remember path for settings if attachPath was not set */
-	if (attachPath.isEmpty()) {
-		m_on_export_zfo_activate =
-		    QFileInfo(fileName).absoluteDir().absolutePath();
-		storeExportPath();
-	}
-
-	QList<QString> accountData =
-	    globAccountDbPtr->getUserDataboxInfo(userName + "___True");
-
-	if (accountData.isEmpty()) {
-		showStatusTextWithTimeout(
-		    tr("Export of message envelope \"%1\" to PDF was not successful!")
-		        .arg(msgId.dmId));
-		return;
-	}
-
-	QTextDocument doc;
-	doc.setHtml(messageDb->envelopeInfoHtmlToPdf(msgId.dmId,
-	    accountData.at(0)));
-
-	showStatusTextPermanently(
-	    tr("Printing of message envelope \"%1\" to PDF. Please wait...")
-	        .arg(msgId.dmId));
-
-	QPrinter printer;
-	printer.setOutputFileName(fileName);
-	printer.setOutputFormat(QPrinter::PdfFormat);
-	doc.print(&printer);
-
-	showStatusTextWithTimeout(
-	    tr("Export of message envelope \"%1\" to PDF was successful.")
-	        .arg(msgId.dmId));
-}
-
-
-/* ========================================================================= */
-/*
- * Export selected message envelope as PDF and attachment files
- */
-void MainWindow::exportMessageEnvelopeAttachments(const QString &attachPath,
-    const QString &userName, MessageDb::MsgId msgId, bool askLocation)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	QString newAttachPath;
-
-	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(msgId.dmId >= 0);
-	/* Delivery time can be invalid. */
-
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-
-	QDir dir(attachPath);
-	dir.mkdir(QString::number(msgId.dmId));
-
-	newAttachPath = attachPath + QDir::separator() +
-	    QString::number(msgId.dmId);
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
-	    false);
-	if (0 == messageDb) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QList<MessageDb::FileData> attachList(
-	    messageDb->getFilesFromMessage(msgId.dmId));
-	if (attachList.isEmpty()) {
-
-		if (!messageMissingOfferDownload(msgId,
-		        tr("Message export error!"))) {
-			return;
-		}
-
-		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
-		if (0 == messageDb) {
-			Q_ASSERT(0);
-			logErrorNL(
-			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-			    msgId.dmId);
-			return;
-		}
-
-		attachList = messageDb->getFilesFromMessage(msgId.dmId);
-		if (attachList.isEmpty()) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-
-	MessageDb::FilenameEntry entry =
-	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-
-	foreach (const MessageDb::FileData &attach, attachList) {
-		QString fileName(attach.dmFileDescr);
-		if (fileName.isEmpty()) {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		fileName = fileNameFromFormat(
-		    globPref.attachment_filename_format,
-		    msgId.dmId, dbId, userName, fileName, entry.dmDeliveryTime,
-		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-		fileName = newAttachPath + QDir::separator() + fileName;
-
-		QByteArray data(
-		    QByteArray::fromBase64(attach.dmEncodedContent));
-
-		if (WF_SUCCESS !=
-		    writeFile(nonconflictingFileName(fileName), data)) {
-			continue;
-		}
-	}
-
-	QString fileName = fileNameFromFormat(globPref.message_filename_format,
-	    msgId.dmId, dbId, userName, "", entry.dmDeliveryTime,
-	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-	if (newAttachPath.isEmpty()) {
-		fileName = m_on_export_zfo_activate + QDir::separator() +
-		    fileName + ".pdf";
-	} else {
-		fileName = newAttachPath + QDir::separator() + fileName + ".pdf";
-	}
-
-	if (askLocation) {
-		fileName = QFileDialog::getSaveFileName(this,
-		    tr("Save message envelope as PDF file"), fileName,
-		    tr("PDF file (*.pdf)"));
-	}
-
-	if (fileName.isEmpty()) {
-		showStatusTextWithTimeout(
-		    tr("Export of message envelope \"%1\" to PDF was not successful!")
-		        .arg(msgId.dmId));
-		return;
-	}
-
-	/* remember path for settings if attachPath was not set */
-	if (newAttachPath.isEmpty()) {
-		m_on_export_zfo_activate =
-		    QFileInfo(fileName).absoluteDir().absolutePath();
-		storeExportPath();
-	}
-
-	QList<QString> accountData =
-	    globAccountDbPtr->getUserDataboxInfo(userName + "___True");
-
-	if (accountData.isEmpty()) {
-		showStatusTextWithTimeout(
-		    tr("Export of message envelope \"%1\" to PDF was not successful!")
-		        .arg(msgId.dmId));
-		return;
-	}
-
-	QTextDocument doc;
-	doc.setHtml(messageDb->descriptionHtml(msgId.dmId, 0) +
-	    messageDb->fileListHtmlToPdf(msgId.dmId));
-
-	showStatusTextPermanently(
-	    tr("Printing of message envelope \"%1\" to PDF. Please wait...")
-	        .arg(msgId.dmId));
-
-	QPrinter printer;
-	printer.setOutputFileName(fileName);
-	printer.setOutputFormat(QPrinter::PdfFormat);
-	doc.print(&printer);
-
-	showStatusTextWithTimeout(
-	    tr("Export of message envelope \"%1\" to PDF was successful.")
-	        .arg(msgId.dmId));
-}
-
 
 /*!
  * @brief Creates email header and message body.
@@ -7544,95 +6976,28 @@ void MainWindow::exportSelectedMessagesAsZFO(void)
 {
 	debugSlotCall();
 
-	const QList<MessageDb::MsgId> msgIds(
-	    msgMsgIds(currentFrstColMessageIndexes()));
-	if (0 == msgIds.size()) {
-		return;
-	}
-
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
-
-	foreach (const MessageDb::MsgId &msgId, msgIds) {
-		Q_ASSERT(msgId.dmId >= 0);
-		exportMessageAsZFO(QString(), userName, msgId, true);
-	}
+	doExportOfSelectedFiles(Exports::ZFO_MESSAGE);
 }
 
 void MainWindow::exportSelectedDeliveryInfosAsZFO(void)
 {
 	debugSlotCall();
 
-	const QList<MessageDb::MsgId> msgIds(
-	    msgMsgIds(currentFrstColMessageIndexes()));
-	if (0 == msgIds.size()) {
-		return;
-	}
-
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
-
-
-	if (isWebDatovkaAccount(userName)) {
-		/* TODO - will be supported later */
-		showWebDatovkaInfoDialog(userName, "");
-		return;
-	}
-
-	foreach (const MessageDb::MsgId &msgId, msgIds) {
-		Q_ASSERT(msgId.dmId >= 0);
-		exportDeliveryInfoAsZFO(QString(), QString(),
-		    globPref.delivery_filename_format, userName, msgId, true);
-	}
+	doExportOfSelectedFiles(Exports::ZFO_DELIVERY);
 }
 
 void MainWindow::exportSelectedDeliveryInfosAsPDF(void)
 {
 	debugSlotCall();
 
-	const QList<MessageDb::MsgId> msgIds(
-	    msgMsgIds(currentFrstColMessageIndexes()));
-	if (0 == msgIds.size()) {
-		return;
-	}
-
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
-
-	if (isWebDatovkaAccount(userName)) {
-		/* TODO - will be supported later */
-		showWebDatovkaInfoDialog(userName, "");
-		return;
-	}
-
-	foreach (const MessageDb::MsgId &msgId, msgIds) {
-		Q_ASSERT(msgId.dmId >= 0);
-		exportDeliveryInfoAsPDF(QString(), QString(),
-		    globPref.delivery_filename_format, userName, msgId, true);
-	}
+	doExportOfSelectedFiles(Exports::PDF_DELIVERY);
 }
 
 void MainWindow::exportSelectedMessageEnvelopesAsPDF(void)
 {
 	debugSlotCall();
 
-	const QList<MessageDb::MsgId> msgIds(
-	    msgMsgIds(currentFrstColMessageIndexes()));
-	if (0 == msgIds.size()) {
-		return;
-	}
-
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
-
-	foreach (const MessageDb::MsgId &msgId, msgIds) {
-		Q_ASSERT(msgId.dmId >= 0);
-		exportMessageEnvelopeAsPDF(QString(), userName, msgId, true);
-	}
+	doExportOfSelectedFiles(Exports::PDF_ENVELOPE);
 }
 
 void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
@@ -7657,10 +7022,18 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 		return;
 	}
 
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+
 	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
-		exportMessageEnvelopeAttachments(newDir, userName, msgId,
-		    false);
+		Exports::exportEnvAndAttachments(this, *dbSet,
+		    newDir, userName, dbId, msgId, false);
 	}
 }
 
@@ -9168,8 +8541,20 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 		return;
 	}
 
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+
+	QString lastPath;
+	QString errrStr;
+
 	foreach (const MessageDb::MsgId &mId, expirMsgIds) {
-		exportMessageAsZFO(newDir, userName, mId, false);
+		Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE, newDir,
+		    QString(), userName, dbId, mId, false, lastPath, errrStr);
 	}
 }
 
@@ -10713,4 +10098,45 @@ bool MainWindow::existsAnotherMojeIdAccountWithSameUserId(
 	}
 
 	return (cnt > 1);
+}
+
+void MainWindow::doExportOfSelectedFiles(Exports::ExportFileType expFileType) {
+
+	debugFuncCall();
+
+	QString lastPath;
+	QString errrStr;
+
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
+	if (isWebDatovkaAccount(userName)) {
+		/* TODO - will be supported later */
+		showWebDatovkaInfoDialog(userName, "");
+		return;
+	}
+
+	const QList<MessageDb::MsgId> msgIds(
+	    msgMsgIds(currentFrstColMessageIndexes()));
+	if (0 == msgIds.size()) {
+		return;
+	}
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+
+	foreach (const MessageDb::MsgId &msgId, msgIds) {
+		Q_ASSERT(msgId.dmId >= 0);
+		Exports::exportAs(this, *dbSet, expFileType,
+		    m_on_export_zfo_activate, QString(),
+		    userName, dbId, msgId, true, lastPath, errrStr);
+		m_on_export_zfo_activate = lastPath;
+		storeExportPath();
+	}
 }

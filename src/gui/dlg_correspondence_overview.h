@@ -64,10 +64,6 @@ private:
 	void getMsgListFromDates(const QDate &fromDate, const QDate &toDate);
 	QString msgInCsv(const MessageDb::MsgId &mId) const;
 	QString msgInHtml(const MessageDb::MsgId &mId) const;
-	bool exportMessageAsZFO(const MessageDb::MsgId &mId,
-	    const QString &fileName, bool deliveryInfo) const;
-	bool exportMessageAsPDF(const MessageDb::MsgId &mId,
-	    const QString &fileName, bool deliveryInfo) const;
 	bool exportMessagesToCsv(const QString &fileName) const;
 	bool exportMessagesToHtml(const QString &fileName) const;
 
