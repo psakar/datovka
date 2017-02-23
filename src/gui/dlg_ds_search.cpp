@@ -302,7 +302,6 @@ void DlgDsSearch::initContent(void)
 	this->labelSearchInfo->setToolTip(toolTipInfo);
 	this->labelSearchInfo->hide();
 
-	this->contactTableWidget->setColumnHidden(CON_COL_PDZ, true);
 	this->contactTableWidget->setColumnWidth(CON_COL_CHECKBOX, 20);
 	this->contactTableWidget->setColumnWidth(CON_COL_BOX_ID, 60);
 	this->contactTableWidget->setColumnWidth(CON_COL_BOX_TYPE, 70);
@@ -429,6 +428,9 @@ void DlgDsSearch::searchDataBoxNormal(void)
 		break;
 	}
 
+	this->contactTableWidget->setColumnHidden(CON_COL_POST_CODE, false);
+	this->contactTableWidget->setColumnHidden(CON_COL_PDZ, true);
+
 	queryBoxNormal(this->iDLineEdit->text(), boxType,
 	    this->iCLineEdit->text(), this->nameLineEdit->text(),
 	    this->pscLineEdit->text());
@@ -474,6 +476,9 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 		boxType = TaskSearchOwnerFulltext::BT_ALL;
 		break;
 	}
+
+	this->contactTableWidget->setColumnHidden(CON_COL_POST_CODE, true);
+	this->contactTableWidget->setColumnHidden(CON_COL_PDZ, true);
 
 	queryBoxFulltext(target, boxType, this->textLineEdit->text());
 }
@@ -535,6 +540,9 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 		item = new QTableWidgetItem;
 		item->setText(entry.id);
 		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
+		item = new QTableWidgetItem;
+		item->setText(convertDbTypeToString(entry.type));
+		this->contactTableWidget->setItem(row, CON_COL_BOX_TYPE, item);
 		item = new QTableWidgetItem;
 		item->setText(entry.name);
 		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
