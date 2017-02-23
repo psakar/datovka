@@ -589,7 +589,7 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 		this->contactTableWidget->selectRow(0);
 	}
 
-	this->contactTableWidget->resizeColumnsToContents();
+	//this->contactTableWidget->resizeColumnsToContents();
 }
 
 void DlgDsSearch::queryBoxFulltext(
@@ -669,5 +669,5 @@ void DlgDsSearch::queryBoxFulltext(
 		this->contactTableWidget->selectRow(0);
 	}
 
-	this->contactTableWidget->resizeColumnsToContents();
+	//this->contactTableWidget->resizeColumnsToContents();
 }
