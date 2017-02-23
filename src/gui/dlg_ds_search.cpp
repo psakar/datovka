@@ -85,15 +85,14 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	    this, SLOT(checkInputFields()));
 	connect(this->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
 	    this, SLOT(checkInputFields()));
-	connect(this->contactTableWidget,SIGNAL(itemClicked(QTableWidgetItem*)),
+	connect(this->contactTableWidget, SIGNAL(itemClicked(QTableWidgetItem*)),
 	    this, SLOT(enableOkButton()));
-	connect(this->contactTableWidget,
-	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
-	    SLOT(enableOkButton()));
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(addSelectedDbIDs()));
-	connect(this->searchPushButton, SIGNAL(clicked()), this,
-	    SLOT(searchDataBox()));
+	connect(this->contactTableWidget, SIGNAL(itemChanged(QTableWidgetItem*)),
+	    this, SLOT(enableOkButton()));
+	connect(this->buttonBox, SIGNAL(accepted()),
+	    this, SLOT(addSelectedDbIDs()));
+	connect(this->searchPushButton, SIGNAL(clicked()),
+	    this, SLOT(searchDataBox()));
 	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
 
@@ -224,6 +223,8 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 	textLineEdit->clear();
 	textLineEdit->hide();
 
+	contactTableWidget->setRowCount(0);
+
 	if (Qt::Checked == fulltextState) {
 		labelSearchDescr->setText(tr("Full-text data box search. Enter phrase for finding and set optional restrictions:"));
 
@@ -234,10 +235,10 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 		dataBoxTypeCBox->addItem(tr("FO") + QStringLiteral(" - ") + tr("Fyzická osoba"));
 
 		fulltextTargetLabel->show();
-		this->fulltextTargetCBox->addItem(tr("All") + QStringLiteral(" - ") + tr("Search in all fields"));
-		this->fulltextTargetCBox->addItem(tr("Address") + QStringLiteral(" - ") + tr(""));
-		this->fulltextTargetCBox->addItem(tr("IC") + QStringLiteral(" - ") + tr("Identification number"));
-		this->fulltextTargetCBox->addItem(tr("ID") + QStringLiteral(" - ") + tr("Box identifier"));
+		fulltextTargetCBox->addItem(tr("All") + QStringLiteral(" - ") + tr("Search in all fields"));
+		fulltextTargetCBox->addItem(tr("Address") + QStringLiteral(" - ") + tr(""));
+		fulltextTargetCBox->addItem(tr("IC") + QStringLiteral(" - ") + tr("Identification number"));
+		fulltextTargetCBox->addItem(tr("ID") + QStringLiteral(" - ") + tr("Box identifier"));
 		fulltextTargetCBox->show();
 
 		textLineLabel->show();
@@ -490,6 +491,9 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 	this->contactTableWidget->setRowCount(0);
 	this->contactTableWidget->setEnabled(false);
 
+	QString resultString(tr("Total found") + QStringLiteral(": "));
+	this->searchResultText->setText(resultString + QStringLiteral("0"));
+
 	TaskSearchOwner::SoughtOwnerInfo soughtInfo(boxId, boxType, ic, name,
 	    name, name, zipCode);
 
@@ -515,21 +519,23 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 		break;
 	case TaskSearchOwner::SO_COM_ERROR:
 		QMessageBox::information(this, tr("Search result"),
-		    tr("It is not possible find databox because") + ":\n\n" +
-		    longErrMsg, QMessageBox::Ok);
+		    tr("It was not possible find any data box because") +
+		    QStringLiteral(":\n\n") + longErrMsg,
+		    QMessageBox::Ok);
 		return;
 		break;
 	case TaskSearchOwner::SO_ERROR:
 	default:
 		QMessageBox::critical(this, tr("Search error"),
-		    tr("It is not possible find databox because "
-		         "error occurred during search process!"),
+		    tr("It was not possible find any data box because an error occurred during the search process!"),
 		    QMessageBox::Ok);
 		return;
 		break;
 	}
 
-	this->contactTableWidget->setRowCount(0);
+	this->searchResultText->setText(
+	    resultString + QString::number(foundBoxes.size()));
+
 	this->contactTableWidget->setEnabled(true);
 	foreach (const TaskSearchOwner::BoxEntry &entry, foundBoxes) {
 		int row = this->contactTableWidget->rowCount();
@@ -571,36 +577,52 @@ void DlgDsSearch::queryBoxFulltext(
 {
 	this->contactTableWidget->setRowCount(0);
 	this->contactTableWidget->setEnabled(false);
-//	this->resultGroupBox->hide();
 
-//	QString resultString = tr("Total found: 0") ;
+	QString resultString(tr("Total found") + QStringLiteral(": "));
+	this->searchResultText->setText(resultString + QStringLiteral("0"));
 
-	TaskSearchOwnerFulltext *task = new (std::nothrow) TaskSearchOwnerFulltext(m_userName,
-	    phrase, target, boxType);
+	TaskSearchOwnerFulltext *task =
+	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, phrase,
+	        target, boxType);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
 	enum TaskSearchOwnerFulltext::Result result = task->m_result;
-
-//	this->resultGroupBox->show();
-//	this->resultGroupBox->setEnabled(true);
-
-	if (result != TaskSearchOwnerFulltext::SOF_SUCCESS) {
-		delete task; task = Q_NULLPTR;
-//		this->searchResultText->setText(resultString);
-		return;
-	}
-
-//	quint64 totalDb = task->m_totalMatchingBoxes;
+	QString errMsg = task->m_isdsError;
+	QString longErrMsg = task->m_isdsLongError;
 	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
+	quint64 totalDb = task->m_totalMatchingBoxes;
 
 	delete task; task = Q_NULLPTR;
 
-//	resultString = tr("Total found") + ": " + QString::number(totalDb);
+	switch (result) {
+	case TaskSearchOwnerFulltext::SOF_SUCCESS:
+		break;
+	case TaskSearchOwnerFulltext::SOF_BAD_DATA:
+		QMessageBox::information(this, tr("Search result"),
+		    longErrMsg, QMessageBox::Ok);
+		return;
+		break;
+	case TaskSearchOwnerFulltext::SOF_COM_ERROR:
+		QMessageBox::information(this, tr("Search result"),
+		    tr("It was not possible find any data box because") +
+		    QStringLiteral(":\n\n") + longErrMsg,
+		    QMessageBox::Ok);
+		return;
+		break;
+	case TaskSearchOwnerFulltext::SOF_ERROR:
+	default:
+		QMessageBox::critical(this, tr("Search error"),
+		    tr("It was not possible find any data box because an error occurred during the search process!"),
+		    QMessageBox::Ok);
+		return;
+		break;
+	}
 
-//	this->searchResultText->setText(resultString);
+	this->searchResultText->setText(
+	    resultString + QString::number(totalDb));
 
-	this->contactTableWidget->setEnabled(!foundBoxes.isEmpty());
+	this->contactTableWidget->setEnabled(true);
 	foreach (const TaskSearchOwnerFulltext::BoxEntry &entry, foundBoxes) {
 		int row = this->contactTableWidget->rowCount();
 		this->contactTableWidget->insertRow(row);
@@ -619,6 +641,12 @@ void DlgDsSearch::queryBoxFulltext(
 		item = new QTableWidgetItem;
 		item->setText(entry.address);
 		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
-		//this->contactTableWidget->resizeColumnsToContents();
 	}
+
+	if (this->contactTableWidget->rowCount() > 0) {
+		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
+		this->contactTableWidget->selectRow(0);
+	}
+
+	this->contactTableWidget->resizeColumnsToContents();
 }
