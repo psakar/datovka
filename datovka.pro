@@ -312,6 +312,7 @@ SOURCES += \
     src/main.cpp \
     src/model_interaction/attachment_interaction.cpp \
     src/models/accounts_model.cpp \
+    src/models/combo_box_model.cpp \
     src/models/files_model.cpp \
     src/models/messages_model.cpp \
     src/models/sort_filter_proxy_model.cpp \
@@ -413,6 +414,7 @@ HEADERS += \
     src/log/log.h \
     src/model_interaction/attachment_interaction.h \
     src/models/accounts_model.h \
+    src/models/combo_box_model.h \
     src/models/files_model.h \
     src/models/messages_model.h \
     src/models/sort_filter_proxy_model.h \

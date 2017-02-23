@@ -28,6 +28,7 @@
 #include <QTimer>
 
 #include "src/common.h"
+#include "src/models/combo_box_model.h"
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
 #include "ui_dlg_ds_search.h"
@@ -149,6 +150,9 @@ private:
 	const QString m_dbType; /*!< Data box type used for searching.  */
 	const bool m_dbEffectiveOVM;
 	const bool m_dbOpenAddressing;
+
+	CBoxModel m_boxTypeCBoxModel; /*!< Data box type combo box model. */
+	CBoxModel m_fulltextCBoxModel; /*!< Full-text combo box model. */
 
 	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
 

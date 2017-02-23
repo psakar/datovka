@@ -37,21 +37,16 @@
 #define CON_COL_POST_CODE 5
 #define CON_COL_PDZ 6
 
-#define CBOX_NORM_TYPE_OVM 0
-#define CBOX_NORM_TYPE_PO 1
-#define CBOX_NORM_TYPE_PFO 2
-#define CBOX_NORM_TYPE_FO 3
-
 #define CBOX_TARGET_ALL 0
 #define CBOX_TARGET_ADDRESS 1
 #define CBOX_TARGET_IC 2
 #define CBOX_TARGET_BOX_ID 3
 
-#define CBOX_FULL_TYPE_ALL 0
-#define CBOX_FULL_TYPE_OVM 1
-#define CBOX_FULL_TYPE_PO 2
-#define CBOX_FULL_TYPE_PFO 3
-#define CBOX_FULL_TYPE_FO 4
+#define CBOX_TYPE_ALL 0
+#define CBOX_TYPE_OVM 1
+#define CBOX_TYPE_PO 2
+#define CBOX_TYPE_PFO 3
+#define CBOX_TYPE_FO 4
 
 DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     bool dbEffectiveOVM, bool dbOpenAddressing, QStringList *dbIdList,
@@ -61,6 +56,8 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
+    m_boxTypeCBoxModel(this),
+    m_fulltextCBoxModel(this),
     m_dbIdList(dbIdList),
     m_pingTimer(Q_NULLPTR),
     m_showInfoLabel(false)
@@ -69,9 +66,39 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	/* Set default line height for table views/widgets. */
 	contactTableWidget->setNarrowedLineHeight();
 
-	connect(this->contactTableWidget,
-	    SIGNAL(itemSelectionChanged()), this,
-	    SLOT(setFirtsColumnActive()));
+	m_boxTypeCBoxModel.appendRow(
+	    tr("All") + QStringLiteral(" - ") + tr("All types"),
+	    CBOX_TYPE_ALL);
+	m_boxTypeCBoxModel.appendRow(
+	    tr("OVM") + QStringLiteral(" - ") + tr("Orgán veřejné moci"),
+	    CBOX_TYPE_OVM);
+	m_boxTypeCBoxModel.appendRow(
+	    tr("PO") + QStringLiteral(" - ") + tr("Právnická osoba"),
+	    CBOX_TYPE_PO);
+	m_boxTypeCBoxModel.appendRow(
+	    tr("PFO") + QStringLiteral(" - ") + tr("Podnikající fyzická osoba"),
+	    CBOX_TYPE_PFO);
+	m_boxTypeCBoxModel.appendRow(
+	    tr("FO") + QStringLiteral(" - ") + tr("Fyzická osoba"),
+	    CBOX_TYPE_FO);
+	this->dataBoxTypeCBox->setModel(&m_boxTypeCBoxModel);
+
+	m_fulltextCBoxModel.appendRow(
+	    tr("All") + QStringLiteral(" - ") + tr("Search in all fields"),
+	    CBOX_TARGET_ALL);
+	m_fulltextCBoxModel.appendRow(
+	    tr("Address") + QStringLiteral(" - ") + tr("Search in address data"),
+	    CBOX_TARGET_ADDRESS);
+	m_fulltextCBoxModel.appendRow(
+	    tr("IC") + QStringLiteral(" - ") + tr("Identification number"),
+	    CBOX_TARGET_IC);
+	m_fulltextCBoxModel.appendRow(
+	    tr("ID") + QStringLiteral(" - ") + tr("Box identifier"),
+	    CBOX_TARGET_BOX_ID);
+	this->fulltextTargetCBox->setModel(&m_fulltextCBoxModel);
+
+	connect(this->contactTableWidget, SIGNAL(itemSelectionChanged()),
+	    this, SLOT(setFirtsColumnActive()));
 
 	connect(this->textLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
@@ -198,9 +225,7 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 {
 	labelSearchInfo->hide();
 
-	dataBoxTypeCBox->clear();
 	fulltextTargetLabel->hide();
-	fulltextTargetCBox->clear();
 	fulltextTargetCBox->hide();
 
 	iDLineLabel->hide();
@@ -226,31 +251,27 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 	contactTableWidget->setRowCount(0);
 
 	if (Qt::Checked == fulltextState) {
-		labelSearchDescr->setText(tr("Full-text data box search. Enter phrase for finding and set optional restrictions:"));
+		labelSearchDescr->setText(
+		    tr("Full-text data box search. Enter phrase for finding and set optional restrictions:"));
 
-		dataBoxTypeCBox->addItem(tr("All") + QStringLiteral(" - ") + tr("All types"));
-		dataBoxTypeCBox->addItem(tr("OVM") + QStringLiteral(" - ") + tr("Orgán veřejné moci"));
-		dataBoxTypeCBox->addItem(tr("PO") + QStringLiteral(" - ") + tr("Právnická osoba"));
-		dataBoxTypeCBox->addItem(tr("PFO") + QStringLiteral(" - ") + tr("Podnikající fyzická osoba"));
-		dataBoxTypeCBox->addItem(tr("FO") + QStringLiteral(" - ") + tr("Fyzická osoba"));
+		m_boxTypeCBoxModel.setEnabled(CBOX_TYPE_ALL, true);
 
 		fulltextTargetLabel->show();
-		fulltextTargetCBox->addItem(tr("All") + QStringLiteral(" - ") + tr("Search in all fields"));
-		fulltextTargetCBox->addItem(tr("Address") + QStringLiteral(" - ") + tr(""));
-		fulltextTargetCBox->addItem(tr("IC") + QStringLiteral(" - ") + tr("Identification number"));
-		fulltextTargetCBox->addItem(tr("ID") + QStringLiteral(" - ") + tr("Box identifier"));
 		fulltextTargetCBox->show();
 
 		textLineLabel->show();
 		textLineEdit->show();
 	} else {
-		labelSearchDescr->setText(tr("Enter the ID, IČ or at least three letters from the name of the data box you look for:"));
+		labelSearchDescr->setText(
+		    tr("Enter the ID, IČ or at least three letters from the name of the data box you look for:"));
 
-		/* Does not contain all. TODO -- Use a mod and disable all. */
-		dataBoxTypeCBox->addItem(tr("OVM") + QStringLiteral(" - ") + tr("Orgán veřejné moci"));
-		dataBoxTypeCBox->addItem(tr("PO") + QStringLiteral(" - ") + tr("Právnická osoba"));
-		dataBoxTypeCBox->addItem(tr("PFO") + QStringLiteral(" - ") + tr("Podnikající fyzická osoba"));
-		dataBoxTypeCBox->addItem(tr("FO") + QStringLiteral(" - ") + tr("Fyzická osoba"));
+		/* Cannot search for all data box types. */
+		m_boxTypeCBoxModel.setEnabled(CBOX_TYPE_ALL, false);
+		if (dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt() ==
+		    CBOX_TYPE_ALL) {
+			dataBoxTypeCBox->setCurrentIndex(
+			    m_boxTypeCBoxModel.findRow(CBOX_TYPE_OVM));
+		}
 
 		iDLineLabel->show();
 		iDLineEdit->show();
@@ -323,29 +344,29 @@ void DlgDsSearch::checkInputFieldsNormal(void)
 	this->iCLineEdit->setEnabled((true));
 	this->iDLineEdit->setEnabled((true));
 
-	switch (this->dataBoxTypeCBox->currentIndex()) {
-	case CBOX_NORM_TYPE_OVM:
+	switch (this->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
+	case CBOX_TYPE_OVM:
 		this->iCLineEdit->setEnabled(true);
 		this->nameLineLabel->setText(tr("Subject Name:"));
 		this->nameLineLabel->setToolTip(tr("Enter name of subject"));
 		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
 		this->labelSearchInfo->hide();
 		break;
-	case CBOX_NORM_TYPE_PO:
+	case CBOX_TYPE_PO:
 		this->iCLineEdit->setEnabled(true);
 		this->nameLineLabel->setText(tr("Subject Name:"));
 		this->nameLineLabel->setToolTip(tr("Enter name of subject"));
 		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
 		this->labelSearchInfo->setVisible(m_showInfoLabel);
 		break;
-	case CBOX_NORM_TYPE_PFO:
+	case CBOX_TYPE_PFO:
 		this->iCLineEdit->setEnabled(true);
 		this->nameLineLabel->setText(tr("Name:"));
 		this->nameLineLabel->setToolTip(tr("Enter last name of the PFO or company name."));
 		this->nameLineEdit->setToolTip(tr("Enter last name of the PFO or company name."));
 		this->labelSearchInfo->setVisible(m_showInfoLabel);
 		break;
-	case CBOX_NORM_TYPE_FO:
+	case CBOX_TYPE_FO:
 		this->iCLineEdit->setEnabled(false);
 		this->nameLineLabel->setText(tr("Last Name:"));
 		this->nameLineLabel->setToolTip(tr("Enter last name or last name at birth of the FO."));
@@ -413,17 +434,17 @@ void DlgDsSearch::searchDataBoxNormal(void)
 	}
 
 	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
-	switch (this->dataBoxTypeCBox->currentIndex()) {
-	case CBOX_NORM_TYPE_FO:
+	switch (this->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
+	case CBOX_TYPE_FO:
 		boxType = TaskSearchOwner::BT_FO;
 		break;
-	case CBOX_NORM_TYPE_PFO:
+	case CBOX_TYPE_PFO:
 		boxType = TaskSearchOwner::BT_PFO;
 		break;
-	case CBOX_NORM_TYPE_PO:
+	case CBOX_TYPE_PO:
 		boxType = TaskSearchOwner::BT_PO;
 		break;
-	case CBOX_NORM_TYPE_OVM:
+	case CBOX_TYPE_OVM:
 	default:
 		boxType = TaskSearchOwner::BT_OVM;
 		break;
@@ -441,7 +462,7 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 {
 	enum TaskSearchOwnerFulltext::FulltextTarget target =
 	    TaskSearchOwnerFulltext::FT_ALL;
-	switch (this->fulltextTargetCBox->currentIndex()) {
+	switch (this->fulltextTargetCBox->currentData(CBoxModel::valueRole).toInt()) {
 	case CBOX_TARGET_ALL:
 		target = TaskSearchOwnerFulltext::FT_ALL;
 		break;
@@ -459,20 +480,20 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 
 	enum TaskSearchOwnerFulltext::BoxType boxType =
 	    TaskSearchOwnerFulltext::BT_ALL;
-	switch (this->dataBoxTypeCBox->currentIndex()) {
-	case CBOX_FULL_TYPE_FO:
+	switch (this->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
+	case CBOX_TYPE_FO:
 		boxType = TaskSearchOwnerFulltext::BT_FO;
 		break;
-	case CBOX_FULL_TYPE_PFO:
+	case CBOX_TYPE_PFO:
 		boxType = TaskSearchOwnerFulltext::BT_PFO;
 		break;
-	case CBOX_FULL_TYPE_PO:
+	case CBOX_TYPE_PO:
 		boxType = TaskSearchOwnerFulltext::BT_PO;
 		break;
-	case CBOX_FULL_TYPE_OVM:
+	case CBOX_TYPE_OVM:
 		boxType = TaskSearchOwnerFulltext::BT_OVM;
 		break;
-	case CBOX_FULL_TYPE_ALL:
+	case CBOX_TYPE_ALL:
 	default:
 		boxType = TaskSearchOwnerFulltext::BT_ALL;
 		break;
