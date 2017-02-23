@@ -225,7 +225,7 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 	textLineEdit->hide();
 
 	if (Qt::Checked == fulltextState) {
-		labelSearchDescr->setText(tr("Enter the ID, IČ or at least three letters from the name of the data box you look for:"));
+		labelSearchDescr->setText(tr("Full-text data box search. Enter phrase for finding and set optional restrictions:"));
 
 		dataBoxTypeCBox->addItem(tr("All") + QStringLiteral(" - ") + tr("All types"));
 		dataBoxTypeCBox->addItem(tr("OVM") + QStringLiteral(" - ") + tr("Orgán veřejné moci"));
@@ -243,7 +243,7 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 		textLineLabel->show();
 		textLineEdit->show();
 	} else {
-		labelSearchDescr->setText(tr("Full-text data box search. Enter phrase for finding and set optional restrictions:"));
+		labelSearchDescr->setText(tr("Enter the ID, IČ or at least three letters from the name of the data box you look for:"));
 
 		/* Does not contain all. TODO -- Use a mod and disable all. */
 		dataBoxTypeCBox->addItem(tr("OVM") + QStringLiteral(" - ") + tr("Orgán veřejné moci"));
