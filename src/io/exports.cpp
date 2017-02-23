@@ -32,6 +32,35 @@
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 
+QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,
+    const QString &targetPath, const QString &attachFileName,
+    const QString &dbId, const QString &userName,
+    const MessageDb::MsgId &msgId)
+{
+	debugFuncCall();
+
+	Q_ASSERT(!userName.isEmpty());
+	Q_ASSERT(msgId.dmId >= 0);
+
+	const MessageDb *messageDb =
+	    dbSet.constAccessMessageDb(msgId.deliveryTime);
+	if (Q_NULLPTR == messageDb) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	MessageDb::FilenameEntry entry =
+	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
+
+	QString fileName = fileNameFromFormat(globPref.attachment_filename_format,
+	    msgId.dmId, dbId, userName, attachFileName, entry.dmDeliveryTime,
+	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
+	if (fileName.isEmpty()) {
+		return QString();
+	}
+	return targetPath + QDir::separator() + fileName;
+}
+
 Exports::ExportError Exports::exportAs(QWidget *parent,
     const MessageDbSet &dbSet, ExportFileType fileType,
     const QString &targetPath, const QString &attachFileName,
@@ -228,12 +257,8 @@ Exports::ExportError Exports::exportEnvAndAttachments(const MessageDbSet &dbSet,
 		}
 
 		// create new file name with format string
-		filename = fileNameFromFormat(
-		    globPref.attachment_filename_format,
-		    msgId.dmId, dbId, userName, filename, entry.dmDeliveryTime,
-		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-		filename = newTargetPath + QDir::separator() + filename;
+		filename = attachmentSavePathWithFileName(dbSet, newTargetPath,
+		    filename, dbId, userName, msgId);
 
 		QByteArray data(
 		    QByteArray::fromBase64(attach.dmEncodedContent));
@@ -302,9 +327,6 @@ Exports::ExportError Exports::saveAttachmentsWithExports(const MessageDbSet &dbS
 		return EXP_NOT_MSG_DATA;
 	}
 
-	MessageDb::FilenameEntry entry =
-	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-
 	// save attachments to target folder
 	foreach (const MessageDb::FileData &attach, attachList) {
 		QString filename(attach.dmFileDescr);
@@ -317,12 +339,8 @@ Exports::ExportError Exports::saveAttachmentsWithExports(const MessageDbSet &dbS
 		}
 
 		// create new file name with format string
-		filename = fileNameFromFormat(
-		    globPref.attachment_filename_format,
-		    msgId.dmId, dbId, userName, filename, entry.dmDeliveryTime,
-		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-		filename = targetPath + QDir::separator() + filename;
+		filename = attachmentSavePathWithFileName(dbSet, targetPath,
+		    filename, dbId, userName, msgId);
 
 		QByteArray data(
 		    QByteArray::fromBase64(attach.dmEncodedContent));

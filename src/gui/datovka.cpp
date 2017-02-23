@@ -79,8 +79,8 @@
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
-#include "src/model_interaction/attachment_interaction.h"
 #include "src/io/tag_db_container.h"
+#include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
@@ -1895,13 +1895,7 @@ void MainWindow::attachmentItemRightClicked(const QPoint &point)
 	menu->deleteLater();
 }
 
-
-/* ========================================================================= */
-/*
- * Saves selected attachment to file.
- */
 void MainWindow::saveSelectedAttachmentsToFile(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -1924,61 +1918,6 @@ void MainWindow::saveSelectedAttachmentsToFile(void)
 	}
 }
 
-QString MainWindow::attachmentFilePath(const QString &userName,
-    const MessageDb::MsgId &msgId, QModelIndex attIdx)
-{
-	if (userName.isEmpty() || !msgId.isValid() || !attIdx.isValid()) {
-		Q_ASSERT(0);
-		return QString();
-	}
-
-	if (attIdx.column() != DbFlsTblModel::FNAME_COL) {
-		attIdx = attIdx.sibling(attIdx.row(), DbFlsTblModel::FNAME_COL);
-		if (!attIdx.isValid()) {
-			Q_ASSERT(0);
-			return QString();
-		}
-	}
-	Q_ASSERT(attIdx.column() == DbFlsTblModel::FNAME_COL);
-
-	QString fileName(attIdx.data().toString());
-	if (fileName.isEmpty()) {
-		Q_ASSERT(0);
-		return QString();
-	}
-
-	QString saveAttachPath;
-	if (globPref.use_global_paths) {
-		saveAttachPath = globPref.save_attachments_path;
-	} else {
-		saveAttachPath = m_save_attach_dir;
-	}
-
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (Q_NULLPTR == dbSet) {
-		Q_ASSERT(0);
-		return QString();
-	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
-	    false);
-	if (Q_NULLPTR == messageDb) {
-		Q_ASSERT(0);
-		return QString();
-	}
-	MessageDb::FilenameEntry entry =
-	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
-
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
-
-	fileName = fileNameFromFormat(globPref.attachment_filename_format,
-	    msgId.dmId, dbId, userName, fileName, entry.dmDeliveryTime,
-	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-	if (fileName.isEmpty()) {
-		return QString();
-	}
-	return saveAttachPath + QDir::separator() + fileName;
-}
-
 void MainWindow::saveAttachmentToFile(const QString &userName,
     const MessageDb::MsgId &msgId, const QModelIndex &attIdx)
 {
@@ -1996,7 +1935,25 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		    "was not successful!").arg(msgId.dmId));
 		return;
 	}
-	QString fileName(attachmentFilePath(userName, msgId, attIdx));
+	QString filename(fileNameIndex.data().toString());
+
+	QString saveAttachPath;
+	if (globPref.use_global_paths) {
+		saveAttachPath = globPref.save_attachments_path;
+	} else {
+		saveAttachPath = m_save_attach_dir;
+	}
+
+	const QString dbId(globAccountDbPtr->dbId(userName + "___True"));
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (Q_NULLPTR == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QString fileName(Exports::attachmentSavePathWithFileName(*dbSet,
+	    saveAttachPath, filename, dbId, userName, msgId));
 
 	QString savedFileName(AttachmentInteraction::saveAttachmentToFile(this,
 	    attIdx, fileName));

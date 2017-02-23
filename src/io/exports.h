@@ -67,6 +67,23 @@ public:
 	};
 
 	/*!
+	 * @brief Generates file path where store attachment into.
+	 *
+	 * @param[in] dbSet      - Account database set.
+	 * @param[in] targetPath - Path to target folder for export.
+	 * @param[in] attachFileName - Attachment file name.
+	 * @param[in] userName     - Account username.
+	 * @param[in] dbId         - Databox ID for export.
+	 * @param[in] msgId        - Message ID for export.
+	 * @return New target path with file name for saving.
+	 */
+	static
+	QString attachmentSavePathWithFileName(const MessageDbSet &dbSet,
+	    const QString &targetPath, const QString &attachFileName,
+	    const QString &dbId, const QString &userName,
+	    const MessageDb::MsgId &msgId);
+
+	/*!
 	 * @brief Export message data as ZFO/PDF file.
 	 *
 	 * @param[in,out] parent - Parent widget to call object from.
