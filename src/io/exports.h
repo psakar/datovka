@@ -39,7 +39,7 @@ private:
 	/*!
 	 * @brief Constructor.
 	 */
-	explicit Exports(void);
+	Exports(void);
 
 public:
 
@@ -66,8 +66,6 @@ public:
 		EXP_ERROR
 	};
 
-public:
-
 	/*!
 	 * @brief Export message data as ZFO/PDF file.
 	 *
@@ -92,7 +90,7 @@ public:
 	    QString &lastPath, QString &errStr);
 
 	/*!
-	 * @brief Export message envelope with attachments.
+	 * @brief Export message envelope together with attachments.
 	 *
 	 * @param[in] dbSet      - Account database set.
 	 * @param[in] targetPath - Path to target folder for export.
@@ -104,6 +102,22 @@ public:
 	 */
 	static
 	ExportError exportEnvAndAttachments(const MessageDbSet &dbSet,
+	    const QString &targetPath, const QString &userName,
+	    const QString &dbId, MessageDb::MsgId msgId, QString &errStr);
+
+	/*!
+	 * @brief Save message attachments and export ZFO/PDF files as well.
+	 *
+	 * @param[in] dbSet      - Account database set.
+	 * @param[in] targetPath - Path to target folder for export.
+	 * @param[in] userName   - Account username.
+	 * @param[in] dbId       - Databox ID for export.
+	 * @param[in] msgId      - Message ID for export.
+	 * @param[out] errTxt    - Error text.
+	 * @return Result operation code.
+	 */
+	static
+	ExportError saveAttachmentsWithExports(const MessageDbSet &dbSet,
 	    const QString &targetPath, const QString &userName,
 	    const QString &dbId, MessageDb::MsgId msgId, QString &errStr);
 
@@ -128,7 +142,6 @@ private:
 	 */
 	static
 	bool writeZFO(const QString &fileName, const QByteArray &data);
-
 };
 
 #endif /* _EXPORTS_H_ */

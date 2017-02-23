@@ -1992,8 +1992,8 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
 		showStatusTextWithTimeout(
-		    tr("Saving attachment of message '%1' to files was not successful!")
-		        .arg(msgId.dmId));
+		    tr("Saving attachment of message '%1' to files "
+		    "was not successful!").arg(msgId.dmId));
 		return;
 	}
 	QString fileName(attachmentFilePath(userName, msgId, attIdx));
@@ -2011,8 +2011,8 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		}
 	} else {
 		showStatusTextWithTimeout(tr(
-		    "Saving attachment of message '%1' to file was not successful!")
-		    .arg(msgId.dmId));
+		    "Saving attachment of message '%1' to file "
+		    "was not successful!").arg(msgId.dmId));
 	}
 }
 
@@ -2020,223 +2020,70 @@ void MainWindow::saveAllAttachmentsToDir(void)
 {
 	debugSlotCall();
 
-	QString lastPath;
-	QString errrStr;
-
-	MessageDb::MsgId msgId;
-	{
-		const QModelIndex messageIndex(currentSingleMessageIndex());
-		msgId = msgMsgId(messageIndex);
-	}
-
-	DbFlsTblModel *attachModel = qobject_cast<DbFlsTblModel *>(
-	    ui->messageAttachmentList->model());
-	/*
-	 * Download missing message.
-	 * TODO -- Make this a separate function and reuse it wherever possible.
-	 */
-	if ((!msgId.deliveryTime.isValid()) ||
-	    (attachModel == Q_NULLPTR) || (attachModel->rowCount() == 0)) {
-		const QModelIndex acntIdx(currentAccountModelIndex());
-		const QString userName(m_accountModel.userName(acntIdx));
-		enum MessageDb::MessageType type;
-		if (AccountModel::nodeTypeIsReceived(acntIdx)) {
-			type = MessageDb::TYPE_RECEIVED;
-		} else if (AccountModel::nodeTypeIsSent(acntIdx)) {
-			type = MessageDb::TYPE_SENT;
-		} else {
-			Q_ASSERT(0);
-			return;
-		}
-
-		/* No data in attachment model present. */
-		const QModelIndex messageIndex(currentSingleMessageIndex());
-		msgId = msgMsgId(messageIndex);
-
-		if (!messageMissingOfferDownload(msgId,
-		        tr("Message export error!"))) {
-			return;
-		}
-
-		/* Navigate to message. */
-		messageItemFromSearchSelection(userName, msgId.dmId,
-		    msgId.deliveryTime.toString("yyyy"), type);
-		/* Process all pending events. */
-		QCoreApplication::processEvents();
-	}
-
-	attachModel = qobject_cast<DbFlsTblModel *>(
-	    ui->messageAttachmentList->model());
-	if ((attachModel == Q_NULLPTR) || (attachModel->rowCount() == 0)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	/* Generate list of indexes into all rows. */
-	QModelIndexList attIdxs;
-	for (int row = 0; row < attachModel->rowCount(); ++row) {
-		QModelIndex idx(attachModel->index(row,
-		    DbFlsTblModel::FNAME_COL));
-		if (!idx.isValid()) {
-			Q_ASSERT(0);
-			return;
-		}
-		attIdxs.append(idx);
-	}
-	Q_ASSERT(attIdxs.size() == attachModel->rowCount());
-
 	QString attSaveDir;
-	if (globPref.use_global_paths) {
-		attSaveDir = globPref.save_attachments_path;
-	} else {
-		attSaveDir = m_save_attach_dir;
-	}
+	QString errStr;
 
-	attSaveDir = QFileDialog::getExistingDirectory(this,
-	    tr("Save attachments"), attSaveDir,
-	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	if (attSaveDir.isEmpty()) {
-		return;
-	}
-
-	/*
-	 * TODO -- This ridiculous asking for mostly irrelevant data and
-	 * generating of stupendous file names must be reworked.
-	 */
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb::MsgId msgId(msgMsgId(currentFrstColMessageIndexes().first()));
+
+	// is complete message downloaded? if not, download now
+	DbFlsTblModel *attachModel = qobject_cast<DbFlsTblModel *>(
+	    ui->messageAttachmentList->model());
+	if ((!msgId.deliveryTime.isValid()) ||
+	    (attachModel == Q_NULLPTR) || (attachModel->rowCount() == 0)) {
+		if (!messageMissingOfferDownload(msgId, errStr)) {
+			return;
+		}
+	}
+
 	const QString dbId(globAccountDbPtr->dbId(userName + "___True"));
-	MessageDb::FilenameEntry entry;
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
-	MessageDb *messageDb = dbSet->accessMessageDb(
-	    msgId.deliveryTime, false);
-	if (Q_NULLPTR == messageDb) {
+
+	// how does default path used for?
+	if (globPref.use_global_paths) {
+		attSaveDir = globPref.save_attachments_path;
+	} else {
+		attSaveDir = m_save_attach_dir;
+	}
+
+	// change target path
+	attSaveDir = QFileDialog::getExistingDirectory(this,
+	    tr("Select target folder to save"), attSaveDir,
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (attSaveDir.isEmpty()) {
 		Q_ASSERT(0);
 		return;
 	}
-	entry = messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
 
-
-	QList<QString> unsuccessfulAtts;
-	bool existenceWarningDisplayed = false; /* Display only once. */
-
-	foreach (const QModelIndex &attIdx, attIdxs) {
-		Q_ASSERT(attIdx.column() == DbFlsTblModel::FNAME_COL);
-		const QString attName(attIdx.data().toString());
-		QString fileName(attName);
-		if (fileName.isEmpty()) {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		fileName = fileNameFromFormat(
-		    globPref.attachment_filename_format,
-		    msgId.dmId, dbId, userName, fileName, entry.dmDeliveryTime,
-		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
-
-		fileName = attSaveDir + QDir::separator() + fileName;
-
-		bool fileExists = QFileInfo::exists(fileName);
-		if (fileExists) {
-			if (!existenceWarningDisplayed) {
-				QMessageBox::warning(this,
-				    tr("Error saving attachment."),
-				    tr("Some files already exist."),
-				    QMessageBox::Ok);
-				existenceWarningDisplayed = true;
-			}
-		}
-		QString savedFileName(
-		    AttachmentInteraction::saveAttachmentToFile(this, attIdx,
-		    fileName, fileExists));
-		if (savedFileName.isEmpty()) {
-			unsuccessfulAtts.append(fileName);
-			continue;
-		}
-
-		if (globPref.delivery_info_for_every_file) {
-			if (globPref.all_attachments_save_zfo_delinfo) {
-
-				Exports::exportAs(this, *dbSet, Exports::ZFO_DELIV_ATTACH,
-				    attSaveDir, attName, userName, dbId, msgId,
-				    false, lastPath, errrStr);
-			}
-			if (globPref.all_attachments_save_pdf_delinfo) {
-
-				Exports::exportAs(this, *dbSet, Exports::PDF_DELIV_ATTACH,
-				    attSaveDir, attName, userName, dbId, msgId,
-				    false, lastPath, errrStr);
-			}
-		}
-	}
-
+	// store selected path
 	if ((!globPref.use_global_paths) && (!attSaveDir.isEmpty())) {
 		m_save_attach_dir = attSaveDir;
 		storeExportPath();
 	}
 
-	if (globPref.all_attachments_save_zfo_msg) {
-		Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE,
-		    attSaveDir, QString(), userName, dbId, msgId, false,
-		    lastPath, errrStr);
-	}
-
-	if (globPref.all_attachments_save_pdf_msgenvel) {
-		Exports::exportAs(this, *dbSet, Exports::PDF_ENVELOPE,
-		    attSaveDir, QString(), userName, dbId, msgId, false,
-		    lastPath, errrStr);
-	}
-
-	if (!globPref.delivery_info_for_every_file) {
-		if (globPref.all_attachments_save_zfo_delinfo) {
-			Exports::exportAs(this, *dbSet, Exports::ZFO_DELIVERY,
-			    attSaveDir, QString(), userName, dbId, msgId, false,
-			    lastPath, errrStr);
-		}
-		if (globPref.all_attachments_save_pdf_delinfo) {
-			Exports::exportAs(this, *dbSet, Exports::PDF_DELIVERY,
-			    attSaveDir, QString(), userName, dbId, msgId,
-			    false, lastPath, errrStr);
-		}
-	}
-
-	if (!unsuccessfulAtts.isEmpty()) {
-		showStatusTextWithTimeout(
-		    tr("Some attachments of message '%1' were not saved to disk!")
-		        .arg(msgId.dmId));
-		QString warnMsg(
-		    tr("In total %1 attachment files could not be written.")
-		        .arg(unsuccessfulAtts.size()));
-		warnMsg += "\n" + tr("These are:") + "\n";
-		int i;
-		for (i = 0; i < (unsuccessfulAtts.size() - 1); ++i) {
-			warnMsg += "    '" + unsuccessfulAtts.at(i) + "'\n";
-		}
-		warnMsg += "    '" + unsuccessfulAtts.at(i) + "'.";
-		QMessageBox::warning(this,
-		    tr("Error saving attachments of message '%1'.")
-		        .arg(msgId.dmId),
-		    warnMsg, QMessageBox::Ok);
+	// save attachments and export zfo/pdf files
+	if (Exports::EXP_SUCCESS ==
+	    Exports::saveAttachmentsWithExports(*dbSet, attSaveDir,
+	    userName, dbId, msgId, errStr)) {
+		showStatusTextWithTimeout(errStr);
 	} else {
-		showStatusTextWithTimeout(
-		    tr("All attachments of message '%1' were saved.")
-		        .arg(msgId.dmId));
+		showStatusTextWithTimeout(errStr);
+		QMessageBox::warning(this, tr("Error saving of attachments"),
+		    tr("Some attachments of message '%1' were not saved "
+		    "to target folder!").arg(msgId.dmId), QMessageBox::Ok);
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Open attachment in default application.
- */
 void MainWindow::openSelectedAttachment(const QModelIndex &index)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -8533,17 +8380,11 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Export messages with expired time stamp to ZFO.
- */
 void MainWindow::exportExpirMessagesToZFO(const QString &userName,
     const QList<MessageDb::MsgId> &expirMsgIds)
-/* ========================================================================= */
 {
 	QString newDir = QFileDialog::getExistingDirectory(this,
-	    tr("Export ZFO"), m_on_export_zfo_activate,
+	    tr("Select target folder for export"), m_on_export_zfo_activate,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (newDir.isEmpty()) {
@@ -8556,17 +8397,22 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 		return;
 	}
 
+	QString lastPath;
+	QString errStr;
+
 	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
-	QString lastPath;
-	QString errrStr;
-
-	foreach (const MessageDb::MsgId &mId, expirMsgIds) {
-		Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE, newDir,
-		    QString(), userName, dbId, mId, false, lastPath, errrStr);
+	foreach (MessageDb::MsgId mId, expirMsgIds) {
+		if (Exports::EXP_NOT_MSG_DATA ==
+		    Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE, newDir,
+		    QString(), userName, dbId, mId, false, lastPath, errStr)) {
+			if (messageMissingOfferDownload(mId, errStr)) {
+			    Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE, newDir,
+			    QString(), userName, dbId, mId, false, lastPath, errStr);
+			}
+		}
 	}
 }
-
 
 /* ========================================================================= */
 /*

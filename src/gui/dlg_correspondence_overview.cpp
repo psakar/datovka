@@ -485,7 +485,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->sentCheckBox->isChecked()) {
 			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
 
-				if (!Exports::exportAs(this, m_messDbSet,
+				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::ZFO_MESSAGE, exportDir,
 				    QString(), m_userName, m_dbId, mId, false,
 				    lastPath, errrStr)) {
@@ -506,7 +506,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->receivedCheckBox->isChecked()) {
 			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
 
-				if (!Exports::exportAs(this, m_messDbSet,
+				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::ZFO_MESSAGE, exportDir,
 				    QString(), m_userName, m_dbId, mId, false,
 				    lastPath, errrStr)) {
@@ -534,7 +534,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->sentCheckBox->isChecked()) {
 			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
 
-				if (!Exports::exportAs(this, m_messDbSet,
+				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::ZFO_DELIVERY, exportDir,
 				    QString(), m_userName, m_dbId, mId, false,
 				    lastPath, errrStr)) {
@@ -555,7 +555,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->receivedCheckBox->isChecked()) {
 			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
 
-				if (!Exports::exportAs(this, m_messDbSet,
+				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::ZFO_DELIVERY, exportDir,
 				    QString(), m_userName, m_dbId, mId, false,
 				    lastPath, errrStr)) {
@@ -582,7 +582,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->sentCheckBox->isChecked()) {
 			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
 
-				if (!Exports::exportAs(this, m_messDbSet,
+				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::PDF_ENVELOPE, exportDir,
 				    QString(), m_userName, m_dbId, mId, false,
 				    lastPath, errrStr)) {
@@ -602,7 +602,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->receivedCheckBox->isChecked()) {
 			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
 
-				if (!Exports::exportAs(this, m_messDbSet,
+				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::PDF_ENVELOPE, exportDir,
 				    QString(), m_userName, m_dbId, mId, false,
 				    lastPath, errrStr)) {
@@ -628,7 +628,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->sentCheckBox->isChecked()) {
 			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
 
-				if (!Exports::exportAs(this, m_messDbSet,
+				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::PDF_DELIVERY, exportDir,
 				    QString(), m_userName, m_dbId, mId, false,
 				    lastPath, errrStr)) {
@@ -649,7 +649,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->receivedCheckBox->isChecked()) {
 			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
 
-				if (!Exports::exportAs(this, m_messDbSet,
+				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::PDF_DELIVERY, exportDir,
 				    QString(), m_userName, m_dbId, mId, false,
 				    lastPath, errrStr)) {
