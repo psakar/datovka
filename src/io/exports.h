@@ -55,6 +55,17 @@ public:
 		PDF_DELIV_ATTACH
 	};
 
+	/*!
+	 * @brief Export result codes.
+	 */
+	enum ExportError {
+		EXP_SUCCESS = 0,
+		EXP_DB_ERROR,
+		EXP_NOT_MSG_DATA,
+		EXP_WRITE_FILE_ERROR,
+		EXP_ERROR
+	};
+
 public:
 
 	/*!
@@ -63,7 +74,7 @@ public:
 	 * @param[in,out] parent - Parent widget to call object from.
 	 * @param[in] dbSet      - Account database set.
 	 * @param[in] fileType   - Type of export file.
-	 * @param[in] attachPath - Path to target folder for export.
+	 * @param[in] targetPath - Path to target folder for export.
 	 * @param[in] attachFileName - Attachment file name.
 	 * @param[in] userName     - Account username.
 	 * @param[in] dbId         - Databox ID for export.
@@ -71,11 +82,11 @@ public:
 	 * @param[in] askLocation  - Ask to new location for export.
 	 * @param[out] lastPath    - Last export path.
 	 * @param[out] errTxt      - Error text.
-	 * @return True on success, false else.
+	 * @return Result operation code.
 	 */
 	static
-	bool exportAs(QWidget *parent, const MessageDbSet &dbSet,
-	    ExportFileType fileType, const QString &attachPath,
+	ExportError exportAs(QWidget *parent, const MessageDbSet &dbSet,
+	    ExportFileType fileType, const QString &targetPath,
 	    const QString &attachFileName, const QString &userName,
 	    const QString &dbId, MessageDb::MsgId msgId, bool askLocation,
 	    QString &lastPath, QString &errStr);
@@ -83,19 +94,18 @@ public:
 	/*!
 	 * @brief Export message envelope with attachments.
 	 *
-	 * @param[in,out] parent - Parent widget to call object from.
 	 * @param[in] dbSet      - Account database set.
-	 * @param[in] attachPath - Path to target folder for export.
-	 * @param[in] userName     - Account username.
-	 * @param[in] dbId         - Databox ID for export.
-	 * @param[in] msgId        - Message ID for export.
-	 * @param[in] askLocation  - Ask to new location for export.
-	 * @return True on success, false else.
+	 * @param[in] targetPath - Path to target folder for export.
+	 * @param[in] userName   - Account username.
+	 * @param[in] dbId       - Databox ID for export.
+	 * @param[in] msgId      - Message ID for export.
+	 * @param[out] errTxt    - Error text.
+	 * @return Result operation code.
 	 */
 	static
-	bool exportEnvAndAttachments(QWidget *parent, const MessageDbSet &dbSet,
-	    const QString &attachPath, const QString &userName,
-	    const QString &dbId, MessageDb::MsgId msgId, bool askLocation);
+	ExportError exportEnvAndAttachments(const MessageDbSet &dbSet,
+	    const QString &targetPath, const QString &userName,
+	    const QString &dbId, MessageDb::MsgId msgId, QString &errStr);
 
 private:
 

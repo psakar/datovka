@@ -34,10 +34,11 @@
 #include "src/settings/preferences.h"
 
 
-bool Exports::exportAs(QWidget *parent, const MessageDbSet &dbSet,
-    ExportFileType fileType, const QString &attachPath,
-    const QString &attachFileName, const QString &userName, const QString &dbId,
-    MessageDb::MsgId msgId, bool askLocation, QString &lastPath, QString &errStr)
+Exports::ExportError Exports::exportAs(QWidget *parent,
+    const MessageDbSet &dbSet, ExportFileType fileType,
+    const QString &targetPath, const QString &attachFileName,
+    const QString &userName, const QString &dbId, MessageDb::MsgId msgId,
+    bool askLocation, QString &lastPath, QString &errStr)
 {
 	debugFuncCall();
 
@@ -56,9 +57,12 @@ bool Exports::exportAs(QWidget *parent, const MessageDbSet &dbSet,
 
 	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
-		return ret;
+		errStr = QObject::tr("Cannot access message database "
+		    "for username \"%1\".").arg(userName);
+		return EXP_DB_ERROR;
 	}
 
+	// what we will export?
 	switch (fileType) {
 	case ZFO_MESSAGE:
 		fileTypeStr = QObject::tr("message");
@@ -98,28 +102,38 @@ bool Exports::exportAs(QWidget *parent, const MessageDbSet &dbSet,
 		break;
 	default:
 		Q_ASSERT(0);
-		return ret;
+		errStr = QObject::tr("Export file type of message \"%1\" "
+		    "was not specified!").arg(msgID);
+		return EXP_ERROR;
 		break;
 	}
 
+	// is complete message in database?
 	if (base64.isEmpty()) {
-		// TODO - complete message is required.
-		errStr = QObject::tr("There is not complete message \"%1\" "
-		    "for export!").arg(msgID);
-		return ret;
+		errStr = QObject::tr("Complete message \"%1\" "
+		    "missing!").arg(msgID);
+		return EXP_NOT_MSG_DATA;
 	}
+
+	errStr = QObject::tr("Export of %1 \"%2\" to %3 was not "
+	    "successful!").arg(fileTypeStr).arg(msgID).arg(fileSufix);
 
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
 
+	// create new file name with format string
 	QString fileName = fileNameFromFormat(fileNameformat, msgId.dmId,
 	    dbId, userName, attachFileName, entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
-	fileName = attachPath + QDir::separator() + fileName + fileSufix;
+	fileName = targetPath + QDir::separator() + fileName + fileSufix;
 
 	Q_ASSERT(!fileName.isEmpty());
+	if (fileName.isEmpty()) {
+		return EXP_ERROR;
+	}
 
+	// ask for a new location?
 	if (askLocation) {
 		fileName = QFileDialog::getSaveFileName(parent,
 		    QObject::tr("Save %1 as file (*%2)").
@@ -127,14 +141,12 @@ bool Exports::exportAs(QWidget *parent, const MessageDbSet &dbSet,
 		    fileName, QObject::tr("File (*%1)").arg(fileSufix));
 	}
 
+	Q_ASSERT(!fileName.isEmpty());
 	if (fileName.isEmpty()) {
-		errStr = QObject::tr("Export of %1 \"%2\" to file was "
-		    "not successful!").arg(fileTypeStr).arg(msgID);
-		return ret;
+		return EXP_ERROR;
 	}
 
-	lastPath = QFileInfo(fileName).absoluteDir().absolutePath();
-
+	// save file to disk
 	switch (fileType) {
 	case ZFO_DELIV_ATTACH:
 	case ZFO_DELIVERY:
@@ -152,86 +164,118 @@ bool Exports::exportAs(QWidget *parent, const MessageDbSet &dbSet,
 		break;
 	default:
 		Q_ASSERT(0);
+		return EXP_ERROR;
 		break;
 	}
 
-	return ret;
+	if (ret) {
+		// remember last path
+		lastPath = QFileInfo(fileName).absoluteDir().absolutePath();
+		errStr = QObject::tr("Export of %1 \"%2\" to %3 was "
+		    "successful.").arg(fileTypeStr).arg(msgID).arg(fileSufix);
+		return EXP_SUCCESS;
+	} else {
+		return EXP_WRITE_FILE_ERROR;
+	}
 }
 
-bool Exports::exportEnvAndAttachments(QWidget *parent, const MessageDbSet &dbSet,
-    const QString &attachPath, const QString &userName, const QString &dbId,
-    MessageDb::MsgId msgId, bool askLocation)
+Exports::ExportError Exports::exportEnvAndAttachments(const MessageDbSet &dbSet,
+    const QString &targetPath, const QString &userName, const QString &dbId,
+    MessageDb::MsgId msgId, QString &errStr)
 {
 	debugFuncCall();
 
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(msgId.dmId >= 0);
 
-	QString newAttachPath;
-	QDir dir(attachPath);
+	QString newTargetPath;
+	QDir dir(targetPath);
+	QString msgID = QString::number(msgId.dmId);
+	bool attachWriteSuccess = true;
+
+	// create new folder with message id
 	dir.mkdir(QString::number(msgId.dmId));
-	newAttachPath = attachPath + QDir::separator() +
+	newTargetPath = targetPath + QDir::separator() +
 	    QString::number(msgId.dmId);
 
 	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
 	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
-		return false;
+		errStr = QObject::tr("Cannot access message database "
+		    "for username \"%1\".").arg(userName);
+		return EXP_DB_ERROR;
 	}
 
+	// get list of attachments
 	QList<MessageDb::FileData> attachList(
 	    messageDb->getFilesFromMessage(msgId.dmId));
 
 	if (attachList.isEmpty()) {
-		// TODO - complete message is required.
-		return false;
+		errStr = QObject::tr("Complete message \"%1\" "
+		    "missing!").arg(msgID);
+		return EXP_NOT_MSG_DATA;
 	}
 
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
 
+	// save attachments to target folder
 	foreach (const MessageDb::FileData &attach, attachList) {
 		QString filename(attach.dmFileDescr);
 		if (filename.isEmpty()) {
 			Q_ASSERT(0);
+			errStr = QObject::tr("Some files of message \"%1\""
+			    " were not saved to disk!").arg(msgID);
+			attachWriteSuccess = false;
 			continue;
 		}
 
+		// create new file name with format string
 		filename = fileNameFromFormat(
 		    globPref.attachment_filename_format,
 		    msgId.dmId, dbId, userName, filename, entry.dmDeliveryTime,
 		    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
-		filename = newAttachPath + QDir::separator() + filename;
+		filename = newTargetPath + QDir::separator() + filename;
 
 		QByteArray data(
 		    QByteArray::fromBase64(attach.dmEncodedContent));
 
+		// save file to disk
 		if (WF_SUCCESS !=
 		    writeFile(nonconflictingFileName(filename), data)) {
+		    	errStr = QObject::tr("Some files of message \"%1\""
+			    " were not saved to disk!").arg(msgID);
+			attachWriteSuccess = false;
 			continue;
 		}
 	}
 
+	// create new file name with format string
 	QString fileName = fileNameFromFormat(globPref.message_filename_format,
 	    msgId.dmId, dbId, userName, "", entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
-	fileName = newAttachPath + QDir::separator() + fileName + ".pdf";
-
-	if (askLocation) {
-		fileName = QFileDialog::getSaveFileName(parent,
-		    QObject::tr("Save message envelope as PDF file"), fileName,
-		    QObject::tr("PDF file (*.pdf)"));
-	}
+	fileName = newTargetPath + QDir::separator() + fileName + ".pdf";
 
 	if (fileName.isEmpty()) {
-		return false;
+		errStr = QObject::tr("Export of message envelope \"%1\" to "
+		    "PDF was not successful!").arg(msgID);
+		return EXP_ERROR;
 	}
 
-	return printPDF(fileName,
+	// save file to disk
+	if (printPDF(fileName,
 	    messageDb->descriptionHtml(msgId.dmId, 0) +
-	    messageDb->fileListHtmlToPdf(msgId.dmId));
+	    messageDb->fileListHtmlToPdf(msgId.dmId)) && attachWriteSuccess) {
+		errStr = QObject::tr("Export of message envelope \"%1\" to "
+		    "PDF and attachments were successful.").arg(msgID);
+		return EXP_SUCCESS;
+	} else {
+		errStr = QObject::tr("Export of message envelope \"%1\" to "
+		    "PDF and attachments were not successful!").arg(msgID);
+		return EXP_WRITE_FILE_ERROR;
+	}
 }
 
 bool Exports::printPDF(const QString &fileName, const QString &data)

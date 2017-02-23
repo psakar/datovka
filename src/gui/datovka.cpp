@@ -7017,7 +7017,7 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	QString newDir = QFileDialog::getExistingDirectory(this,
-	    tr("Export ZFO"), m_on_export_zfo_activate,
+	    tr("Select target folder to save"), m_on_export_zfo_activate,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (newDir.isEmpty()) {
@@ -7031,11 +7031,18 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 	}
 
 	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+	QString errStr;
 
-	foreach (const MessageDb::MsgId &msgId, msgIds) {
+	foreach (MessageDb::MsgId msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
-		Exports::exportEnvAndAttachments(this, *dbSet,
-		    newDir, userName, dbId, msgId, false);
+		if (Exports::EXP_NOT_MSG_DATA ==
+		    Exports::exportEnvAndAttachments(*dbSet, newDir,
+		    userName, dbId, msgId, errStr)) {
+			if (messageMissingOfferDownload(msgId, errStr)) {
+				Exports::exportEnvAndAttachments(*dbSet,
+				    newDir, userName, dbId, msgId, errStr);
+			}
+		}
 	}
 }
 
@@ -10107,7 +10114,7 @@ void MainWindow::doExportOfSelectedFiles(Exports::ExportFileType expFileType) {
 	debugFuncCall();
 
 	QString lastPath;
-	QString errrStr;
+	QString errStr;
 
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
@@ -10133,11 +10140,18 @@ void MainWindow::doExportOfSelectedFiles(Exports::ExportFileType expFileType) {
 
 	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
-	foreach (const MessageDb::MsgId &msgId, msgIds) {
+	foreach (MessageDb::MsgId msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
-		Exports::exportAs(this, *dbSet, expFileType,
+		if (Exports::EXP_NOT_MSG_DATA ==
+		    Exports::exportAs(this, *dbSet, expFileType,
 		    m_on_export_zfo_activate, QString(),
-		    userName, dbId, msgId, true, lastPath, errrStr);
+		    userName, dbId, msgId, true, lastPath, errStr)) {
+			if (messageMissingOfferDownload(msgId, errStr)) {
+				Exports::exportAs(this, *dbSet, expFileType,
+				    m_on_export_zfo_activate, QString(),
+				    userName, dbId, msgId, true, lastPath, errStr);
+			}
+		}
 		m_on_export_zfo_activate = lastPath;
 		storeExportPath();
 	}
