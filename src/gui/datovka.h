@@ -1192,10 +1192,9 @@ private:
 	                              * configuration file.
 	                              */
 	SortFilterProxyModel m_messageListProxyModel; /*!<
-	                                                * Used for message
-	                                                * sorting and
-	                                                * filtering.
-	                                                */
+	                                               * Used for message
+	                                               * sorting and filtering.
+	                                               */
 
 	QTimer m_messageMarker; /*!< Used for marking messages as read. */
 	qint64 m_lastSelectedMessageId; /*!< Id of the last selected message. */

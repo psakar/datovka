@@ -5457,13 +5457,14 @@ void MainWindow::filterMessages(const QString &text)
 
 	/* Set filter field background colour. */
 	if (text.isEmpty()) {
-		mui_filterLine->setStyleSheet("QLineEdit{background: white;}");
+		mui_filterLine->setStyleSheet(
+		    SortFilterProxyModel::blankFilterEditStyle);
 	} else if (m_messageListProxyModel.rowCount() != 0) {
 		mui_filterLine->setStyleSheet(
-		    "QLineEdit{background: #afffaf;}");
+		    SortFilterProxyModel::foundFilterEditStyle);
 	} else {
 		mui_filterLine->setStyleSheet(
-		    "QLineEdit{background: #ffafaf;}");
+		    SortFilterProxyModel::notFoundFilterEditStyle);
 	}
 }
 

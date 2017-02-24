@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,13 @@
 
 #include "src/delegates/tag_item.h"
 #include "src/models/sort_filter_proxy_model.h"
+
+const QString SortFilterProxyModel::blankFilterEditStyle(
+    "QLineEdit{background: white;}");
+const QString SortFilterProxyModel::foundFilterEditStyle(
+    "QLineEdit{background: #afffaf;}");
+const QString SortFilterProxyModel::notFoundFilterEditStyle(
+    "QLineEdit{background: #ffafaf;}");
 
 SortFilterProxyModel::SortFilterProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)
