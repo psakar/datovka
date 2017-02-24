@@ -715,9 +715,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 {
 	debugSlotCall();
 
-	Q_UNUSED(previous);
-
 	QString html;
+	QString prevUserName;
 	QAbstractTableModel *msgTblMdl = 0;
 
 	if (!current.isValid()) {
@@ -745,7 +744,11 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		return;
 	}
 
+	if (previous.isValid()) {
+		prevUserName = m_accountModel.userName(previous);
+	}
 	const QString userName(m_accountModel.userName(current));
+
 	Q_ASSERT(!userName.isEmpty());
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -801,6 +804,12 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		return;
 	}
 
+	// save and load export paths
+	if (!prevUserName.isEmpty()) {
+		if (prevUserName != userName) {
+			storeExportPath(prevUserName);
+		}
+	}
 	setAccountStoragePaths(userName);
 
 	/*
@@ -1516,13 +1525,11 @@ void MainWindow::messageItemStoreSelection(qint64 msgId)
 /*
  * Saves account export paths.
  */
-void MainWindow::storeExportPath(void)
+void MainWindow::storeExportPath(const QString &userName)
 /* ========================================================================= */
 {
 	debugFuncCall();
 
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
 	AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
@@ -1964,7 +1971,7 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		if (!globPref.use_global_paths) {
 			m_save_attach_dir =
 			    QFileInfo(fileName).absoluteDir().absolutePath();
-			storeExportPath();
+			storeExportPath(userName);
 		}
 	} else {
 		showStatusTextWithTimeout(tr(
@@ -2024,7 +2031,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	// store selected path
 	if ((!globPref.use_global_paths) && (!attSaveDir.isEmpty())) {
 		m_save_attach_dir = attSaveDir;
-		storeExportPath();
+		storeExportPath(userName);
 	}
 
 	// save attachments and export zfo/pdf files
@@ -4917,7 +4924,7 @@ void MainWindow::doActionAfterSentMsgSlot(const QString &userName,
 
 	if (!globPref.use_global_paths) {
 		m_add_attach_dir = lastDir;
-		storeExportPath();
+		storeExportPath(userName);
 	}
 }
 
@@ -6211,7 +6218,7 @@ void MainWindow::exportCorrespondenceOverview(void)
 
 	correspondence_overview->exec();
 	correspondence_overview->deleteLater();
-	storeExportPath();
+	storeExportPath(userName);
 }
 
 
@@ -8354,7 +8361,7 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 		return;
 	}
 
-	QString lastPath;
+	QString lastPath = newDir;
 	QString errStr;
 
 	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
@@ -8367,6 +8374,10 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 			    Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE, newDir,
 			    QString(), userName, dbId, mId, false, lastPath, errStr);
 			}
+		}
+		if (!lastPath.isEmpty()) {
+			m_on_export_zfo_activate = lastPath;
+			storeExportPath(userName);
 		}
 	}
 }
@@ -9916,7 +9927,7 @@ void MainWindow::doExportOfSelectedFiles(Exports::ExportFileType expFileType) {
 
 	debugFuncCall();
 
-	QString lastPath;
+	QString lastPath = m_on_export_zfo_activate;
 	QString errStr;
 
 	const QString userName(
@@ -9955,7 +9966,11 @@ void MainWindow::doExportOfSelectedFiles(Exports::ExportFileType expFileType) {
 				    userName, dbId, msgId, true, lastPath, errStr);
 			}
 		}
-		m_on_export_zfo_activate = lastPath;
-		storeExportPath();
+
+		if (!lastPath.isEmpty()) {
+			m_on_export_zfo_activate = lastPath;
+			storeExportPath(userName);
+		}
+
 	}
 }

@@ -975,7 +975,7 @@ private:
 	/*!
 	 * @brief Saves account export paths.
 	 */
-	void storeExportPath(void);
+	void storeExportPath(const QString &userName);
 
 	/*!
 	 * @brief Store geometry to settings.
