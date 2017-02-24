@@ -97,7 +97,7 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 
 	connect(this->contactTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
-	    this, SLOT(setFirtsColumnActive(QItemSelection, QItemSelection)));
+	    this, SLOT(setFirstColumnActive(QItemSelection, QItemSelection)));
 
 	connect(this->textLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
@@ -150,7 +150,7 @@ void DlgDsSearch::enableOkButton(void)
 	    m_contactTableModel.somethingChecked());
 }
 
-void DlgDsSearch::setFirtsColumnActive(const QItemSelection &selected,
+void DlgDsSearch::setFirstColumnActive(const QItemSelection &selected,
     const QItemSelection &deselected)
 {
 	Q_UNUSED(deselected);
@@ -190,7 +190,7 @@ void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
 	this->close();
 }
 
-void DlgDsSearch::addSelectedDbIDs(void)
+void DlgDsSearch::addSelectedDbIDs(void) const
 {
 	if (m_dbIdList != Q_NULLPTR) {
 		m_dbIdList->append(m_contactTableModel.checkedBoxIds());

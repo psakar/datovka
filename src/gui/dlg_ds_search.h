@@ -65,7 +65,7 @@ private slots:
 	 * @param[in] selected Newly selected items.
 	 * @param[in] deselected Deselected items.
 	 */
-	void setFirtsColumnActive(const QItemSelection &selected,
+	void setFirstColumnActive(const QItemSelection &selected,
 	    const QItemSelection &deselected);
 
 	/*!
@@ -86,7 +86,7 @@ private slots:
 	/*!
 	 * @brief Appends selected box identifiers into identifier list.
 	 */
-	void addSelectedDbIDs(void);
+	void addSelectedDbIDs(void) const;
 
 	/*!
 	 * @brief Ping the ISDS server, test whether connection is active.
