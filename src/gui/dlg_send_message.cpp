@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -865,7 +865,7 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 /* ========================================================================= */
 {
 	QStringList dbIDs;
-	QDialog *dlgCont = new DlgContacts(*m_dbSet, m_dbId, dbIDs, this);
+	QDialog *dlgCont = new DlgContacts(*m_dbSet, m_dbId, &dbIDs, this);
 	dlgCont->exec();
 	dlgCont->deleteLater();
 	insertDataboxesToRecipientList(dbIDs);

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>531</width>
-    <height>288</height>
+    <width>560</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,7 +28,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="filterLinelabel">
        <property name="text">
         <string>Filter:</string>
        </property>
@@ -51,18 +51,9 @@
     </layout>
    </item>
    <item>
-    <widget class="LoweredTableWidget" name="contactTableWidget">
-     <property name="editTriggers">
-      <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
-     </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectRows</enum>
-     </property>
+    <widget class="LoweredTableView" name="contactTableView">
      <property name="showGrid">
       <bool>false</bool>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
      </property>
      <property name="wordWrap">
       <bool>false</bool>
@@ -79,26 +70,6 @@
      <attribute name="verticalHeaderHighlightSections">
       <bool>false</bool>
      </attribute>
-     <column>
-      <property name="text">
-       <string/>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>ID</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Name</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>Address</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item>
@@ -115,9 +86,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>LoweredTableWidget</class>
-   <extends>QTableWidget</extends>
-   <header>lowered_table_widget.h</header>
+   <class>LoweredTableView</class>
+   <extends>QTableView</extends>
+   <header>lowered_table_view.h</header>
   </customwidget>
  </customwidgets>
  <resources>

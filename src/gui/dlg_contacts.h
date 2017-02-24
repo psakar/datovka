@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,43 +21,83 @@
  * the two.
  */
 
-
 #ifndef _DLG_CONTACTS_H_
 #define _DLG_CONTACTS_H_
 
-
 #include <QDialog>
-#include <QTableWidget>
 
 #include "src/common.h"
 #include "src/io/message_db_set.h"
+#include "src/models/data_box_contacts_model.h"
+#include "src/models/sort_filter_proxy_model.h"
 #include "ui_dlg_contacts.h"
 
-
-class DlgContacts : public QDialog, public Ui::Contacts
-{
+class DlgContacts : public QDialog, public Ui::Contacts {
 	Q_OBJECT
 
 public:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] dbSet Database container.
+	 * @Param[in] dbId Current database container.
+	 * @param[out] dbIdList List of selected box identifiers to be set.
+	 * @param[in] parent Parent object.
+	 */
 	DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
-	    QStringList &dbIdList, QWidget *parent = 0);
+	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
 private slots:
-
-	void filterContact(const QString &text);
-	void clearContactText(void);
-	void fillContactsFromMessageDb(void);
+	/*!
+	 * @brief Activates confirmation button.
+	 */
 	void enableOkButton(void);
-	void addSelectedDbIDs(void);
-	void setFirtsColumnActive(void);
+
+	/*!
+	 * @brief Set first column containing checkboxes active.
+	 *
+	 * @param[in] selected Newly selected items.
+	 * @param[in] deselected Deselected items.
+	 */
+	void setFirstColumnActive(const QItemSelection &selected,
+	    const QItemSelection &deselected);
+
+	/*!
+	 * @brief Makes a selection and closes the dialogue.
+	 */
 	void contactItemDoubleClicked(const QModelIndex &index);
 
+	/*!
+	 * @brief Appends selected box identifiers into identifier list.
+	 */
+	void addSelectedDbIDs(void) const;
+
+	/*!
+	 * @brief Apply filter text on the table.
+	 */
+	void filterContact(const QString &text);
+
+	/*!
+	 * @brief Clear search text in the filter input line.
+	 */
+	void clearContactText(void);
+
 private:
+	/*!
+	 * @brief Get contacts from message database and fill table model.
+	 */
+	void fillContactsFromMessageDb(void);
 
-	const MessageDbSet &m_dbSet;
-	const QString m_dbId;
-	QStringList &m_dbIdList;
+	const MessageDbSet &m_dbSet; /*!< Database set container. */
+	const QString m_dbId; /*!< Database identifier. */
+
+	SortFilterProxyModel m_contactListProxyModel; /*!<
+	                                               * Used for message
+	                                               * sorting and filtering.
+	                                               */
+	BoxContactsModel m_contactTableModel; /*!< Model of found data boxes. */
+
+	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
 };
-
 
 #endif /* _DLG_CONTACTS_H_ */
