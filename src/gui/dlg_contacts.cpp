@@ -72,11 +72,12 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 
 	connect(this->filterLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterContact(QString)));
+	connect(&m_contactTableModel,
+	    SIGNAL(dataChanged(QModelIndex, QModelIndex)),
+	    this, SLOT(enableOkButton()));
 	connect(this->contactTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 	    this, SLOT(setFirstColumnActive(QItemSelection, QItemSelection)));
-	connect(this->contactTableView, SIGNAL(clicked(QModelIndex)),
-	    this, SLOT(enableOkButton()));
 	connect(this->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
 	connect(this->clearPushButton, SIGNAL(clicked()),

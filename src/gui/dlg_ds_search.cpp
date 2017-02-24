@@ -111,7 +111,8 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	    this, SLOT(checkInputFields()));
 	connect(this->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
 	    this, SLOT(checkInputFields()));
-	connect(this->contactTableView, SIGNAL(clicked(QModelIndex)),
+	connect(&m_contactTableModel,
+	    SIGNAL(dataChanged(QModelIndex, QModelIndex)),
 	    this, SLOT(enableOkButton()));
 	connect(this->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
