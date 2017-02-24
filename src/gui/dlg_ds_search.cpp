@@ -29,14 +29,6 @@
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
 
-#define CON_COL_CHECKBOX 0
-#define CON_COL_BOX_ID 1
-#define CON_COL_BOX_TYPE 2
-#define CON_COL_BOX_NAME 3
-#define CON_COL_ADDRESS 4
-#define CON_COL_POST_CODE 5
-#define CON_COL_PDZ 6
-
 #define CBOX_TARGET_ALL 0
 #define CBOX_TARGET_ADDRESS 1
 #define CBOX_TARGET_IC 2
@@ -56,6 +48,7 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
+    m_contactTableModel(this),
     m_boxTypeCBoxModel(this),
     m_fulltextCBoxModel(this),
     m_dbIdList(dbIdList),
@@ -64,7 +57,9 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 {
 	setupUi(this);
 	/* Set default line height for table views/widgets. */
-	contactTableWidget->setNarrowedLineHeight();
+	this->contactTableView->setNarrowedLineHeight();
+	this->contactTableView->setSelectionBehavior(
+	    QAbstractItemView::SelectRows);
 
 	m_boxTypeCBoxModel.appendRow(
 	    tr("All") + QStringLiteral(" - ") + tr("All types"),
@@ -97,8 +92,12 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	    CBOX_TARGET_BOX_ID);
 	this->fulltextTargetCBox->setModel(&m_fulltextCBoxModel);
 
-	connect(this->contactTableWidget, SIGNAL(itemSelectionChanged()),
-	    this, SLOT(setFirtsColumnActive()));
+	m_contactTableModel.setHeader();
+	this->contactTableView->setModel(&m_contactTableModel);
+
+	connect(this->contactTableView->selectionModel(),
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+	    this, SLOT(setFirtsColumnActive(QItemSelection, QItemSelection)));
 
 	connect(this->textLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
@@ -112,24 +111,22 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	    this, SLOT(checkInputFields()));
 	connect(this->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
 	    this, SLOT(checkInputFields()));
-	connect(this->contactTableWidget, SIGNAL(itemClicked(QTableWidgetItem*)),
+	connect(this->contactTableView, SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(enableOkButton()));
-	connect(this->contactTableWidget, SIGNAL(itemChanged(QTableWidgetItem*)),
-	    this, SLOT(enableOkButton()));
+	connect(this->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
+	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
 	connect(this->buttonBox, SIGNAL(accepted()),
 	    this, SLOT(addSelectedDbIDs()));
 	connect(this->searchPushButton, SIGNAL(clicked()),
 	    this, SLOT(searchDataBox()));
-	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
-	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
 
 	connect(this->useFulltextCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(makeSearchElelementsVisible(int)));
 	this->useFulltextCheckBox->setCheckState(Qt::Checked);
 
-	this->contactTableWidget->installEventFilter(
+	this->contactTableView->installEventFilter(
 	    new TableHomeEndFilter(this));
-	this->contactTableWidget->installEventFilter(
+	this->contactTableView->installEventFilter(
 	    new TableSpaceSelectionFilter(this));
 
 	m_pingTimer = new QTimer(this);
@@ -149,21 +146,20 @@ DlgDsSearch::~DlgDsSearch(void)
 
 void DlgDsSearch::enableOkButton(void)
 {
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
-		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
-			this->buttonBox->button(QDialogButtonBox::Ok)->
-			    setEnabled(true);
-			return;
-		}
-	}
+	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	    m_contactTableModel.somethingChecked());
 }
 
-void DlgDsSearch::setFirtsColumnActive(void)
+void DlgDsSearch::setFirtsColumnActive(const QItemSelection &selected,
+    const QItemSelection &deselected)
 {
-	this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
-	this->contactTableWidget->selectRow(
-	    this->contactTableWidget->currentRow());
+	Q_UNUSED(deselected);
+
+	if (selected.isEmpty()) {
+		return;
+	}
+	this->contactTableView->selectColumn(BoxContactsModel::CHECKBOX_COL);
+	this->contactTableView->selectRow(selected.first().top());
 }
 
 void DlgDsSearch::checkInputFields(void)
@@ -186,29 +182,18 @@ void DlgDsSearch::searchDataBox(void)
 
 void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
 {
-	if (!index.isValid()) {
-		this->close();
-		return;
-	}
-
-	if (m_dbIdList != Q_NULLPTR) {
-		m_dbIdList->append(this->contactTableWidget->
-		    item(index.row(), CON_COL_BOX_ID)->text());
+	if (index.isValid() && (m_dbIdList != Q_NULLPTR)) {
+		m_dbIdList->append(index.sibling(index.row(),
+		    BoxContactsModel::BOX_ID_COL).data(
+		        Qt::DisplayRole).toString());
 	}
 	this->close();
 }
 
 void DlgDsSearch::addSelectedDbIDs(void)
 {
-	if (m_dbIdList == Q_NULLPTR) {
-		return;
-	}
-
-	for (int i = 0; i < this->contactTableWidget->rowCount(); ++i) {
-		if (this->contactTableWidget->item(i, CON_COL_CHECKBOX)->checkState()) {
-			m_dbIdList->append(this->contactTableWidget->
-			    item(i, CON_COL_BOX_ID)->text());
-		}
+	if (m_dbIdList != Q_NULLPTR) {
+		m_dbIdList->append(m_contactTableModel.checkedBoxIds());
 	}
 }
 
@@ -248,7 +233,7 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 	textLineEdit->clear();
 	textLineEdit->hide();
 
-	contactTableWidget->setRowCount(0);
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
 	if (Qt::Checked == fulltextState) {
 		labelSearchDescr->setText(
@@ -324,14 +309,14 @@ void DlgDsSearch::initContent(void)
 	this->labelSearchInfo->setToolTip(toolTipInfo);
 	this->labelSearchInfo->hide();
 
-	this->contactTableWidget->setColumnWidth(CON_COL_CHECKBOX, 20);
-	this->contactTableWidget->setColumnWidth(CON_COL_BOX_ID, 60);
-	this->contactTableWidget->setColumnWidth(CON_COL_BOX_TYPE, 70);
-	this->contactTableWidget->setColumnWidth(CON_COL_BOX_NAME, 120);
-	this->contactTableWidget->setColumnWidth(CON_COL_ADDRESS, 100);
+	this->contactTableView->setColumnWidth(BoxContactsModel::CHECKBOX_COL, 20);
+	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 60);
+	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_TYPE_COL, 70);
+	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 120);
+	this->contactTableView->setColumnWidth(BoxContactsModel::ADDRESS_COL, 100);
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	this->contactTableWidget->
+	this->contactTableView->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	checkInputFields();
@@ -450,8 +435,10 @@ void DlgDsSearch::searchDataBoxNormal(void)
 		break;
 	}
 
-	this->contactTableWidget->setColumnHidden(CON_COL_POST_CODE, false);
-	this->contactTableWidget->setColumnHidden(CON_COL_PDZ, true);
+	this->contactTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL,
+	    false);
+	this->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+	    true);
 
 	queryBoxNormal(this->iDLineEdit->text(), boxType,
 	    this->iCLineEdit->text(), this->nameLineEdit->text(),
@@ -499,8 +486,10 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 		break;
 	}
 
-	this->contactTableWidget->setColumnHidden(CON_COL_POST_CODE, true);
-	this->contactTableWidget->setColumnHidden(CON_COL_PDZ, true);
+	this->contactTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL,
+	    true);
+	this->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+	    true);
 
 	queryBoxFulltext(target, boxType, this->textLineEdit->text());
 }
@@ -509,8 +498,8 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
     enum TaskSearchOwner::BoxType boxType, const QString &ic,
     const QString &name, const QString &zipCode)
 {
-	this->contactTableWidget->setRowCount(0);
-	this->contactTableWidget->setEnabled(false);
+	this->contactTableView->setEnabled(false);
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
 	QString resultString(tr("Total found") + QStringLiteral(": "));
 	this->searchResultText->setText(resultString + QStringLiteral("0"));
@@ -557,47 +546,24 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 	this->searchResultText->setText(
 	    resultString + QString::number(foundBoxes.size()));
 
-	this->contactTableWidget->setEnabled(true);
-	foreach (const TaskSearchOwner::BoxEntry &entry, foundBoxes) {
-		int row = this->contactTableWidget->rowCount();
-		this->contactTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setCheckState(Qt::Unchecked);
-		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.id);
-		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
-		item = new QTableWidgetItem;
-		item->setText(convertDbTypeToString(entry.type));
-		this->contactTableWidget->setItem(row, CON_COL_BOX_TYPE, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.name);
-		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.address);
-		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.zipCode);
-		this->contactTableWidget->setItem(row, CON_COL_POST_CODE, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.effectiveOVM ? tr("no") : tr("yes"));
-		this->contactTableWidget->setItem(row, CON_COL_PDZ, item);
+	this->contactTableView->setEnabled(true);
+	m_contactTableModel.appendData(foundBoxes);
+
+	if (m_contactTableModel.rowCount() > 0) {
+		this->contactTableView->selectColumn(
+		    BoxContactsModel::CHECKBOX_COL);
+		this->contactTableView->selectRow(0);
 	}
 
-	if (this->contactTableWidget->rowCount() > 0) {
-		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
-		this->contactTableWidget->selectRow(0);
-	}
-
-	//this->contactTableWidget->resizeColumnsToContents();
+	//this->contactTableView->resizeColumnsToContents();
 }
 
 void DlgDsSearch::queryBoxFulltext(
     enum TaskSearchOwnerFulltext::FulltextTarget target,
     enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
 {
-	this->contactTableWidget->setRowCount(0);
-	this->contactTableWidget->setEnabled(false);
+	this->contactTableView->setEnabled(false);
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
 	QString resultString(tr("Total found") + QStringLiteral(": "));
 	this->searchResultText->setText(resultString + QStringLiteral("0"));
@@ -643,31 +609,14 @@ void DlgDsSearch::queryBoxFulltext(
 	this->searchResultText->setText(
 	    resultString + QString::number(totalDb));
 
-	this->contactTableWidget->setEnabled(true);
-	foreach (const TaskSearchOwnerFulltext::BoxEntry &entry, foundBoxes) {
-		int row = this->contactTableWidget->rowCount();
-		this->contactTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setCheckState(Qt::Unchecked);
-		this->contactTableWidget->setItem(row, CON_COL_CHECKBOX, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.id);
-		this->contactTableWidget->setItem(row, CON_COL_BOX_ID, item);
-		item = new QTableWidgetItem;
-		item->setText(convertDbTypeToString(entry.type));
-		this->contactTableWidget->setItem(row, CON_COL_BOX_TYPE, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.name);
-		this->contactTableWidget->setItem(row, CON_COL_BOX_NAME, item);
-		item = new QTableWidgetItem;
-		item->setText(entry.address);
-		this->contactTableWidget->setItem(row, CON_COL_ADDRESS, item);
+	this->contactTableView->setEnabled(true);
+	m_contactTableModel.appendData(foundBoxes);
+
+	if (m_contactTableModel.rowCount() > 0) {
+		this->contactTableView->selectColumn(
+		    BoxContactsModel::CHECKBOX_COL);
+		this->contactTableView->selectRow(0);
 	}
 
-	if (this->contactTableWidget->rowCount() > 0) {
-		this->contactTableWidget->selectColumn(CON_COL_CHECKBOX);
-		this->contactTableWidget->selectRow(0);
-	}
-
-	//this->contactTableWidget->resizeColumnsToContents();
+	//this->contactTableView->resizeColumnsToContents();
 }

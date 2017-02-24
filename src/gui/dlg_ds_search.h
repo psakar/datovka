@@ -29,6 +29,7 @@
 
 #include "src/common.h"
 #include "src/models/combo_box_model.h"
+#include "src/models/data_box_contacts_model.h"
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
 #include "ui_dlg_ds_search.h"
@@ -60,8 +61,12 @@ private slots:
 
 	/*!
 	 * @brief Set first column containing checkboxes active.
+	 *
+	 * @param[in] selected Newly selected items.
+	 * @param[in] deselected Deselected items.
 	 */
-	void setFirtsColumnActive(void);
+	void setFirtsColumnActive(const QItemSelection &selected,
+	    const QItemSelection &deselected);
 
 	/*!
 	 * @brief Check input fields sanity and activate search button.
@@ -151,6 +156,7 @@ private:
 	const bool m_dbEffectiveOVM;
 	const bool m_dbOpenAddressing;
 
+	BoxContactsModel m_contactTableModel; /*!< Model of found data boxes. */
 	CBoxModel m_boxTypeCBoxModel; /*!< Data box type combo box model. */
 	CBoxModel m_fulltextCBoxModel; /*!< Full-text combo box model. */
 
