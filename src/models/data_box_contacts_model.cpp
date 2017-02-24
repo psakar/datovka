@@ -168,8 +168,38 @@ void BoxContactsModel::appendData(
 		row[BOX_TYPE_COL] = entry.type;
 		row[BOX_NAME_COL] = entry.name;
 		row[ADDRESS_COL] = entry.address;
-		//row[POST_CODE_COL] = entry.zipCode;
+		//row[POST_CODE_COL];
 		row[PDZ_COL] = !entry.publicSending && entry.commercialSending;
+
+		m_data[m_rowCount++] = row;
+	}
+
+	endInsertRows();
+}
+
+void BoxContactsModel::appendData(
+    const QList<MessageDb::ContactEntry> &entryList)
+{
+	if (entryList.isEmpty()) {
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), rowCount(),
+	    rowCount() + entryList.size() - 1);
+
+	foreach (const MessageDb::ContactEntry &entry, entryList) {
+
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		row[CHECKBOX_COL] = false;
+		row[BOX_ID_COL] = entry.boxId;
+		//row[BOX_TYPE_COL];
+		row[BOX_NAME_COL] = entry.name;
+		row[ADDRESS_COL] = entry.address;
+		//row[POST_CODE_COL];
+		//row[PDZ_COL];
 
 		m_data[m_rowCount++] = row;
 	}

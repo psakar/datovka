@@ -24,6 +24,7 @@
 #ifndef _DATA_BOX_CONTACTS_MODEL_H_
 #define _DATA_BOX_CONTACTS_MODEL_H_
 
+#include "src/io/message_db.h"
 #include "src/models/table_model.h"
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
@@ -107,6 +108,13 @@ public:
 	 */
 	void appendData(
 	    const QList<TaskSearchOwnerFulltext::BoxEntry> &entryList);
+
+	/*!
+	 * @brief Appends data into the model.
+	 *
+	 * @param[in] entryList List of entries to append into the model.
+	 */
+	void appendData(const QList<MessageDb::ContactEntry> &entryList);
 
 	/*!
 	 * @brief Returns true if there are some items checked.
