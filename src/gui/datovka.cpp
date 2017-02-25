@@ -715,8 +715,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 {
 	debugSlotCall();
 
+	Q_UNUSED(previous);
+
 	QString html;
-	QString prevUserName;
 	QAbstractTableModel *msgTblMdl = 0;
 
 	if (!current.isValid()) {
@@ -744,9 +745,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		return;
 	}
 
-	if (previous.isValid()) {
-		prevUserName = m_accountModel.userName(previous);
-	}
 	const QString userName(m_accountModel.userName(current));
 
 	Q_ASSERT(!userName.isEmpty());
@@ -803,14 +801,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->accountTextInfo->setReadOnly(true);
 		return;
 	}
-
-	// save and load export paths
-	if (!prevUserName.isEmpty()) {
-		if (prevUserName != userName) {
-			storeExportPath(prevUserName);
-		}
-	}
-	setAccountStoragePaths(userName);
 
 	/*
 	 * Disconnect message clicked. This slot will be enabled only for
@@ -1944,6 +1934,8 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	}
 	QString filename(fileNameIndex.data().toString());
 
+	setAccountStoragePaths(userName);
+
 	QString saveAttachPath;
 	if (globPref.use_global_paths) {
 		saveAttachPath = globPref.save_attachments_path;
@@ -2010,6 +2002,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		Q_ASSERT(0);
 		return;
 	}
+
+	setAccountStoragePaths(userName);
 
 	// how does default path used for?
 	if (globPref.use_global_paths) {
@@ -6213,6 +6207,8 @@ void MainWindow::exportCorrespondenceOverview(void)
 
 	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
+	setAccountStoragePaths(userName);
+
 	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
 	    *dbSet, userName, m_export_correspond_dir, dbId, this);
 
@@ -6827,6 +6823,8 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
+	setAccountStoragePaths(userName);
+
 	QString newDir = QFileDialog::getExistingDirectory(this,
 	    tr("Select target folder to save"), m_on_export_zfo_activate,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -6855,6 +6853,9 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 			}
 		}
 	}
+
+	m_on_export_zfo_activate = newDir;
+	storeExportPath(userName);
 }
 
 void MainWindow::sendMessagesZfoEmail(void)
@@ -8347,6 +8348,8 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 void MainWindow::exportExpirMessagesToZFO(const QString &userName,
     const QList<MessageDb::MsgId> &expirMsgIds)
 {
+	setAccountStoragePaths(userName);
+
 	QString newDir = QFileDialog::getExistingDirectory(this,
 	    tr("Select target folder for export"), m_on_export_zfo_activate,
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
@@ -9927,7 +9930,7 @@ void MainWindow::doExportOfSelectedFiles(Exports::ExportFileType expFileType) {
 
 	debugFuncCall();
 
-	QString lastPath = m_on_export_zfo_activate;
+	QString lastPath;
 	QString errStr;
 
 	const QString userName(
@@ -9953,6 +9956,9 @@ void MainWindow::doExportOfSelectedFiles(Exports::ExportFileType expFileType) {
 	}
 
 	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+
+	setAccountStoragePaths(userName);
+	lastPath = m_on_export_zfo_activate;
 
 	foreach (MessageDb::MsgId msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
