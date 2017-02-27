@@ -170,6 +170,12 @@ private slots:
 	    bool add, int rt, int rn, int st, int sn);
 
 	/*!
+	 * @brief Collects information about import status.
+	 */
+	void collectImportZfoStatus(const QString &fileName, int result,
+	    const QString &resultDesc);
+
+	/*!
 	 * @brief Performs action depending on message send outcome.
 	 */
 	void collectSendMessageStatus(const QString &userName,
@@ -1170,6 +1176,13 @@ private:
 	 */
 	void doExportOfSelectedFiles(enum Exports::ExportFileType expFileType);
 
+	/*
+	 * @brief Show ZFO import notification dialog with results of import.
+	 */
+	void showImportZfoResultDialogue(int filesCnt,
+	    const QList<QPair<QString,QString>> &successFilesList,
+	    const QList<QPair<QString,QString>> &existFilesList,
+	    const QList<QPair<QString,QString>> &errorFilesList);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
@@ -1208,6 +1221,15 @@ private:
 	QString m_import_zfo_path;
 
 	QStringList m_msgTblAppendedCols; /*< Appended columns. */
+
+	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
+	int m_numFilesToImport; /*!< Input ZFO count. */
+	/*!< QPair in following lists means:
+	 * first string - zfo file name,
+	 * second = import result text */
+	QList< QPair<QString, QString> > m_importSucceeded; /*!< Success import resulty lists. */
+	QList< QPair<QString, QString> > m_importExisted; /*!< Import exists resulty lists. */
+	QList< QPair<QString, QString> > m_importFailed; /*!< Import error resulty lists. */
 
 	/* User interface elements. */
 	Ui::MainWindow *ui; /*!< User interface as generated from ui files. */

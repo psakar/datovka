@@ -25,77 +25,41 @@
 #ifndef _IMPORT_ZFO_H_
 #define _IMPORT_ZFO_H_
 
-#include <QObject>
-
-#include "src/worker/task.h"
 #include "src/gui/dlg_import_zfo.h"
+#include "src/worker/task.h"
 
 /*!
  * @brief Provides zfo import to local database.
  */
-class ImportZfo : public QObject {
-	Q_OBJECT
+class ImportZfo {
 
 public:
 	/*!
-	 * @brief Constructor.
-	 */
-	explicit ImportZfo(QObject *parent = Q_NULLPTR);
-
-	/*!
 	 * @brief Import ZFO file(s) into database by ZFO type.
 	 *
-	 * @param[in] files - List of ZFO paths.
-	 * @param[in] accountList - List of account databases.
-	 * @param[in] zfoType     - ZFO type for import.
-	 * @param[in] authenticate - Check ZFO validity in the ISDS.
-	 * @param[out] errTxt      - Error text.
+	 * @param[in] fileList          - List of file path to import.
+	 * @param[in] databaseList      - List of databases.
+	 * @param[in] zfoType           - ZFO type for import.
+	 * @param[in] authenticate      - Check ZFO validity in the ISDS.
+	 * @param[out] zfoFilesToImport - List of valid ZFOs for import.
+	 * @param[out] zfoFilesInvalid  - List of invalid ZFOs.
+	 * @param[out] numFilesToImport - Number of valid ZFOs for import.
+	 * @param[out] errTxt           - Error text.
 	 */
-	void importZfoIntoDatabase(const QStringList &files,
-	    const QList<Task::AccountDescr> &accountList,
+	static
+	void importZfoIntoDatabase(const QStringList &fileList,
+	    const QList<Task::AccountDescr> &databaseList,
 	    enum ImportZFODialog::ZFOtype zfoType, bool authenticate,
+	    QSet<QString> &zfoFilesToImport,
+	    QList<QPair<QString,QString>> &zfoFilesInvalid,
+	    int &numFilesToImport,
 	    QString &errTxt);
 
-private slots:
-
-	/*!
-	 * @brief Collects information about import status.
-	 *
-	 * @param[in] fileName - zfo file name.
-	 * @param[in] result   - import result.
-	 * @param[in] resultDesc - result desctiprion.
-	 */
-	void collectImportZfoStatus(const QString &fileName, int result,
-	    const QString &resultDesc);
-
 private:
-
-	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
-	int m_numFilesToImport; /*!< Input ZFO count. */
-	/*!< QPair in following lists means:
-	 * first string - zfo file name,
-	 * second = import result text */
-	QList< QPair<QString, QString> > m_importSucceeded; /*!< Success import resulty lists. */
-	QList< QPair<QString, QString> > m_importExisted; /*!< Import exists resulty lists. */
-	QList< QPair<QString, QString> > m_importFailed; /*!< Import error resulty lists. */
-
 	/*!
-	 * @brief Show ZFO import notification dialog with results of imports.
-	 *
-	 * @param[in] filesCnt - input ZFO count.
-	 * @param[in] successFilesList - List of success import files.
-	 * @param[in] existFilesList   - List of existing files.
-	 * @param[in] errorFilesList   - List of error import files.
+	 * @brief Constructor.
 	 */
-	void showImportZfoResultDialogue(int filesCnt,
-	    const QList<QPair<QString,QString>> &successFilesList,
-	    const QList<QPair<QString,QString>> &existFilesList,
-	    const QList<QPair<QString,QString>> &errorFilesList);
+	ImportZfo(void);
 };
-
-/*!
- * @brief Global instance.
- */
-extern ImportZfo globImportZfo;
 
 #endif /* _IMPORT_ZFO_H_ */

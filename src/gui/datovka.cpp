@@ -64,6 +64,7 @@
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/gui/dlg_import_zfo.h"
+#include "src/gui/dlg_import_zfo_result.h"
 #include "src/gui/dlg_timestamp_expir.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
 #include "src/gui/dlg_tags.h"
@@ -97,11 +98,11 @@
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
+#include "src/worker/task_import_zfo.h"
 #include "src/worker/task_vacuum_db_set.h"
 #include "src/worker/task_verify_message.h"
 #include "src/worker/task_get_account_list_mojeid.h"
 #include "ui_datovka.h"
-
 
 #define WIN_POSITION_HEADER "window_position"
 #define WIN_POSITION_X "x"
@@ -311,6 +312,9 @@ MainWindow::MainWindow(QWidget *parent)
 	        bool, int, int, int, int)), this,
 	    SLOT(collectDownloadMessageListStatus(QString, int, int, QString,
 	        bool, int, int, int, int)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(importZfoFinished(QString, int, QString)), this,
+	    SLOT(collectImportZfoStatus(QString, int, QString)));
 	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
 	    this, SLOT(updateProgressBar(QString, int)));
 	connect(&globMsgProcEmitter,
@@ -2215,6 +2219,50 @@ void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
 		msgBox.setStandardButtons(QMessageBox::Ok);
 		msgBox.setDefaultButton(QMessageBox::Ok);
 		msgBox.exec();
+	}
+}
+
+void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
+    const QString &resultDesc)
+{
+	debugSlotCall();
+
+	logDebugLv0NL("Received import ZFO finished for file '%s' %d: '%s'",
+	    fileName.toUtf8().constData(), result,
+	    resultDesc.toUtf8().constData());
+
+	switch (result) {
+	case TaskImportZfo::IMP_SUCCESS:
+		m_importSucceeded.append(
+		    QPair<QString, QString>(fileName, resultDesc));
+		break;
+	case TaskImportZfo::IMP_DB_EXISTS:
+		m_importExisted.append(
+		    QPair<QString, QString>(fileName, resultDesc));
+		break;
+	default:
+		m_importFailed.append(
+		    QPair<QString, QString>(fileName, resultDesc));
+		break;
+	}
+
+	if (!m_zfoFilesToImport.remove(fileName)) {
+		logErrorNL("Processed ZFO file that '%s' the application "
+		    "has not been aware of.", fileName.toUtf8().constData());
+	}
+
+	if (m_zfoFilesToImport.isEmpty()) {
+		showImportZfoResultDialogue(m_numFilesToImport,
+		    m_importSucceeded, m_importExisted, m_importFailed);
+
+		m_numFilesToImport = 0;
+		m_importSucceeded.clear();
+		m_importExisted.clear();
+		m_importFailed.clear();
+
+		/* Activate import buttons. */
+		ui->actionImport_messages_from_database->setEnabled(true);
+		ui->actionImport_ZFO_file_into_database->setEnabled(true);
 	}
 }
 
@@ -6213,13 +6261,7 @@ void MainWindow::exportCorrespondenceOverview(void)
 	storeExportPath(userName);
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: Show dialog with settings of import ZFO file(s) into database.
- */
 void MainWindow::showImportZFOActionDialog(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -6356,17 +6398,20 @@ void MainWindow::showImportZFOActionDialog(void)
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
 
 	QString errTxt;
-	globImportZfo.importZfoIntoDatabase(filePathList, accountList,
-	    zfoType, checkZfoOnServer, errTxt);
+	m_zfoFilesToImport.clear();
+	m_importSucceeded.clear();
+	m_importExisted.clear();
+	m_importFailed.clear();
+	m_numFilesToImport = 0;
+
+	ImportZfo::importZfoIntoDatabase(filePathList, accountList,
+	    zfoType, checkZfoOnServer, m_zfoFilesToImport, m_importFailed,
+	    m_numFilesToImport, errTxt);
 
 	if (!errTxt.isEmpty()) {
 		logInfo("%s\n", errTxt.toUtf8().constData());
 		showStatusTextWithTimeout(errTxt);
 	}
-
-	/* Unblock import gui buttons. */
-	ui->actionImport_messages_from_database->setEnabled(true);
-	ui->actionImport_ZFO_file_into_database->setEnabled(true);
 
 	clearProgressBar();
 }
@@ -9799,4 +9844,17 @@ void MainWindow::doExportOfSelectedFiles(
 		}
 
 	}
+}
+
+void MainWindow::showImportZfoResultDialogue(int filesCnt,
+    const QList<QPair<QString,QString>> &successFilesList,
+    const QList<QPair<QString,QString>> &existFilesList,
+    const QList<QPair<QString,QString>> &errorFilesList)
+{
+	debugFuncCall();
+
+	QDialog *importZfoResult = new ImportZFOResultDialog(filesCnt,
+	    errorFilesList, successFilesList, existFilesList, 0);
+	importZfoResult->exec();
+	importZfoResult->deleteLater();
 }
