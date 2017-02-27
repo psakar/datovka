@@ -30,8 +30,7 @@
 /*!
  * @brief Import ZFO files settings dialogue.
  */
-class ImportZFODialog : public QDialog, public Ui::ImportZFO
-{
+class ImportZFODialog : public QDialog, public Ui::ImportZFO {
 	Q_OBJECT
 public:
 	/*!
@@ -52,7 +51,6 @@ public:
 		IMPORT_DELIVERY_ZFO
 	};
 
-public:
 	/*!
 	 * @brief Constructor.
 	 *
@@ -64,7 +62,7 @@ public:
 	 */
 	ImportZFODialog(enum ImportZFODialog::ZFOtype &zfoType,
 	    enum ImportZFODialog::ZFOlocation &locationType,
-	    bool &checkZfoOnServer, QWidget *parent = 0);
+	    bool &checkZfoOnServer, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	void ImportFiles(void);

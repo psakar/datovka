@@ -25,8 +25,8 @@
 
 ImportZFODialog::ImportZFODialog(enum ImportZFODialog::ZFOtype &zfoType,
     enum ImportZFODialog::ZFOlocation &locationType, bool &checkZfoOnServer,
-    QWidget *parent) :
-    QDialog(parent),
+    QWidget *parent)
+    : QDialog(parent),
     m_zfoType(zfoType),
     m_locationType(locationType),
     m_checkZfoOnServer(checkZfoOnServer)
