@@ -130,10 +130,12 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	this->contactTableView->installEventFilter(
 	    new TableSpaceSelectionFilter(this));
 
+#if 0 /* Don't use the timer. */
 	m_pingTimer = new QTimer(this);
 	m_pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
 
 	connect(m_pingTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
+#endif
 
 	initContent();
 }
