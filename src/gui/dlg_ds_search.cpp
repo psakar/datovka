@@ -631,7 +631,8 @@ bool DlgDsSearch::queryBoxFulltextPage(
 
 	this->searchResultText->setText(
 	    resultString + QString::number(totalDb) + QStringLiteral("; ") +
-	    tr("Displayed") + QStringLiteral(": ") + QString::number(m_contactTableModel.rowCount()));
+	    tr("Displayed") + QStringLiteral(": ") +
+	    QString::number(m_contactTableModel.rowCount()));
 
 	if (m_contactTableModel.rowCount() > 0) {
 		this->contactTableView->selectColumn(
