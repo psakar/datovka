@@ -65,8 +65,15 @@ public:
 	    bool &checkZfoOnServer, QWidget *parent = Q_NULLPTR);
 
 private slots:
-	void ImportFiles(void);
-	void ChangeRadioBox(void);
+	/*!
+	 * @brief Sets control elements activity according to chosen values.
+	 */
+	void setControlsActivity(void);
+
+	/*!
+	 * @brief Sets chosen values via references to external values.
+	 */
+	void setChosenValues(void);
 
 private:
 	enum ImportZFODialog::ZFOtype &m_zfoType; /*!< Specifies ZFO type. */

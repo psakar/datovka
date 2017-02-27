@@ -41,16 +41,17 @@ ImportZFODialog::ImportZFODialog(enum ImportZFODialog::ZFOtype &zfoType,
 	    "only if a corresponding complete message already exists in the "
 	    "database."));
 
-	connect(this->buttonBox, SIGNAL(accepted()), this, SLOT(ImportFiles()));
+	connect(this->buttonBox, SIGNAL(accepted()),
+	    this, SLOT(setChosenValues()));
 	connect(this->radioImportAll, SIGNAL(clicked()),
-	    this, SLOT(ChangeRadioBox()));
+	    this, SLOT(setControlsActivity()));
 	connect(this->radioImportSelected, SIGNAL(clicked()),
-	    this, SLOT(ChangeRadioBox()));
+	    this, SLOT(setControlsActivity()));
 
 	this->checkOnServer->setCheckState(Qt::Checked);
 }
 
-void ImportZFODialog::ChangeRadioBox(void)
+void ImportZFODialog::setControlsActivity(void)
 {
 	if (this->radioImportAll->isChecked()) {
 		this->includeSubDir->setEnabled(true);
@@ -59,7 +60,7 @@ void ImportZFODialog::ChangeRadioBox(void)
 	}
 }
 
-void ImportZFODialog::ImportFiles(void)
+void ImportZFODialog::setChosenValues(void)
 {
 	if (this->messageZFO->isChecked()) {
 		m_zfoType = IMPORT_MESSAGE_ZFO;
