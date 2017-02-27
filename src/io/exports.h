@@ -91,8 +91,8 @@ public:
 	 * @return Result operation code.
 	 */
 	static
-	ExportError exportAs(QWidget *parent, const MessageDbSet &dbSet,
-	    ExportFileType fileType, const QString &targetPath,
+	enum ExportError exportAs(QWidget *parent, const MessageDbSet &dbSet,
+	    enum ExportFileType fileType, const QString &targetPath,
 	    const QString &attachFileName, const QString &userName,
 	    const QString &dbId, const MessageDb::MsgId &msgId,
 	    bool askLocation, QString &lastPath, QString &errStr);
@@ -109,7 +109,7 @@ public:
 	 * @return Result operation code.
 	 */
 	static
-	ExportError exportEnvAndAttachments(const MessageDbSet &dbSet,
+	enum ExportError exportEnvAndAttachments(const MessageDbSet &dbSet,
 	    const QString &targetPath, const QString &userName,
 	    const QString &dbId, const MessageDb::MsgId &msgId,
 	    QString &errStr);
@@ -126,7 +126,7 @@ public:
 	 * @return Result operation code.
 	 */
 	static
-	ExportError saveAttachmentsWithExports(const MessageDbSet &dbSet,
+	enum ExportError saveAttachmentsWithExports(const MessageDbSet &dbSet,
 	    const QString &targetPath, const QString &userName,
 	    const QString &dbId, const MessageDb::MsgId &msgId,
 	    QString &errStr);

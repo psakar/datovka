@@ -61,8 +61,8 @@ QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,
 	return targetPath + QDir::separator() + fileName;
 }
 
-Exports::ExportError Exports::exportAs(QWidget *parent,
-    const MessageDbSet &dbSet, ExportFileType fileType,
+enum Exports::ExportError Exports::exportAs(QWidget *parent,
+    const MessageDbSet &dbSet, enum ExportFileType fileType,
     const QString &targetPath, const QString &attachFileName,
     const QString &userName, const QString &dbId, const MessageDb::MsgId &msgId,
     bool askLocation, QString &lastPath, QString &errStr)
@@ -206,9 +206,10 @@ Exports::ExportError Exports::exportAs(QWidget *parent,
 	}
 }
 
-Exports::ExportError Exports::exportEnvAndAttachments(const MessageDbSet &dbSet,
-    const QString &targetPath, const QString &userName, const QString &dbId,
-    const MessageDb::MsgId &msgId, QString &errStr)
+enum Exports::ExportError Exports::exportEnvAndAttachments(
+    const MessageDbSet &dbSet, const QString &targetPath,
+    const QString &userName, const QString &dbId, const MessageDb::MsgId &msgId,
+    QString &errStr)
 {
 	debugFuncCall();
 
@@ -300,9 +301,10 @@ Exports::ExportError Exports::exportEnvAndAttachments(const MessageDbSet &dbSet,
 	}
 }
 
-Exports::ExportError Exports::saveAttachmentsWithExports(const MessageDbSet &dbSet,
-    const QString &targetPath, const QString &userName, const QString &dbId,
-    const MessageDb::MsgId &msgId, QString &errStr)
+enum Exports::ExportError Exports::saveAttachmentsWithExports(
+    const MessageDbSet &dbSet, const QString &targetPath,
+    const QString &userName, const QString &dbId, const MessageDb::MsgId &msgId,
+    QString &errStr)
 {
 	debugFuncCall();
 

@@ -9926,8 +9926,9 @@ bool MainWindow::existsAnotherMojeIdAccountWithSameUserId(
 	return (cnt > 1);
 }
 
-void MainWindow::doExportOfSelectedFiles(Exports::ExportFileType expFileType) {
-
+void MainWindow::doExportOfSelectedFiles(
+    enum Exports::ExportFileType expFileType)
+{
 	debugFuncCall();
 
 	QString lastPath;

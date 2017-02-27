@@ -1205,7 +1205,7 @@ private:
 	 *
 	 * @param[in] expFileType - export file type.
 	 */
-	void doExportOfSelectedFiles(Exports::ExportFileType expFileType);
+	void doExportOfSelectedFiles(enum Exports::ExportFileType expFileType);
 
 
 	QString m_confDirName; /*!< Configuration directory location. */
