@@ -287,6 +287,7 @@ SOURCES += \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
     src/io/dbs.cpp \
+    src/io/exports.cpp \
     src/io/file_downloader.cpp \
     src/io/filesystem.cpp \
     src/io/isds_helper.cpp \
@@ -385,6 +386,7 @@ HEADERS += \
     src/io/account_db.h \
     src/io/db_tables.h \
     src/io/dbs.h \
+    src/io/exports.h \
     src/io/file_downloader.h \
     src/io/filesystem.h \
     src/io/isds_helper.h \
@@ -448,7 +450,6 @@ HEADERS += \
     src/io/tag_db_container.h \
     src/worker/task_tag_sync_mojeid.h \
     src/gui/dlg_login_mojeid.h
-
 
 FORMS += \
     src/gui/ui/datovka.ui \
