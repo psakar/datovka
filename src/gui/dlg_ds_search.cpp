@@ -252,6 +252,8 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 	textLineEdit->clear();
 	textLineEdit->hide();
 
+	searchResultText->setText(QString());
+
 	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
 	if (Qt::Checked == fulltextState) {
@@ -259,6 +261,11 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 		    tr("Full-text data box search. Enter phrase for finding and set optional restrictions:"));
 
 		m_boxTypeCBoxModel.setEnabled(CBOX_TYPE_ALL, true);
+
+		contactTableView->setColumnHidden(
+		    BoxContactsModel::POST_CODE_COL, true);
+		contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+		    true);
 
 		fulltextTargetLabel->show();
 		fulltextTargetCBox->show();
@@ -276,6 +283,11 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 			dataBoxTypeCBox->setCurrentIndex(
 			    m_boxTypeCBoxModel.findRow(CBOX_TYPE_OVM));
 		}
+
+		contactTableView->setColumnHidden(
+		    BoxContactsModel::POST_CODE_COL, false);
+		contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+		    true);
 
 		iDLineLabel->show();
 		iDLineEdit->show();
@@ -454,11 +466,6 @@ void DlgDsSearch::searchDataBoxNormal(void)
 		break;
 	}
 
-	this->contactTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL,
-	    false);
-	this->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
-	    true);
-
 	queryBoxNormal(this->iDLineEdit->text(), boxType,
 	    this->iCLineEdit->text(), this->nameLineEdit->text(),
 	    this->pscLineEdit->text());
@@ -504,11 +511,6 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 		boxType = TaskSearchOwnerFulltext::BT_ALL;
 		break;
 	}
-
-	this->contactTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL,
-	    true);
-	this->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
-	    true);
 
 	queryBoxFulltextAll(target, boxType, this->textLineEdit->text());
 }
