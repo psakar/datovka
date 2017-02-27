@@ -86,7 +86,12 @@ private slots:
 	/*!
 	 * @brief Appends selected box identifiers into identifier list.
 	 */
-	void addSelectedDbIDs(void) const;
+	void addSelectedDbIDs(void);
+
+	/*!
+	 * @brief Signals breaking of download loop.
+	 */
+	void setBreakDownloadLoop(void);
 
 	/*!
 	 * @brief Ping the ISDS server, test whether connection is active.
@@ -140,13 +145,27 @@ private:
 	    const QString &name, const QString &zipCode);
 
 	/*!
-	 * @brief Encapsulated full-text query.
+	 * @brief Encapsulates full-text query for a single page.
+	 *
+	 * @param[in] target Which field to search in.
+	 * @param[in] boxType Type of data box to search for.
+	 * @param[in] phrase Text phrase to search for.
+	 * @param[in] pageNum Page umber to ask for.
+	 * @return False on error or when last page downloaded.
+	 */
+	bool queryBoxFulltextPage(
+	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	    enum TaskSearchOwnerFulltext::BoxType boxType,
+	    const QString &phrase, qint64 pageNum);
+
+	/*!
+	 * @brief Encapsulated full-text query for all entries.
 	 *
 	 * @param[in] target Which field to search in.
 	 * @param[in] boxType Type of data box to search for.
 	 * @param[in] phrase Text phrase to search for.
 	 */
-	void queryBoxFulltext(
+	void queryBoxFulltextAll(
 	    enum TaskSearchOwnerFulltext::FulltextTarget target,
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase);
@@ -161,6 +180,8 @@ private:
 	CBoxModel m_fulltextCBoxModel; /*!< Full-text combo box model. */
 
 	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
+
+	bool m_breakDownloadLoop; /*!< Setting to true interrupts download loop. */
 
 	QTimer *m_pingTimer;
 	bool m_showInfoLabel;

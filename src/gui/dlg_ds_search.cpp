@@ -53,6 +53,7 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     m_boxTypeCBoxModel(this),
     m_fulltextCBoxModel(this),
     m_dbIdList(dbIdList),
+    m_breakDownloadLoop(false),
     m_pingTimer(Q_NULLPTR),
     m_showInfoLabel(false)
 {
@@ -119,6 +120,8 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
 	connect(this->buttonBox, SIGNAL(accepted()),
 	    this, SLOT(addSelectedDbIDs()));
+	connect(this->buttonBox, SIGNAL(rejected()),
+	    this, SLOT(setBreakDownloadLoop()));
 	connect(this->searchPushButton, SIGNAL(clicked()),
 	    this, SLOT(searchDataBox()));
 
@@ -197,11 +200,18 @@ void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
 	this->close();
 }
 
-void DlgDsSearch::addSelectedDbIDs(void) const
+void DlgDsSearch::addSelectedDbIDs(void)
 {
+	setBreakDownloadLoop(); /* Break download loop. */
+
 	if (m_dbIdList != Q_NULLPTR) {
 		m_dbIdList->append(m_contactTableModel.checkedBoxIds());
 	}
+}
+
+void DlgDsSearch::setBreakDownloadLoop(void)
+{
+	m_breakDownloadLoop = true;
 }
 
 void DlgDsSearch::pingIsdsServer(void)
@@ -498,7 +508,7 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 	this->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
 	    true);
 
-	queryBoxFulltext(target, boxType, this->textLineEdit->text());
+	queryBoxFulltextAll(target, boxType, this->textLineEdit->text());
 }
 
 void DlgDsSearch::queryBoxNormal(const QString &boxId,
@@ -553,7 +563,6 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 	this->searchResultText->setText(
 	    resultString + QString::number(foundBoxes.size()));
 
-	this->contactTableView->setEnabled(true);
 	m_contactTableModel.appendData(foundBoxes);
 
 	if (m_contactTableModel.rowCount() > 0) {
@@ -562,22 +571,22 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 		this->contactTableView->selectRow(0);
 	}
 
+	this->contactTableView->setEnabled(true);
+
 	//this->contactTableView->resizeColumnsToContents();
 }
 
-void DlgDsSearch::queryBoxFulltext(
-    enum TaskSearchOwnerFulltext::FulltextTarget target,
-    enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
+bool DlgDsSearch::queryBoxFulltextPage(
+	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	    enum TaskSearchOwnerFulltext::BoxType boxType,
+	    const QString &phrase, qint64 pageNum)
 {
-	this->contactTableView->setEnabled(false);
-	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
-
 	QString resultString(tr("Total found") + QStringLiteral(": "));
 	this->searchResultText->setText(resultString + QStringLiteral("0"));
 
 	TaskSearchOwnerFulltext *task =
 	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, phrase,
-	        target, boxType);
+	        target, boxType, pageNum, false);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
@@ -586,6 +595,7 @@ void DlgDsSearch::queryBoxFulltext(
 	QString longErrMsg = task->m_isdsLongError;
 	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
 	quint64 totalDb = task->m_totalMatchingBoxes;
+	bool gotLastPage = task->m_gotLastPage;
 
 	delete task; task = Q_NULLPTR;
 
@@ -595,28 +605,27 @@ void DlgDsSearch::queryBoxFulltext(
 	case TaskSearchOwnerFulltext::SOF_BAD_DATA:
 		QMessageBox::information(this, tr("Search result"),
 		    longErrMsg, QMessageBox::Ok);
-		return;
+		return false;
 		break;
 	case TaskSearchOwnerFulltext::SOF_COM_ERROR:
 		QMessageBox::information(this, tr("Search result"),
 		    tr("It was not possible find any data box because") +
 		    QStringLiteral(":\n\n") + longErrMsg,
 		    QMessageBox::Ok);
-		return;
+		return false;
 		break;
 	case TaskSearchOwnerFulltext::SOF_ERROR:
 	default:
 		QMessageBox::critical(this, tr("Search error"),
 		    tr("It was not possible find any data box because an error occurred during the search process!"),
 		    QMessageBox::Ok);
-		return;
+		return false;
 		break;
 	}
 
 	this->searchResultText->setText(
 	    resultString + QString::number(totalDb));
 
-	this->contactTableView->setEnabled(true);
 	m_contactTableModel.appendData(foundBoxes);
 
 	if (m_contactTableModel.rowCount() > 0) {
@@ -624,6 +633,28 @@ void DlgDsSearch::queryBoxFulltext(
 		    BoxContactsModel::CHECKBOX_COL);
 		this->contactTableView->selectRow(0);
 	}
+
+	return !gotLastPage; /* Return false when last page received. */
+}
+
+void DlgDsSearch::queryBoxFulltextAll(
+    enum TaskSearchOwnerFulltext::FulltextTarget target,
+    enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
+{
+	this->contactTableView->setEnabled(false);
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
+
+	qint64 pageNum = 0;
+	while (queryBoxFulltextPage(target, boxType, phrase, pageNum)) {
+		QCoreApplication::processEvents();
+		++pageNum;
+		if (m_breakDownloadLoop) {
+			m_breakDownloadLoop = false;
+			break;
+		}
+	}
+
+	this->contactTableView->setEnabled(true);
 
 	//this->contactTableView->resizeColumnsToContents();
 }
