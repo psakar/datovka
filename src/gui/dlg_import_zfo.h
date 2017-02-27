@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
  * the two.
  */
 
-
 #ifndef _DLG_IMPORT_ZFO_H_
 #define _DLG_IMPORT_ZFO_H_
 
@@ -34,7 +33,6 @@
 class ImportZFODialog : public QDialog, public Ui::ImportZFO
 {
 	Q_OBJECT
-
 public:
 	/*!
 	 * Specifies how/where ZFOs will load.
@@ -69,12 +67,10 @@ public:
 	    bool &checkZfoOnServer, QWidget *parent = 0);
 
 private slots:
-
 	void ImportFiles(void);
 	void ChangeRadioBox(void);
 
 private:
-
 	enum ImportZFODialog::ZFOtype &m_zfoType; /*!< Specifies ZFO type. */
 	enum ImportZFODialog::ZFOlocation &m_locationType; /*!< Specifies how/where ZFOs will load. */
 	bool &m_checkZfoOnServer; /*!< ZFO will check on the ISDS server. */
