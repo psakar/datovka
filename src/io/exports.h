@@ -94,8 +94,8 @@ public:
 	ExportError exportAs(QWidget *parent, const MessageDbSet &dbSet,
 	    ExportFileType fileType, const QString &targetPath,
 	    const QString &attachFileName, const QString &userName,
-	    const QString &dbId, MessageDb::MsgId msgId, bool askLocation,
-	    QString &lastPath, QString &errStr);
+	    const QString &dbId, const MessageDb::MsgId &msgId,
+	    bool askLocation, QString &lastPath, QString &errStr);
 
 	/*!
 	 * @brief Export message envelope together with attachments.
@@ -111,7 +111,8 @@ public:
 	static
 	ExportError exportEnvAndAttachments(const MessageDbSet &dbSet,
 	    const QString &targetPath, const QString &userName,
-	    const QString &dbId, MessageDb::MsgId msgId, QString &errStr);
+	    const QString &dbId, const MessageDb::MsgId &msgId,
+	    QString &errStr);
 
 	/*!
 	 * @brief Save message attachments and export ZFO/PDF files as well.
@@ -127,7 +128,8 @@ public:
 	static
 	ExportError saveAttachmentsWithExports(const MessageDbSet &dbSet,
 	    const QString &targetPath, const QString &userName,
-	    const QString &dbId, MessageDb::MsgId msgId, QString &errStr);
+	    const QString &dbId, const MessageDb::MsgId &msgId,
+	    QString &errStr);
 
 private:
 	/*!
