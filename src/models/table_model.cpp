@@ -192,6 +192,13 @@ bool TblModel::removeRows(int row, int count, const QModelIndex &parent)
 		--m_rowCount;
 	}
 
+	/* Adjust size of pre-allocated space. */
+	if (m_rowCount != 0) {
+		m_rowsAllocated -= count;
+	} else {
+		m_rowsAllocated = 0;
+	}
+
 	endRemoveRows();
 
 	return true;
