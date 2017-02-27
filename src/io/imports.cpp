@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include "src/io/import_zfo.h"
+#include "src/io/imports.h"
 #include "src/log/log.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_import_zfo.h"
@@ -30,12 +30,12 @@ void ImportZfo::importZfoIntoDatabase(const QStringList &fileList,
     const QList<Task::AccountDescr> &databaseList,
     enum ImportZFODialog::ZFOtype zfoType, bool authenticate,
     QSet<QString> &zfoFilesToImport,
-    QList<QPair<QString,QString>> &zfoFilesInvalid,
+    QList< QPair<QString, QString> > &zfoFilesInvalid,
     int &numFilesToImport, QString &errTxt)
 {
 	debugFuncCall();
 
-	QPair<QString,QString> impZFOInfo;
+	QPair<QString, QString> impZFOInfo;
 	QSet<QString> messageZfoFiles;
 	QSet<QString> deliveryZfoFiles;
 

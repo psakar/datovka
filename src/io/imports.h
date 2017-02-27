@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _IMPORT_ZFO_H_
-#define _IMPORT_ZFO_H_
+#ifndef _IMPORTS_H_
+#define _IMPORTS_H_
 
 #include "src/gui/dlg_import_zfo.h"
 #include "src/worker/task.h"
@@ -50,9 +50,8 @@ public:
 	    const QList<Task::AccountDescr> &databaseList,
 	    enum ImportZFODialog::ZFOtype zfoType, bool authenticate,
 	    QSet<QString> &zfoFilesToImport,
-	    QList<QPair<QString,QString>> &zfoFilesInvalid,
-	    int &numFilesToImport,
-	    QString &errTxt);
+	    QList< QPair<QString, QString> > &zfoFilesInvalid,
+	    int &numFilesToImport, QString &errTxt);
 
 private:
 	/*!
@@ -63,4 +62,4 @@ private:
 	ImportZfo(void);
 };
 
-#endif /* _IMPORT_ZFO_H_ */
+#endif /* _IMPORTS_H_ */

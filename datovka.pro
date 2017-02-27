@@ -292,7 +292,7 @@ SOURCES += \
     src/io/exports.cpp \
     src/io/file_downloader.cpp \
     src/io/filesystem.cpp \
-    src/io/import_zfo.cpp \
+    src/io/imports.cpp \
     src/io/isds_helper.cpp \
     src/io/isds_login.cpp \
     src/io/isds_sessions.cpp \
@@ -392,7 +392,7 @@ HEADERS += \
     src/io/exports.h \
     src/io/file_downloader.h \
     src/io/filesystem.h \
-    src/io/import_zfo.h \
+    src/io/imports.h \
     src/io/isds_helper.h \
     src/io/isds_login.h \
     src/io/isds_sessions.h \    
