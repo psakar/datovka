@@ -87,10 +87,13 @@ public:
 	 * @param[in] query Sought string.
 	 * @param[in] target Type of information to search the string in.
 	 * @param[in] type Type of data box to search for.
+	 * @param[in] pageNumber Page number to ask for.
+	 * @paran[in] askAll Whether to gather all available data starting
+	 *                   from given \a pageNumber.
 	 */
 	explicit TaskSearchOwnerFulltext(const QString &userName,
 	    const QString &query, enum FulltextTarget target,
-	    enum BoxType type);
+	    enum BoxType type, qint64 pageNumber = 0, bool askAll = true);
 
 	/*!
 	 * @brief Performs action.
@@ -103,6 +106,7 @@ public:
 	QString m_isdsLongError; /*!< Long error description. */
 	quint64 m_totalMatchingBoxes; /*!< Set to number of boxes matching request. */
 	QList<BoxEntry> m_foundBoxes; /*!< List of found boxes. */
+	bool m_gotLastPage; /*!< Set to true if last page acquired. */
 
 private:
 	/*!
@@ -123,7 +127,7 @@ private:
 	 * @param[out] totalMatchingBoxes Total number of found boxes.
 	 * @param[out] currentPageStart Index of first box in the found page.
 	 * @param[out] currentPageSize Size of current page.
-	 * @param[out] isLastPage True if last page downloaded.
+	 * @param[out] gotLastPage True if last page downloaded.
 	 * @param[out] foundBoxes List of found boxes to append search results to.
 	 * @param[out] error Short error description.
 	 * @param[out] longError Long error description.
@@ -134,7 +138,7 @@ private:
 	    const QString &query, enum FulltextTarget target, enum BoxType type,
 	    quint64 pageSize, quint64 pageNumber, quint64 &totalMatchingBoxes,
 	    quint64 &currentPageStart, quint64 &currentPageSize,
-	    bool &isLastPage, QList<BoxEntry> &foundBoxes,
+	    bool &gotLastPage, QList<BoxEntry> &foundBoxes,
 	    QString &error, QString &longError);
 
 	/*!
@@ -144,7 +148,11 @@ private:
 	 * @param[in]  query Sought string.
 	 * @param[in]  target Type of information to search the string in.
 	 * @param[in]  type Type of data box to search for.
+	 * @param[in]  pageNumber Index of page to download.
+	 * @paran[in]  askAll Whether to gather all available data starting
+	 *                    from given \a pageNumber.
 	 * @param[out] totalMatchingBoxes Total number of found boxes.
+	 * @param[out] gotLastPage True if last page downloaded.
 	 * @param[out] foundBoxes List of found boxes to append search results to.
 	 * @param[out] error Short error description.
 	 * @param[out] longError Long error description.
@@ -153,13 +161,16 @@ private:
 	static
 	enum Result isdsSearch2All(const QString &userName,
 	    const QString &query, enum FulltextTarget target, enum BoxType type,
-	    quint64 &totalMatchingBoxes, QList<BoxEntry> &foundBoxes,
-	    QString &error, QString &longError);
+	    quint64 pageNumber, bool askAll, quint64 &totalMatchingBoxes,
+	    bool &gotLastPage, QList<BoxEntry> &foundBoxes, QString &error,
+	    QString &longError);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	const QString m_query; /*!< Search phrase. */
 	const enum FulltextTarget m_target; /*!< Full-text search target. */
 	const enum BoxType m_boxType; /*!< Sought box type. */
+	const quint64 m_pageNumber; /*!< Page number to ask for. */
+	const bool m_askAll; /*!< Whether to ask all remaining pages. */
 
 	static const quint64 maxResponseSize; /*!< Maximal response size. */
 };

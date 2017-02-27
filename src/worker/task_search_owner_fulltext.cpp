@@ -46,16 +46,20 @@ TaskSearchOwnerFulltext::BoxEntry::BoxEntry(const QString &i, int t,
 }
 
 TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
-    const QString &query, enum FulltextTarget target, enum BoxType type)
+    const QString &query, enum FulltextTarget target, enum BoxType type,
+    qint64 pageNumber, bool askAll)
     : m_result(SOF_ERROR),
     m_isdsError(),
     m_isdsLongError(),
     m_totalMatchingBoxes(0),
     m_foundBoxes(),
+    m_gotLastPage(false),
     m_userName(userName),
     m_query(query),
     m_target(target),
-    m_boxType(type)
+    m_boxType(type),
+    m_pageNumber(pageNumber),
+    m_askAll(askAll)
 {
 	Q_ASSERT(!m_userName.isEmpty());
 	Q_ASSERT(!m_query.isEmpty());
@@ -79,7 +83,8 @@ void TaskSearchOwnerFulltext::run(void)
 	/* ### Worker task begin. ### */
 
 	m_result = isdsSearch2All(m_userName, m_query, m_target, m_boxType,
-	    m_totalMatchingBoxes, m_foundBoxes, m_isdsError, m_isdsLongError);
+	    m_pageNumber, m_askAll, m_totalMatchingBoxes, m_gotLastPage,
+	    m_foundBoxes, m_isdsError, m_isdsLongError);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -222,7 +227,7 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
     const QString &userName, const QString &query, enum FulltextTarget target,
     enum BoxType type, quint64 pageSize, quint64 pageNumber,
     quint64 &totalMatchingBoxes, quint64 &currentPageStart,
-    quint64 &currentPageSize, bool &isLastPage, QList<BoxEntry> &foundBoxes,
+    quint64 &currentPageSize, bool &gotLastPage, QList<BoxEntry> &foundBoxes,
     QString &error, QString &longError)
 {
 	isds_error status = IE_ERROR;
@@ -268,7 +273,7 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
 		free(iCurentPageSize); iCurentPageSize = NULL;
 	}
 	if (iIsLastPage != NULL) {
-		isLastPage = *iIsLastPage;
+		gotLastPage = *iIsLastPage;
 		free(iIsLastPage); iIsLastPage = NULL;
 	}
 	if (iFoundBoxes != NULL) {
@@ -278,13 +283,15 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
 
 	if (IE_SUCCESS != status) {
 		logErrorNL(
-		    "Searching for data box returned status %d: '%s'.",
-		    status, isdsStrError(status).toUtf8().constData());
+		    "Searching for data box (page %lu) returned status '%d': '%s'.",
+		    (unsigned long)iPageNumber, status,
+		    isdsStrError(status).toUtf8().constData());
 		error = isds_error(status);
 		longError = isdsLongMessage(session);
 	} else {
-		logDebugLv1NL("Find databox returned '%d': '%s'.",
-		    status, isdsStrError(status).toUtf8().constData());
+		logDebugLv1NL("Find data box (page %lu) returned '%d': '%s'.",
+		    (unsigned long)iPageNumber, status,
+		    isdsStrError(status).toUtf8().constData());
 	}
 
 	return convertError(status);
@@ -292,27 +299,30 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
 
 enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2All(
     const QString &userName, const QString &query, enum FulltextTarget target,
-    enum BoxType type, quint64 &totalMatchingBoxes, QList<BoxEntry> &foundBoxes,
+    enum BoxType type, quint64 pageNumber, bool askAll,
+    quint64 &totalMatchingBoxes, bool &gotLastPage, QList<BoxEntry> &foundBoxes,
     QString &error, QString &longError)
 {
 	enum Result res = SOF_SUCCESS;
 
 	quint64 pageSize = maxResponseSize;
-	quint64 pageNumber = 0;
 	quint64 currentPageStart = 0;
 	quint64 currentPageSize = 0;
-	bool isLastPage = false;
 
-	while ((res == SOF_SUCCESS) && (!isLastPage)) {
-		res = isdsSearch2(userName, query, target, type,
-		    pageSize, pageNumber, totalMatchingBoxes, currentPageStart,
-		    currentPageSize, isLastPage, foundBoxes, error, longError);
-
-		++pageNumber;
+	if (gotLastPage) {
+		return res;
 	}
 
+	do {
+		res = isdsSearch2(userName, query, target, type,
+		    pageSize, pageNumber, totalMatchingBoxes, currentPageStart,
+		    currentPageSize, gotLastPage, foundBoxes, error, longError);
+
+		++pageNumber;
+	} while (askAll && (res == SOF_SUCCESS) && (!gotLastPage));
+
 	if ((unsigned)foundBoxes.size() != totalMatchingBoxes) {
-		logWarningNL("Got %d instead og %lu declated found data boxes.",
+		logWarningNL("Got %d instead of %lu declared found data boxes.",
 		    foundBoxes.size(), (unsigned long)totalMatchingBoxes);
 	}
 
