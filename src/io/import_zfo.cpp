@@ -26,10 +26,6 @@
 #include "src/worker/pool.h"
 #include "src/worker/task_import_zfo.h"
 
-ImportZfo::ImportZfo(void)
-{
-}
-
 void ImportZfo::importZfoIntoDatabase(const QStringList &fileList,
     const QList<Task::AccountDescr> &databaseList,
     enum ImportZFODialog::ZFOtype zfoType, bool authenticate,

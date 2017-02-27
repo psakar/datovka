@@ -21,7 +21,6 @@
  * the two.
  */
 
-
 #ifndef _IMPORT_ZFO_H_
 #define _IMPORT_ZFO_H_
 
@@ -57,7 +56,9 @@ public:
 
 private:
 	/*!
-	 * @brief Constructor.
+	 * @brief Private constructor.
+	 *
+	 * @note Just prevent any instances of this class.
 	 */
 	ImportZfo(void);
 };
