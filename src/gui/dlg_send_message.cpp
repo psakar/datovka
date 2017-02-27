@@ -31,7 +31,6 @@
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
-#include "src/gui/dlg_ds_search2.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/gui/dlg_search_mojeid.h"
 #include "src/models/accounts_model.h"
@@ -1005,8 +1004,6 @@ void DlgSendMessage::findAndAddRecipient(void)
 	if (!m_isWebDatovkaAccount) {
 		dsSearch = new DlgDsSearch(m_userName, m_dbType,
 		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
-//		dsSearch = new DlgSearch2(m_userName, m_dbType,
-//		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
 	} else {
 		dsSearch = new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_ADDNEW,
 		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,

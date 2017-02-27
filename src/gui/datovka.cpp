@@ -57,7 +57,6 @@
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/gui/dlg_ds_search.h"
-#include "src/gui/dlg_ds_search2.h"
 #include "src/gui/dlg_search_mojeid.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/gui/dlg_preferences.h"
@@ -5409,8 +5408,6 @@ void MainWindow::findDatabox(void)
 	} else {
 		QDialog *dsSearch = new DlgDsSearch(userName, dbType,
 		    dbEffectiveOVM, dbOpenAddressing, Q_NULLPTR, this);
-//		QDialog *dsSearch = new DlgSearch2(userName, dbType,
-//		    dbEffectiveOVM, dbOpenAddressing, Q_NULLPTR, this);
 		dsSearch->exec();
 		dsSearch->deleteLater();
 	}
