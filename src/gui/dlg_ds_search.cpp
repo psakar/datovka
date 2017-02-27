@@ -180,6 +180,7 @@ void DlgDsSearch::checkInputFields(void)
 
 void DlgDsSearch::searchDataBox(void)
 {
+	this->useFulltextCheckBox->setEnabled(false);
 	this->searchPushButton->setEnabled(false);
 	QCoreApplication::processEvents();
 	if (Qt::Checked == this->useFulltextCheckBox->checkState()) {
@@ -187,6 +188,7 @@ void DlgDsSearch::searchDataBox(void)
 	} else {
 		searchDataBoxNormal();
 	}
+	this->useFulltextCheckBox->setEnabled(true);
 	this->searchPushButton->setEnabled(true);
 }
 
