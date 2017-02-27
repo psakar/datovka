@@ -560,10 +560,10 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 		break;
 	}
 
+	m_contactTableModel.appendData(foundBoxes);
+
 	this->searchResultText->setText(
 	    resultString + QString::number(foundBoxes.size()));
-
-	m_contactTableModel.appendData(foundBoxes);
 
 	if (m_contactTableModel.rowCount() > 0) {
 		this->contactTableView->selectColumn(
@@ -623,10 +623,11 @@ bool DlgDsSearch::queryBoxFulltextPage(
 		break;
 	}
 
-	this->searchResultText->setText(
-	    resultString + QString::number(totalDb));
-
 	m_contactTableModel.appendData(foundBoxes);
+
+	this->searchResultText->setText(
+	    resultString + QString::number(totalDb) + QStringLiteral("; ") +
+	    tr("Displayed") + QStringLiteral(": ") + QString::number(m_contactTableModel.rowCount()));
 
 	if (m_contactTableModel.rowCount() > 0) {
 		this->contactTableView->selectColumn(
