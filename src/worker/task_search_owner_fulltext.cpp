@@ -232,7 +232,7 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
 {
 	isds_error status = IE_ERROR;
 
-	if (NULL == query) {
+	if (query.isEmpty()) {
 		Q_ASSERT(0);
 		return SOF_ERROR;
 	}
