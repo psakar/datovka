@@ -21,7 +21,6 @@
  * the two.
  */
 
-
 #ifndef _EXPORTS_H_
 #define _EXPORTS_H_
 
@@ -34,15 +33,7 @@
  */
 class Exports {
 
-private:
-
-	/*!
-	 * @brief Constructor.
-	 */
-	Exports(void);
-
 public:
-
 	/*!
 	 * @brief Defines type of exported file.
 	 */
@@ -139,6 +130,12 @@ public:
 	    const QString &dbId, MessageDb::MsgId msgId, QString &errStr);
 
 private:
+	/*!
+	 * @brief Private constructor.
+	 *
+	 * @note Just prevent any instances of this class.
+	 */
+	Exports(void);
 
 	/*!
 	 * @brief Print and write PDF file to disk.
