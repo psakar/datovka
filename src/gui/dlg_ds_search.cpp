@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QCoreApplication>
 #include <QMessageBox>
 
 #include "src/gui/dlg_ds_search.h"
@@ -176,11 +177,14 @@ void DlgDsSearch::checkInputFields(void)
 
 void DlgDsSearch::searchDataBox(void)
 {
+	this->searchPushButton->setEnabled(false);
+	QCoreApplication::processEvents();
 	if (Qt::Checked == this->useFulltextCheckBox->checkState()) {
 		searchDataBoxFulltext();
 	} else {
 		searchDataBoxNormal();
 	}
+	this->searchPushButton->setEnabled(true);
 }
 
 void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
