@@ -395,7 +395,7 @@ HEADERS += \
     src/io/imports.h \
     src/io/isds_helper.h \
     src/io/isds_login.h \
-    src/io/isds_sessions.h \    
+    src/io/isds_sessions.h \
     src/io/message_db.h \
     src/io/message_db_set.h \
     src/io/message_db_set_container.h \
