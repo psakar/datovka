@@ -223,6 +223,37 @@ void BoxContactsModel::appendData(
 	endInsertRows();
 }
 
+void BoxContactsModel::appendData(const QString &id, int type,
+    const QString &name, const QString &addr, const QString postCode,
+    const QVariant &pdz)
+{
+	if (id.isEmpty() || name.isEmpty() || addr.isEmpty()) {
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), rowCount(), rowCount());
+
+	{
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		row[CHECKBOX_COL] = false;
+		row[BOX_ID_COL] = id;
+		if (type >= 0) {
+			row[BOX_TYPE_COL] = type;
+		}
+		row[BOX_NAME_COL] = name;
+		row[ADDRESS_COL] = addr;
+		row[POST_CODE_COL] = postCode;
+		row[PDZ_COL] = pdz;
+
+		m_data[m_rowCount++] = row;
+	}
+
+	endInsertRows();
+}
+
 bool BoxContactsModel::somethingChecked(void) const
 {
 	for (int row = 0; row < m_rowCount; ++row) {

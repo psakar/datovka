@@ -144,6 +144,19 @@ public:
 	void appendData(const QList<MessageDb::ContactEntry> &entryList);
 
 	/*!
+	 * @brief Appends single entry to the model.
+	 *
+	 * @param[in] id Box identifier.
+	 * @param[in] type Data box type.
+	 * @param[in] name Box name.
+	 * @param[in] addr Data box subject address.
+	 * @param[in] postCode Postal code.
+	 * @param[in] pdz True if sending of PDZ is necessary.
+	 */
+	void appendData(const QString &id, int type, const QString &name,
+	    const QString &addr, const QString postCode, const QVariant &pdz);
+
+	/*!
 	 * @brief Returns true if there are some items checked.
 	 *
 	 * @return True if something checked.
