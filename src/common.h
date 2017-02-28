@@ -279,4 +279,18 @@ int getWebDatovkaUserId(const QString &userName);
  * Get name prefix of tag database from username (WebDatovka).
  */
 QString getWebDatovkaTagDbPrefix(const QString &userName);
+
+/*!
+ * @brief Split database filename into mandatory entries.
+ *
+ * @param[in] inDbFileName - input database file name.
+ * @param[out] dbUserName - username entry.
+ * @paran[out] dbYear - year entry if exists or NULL.
+ * @paran[out] dbTestingFlag - true if account is testing or false
+ * @paran[out] errMsg - error message to user
+ * @return true if database filename is correct
+ */
+bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
+    QString &dbYear, bool &dbTestingFlag, QString &errMsg);
+
 #endif /* _COMMON_H_ */

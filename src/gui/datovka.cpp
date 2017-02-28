@@ -6427,7 +6427,7 @@ void MainWindow::showImportZFOActionDialog(void)
 	m_importFailed.clear();
 	m_numFilesToImport = 0;
 
-	ImportZfo::importZfoIntoDatabase(filePathList, accountList,
+	Imports::importZfoIntoDatabase(filePathList, accountList,
 	    zfoType, checkZfoOnServer, m_zfoFilesToImport, m_importFailed,
 	    m_numFilesToImport, errTxt);
 
@@ -8307,90 +8307,7 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 	}
 }
 
-/* ========================================================================= */
-/*
- * Func: Split database filename into mandatory entries.
- */
-bool MainWindow::isValidDatabaseFileName(QString inDbFileName,
-    QString &dbUserName, QString &dbYear, bool &dbTestingFlag, QString &errMsg)
-/* ========================================================================= */
-{
-	QStringList fileNameParts;
-	bool ret = false;
-	errMsg = "";
-	dbUserName = "";
-	dbYear = "";
-
-	if (inDbFileName.contains("___")) {
-		// get username from filename
-		fileNameParts = inDbFileName.split("_");
-		if (fileNameParts.isEmpty() || fileNameParts.count() <= 1) {
-			errMsg = tr("This file does not contain a valid "
-			    "database filename.");
-			return ret;
-		}
-		if (fileNameParts[0].isEmpty() ||
-		    fileNameParts[0].length() != 6) {
-			errMsg = tr("This file does not contain a valid "
-			    "username in the database filename.");
-			return ret;
-		}
-		dbUserName = fileNameParts[0];
-
-		// get year from filename
-		if (fileNameParts[1].isEmpty()) {
-			dbYear = "";
-		} else if (fileNameParts[1] == "inv") {
-			dbYear = fileNameParts[1];
-		} else if (fileNameParts[1].length() == 4) {
-			dbYear = fileNameParts[1];
-		} else {
-			errMsg = tr("This database file does not contain "
-			    "valid year in the database filename.");
-			dbYear = "";
-			return ret;
-		}
-
-		// get testing flag from filename
-		fileNameParts = inDbFileName.split(".");
-		if (fileNameParts.isEmpty()) {
-			errMsg = tr("This file does not contain valid "
-			    "database filename.");
-			return ret;
-		}
-		fileNameParts = fileNameParts[0].split("___");
-		if (fileNameParts.isEmpty()) {
-			errMsg = tr("This database file does not contain "
-			    "valid database filename.");
-			return ret;
-		}
-
-		if (fileNameParts[1] == "1") {
-			dbTestingFlag = true;
-		} else if (fileNameParts[1] == "0") {
-			dbTestingFlag = false;
-		} else {
-			errMsg = tr("This file does not contain a valid "
-			    "account type flag or filename has wrong format.");
-			dbTestingFlag = false;
-			return ret;
-		}
-	} else {
-		errMsg = tr("This file does not contain a valid message "
-		    "database or filename has wrong format.");
-		return ret;
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Slot: Prepare import of messages from database.
- */
 void MainWindow::prepareMsgsImportFromDatabase(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -8418,11 +8335,11 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 	}
 
 	/* get list of selected database files */
-	QStringList files = QFileDialog::getOpenFileNames(this,
+	QStringList dbFileList = QFileDialog::getOpenFileNames(this,
 	    tr("Select database file(s)"),
 	    m_on_import_database_dir_activate, tr("DB file (*.db)"));
 
-	if (files.isEmpty()) {
+	if (dbFileList.isEmpty()) {
 		qDebug() << "No *.db selected file(s)";
 		showStatusTextWithTimeout(tr("Database file(s) not selected."));
 		return;
@@ -8430,237 +8347,23 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 
 	/* remember import path */
 	m_on_import_database_dir_activate =
-	    QFileInfo(files.at(0)).absoluteDir().absolutePath();
+	    QFileInfo(dbFileList.at(0)).absoluteDir().absolutePath();
 
-	doMsgsImportFromDatabase(files, userName);
-}
-
-
-/* ========================================================================= */
-/*
- *  Func: Import of messages from database to selected account
- */
-void MainWindow::doMsgsImportFromDatabase(const QStringList &dbFileList,
-    const QString &userName)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	/* ProgressBar text and diference */
-	const QString progressBarTitle = "DatabaseImport";
-	float delta = 0.0;
-	float diff = 0.0;
-	clearProgressBar();
-
-	QString msg;
-	QString dbDir;
-	QString dbFileName;
-	QString dbUserName;
-	QString dbYearFlag;
-	bool dbTestingFlag;
-	int sMsgCnt = 0;
-
-	QStringList errImportList;
-
-	/* for all selected import database files */
-	for (int i = 0; i < dbFileList.count(); ++i) {
-
-		updateProgressBar(progressBarTitle, 0);
-
-		showStatusTextPermanently(tr("Import of messages from %1 "
-		    "to account %2").arg(dbFileList.at(i)).arg(userName));
-
-		errImportList.clear();
-		sMsgCnt = 0;
-
-		qDebug() << dbFileList.at(i) << "file is analysed...";
-
-		/* get db filename from path */
-		QFileInfo file(dbFileList.at(i));
-		dbDir = file.path();
-		dbFileName = file.fileName();
-
-		updateProgressBar(progressBarTitle, 5);
-
-		showStatusTextPermanently(tr("Import of messages from %1 "
-		    "to account %2 is running").arg(dbFileName).arg(userName));
-
-		/* parse and check the import database file name */
-		if (!isValidDatabaseFileName(dbFileName, dbUserName,
-		    dbYearFlag, dbTestingFlag, msg)) {
-			qDebug() << msg;
-			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(userName),
-			    tr("File") + ": " + dbFileList.at(i) +
-			    "\n\n" + msg,
-			    QMessageBox::Ok);
-			continue;
-		}
-
-		updateProgressBar(progressBarTitle, 10);
-
-		/* check if username of db file is relevant to account */
-		if (userName != dbUserName) {
-			msg = tr("This database file cannot import into "
-			    "selected account because username of account "
-			    "and username of database file do not correspond.");
-			qDebug() << msg;
-			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(userName),
-			    tr("File") + ": " + dbFileList.at(i) +
-			    "\n\n" + msg,
-			    QMessageBox::Ok);
-			continue;
-		}
-
-		/* open selected database file as temporary single db */
-		MessageDbSingle *srcDbSingle =
-		     MessageDbSingle::createNew(dbFileList.at(i),
-		     "TEMPORARYDBS");
-		if (0 == srcDbSingle) {
-			msg = tr("Failed to open import database file.");
-			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(userName),
-			    tr("File") + ": " + dbFileList.at(i) +
-			    "\n\n" + msg,
-			    QMessageBox::Ok);
-			qDebug() << dbFileList.at(i) << msg;
-			continue;
-		}
-
-		qDebug() << dbFileList.at(i) << "is open";
-
-		/* get databox ID for test if imported message is
-		 * relevant to destination account */
-		QString dboxId = globAccountDbPtr->dbId(userName + "___True");
-
-		/* get all messages from source single database */
-		QList<MessageDb::MsgId> msgIdList(
-		    srcDbSingle->getAllMessageIDsFromDB());
-
-		/* get database set for selected account */
-		MessageDbSet *dstDbSet = accountDbSet(userName, this);
-		if (0 == dstDbSet) {
-			msg = tr("Failed to open database file of "
-			    "target account '%1'").arg(userName);
-			QMessageBox::critical(this,
-			    tr("Database import: %1").arg(userName),
-			    tr("File") + ": " + dbFileList.at(i) +
-			    "\n\n" + msg,
-			    QMessageBox::Ok);
-			qDebug() << dbFileList.at(i) << msg;
-			delete srcDbSingle; srcDbSingle = NULL;
-			continue;
-		}
-
-		updateProgressBar(progressBarTitle, 20);
-		int msgs = msgIdList.count();
-		delta = 80.0 / msgs;
-
-		// over all messages in source database do import */
-		foreach (const MessageDb::MsgId &mId, msgIdList) {
-
-			if (msgs == 0) {
-				updateProgressBar(progressBarTitle, 50);
-			} else {
-				diff += delta;
-				updateProgressBar(progressBarTitle, (20+diff));
-			}
-
-			showStatusTextPermanently(tr("Importing of message %1"
-			    " into account %2 ...").arg(mId.dmId)
-			    .arg(userName));
-
-			/* select target database via delivery time for account */
-			MessageDb *dstDb =
-			    dstDbSet->accessMessageDb(mId.deliveryTime, true);
-			if (0 == dstDb) {
-				msg = tr("Failed to open database file of "
-				    "target account '%1'").arg(userName);
-				QMessageBox::critical(this,
-				    tr("Database import: %1").arg(userName),
-				    tr("File") + ": " + dbFileList.at(i) +
-				    "\n\n" + msg,
-				    QMessageBox::Ok);
-				qDebug() << dbFileList.at(i) << msg;
-				continue;
-			}
-
-			/* check if msg exists in target database */
-			if (-1 != dstDb->msgsStatusIfExists(mId.dmId)) {
-				msg = tr("Message '%1' already exists in "
-				    "database for this account.").arg(mId.dmId);
-				errImportList.append(msg);
-				continue;
-			}
-
-			/* check if msg is relevant for account databox ID  */
-			if (!srcDbSingle->isRelevantMsgForImport(
-			    mId.dmId, dboxId)) {
-				msg = tr("Message '%1' cannot be imported "
-				    "into this account. Message does not "
-				    "contain any valid ID of databox "
-				    "corresponding with this account.").
-				    arg(mId.dmId);
-				errImportList.append(msg);
-				continue;
-			}
-
-			/* copy all msg data to target account database */
-			if (!dstDb->copyCompleteMsgDataToAccountDb(
-			    dbFileList.at(i), mId.dmId)) {
-				msg = tr("Message '%1' cannot be inserted "
-				    "into database of this account. An error "
-				    "occurred during insertion procedure.").
-				    arg(mId.dmId);
-				errImportList.append(msg);
-				continue;
-			}
-			sMsgCnt++;
-		}
-
-		updateProgressBar(progressBarTitle, 100);
-
-		delete srcDbSingle; srcDbSingle = NULL;
-
-		/* show import result for import databse file */
-		QMessageBox msgBox(this);
-		msgBox.setIcon(QMessageBox::Information);
-		msgBox.setWindowTitle(tr("Messages import result"));
-		msg = tr("Import of messages into account '%1' "
-		    "finished with result:").arg(userName) +
-		    "<br/><br/>" + tr("Source database file: '%1'").
-		    arg(dbFileList.at(i));
-		msgBox.setText(msg);
-		msg = tr("Total of messages in database: %1").
-		    arg(msgIdList.count())
-		    + "<br/><b>" +
-		    tr("Imported messages: %1").arg(sMsgCnt)
-		    + "<br/>" +
-		    tr("Non-imported messages: %1").arg(errImportList.count()) +
-		    "</b><br/>";
-		msgBox.setInformativeText(msg);
-		if (errImportList.count() > 0) {
-			msg = "";
-			for (int m = 0; m < errImportList.count(); ++ m) {
-				msg += errImportList.at(m) + "\n";
-			}
-			msgBox.setDetailedText(msg);
-		}
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		showStatusTextPermanently(tr("Import of messages from %1 "
-		    "to account %2 finished").arg(dbFileName).arg(userName));
-		msgBox.exec();
-
-		clearProgressBar();
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (0 == dbSet) {
+		Q_ASSERT(0);
+		return;
 	}
 
-	clearStatusBar();
+	QString errStr;
+	QString dbId = globAccountDbPtr->dbId(userName + "___True");
+
+	Imports::importDbMsgsIntoDatabase(this, *dbSet, dbFileList,
+	    userName, dbId, errStr);
 
 	/* update account model */
 	refreshAccountList(userName);
 }
-
 
 /* ========================================================================= */
 /*

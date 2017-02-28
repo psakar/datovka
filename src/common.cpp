@@ -582,3 +582,76 @@ QString getWebDatovkaTagDbPrefix(const QString &userName)
 
 	return DB_MOJEID_NAME_PREFIX + userName.split("-").at(1);
 }
+
+bool isValidDatabaseFileName(QString inDbFileName,
+    QString &dbUserName, QString &dbYear, bool &dbTestingFlag, QString &errMsg)
+{
+	QStringList fileNameParts;
+	bool ret = false;
+	errMsg = "";
+	dbUserName = "";
+	dbYear = "";
+
+	if (inDbFileName.contains("___")) {
+		// get username from filename
+		fileNameParts = inDbFileName.split("_");
+		if (fileNameParts.isEmpty() || fileNameParts.count() <= 1) {
+			errMsg = QObject::tr("This file does not contain a valid "
+			    "database filename.");
+			return ret;
+		}
+		if (fileNameParts[0].isEmpty() ||
+		    fileNameParts[0].length() != 6) {
+			errMsg = QObject::tr("This file does not contain a valid "
+			    "username in the database filename.");
+			return ret;
+		}
+		dbUserName = fileNameParts[0];
+
+		// get year from filename
+		if (fileNameParts[1].isEmpty()) {
+			dbYear = "";
+		} else if (fileNameParts[1] == "inv") {
+			dbYear = fileNameParts[1];
+		} else if (fileNameParts[1].length() == 4) {
+			dbYear = fileNameParts[1];
+		} else {
+			errMsg = QObject::tr("This database file does not contain "
+			    "valid year in the database filename.");
+			dbYear = "";
+			return ret;
+		}
+
+		// get testing flag from filename
+		fileNameParts = inDbFileName.split(".");
+		if (fileNameParts.isEmpty()) {
+			errMsg = QObject::tr("This file does not contain valid "
+			    "database filename.");
+			return ret;
+		}
+		fileNameParts = fileNameParts[0].split("___");
+		if (fileNameParts.isEmpty()) {
+			errMsg = QObject::tr("This database file does not contain "
+			    "valid database filename.");
+			return ret;
+		}
+
+		if (fileNameParts[1] == "1") {
+			dbTestingFlag = true;
+		} else if (fileNameParts[1] == "0") {
+			dbTestingFlag = false;
+		} else {
+			errMsg = QObject::tr("This file does not contain a valid "
+			    "account type flag or filename has wrong format.");
+			dbTestingFlag = false;
+			return ret;
+		}
+	} else {
+		errMsg = QObject::tr("This file does not contain a valid message "
+		    "database or filename has wrong format.");
+		return ret;
+	}
+
+	return true;
+}
+
