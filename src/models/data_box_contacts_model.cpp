@@ -234,6 +234,17 @@ bool BoxContactsModel::somethingChecked(void) const
 	return false;
 }
 
+bool BoxContactsModel::containsBoxId(const QString &boxId) const
+{
+	for (int row = 0; row < m_rowCount; ++row) {
+		if (m_data[row][BOX_ID_COL].toString() == boxId) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
 /*!
  * @brief Compares the check state according to required criteria.
  *
@@ -261,4 +272,26 @@ QStringList BoxContactsModel::boxIdentifiers(enum EntryState entryState) const
 	}
 
 	return ids;
+}
+
+QList<BoxContactsModel::PartialEntry> BoxContactsModel::partialBoxEntries(
+    enum EntryState entryState) const
+{
+	QList<PartialEntry> entries;
+
+	for (int row = 0; row < m_rowCount; ++row) {
+		if (checkStateMatch(m_data[row][CHECKBOX_COL].toBool(),
+		        entryState)) {
+			PartialEntry entry;
+
+			entry.id = m_data[row][BOX_ID_COL].toString();
+			entry.name = m_data[row][BOX_NAME_COL].toString();
+			entry.address = m_data[row][ADDRESS_COL].toString();
+			entry.pdz = m_data[row][PDZ_COL].toBool();
+
+			entries.append(entry);
+		}
+	}
+
+	return entries;
 }

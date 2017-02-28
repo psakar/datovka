@@ -59,6 +59,24 @@ public:
 	};
 
 	/*!
+	 * @brief Used for returning model entries.
+	 */
+	class PartialEntry {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		PartialEntry(void)
+		    : id(), name(), address(), pdz(false)
+		{}
+
+		QString id; /*!< Data box identifier. */
+		QString name; /*!< Data box name. */
+		QString address; /*!< Data box subject address. */
+		bool pdz; /*!< True only if true held in the model. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] parent Parent object.
@@ -133,12 +151,28 @@ public:
 	bool somethingChecked(void) const;
 
 	/*!
+	 * @brief Returns true if model contains supplied data box identifier.
+	 *
+	 * @oaram[in] boxId Data box identifier.
+	 * @return True if model contains provided identifier.
+	 */
+	bool containsBoxId(const QString &boxId) const;
+
+	/*!
 	 * @brief Returns list of box identifiers according to required state.
 	 *
 	 * @param[in] entryState Specifies the checked state of required data.
 	 * @return List of data box identifiers.
 	 */
 	QStringList boxIdentifiers(enum EntryState entryState) const;
+
+	/*!
+	 * @brief Returns list of entries according to required state.
+	 *
+	 * @Param[in] entryState Specifies the checked state of required data.
+	 * @return List of partial entries.
+	 */
+	QList<PartialEntry> partialBoxEntries(enum EntryState entryState) const;
 };
 
 #endif /* _DATA_BOX_CONTACTS_MODEL_H_ */
