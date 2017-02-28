@@ -272,7 +272,6 @@ SOURCES += \
     src/gui/dlg_correspondence_overview.cpp \
     src/gui/dlg_create_account.cpp \
     src/gui/dlg_ds_search.cpp \
-    src/gui/dlg_ds_search2.cpp \
     src/gui/dlg_import_zfo.cpp \
     src/gui/dlg_import_zfo_result.cpp \
     src/gui/dlg_login_mojeid.cpp \
@@ -376,7 +375,6 @@ HEADERS += \
     src/gui/dlg_correspondence_overview.h \
     src/gui/dlg_create_account.h \
     src/gui/dlg_ds_search.h \
-    src/gui/dlg_ds_search2.h \
     src/gui/dlg_import_zfo.h \
     src/gui/dlg_import_zfo_result.h \
     src/gui/dlg_login_mojeid.h \
@@ -471,7 +469,6 @@ FORMS += \
     src/gui/ui/dlg_correspondence_overview.ui \
     src/gui/ui/dlg_create_account.ui \
     src/gui/ui/dlg_ds_search.ui \
-    src/gui/ui/dlg_ds_search2.ui \
     src/gui/ui/dlg_import_zfo_result.ui \
     src/gui/ui/dlg_import_zfo.ui \
     src/gui/ui/dlg_login_mojeid.ui \
