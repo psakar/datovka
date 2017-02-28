@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,15 @@
  * the two.
  */
 
+#include "src/gui/dlg_import_zfo.h"
 
-#include "dlg_import_zfo.h"
-#include "src/common.h"
-
-
-ImportZFODialog::ImportZFODialog(QWidget *parent) :
-    QDialog(parent)
+ImportZFODialog::ImportZFODialog(enum ImportZFODialog::ZFOtype &zfoType,
+    enum ImportZFODialog::ZFOlocation &locationType, bool &checkZfoOnServer,
+    QWidget *parent)
+    : QDialog(parent),
+    m_zfoType(zfoType),
+    m_locationType(locationType),
+    m_checkZfoOnServer(checkZfoOnServer)
 {
 	setupUi(this);
 	this->info->setText(tr("Here you can import whole messages and "
@@ -39,16 +41,17 @@ ImportZFODialog::ImportZFODialog(QWidget *parent) :
 	    "only if a corresponding complete message already exists in the "
 	    "database."));
 
-	connect(this->buttonBox, SIGNAL(accepted()), this, SLOT(ImportFiles()));
+	connect(this->buttonBox, SIGNAL(accepted()),
+	    this, SLOT(setChosenValues()));
 	connect(this->radioImportAll, SIGNAL(clicked()),
-	    this, SLOT(ChangeRadioBox()));
+	    this, SLOT(setControlsActivity()));
 	connect(this->radioImportSelected, SIGNAL(clicked()),
-	    this, SLOT(ChangeRadioBox()));
+	    this, SLOT(setControlsActivity()));
 
 	this->checkOnServer->setCheckState(Qt::Checked);
 }
 
-void ImportZFODialog::ChangeRadioBox(void)
+void ImportZFODialog::setControlsActivity(void)
 {
 	if (this->radioImportAll->isChecked()) {
 		this->includeSubDir->setEnabled(true);
@@ -57,29 +60,25 @@ void ImportZFODialog::ChangeRadioBox(void)
 	}
 }
 
-void ImportZFODialog::ImportFiles(void)
+void ImportZFODialog::setChosenValues(void)
 {
-	enum ZFOtype zfoType = IMPORT_MESSAGE_ZFO;
-	enum ZFOaction zfoAaction = IMPORT_FROM_DIR;
-
 	if (this->messageZFO->isChecked()) {
-		zfoType = IMPORT_MESSAGE_ZFO;
+		m_zfoType = IMPORT_MESSAGE_ZFO;
 	} else if (this->deliveryZFO->isChecked()) {
-		zfoType = IMPORT_DELIVERY_ZFO;
+		m_zfoType = IMPORT_DELIVERY_ZFO;
 	} else {
-		zfoType = IMPORT_ALL_ZFO;
+		m_zfoType = IMPORT_ALL_ZFO;
 	}
 
 	if (this->radioImportAll->isChecked()) {
 		if (this->includeSubDir->isChecked()) {
-			zfoAaction = IMPORT_FROM_SUBDIR;
+			m_locationType = IMPORT_FROM_SUBDIR;
 		} else {
-			zfoAaction = IMPORT_FROM_DIR;
+			m_locationType = IMPORT_FROM_DIR;
 		}
 	} else if (this->radioImportSelected->isChecked()) {
-		zfoAaction = IMPORT_SEL_FILES;
+		m_locationType = IMPORT_SEL_FILES;
 	}
 
-	emit returnZFOAction(zfoType, zfoAaction,
-	    Qt::Unchecked != checkOnServer->checkState());
+	m_checkZfoOnServer = Qt::Unchecked != checkOnServer->checkState();
 }

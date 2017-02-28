@@ -274,9 +274,11 @@ SOURCES += \
     src/gui/dlg_ds_search.cpp \
     src/gui/dlg_import_zfo.cpp \
     src/gui/dlg_import_zfo_result.cpp \
+    src/gui/dlg_login_mojeid.cpp \
     src/gui/dlg_msg_search.cpp \
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
+    src/gui/dlg_search_mojeid.cpp \
     src/gui/dlg_send_message.cpp \
     src/gui/dlg_signature_detail.cpp \
     src/gui/dlg_tag.cpp \
@@ -290,6 +292,7 @@ SOURCES += \
     src/io/exports.cpp \
     src/io/file_downloader.cpp \
     src/io/filesystem.cpp \
+    src/io/imports.cpp \
     src/io/isds_helper.cpp \
     src/io/isds_login.cpp \
     src/io/isds_sessions.cpp \
@@ -301,6 +304,8 @@ SOURCES += \
     src/io/sqlite/db.cpp \
     src/io/sqlite/table.cpp \
     src/io/tag_db.cpp \
+    src/io/tag_db_container.cpp \
+    src/io/wd_sessions.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
@@ -321,36 +326,32 @@ SOURCES += \
     src/views/table_home_end_filter.cpp \
     src/views/table_key_press_filter.cpp \
     src/views/table_space_selection_filter.cpp \
+    src/web/net.cpp \
+    src/web/json.cpp \
     src/worker/message_emitter.cpp \
     src/worker/pool.cpp \
     src/worker/task.cpp \
     src/worker/task_authenticate_message.cpp \
     src/worker/task_change_pwd.cpp \
-    src/worker/task_download_message.cpp \
-    src/worker/task_download_message_list.cpp \
     src/worker/task_download_credit_info.cpp \
+    src/worker/task_download_message.cpp \
+    src/worker/task_download_message_mojeid.cpp \
+    src/worker/task_download_message_list.cpp \
+    src/worker/task_download_message_list_mojeid.cpp \
     src/worker/task_download_owner_info.cpp \
     src/worker/task_download_password_info.cpp \
     src/worker/task_download_user_info.cpp \
     src/worker/task_erase_message.cpp \
+    src/worker/task_get_account_list_mojeid.cpp \
     src/worker/task_import_zfo.cpp \
     src/worker/task_keep_alive.cpp \
     src/worker/task_search_owner.cpp \
     src/worker/task_send_message.cpp \
-    src/worker/task_vacuum_db_set.cpp \
-    src/worker/task_verify_message.cpp \
-    src/web/net.cpp \
-    src/web/json.cpp \
-    src/worker/task_download_message_list_mojeid.cpp \
-    src/worker/task_sync_mojeid.cpp \
-    src/worker/task_get_account_list_mojeid.cpp \
-    src/worker/task_download_message_mojeid.cpp \
-    src/gui/dlg_search_mojeid.cpp \
     src/worker/task_send_message_mojeid.cpp \
-    src/io/wd_sessions.cpp \
-    src/io/tag_db_container.cpp \
+    src/worker/task_sync_mojeid.cpp \
     src/worker/task_tag_sync_mojeid.cpp \
-    src/gui/dlg_login_mojeid.cpp
+    src/worker/task_vacuum_db_set.cpp \
+    src/worker/task_verify_message.cpp
 
 HEADERS += \
     src/cli/cli.h \
@@ -373,9 +374,11 @@ HEADERS += \
     src/gui/dlg_ds_search.h \
     src/gui/dlg_import_zfo.h \
     src/gui/dlg_import_zfo_result.h \
+    src/gui/dlg_login_mojeid.h \
     src/gui/dlg_msg_search.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
+    src/gui/dlg_search_mojeid.h \
     src/gui/dlg_send_message.h \
     src/gui/dlg_signature_detail.h \
     src/gui/dlg_tag.h \
@@ -389,6 +392,7 @@ HEADERS += \
     src/io/exports.h \
     src/io/file_downloader.h \
     src/io/filesystem.h \
+    src/io/imports.h \
     src/io/isds_helper.h \
     src/io/isds_login.h \
     src/io/isds_sessions.h \
@@ -399,6 +403,8 @@ HEADERS += \
     src/io/sqlite/db.h \
     src/io/sqlite/table.h \
     src/io/tag_db.h \
+    src/io/tag_db_container.h \
+    src/io/wd_sessions.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/log/log.h \
@@ -419,37 +425,33 @@ HEADERS += \
     src/views/table_home_end_filter.h \
     src/views/table_key_press_filter.h \
     src/views/table_space_selection_filter.h \
+    src/web/net.h \
+    src/web/net_consts.h \
+    src/web/json.h \
     src/worker/message_emitter.h \
     src/worker/pool.h \
     src/worker/task.h \
     src/worker/task_authenticate_message.h \
     src/worker/task_change_pwd.h \
-    src/worker/task_download_message.h \
-    src/worker/task_download_message_list.h \
     src/worker/task_download_credit_info.h \
+    src/worker/task_download_message.h \
+    src/worker/task_download_message_mojeid.h \
+    src/worker/task_download_message_list.h \
+    src/worker/task_download_message_list_mojeid.h \
     src/worker/task_download_owner_info.h \
     src/worker/task_download_password_info.h \
     src/worker/task_download_user_info.h \
     src/worker/task_erase_message.h \
+    src/worker/task_get_account_list_mojeid.h \
     src/worker/task_import_zfo.h \
     src/worker/task_keep_alive.h \
     src/worker/task_search_owner.h \
     src/worker/task_send_message.h \
-    src/worker/task_vacuum_db_set.h \
-    src/worker/task_verify_message.h \
-    src/web/net.h \
-    src/web/net_consts.h \
-    src/web/json.h \
-    src/worker/task_download_message_list_mojeid.h \
-    src/worker/task_sync_mojeid.h \
-    src/worker/task_get_account_list_mojeid.h \
-    src/worker/task_download_message_mojeid.h \
-    src/gui/dlg_search_mojeid.h \
     src/worker/task_send_message_mojeid.h \
-    src/io/wd_sessions.h \
-    src/io/tag_db_container.h \
+    src/worker/task_sync_mojeid.h \
     src/worker/task_tag_sync_mojeid.h \
-    src/gui/dlg_login_mojeid.h
+    src/worker/task_vacuum_db_set.h \
+    src/worker/task_verify_message.h
 
 FORMS += \
     src/gui/ui/datovka.ui \
@@ -463,18 +465,18 @@ FORMS += \
     src/gui/ui/dlg_ds_search.ui \
     src/gui/ui/dlg_import_zfo_result.ui \
     src/gui/ui/dlg_import_zfo.ui \
+    src/gui/ui/dlg_login_mojeid.ui \
     src/gui/ui/dlg_msg_search.ui \
     src/gui/ui/dlg_preferences.ui \
     src/gui/ui/dlg_proxysets.ui \
+    src/gui/ui/dlg_search_mojeid.ui \
     src/gui/ui/dlg_send_message.ui \
     src/gui/ui/dlg_signature_detail.ui \
     src/gui/ui/dlg_tag.ui \
     src/gui/ui/dlg_tags.ui \
     src/gui/ui/dlg_timestamp_expir.ui \
     src/gui/ui/dlg_view_zfo.ui \
-    src/gui/ui/dlg_yes_no_checkbox.ui \
-    src/gui/ui/dlg_search_mojeid.ui \
-    src/gui/ui/dlg_login_mojeid.ui
+    src/gui/ui/dlg_yes_no_checkbox.ui
 
 RESOURCES += \
     res/resources.qrc

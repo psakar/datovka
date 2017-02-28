@@ -170,6 +170,12 @@ private slots:
 	    bool add, int rt, int rn, int st, int sn);
 
 	/*!
+	 * @brief Collects information about import status.
+	 */
+	void collectImportZfoStatus(const QString &fileName, int result,
+	    const QString &resultDesc);
+
+	/*!
 	 * @brief Performs action depending on message send outcome.
 	 */
 	void collectSendMessageStatus(const QString &userName,
@@ -592,43 +598,6 @@ private slots:
 	 * @brief Show dialog with settings of import ZFO file(s) into database.
 	 */
 	void showImportZFOActionDialog(void);
-
-	/*!
-	 * @brief Create ZFO file(s) list for import into database.
-	 */
-	void createZFOListForImport(enum ImportZFODialog::ZFOtype zfoType,
-	    enum ImportZFODialog::ZFOaction importType, bool checkOnServer);
-
-	/*!
-	 * @brief Collects information about import status.
-	 */
-	void collectImportZfoStatus(const QString &fileName, int result,
-	    const QString &resultDesc);
-
-	/*!
-	 * @brief Create account info list for ZFO files import into database.
-	 *
-	 * @note The user if going to be prompted about missing password.
-	 *
-	 * @param[in] activeOnly Whether to list only active accounts.
-	 * @return List of accounts.
-	 */
-	QList<Task::AccountDescr> createAccountInfoForZFOImport(
-	    bool activeOnly);
-
-	/*!
-	 * @brief Prepare import ZFO file(s) into database by ZFO type.
-	 */
-	void prepareZFOImportIntoDatabase(const QStringList &files,
-	    enum ImportZFODialog::ZFOtype zfoType, bool authenticate);
-
-	/*!
-	 * @brief Show ZFO import notification dialog with results of import.
-	 */
-	void showImportZfoResultDialogue(int filesCnt,
-	    const QList<QPair<QString,QString>> &successFilesList,
-	    const QList<QPair<QString,QString>> &existFilesList,
-	    const QList<QPair<QString,QString>> &errorFilesList);
 
 	/*!
 	 * @brief About application dialog.
@@ -1207,6 +1176,13 @@ private:
 	 */
 	void doExportOfSelectedFiles(enum Exports::ExportFileType expFileType);
 
+	/*
+	 * @brief Show ZFO import notification dialog with results of import.
+	 */
+	void showImportZfoResultDialogue(int filesCnt,
+	    const QList<QPair<QString,QString>> &successFilesList,
+	    const QList<QPair<QString,QString>> &existFilesList,
+	    const QList<QPair<QString,QString>> &errorFilesList);
 
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
@@ -1231,12 +1207,6 @@ private:
 
 	bool m_searchDlgActive; /*!< True if search dialogue is active. */
 
-	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
-	int m_numFilesToImport;
-	QList< QPair<QString, QString> > m_importSucceeded,
-	                                 m_importExisted,
-	                                 m_importFailed;
-
 	int m_received_1;
 	int m_received_2;
 	int m_sent_1;
@@ -1251,6 +1221,15 @@ private:
 	QString m_import_zfo_path;
 
 	QStringList m_msgTblAppendedCols; /*< Appended columns. */
+
+	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
+	int m_numFilesToImport; /*!< Input ZFO count. */
+	/*!< QPair in following lists means:
+	 * first string - zfo file name,
+	 * second = import result text */
+	QList< QPair<QString, QString> > m_importSucceeded; /*!< Success import resulty lists. */
+	QList< QPair<QString, QString> > m_importExisted; /*!< Import exists resulty lists. */
+	QList< QPair<QString, QString> > m_importFailed; /*!< Import error resulty lists. */
 
 	/* User interface elements. */
 	Ui::MainWindow *ui; /*!< User interface as generated from ui files. */

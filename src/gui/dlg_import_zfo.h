@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,43 +21,64 @@
  * the two.
  */
 
-
 #ifndef _DLG_IMPORT_ZFO_H_
 #define _DLG_IMPORT_ZFO_H_
 
-
 #include <QDialog>
-#include "src/common.h"
 #include "ui_dlg_import_zfo.h"
 
-
-class ImportZFODialog : public QDialog, public Ui::ImportZFO
-{
+/*!
+ * @brief Import ZFO files settings dialogue.
+ */
+class ImportZFODialog : public QDialog, public Ui::ImportZFO {
 	Q_OBJECT
-
 public:
-	enum ZFOaction {
+	/*!
+	 * Specifies how/where ZFOs will load.
+	 */
+	enum ZFOlocation {
 		IMPORT_FROM_DIR,
 		IMPORT_FROM_SUBDIR,
 		IMPORT_SEL_FILES
 	};
 
+	/*!
+	 * ZFO type.
+	 */
 	enum ZFOtype {
 		IMPORT_ALL_ZFO,
 		IMPORT_MESSAGE_ZFO,
 		IMPORT_DELIVERY_ZFO
 	};
 
-public:
-	ImportZFODialog(QWidget *parent = 0);
-
-signals:
-	void returnZFOAction(enum ImportZFODialog::ZFOtype,
-	    enum ImportZFODialog::ZFOaction, bool checkOnServer);
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[out] zfoType  - Specifies ZFO type.
+	 * @param[out] locationType - Specifies how/where ZFOs will load.
+	 * @param[out] checkZfoOnServer - Specifies if every ZFO
+	 *                                will check on the ISDS server.
+	 * @param[in] parent - Parent object.
+	 */
+	ImportZFODialog(enum ImportZFODialog::ZFOtype &zfoType,
+	    enum ImportZFODialog::ZFOlocation &locationType,
+	    bool &checkZfoOnServer, QWidget *parent = Q_NULLPTR);
 
 private slots:
-	void ImportFiles(void);
-	void ChangeRadioBox(void);
+	/*!
+	 * @brief Sets control elements activity according to chosen values.
+	 */
+	void setControlsActivity(void);
+
+	/*!
+	 * @brief Sets chosen values via references to external values.
+	 */
+	void setChosenValues(void);
+
+private:
+	enum ImportZFODialog::ZFOtype &m_zfoType; /*!< Specifies ZFO type. */
+	enum ImportZFODialog::ZFOlocation &m_locationType; /*!< Specifies how/where ZFOs will load. */
+	bool &m_checkZfoOnServer; /*!< ZFO will check on the ISDS server. */
 };
 
 #endif /* _DLG_IMPORT_ZFO_H_ */
