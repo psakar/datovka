@@ -317,6 +317,9 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(&globMsgProcEmitter,
 	    SIGNAL(importZfoFinished(QString, int, QString)), this,
 	    SLOT(collectImportZfoStatus(QString, int, QString)));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(importMessageFinished(QString, QStringList, int, int)), this,
+	    SLOT(showImportMessageResults(QString, QStringList, int, int)));
 	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
 	    this, SLOT(updateProgressBar(QString, int)));
 	connect(&globMsgProcEmitter,
@@ -8355,11 +8358,9 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 		return;
 	}
 
-	QString errStr;
 	QString dbId = globAccountDbPtr->dbId(userName + "___True");
 
-	Imports::importDbMsgsIntoDatabase(this, *dbSet, dbFileList,
-	    userName, dbId, errStr);
+	Imports::importDbMsgsIntoDatabase(*dbSet, dbFileList, userName, dbId);
 
 	/* update account model */
 	refreshAccountList(userName);
@@ -9618,4 +9619,34 @@ void MainWindow::showImportZfoResultDialogue(int filesCnt,
 	    errorFilesList, successFilesList, existFilesList, 0);
 	importZfoResult->exec();
 	importZfoResult->deleteLater();
+}
+
+void MainWindow::showImportMessageResults(const QString &userName,
+    const QStringList &errImportList, int totalMsgs, int importedMsgs)
+{
+	showStatusTextPermanently(tr("Import of messages to account %1 "
+	     "finished").arg(userName));
+
+	QMessageBox msgBox(this);
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setWindowTitle(tr("Messages import result"));
+	QString msg = tr("Import of messages into account '%1' "
+	    "finished with result:").arg(userName);
+	msgBox.setText(msg);
+	msg = tr("Total of messages in database: %1").arg(totalMsgs)
+	    + "<br/><b>" +
+	    tr("Imported messages: %1").arg(importedMsgs)
+	    + "<br/>" +
+	    tr("Non-imported messages: %1").arg(errImportList.count()) +
+	    "</b><br/>";
+	msgBox.setInformativeText(msg);
+	if (errImportList.count() > 0) {
+		msg = "";
+		for (int m = 0; m < errImportList.count(); ++ m) {
+			msg += errImportList.at(m) + "\n";
+		}
+		msgBox.setDetailedText(msg);
+	}
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.exec();
 }

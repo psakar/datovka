@@ -33,21 +33,18 @@
 class Imports {
 
 public:
-
 	/*!
 	 * @brief Import messages from external databases to local database.
 	 *
-	 * @param[in,out] parent - Parent widget to call object from.
 	 * @param[in] dbSet - Account target database set.
 	 * @param[in] dbFileList - List of external databases to import.
 	 * @param[in] userName - Account username.
 	 * @param[in] dbId - Databox ID for import.
-	 * @param[out] errTxt - Error text.
 	 */
 	static
-	void importDbMsgsIntoDatabase(QWidget *parent,
-	    MessageDbSet &dbSet, const QStringList &dbFileList,
-	    const QString &userName, const QString &dbId, QString &errTxt);
+	void importDbMsgsIntoDatabase(MessageDbSet &dbSet,
+	    const QStringList &dbFileList, const QString &userName,
+	    const QString &dbId);
 
 	/*!
 	 * @brief Import ZFO file(s) into database by ZFO type.
@@ -76,20 +73,6 @@ private:
 	 * @note Just prevent any instances of this class.
 	 */
 	Imports(void);
-
-	/*!
-	 * @brief Show error/result message box.
-	 *
-	 * @param[in,out] parent - Parent widget to call object from.
-	 * @param[in] title - Message box title.
-	 * @param[in] baseText - Message box base text.
-	 * @param[in] informativeText - Message box informative text.
-	 * @param[in] detailedText - Message box detail text.
-	 */
-	static
-	void showMessageBox(QWidget *parent, const QString &title,
-	    const QString &baseText, const QString &informativeText,
-	    const QString &detailedText);
 };
 
 #endif /* _IMPORTS_H_ */

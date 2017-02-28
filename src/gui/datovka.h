@@ -740,6 +740,12 @@ private slots:
 	    const QString &token, QString userName, QString pwd, QString otp,
 	    bool syncALL, const QString &certPath);
 
+	/*!
+	 * @brief Show information about import message results.
+	 */
+	void showImportMessageResults(const QString &userName,
+	    const QStringList &errImportList, int totalMsgs, int importedMsgs);
+
 private:
 
 	QTimer m_timerSyncAccounts;

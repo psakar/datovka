@@ -46,6 +46,7 @@
 #define PL_DOWNLOAD_RECEIVED_LIST "DownloadReceivedMessageList"
 #define PL_DOWNLOAD_SENT_LIST "DownloadSentMessageList"
 #define PL_IMPORT_ZFO_DINFO "ImportZfoDeliveryInfo"
+#define PL_IMPORT_MSG "ImportMessage"
 #define PL_IMPORT_ZFO_MSG "ImportZfoMessage"
 #define PL_SEND_MESSAGE "SendMessage"
 #define PL_SYNC_ACCOUNT "SyncAccount"
