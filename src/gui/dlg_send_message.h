@@ -158,9 +158,15 @@ private:
 	QString getPDZCreditFromISDS(const QString &userName,
 	    const QString &dbId);
 
+	/*!
+	 * @brief Query ISDS whether data box has effective OVM set.
+	 *
+	 * @param[in] userName User account to generate the query from.
+	 * @param[in] boxId Data box to ask for OVM status.
+	 * @return True if \a boxId has effective OVM status set.
+	 */
 	static
-	QString getUserInfoFromIsds(const QString &userName,
-	    const QString &idDbox);
+	bool queryISDSBoxEOVM(const QString &userName, const QString &boxId);
 
 };
 

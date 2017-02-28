@@ -533,15 +533,15 @@ void DlgSendMessage::fillDlgAsReply(void)
 	this->payRecipient->setChecked(false);
 	this->payRecipient->hide();
 
-	QString pdz;
+	bool pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = getUserInfoFromIsds(m_userName, envData.dbIDSender);
+		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDSender);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
 		this->payReply->setEnabled(false);
 		this->payReply->hide();
-		pdz = tr("no");
+		pdz = false;
 	}
 
 	if (m_dmType == "I") {
@@ -555,7 +555,7 @@ void DlgSendMessage::fillDlgAsReply(void)
 		this->payRecipient->setEnabled(true);
 		this->payRecipient->setChecked(true);
 		this->payRecipient->show();
-		pdz = tr("yes");
+		pdz = true;
 	}
 
 	int row = this->recipientTableWidget->rowCount();
@@ -570,7 +570,7 @@ void DlgSendMessage::fillDlgAsReply(void)
 	item->setText(envData.dmSenderAddress);
 	this->recipientTableWidget->setItem(row, RTW_ADDR, item);
 	item = new QTableWidgetItem;
-	item->setText(pdz);
+	item->setText(pdz ? tr("yes") : tr("no"));
 	item->setTextAlignment(Qt::AlignCenter);
 	this->recipientTableWidget->setItem(row, RTW_PDZ, item);
 }
@@ -690,15 +690,15 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 	this->OptionalWidget->setHidden(hideOptionalWidget);
 	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
 
-	QString pdz;
+	bool pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = getUserInfoFromIsds(m_userName, envData.dbIDRecipient);
+		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDRecipient);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
 		this->payReply->setEnabled(false);
 		this->payReply->hide();
-		pdz = tr("no");
+		pdz = false;
 	}
 
 	/* message is received -> recipient == sender */
@@ -715,7 +715,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		item->setText(envData.dmRecipientAddress);
 		this->recipientTableWidget->setItem(row, RTW_ADDR, item);
 		item = new QTableWidgetItem;
-		item->setText(pdz);
+		item->setText(pdz ? tr("yes") : tr("no"));
 		item->setTextAlignment(Qt::AlignCenter);
 		this->recipientTableWidget->setItem(row, RTW_PDZ, item);
 	}
@@ -1650,18 +1650,13 @@ void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
 	}
 }
 
-/* ========================================================================= */
-/*
- * Func: Return dbEffectiveOVM info from recipient
- */
-QString DlgSendMessage::getUserInfoFromIsds(const QString &userName,
-    const QString &idDbox)
-/* ========================================================================= */
+bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,
+    const QString &boxId)
 {
-	QString str = tr("no");
+	bool ret = false;
 
 	TaskSearchOwner::SoughtOwnerInfo soughtInfo(
-	    idDbox, TaskSearchOwner::BT_FO, QString(), QString(), QString(),
+	    boxId, TaskSearchOwner::BT_FO, QString(), QString(), QString(),
 	    QString(), QString());
 
 	TaskSearchOwner *task =
@@ -1676,8 +1671,8 @@ QString DlgSendMessage::getUserInfoFromIsds(const QString &userName,
 	if (foundBoxes.size() == 1) {
 		const TaskSearchOwner::BoxEntry &entry(foundBoxes.first());
 
-		str = entry.effectiveOVM ? tr("no") : tr("yes");
+		ret = entry.effectiveOVM;
 	}
 
-	return str;
+	return ret;
 }
