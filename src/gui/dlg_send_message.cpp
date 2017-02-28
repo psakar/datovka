@@ -125,14 +125,6 @@ DlgSendMessage::DlgSendMessage(
 }
 
 /* ========================================================================= */
-void DlgSendMessage::on_cancelButton_clicked(void)
-/* ========================================================================= */
-{
-	this->close();
-}
-
-
-/* ========================================================================= */
 /*
  * Init send message dialogue.
  */
@@ -159,22 +151,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	this->attachmentTableView->setColumnHidden(DbFlsTblModel::MSGID_COL, true);
 	this->attachmentTableView->setColumnHidden(DbFlsTblModel::CONTENT_COL, true);
 
-#if 0
-	this->attachmentTableView->setAcceptDrops(true);
-	this->attachmentTableView->setDragEnabled(false);
-	this->attachmentTableView->setDragDropOverwriteMode(false);
-	this->attachmentTableView->setDropIndicatorShown(true);
-	this->attachmentTableView->setDragDropMode(QAbstractItemView::InternalMove);
-//	this->attachmentTableView->setDefaultDropAction(Qt::MoveAction);
-#endif
-#if 0
-	this->attachmentTableView->setAcceptDrops(true);
-	this->attachmentTableView->setDragEnabled(true);
-	this->attachmentTableView->setDragDropOverwriteMode(false);
-	this->attachmentTableView->setDropIndicatorShown(true);
-	this->attachmentTableView->setDragDropMode(QAbstractItemView::DragDrop);
-	this->attachmentTableView->setDefaultDropAction(Qt::MoveAction);
-#endif
+	/* Enable drag and drop on attachment table. */
 	this->attachmentTableView->setAcceptDrops(true);
 	this->attachmentTableView->setDragEnabled(true);
 	this->attachmentTableView->setDragDropOverwriteMode(false);
@@ -269,6 +246,7 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    new TableHomeEndFilter(this));
 
 	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
+	connect(this->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
 	        QString, QString, bool, qint64)), this,

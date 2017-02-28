@@ -79,7 +79,6 @@ signals:
 	void doActionAfterSentMsgSignal(const QString, const QString);
 
 private slots:
-	void on_cancelButton_clicked(void);
 	void showOptionalForm(int);
 	void showOptionalFormAndSet(int);
 	void addAttachmentFile(void);
