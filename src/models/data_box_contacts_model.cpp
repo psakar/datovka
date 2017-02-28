@@ -55,10 +55,26 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 		break;
 	case BOX_TYPE_COL:
-		return convertDbTypeToString(_data(index, role).toInt());
+		{
+			QVariant entry(_data(index, role));
+
+			if (!entry.isNull()) {
+				return convertDbTypeToString(entry.toInt());
+			} else {
+				return entry;
+			}
+		}
 		break;
 	case PDZ_COL:
-		return _data(index, role).toBool() ? tr("yes") : tr("no");
+		{
+			QVariant entry(_data(index, role));
+
+			if (!entry.isNull()) {
+				return entry.toBool() ? tr("yes") : tr("no");
+			} else {
+				return entry;
+			}
+		}
 		break;
 	default:
 		return _data(index, role);
