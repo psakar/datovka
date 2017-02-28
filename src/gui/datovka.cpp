@@ -109,6 +109,7 @@
 #define WIN_POSITION_Y "y"
 #define WIN_POSITION_W "w"
 #define WIN_POSITION_H "h"
+#define WIN_POSITION_MAX "max"
 
 QNetworkAccessManager* nam;
 
@@ -275,6 +276,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_on_export_zfo_activate(QDir::homePath()),
     m_on_import_database_dir_activate(QDir::homePath()),
     m_import_zfo_path(QDir::homePath()),
+    m_geometry(),
     m_msgTblAppendedCols(),
     ui(new Ui::MainWindow),
     mui_filterLine(0),
@@ -4106,9 +4108,10 @@ bool MainWindow::ensureConfPresence(void)
 void MainWindow::loadWindowGeometry(const QSettings &settings)
 /* ========================================================================= */
 {
-	/* Window geometry. */
+	/* Default geometry. */
 	QRect defaultDimensions(Dimensions::windowDimensions(this, 76.0, 48.0));
 
+	/* Stored geometry. */
 	int x = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_X,
 	    defaultDimensions.x()).toInt();
 	int y = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_Y,
@@ -4118,6 +4121,16 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	int h = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_H,
 	    defaultDimensions.height()).toInt();
 	this->setGeometry(x, y, w, h);
+
+	/* Adjust for screen size. */
+	this->setGeometry(Dimensions::windowOnScreenDimensions(this));
+
+	bool max = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_MAX,
+	    false).toBool();
+	if (max) {
+		m_geometry = QRect(x, y, w, h);
+		this->showMaximized();
+	}
 
 	/* Splitter geometry. */
 
@@ -4465,19 +4478,28 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 	int value;
 
 	/* Window geometry. */
+	QRect geom(this->geometry());
+
+	if (this->isMaximized() && m_geometry.isValid()) {
+		geom = m_geometry;
+	}
 
 	settings.beginGroup(WIN_POSITION_HEADER);
 
-	value = this->geometry().x();
+	value = geom.x();
 	value = (value < 0) ? 0 : value;
 	settings.setValue(WIN_POSITION_X, value);
 
-	value = this->geometry().y();
+	value = geom.y();
 	value = (value < 0) ? 0 : value;
 	settings.setValue(WIN_POSITION_Y, value);
 
-	settings.setValue(WIN_POSITION_W, this->geometry().width());
-	settings.setValue(WIN_POSITION_H, this->geometry().height());
+	settings.setValue(WIN_POSITION_W, geom.width());
+	settings.setValue(WIN_POSITION_H, geom.height());
+
+	if (this->isMaximized()) {
+		settings.setValue(WIN_POSITION_MAX, true);
+	}
 
 	settings.endGroup();
 
@@ -7518,14 +7540,7 @@ bool MainWindow::firstConnectToIsds(AcntSettings &accountInfo)
 	return true;
 }
 
-
-/* ========================================================================= */
-/*
- * Check if some worker is not working on the background and show
- * dialog if user want to close application
- */
 void MainWindow::closeEvent(QCloseEvent *event)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -7553,6 +7568,48 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	}
 }
 
+void MainWindow::moveEvent(QMoveEvent *event)
+{
+	/* Event precedes actual maximisation. */
+	if (!isMaximized()) {
+		QPoint oldPos(event->oldPos());
+		if (oldPos != event->pos()) {
+			m_geometry.setTopLeft(oldPos);
+		}
+	}
+	QMainWindow::moveEvent(event);
+}
+
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+	/* Event precedes actual maximisation. */
+	if (!isMaximized()) {
+		QSize oldSize(event->oldSize());
+		if (oldSize != event->size()) {
+			m_geometry.setSize(oldSize);
+		}
+	}
+	QMainWindow::resizeEvent(event);
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+	debugFuncCall();
+
+	QMainWindow::showEvent(event);
+
+	QRect availRect(Dimensions::availableScreenSize());
+	QRect frameRect(frameGeometry());
+
+	if (isMaximized() ||
+	    ((frameRect.width() <= availRect.width()) &&
+	    (frameRect.height() <= availRect.height()))) {
+		/* Window fits to screen. */
+		return;
+	}
+
+	this->setGeometry(Dimensions::windowDimensions(this, -1.0, -1.0));
+}
 
 /* ========================================================================= */
 /*

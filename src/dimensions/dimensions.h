@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,21 @@ public:
 	int tableLineHeight(const QStyleOptionViewItem &option);
 
 	/*!
+	 * @brief Return size of available space on desktop.
+	 * @note This excludes some control elements (e.g. dock, menu bar,
+	 *     task bar). This may not work when using X11.
+	 */
+	static
+	QRect availableScreenSize(void);
+
+	/*!
+	 * @brief Return screen size.
+	 * @return Screen size.
+	 */
+	static
+	QRect screenSize(void);
+
+	/*!
 	 * @brief Returns size of dialogue specified as the ratio of the
 	 *     detected font height.
 	 *
@@ -75,6 +90,9 @@ public:
 	 * @brief Returns dimensions of window specified as the ratio of the
 	 *     detected font height.
 	 *
+	 * @note If \a wr of \a hr is negative, the window size will be
+	 *     computed to fill available space.
+	 *
 	 * @param[in] widget Widget to obtain font metrics from.
 	 * @param[in] wr Width ratio relative to font height.
 	 * @param[in] hr Height ratio relative to font height.
@@ -82,6 +100,15 @@ public:
 	 */
 	static
 	QRect windowDimensions(const QWidget *widget, qreal wr, qreal hr);
+
+	/*!
+	 * @brief Returns window geometry to fit the screen..
+	 *
+	 * @param[in] widget Window widget.
+	 * @return Widget geometry to fit into the screen.
+	 */
+	static
+	QRect windowOnScreenDimensions(const QWidget *widget);
 
 private:
 	/*!
@@ -102,6 +129,9 @@ private:
 
 	static
 	const qreal m_screenRatio; /*!< Ratio of screen dimensions to use. */
+
+	static
+	const QRect m_dfltWinRect; /*!< Default window rectangle. */
 };
 
 #endif /* _DIMENSIONS_H_ */
