@@ -218,12 +218,28 @@ bool BoxContactsModel::somethingChecked(void) const
 	return false;
 }
 
-QStringList BoxContactsModel::checkedBoxIds(void) const
+/*!
+ * @brief Compares the check state according to required criteria.
+ *
+ * @param[in] checked Check state from the model.
+ * @param[in] entryState User required check state.
+ * @return True if state matches the criteria.
+ */
+static inline
+bool checkStateMatch(bool checked, enum BoxContactsModel::EntryState entryState)
+{
+	return (!checked && (entryState == BoxContactsModel::UNCHECKED)) ||
+	    (checked && (entryState == BoxContactsModel::CHECKED)) ||
+	    (entryState == BoxContactsModel::ANY);
+}
+
+QStringList BoxContactsModel::boxIdentifiers(enum EntryState entryState) const
 {
 	QStringList ids;
 
 	for (int row = 0; row < m_rowCount; ++row) {
-		if (m_data[row][CHECKBOX_COL].toBool()) {
+		if (checkStateMatch(m_data[row][CHECKBOX_COL].toBool(),
+		        entryState)) {
 			ids.append(m_data[row][BOX_ID_COL].toString());
 		}
 	}

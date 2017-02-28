@@ -30,7 +30,7 @@
 #include "src/worker/task_search_owner_fulltext.h"
 
 /*!
- * @brief List of data boxes and additional informaction.
+ * @brief List of data boxes and additional information.
  */
 class BoxContactsModel : public TblModel {
 	Q_OBJECT
@@ -47,6 +47,15 @@ public:
 		POST_CODE_COL = 5, /* Postal code. */
 		PDZ_COL = 6, /* Commercial message. */
 		MAX_COL = 7 /* Number of columns. */
+	};
+
+	/*!
+	 * @brief Used for identifying check state for entries.
+	 */
+	enum EntryState {
+		UNCHECKED, /* Unchecked entries. */
+		CHECKED, /* Checked entries. */
+		ANY /* Unchecked and checked entries. */
 	};
 
 	/*!
@@ -124,11 +133,12 @@ public:
 	bool somethingChecked(void) const;
 
 	/*!
-	 * @brief Returns list of box identifiers that have been checked.
+	 * @brief Returns list of box identifiers according to required state.
 	 *
+	 * @param[in] entryState Specifies the checked state of required data.
 	 * @return List of data box identifiers.
 	 */
-	QStringList checkedBoxIds(void) const;
+	QStringList boxIdentifiers(enum EntryState entryState) const;
 };
 
 #endif /* _DATA_BOX_CONTACTS_MODEL_H_ */

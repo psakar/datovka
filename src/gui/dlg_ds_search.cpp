@@ -207,7 +207,8 @@ void DlgDsSearch::addSelectedDbIDs(void)
 	setBreakDownloadLoop(); /* Break download loop. */
 
 	if (m_dbIdList != Q_NULLPTR) {
-		m_dbIdList->append(m_contactTableModel.checkedBoxIds());
+		m_dbIdList->append(m_contactTableModel.boxIdentifiers(
+		    BoxContactsModel::CHECKED));
 	}
 }
 

@@ -125,7 +125,8 @@ void DlgContacts::contactItemDoubleClicked(const QModelIndex &index)
 void DlgContacts::addSelectedDbIDs(void) const
 {
 	if (m_dbIdList != Q_NULLPTR) {
-		m_dbIdList->append(m_contactTableModel.checkedBoxIds());
+		m_dbIdList->append(m_contactTableModel.boxIdentifiers(
+		    BoxContactsModel::CHECKED));
 	}
 }
 
