@@ -58,7 +58,7 @@ const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
 {
 	const static QString nothing;
 	const static QString received(QLatin1String("D"));
-	const static QString sent(QLatin1String("0"));
+	const static QString sent(QLatin1String("O"));
 
 	if (0 == messageDb || dmId < 0) {
 		return nothing;
