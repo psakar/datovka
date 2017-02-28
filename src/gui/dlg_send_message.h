@@ -53,6 +53,9 @@
  */
 const QString &dzPrefix(MessageDb *messageDb, qint64 dmId);
 
+/*!
+ * @brief Send message dialogue.
+ */
 class DlgSendMessage : public QDialog, public Ui::SendMessage {
     Q_OBJECT
 
@@ -64,9 +67,13 @@ public:
 		ACT_NEW_FROM_TMP
 	};
 
+	/*!
+	 * @brief Constructor.
+	 */
 	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
 	    Action action, const QList<MessageDb::MsgId> &msgIds,
-	    const QString &userName, class MainWindow *mv, QWidget *parent = 0);
+	    const QString &userName, class MainWindow *mv,
+	    QWidget *parent = Q_NULLPTR);
 
 signals:
 	void doActionAfterSentMsgSignal(const QString, const QString);

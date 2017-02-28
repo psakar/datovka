@@ -60,7 +60,7 @@ const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
 	const static QString received(QLatin1String("D"));
 	const static QString sent(QLatin1String("O"));
 
-	if (0 == messageDb || dmId < 0) {
+	if (Q_NULLPTR == messageDb || dmId < 0) {
 		return nothing;
 	}
 
@@ -95,19 +95,19 @@ DlgSendMessage::DlgSendMessage(
     m_keepAliveTimer(),
     m_messageDbSetList(messageDbSetList),
     m_msgIds(msgIds),
-    m_dbId(""),
-    m_senderName(""),
+    m_dbId(),
+    m_senderName(),
     m_action(action),
     m_userName(userName),
-    m_dbType(""),
+    m_dbType(),
     m_dbEffectiveOVM(false),
     m_dbOpenAddressing(false),
     m_lastAttAddPath(""),
     m_pdzCredit("0"),
-    m_dmType(""),
-    m_dmSenderRefNumber(""),
+    m_dmType(),
+    m_dmSenderRefNumber(),
     m_mv(mv),
-    m_dbSet(0),
+    m_dbSet(Q_NULLPTR),
     m_isLogged(false),
     m_attachmentModel(),
     m_isWebDatovkaAccount(false),
@@ -121,7 +121,7 @@ DlgSendMessage::DlgSendMessage(
 
 	initNewMessageDialog();
 
-	Q_ASSERT(0 != m_dbSet);
+	Q_ASSERT(Q_NULLPTR != m_dbSet);
 }
 
 /* ========================================================================= */
@@ -488,7 +488,7 @@ void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
 	{
 		QItemSelectionModel *selectionModel =
 		    this->attachmentTableView->selectionModel();
-		if (0 == selectionModel) {
+		if (Q_NULLPTR == selectionModel) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -523,7 +523,7 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 	MessageDb *messageDb =
 	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	Q_ASSERT(Q_NULLPTR != messageDb);
 
 	MessageDb::PartialEnvelopeData envData =
 	    messageDb->msgsReplyData(msgId.dmId);
@@ -611,7 +611,7 @@ void DlgSendMessage::fillDlgAsForward(void)
 	foreach (const MessageDb::MsgId &msgId, m_msgIds) {
 		MessageDb *messageDb =
 		    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
-		if (0 == messageDb) {
+		if (Q_NULLPTR == messageDb) {
 			Q_ASSERT(0);
 			continue;
 		}
@@ -654,7 +654,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 	MessageDb *messageDb =
 	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
-	Q_ASSERT(0 != messageDb);
+	Q_ASSERT(Q_NULLPTR != messageDb);
 
 	MessageDb::PartialEnvelopeData envData =
 	    messageDb->msgsReplyData(msgId.dmId);
@@ -878,8 +878,8 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 /* ========================================================================= */
 {
-	QModelIndexList firstMsgColumnIdxs =
-	   this->attachmentTableView->selectionModel()->selectedRows(0);
+	QModelIndexList firstMsgColumnIdxs(
+	   this->attachmentTableView->selectionModel()->selectedRows(0));
 
 	for (int i = firstMsgColumnIdxs.size() - 1; i >= 0; --i) {
 		/*
