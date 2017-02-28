@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,19 +34,68 @@
 class TaskSearchOwner : public Task {
 public:
 	/*!
+	 * @brief Return state describing what happened.
+	 */
+	enum Result {
+		SO_SUCCESS, /*!< Operation was successful. */
+		SO_BAD_DATA, /*!< Data related error, non-existent data. */
+		SO_COM_ERROR, /*!< Communication error. */
+		SO_ERROR /*!< Other type of error occurred. */
+	};
+
+	enum BoxType {
+		BT_OVM,
+		BT_PO,
+		BT_PFO,
+		BT_FO
+	};
+
+	/*!
+	 * @brief Structure encapsulating parts of isds_DbOwnerInfo.
+	 */
+	class SoughtOwnerInfo {
+	public:
+		SoughtOwnerInfo(const QString &_id, enum BoxType _type,
+		    const QString &_ic, const QString &_firstName,
+		    const QString &_lastName, const QString &_firmName,
+		    const QString &_zipCode);
+
+		QString id; /*!< Box identifier. */
+		enum BoxType type; /*!< Box type. */
+		QString ic; /*!< Subject identifier number. */
+		QString firstName; /*!< Person first name. */
+		QString lastName; /*!< Person last name, also last name at birth. */
+		QString firmName; /*!< Firm name. */
+		QString zipCode; /*!< ZIP code. */
+	};
+
+	/*!
+	 * @brief Describes found data box.
+	 */
+	class BoxEntry {
+	public:
+		/*!
+		 *  @brief Constructor.
+		 */
+		BoxEntry(const QString &i, int t, const QString &n,
+		    const QString &ad, const QString &zc, bool &ovm);
+
+		QString id; /*!< Data box id. */
+		int type; /*!< Data box type (as specified in libisds). */
+		QString name; /*!< Data box name. */
+		QString address; /*!< Post address. */
+		QString zipCode; /*!< ZIP code. */
+		bool effectiveOVM; /*!< Box has OVM role. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account identifier (user login name).
-	 * @param[in] info     Sought box identifiers.
+	 * @param[in] soughtInfo Sought box identifiers.
 	 */
 	explicit TaskSearchOwner(const QString &userName,
-	    const struct isds_DbOwnerInfo *info);
-
-	/*!
-	 * @brief Destructor.
-	 */
-	virtual
-	~TaskSearchOwner(void);
+	    const SoughtOwnerInfo &soughtInfo);
 
 	/*!
 	 * @brief Performs action.
@@ -60,16 +109,21 @@ public:
 	 * TODO -- This method must be private.
 	 *
 	 * @param[in]  userName Account identifier (user login name).
-	 * @param[in]  info     Sought box identifiers.
-	 * @param[out] results  List of found data boxes.
-	 * @return Value of isds_error.
+	 * @param[in]  soughtInfo Sought box identifiers.
+	 * @param[out] foundBoxes List of found data boxes to append data to.
+	 * @param[out] error Short error description.
+	 * @param[out] longError Long error description.
+	 * @return Error value.
 	 */
 	static
-	int isdsSearch(const QString &userName,
-	    const struct isds_DbOwnerInfo *info, struct isds_list **results);
+	enum Result isdsSearch(const QString &userName,
+	    const SoughtOwnerInfo &soughtInfo, QList<BoxEntry> &foundBoxes,
+	    QString &error, QString &longError);
 
-	int m_isdsRetError; /*!< Returned error code. */
-	struct isds_list *m_results; /*!< List of found data boxes. */
+	enum Result m_result; /*!< Return state. */
+	QString m_isdsError; /*!< Error description.  */
+	QString m_isdsLongError; /*!< Long error description. */
+	QList<BoxEntry> m_foundBoxes; /*!< List of found boxes. */
 
 private:
 	/*!
@@ -79,7 +133,7 @@ private:
 	TaskSearchOwner &operator=(const TaskSearchOwner &);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
-	const struct isds_DbOwnerInfo *m_info; /*!< Sought box identifiers. */
+	const SoughtOwnerInfo m_soughtInfo; /*!< Sought box identifiers. */
 };
 
 #endif /* _TASK_SEARCH_OWNER_H_ */

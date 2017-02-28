@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,47 +21,290 @@
  * the two.
  */
 
-
-#include <cstddef>
+#include <QCoreApplication>
 #include <QMessageBox>
 
-#include "dlg_ds_search.h"
+#include "src/gui/dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
-#include "src/worker/task_search_owner.h"
 
+#define CBOX_TARGET_ALL 0
+#define CBOX_TARGET_ADDRESS 1
+#define CBOX_TARGET_IC 2
+#define CBOX_TARGET_BOX_ID 3
 
-DlgDsSearch::DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-    const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-    QWidget *parent, const QString &userName)
+#define CBOX_TYPE_ALL 0
+#define CBOX_TYPE_OVM 1
+#define CBOX_TYPE_PO 2
+#define CBOX_TYPE_PFO 3
+#define CBOX_TYPE_FO 4
+
+DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
+    bool dbEffectiveOVM, bool dbOpenAddressing, QStringList *dbIdList,
+    QWidget *parent)
     : QDialog(parent),
-    m_action(action),
-    m_recipientTableWidget(recipientTableWidget),
+    m_userName(userName),
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
-    m_userName(userName),
+    m_contactTableModel(this),
+    m_boxTypeCBoxModel(this),
+    m_fulltextCBoxModel(this),
+    m_dbIdList(dbIdList),
+    m_breakDownloadLoop(false),
+    m_pingTimer(Q_NULLPTR),
     m_showInfoLabel(false)
 {
 	setupUi(this);
 	/* Set default line height for table views/widgets. */
-	resultsTableWidget->setNarrowedLineHeight();
+	this->contactTableView->setNarrowedLineHeight();
+	this->contactTableView->setSelectionBehavior(
+	    QAbstractItemView::SelectRows);
 
-	initSearchWindow();
+	m_boxTypeCBoxModel.appendRow(
+	    tr("All") + QStringLiteral(" - ") + tr("All types"),
+	    CBOX_TYPE_ALL);
+	m_boxTypeCBoxModel.appendRow(
+	    tr("OVM") + QStringLiteral(" - ") + tr("Orgán veřejné moci"),
+	    CBOX_TYPE_OVM);
+	m_boxTypeCBoxModel.appendRow(
+	    tr("PO") + QStringLiteral(" - ") + tr("Právnická osoba"),
+	    CBOX_TYPE_PO);
+	m_boxTypeCBoxModel.appendRow(
+	    tr("PFO") + QStringLiteral(" - ") + tr("Podnikající fyzická osoba"),
+	    CBOX_TYPE_PFO);
+	m_boxTypeCBoxModel.appendRow(
+	    tr("FO") + QStringLiteral(" - ") + tr("Fyzická osoba"),
+	    CBOX_TYPE_FO);
+	this->dataBoxTypeCBox->setModel(&m_boxTypeCBoxModel);
+
+	m_fulltextCBoxModel.appendRow(
+	    tr("All") + QStringLiteral(" - ") + tr("Search in all fields"),
+	    CBOX_TARGET_ALL);
+	m_fulltextCBoxModel.appendRow(
+	    tr("Address") + QStringLiteral(" - ") + tr("Search in address data"),
+	    CBOX_TARGET_ADDRESS);
+	m_fulltextCBoxModel.appendRow(
+	    tr("IC") + QStringLiteral(" - ") + tr("Identification number"),
+	    CBOX_TARGET_IC);
+	m_fulltextCBoxModel.appendRow(
+	    tr("ID") + QStringLiteral(" - ") + tr("Box identifier"),
+	    CBOX_TARGET_BOX_ID);
+	this->fulltextTargetCBox->setModel(&m_fulltextCBoxModel);
+
+	m_contactTableModel.setHeader();
+	this->contactTableView->setModel(&m_contactTableModel);
+
+	connect(this->contactTableView->selectionModel(),
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+	    this, SLOT(setFirstColumnActive(QItemSelection, QItemSelection)));
+
+	connect(this->textLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->iDLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->iCLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->nameLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->pscLineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(this->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
+	    this, SLOT(checkInputFields()));
+	connect(&m_contactTableModel,
+	    SIGNAL(dataChanged(QModelIndex, QModelIndex)),
+	    this, SLOT(enableOkButton()));
+	connect(this->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
+	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
+	connect(this->buttonBox, SIGNAL(accepted()),
+	    this, SLOT(addSelectedDbIDs()));
+	connect(this->buttonBox, SIGNAL(rejected()),
+	    this, SLOT(setBreakDownloadLoop()));
+	connect(this->searchPushButton, SIGNAL(clicked()),
+	    this, SLOT(searchDataBox()));
+
+	connect(this->useFulltextCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(makeSearchElelementsVisible(int)));
+	this->useFulltextCheckBox->setCheckState(Qt::Checked);
+
+	this->contactTableView->installEventFilter(
+	    new TableHomeEndFilter(this));
+	this->contactTableView->installEventFilter(
+	    new TableSpaceSelectionFilter(this));
+
+#if 0 /* Don't use the timer. */
+	m_pingTimer = new QTimer(this);
+	m_pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
+
+	connect(m_pingTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
+#endif
+
+	initContent();
 }
 
-
-/* ========================================================================= */
-/*
- * Init ISDS search dialog
- */
-void DlgDsSearch::initSearchWindow(void)
-/* ========================================================================= */
+DlgDsSearch::~DlgDsSearch(void)
 {
-	this->resultsTableWidget->setColumnHidden(5, true);
+	if (m_pingTimer != Q_NULLPTR) {
+		delete m_pingTimer;
+	}
+}
 
+void DlgDsSearch::enableOkButton(void)
+{
+	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	    m_contactTableModel.somethingChecked());
+}
+
+void DlgDsSearch::setFirstColumnActive(const QItemSelection &selected,
+    const QItemSelection &deselected)
+{
+	Q_UNUSED(deselected);
+
+	if (selected.isEmpty()) {
+		return;
+	}
+	this->contactTableView->selectColumn(BoxContactsModel::CHECKBOX_COL);
+	this->contactTableView->selectRow(selected.first().top());
+}
+
+void DlgDsSearch::checkInputFields(void)
+{
+	if (Qt::Checked == this->useFulltextCheckBox->checkState()) {
+		checkInputFieldsFulltext();
+	} else {
+		checkInputFieldsNormal();
+	}
+}
+
+void DlgDsSearch::searchDataBox(void)
+{
+	this->useFulltextCheckBox->setEnabled(false);
+	this->searchPushButton->setEnabled(false);
+	QCoreApplication::processEvents();
+	if (Qt::Checked == this->useFulltextCheckBox->checkState()) {
+		searchDataBoxFulltext();
+	} else {
+		searchDataBoxNormal();
+	}
+	this->useFulltextCheckBox->setEnabled(true);
+	this->searchPushButton->setEnabled(true);
+}
+
+void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
+{
+	if (index.isValid() && (m_dbIdList != Q_NULLPTR)) {
+		m_dbIdList->append(index.sibling(index.row(),
+		    BoxContactsModel::BOX_ID_COL).data(
+		        Qt::DisplayRole).toString());
+	}
+	this->close();
+}
+
+void DlgDsSearch::addSelectedDbIDs(void)
+{
+	setBreakDownloadLoop(); /* Break download loop. */
+
+	if (m_dbIdList != Q_NULLPTR) {
+		m_dbIdList->append(m_contactTableModel.checkedBoxIds());
+	}
+}
+
+void DlgDsSearch::setBreakDownloadLoop(void)
+{
+	m_breakDownloadLoop = true;
+}
+
+void DlgDsSearch::pingIsdsServer(void)
+{
+	if (globIsdsSessions.isConnectedToIsds(m_userName)) {
+		qDebug() << "Connection to ISDS is alive :)";
+	} else {
+		qDebug() << "Connection to ISDS is dead :(";
+	}
+}
+
+void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
+{
+	labelSearchInfo->hide();
+
+	fulltextTargetLabel->hide();
+	fulltextTargetCBox->hide();
+
+	iDLineLabel->hide();
+	iDLineEdit->clear();
+	iDLineEdit->hide();
+
+	iCLineLabel->hide();
+	iCLineEdit->clear();
+	iCLineEdit->hide();
+
+	nameLineLabel->hide();
+	nameLineEdit->clear();
+	nameLineEdit->hide();
+
+	pscLineLabel->hide();
+	pscLineEdit->clear();
+	pscLineEdit->hide();
+
+	textLineLabel->hide();
+	textLineEdit->clear();
+	textLineEdit->hide();
+
+	searchResultText->setText(QString());
+
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
+
+	if (Qt::Checked == fulltextState) {
+		labelSearchDescr->setText(
+		    tr("Full-text data box search. Enter phrase for finding and set optional restrictions:"));
+
+		m_boxTypeCBoxModel.setEnabled(CBOX_TYPE_ALL, true);
+
+		contactTableView->setColumnHidden(
+		    BoxContactsModel::POST_CODE_COL, true);
+		contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+		    true);
+
+		fulltextTargetLabel->show();
+		fulltextTargetCBox->show();
+
+		textLineLabel->show();
+		textLineEdit->show();
+	} else {
+		labelSearchDescr->setText(
+		    tr("Enter the ID, IČ or at least three letters from the name of the data box you look for:"));
+
+		/* Cannot search for all data box types. */
+		m_boxTypeCBoxModel.setEnabled(CBOX_TYPE_ALL, false);
+		if (dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt() ==
+		    CBOX_TYPE_ALL) {
+			dataBoxTypeCBox->setCurrentIndex(
+			    m_boxTypeCBoxModel.findRow(CBOX_TYPE_OVM));
+		}
+
+		contactTableView->setColumnHidden(
+		    BoxContactsModel::POST_CODE_COL, false);
+		contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+		    true);
+
+		iDLineLabel->show();
+		iDLineEdit->show();
+
+		iCLineLabel->show();
+		iCLineEdit->show();
+
+		nameLineLabel->show();
+		nameLineEdit->show();
+
+		pscLineLabel->show();
+		pscLineEdit->show();
+	}
+}
+
+void DlgDsSearch::initContent(void)
+{
 	QString dbOpenAddressing = "";
 	QString toolTipInfo = "";
 
@@ -93,150 +336,58 @@ void DlgDsSearch::initSearchWindow(void)
 	this->accountInfo->setText("<strong>" + m_userName +
 	    "</strong>" + " - " + m_dbType + dbOpenAddressing);
 
-	this->infoLabel->setStyleSheet("QLabel { color: red }");
-	this->infoLabel->setToolTip(toolTipInfo);
-	this->infoLabel->hide();
+	this->labelSearchInfo->setStyleSheet("QLabel { color: red }");
+	this->labelSearchInfo->setToolTip(toolTipInfo);
+	this->labelSearchInfo->hide();
 
-	this->dataBoxTypeCBox->addItem(tr("OVM – Orgán veřejné moci"));
-	this->dataBoxTypeCBox->addItem(tr("PO – Právnická osoba"));
-	this->dataBoxTypeCBox->addItem(tr("PFO – Podnikající fyzická osoba"));
-	this->dataBoxTypeCBox->addItem(tr("FO – Fyzická osoba"));
-
-	this->resultsTableWidget->setColumnWidth(0,20);
-	this->resultsTableWidget->setColumnWidth(1,60);
-	this->resultsTableWidget->setColumnWidth(2,120);
-	this->resultsTableWidget->setColumnWidth(3,100);
-
-	connect(this->resultsTableWidget,
-	    SIGNAL(itemSelectionChanged()), this,
-	    SLOT(setFirtsColumnActive()));
-
-	connect(this->iDLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->iCLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->nameLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->pscLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
-	    this, SLOT(checkInputFields()));
-	connect(this->resultsTableWidget,SIGNAL(itemClicked(QTableWidgetItem*)),
-	    this, SLOT(enableOkButton()));
-	connect(this->resultsTableWidget,
-	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
-	    SLOT(enableOkButton()));
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(insertDsItems()));
-	connect(this->searchPushButton, SIGNAL(clicked()), this,
-	    SLOT(searchDataBox()));
-	connect(this->resultsTableWidget, SIGNAL(doubleClicked(QModelIndex)),
-	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
+	this->contactTableView->setColumnWidth(BoxContactsModel::CHECKBOX_COL, 20);
+	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 60);
+	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_TYPE_COL, 70);
+	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 120);
+	this->contactTableView->setColumnWidth(BoxContactsModel::ADDRESS_COL, 100);
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	this->resultsTableWidget->
+	this->contactTableView->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-	this->resultsTableWidget->installEventFilter(
-	    new TableHomeEndFilter(this));
-	this->resultsTableWidget->installEventFilter(
-	    new TableSpaceSelectionFilter(this));
-
-	pingTimer = new QTimer(this);
-	pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
-
-	connect(pingTimer, SIGNAL(timeout()), this,
-	    SLOT(pingIsdsServer()));
 
 	checkInputFields();
 }
 
-
-/* ========================================================================= */
-/*
- * Set first column with checkbox active if item was changed
- */
-void DlgDsSearch::setFirtsColumnActive(void)
-/* ========================================================================= */
-{
-	this->resultsTableWidget->selectColumn(0);
-	this->resultsTableWidget->selectRow(
-	    this->resultsTableWidget->currentRow());
-}
-
-
-/* ========================================================================= */
-/*
- * Ping isds server, test if connection on isds server is active
- */
-void DlgDsSearch::pingIsdsServer(void)
-/* ========================================================================= */
-{
-	if (globIsdsSessions.isConnectedToIsds(m_userName)) {
-		qDebug() << "Connection to ISDS is alive :)";
-	} else {
-		qDebug() << "Connection to ISDS is dead :(";
-	}
-}
-
-/* ========================================================================= */
-/*
- * Check input fields in the dialog
- */
-void DlgDsSearch::checkInputFields(void)
-/* ========================================================================= */
+void DlgDsSearch::checkInputFieldsNormal(void)
 {
 	this->nameLineEdit->setEnabled(true);
 	this->pscLineEdit->setEnabled((true));
 	this->iCLineEdit->setEnabled((true));
 	this->iDLineEdit->setEnabled((true));
 
-	switch (this->dataBoxTypeCBox->currentIndex()) {
-	/* OVM */
-	case 0:
+	switch (this->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
+	case CBOX_TYPE_OVM:
 		this->iCLineEdit->setEnabled(true);
-		this->labelName->setText(tr("Subject Name:"));
-		this->labelName->setToolTip(tr("Enter name of subject"));
+		this->nameLineLabel->setText(tr("Subject Name:"));
+		this->nameLineLabel->setToolTip(tr("Enter name of subject"));
 		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
-		this->infoLabel->hide();
+		this->labelSearchInfo->hide();
 		break;
-	/* PO */
-	case 1:
+	case CBOX_TYPE_PO:
 		this->iCLineEdit->setEnabled(true);
-		this->labelName->setText(tr("Subject Name:"));
-		this->labelName->setToolTip(tr("Enter name of subject"));
+		this->nameLineLabel->setText(tr("Subject Name:"));
+		this->nameLineLabel->setToolTip(tr("Enter name of subject"));
 		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
-		if (m_showInfoLabel) {
-			this->infoLabel->show();
-		} else {
-			this->infoLabel->hide();
-		}
+		this->labelSearchInfo->setVisible(m_showInfoLabel);
 		break;
-	/* FPO */
-	case 2:
+	case CBOX_TYPE_PFO:
 		this->iCLineEdit->setEnabled(true);
-		this->labelName->setText(tr("Name:"));
-		this->labelName->setToolTip(tr("Enter PFO last name or company name."));
-		this->nameLineEdit->setToolTip(tr("Enter PFO last name or company name."));
-		if (m_showInfoLabel) {
-			this->infoLabel->show();
-		} else {
-			this->infoLabel->hide();
-		}
+		this->nameLineLabel->setText(tr("Name:"));
+		this->nameLineLabel->setToolTip(tr("Enter last name of the PFO or company name."));
+		this->nameLineEdit->setToolTip(tr("Enter last name of the PFO or company name."));
+		this->labelSearchInfo->setVisible(m_showInfoLabel);
 		break;
-	/* FO */
-	case 3:
+	case CBOX_TYPE_FO:
 		this->iCLineEdit->setEnabled(false);
-		this->labelName->setText(tr("Last Name:"));
-		this->labelName->setToolTip(tr("Enter last name or "
-		    "birth last name of FO."));
-		this->nameLineEdit->setToolTip(tr("Enter last name or "
-		    "birth last name of FO."));
-		if (m_showInfoLabel) {
-			this->infoLabel->show();
-		} else {
-			this->infoLabel->hide();
-		}
+		this->nameLineLabel->setText(tr("Last Name:"));
+		this->nameLineLabel->setToolTip(tr("Enter last name or last name at birth of the FO."));
+		this->nameLineEdit->setToolTip(tr("Enter last name or last name at birth of the FO."));
+		this->labelSearchInfo->setVisible(m_showInfoLabel);
 		break;
 	default:
 		break;
@@ -281,17 +432,14 @@ void DlgDsSearch::checkInputFields(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Call ISDS and find data boxes with given criteria
- */
-void DlgDsSearch::searchDataBox(void)
-/* ========================================================================= */
+void DlgDsSearch::checkInputFieldsFulltext(void)
 {
-	this->resultsTableWidget->setRowCount(0);
-	this->resultsTableWidget->setEnabled(false);
+	this->searchPushButton->setEnabled(
+	    this->textLineEdit->text().size() > 2);
+}
 
+void DlgDsSearch::searchDataBoxNormal(void)
+{
 	if (this->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
 		QMessageBox::information(this, tr("Search result"),
 		    tr("This is a special ID for system databox of "
@@ -301,330 +449,218 @@ void DlgDsSearch::searchDataBox(void)
 		return;
 	}
 
-	struct isds_ctx *session;
-	struct isds_PersonName *personName = NULL;
-	struct isds_Address *address = NULL;
-	struct isds_DbOwnerInfo *ownerInfo = NULL;
-	struct isds_list *boxes = NULL;
-	QList<QVector<QString>> list_contacts;
-
-	isds_DbType dbType;
-
-	switch (this->dataBoxTypeCBox->currentIndex()) {
-	case 3:
-		dbType = DBTYPE_FO;
+	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
+	switch (this->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
+	case CBOX_TYPE_FO:
+		boxType = TaskSearchOwner::BT_FO;
 		break;
-	case 2:
-		dbType = DBTYPE_PFO;
+	case CBOX_TYPE_PFO:
+		boxType = TaskSearchOwner::BT_PFO;
 		break;
-	case 1:
-		dbType = DBTYPE_PO;
+	case CBOX_TYPE_PO:
+		boxType = TaskSearchOwner::BT_PO;
 		break;
+	case CBOX_TYPE_OVM:
 	default:
-		dbType = DBTYPE_OVM;
+		boxType = TaskSearchOwner::BT_OVM;
 		break;
 	}
 
-	personName = isds_PersonName_create(QString(), QString(),
-	    this->nameLineEdit->text(), this->nameLineEdit->text());
-	if (NULL == personName) {
-		goto fail;
-	}
-	address = isds_Address_create(QString(), QString(), QString(),
-	    QString(), this->pscLineEdit->text(), QString());
-	if (NULL == address) {
-		goto fail;
-	}
-	ownerInfo = isds_DbOwnerInfo_createConsume(this->iDLineEdit->text(),
-	    dbType, this->iCLineEdit->text(), personName,
-	    this->nameLineEdit->text(), NULL, address, QString(), QString(),
-	    QString(), QString(), QString(), 0, false, false);
-	if (NULL != ownerInfo) {
-		personName = NULL;
-		address = NULL;
-	} else {
-		goto fail;
+	queryBoxNormal(this->iDLineEdit->text(), boxType,
+	    this->iCLineEdit->text(), this->nameLineEdit->text(),
+	    this->pscLineEdit->text());
+}
+
+void DlgDsSearch::searchDataBoxFulltext(void)
+{
+	enum TaskSearchOwnerFulltext::FulltextTarget target =
+	    TaskSearchOwnerFulltext::FT_ALL;
+	switch (this->fulltextTargetCBox->currentData(CBoxModel::valueRole).toInt()) {
+	case CBOX_TARGET_ALL:
+		target = TaskSearchOwnerFulltext::FT_ALL;
+		break;
+	case CBOX_TARGET_ADDRESS:
+		target = TaskSearchOwnerFulltext::FT_ADDRESS;
+		break;
+	case CBOX_TARGET_IC:
+		target = TaskSearchOwnerFulltext::FT_IC;
+		break;
+	case CBOX_TARGET_BOX_ID:
+	default:
+		target = TaskSearchOwnerFulltext::FT_BOX_ID;
+		break;
 	}
 
-	int status;
-	TaskSearchOwner *task;
+	enum TaskSearchOwnerFulltext::BoxType boxType =
+	    TaskSearchOwnerFulltext::BT_ALL;
+	switch (this->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
+	case CBOX_TYPE_FO:
+		boxType = TaskSearchOwnerFulltext::BT_FO;
+		break;
+	case CBOX_TYPE_PFO:
+		boxType = TaskSearchOwnerFulltext::BT_PFO;
+		break;
+	case CBOX_TYPE_PO:
+		boxType = TaskSearchOwnerFulltext::BT_PO;
+		break;
+	case CBOX_TYPE_OVM:
+		boxType = TaskSearchOwnerFulltext::BT_OVM;
+		break;
+	case CBOX_TYPE_ALL:
+	default:
+		boxType = TaskSearchOwnerFulltext::BT_ALL;
+		break;
+	}
 
-	task = new (std::nothrow) TaskSearchOwner(m_userName, ownerInfo);
+	queryBoxFulltextAll(target, boxType, this->textLineEdit->text());
+}
+
+void DlgDsSearch::queryBoxNormal(const QString &boxId,
+    enum TaskSearchOwner::BoxType boxType, const QString &ic,
+    const QString &name, const QString &zipCode)
+{
+	this->contactTableView->setEnabled(false);
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
+
+	QString resultString(tr("Total found") + QStringLiteral(": "));
+	this->searchResultText->setText(resultString + QStringLiteral("0"));
+
+	TaskSearchOwner::SoughtOwnerInfo soughtInfo(boxId, boxType, ic, name,
+	    name, name, zipCode);
+
+	TaskSearchOwner *task =
+	    new (std::nothrow) TaskSearchOwner(m_userName, soughtInfo);
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
-	status = task->m_isdsRetError;
-	boxes = task->m_results; task->m_results = NULL;
+	enum TaskSearchOwner::Result result = task->m_result;
+	QString errMsg = task->m_isdsError;
+	QString longErrMsg = task->m_isdsLongError;
+	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
 
-	delete task;
-	isds_DbOwnerInfo_free(&ownerInfo);
+	delete task; task = Q_NULLPTR;
 
-	session = globIsdsSessions.session(m_userName);
-	if (NULL == session) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-
-	switch (status) {
-	case IE_SUCCESS:
+	switch (result) {
+	case TaskSearchOwner::SO_SUCCESS:
 		break;
-	case IE_2BIG:
-	case IE_NOEXIST:
-	case IE_INVAL:
-	case IE_INVALID_CONTEXT:
+	case TaskSearchOwner::SO_BAD_DATA:
 		QMessageBox::information(this, tr("Search result"),
-		    isdsLongMessage(session), QMessageBox::Ok);
-		goto fail;
+		    longErrMsg, QMessageBox::Ok);
+		return;
 		break;
-	case IE_ISDS:
-	case IE_NOT_LOGGED_IN:
-	case IE_CONNECTION_CLOSED:
-	case IE_TIMED_OUT:
-	case IE_NETWORK:
-	case IE_HTTP:
-	case IE_SOAP:
-	case IE_XML:
+	case TaskSearchOwner::SO_COM_ERROR:
 		QMessageBox::information(this, tr("Search result"),
-		    tr("It is not possible find databox because") + ":\n\n" +
-		    isdsLongMessage(session), QMessageBox::Ok);
-		goto fail;
+		    tr("It was not possible find any data box because") +
+		    QStringLiteral(":\n\n") + longErrMsg,
+		    QMessageBox::Ok);
+		return;
 		break;
+	case TaskSearchOwner::SO_ERROR:
 	default:
 		QMessageBox::critical(this, tr("Search error"),
-		    tr("It is not possible find databox because "
-		         "error occurred during search process!"),
+		    tr("It was not possible find any data box because an error occurred during the search process!"),
 		    QMessageBox::Ok);
-		goto fail;
+		return;
 		break;
 	}
 
-	struct isds_list *box;
-	box = boxes;
+	m_contactTableModel.appendData(foundBoxes);
 
-	while (0 != box) {
+	this->searchResultText->setText(
+	    resultString + QString::number(foundBoxes.size()));
 
-		this->resultsTableWidget->setEnabled(true);
-		isds_DbOwnerInfo *item = (isds_DbOwnerInfo *) box->data;
-		Q_ASSERT(0 != item);
-		QVector<QString> contact;
-		contact.append(item->dbID);
-
-		QString name;
-
-		if ((item->dbType != NULL) && (*item->dbType == DBTYPE_FO)) {
-			name = QString(item->personName->pnFirstName) +
-			    " " + QString(item->personName->pnLastName);
-		} else if ((item->dbType != NULL) &&
-		           (*item->dbType == DBTYPE_PFO)) {
-			QString firmName = item->firmName;
-			if (firmName.isEmpty() || firmName == " ") {
-				name = QString(item->personName->pnFirstName) +
-				    " " + QString(item->personName->pnLastName);
-			} else {
-				name = item->firmName;
-			}
-		} else {
-			name = item->firmName;
-		}
-
-		QString address, street, adNumberInStreet, adNumberInMunicipality;
-		if (NULL != item->address) {
-
-			street = item->address->adStreet;
-			adNumberInStreet = item->address->adNumberInStreet;
-			adNumberInMunicipality = item->address->adNumberInMunicipality;
-
-			if (street.isEmpty() || street == " ") {
-				address = item->address->adCity;
-			} else {
-				address = street;
-				if (adNumberInStreet.isEmpty() ||
-				    adNumberInStreet == " ") {
-					address += + " " +
-					    adNumberInMunicipality +
-					    ", " + QString(item->address->adCity);
-				} else if (adNumberInMunicipality.isEmpty() ||
-				    adNumberInMunicipality == " ") {
-					address += + " " +
-					    adNumberInStreet +
-					    ", " + QString(item->address->adCity);
-				} else {
-					address += + " "+
-					    adNumberInMunicipality
-					    + "/" +
-					    adNumberInStreet +
-					", " + QString(item->address->adCity);
-				}
-			}
-
-			contact.append(name);
-			contact.append(address);
-			contact.append(QString(item->address->adZipCode));
-			contact.append(*item->dbEffectiveOVM ? tr("no") : tr("yes"));
-
-			list_contacts.append(contact);
-			addContactsToTable(list_contacts);
-		}
-
-		box = box->next;
+	if (m_contactTableModel.rowCount() > 0) {
+		this->contactTableView->selectColumn(
+		    BoxContactsModel::CHECKBOX_COL);
+		this->contactTableView->selectRow(0);
 	}
 
-	this->resultsTableWidget->resizeColumnsToContents();
+	this->contactTableView->setEnabled(true);
 
-fail:
-	isds_PersonName_free(&personName);
-	isds_Address_free(&address);
-	isds_DbOwnerInfo_free(&ownerInfo);
-	isds_list_free(&boxes);
+	//this->contactTableView->resizeColumnsToContents();
 }
 
-
-/* ========================================================================= */
-/*
- * Enable action button
- */
-void DlgDsSearch::enableOkButton(void)
-/* ========================================================================= */
+bool DlgDsSearch::queryBoxFulltextPage(
+	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	    enum TaskSearchOwnerFulltext::BoxType boxType,
+	    const QString &phrase, qint64 pageNum)
 {
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
-		if (this->resultsTableWidget->item(i,0)->checkState()) {
-			this->buttonBox->button(QDialogButtonBox::Ok)->
-			    setEnabled(true);
+	QString resultString(tr("Total found") + QStringLiteral(": "));
+	this->searchResultText->setText(resultString + QStringLiteral("0"));
+
+	TaskSearchOwnerFulltext *task =
+	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, phrase,
+	        target, boxType, pageNum, false);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	enum TaskSearchOwnerFulltext::Result result = task->m_result;
+	QString errMsg = task->m_isdsError;
+	QString longErrMsg = task->m_isdsLongError;
+	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
+	quint64 totalDb = task->m_totalMatchingBoxes;
+	bool gotLastPage = task->m_gotLastPage;
+
+	delete task; task = Q_NULLPTR;
+
+	switch (result) {
+	case TaskSearchOwnerFulltext::SOF_SUCCESS:
+		break;
+	case TaskSearchOwnerFulltext::SOF_BAD_DATA:
+		QMessageBox::information(this, tr("Search result"),
+		    longErrMsg, QMessageBox::Ok);
+		return false;
+		break;
+	case TaskSearchOwnerFulltext::SOF_COM_ERROR:
+		QMessageBox::information(this, tr("Search result"),
+		    tr("It was not possible find any data box because") +
+		    QStringLiteral(":\n\n") + longErrMsg,
+		    QMessageBox::Ok);
+		return false;
+		break;
+	case TaskSearchOwnerFulltext::SOF_ERROR:
+	default:
+		QMessageBox::critical(this, tr("Search error"),
+		    tr("It was not possible find any data box because an error occurred during the search process!"),
+		    QMessageBox::Ok);
+		return false;
+		break;
+	}
+
+	m_contactTableModel.appendData(foundBoxes);
+
+	this->searchResultText->setText(
+	    resultString + QString::number(totalDb) + QStringLiteral("; ") +
+	    tr("Displayed") + QStringLiteral(": ") +
+	    QString::number(m_contactTableModel.rowCount()));
+
+	if (m_contactTableModel.rowCount() > 0) {
+		this->contactTableView->selectColumn(
+		    BoxContactsModel::CHECKBOX_COL);
+		this->contactTableView->selectRow(0);
+	}
+
+	return !gotLastPage; /* Return false when last page received. */
+}
+
+void DlgDsSearch::queryBoxFulltextAll(
+    enum TaskSearchOwnerFulltext::FulltextTarget target,
+    enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
+{
+	this->contactTableView->setEnabled(false);
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
+
+	qint64 pageNum = 0;
+	while (queryBoxFulltextPage(target, boxType, phrase, pageNum)) {
+		QCoreApplication::processEvents();
+		++pageNum;
+		if (m_breakDownloadLoop) {
+			m_breakDownloadLoop = false;
+			break;
 		}
 	}
-}
 
+	this->contactTableView->setEnabled(true);
 
-/* ========================================================================= */
-/*
- * At contact list from ISDS into search result table widget
- */
-void DlgDsSearch::addContactsToTable(
-    const QList< QVector<QString> > &contactList)
-/* ========================================================================= */
-{
-	this->resultsTableWidget->setRowCount(0);
-
-	this->resultsTableWidget->setEnabled(true);
-	for (int i = 0; i < contactList.count(); i++) {
-
-		int row = this->resultsTableWidget->rowCount();
-		this->resultsTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setCheckState(Qt::Unchecked);
-		this->resultsTableWidget->setItem(row,0,item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(0));
-		this->resultsTableWidget->setItem(row,1,item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(1));
-		this->resultsTableWidget->setItem(row,2,item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(2));
-		this->resultsTableWidget->setItem(row,3,item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(3));
-		this->resultsTableWidget->setItem(row,4,item);
-		item = new QTableWidgetItem;
-		item->setText(contactList[i].at(4));
-		this->resultsTableWidget->setItem(row,5,item);
-	}
-
-	if (this->resultsTableWidget->rowCount() > 0) {
-		this->resultsTableWidget->selectColumn(0);
-		this->resultsTableWidget->selectRow(0);
-	}
-
-}
-
-
-/* ========================================================================= */
-/*
- * Test if the selected item is not in recipient list
- */
-bool DlgDsSearch::isInRecipientTable(const QString &idDs) const
-/* ========================================================================= */
-{
-	Q_ASSERT(0 != m_recipientTableWidget);
-
-	for (int i = 0; i < this->m_recipientTableWidget->rowCount(); i++) {
-		if (this->m_recipientTableWidget->item(i,0)->text() == idDs) {
-			return true;
-		}
-	}
-	return false;
-}
-
-
-/* ========================================================================= */
-/*
- * Insert selected contacts into recipient list of the sent message dialog.
- */
-void DlgDsSearch::insertDsItems(void)
-/* ========================================================================= */
-{
-	if (ACT_ADDNEW == m_action) {
-		Q_ASSERT(0 != m_recipientTableWidget);
-		for (int i = 0; i < this->resultsTableWidget->rowCount(); i++) {
-			if (this->resultsTableWidget->item(i,0)->checkState()) {
-				insertContactToRecipentTable(i);
-			}
-		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Doubleclick of selected contact.
- */
-void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
-/* ========================================================================= */
-{
-	if (ACT_ADDNEW == m_action) {
-
-		if (!index.isValid()) {
-			this->close();
-			return;
-		}
-
-		insertContactToRecipentTable(index.row());
-
-		this->close();
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Insert contact into recipient list of the sent message dialog.
- */
-void DlgDsSearch::insertContactToRecipentTable(int selRow)
-/* ========================================================================= */
-{
-	if (!isInRecipientTable(
-	    this->resultsTableWidget->item(selRow, 1)->text())) {
-
-		int row = m_recipientTableWidget->rowCount();
-		m_recipientTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(this->resultsTableWidget->
-		    item(selRow, 1)->text());
-		this->m_recipientTableWidget->setItem(row,0,item);
-		item = new QTableWidgetItem;
-		item->setText(this->resultsTableWidget->
-		    item(selRow, 2)->text());
-		this->m_recipientTableWidget->setItem(row,1,item);
-		item = new QTableWidgetItem;
-		item->setText(this->resultsTableWidget->
-		    item(selRow, 3)->text() + " " +
-		    this->resultsTableWidget->item(selRow, 4)->text());
-		this->m_recipientTableWidget->setItem(row, 2, item);
-		item = new QTableWidgetItem;
-		item->setText(m_dbEffectiveOVM ? tr("no") :
-		    this->resultsTableWidget->item(selRow, 5)->text());
-		item->setTextAlignment(Qt::AlignCenter);
-		this->m_recipientTableWidget->setItem(row, 3, item);
-	}
+	//this->contactTableView->resizeColumnsToContents();
 }

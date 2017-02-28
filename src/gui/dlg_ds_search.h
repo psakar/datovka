@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,55 +21,170 @@
  * the two.
  */
 
-
 #ifndef _DLG_DS_SEARCH_H_
 #define _DLG_DS_SEARCH_H_
-
 
 #include <QDialog>
 #include <QTimer>
 
 #include "src/common.h"
+#include "src/models/combo_box_model.h"
+#include "src/models/data_box_contacts_model.h"
+#include "src/worker/task_search_owner.h"
+#include "src/worker/task_search_owner_fulltext.h"
 #include "ui_dlg_ds_search.h"
 
-
+/*!
+ * @brief Data box search dialogue.
+ */
 class DlgDsSearch : public QDialog, public Ui::DsSearch {
 	Q_OBJECT
-
 public:
-	enum Action {
-		ACT_BLANK,
-		ACT_ADDNEW
-	};
+	/*!
+	 * @brief Constructor.
+	 */
+	DlgDsSearch(const QString &userName, const QString &dbType,
+	    bool dbEffectiveOVM, bool dbOpenAddressing,
+	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
-	DlgDsSearch(Action action, QTableWidget *recipientTableWidget,
-	    const QString &dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-	    QWidget *parent = 0, const QString &userName = QString());
+	/*!
+	 * @brief Destructor.
+	 */
+	virtual
+	~DlgDsSearch(void);
 
 private slots:
-	void checkInputFields(void);
-	void insertDsItems(void);
+	/*!
+	 * @brief Activates confirmation button.
+	 */
 	void enableOkButton(void);
+
+	/*!
+	 * @brief Set first column containing checkboxes active.
+	 *
+	 * @param[in] selected Newly selected items.
+	 * @param[in] deselected Deselected items.
+	 */
+	void setFirstColumnActive(const QItemSelection &selected,
+	    const QItemSelection &deselected);
+
+	/*!
+	 * @brief Check input fields sanity and activate search button.
+	 */
+	void checkInputFields(void);
+
+	/*!
+	 * @brief Search for data boxes according given criteria.
+	 */
 	void searchDataBox(void);
-	void pingIsdsServer(void);
-	void setFirtsColumnActive(void);
+
+	/*!
+	 * @brief Makes a selection and closes the dialogue.
+	 */
 	void contactItemDoubleClicked(const QModelIndex &index);
 
-private:
-	QTimer *pingTimer;
-	bool isInRecipientTable(const QString &idDs) const;
-	void initSearchWindow(void);
-	void addContactsToTable(const QList< QVector<QString> > &contactList);
-	void insertContactToRecipentTable(int selRow);
+	/*!
+	 * @brief Appends selected box identifiers into identifier list.
+	 */
+	void addSelectedDbIDs(void);
 
-	Action m_action;
-	QTableWidget *m_recipientTableWidget;
-	QString m_dbType;
-	bool m_dbEffectiveOVM;
-	bool m_dbOpenAddressing;
-	const QString m_userName;
+	/*!
+	 * @brief Signals breaking of download loop.
+	 */
+	void setBreakDownloadLoop(void);
+
+	/*!
+	 * @brief Ping the ISDS server, test whether connection is active.
+	 */
+	void pingIsdsServer(void);
+
+	/*!
+	 * @brief Displays elements relevant for normal or full-text search.
+	 *
+	 * @param[in] fulltextCheckState STate of full-text checkbox state.
+	 */
+	void makeSearchElelementsVisible(int fulltextState);
+
+private:
+	/*!
+	 * @brief Initialise dialogue content.
+	 */
+	void initContent(void);
+
+	/*!
+	 * @brief Check input field sanity for normal search.
+	 */
+	void checkInputFieldsNormal(void);
+
+	/*!
+	 * @brief Check input field sanity for full-text search.
+	 */
+	void checkInputFieldsFulltext(void);
+
+	/*!
+	 * @brief Normal search for data boxes according given criteria.
+	 */
+	void searchDataBoxNormal(void);
+
+	/*!
+	 * @brief Full-text search for data boxes according given criteria.
+	 */
+	void searchDataBoxFulltext(void);
+
+	/*!
+	 * @brief Encapsulates query.
+	 *
+	 * @param[in] boxId Data box identifier.
+	 * @param[in] boxTye Type of sought data box.
+	 * @param[in] ic Identifier number.
+	 * @param[in] name Name to search for.
+	 * @param[in] zipCode ZIP code.
+	 */
+	void queryBoxNormal(const QString &boxId,
+	    enum TaskSearchOwner::BoxType boxType, const QString &ic,
+	    const QString &name, const QString &zipCode);
+
+	/*!
+	 * @brief Encapsulates full-text query for a single page.
+	 *
+	 * @param[in] target Which field to search in.
+	 * @param[in] boxType Type of data box to search for.
+	 * @param[in] phrase Text phrase to search for.
+	 * @param[in] pageNum Page umber to ask for.
+	 * @return False on error or when last page downloaded.
+	 */
+	bool queryBoxFulltextPage(
+	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	    enum TaskSearchOwnerFulltext::BoxType boxType,
+	    const QString &phrase, qint64 pageNum);
+
+	/*!
+	 * @brief Encapsulated full-text query for all entries.
+	 *
+	 * @param[in] target Which field to search in.
+	 * @param[in] boxType Type of data box to search for.
+	 * @param[in] phrase Text phrase to search for.
+	 */
+	void queryBoxFulltextAll(
+	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	    enum TaskSearchOwnerFulltext::BoxType boxType,
+	    const QString &phrase);
+
+	const QString m_userName; /*!< User name used for searching. */
+	const QString m_dbType; /*!< Data box type used for searching.  */
+	const bool m_dbEffectiveOVM;
+	const bool m_dbOpenAddressing;
+
+	BoxContactsModel m_contactTableModel; /*!< Model of found data boxes. */
+	CBoxModel m_boxTypeCBoxModel; /*!< Data box type combo box model. */
+	CBoxModel m_fulltextCBoxModel; /*!< Full-text combo box model. */
+
+	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
+
+	bool m_breakDownloadLoop; /*!< Setting to true interrupts download loop. */
+
+	QTimer *m_pingTimer;
 	bool m_showInfoLabel;
 };
-
 
 #endif /* DLG_DS_SEARCH_H */

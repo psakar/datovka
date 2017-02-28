@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,9 +142,19 @@ private:
 	bool buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
 	bool buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
 
+	/*
+	 * Insert list of databoxes into recipient list.
+	*/
+	void insertDataboxesToRecipientList(const QStringList &dbIDs);
+
+
 	static
 	QString getPDZCreditFromISDS(const QString &userName,
 	    const QString &dbId);
+
+	static
+	QString getUserInfoFromIsds(const QString &userName,
+	    const QString &idDbox);
 
 };
 

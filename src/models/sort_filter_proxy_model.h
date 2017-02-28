@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,14 +28,20 @@
 
 class SortFilterProxyModel : public QSortFilterProxyModel {
 	Q_OBJECT
-
 public:
+	static
+	const QString blankFilterEditStyle; /*!< Blank filter line style. */
+	static
+	const QString foundFilterEditStyle; /*!< Found filter line style. */
+	static
+	const QString notFoundFilterEditStyle; /*!< Not found filter line style. */
+
 	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	explicit SortFilterProxyModel(QObject *parent = 0);
+	explicit SortFilterProxyModel(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Set the column where the key is used for filtering.

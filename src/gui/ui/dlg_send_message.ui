@@ -530,6 +530,11 @@
      </column>
      <column>
       <property name="text">
+       <string>Type</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
        <string>Name</string>
       </property>
       <property name="toolTip">
@@ -843,14 +848,14 @@ of postal data messages active.</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>AttachmentTableView</class>
-   <extends>QTableView</extends>
-   <header>attachment_table_view.h</header>
-  </customwidget>
-  <customwidget>
    <class>LoweredTableWidget</class>
    <extends>QTableWidget</extends>
    <header>lowered_table_widget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>AttachmentTableView</class>
+   <extends>QTableView</extends>
+   <header>attachment_table_view.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>

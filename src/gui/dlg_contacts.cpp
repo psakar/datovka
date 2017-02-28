@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,290 +22,153 @@
  */
 
 
-#include "dlg_contacts.h"
-#include "src/io/isds_sessions.h"
+#include "src/gui/dlg_contacts.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
-#include "src/worker/pool.h"
-#include "src/worker/task_search_owner.h"
 
 
 DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
-    QTableWidget &recipientTableWidget,
-    QString dbType, bool dbEffectiveOVM, bool dbOpenAddressing,
-    QWidget *parent, const QString &userName)
+    QStringList *dbIdList, QWidget *parent)
     : QDialog(parent),
-    m_recipientTableWidget(recipientTableWidget),
     m_dbSet(dbSet),
     m_dbId(dbId),
-    m_dbType(dbType),
-    m_dbEffectiveOVM(dbEffectiveOVM),
-    m_dbOpenAddressing(dbOpenAddressing),
-    m_userName(userName)
+    m_contactListProxyModel(this),
+    m_contactTableModel(this),
+    m_dbIdList(dbIdList)
 {
 	setupUi(this);
 	/* Set default line height for table views/widgets. */
-	contactTableWidget->setNarrowedLineHeight();
+	this->contactTableView->setNarrowedLineHeight();
+	this->contactTableView->setSelectionBehavior(
+	    QAbstractItemView::SelectRows);
 
-	this->contactTableWidget->setColumnWidth(0,20);
-	this->contactTableWidget->setColumnWidth(1,60);
-	this->contactTableWidget->setColumnWidth(2,150);
+	m_contactTableModel.setHeader();
+	m_contactListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
+	m_contactListProxyModel.setSourceModel(&m_contactTableModel);
+	{
+		QList<int> columnList;
+		columnList.append(BoxContactsModel::BOX_ID_COL);
+		columnList.append(BoxContactsModel::BOX_NAME_COL);
+		columnList.append(BoxContactsModel::ADDRESS_COL);
+		m_contactListProxyModel.setFilterKeyColumns(columnList);
+	}
+	this->contactTableView->setModel(&m_contactListProxyModel);
+
+	this->contactTableView->setColumnWidth(BoxContactsModel::CHECKBOX_COL, 20);
+	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 70);
+	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 150);
+
+	this->contactTableView->setColumnHidden(BoxContactsModel::BOX_TYPE_COL,
+	    true);
+	this->contactTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL,
+	    true);
+	this->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+	    true);
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	this->clearPushButton->setEnabled(false);
 
 	fillContactsFromMessageDb();
 
-	if (this->contactTableWidget->rowCount() > 0) {
-
-		this->contactTableWidget->selectColumn(0);
-		this->contactTableWidget->selectRow(0);
-	}
-
-	connect(this->contactTableWidget,
-	    SIGNAL(itemSelectionChanged()), this,
-	    SLOT(setFirtsColumnActive()));
 	connect(this->filterLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterContact(QString)));
-	connect(this->contactTableWidget,
-	    SIGNAL(itemClicked(QTableWidgetItem*)), this,
-	    SLOT(enableOkButton()));
-	connect(this->contactTableWidget,
-	    SIGNAL(itemChanged(QTableWidgetItem*)), this,
-	    SLOT(enableOkButton()));
-	connect(this->clearPushButton, SIGNAL(clicked()), this,
-	    SLOT(clearContactText()));
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(insertDsItems()));
-	connect(this->contactTableWidget, SIGNAL(doubleClicked(QModelIndex)),
+	connect(&m_contactTableModel,
+	    SIGNAL(dataChanged(QModelIndex, QModelIndex)),
+	    this, SLOT(enableOkButton()));
+	connect(this->contactTableView->selectionModel(),
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+	    this, SLOT(setFirstColumnActive(QItemSelection, QItemSelection)));
+	connect(this->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
+	connect(this->clearPushButton, SIGNAL(clicked()),
+	    this, SLOT(clearContactText()));
+	connect(this->buttonBox, SIGNAL(accepted()),
+	    this, SLOT(addSelectedDbIDs()));
 
-	this->contactTableWidget->
+	this->contactTableView->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	this->contactTableWidget->installEventFilter(
+	this->contactTableView->installEventFilter(
 	    new TableHomeEndFilter(this));
-	this->contactTableWidget->installEventFilter(
+	this->contactTableView->installEventFilter(
 	    new TableSpaceSelectionFilter(this));
 }
 
-
-/* ========================================================================= */
-/*
- * Set first column with checkbox active if item was changed
- */
-void DlgContacts::setFirtsColumnActive(void)
-/* ========================================================================= */
+void DlgContacts::enableOkButton(void)
 {
-	this->contactTableWidget->selectColumn(0);
-	this->contactTableWidget->selectRow(
-	    this->contactTableWidget->currentRow());
+	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	    m_contactTableModel.somethingChecked());
 }
 
-
-/* ========================================================================= */
-/*
- * Apply filter text on the tablewidget
- */
-void DlgContacts::filterContact(const QString &text)
-/* ========================================================================= */
+void DlgContacts::setFirstColumnActive(const QItemSelection &selected,
+    const QItemSelection &deselected)
 {
-	this->clearPushButton->setEnabled(true);
-	if (!text.isEmpty()) {
-		for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-			contactTableWidget->hideRow(i);
-		}
-		QList<QTableWidgetItem *> items =
-		    contactTableWidget->findItems(text, Qt::MatchContains);
-		for (int i = 0; i < items.count(); i++) {
-				contactTableWidget->showRow(items.at(i)->row());
-		}
-	} else {
-		this->clearPushButton->setEnabled(false);
-		for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-			contactTableWidget->showRow(i);
-		}
+	Q_UNUSED(deselected);
+
+	if (selected.isEmpty()) {
+		return;
+	}
+	this->contactTableView->selectColumn(BoxContactsModel::CHECKBOX_COL);
+	this->contactTableView->selectRow(selected.first().top());
+}
+
+void DlgContacts::contactItemDoubleClicked(const QModelIndex &index)
+{
+	if (index.isValid() && (m_dbIdList != Q_NULLPTR)) {
+		m_dbIdList->append(index.sibling(index.row(),
+		    BoxContactsModel::BOX_ID_COL).data(
+		        Qt::DisplayRole).toString());
+	}
+	this->close();
+}
+
+void DlgContacts::addSelectedDbIDs(void) const
+{
+	if (m_dbIdList != Q_NULLPTR) {
+		m_dbIdList->append(m_contactTableModel.checkedBoxIds());
 	}
 }
 
+void DlgContacts::filterContact(const QString &text)
+{
+	this->clearPushButton->setEnabled(!text.isEmpty());
 
-/* ========================================================================= */
-/*
- * Clear search text in the filterLineEdit
- */
+	m_contactListProxyModel.setFilterRegExp(QRegExp(text,
+	    Qt::CaseInsensitive, QRegExp::FixedString));
+	/* Set filter field background colour. */
+	if (text.isEmpty()) {
+		this->filterLineEdit->setStyleSheet(
+		    SortFilterProxyModel::blankFilterEditStyle);
+	} else if (m_contactListProxyModel.rowCount() != 0) {
+		this->filterLineEdit->setStyleSheet(
+		    SortFilterProxyModel::foundFilterEditStyle);
+	} else {
+		this->filterLineEdit->setStyleSheet(
+		    SortFilterProxyModel::notFoundFilterEditStyle);
+	}
+}
+
 void DlgContacts::clearContactText(void)
-/* ========================================================================= */
 {
 	this->filterLineEdit->clear();
 	this->clearPushButton->setEnabled(false);
 }
 
-
-/* ========================================================================= */
-/*
- * Get contacts from message db and fill wablewidget
- */
-void DlgContacts::fillContactsFromMessageDb()
-/* ========================================================================= */
+void DlgContacts::fillContactsFromMessageDb(void)
 {
-	QList<MessageDb::ContactEntry> contactList(m_dbSet.uniqueContacts());
+	this->contactTableView->setEnabled(false);
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
-	foreach (const MessageDb::ContactEntry &entry, contactList) {
-		if (m_dbId != entry.boxId) {
-			int row = this->contactTableWidget->rowCount();
-			this->contactTableWidget->insertRow(row);
-			QTableWidgetItem *item = new QTableWidgetItem;
-			item->setCheckState(Qt::Unchecked);
-			this->contactTableWidget->setItem(row, 0, item);
-			item = new QTableWidgetItem;
-			item->setText(entry.boxId);
-			this->contactTableWidget->setItem(row, 1, item);
-			item = new QTableWidgetItem;
-			item->setText(entry.name);
-			this->contactTableWidget->setItem(row, 2, item);
-			item = new QTableWidgetItem;
-			item->setText(entry.address);
-			this->contactTableWidget->setItem(row, 3, item);
-		};
-	}
-	this->contactTableWidget->resizeColumnsToContents();
-}
+	QList<MessageDb::ContactEntry> foundBoxes(m_dbSet.uniqueContacts());
 
+	this->contactTableView->setEnabled(true);
+	m_contactTableModel.appendData(foundBoxes);
 
-/* ========================================================================= */
-/*
- * Enable ok (add) button if some contact was selected
- */
-void DlgContacts::enableOkButton(void)
-/* ========================================================================= */
-{
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-		if (this->contactTableWidget->item(i,0)->checkState()) {
-			this->buttonBox->button(QDialogButtonBox::Ok)->
-			    setEnabled(true);
-		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Test if recipient exists in recipient tablewidget
- */
-bool DlgContacts::isInRecipientTable(const QString &idDs) const
-/* ========================================================================= */
-{
-	for (int i = 0; i < this->m_recipientTableWidget.rowCount(); i++) {
-		if (this->m_recipientTableWidget.item(i,0)->text() == idDs)
-		return true;
-	}
-	return false;
-}
-
-
-/* ========================================================================= */
-/*
- * Insert selected recipients into send message dialog tablewidget
- */
-void DlgContacts::insertDsItems(void)
-/* ========================================================================= */
-{
-	for (int i = 0; i < this->contactTableWidget->rowCount(); i++) {
-		if (this->contactTableWidget->item(i,0)->checkState()) {
-			insertContactToRecipentTable(i);
-		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Get and return dbEffectiveOVM info for recipient
- */
-QString DlgContacts::getUserInfoFromIsds(const QString &userName,
-    const QString &idDbox)
-/* ========================================================================= */
-{
-	QString str = tr("no");
-	struct isds_DbOwnerInfo *doi = NULL;
-	struct isds_list *box = NULL;
-	isds_DbType dbType = DBTYPE_FO;
-
-	doi = isds_DbOwnerInfo_createConsume(idDbox, dbType, QString(),
-	    NULL, QString(), NULL, NULL, QString(), QString(), QString(),
-	    QString(), QString(), 0, false, false);
-	if (NULL == doi) {
-		return str;
+	if (m_contactTableModel.rowCount() > 0) {
+		this->contactTableView->selectColumn(
+		    BoxContactsModel::CHECKBOX_COL);
+		this->contactTableView->selectRow(0);
 	}
 
-	TaskSearchOwner *task;
-
-	task = new (std::nothrow) TaskSearchOwner(userName, doi);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-
-	box = task->m_results; task->m_results = NULL;
-
-	delete task;
-	isds_DbOwnerInfo_free(&doi);
-
-	if (NULL != box) {
-		const struct isds_DbOwnerInfo *item = (isds_DbOwnerInfo *)
-		    box->data;
-		Q_ASSERT(NULL != item);
-		str = *item->dbEffectiveOVM ? tr("no") : tr("yes");
-	}
-
-	isds_list_free(&box);
-
-	return str;
-}
-
-void DlgContacts::contactItemDoubleClicked(const QModelIndex &index)
-{
-	if (!index.isValid()) {
-		this->close();
-		return;
-	}
-
-	insertContactToRecipentTable(index.row());
-
-	this->close();
-}
-
-
-void DlgContacts::insertContactToRecipentTable(int selRow)
-{
-	if (!isInRecipientTable(
-	    this->contactTableWidget->item(selRow, 1)->text())) {
-		int row = m_recipientTableWidget.rowCount();
-		m_recipientTableWidget.insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(this->contactTableWidget->
-		    item(selRow, 1)->text());
-		this->m_recipientTableWidget.setItem(row, 0,
-		    item);
-		item = new QTableWidgetItem;
-		item->setText(this->contactTableWidget->
-		    item(selRow, 2)->text());
-		this->m_recipientTableWidget.setItem(row, 1,
-		    item);
-		item = new QTableWidgetItem;
-		item->setText(this->contactTableWidget->
-		    item(selRow, 3)->text());
-		this->m_recipientTableWidget.setItem(row, 2,
-		    item);
-		item = new QTableWidgetItem;
-		if (!m_dbEffectiveOVM) {
-			item->setText(getUserInfoFromIsds(
-			    m_userName,
-			    this->contactTableWidget->item(selRow ,1)
-			    ->text()));
-		} else {
-			item->setText(tr("no"));
-		}
-		item->setTextAlignment(Qt::AlignCenter);
-		this->m_recipientTableWidget.setItem(row, 3, item);
-	}
+	//this->contactTableView->resizeColumnsToContents();
 }

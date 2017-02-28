@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -171,7 +171,7 @@ public:
 	/*!
 	 * @brief Override message as having its attachments having downloaded.
 	 *
-	 * note Emits dataChanged signal.
+	 * @note Emits dataChanged signal.
 	 *
 	 * @param[in] dmId            Message id.
 	 * @param[in] forceDownloaded Set whether to force attachments
@@ -183,7 +183,7 @@ public:
 	/*!
 	 * @brief Override message processing state.
 	 *
-	 * note Emits dataChanged signal.
+	 * @note Emits dataChanged signal.
 	 *
 	 * @param[in] dmId       Message id.
 	 * @param[in] forceState Set forced value.

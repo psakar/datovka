@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,14 +48,17 @@
 #include "src/worker/task_download_credit_info.h"
 #include "src/worker/task_keep_alive.h"
 #include "src/worker/task_send_message.h"
+#include "src/worker/task_search_owner.h"
+#include "src/worker/task_search_owner_fulltext.h"
 #include "src/worker/task_send_message_mojeid.h"
+#include "src/worker/task_search_owner.h"
 #include "ui_dlg_send_message.h"
 
 const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
 {
 	const static QString nothing;
 	const static QString received(QLatin1String("D"));
-	const static QString sent(QLatin1String("0"));
+	const static QString sent(QLatin1String("O"));
 
 	if (0 == messageDb || dmId < 0) {
 		return nothing;
@@ -78,9 +81,10 @@ const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
  * Column indexes into recipient table widget.
  */
 #define RTW_ID 0
-#define RTW_NAME 1
-#define RTW_ADDR 2
-#define RTW_PDZ 3
+#define RTW_TYPE 1
+#define RTW_NAME 2
+#define RTW_ADDR 3
+#define RTW_PDZ 4
 
 
 DlgSendMessage::DlgSendMessage(
@@ -139,9 +143,10 @@ void DlgSendMessage::initNewMessageDialog(void)
 		m_isWebDatovkaAccount = true;
 	}
 
-	this->recipientTableWidget->setColumnWidth(0,70);
-	this->recipientTableWidget->setColumnWidth(1,180);
-	this->recipientTableWidget->setColumnWidth(2,240);
+	this->recipientTableWidget->setColumnWidth(RTW_ID,70);
+	this->recipientTableWidget->setColumnWidth(RTW_TYPE,70);
+	this->recipientTableWidget->setColumnWidth(RTW_NAME,180);
+	this->recipientTableWidget->setColumnWidth(RTW_ADDR,200);
 
 	m_attachmentModel.setHeader();
 
@@ -552,8 +557,7 @@ void DlgSendMessage::fillDlgAsReply(void)
 
 	QString pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = DlgContacts::getUserInfoFromIsds(m_userName,
-		    envData.dbIDSender);
+		pdz = getUserInfoFromIsds(m_userName, envData.dbIDSender);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
@@ -710,8 +714,7 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 	QString pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = DlgContacts::getUserInfoFromIsds(m_userName,
-		    envData.dbIDRecipient);
+		pdz = getUserInfoFromIsds(m_userName, envData.dbIDRecipient);
 		this->payReply->show();
 		this->payReply->setEnabled(true);
 	} else {
@@ -860,10 +863,11 @@ void DlgSendMessage::showOptionalFormAndSet(int state)
 void DlgSendMessage::addRecipientFromLocalContact(void)
 /* ========================================================================= */
 {
-	QDialog *dlg_cont = new DlgContacts(*m_dbSet, m_dbId,
-	    *(this->recipientTableWidget), m_dbType, m_dbEffectiveOVM,
-	    m_dbOpenAddressing, this, m_userName);
-	dlg_cont->exec();
+	QStringList dbIDs;
+	QDialog *dlgCont = new DlgContacts(*m_dbSet, m_dbId, &dbIDs, this);
+	dlgCont->exec();
+	dlgCont->deleteLater();
+	insertDataboxesToRecipientList(dbIDs);
 }
 
 
@@ -995,18 +999,23 @@ void DlgSendMessage::deleteRecipientData(void)
 void DlgSendMessage::findAndAddRecipient(void)
 /* ========================================================================= */
 {
-	QDialog *dsSearch = NULL;
+	QStringList dbIDs;
+	QDialog *dsSearch = Q_NULLPTR;
 	if (!m_isWebDatovkaAccount) {
-		dsSearch = new DlgDsSearch(DlgDsSearch::ACT_ADDNEW,
-		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
-		    m_dbOpenAddressing, this, m_userName);
+		dsSearch = new DlgDsSearch(m_userName, m_dbType,
+		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
 	} else {
 		dsSearch = new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_ADDNEW,
 		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
 		    this, m_userName);
 	}
 	dsSearch->exec();
+	dsSearch->deleteLater();
+	insertDataboxesToRecipientList(dbIDs);
 }
+
+
+
 
 void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
 {
@@ -1481,19 +1490,116 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 	    tr("Enter Databox ID (7 characters):"), QLineEdit::Normal,
 	    NULL, &ok, Qt::WindowStaysOnTopHint);
 
-	if (ok) {
-		if (dbID.isEmpty() || dbID.length() != 7) {
-			return;
-		}
+	if (!ok) {
+		return;
+	}
+
+	if (dbID.isEmpty() || dbID.length() != 7) {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Critical);
+		msgBox.setWindowTitle(tr("Wrong data box ID"));
+		msgBox.setText(tr("Wrong data box ID '%1'!").arg(dbID));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		return;
+	}
+
+	QStringList dbIDs;
+	dbIDs.append(dbID);
+	insertDataboxesToRecipientList(dbIDs);
+}
+
+
+/* ========================================================================= */
+/*
+ * Insert list of databoxes into recipient list.
+ */
+void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
+/* ========================================================================= */
+{
+	foreach (const QString &dbID, dbIDs) {
 
 		int row = this->recipientTableWidget->rowCount();
 
 		/* exists dbID in the recipientTableWidget? */
 		for (int i = 0; i < row; ++i) {
-			if (this->recipientTableWidget->item(i, RTW_ID)->text() ==
-			    dbID) {
-				return;
+			if (this->recipientTableWidget->item(i, RTW_ID)->text()
+			    == dbID) {
+				continue;
 			}
+		}
+
+		// search dbID only
+		TaskSearchOwnerFulltext *task =
+		    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, dbID,
+		        TaskSearchOwnerFulltext::FT_BOX_ID,
+		        TaskSearchOwnerFulltext::BT_ALL);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+
+		QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(
+		    task->m_foundBoxes);
+		delete task; task = Q_NULLPTR;
+
+		QString name = tr("Unknown");
+		QString address = tr("Unknown");
+		QString pdz = "n/a";
+		QString dbType = "n/a";
+
+		if (foundBoxes.size() == 1) {
+			const TaskSearchOwnerFulltext::BoxEntry &entry(
+			    foundBoxes.first());
+
+			name = entry.name;
+			address = entry.address;
+			dbType = convertDbTypeToString(entry.type);
+			if (!entry.active) {
+				QMessageBox msgBox;
+				msgBox.setIcon(QMessageBox::Warning);
+				msgBox.setWindowTitle(tr("Data box is not active"));
+				msgBox.setText(tr("Recipient with data box ID '%1' "
+				    "does not have active data box.").arg(dbID));
+				msgBox.setInformativeText(tr("The message can "
+				    "not be delivered."));
+				msgBox.setStandardButtons(QMessageBox::Ok);
+				msgBox.setDefaultButton(QMessageBox::Ok);
+				msgBox.exec();
+				continue;
+			}
+			if (entry.publicSending) {
+				pdz = tr("no");
+			} else if (entry.commercialSending) {
+				pdz = tr("yes");
+			} else if (entry.effectiveOVM) {
+				pdz = tr("no");
+			} else {
+				QMessageBox msgBox;
+				msgBox.setIcon(QMessageBox::Critical);
+				msgBox.setWindowTitle(tr("Cannot send to data box"));
+				msgBox.setText(tr("Cannot send message to recipient "
+				    "with data box ID '%1'.").arg(dbID));
+				msgBox.setInformativeText(tr("You won't be able as "
+				    "user '%1' to send messages into data "
+				    "box '%2'.").arg(m_userName).arg(dbID));
+				msgBox.setStandardButtons(QMessageBox::Ok);
+				msgBox.setDefaultButton(QMessageBox::Ok);
+				msgBox.exec();
+				continue;
+			}
+		} else if (foundBoxes.isEmpty()) {
+			QMessageBox msgBox;
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle(tr("Wrong recipient"));
+			msgBox.setText(tr("Recipient with data box ID '%1' "
+			    "does not exist.").arg(dbID));
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
+			continue;
+		} else {
+			Q_ASSERT(0);
+			continue;
 		}
 
 		this->recipientTableWidget->insertRow(row);
@@ -1501,13 +1607,16 @@ void DlgSendMessage::addDbIdToRecipientList(void)
 		item->setText(dbID);
 		this->recipientTableWidget->setItem(row, RTW_ID, item);
 		item = new QTableWidgetItem;
-		item->setText("Unknown");
+		item->setText(dbType);
+		this->recipientTableWidget->setItem(row, RTW_TYPE, item);
+		item = new QTableWidgetItem;
+		item->setText(name);
 		this->recipientTableWidget->setItem(row, RTW_NAME, item);
 		item = new QTableWidgetItem;
-		item->setText("Unknown");
+		item->setText(address);
 		this->recipientTableWidget->setItem(row, RTW_ADDR, item);
 		item = new QTableWidgetItem;
-		item->setText("n/a");
+		item->setText(pdz);
 		this->recipientTableWidget->setItem(row, RTW_PDZ, item);
 	}
 }
@@ -1561,4 +1670,36 @@ void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
 			    m_lastAttAddPath);
 		}
 	}
+}
+
+/* ========================================================================= */
+/*
+ * Func: Return dbEffectiveOVM info from recipient
+ */
+QString DlgSendMessage::getUserInfoFromIsds(const QString &userName,
+    const QString &idDbox)
+/* ========================================================================= */
+{
+	QString str = tr("no");
+
+	TaskSearchOwner::SoughtOwnerInfo soughtInfo(
+	    idDbox, TaskSearchOwner::BT_FO, QString(), QString(), QString(),
+	    QString(), QString());
+
+	TaskSearchOwner *task =
+	    new (std::nothrow) TaskSearchOwner(userName, soughtInfo);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
+
+	delete task; task = Q_NULLPTR;
+
+	if (foundBoxes.size() == 1) {
+		const TaskSearchOwner::BoxEntry &entry(foundBoxes.first());
+
+		str = entry.effectiveOVM ? tr("no") : tr("yes");
+	}
+
+	return str;
 }
