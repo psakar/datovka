@@ -187,6 +187,13 @@ public:
 	    const QString &fName);
 
 	/*!
+	 * @brief Computes size of files held by the model.
+	 *
+	 * @returns Total attachment data size.
+	 */
+	qint64 totalAttachmentSize(void) const;
+
+	/*!
 	 * @brief Generate sorted list containing only one index per line each.
 	 *
 	 * @param[in] indexes Indexes identifying lines.

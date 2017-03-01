@@ -486,6 +486,18 @@ bool DbFlsTblModel::appendAttachmentEntry(const QByteArray &base64content,
 	return insertVector(rowVect, rowCount(), true);
 }
 
+qint64 DbFlsTblModel::totalAttachmentSize(void) const
+{
+	qint64 sum = 0;
+
+	for (int row = 0; row < rowCount(); ++row) {
+		sum += data(index(row, FSIZE_COL),
+		    Qt::DisplayRole).toLongLong();
+	}
+
+	return sum;
+}
+
 /*!
  * @brief Used for sorting index lists.
  */
