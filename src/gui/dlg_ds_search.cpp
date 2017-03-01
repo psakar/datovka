@@ -218,7 +218,7 @@ void DlgDsSearch::setBreakDownloadLoop(void)
 	m_breakDownloadLoop = true;
 }
 
-void DlgDsSearch::pingIsdsServer(void)
+void DlgDsSearch::pingIsdsServer(void) const
 {
 	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
 	task->setAutoDelete(true);

@@ -96,7 +96,7 @@ private slots:
 	/*!
 	 * @brief Ping the ISDS server, test whether connection is active.
 	 */
-	void pingIsdsServer(void);
+	void pingIsdsServer(void) const;
 
 	/*!
 	 * @brief Displays elements relevant for normal or full-text search.

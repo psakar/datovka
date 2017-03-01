@@ -336,6 +336,13 @@ void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
 	    index);
 }
 
+void DlgSendMessage::pingIsdsServer(void) const
+{
+	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
+	task->setAutoDelete(true);
+	globWorkPool.assignHi(task);
+}
+
 void DlgSendMessage::initContent(void)
 {
 	if (isWebDatovkaAccount(m_userName)) {
@@ -852,21 +859,6 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		m_attachmentModel.appendAttachmentEntry(
 		    fileData.dmEncodedContent, fileData.dmFileDescr);
 	}
-}
-
-
-/* ========================================================================= */
-/*
- * Ping isds server, test if connection on isds server is active.
- */
-void DlgSendMessage::pingIsdsServer(void)
-/* ========================================================================= */
-{
-	TaskKeepAlive *task;
-
-	task = new (std::nothrow) TaskKeepAlive(m_userName);
-	task->setAutoDelete(true);
-	globWorkPool.assignHi(task);
 }
 
 

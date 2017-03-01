@@ -112,7 +112,7 @@ private slots:
 	/*!
 	 * @brief Deletes selected row from the recipient list.
 	 */
-	void deleteRecipientData(void);
+	void deleteRecipientEntries(void);
 
 	/*!
 	 * @brief Show/hide optional form elements.
@@ -141,10 +141,16 @@ private slots:
 	/*
 	 * @brief Open attachment in default application.
 	 *
-	 * @param index Index identifying the line. If invalid index passed then
-	 *              selected item is taken from the selection model.
+	 * @param[in] index Index identifying the line. If invalid index passed
+	 *                  then selected item is taken from the selection
+	 *                  model.
 	 */
 	void openSelectedAttachment(const QModelIndex &index = QModelIndex());
+
+	/*!
+	 * @brief ISDS connection keep-alive function.
+	 */
+	void pingIsdsServer(void) const;
 
 	void sendMessage(void);
 	void collectSendMessageStatus(const QString &userName,
@@ -153,7 +159,6 @@ private slots:
 	    bool isPDZ, qint64 dmId);
 	void sendMessageMojeIdAction(const QString &userName,
 	    const QStringList &result, const QString &error);
-	void pingIsdsServer(void);
 	void attachmentDataChanged(const QModelIndex &topLeft,
 	    const QModelIndex &bottomRight, const QVector<int> &roles);
 	void setAccountInfo(int item);
