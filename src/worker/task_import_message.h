@@ -47,10 +47,10 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] userName - Account user name.
-	 * @param[in] dbSet - Non-null pointer to target database container.
-	 * @param[in,out] dbFileList - List of source databases.
-	 * @param[in,out] dbId - Databox ID of target account.
+	 * @param[in] userName   Account user name.
+	 * @param[in] dbSet      Non-null pointer to target database container.
+	 * @param[in] dbFileList List of source databases.
+	 * @param[in] dbId       Databox ID of target account.
 	 */
 	explicit TaskImportMessage(const QString &userName, MessageDbSet *dbSet,
 	    const QStringList &dbFileList, const QString &dbId);
@@ -76,14 +76,14 @@ private:
 	/*!
 	 * @brief Tries to import a single message into a single database.
 	 *
-	 * @param[in] userName - Account user name.
-	 * @param[in,out] dbSet - Non-null pointer to database container.
-	 * @param[in] dbSet - Non-null pointer to target database container.
-	 * @param[in] srcDbSingle - Non-null pointer to source database.
-	 * @param[in] dbFile - Path to database file.
-	 * @param[in] mId - Mesasge ID.
-	 * @param[in] dbId - Databox ID of target account.
-	 * @param[out] resultDesc - Result description.
+	 * @param[in] userName    Account user name.
+	 * @param[in,out] dbSet   Non-null pointer to database container.
+	 * @param[in] dbSet       Non-null pointer to target database container.
+	 * @param[in] srcDbSingle Non-null pointer to source database.
+	 * @param[in] dbFile      Path to database file.
+	 * @param[in] mId         Mesasge ID.
+	 * @param[in] dbId        Databox ID of target account.
+	 * @param[out] resultDesc Result description.
 	 * @returns Error identifier.
 	 */
 	static
@@ -95,13 +95,13 @@ private:
 	/*!
 	 * @brief Imports messages into database.
 	 *
-	 * @param[in] userName - Account user name.
-	 * @param[in] dbSet - Non-null pointer to target database container.
-	 * @param[in] dbFileList - List of source databases.
-	 * @param[in] dbId - Databox ID of target account.
-	 * @param[out] resultDescList - List of import results.
-	 * @param[out] msgCntTotal - Total number of messages in source db.
-	 * @param[out] importedMsg - Number of success imported messages.
+	 * @param[in] userName        Account user name.
+	 * @param[in] dbSet           Non-null pointer to target database container.
+	 * @param[in] dbFileList      List of source databases.
+	 * @param[in] dbId            Databox ID of target account.
+	 * @param[out] resultDescList List of import results.
+	 * @param[out] msgCntTotal    Total number of messages in source db.
+	 * @param[out] importedMsg    Number of success imported messages.
 	 * @returns Error identifier.
 	 */
 	static

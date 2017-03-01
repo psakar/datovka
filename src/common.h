@@ -283,11 +283,11 @@ QString getWebDatovkaTagDbPrefix(const QString &userName);
 /*!
  * @brief Check valid database filename.
  *
- * @param[in] inDbFileName Input database file name.
- * @param[out] dbUserName Username entry.
- * @paran[out] dbYear Year entry if exists or NULL.
+ * @param[in] inDbFileName   Input database file name.
+ * @param[out] dbUserName    Username entry.
+ * @paran[out] dbYear        Year entry if exists or NULL.
  * @paran[out] dbTestingFlag True if account is testing or false
- * @paran[out] errMsg Error message to user
+ * @paran[out] errMsg        Error message to user
  * @return true if database filename is correct
  */
 bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,

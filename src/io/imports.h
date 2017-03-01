@@ -36,10 +36,10 @@ public:
 	/*!
 	 * @brief Import messages from external databases to local database.
 	 *
-	 * @param[in] dbSet Account target database set.
+	 * @param[in] dbSet      Account target database set.
 	 * @param[in] dbFileList List of external databases to import.
-	 * @param[in] userName Account username.
-	 * @param[in] dbId Databox ID for import.
+	 * @param[in] userName   Account username.
+	 * @param[in] dbId       Databox ID for import.
 	 */
 	static
 	void importDbMsgsIntoDatabase(MessageDbSet &dbSet,
@@ -49,14 +49,14 @@ public:
 	/*!
 	 * @brief Import ZFO file(s) into database by ZFO type.
 	 *
-	 * @param[in] fileList List of file path to import.
-	 * @param[in] databaseList List of databases.
-	 * @param[in] zfoType ZFO type for import.
-	 * @param[in] authenticate Check ZFO validity in the ISDS.
+	 * @param[in] fileList          List of file path to import.
+	 * @param[in] databaseList      List of databases.
+	 * @param[in] zfoType           ZFO type for import.
+	 * @param[in] authenticate      Check ZFO validity in the ISDS.
 	 * @param[out] zfoFilesToImport List of valid ZFOs for import.
-	 * @param[out] zfoFilesInvalid List of invalid ZFOs.
+	 * @param[out] zfoFilesInvalid  List of invalid ZFOs.
 	 * @param[out] numFilesToImport Number of valid ZFOs for import.
-	 * @param[out] errTxt Error text.
+	 * @param[out] errTxt           Error text.
 	 */
 	static
 	void importZfoIntoDatabase(const QStringList &fileList,
