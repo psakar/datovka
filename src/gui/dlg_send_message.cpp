@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <algorithm> /* std::sort */
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDir>
@@ -77,16 +78,6 @@ const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
 	}
 }
 
-/*
- * Column indexes into recipient table widget.
- */
-#define RTW_ID 0
-#define RTW_TYPE 1
-#define RTW_NAME 2
-#define RTW_ADDR 3
-#define RTW_PDZ 4
-
-
 DlgSendMessage::DlgSendMessage(
     const QList<Task::AccountDescr> &messageDbSetList,
     Action action, const QList<MessageDb::MsgId> &msgIds,
@@ -111,37 +102,115 @@ DlgSendMessage::DlgSendMessage(
     m_isLogged(false),
     m_attachmentModel(),
     m_isWebDatovkaAccount(false),
+    m_recipientTableModel(this),
     m_transactIds(),
     m_sentMsgResultList()
 {
 	setupUi(this);
-	/* Set default line height for table views/widgets. */
-	recipientTableWidget->setNarrowedLineHeight();
-	attachmentTableView->setNarrowedLineHeight();
 
-	initNewMessageDialog();
+	/* Set default line height for table views/widgets. */
+	recipientTableView->setNarrowedLineHeight();
+	recipientTableView->setSelectionBehavior(
+	    QAbstractItemView::SelectRows);
+
+	attachmentTableView->setNarrowedLineHeight();
+	attachmentTableView->setSelectionBehavior(
+	    QAbstractItemView::SelectRows);
+
+	initContent();
 
 	Q_ASSERT(Q_NULLPTR != m_dbSet);
 }
 
-/* ========================================================================= */
-/*
- * Init send message dialogue.
+void DlgSendMessage::checkInputFields(void)
+{
+	bool buttonEnabled = calculateAndShowTotalAttachSize() &&
+	    !this->subjectText->text().isEmpty() &&
+	    (m_recipientTableModel.rowCount() > 0) &&
+	    (m_attachmentModel.rowCount() > 0);
+
+	if (this->payReply->isChecked()) {
+		if (this->dmSenderRefNumber->text().isEmpty()) {
+			buttonEnabled = false;
+		}
+	}
+
+	if (m_isLogged) {
+		this->sendButton->setEnabled(buttonEnabled);
+	} else {
+		this->sendButton->setEnabled(false);
+	}
+}
+
+void DlgSendMessage::recipientSelected(const QItemSelection &selected,
+    const QItemSelection &deselected)
+{
+	Q_UNUSED(selected);
+	Q_UNUSED(deselected);
+
+	/*
+	 * 'I' means contractual PDZ that initiates a reply (prepaid?) PDZ.
+	 * It should not be possible to delete recipients for those messages.
+	 */
+	removeRecipient->setEnabled((m_dmType != QStringLiteral("I")) &&
+	    recipientTableView->selectionModel()->selectedRows(0).size() > 0);
+}
+
+/*!
+ * @brief Used for sorting lists of integers.
  */
-void DlgSendMessage::initNewMessageDialog(void)
-/* ========================================================================= */
+class RowLess {
+public:
+	bool operator()(int a, int b) const
+	{
+		return a < b;
+	}
+};
+
+void DlgSendMessage::deleteRecipientData(void)
+{
+	QList<int> rows;
+	{
+		QModelIndexList indexes(
+		    recipientTableView->selectionModel()->selectedRows(0));
+
+		foreach (const QModelIndex &idx, indexes) {
+			rows.append(idx.row());
+		}
+
+		::std::sort(rows.begin(), rows.end(), RowLess());
+	}
+
+	/* In reverse order. */
+	for (int i = rows.size() - 1; i >= 0; --i) {
+		m_recipientTableModel.removeRows(rows.at(i), 1);
+	}
+	/* Deleting selected items should disable the trigger button. */
+}
+
+void DlgSendMessage::showOptionalForm(int checkState)
+{
+	this->OptionalWidget->setHidden(Qt::Unchecked == checkState);
+}
+
+void DlgSendMessage::initContent(void)
 {
 	if (isWebDatovkaAccount(m_userName)) {
 		m_isWebDatovkaAccount = true;
 	}
 
-	this->recipientTableWidget->setColumnWidth(RTW_ID,70);
-	this->recipientTableWidget->setColumnWidth(RTW_TYPE,70);
-	this->recipientTableWidget->setColumnWidth(RTW_NAME,180);
-	this->recipientTableWidget->setColumnWidth(RTW_ADDR,200);
+	m_recipientTableModel.setHeader();
+	this->recipientTableView->setModel(&m_recipientTableModel);
+
+	this->recipientTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 60);
+	this->recipientTableView->setColumnWidth(BoxContactsModel::BOX_TYPE_COL, 70);
+	this->recipientTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 120);
+	this->recipientTableView->setColumnWidth(BoxContactsModel::ADDRESS_COL, 100);
+
+	this->recipientTableView->setColumnHidden(BoxContactsModel::CHECKBOX_COL, true);
+	this->recipientTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL, true);
 
 	m_attachmentModel.setHeader();
-
 	this->attachmentTableView->setModel(&m_attachmentModel);
 
 	this->attachmentTableView->setColumnWidth(DbFlsTblModel::FNAME_COL, 150);
@@ -180,12 +249,12 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(this->fromComboBox, SIGNAL(currentIndexChanged(int)),
 	    this, SLOT(setAccountInfo(int)));
 
-	connect(this->recipientTableWidget->model(),
-	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
-	    SLOT(checkInputFields()));
-	connect(this->recipientTableWidget->model(),
-	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
-	    SLOT(checkInputFields()));
+	connect(&m_recipientTableModel,
+	    SIGNAL(rowsInserted(QModelIndex, int, int)),
+	    this, SLOT(checkInputFields()));
+	connect(&m_recipientTableModel,
+	    SIGNAL(rowsRemoved(QModelIndex, int, int)),
+	    this, SLOT(checkInputFields()));
 
 	connect(this->payReply, SIGNAL(stateChanged(int)), this,
 	    SLOT(showOptionalFormAndSet(int)));
@@ -209,9 +278,9 @@ void DlgSendMessage::initNewMessageDialog(void)
 	connect(this->openAttachment, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
 
-	connect(this->recipientTableWidget,
-	    SIGNAL(itemClicked(QTableWidgetItem *)), this,
-	    SLOT(recItemSelect()));
+	connect(this->recipientTableView->selectionModel(),
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+	    this, SLOT(recipientSelected(QItemSelection, QItemSelection)));
 
 	connect(this->attachmentTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(openSelectedAttachment(QModelIndex)));
@@ -235,12 +304,12 @@ void DlgSendMessage::initNewMessageDialog(void)
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
 	    SLOT(attachmentSelectionChanged(QItemSelection, QItemSelection)));
 
-	this->recipientTableWidget->
+	this->recipientTableView->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 	this->attachmentTableView->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
-	this->recipientTableWidget->installEventFilter(
+	this->recipientTableView->installEventFilter(
 	    new TableHomeEndFilter(this));
 	this->attachmentTableView->installEventFilter(
 	    new TableHomeEndFilter(this));
@@ -308,13 +377,9 @@ void DlgSendMessage::setAccountInfo(int item)
 	const QString userName = this->fromComboBox->itemData(item).toString();
 
 	if (!userName.isEmpty()) {
-		/* if account was changed, remove all recipients */
-		if (m_userName != userName) {
-			for (int i = this->recipientTableWidget->rowCount() - 1;
-			    i >= 0; --i) {
-				this->recipientTableWidget->removeRow(i);
-			}
-		}
+		/* If account was changed, remove all recipients. */
+		m_recipientTableModel.removeRows(0,
+		    m_recipientTableModel.rowCount());
 		m_userName = userName;
 	}
 
@@ -558,21 +623,8 @@ void DlgSendMessage::fillDlgAsReply(void)
 		pdz = true;
 	}
 
-	int row = this->recipientTableWidget->rowCount();
-	this->recipientTableWidget->insertRow(row);
-	QTableWidgetItem *item = new QTableWidgetItem;
-	item->setText(envData.dbIDSender);
-	this->recipientTableWidget->setItem(row, RTW_ID, item);
-	item = new QTableWidgetItem;
-	item->setText(envData.dmSender);
-	this->recipientTableWidget->setItem(row, RTW_NAME, item);
-	item = new QTableWidgetItem;
-	item->setText(envData.dmSenderAddress);
-	this->recipientTableWidget->setItem(row, RTW_ADDR, item);
-	item = new QTableWidgetItem;
-	item->setText(pdz ? tr("yes") : tr("no"));
-	item->setTextAlignment(Qt::AlignCenter);
-	this->recipientTableWidget->setItem(row, RTW_PDZ, item);
+	m_recipientTableModel.appendData(envData.dbIDSender, -1,
+	    envData.dmSender, envData.dmSenderAddress, QString(), pdz);
 }
 
 void DlgSendMessage::fillDlgAsForward(void)
@@ -703,21 +755,9 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 	/* message is received -> recipient == sender */
 	if (m_dbId != envData.dbIDRecipient) {
-		int row = this->recipientTableWidget->rowCount();
-		this->recipientTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(envData.dbIDRecipient);
-		this->recipientTableWidget->setItem(row, RTW_ID, item);
-		item = new QTableWidgetItem;
-		item->setText(envData.dmRecipient);
-		this->recipientTableWidget->setItem(row, RTW_NAME, item);
-		item = new QTableWidgetItem;
-		item->setText(envData.dmRecipientAddress);
-		this->recipientTableWidget->setItem(row, RTW_ADDR, item);
-		item = new QTableWidgetItem;
-		item->setText(pdz ? tr("yes") : tr("no"));
-		item->setTextAlignment(Qt::AlignCenter);
-		this->recipientTableWidget->setItem(row, RTW_PDZ, item);
+		m_recipientTableModel.appendData(envData.dbIDRecipient, -1,
+		    envData.dmRecipient, envData.dmRecipientAddress, QString(),
+		    pdz);
 	}
 
 	/* fill attachments from template message */
@@ -775,32 +815,6 @@ void DlgSendMessage::addAttachmentFile(void)
 			continue;
 		}
 	}
-}
-
-
-/* ========================================================================= */
-/*
- * Enable/disable optional fields in dialog.
- */
-void DlgSendMessage::recItemSelect(void)
-/* ========================================================================= */
-{
-	if (m_dmType == "I") {
-		this->removeRecipient->setEnabled(false);
-	} else {
-		this->removeRecipient->setEnabled(true);
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Show/hide optional fields in dialog.
- */
-void DlgSendMessage::showOptionalForm(int state)
-/* ========================================================================= */
-{
-	this->OptionalWidget->setHidden(Qt::Unchecked == state);
 }
 
 
@@ -931,47 +945,6 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 
 /* ========================================================================= */
 /*
- * Check non-empty mandatory items in send message dialog.
- */
-void DlgSendMessage::checkInputFields(void)
-/* ========================================================================= */
-{
-	bool buttonEnabled = calculateAndShowTotalAttachSize()
-	    && !this->subjectText->text().isEmpty()
-	    && (this->recipientTableWidget->rowCount() > 0)
-	    && (m_attachmentModel.rowCount() > 0);
-
-	if (this->payReply->isChecked()) {
-		if (this->dmSenderRefNumber->text().isEmpty()) {
-			buttonEnabled = false;
-		}
-	}
-
-	if (m_isLogged) {
-		this->sendButton->setEnabled(buttonEnabled);
-	} else {
-		this->sendButton->setEnabled(false);
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Delete recipient from table widget.
- */
-void DlgSendMessage::deleteRecipientData(void)
-/* ========================================================================= */
-{
-	int row = this->recipientTableWidget->currentRow();
-	if (row >= 0) {
-		this->recipientTableWidget->removeRow(row);
-		this->removeRecipient->setEnabled(false);
-	}
-}
-
-
-/* ========================================================================= */
-/*
  * Find recipient in the ISDS.
  */
 void DlgSendMessage::findAndAddRecipient(void)
@@ -983,17 +956,18 @@ void DlgSendMessage::findAndAddRecipient(void)
 		dsSearch = new DlgDsSearch(m_userName, m_dbType,
 		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
 	} else {
+#if 0 /* TODO -- MojeID functionality disabled, deal with it later. */
 		dsSearch = new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_ADDNEW,
 		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
 		    this, m_userName);
+#else
+		return;
+#endif
 	}
 	dsSearch->exec();
 	dsSearch->deleteLater();
 	insertDataboxesToRecipientList(dbIDs);
 }
-
-
-
 
 void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
 {
@@ -1226,6 +1200,9 @@ void DlgSendMessage::sendMessage(void)
 {
 	debugSlotCall();
 
+	const QList<BoxContactsModel::PartialEntry> recipEntries(
+	    m_recipientTableModel.partialBoxEntries(BoxContactsModel::ANY));
+
 	if (m_isWebDatovkaAccount) {
 
 		/* Get account ID */
@@ -1234,14 +1211,12 @@ void DlgSendMessage::sendMessage(void)
 		/* Create recipient list. */
 		JsonLayer::Recipient recipient;
 		QList<JsonLayer::Recipient> recipientList;
-		for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
-			recipient.recipientDbId =
-			    this->recipientTableWidget->item(row, RTW_ID)->text();
+		foreach (const BoxContactsModel::PartialEntry &e,
+		         recipEntries) {
+			recipient.recipientDbId = e.id;
 			recipient.toHands = this->dmToHands->text();
-			recipient.recipientName =
-			    this->recipientTableWidget->item(row, RTW_NAME)->text();
-			recipient.recipientAddress =
-			    this->recipientTableWidget->item(row, RTW_ADDR)->text();
+			recipient.recipientName = e.name;
+			recipient.recipientAddress = e.address;
 			recipientList.append(recipient);
 		}
 
@@ -1268,9 +1243,8 @@ void DlgSendMessage::sendMessage(void)
 	int pdzCnt = 0; /* Number of paid messages. */
 
 	/* Compute number of messages which the sender has to pay for. */
-	for (int i = 0; i < this->recipientTableWidget->rowCount(); ++i) {
-		if (this->recipientTableWidget->item(i, RTW_PDZ)->text() ==
-		    tr("yes")) {
+	foreach (const BoxContactsModel::PartialEntry &e, recipEntries) {
+		if (e.pdz) {
 			++pdzCnt;
 		}
 	}
@@ -1308,12 +1282,10 @@ void DlgSendMessage::sendMessage(void)
 	 * Generate unique identifiers.
 	 * These must be complete before creating first task.
 	 */
-	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
-		QString taskIdentifier =
-		    m_userName + "_" +
-		    this->recipientTableWidget->item(row, RTW_ID)->text() +
-		    "_" + currentTime.toString() + "_" +
-		    DlgChangePwd::generateRandomString(6);
+	foreach (const BoxContactsModel::PartialEntry &e, recipEntries) {
+		QString taskIdentifier(m_userName + "_" + e.id + "_" +
+		    currentTime.toString() + "_" +
+		    DlgChangePwd::generateRandomString(6));
 
 		taskIdentifiers.append(taskIdentifier);
 	}
@@ -1321,21 +1293,20 @@ void DlgSendMessage::sendMessage(void)
 	m_sentMsgResultList.clear();
 
 	/* Send message to all recipients. */
-	for (int row = 0; row < this->recipientTableWidget->rowCount(); ++row) {
+	for (int i = 0; i < recipEntries.size(); ++i) {
+		const BoxContactsModel::PartialEntry &e(recipEntries.at(i));
+
 		/* Clear fields. */
 		message.envelope.dmID.clear();
 
 		/* Set new recipient. */
-		message.envelope.dbIDRecipient = this->recipientTableWidget->item(row, RTW_ID)->text();
+		message.envelope.dbIDRecipient = e.id;
 		message.envelope.dmToHands = this->dmToHands->text();
 
 		TaskSendMessage *task;
 
-		task = new (std::nothrow) TaskSendMessage(
-		    m_userName, m_dbSet, taskIdentifiers.at(row), message,
-		    this->recipientTableWidget->item(row, RTW_NAME)->text(),
-		    this->recipientTableWidget->item(row, RTW_ADDR)->text(),
-		    this->recipientTableWidget->item(row, RTW_PDZ)->text() == tr("yes"));
+		task = new (std::nothrow) TaskSendMessage(m_userName, m_dbSet,
+		    taskIdentifiers.at(i), message, e.name, e.address, e.pdz);
 		task->setAutoDelete(true);
 		globWorkPool.assignHi(task);
 	}
@@ -1423,7 +1394,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 	}
 	m_sentMsgResultList.clear();
 
-	if (this->recipientTableWidget->rowCount() == successfullySentCnt) {
+	if (m_recipientTableModel.rowCount() == successfullySentCnt) {
 		QMessageBox msgBox;
 		msgBox.setIcon(QMessageBox::Information);
 		msgBox.setWindowTitle(tr("Message sent"));
@@ -1498,14 +1469,9 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 {
 	foreach (const QString &dbID, dbIDs) {
 
-		int row = this->recipientTableWidget->rowCount();
-
-		/* exists dbID in the recipientTableWidget? */
-		for (int i = 0; i < row; ++i) {
-			if (this->recipientTableWidget->item(i, RTW_ID)->text()
-			    == dbID) {
-				continue;
-			}
+		/* Ignore existent entries. */
+		if (m_recipientTableModel.containsBoxId(dbID)) {
+			continue;
 		}
 
 		// search dbID only
@@ -1522,8 +1488,8 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 
 		QString name = tr("Unknown");
 		QString address = tr("Unknown");
-		QString pdz = "n/a";
-		QString dbType = "n/a";
+		QVariant pdz;
+		int boxType = -1;
 
 		if (foundBoxes.size() == 1) {
 			const TaskSearchOwnerFulltext::BoxEntry &entry(
@@ -1531,7 +1497,7 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 
 			name = entry.name;
 			address = entry.address;
-			dbType = convertDbTypeToString(entry.type);
+			boxType = entry.type;
 			if (!entry.active) {
 				QMessageBox msgBox;
 				msgBox.setIcon(QMessageBox::Warning);
@@ -1546,11 +1512,11 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 				continue;
 			}
 			if (entry.publicSending) {
-				pdz = tr("no");
+				pdz = false;
 			} else if (entry.commercialSending) {
-				pdz = tr("yes");
+				pdz = true;
 			} else if (entry.effectiveOVM) {
-				pdz = tr("no");
+				pdz = false;
 			} else {
 				QMessageBox msgBox;
 				msgBox.setIcon(QMessageBox::Critical);
@@ -1580,22 +1546,8 @@ void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
 			continue;
 		}
 
-		this->recipientTableWidget->insertRow(row);
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(dbID);
-		this->recipientTableWidget->setItem(row, RTW_ID, item);
-		item = new QTableWidgetItem;
-		item->setText(dbType);
-		this->recipientTableWidget->setItem(row, RTW_TYPE, item);
-		item = new QTableWidgetItem;
-		item->setText(name);
-		this->recipientTableWidget->setItem(row, RTW_NAME, item);
-		item = new QTableWidgetItem;
-		item->setText(address);
-		this->recipientTableWidget->setItem(row, RTW_ADDR, item);
-		item = new QTableWidgetItem;
-		item->setText(pdz);
-		this->recipientTableWidget->setItem(row, RTW_PDZ, item);
+		m_recipientTableModel.appendData(dbID, boxType, name, address,
+		    QString(), pdz);
 	}
 }
 

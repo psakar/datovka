@@ -35,6 +35,7 @@
 #include "src/common.h"
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
+#include "src/models/data_box_contacts_model.h"
 #include "src/models/files_model.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
@@ -79,7 +80,32 @@ signals:
 	void doActionAfterSentMsgSignal(const QString, const QString);
 
 private slots:
-	void showOptionalForm(int);
+	/*!
+	 * @brief Check input fields sanity and activate search button.
+	 */
+	void checkInputFields(void);
+
+	/*!
+	 * @brief Activates control elements based on selected recipients.
+	 *
+	 * @param[in] selected Newly selected items.
+	 * @param[in] deselected Deselected items.
+	 */
+	void recipientSelected(const QItemSelection &selected,
+	    const QItemSelection &deselected);
+
+	/*!
+	 * @brief Deletes selected row from the recipient list.
+	 */
+	void deleteRecipientData(void);
+
+	/*!
+	 * @brief Show/hide optional form elements depending on \a checkState.
+	 *
+	 * @param[in] checkState Check state of the controlling check box.
+	 */
+	void showOptionalForm(int checkState);
+
 	void showOptionalFormAndSet(int);
 	void addAttachmentFile(void);
 	void deleteSelectedAttachmentFiles(void);
@@ -92,10 +118,7 @@ private slots:
 	 */
 	void openSelectedAttachment(const QModelIndex &index = QModelIndex());
 	void addRecipientFromLocalContact(void);
-	void deleteRecipientData(void);
 	void findAndAddRecipient(void);
-	void recItemSelect(void);
-	void checkInputFields(void);
 	void sendMessage(void);
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
@@ -112,6 +135,11 @@ private slots:
 	void setAccountInfo(int item);
 
 private:
+	/*!
+	 * @brief Initialises the dialogue content.
+	 */
+	void initContent(void);
+
 	QTimer m_keepAliveTimer;
 	const QList<Task::AccountDescr> m_messageDbSetList;
 	const QList<MessageDb::MsgId> m_msgIds;
@@ -132,11 +160,12 @@ private:
 	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
 	bool m_isWebDatovkaAccount;
 
+	BoxContactsModel m_recipientTableModel; /*!< Model of data boxes. */
+
 	/* Used to collect sending results. */
 	QSet<QString> m_transactIds;
 	QList<TaskSendMessage::ResultData> m_sentMsgResultList;
 
-	void initNewMessageDialog(void);
 	bool calculateAndShowTotalAttachSize(void);
 	void fillDlgAsReply(void);
 	void fillDlgAsForward(void);
