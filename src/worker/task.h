@@ -49,6 +49,7 @@
 #define PL_IMPORT_ZFO_DINFO "ImportZfoDeliveryInfo"
 #define PL_IMPORT_ZFO_MSG "ImportZfoMessage"
 #define PL_SEND_MESSAGE "SendMessage"
+#define PL_SPLIT_DB "DatabaseSplit"
 #define PL_SYNC_ACCOUNT "SyncAccount"
 
 /*!
