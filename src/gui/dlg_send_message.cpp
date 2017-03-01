@@ -864,63 +864,6 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 
 /* ========================================================================= */
 /*
- * Calculate total attachment size when an item was added/removed in the table.
- */
-bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
-/* ========================================================================= */
-{
-	int aSize = 0;
-
-	for (int i = 0; i < m_attachmentModel.rowCount(); ++i) {
-		QModelIndex idx(
-		    m_attachmentModel.index(i, DbFlsTblModel::FSIZE_COL));
-
-		if (idx.isValid()) {
-			aSize += idx.data().toInt();
-		}
-	}
-
-	this->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
-
-	if (m_attachmentModel.rowCount() > MAX_ATTACHMENT_FILES) {
-		this->attachmentSizeInfo->
-		     setStyleSheet("QLabel { color: red }");
-		this->attachmentSizeInfo->setText(tr(
-		    "Warning: The permitted amount (%1) of attachments has been exceeded.")
-		        .arg(QString::number(MAX_ATTACHMENT_FILES)));
-		return false;
-	}
-
-
-	if (aSize > 0) {
-		if (aSize >= 1024) {
-			this->attachmentSizeInfo->setText(
-			    tr("Total size of attachments is ~%1 KB").
-			    arg(aSize/1024));
-			if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
-				this->attachmentSizeInfo->
-				     setStyleSheet("QLabel { color: red }");
-				this->attachmentSizeInfo->setText(
-				    tr("Warning: Total size of attachments is larger than %1 MB!")
-				    .arg(QString::number(
-				        MAX_ATTACHMENT_SIZE_MB)));
-				return false;
-			}
-		} else {
-			this->attachmentSizeInfo->setText(tr(
-			    "Total size of attachments is ~%1 B").arg(aSize));
-		}
-	} else {
-		this->attachmentSizeInfo->setText(
-		    tr("Total size of attachments is %1 B").arg(aSize));
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
  * Dialog informs user that message contains one or more PDZs.
  */
 int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
@@ -1415,6 +1358,48 @@ void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
 			    m_lastAttAddPath);
 		}
 	}
+}
+
+bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
+{
+	int aSize = m_attachmentModel.totalAttachmentSize();
+
+	this->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
+
+	if (m_attachmentModel.rowCount() > MAX_ATTACHMENT_FILES) {
+		this->attachmentSizeInfo->
+		     setStyleSheet("QLabel { color: red }");
+		this->attachmentSizeInfo->setText(tr(
+		    "Warning: The permitted amount (%1) of attachments has been exceeded.")
+		        .arg(QString::number(MAX_ATTACHMENT_FILES)));
+		return false;
+	}
+
+
+	if (aSize > 0) {
+		if (aSize >= 1024) {
+			this->attachmentSizeInfo->setText(
+			    tr("Total size of attachments is ~%1 KB").
+			    arg(aSize/1024));
+			if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
+				this->attachmentSizeInfo->
+				     setStyleSheet("QLabel { color: red }");
+				this->attachmentSizeInfo->setText(
+				    tr("Warning: Total size of attachments is larger than %1 MB!")
+				    .arg(QString::number(
+				        MAX_ATTACHMENT_SIZE_MB)));
+				return false;
+			}
+		} else {
+			this->attachmentSizeInfo->setText(tr(
+			    "Total size of attachments is ~%1 B").arg(aSize));
+		}
+	} else {
+		this->attachmentSizeInfo->setText(
+		    tr("Total size of attachments is %1 B").arg(aSize));
+	}
+
+	return true;
 }
 
 void DlgSendMessage::addRecipientBox(const QString &boxId)

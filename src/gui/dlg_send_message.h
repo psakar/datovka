@@ -169,7 +169,6 @@ private:
 	 */
 	void initContent(void);
 
-	bool calculateAndShowTotalAttachSize(void);
 	void fillDlgAsReply(void);
 	void fillDlgAsForward(void);
 	void fillDlgFromTmpMsg(void);
@@ -179,6 +178,11 @@ private:
 	bool buildEnvelope(IsdsEnvelope &envelope) const;
 	bool buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
 	bool buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
+
+	/*!
+	 * @brief Calculates and shows total attachment size.
+	 */
+	bool calculateAndShowTotalAttachSize(void);
 
 	/*!
 	 * @brief Append data box into recipient list.
