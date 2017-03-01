@@ -167,14 +167,24 @@ public:
 	}
 };
 
-void DlgSendMessage::deleteRecipientData(void)
+/*!
+ * @brief Remove selected lines from model.
+ *
+ * @param[in]     view Table view to use for determining the selected lines.
+ * @param[in,out] model Model to delete the rows from.
+ */
+static
+void removeSelectedEntries(const QTableView *view, QAbstractItemModel *model)
 {
+	if ((view == Q_NULLPTR) || (model == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	QList<int> rows;
 	{
-		QModelIndexList indexes(
-		    recipientTableView->selectionModel()->selectedRows(0));
-
-		foreach (const QModelIndex &idx, indexes) {
+		foreach (const QModelIndex &idx,
+		         view->selectionModel()->selectedRows(0)) {
 			rows.append(idx.row());
 		}
 
@@ -183,9 +193,13 @@ void DlgSendMessage::deleteRecipientData(void)
 
 	/* In reverse order. */
 	for (int i = rows.size() - 1; i >= 0; --i) {
-		m_recipientTableModel.removeRows(rows.at(i), 1);
+		model->removeRow(rows.at(i));
 	}
-	/* Deleting selected items should disable the trigger button. */
+}
+
+void DlgSendMessage::deleteRecipientData(void)
+{
+	removeSelectedEntries(recipientTableView, &m_recipientTableModel);
 }
 
 void DlgSendMessage::showOptionalForm(void)
@@ -212,6 +226,37 @@ void DlgSendMessage::showOptionalForm(void)
 		connect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
 		    this, SLOT(checkInputFields()));
 	}
+}
+
+void DlgSendMessage::addAttachmentFile(void)
+{
+	QFileDialog dialog(this);
+	dialog.setDirectory(m_lastAttAddPath);
+	dialog.setFileMode(QFileDialog::ExistingFiles);
+	QStringList fileNames;
+
+	if (dialog.exec()) {
+		fileNames = dialog.selectedFiles();
+		if (!globPref.use_global_paths) {
+			m_lastAttAddPath = dialog.directory().absolutePath();
+			emit doActionAfterSentMsgSignal(m_userName,
+			    m_lastAttAddPath);
+		}
+	}
+
+	foreach (const QString &fileName, fileNames) {
+		int fileSize = m_attachmentModel.insertAttachmentFile(fileName,
+		    m_attachmentModel.rowCount());
+		if (fileSize <= 0) {
+			/* TODO -- Generate some warning message. */
+			continue;
+		}
+	}
+}
+
+void DlgSendMessage::deleteSelectedAttachmentFiles(void)
+{
+	removeSelectedEntries(attachmentTableView, &m_attachmentModel);
 }
 
 void DlgSendMessage::initContent(void)
@@ -808,38 +853,6 @@ void DlgSendMessage::pingIsdsServer(void)
 
 /* ========================================================================= */
 /*
- * Add file to attachment table widget.
- */
-void DlgSendMessage::addAttachmentFile(void)
-/* ========================================================================= */
-{
-	QFileDialog dialog(this);
-	dialog.setDirectory(m_lastAttAddPath);
-	dialog.setFileMode(QFileDialog::ExistingFiles);
-	QStringList fileNames;
-
-	if (dialog.exec()) {
-		fileNames = dialog.selectedFiles();
-		if (!globPref.use_global_paths) {
-			m_lastAttAddPath = dialog.directory().absolutePath();
-			emit doActionAfterSentMsgSignal(m_userName,
-			    m_lastAttAddPath);
-		}
-	}
-
-	foreach (const QString &fileName, fileNames) {
-		int fileSize = m_attachmentModel.insertAttachmentFile(fileName,
-		    m_attachmentModel.rowCount());
-		if (fileSize <= 0) {
-			/* TODO -- Generate some warning message. */
-			continue;
-		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
  * Add recipient from local contact list.
  */
 void DlgSendMessage::addRecipientFromLocalContact(void)
@@ -850,29 +863,6 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 	dlgCont->exec();
 	dlgCont->deleteLater();
 	insertDataboxesToRecipientList(dbIDs);
-}
-
-
-/* ========================================================================= */
-/*
- * Remove file (item) from attachment table widget.
- */
-void DlgSendMessage::deleteSelectedAttachmentFiles(void)
-/* ========================================================================= */
-{
-	QModelIndexList firstMsgColumnIdxs(
-	   this->attachmentTableView->selectionModel()->selectedRows(0));
-
-	for (int i = firstMsgColumnIdxs.size() - 1; i >= 0; --i) {
-		/*
-		 * Delete rows in reverse order so that we don't mess with
-		 * indexes.
-		 */
-		int row = firstMsgColumnIdxs.at(i).row();
-		m_attachmentModel.removeRow(row);
-	}
-
-	checkInputFields();
 }
 
 

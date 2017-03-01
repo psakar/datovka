@@ -104,7 +104,14 @@ private slots:
 	 */
 	void showOptionalForm(void);
 
+	/*!
+	 * @brief Add attachment file.
+	 */
 	void addAttachmentFile(void);
+
+	/*!
+	 * @brief Remove selected attachment entries.
+	 */
 	void deleteSelectedAttachmentFiles(void);
 
 	/*
