@@ -148,7 +148,7 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 	QDialog *dlgCont = new DlgContacts(*m_dbSet, m_dbId, &dbIDs, this);
 	dlgCont->exec();
 	dlgCont->deleteLater();
-	insertDataboxesToRecipientList(dbIDs);
+	addRecipientBoxes(dbIDs);
 }
 
 void DlgSendMessage::addRecipientFromISDSSearch(void)
@@ -169,7 +169,7 @@ void DlgSendMessage::addRecipientFromISDSSearch(void)
 	}
 	dsSearch->exec();
 	dsSearch->deleteLater();
-	insertDataboxesToRecipientList(dbIDs);
+	addRecipientBoxes(dbIDs);
 }
 
 void DlgSendMessage::addRecipientManually(void)
@@ -195,7 +195,7 @@ void DlgSendMessage::addRecipientManually(void)
 		return;
 	}
 
-	insertDataboxesToRecipientList(QStringList(dbID));
+	addRecipientBox(dbID);
 }
 
 void DlgSendMessage::recipientSelectionChanged(const QItemSelection &selected,
@@ -1369,98 +1369,6 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 
 /* ========================================================================= */
 /*
- * Insert list of databoxes into recipient list.
- */
-void DlgSendMessage::insertDataboxesToRecipientList(const QStringList &dbIDs)
-/* ========================================================================= */
-{
-	foreach (const QString &dbID, dbIDs) {
-
-		/* Ignore existent entries. */
-		if (m_recipientTableModel.containsBoxId(dbID)) {
-			continue;
-		}
-
-		// search dbID only
-		TaskSearchOwnerFulltext *task =
-		    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, dbID,
-		        TaskSearchOwnerFulltext::FT_BOX_ID,
-		        TaskSearchOwnerFulltext::BT_ALL);
-		task->setAutoDelete(false);
-		globWorkPool.runSingle(task);
-
-		QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(
-		    task->m_foundBoxes);
-		delete task; task = Q_NULLPTR;
-
-		QString name = tr("Unknown");
-		QString address = tr("Unknown");
-		QVariant pdz;
-		int boxType = -1;
-
-		if (foundBoxes.size() == 1) {
-			const TaskSearchOwnerFulltext::BoxEntry &entry(
-			    foundBoxes.first());
-
-			name = entry.name;
-			address = entry.address;
-			boxType = entry.type;
-			if (!entry.active) {
-				QMessageBox msgBox;
-				msgBox.setIcon(QMessageBox::Warning);
-				msgBox.setWindowTitle(tr("Data box is not active"));
-				msgBox.setText(tr("Recipient with data box ID '%1' "
-				    "does not have active data box.").arg(dbID));
-				msgBox.setInformativeText(tr("The message can "
-				    "not be delivered."));
-				msgBox.setStandardButtons(QMessageBox::Ok);
-				msgBox.setDefaultButton(QMessageBox::Ok);
-				msgBox.exec();
-				continue;
-			}
-			if (entry.publicSending) {
-				pdz = false;
-			} else if (entry.commercialSending) {
-				pdz = true;
-			} else if (entry.effectiveOVM) {
-				pdz = false;
-			} else {
-				QMessageBox msgBox;
-				msgBox.setIcon(QMessageBox::Critical);
-				msgBox.setWindowTitle(tr("Cannot send to data box"));
-				msgBox.setText(tr("Cannot send message to recipient "
-				    "with data box ID '%1'.").arg(dbID));
-				msgBox.setInformativeText(tr("You won't be able as "
-				    "user '%1' to send messages into data "
-				    "box '%2'.").arg(m_userName).arg(dbID));
-				msgBox.setStandardButtons(QMessageBox::Ok);
-				msgBox.setDefaultButton(QMessageBox::Ok);
-				msgBox.exec();
-				continue;
-			}
-		} else if (foundBoxes.isEmpty()) {
-			QMessageBox msgBox;
-			msgBox.setIcon(QMessageBox::Critical);
-			msgBox.setWindowTitle(tr("Wrong recipient"));
-			msgBox.setText(tr("Recipient with data box ID '%1' "
-			    "does not exist.").arg(dbID));
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.setDefaultButton(QMessageBox::Ok);
-			msgBox.exec();
-			continue;
-		} else {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		m_recipientTableModel.appendData(dbID, boxType, name, address,
-		    QString(), pdz);
-	}
-}
-
-
-/* ========================================================================= */
-/*
  * Slot: Performs action depending on webdatovka message send outcome.
  */
 void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
@@ -1506,6 +1414,99 @@ void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
 			emit doActionAfterSentMsgSignal(userName,
 			    m_lastAttAddPath);
 		}
+	}
+}
+
+void DlgSendMessage::addRecipientBox(const QString &boxId)
+{
+	/* Ignore existent entry. */
+	if (boxId.isEmpty() || m_recipientTableModel.containsBoxId(boxId)) {
+		return;
+	}
+
+	/* Search for box information according to supplied identifier. */
+	TaskSearchOwnerFulltext *task =
+	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, boxId,
+	        TaskSearchOwnerFulltext::FT_BOX_ID,
+	        TaskSearchOwnerFulltext::BT_ALL);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
+	delete task; task = Q_NULLPTR;
+
+	QString name = tr("Unknown");
+	QString address = tr("Unknown");
+	QVariant pdz;
+	int boxType = -1; /* Unknown type. */
+
+	if (foundBoxes.size() == 1) {
+		const TaskSearchOwnerFulltext::BoxEntry &entry(
+		    foundBoxes.first());
+
+		name = entry.name;
+		address = entry.address;
+		boxType = entry.type;
+		if (!entry.active) {
+			QMessageBox msgBox;
+			msgBox.setIcon(QMessageBox::Warning);
+			msgBox.setWindowTitle(tr("Data box is not active"));
+			msgBox.setText(tr(
+			    "Recipient with data box ID '%1' does not have active data box.")
+			    .arg(boxId));
+			msgBox.setInformativeText(
+			    tr("The message cannot be delivered."));
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
+			return;
+		}
+		if (entry.publicSending) {
+			pdz = false;
+		} else if (entry.commercialSending) {
+			pdz = true;
+		} else if (entry.effectiveOVM) {
+			pdz = false;
+		} else {
+			QMessageBox msgBox;
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle(tr("Cannot send to data box"));
+			msgBox.setText(tr(
+			    "Cannot send message to recipient with data box ID '%1'.")
+			    .arg(boxId));
+			msgBox.setInformativeText(tr(
+			    "You won't be able as user '%1' to send messages into data box '%2'.")
+			    .arg(m_userName).arg(boxId));
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
+			return;
+		}
+	} else if (foundBoxes.isEmpty()) {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Critical);
+		msgBox.setWindowTitle(tr("Wrong recipient"));
+		msgBox.setText(tr(
+		    "Recipient with data box ID '%1' does not exist.")
+		    .arg(boxId));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		return;
+	} else {
+		Q_ASSERT(0);
+		return;
+	}
+
+	m_recipientTableModel.appendData(boxId, boxType, name, address,
+	    QString(), pdz);
+
+}
+
+void DlgSendMessage::addRecipientBoxes(const QStringList &boxIds)
+{
+	foreach (const QString &boxId, boxIds) {
+		addRecipientBox(boxId);
 	}
 }
 

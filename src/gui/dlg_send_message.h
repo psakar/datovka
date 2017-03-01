@@ -169,6 +169,55 @@ private:
 	 */
 	void initContent(void);
 
+	bool calculateAndShowTotalAttachSize(void);
+	void fillDlgAsReply(void);
+	void fillDlgAsForward(void);
+	void fillDlgFromTmpMsg(void);
+	int showInfoAboutPDZ(int pdzCnt);
+
+	bool buildDocuments(QList<IsdsDocument> &documents) const;
+	bool buildEnvelope(IsdsEnvelope &envelope) const;
+	bool buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
+	bool buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
+
+	/*!
+	 * @brief Append data box into recipient list.
+	 *
+	 * @param[in] boxId Data box identifier.
+	 */
+	void addRecipientBox(const QString &boxId);
+
+	/*!
+	 * @brief Appends data boxes into recipient list.
+	 *
+	 * @note This is a convenience method that calls addRecipientBox().
+	 *
+	 * @param[in] boxIds List of data box identifiers.
+	 */
+	void addRecipientBoxes(const QStringList &boxIds);
+
+	/*!
+	 * @brief Queries ISDS for remaining PDZ credit.
+	 *
+	 * @param[in] userName User name identifying the account.
+	 * @param[in] dnId Data box identifier.
+	 * @return String containing the amount of remaining credit in Czech
+	 *         crowns.
+	 */
+	static
+	QString getPDZCreditFromISDS(const QString &userName,
+	    const QString &dbId);
+
+	/*!
+	 * @brief Query ISDS whether data box has effective OVM set.
+	 *
+	 * @param[in] userName User account to generate the query from.
+	 * @param[in] boxId Data box to ask for OVM status.
+	 * @return True if \a boxId has effective OVM status set.
+	 */
+	static
+	bool queryISDSBoxEOVM(const QString &userName, const QString &boxId);
+
 	QTimer m_keepAliveTimer;
 	const QList<Task::AccountDescr> m_messageDbSetList;
 	const QList<MessageDb::MsgId> m_msgIds;
@@ -194,45 +243,6 @@ private:
 	/* Used to collect sending results. */
 	QSet<QString> m_transactIds;
 	QList<TaskSendMessage::ResultData> m_sentMsgResultList;
-
-	bool calculateAndShowTotalAttachSize(void);
-	void fillDlgAsReply(void);
-	void fillDlgAsForward(void);
-	void fillDlgFromTmpMsg(void);
-	int showInfoAboutPDZ(int pdzCnt);
-
-	bool buildDocuments(QList<IsdsDocument> &documents) const;
-	bool buildEnvelope(IsdsEnvelope &envelope) const;
-	bool buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
-	bool buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
-
-	/*
-	 * Insert list of databoxes into recipient list.
-	*/
-	void insertDataboxesToRecipientList(const QStringList &dbIDs);
-
-	/*!
-	 * @brief Queries ISDS for remaining PDZ credit.
-	 *
-	 * @param[in] userName User name identifying the account.
-	 * @param[in] dnId Data box identifier.
-	 * @return String containing the amount of remaining credit in Czech
-	 *         crowns.
-	 */
-	static
-	QString getPDZCreditFromISDS(const QString &userName,
-	    const QString &dbId);
-
-	/*!
-	 * @brief Query ISDS whether data box has effective OVM set.
-	 *
-	 * @param[in] userName User account to generate the query from.
-	 * @param[in] boxId Data box to ask for OVM status.
-	 * @return True if \a boxId has effective OVM status set.
-	 */
-	static
-	bool queryISDSBoxEOVM(const QString &userName, const QString &boxId);
-
 };
 
 
