@@ -142,7 +142,63 @@ void DlgSendMessage::checkInputFields(void)
 	}
 }
 
-void DlgSendMessage::recipientSelected(const QItemSelection &selected,
+void DlgSendMessage::addRecipientFromLocalContact(void)
+{
+	QStringList dbIDs;
+	QDialog *dlgCont = new DlgContacts(*m_dbSet, m_dbId, &dbIDs, this);
+	dlgCont->exec();
+	dlgCont->deleteLater();
+	insertDataboxesToRecipientList(dbIDs);
+}
+
+void DlgSendMessage::addRecipientFromISDSSearch(void)
+{
+	QStringList dbIDs;
+	QDialog *dsSearch = Q_NULLPTR;
+	if (!m_isWebDatovkaAccount) {
+		dsSearch = new DlgDsSearch(m_userName, m_dbType,
+		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
+	} else {
+#if 0 /* TODO -- MojeID functionality disabled, deal with it later. */
+		dsSearch = new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_ADDNEW,
+		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
+		    this, m_userName);
+#else
+		return;
+#endif
+	}
+	dsSearch->exec();
+	dsSearch->deleteLater();
+	insertDataboxesToRecipientList(dbIDs);
+}
+
+void DlgSendMessage::addRecipientManually(void)
+{
+	bool ok = false;
+
+	QString dbID = QInputDialog::getText(this, tr("Databox ID"),
+	    tr("Enter Databox ID (7 characters):"), QLineEdit::Normal,
+	    NULL, &ok, Qt::WindowStaysOnTopHint);
+
+	if (!ok) {
+		return;
+	}
+
+	if (dbID.isEmpty() || dbID.length() != 7) {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Critical);
+		msgBox.setWindowTitle(tr("Wrong data box ID"));
+		msgBox.setText(tr("Wrong data box ID '%1'!").arg(dbID));
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		return;
+	}
+
+	insertDataboxesToRecipientList(QStringList(dbID));
+}
+
+void DlgSendMessage::recipientSelectionChanged(const QItemSelection &selected,
     const QItemSelection &deselected)
 {
 	Q_UNUSED(selected);
@@ -197,7 +253,7 @@ void removeSelectedEntries(const QTableView *view, QAbstractItemModel *model)
 	}
 }
 
-void DlgSendMessage::deleteRecipientData(void)
+void DlgSendMessage::deleteRecipientEntries(void)
 {
 	removeSelectedEntries(recipientTableView, &m_recipientTableModel);
 }
@@ -254,9 +310,30 @@ void DlgSendMessage::addAttachmentFile(void)
 	}
 }
 
+void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
+    const QItemSelection &deselected)
+{
+	Q_UNUSED(selected);
+	Q_UNUSED(deselected);
+
+	int selectionSize =
+	    attachmentTableView->selectionModel()->selectedRows(0).size();
+
+	removeAttachment->setEnabled(selectionSize > 0);
+	openAttachment->setEnabled(selectionSize == 1);
+}
+
 void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 {
 	removeSelectedEntries(attachmentTableView, &m_attachmentModel);
+}
+
+void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
+{
+	debugSlotCall();
+
+	AttachmentInteraction::openAttachment(this, *this->attachmentTableView,
+	    index);
 }
 
 void DlgSendMessage::initContent(void)
@@ -329,12 +406,14 @@ void DlgSendMessage::initContent(void)
 	connect(this->payReplyCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(showOptionalForm()));
 
-	connect(this->addRecipient, SIGNAL(clicked()), this,
-	    SLOT(addRecipientFromLocalContact()));
-	connect(this->removeRecipient, SIGNAL(clicked()), this,
-	    SLOT(deleteRecipientData()));
-	connect(this->findRecipient, SIGNAL(clicked()), this,
-	    SLOT(findAndAddRecipient()));
+	connect(this->addRecipient, SIGNAL(clicked()),
+	    this, SLOT(addRecipientFromLocalContact()));
+	connect(this->removeRecipient, SIGNAL(clicked()),
+	    this, SLOT(deleteRecipientEntries()));
+	connect(this->findRecipient, SIGNAL(clicked()),
+	    this, SLOT(addRecipientFromISDSSearch()));
+	connect(this->enterDbIdpushButton, SIGNAL(clicked()),
+	    this, SLOT(addRecipientManually()));
 
 	connect(this->addAttachment, SIGNAL(clicked()), this,
 	    SLOT(addAttachmentFile()));
@@ -344,14 +423,11 @@ void DlgSendMessage::initContent(void)
 	    SLOT(openSelectedAttachment()));
 
 	connect(this->recipientTableView->selectionModel(),
-	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
-	    this, SLOT(recipientSelected(QItemSelection, QItemSelection)));
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
+	    SLOT(recipientSelectionChanged(QItemSelection, QItemSelection)));
 
 	connect(this->attachmentTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(openSelectedAttachment(QModelIndex)));
-
-	connect(this->enterDbIdpushButton, SIGNAL(clicked()), this,
-	    SLOT(addDbIdToRecipientList()));
 
 	connect(this->subjectText, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
@@ -576,36 +652,6 @@ void DlgSendMessage::attachmentDataChanged(const QModelIndex &topLeft,
 	Q_UNUSED(roles);
 
 	checkInputFields();
-}
-
-
-/* ========================================================================= */
-/*
- * Whenever attachment selection changes.
- */
-void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
-    const QItemSelection &deselected)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	Q_UNUSED(selected);
-	Q_UNUSED(deselected);
-
-	QModelIndexList selectedIndexes;
-	{
-		QItemSelectionModel *selectionModel =
-		    this->attachmentTableView->selectionModel();
-		if (Q_NULLPTR == selectionModel) {
-			Q_ASSERT(0);
-			return;
-		}
-		selectedIndexes =
-		    selectionModel->selectedRows(DbFlsTblModel::FNAME_COL);
-	}
-
-	this->removeAttachment->setEnabled(selectedIndexes.size() > 0);
-	this->openAttachment->setEnabled(1 == selectedIndexes.size());
 }
 
 
@@ -853,21 +899,6 @@ void DlgSendMessage::pingIsdsServer(void)
 
 /* ========================================================================= */
 /*
- * Add recipient from local contact list.
- */
-void DlgSendMessage::addRecipientFromLocalContact(void)
-/* ========================================================================= */
-{
-	QStringList dbIDs;
-	QDialog *dlgCont = new DlgContacts(*m_dbSet, m_dbId, &dbIDs, this);
-	dlgCont->exec();
-	dlgCont->deleteLater();
-	insertDataboxesToRecipientList(dbIDs);
-}
-
-
-/* ========================================================================= */
-/*
  * Calculate total attachment size when an item was added/removed in the table.
  */
 bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
@@ -920,41 +951,6 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 	}
 
 	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Find recipient in the ISDS.
- */
-void DlgSendMessage::findAndAddRecipient(void)
-/* ========================================================================= */
-{
-	QStringList dbIDs;
-	QDialog *dsSearch = Q_NULLPTR;
-	if (!m_isWebDatovkaAccount) {
-		dsSearch = new DlgDsSearch(m_userName, m_dbType,
-		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
-	} else {
-#if 0 /* TODO -- MojeID functionality disabled, deal with it later. */
-		dsSearch = new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_ADDNEW,
-		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
-		    this, m_userName);
-#else
-		return;
-#endif
-	}
-	dsSearch->exec();
-	dsSearch->deleteLater();
-	insertDataboxesToRecipientList(dbIDs);
-}
-
-void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
-{
-	debugSlotCall();
-
-	AttachmentInteraction::openAttachment(this, *this->attachmentTableView,
-	    index);
 }
 
 
@@ -1405,40 +1401,6 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 
 	emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
 }
-
-/* ========================================================================= */
-/*
- * Enter DB ID manually.
- */
-void DlgSendMessage::addDbIdToRecipientList(void)
-/* ========================================================================= */
-{
-	bool ok = false;
-
-	QString dbID = QInputDialog::getText(this, tr("Databox ID"),
-	    tr("Enter Databox ID (7 characters):"), QLineEdit::Normal,
-	    NULL, &ok, Qt::WindowStaysOnTopHint);
-
-	if (!ok) {
-		return;
-	}
-
-	if (dbID.isEmpty() || dbID.length() != 7) {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setWindowTitle(tr("Wrong data box ID"));
-		msgBox.setText(tr("Wrong data box ID '%1'!").arg(dbID));
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
-		return;
-	}
-
-	QStringList dbIDs;
-	dbIDs.append(dbID);
-	insertDataboxesToRecipientList(dbIDs);
-}
-
 
 /* ========================================================================= */
 /*

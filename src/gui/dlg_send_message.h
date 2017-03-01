@@ -86,12 +86,27 @@ private slots:
 	void checkInputFields(void);
 
 	/*!
+	 * @brief Add recipient from contacts held in database.
+	 */
+	void addRecipientFromLocalContact(void);
+
+	/*!
+	 * @brief Add recipients found via ISDS search.
+	 */
+	void addRecipientFromISDSSearch(void);
+
+	/*!
+	 * @brief Manually add a data box identifier.
+	 */
+	void addRecipientManually(void);
+
+	/*!
 	 * @brief Activates control elements based on selected recipients.
 	 *
 	 * @param[in] selected Newly selected items.
 	 * @param[in] deselected Deselected items.
 	 */
-	void recipientSelected(const QItemSelection &selected,
+	void recipientSelectionChanged(const QItemSelection &selected,
 	    const QItemSelection &deselected);
 
 	/*!
@@ -110,6 +125,15 @@ private slots:
 	void addAttachmentFile(void);
 
 	/*!
+	 * @brief Activates control elements based on selected attachments.
+	 *
+	 * @param[in] selected Newly selected items.
+	 * @param[in] deselected Deselected items.
+	 */
+	void attachmentSelectionChanged(const QItemSelection &selected,
+	    const QItemSelection &deselected);
+
+	/*!
 	 * @brief Remove selected attachment entries.
 	 */
 	void deleteSelectedAttachmentFiles(void);
@@ -121,8 +145,7 @@ private slots:
 	 *              selected item is taken from the selection model.
 	 */
 	void openSelectedAttachment(const QModelIndex &index = QModelIndex());
-	void addRecipientFromLocalContact(void);
-	void findAndAddRecipient(void);
+
 	void sendMessage(void);
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
@@ -131,11 +154,8 @@ private slots:
 	void sendMessageMojeIdAction(const QString &userName,
 	    const QStringList &result, const QString &error);
 	void pingIsdsServer(void);
-	void addDbIdToRecipientList(void);
 	void attachmentDataChanged(const QModelIndex &topLeft,
 	    const QModelIndex &bottomRight, const QVector<int> &roles);
-	void attachmentSelectionChanged(const QItemSelection &selected,
-	    const QItemSelection &deselected);
 	void setAccountInfo(int item);
 
 private:
