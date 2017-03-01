@@ -100,13 +100,10 @@ private slots:
 	void deleteRecipientData(void);
 
 	/*!
-	 * @brief Show/hide optional form elements depending on \a checkState.
-	 *
-	 * @param[in] checkState Check state of the controlling check box.
+	 * @brief Show/hide optional form elements.
 	 */
-	void showOptionalForm(int checkState);
+	void showOptionalForm(void);
 
-	void showOptionalFormAndSet(int);
 	void addAttachmentFile(void);
 	void deleteSelectedAttachmentFiles(void);
 

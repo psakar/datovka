@@ -129,7 +129,7 @@ void DlgSendMessage::checkInputFields(void)
 	    (m_recipientTableModel.rowCount() > 0) &&
 	    (m_attachmentModel.rowCount() > 0);
 
-	if (this->payReply->isChecked()) {
+	if (this->payReplyCheckBox->isChecked()) {
 		if (this->dmSenderRefNumber->text().isEmpty()) {
 			buttonEnabled = false;
 		}
@@ -188,9 +188,30 @@ void DlgSendMessage::deleteRecipientData(void)
 	/* Deleting selected items should disable the trigger button. */
 }
 
-void DlgSendMessage::showOptionalForm(int checkState)
+void DlgSendMessage::showOptionalForm(void)
 {
-	this->OptionalWidget->setHidden(Qt::Unchecked == checkState);
+	this->optionalWidget->setHidden(
+	    (this->optionalFieldCheckBox->checkState() == Qt::Unchecked) &&
+	    (this->payReplyCheckBox->checkState() == Qt::Unchecked));
+
+	checkInputFields();
+
+	if (this->payReplyCheckBox->checkState() == Qt::Unchecked) {
+		this->labeldmSenderRefNumber->setStyleSheet(
+		    "QLabel { color: black }");
+		this->labeldmSenderRefNumber->setText(
+		    tr("Our reference number:"));
+		disconnect(this->dmSenderRefNumber,SIGNAL(textChanged(QString)),
+		    this, SLOT(checkInputFields()));
+	} else {
+		this->labeldmSenderRefNumber->setStyleSheet(
+		    "QLabel { color: red }");
+		this->labeldmSenderRefNumber->setText(
+		    tr("Enter reference number:"));
+		this->dmSenderRefNumber->setFocus();
+		connect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
+		    this, SLOT(checkInputFields()));
+	}
 }
 
 void DlgSendMessage::initContent(void)
@@ -256,13 +277,12 @@ void DlgSendMessage::initContent(void)
 	    SIGNAL(rowsRemoved(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
 
-	connect(this->payReply, SIGNAL(stateChanged(int)), this,
-	    SLOT(showOptionalFormAndSet(int)));
+	this->optionalWidget->setHidden(true);
 
-	this->OptionalWidget->setHidden(true);
-
-	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)), this,
-	    SLOT(showOptionalForm(int)));
+	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(showOptionalForm()));
+	connect(this->payReplyCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(showOptionalForm()));
 
 	connect(this->addRecipient, SIGNAL(clicked()), this,
 	    SLOT(addRecipientFromLocalContact()));
@@ -344,11 +364,11 @@ void DlgSendMessage::initContent(void)
 		fillDlgAsReply();
 	} else {
 		if (m_dbOpenAddressing) {
-			this->payReply->setEnabled(true);
-			this->payReply->show();
+			this->payReplyCheckBox->setEnabled(true);
+			this->payReplyCheckBox->show();
 		} else {
-			this->payReply->setEnabled(false);
-			this->payReply->hide();
+			this->payReplyCheckBox->setEnabled(false);
+			this->payReplyCheckBox->hide();
 		}
 
 		this->payRecipient->setEnabled(false);
@@ -592,7 +612,7 @@ void DlgSendMessage::fillDlgAsReply(void)
 		hideOptionalWidget = false;
 	}
 
-	this->OptionalWidget->setHidden(hideOptionalWidget);
+	this->optionalWidget->setHidden(hideOptionalWidget);
 	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
 	this->payRecipient->setEnabled(false);
 	this->payRecipient->setChecked(false);
@@ -601,11 +621,11 @@ void DlgSendMessage::fillDlgAsReply(void)
 	bool pdz;
 	if (!m_dbEffectiveOVM) {
 		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDSender);
-		this->payReply->show();
-		this->payReply->setEnabled(true);
+		this->payReplyCheckBox->show();
+		this->payReplyCheckBox->setEnabled(true);
 	} else {
-		this->payReply->setEnabled(false);
-		this->payReply->hide();
+		this->payReplyCheckBox->setEnabled(false);
+		this->payReplyCheckBox->hide();
 		pdz = false;
 	}
 
@@ -615,8 +635,8 @@ void DlgSendMessage::fillDlgAsReply(void)
 		this->findRecipient->setEnabled(false);
 		this->replyLabel->show();
 		this->replyLabel->setEnabled(true);
-		this->payReply->hide();
-		this->payReply->setEnabled(false);
+		this->payReplyCheckBox->hide();
+		this->payReplyCheckBox->setEnabled(false);
 		this->payRecipient->setEnabled(true);
 		this->payRecipient->setChecked(true);
 		this->payRecipient->show();
@@ -739,17 +759,17 @@ void DlgSendMessage::fillDlgFromTmpMsg(void)
 		hideOptionalWidget = false;
 	}
 
-	this->OptionalWidget->setHidden(hideOptionalWidget);
+	this->optionalWidget->setHidden(hideOptionalWidget);
 	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
 
 	bool pdz;
 	if (!m_dbEffectiveOVM) {
 		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDRecipient);
-		this->payReply->show();
-		this->payReply->setEnabled(true);
+		this->payReplyCheckBox->show();
+		this->payReplyCheckBox->setEnabled(true);
 	} else {
-		this->payReply->setEnabled(false);
-		this->payReply->hide();
+		this->payReplyCheckBox->setEnabled(false);
+		this->payReplyCheckBox->hide();
 		pdz = false;
 	}
 
@@ -814,36 +834,6 @@ void DlgSendMessage::addAttachmentFile(void)
 			/* TODO -- Generate some warning message. */
 			continue;
 		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Show/hide optional fields in dialog and set any items.
- */
-void DlgSendMessage::showOptionalFormAndSet(int state)
-/* ========================================================================= */
-{
-	this->OptionalWidget->setHidden(Qt::Unchecked == state);
-
-	checkInputFields();
-
-	if (Qt::Unchecked == state) {
-		this->labeldmSenderRefNumber->setStyleSheet(
-		    "QLabel { color: black }");
-		this->labeldmSenderRefNumber->setText(
-		     tr("Our reference number:"));
-		disconnect(this->dmSenderRefNumber,SIGNAL(textChanged(QString)),
-		this, SLOT(checkInputFields()));
-	} else {
-		this->labeldmSenderRefNumber->setStyleSheet(
-		    "QLabel { color: red }");
-		this->labeldmSenderRefNumber->setText(
-		    tr("Enter reference number:"));
-		this->dmSenderRefNumber->setFocus();
-		connect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
-		this, SLOT(checkInputFields()));
 	}
 }
 
@@ -1108,7 +1098,7 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 			envelope.dmRecipientRefNumber = m_dmSenderRefNumber;
 		}
 	} else {
-		if (this->payReply->isChecked()) {
+		if (this->payReplyCheckBox->isChecked()) {
 			dmType = "I";
 		}
 	}

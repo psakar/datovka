@@ -169,7 +169,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="OptionalWidget" native="true">
+    <widget class="QWidget" name="optionalWidget" native="true">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -545,7 +545,7 @@ message is considered as delivered after
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="payReply">
+    <widget class="QCheckBox" name="payReplyCheckBox">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -814,7 +814,7 @@ of postal data messages active.</string>
   <tabstop>cancelButton</tabstop>
   <tabstop>dmPublishOwnID</tabstop>
   <tabstop>payRecipient</tabstop>
-  <tabstop>payReply</tabstop>
+  <tabstop>payReplyCheckBox</tabstop>
   <tabstop>dmAllowSubstDelivery</tabstop>
   <tabstop>optionalFieldCheckBox</tabstop>
   <tabstop>removeRecipient</tabstop>
