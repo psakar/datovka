@@ -614,33 +614,6 @@ void DlgSendMessage::setAccountInfo(int item)
 
 /* ========================================================================= */
 /*
- * Func: Return remaining PDZ credit.
- */
-QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
-    const QString &dbId)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	TaskDownloadCreditInfo *task;
-
-	task = new (std::nothrow) TaskDownloadCreditInfo(userName, dbId);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-
-	long int credit = task->m_heller;
-	delete task;
-
-	if (credit <= 0) {
-		return "0";
-	}
-
-	return programLocale.toString((float)credit / 100, 'f', 2);
-}
-
-
-/* ========================================================================= */
-/*
  * Whenever any data in attachment table change.
  */
 void DlgSendMessage::attachmentDataChanged(const QModelIndex &topLeft,
@@ -1542,6 +1515,26 @@ void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
 			    m_lastAttAddPath);
 		}
 	}
+}
+
+QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
+    const QString &dbId)
+{
+	debugFuncCall();
+
+	TaskDownloadCreditInfo *task =
+	    new (std::nothrow) TaskDownloadCreditInfo(userName, dbId);
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	qint64 credit = task->m_heller;
+	delete task; task = Q_NULLPTR;
+
+	if (credit <= 0) {
+		return "0";
+	}
+
+	return programLocale.toString((float)credit / 100, 'f', 2);
 }
 
 bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,

@@ -206,7 +206,14 @@ private:
 	*/
 	void insertDataboxesToRecipientList(const QStringList &dbIDs);
 
-
+	/*!
+	 * @brief Queries ISDS for remaining PDZ credit.
+	 *
+	 * @param[in] userName User name identifying the account.
+	 * @param[in] dnId Data box identifier.
+	 * @return String containing the amount of remaining credit in Czech
+	 *         crowns.
+	 */
 	static
 	QString getPDZCreditFromISDS(const QString &userName,
 	    const QString &dbId);

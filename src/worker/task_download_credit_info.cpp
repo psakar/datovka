@@ -65,7 +65,7 @@ void TaskDownloadCreditInfo::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-long TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
+qint64 TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
     const QString &dbId)
 {
 	long credit = 0;
