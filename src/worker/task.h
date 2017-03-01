@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@
 #include "src/io/message_db_set.h"
 #include "src/web/json.h"
 
-
 /*!
  * @brief Maximum length of message list to be downloaded.
  */
@@ -41,16 +40,16 @@
 /*!
  * @brief Progress-bar labels used.
  */
-#define PL_IDLE "Idle"
 #define PL_DOWNLOAD_MESSAGE "DownloadMessage"
 #define PL_DOWNLOAD_RECEIVED_LIST "DownloadReceivedMessageList"
 #define PL_DOWNLOAD_SENT_LIST "DownloadSentMessageList"
-#define PL_IMPORT_ZFO_DINFO "ImportZfoDeliveryInfo"
+#define PL_GET_ACCOUNT_LIST "GetAccounts"
+#define PL_IDLE "Idle"
 #define PL_IMPORT_MSG "ImportMessage"
+#define PL_IMPORT_ZFO_DINFO "ImportZfoDeliveryInfo"
 #define PL_IMPORT_ZFO_MSG "ImportZfoMessage"
 #define PL_SEND_MESSAGE "SendMessage"
 #define PL_SYNC_ACCOUNT "SyncAccount"
-#define PL_GET_ACCOUNT_LIST "GetAccounts"
 
 /*!
  * @brief This class contains generic functions that can be used in derived

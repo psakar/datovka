@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -281,13 +281,13 @@ int getWebDatovkaUserId(const QString &userName);
 QString getWebDatovkaTagDbPrefix(const QString &userName);
 
 /*!
- * @brief Split database filename into mandatory entries.
+ * @brief Check valid database filename.
  *
- * @param[in] inDbFileName - input database file name.
- * @param[out] dbUserName - username entry.
- * @paran[out] dbYear - year entry if exists or NULL.
- * @paran[out] dbTestingFlag - true if account is testing or false
- * @paran[out] errMsg - error message to user
+ * @param[in] inDbFileName Input database file name.
+ * @param[out] dbUserName Username entry.
+ * @paran[out] dbYear Year entry if exists or NULL.
+ * @paran[out] dbTestingFlag True if account is testing or false
+ * @paran[out] errMsg Error message to user
  * @return true if database filename is correct
  */
 bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -596,14 +596,14 @@ bool isValidDatabaseFileName(QString inDbFileName,
 		// get username from filename
 		fileNameParts = inDbFileName.split("_");
 		if (fileNameParts.isEmpty() || fileNameParts.count() <= 1) {
-			errMsg = QObject::tr("This file does not contain a valid "
-			    "database filename.");
+			errMsg = QObject::tr("File '%1' does not contain a valid "
+			    "database filename.").arg(inDbFileName);
 			return ret;
 		}
 		if (fileNameParts[0].isEmpty() ||
 		    fileNameParts[0].length() != 6) {
-			errMsg = QObject::tr("This file does not contain a valid "
-			    "username in the database filename.");
+			errMsg = QObject::tr("File '%1' does not contain a valid "
+			    "username in the database filename.").arg(inDbFileName);
 			return ret;
 		}
 		dbUserName = fileNameParts[0];
@@ -616,8 +616,8 @@ bool isValidDatabaseFileName(QString inDbFileName,
 		} else if (fileNameParts[1].length() == 4) {
 			dbYear = fileNameParts[1];
 		} else {
-			errMsg = QObject::tr("This database file does not contain "
-			    "valid year in the database filename.");
+			errMsg = QObject::tr("File '%1' does not contain valid "
+			    "year in the database filename.").arg(inDbFileName);
 			dbYear = "";
 			return ret;
 		}
@@ -625,14 +625,14 @@ bool isValidDatabaseFileName(QString inDbFileName,
 		// get testing flag from filename
 		fileNameParts = inDbFileName.split(".");
 		if (fileNameParts.isEmpty()) {
-			errMsg = QObject::tr("This file does not contain valid "
-			    "database filename.");
+			errMsg = QObject::tr("File '%1' does not contain valid "
+			    "database filename.").arg(inDbFileName);
 			return ret;
 		}
 		fileNameParts = fileNameParts[0].split("___");
 		if (fileNameParts.isEmpty()) {
-			errMsg = QObject::tr("This database file does not contain "
-			    "valid database filename.");
+			errMsg = QObject::tr("File '%1' does not contain "
+			    "valid database filename.").arg(inDbFileName);
 			return ret;
 		}
 
@@ -641,17 +641,16 @@ bool isValidDatabaseFileName(QString inDbFileName,
 		} else if (fileNameParts[1] == "0") {
 			dbTestingFlag = false;
 		} else {
-			errMsg = QObject::tr("This file does not contain a valid "
-			    "account type flag or filename has wrong format.");
+			errMsg = QObject::tr("File '%1' does not contain a valid "
+			    "account type flag or filename has wrong format.").arg(inDbFileName);
 			dbTestingFlag = false;
 			return ret;
 		}
 	} else {
-		errMsg = QObject::tr("This file does not contain a valid message "
-		    "database or filename has wrong format.");
+		errMsg = QObject::tr("File '%1' does not contain a valid message "
+		    "database or filename has wrong format.").arg(inDbFileName);
 		return ret;
 	}
 
 	return true;
 }
-

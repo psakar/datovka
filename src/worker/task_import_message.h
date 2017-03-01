@@ -62,7 +62,7 @@ public:
 	void run(void) Q_DECL_OVERRIDE;
 
 	enum Result m_result; /*!< Import outcome. */
-	QStringList m_resultDescList; /*!< List of unsuccess import messages. */
+	QStringList m_resultDescList; /*!< List of unsuccessful messages import. */
 	int m_msgCntTotal; /*!< Holds total number of messages in source db. */
 	int m_importedMsg; /*!< Holds number of success imported messages */
 

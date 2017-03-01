@@ -31,14 +31,14 @@
 TaskImportMessage::TaskImportMessage(const QString &userName,
     MessageDbSet *dbSet, const QStringList &dbFileList, const QString &dbId)
     : m_result(IMP_ERR),
-    m_resultDescList(QStringList()),
+    m_resultDescList(),
     m_msgCntTotal(0),
     m_importedMsg(0),
     m_userName(userName),
     m_dbSet(dbSet),
     m_dbFileList(dbFileList),
     m_dbId(dbId),
-    m_resultDesc(QString())
+    m_resultDesc()
 {
 }
 
@@ -152,15 +152,17 @@ enum TaskImportMessage::Result TaskImportMessage::importMessages(
 		/* parse and check the import database file name */
 		if (!isValidDatabaseFileName(dbFileName, dbUserName,
 		    dbYearFlag, dbTestingFlag, resultDesc)) {
+			resultDescList.append(resultDesc);
 			continue;
 		}
 
 		/* check if username of db file is relevant to account */
 		if (userName != dbUserName) {
-			resultDesc = QObject::tr("This database file cannot "
+			resultDesc = QObject::tr("Database file '%1' cannot "
 			    "import into selected account because username "
 			    "of account and username of database file do "
-			    "not correspond.");
+			    "not correspond.").arg(dbFileName);
+			resultDescList.append(resultDesc);
 			continue;
 		}
 
@@ -168,8 +170,8 @@ enum TaskImportMessage::Result TaskImportMessage::importMessages(
 		MessageDbSingle *srcDbSingle =
 		     MessageDbSingle::createNew(dbFile, "TEMPORARYDBS");
 		if (0 == srcDbSingle) {
-			resultDesc = QObject::tr("Failed to open import "
-			    "database file.");
+			resultDesc = QObject::tr("Failed to open import database file %1'.").arg(dbFileName);
+			resultDescList.append(resultDesc);
 			continue;
 		}
 
