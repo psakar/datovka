@@ -440,14 +440,14 @@ void DlgSendMessage::initContent(void)
 	    this, SLOT(checkInputFields()));
 
 	connect(&m_attachmentModel,
-	    SIGNAL(rowsInserted(QModelIndex, int, int)), this,
-	    SLOT(checkInputFields()));
+	    SIGNAL(rowsInserted(QModelIndex, int, int)),
+	    this, SLOT(checkInputFields()));
 	connect(&m_attachmentModel,
-	    SIGNAL(rowsRemoved(QModelIndex, int, int)), this,
-	    SLOT(checkInputFields()));
+	    SIGNAL(rowsRemoved(QModelIndex, int, int)),
+	    this, SLOT(checkInputFields()));
 	connect(&m_attachmentModel,
-	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)), this,
-	    SLOT(attachmentDataChanged(QModelIndex, QModelIndex, QVector<int>)));
+	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
+	    this, SLOT(checkInputFields()));
 	connect(this->attachmentTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
 	    SLOT(attachmentSelectionChanged(QItemSelection, QItemSelection)));
@@ -621,21 +621,6 @@ void DlgSendMessage::setAccountInfo(int item)
 
 /* ========================================================================= */
 /*
- * Whenever any data in attachment table change.
- */
-void DlgSendMessage::attachmentDataChanged(const QModelIndex &topLeft,
-    const QModelIndex &bottomRight, const QVector<int> &roles)
-/* ========================================================================= */
-{
-	Q_UNUSED(topLeft);
-	Q_UNUSED(bottomRight);
-	Q_UNUSED(roles);
-
-	checkInputFields();
-}
-
-
-/* ========================================================================= */
 /*
  * Func: Fill Send Message Dialog as reply.
  */

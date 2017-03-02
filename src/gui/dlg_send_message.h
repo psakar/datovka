@@ -159,8 +159,6 @@ private slots:
 	    bool isPDZ, qint64 dmId);
 	void sendMessageMojeIdAction(const QString &userName,
 	    const QStringList &result, const QString &error);
-	void attachmentDataChanged(const QModelIndex &topLeft,
-	    const QModelIndex &bottomRight, const QVector<int> &roles);
 	void setAccountInfo(int item);
 
 private:
