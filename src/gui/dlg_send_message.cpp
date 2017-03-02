@@ -586,7 +586,7 @@ void DlgSendMessage::collectSendMessageStatusWebDatovka(const QString &userName,
 		this->accept(); /* Set return code to accepted. */
 		emit doActionAfterSentMsgSignal(userName, m_lastAttAddPath);
 	} else {
-		for (int i = 0; i < result.count(); ++i) {
+		for (int i = 0; i < results.count(); ++i) {
 			QString msg = results.at(i);
 			detailText += msg.replace("§", ": ");
 		}
