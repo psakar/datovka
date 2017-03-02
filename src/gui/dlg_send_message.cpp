@@ -464,6 +464,150 @@ void DlgSendMessage::sendMessage(void)
 	}
 }
 
+void DlgSendMessage::collectSendMessageStatus(const QString &userName,
+    const QString &transactId, int result, const QString &resultDesc,
+    const QString &dbIDRecipient, const QString &recipientName,
+    bool isPDZ, qint64 dmId)
+{
+	debugSlotCall();
+
+	Q_UNUSED(userName);
+
+	if (m_transactIds.end() == m_transactIds.find(transactId)) {
+		/* Nothing found. */
+		return;
+	}
+
+	/* Gather data. */
+	m_sentMsgResultList.append(TaskSendMessage::ResultData(
+	    (enum TaskSendMessage::Result) result, resultDesc,
+	    dbIDRecipient, recipientName, isPDZ, dmId));
+
+	if (!m_transactIds.remove(transactId)) {
+		logErrorNL("%s",
+		    "Was not able to remove a transaction identifier from list of unfinished transactions.");
+	}
+
+	if (!m_transactIds.isEmpty()) {
+		/* Still has some pending transactions. */
+		return;
+	}
+
+	/* All transactions finished. */
+
+	this->setCursor(Qt::ArrowCursor);
+	this->setEnabled(true);
+
+	int successfullySentCnt = 0;
+	QString detailText;
+
+	foreach (const TaskSendMessage::ResultData &resultData,
+	         m_sentMsgResultList) {
+		if (TaskSendMessage::SM_SUCCESS == resultData.result) {
+			++successfullySentCnt;
+
+			if (resultData.isPDZ) {
+				detailText += tr(
+				    "Message was successfully sent to "
+				    "<i>%1 (%2)</i> as PDZ with number "
+				    "<i>%3</i>.").
+				    arg(resultData.recipientName).
+				    arg(resultData.dbIDRecipient).
+				    arg(resultData.dmId) + "<br/>";
+			} else {
+				detailText += tr(
+				    "Message was successfully sent to "
+				    "<i>%1 (%2)</i> as message number "
+				    "<i>%3</i>.").
+				    arg(resultData.recipientName).
+				    arg(resultData.dbIDRecipient).
+				    arg(resultData.dmId) + "<br/>";
+			}
+		} else {
+			detailText += tr("Message was NOT sent to "
+			    "<i>%1 (%2)</i>. Server says: %3").
+			    arg(resultData.recipientName).
+			    arg(resultData.dbIDRecipient).
+			    arg(resultData.errInfo) + "<br/>";
+		}
+	}
+	m_sentMsgResultList.clear();
+
+	if (m_recipientTableModel.rowCount() == successfullySentCnt) {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.setWindowTitle(tr("Message sent"));
+		msgBox.setText("<b>" +
+		    tr("Message was successfully sent to all recipients.") +
+		    "</b>");
+		msgBox.setInformativeText(detailText);
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		this->accept(); /* Set return code to accepted. */
+	} else {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Message sending error"));
+		msgBox.setText("<b>" +
+		    tr("Message was NOT sent to all recipients.") + "</b>");
+		detailText += "<br/><br/><b>" +
+		    tr("Do you want to close the Send message form?") + "</b>";
+		msgBox.setInformativeText(detailText);
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (msgBox.exec() == QMessageBox::Yes) {
+			this->close(); /* Set return code to closed. */
+		}
+	}
+
+	emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
+}
+
+void DlgSendMessage::collectSendMessageStatusWebDatovka(const QString &userName,
+    const QStringList &results, const QString &error)
+{
+	debugSlotCall();
+
+	Q_UNUSED(error);
+
+	QString detailText;
+
+	if (results.isEmpty()) {
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Information);
+		msgBox.setWindowTitle(tr("Message sent"));
+		msgBox.setText("<b>" +
+		    tr("Message was successfully sent to all recipients.") +
+		    "</b>");
+		msgBox.setStandardButtons(QMessageBox::Ok);
+		msgBox.setDefaultButton(QMessageBox::Ok);
+		msgBox.exec();
+		this->accept(); /* Set return code to accepted. */
+		emit doActionAfterSentMsgSignal(userName, m_lastAttAddPath);
+	} else {
+		for (int i = 0; i < result.count(); ++i) {
+			QString msg = results.at(i);
+			detailText += msg.replace("§", ": ");
+		}
+		QMessageBox msgBox;
+		msgBox.setIcon(QMessageBox::Warning);
+		msgBox.setWindowTitle(tr("Message sending error"));
+		msgBox.setText("<b>" +
+		    tr("Message was NOT sent to all recipients.") + "</b>");
+		detailText += "<br/><br/><b>" +
+		    tr("Do you want to close the Send message form?") + "</b>";
+		msgBox.setInformativeText(detailText);
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+		if (msgBox.exec() == QMessageBox::Yes) {
+			this->close(); /* Set return code to closed. */
+			emit doActionAfterSentMsgSignal(userName,
+			    m_lastAttAddPath);
+		}
+	}
+}
+
 void DlgSendMessage::initContent(void)
 {
 	if (isWebDatovkaAccount(m_userName)) {
@@ -591,8 +735,10 @@ void DlgSendMessage::initContent(void)
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
 	connect(&globMsgProcEmitter,
-	    SIGNAL(sendMessageMojeIdFinished(QString, QStringList, QString)), this,
-	    SLOT(sendMessageMojeIdAction(QString, QStringList,  QString)));
+	    SIGNAL(sendMessageMojeIdFinished(QString, QStringList, QString)),
+	    this,
+	    SLOT(collectSendMessageStatusWebDatovka(QString, QStringList,
+	        QString)));
 
 	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
@@ -630,156 +776,6 @@ void DlgSendMessage::initContent(void)
 	}
 
 	this->adjustSize();
-}
-
-void DlgSendMessage::collectSendMessageStatus(const QString &userName,
-    const QString &transactId, int result, const QString &resultDesc,
-    const QString &dbIDRecipient, const QString &recipientName,
-    bool isPDZ, qint64 dmId)
-{
-	debugSlotCall();
-
-	Q_UNUSED(userName);
-
-	if (m_transactIds.end() == m_transactIds.find(transactId)) {
-		/* Nothing found. */
-		return;
-	}
-
-	m_sentMsgResultList.append(TaskSendMessage::ResultData(
-	    (enum TaskSendMessage::Result) result, resultDesc,
-	    dbIDRecipient, recipientName, isPDZ, dmId));
-
-	if (!m_transactIds.remove(transactId)) {
-		logErrorNL("%s", "Could not be able to remove a transaction "
-		    "identifier from list of unfinished transactions.");
-	}
-
-	if (!m_transactIds.isEmpty()) {
-		/* Still has some pending transactions. */
-		return;
-	}
-
-	/* All transactions finished. */
-
-	this->setCursor(Qt::ArrowCursor);
-	this->setEnabled(true);
-
-	int successfullySentCnt = 0;
-	QString detailText;
-
-	foreach (const TaskSendMessage::ResultData &resultData,
-	         m_sentMsgResultList) {
-		if (TaskSendMessage::SM_SUCCESS == resultData.result) {
-			++successfullySentCnt;
-
-			if (resultData.isPDZ) {
-				detailText += tr(
-				    "Message has successfully been sent to "
-				    "<i>%1 (%2)</i> as PDZ with number "
-				    "<i>%3</i>.").
-				    arg(resultData.recipientName).
-				    arg(resultData.dbIDRecipient).
-				    arg(resultData.dmId) + "<br/>";
-			} else {
-				detailText += tr(
-				    "Message has successfully been sent to "
-				    "<i>%1 (%2)</i> as message number "
-				    "<i>%3</i>.").
-				    arg(resultData.recipientName).
-				    arg(resultData.dbIDRecipient).
-				    arg(resultData.dmId) + "<br/>";
-			}
-		} else {
-			detailText += tr("Message has NOT been sent to "
-			    "<i>%1 (%2)</i>. Server says: %3").
-			    arg(resultData.recipientName).
-			    arg(resultData.dbIDRecipient).
-			    arg(resultData.errInfo) + "<br/>";
-		}
-	}
-	m_sentMsgResultList.clear();
-
-	if (m_recipientTableModel.rowCount() == successfullySentCnt) {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Information);
-		msgBox.setWindowTitle(tr("Message sent"));
-		msgBox.setText("<b>" +
-		    tr("Message has successfully been sent to all recipients.") +
-		    "</b>");
-		msgBox.setInformativeText(detailText);
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
-		this->accept(); /* Set return code to accepted. */
-	} else {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Message sending error"));
-		msgBox.setText("<b>" +
-		    tr("Message has NOT been sent to all recipients.") +
-		    "</b>");
-		detailText += "<br/><br/><b>" +
-		    tr("Do you want to close the Send message form?") + "</b>";
-		msgBox.setInformativeText(detailText);
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		msgBox.setDefaultButton(QMessageBox::No);
-		if (msgBox.exec() == QMessageBox::Yes) {
-			this->close(); /* Set return code to closed. */
-		}
-	}
-
-	emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
-}
-
-/* ========================================================================= */
-/*
- * Slot: Performs action depending on webdatovka message send outcome.
- */
-void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
-    const QStringList &result, const QString &error)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	Q_UNUSED(error);
-
-	QString detailText;
-
-	if (result.isEmpty()) {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Information);
-		msgBox.setWindowTitle(tr("Message sent"));
-		msgBox.setText("<b>" +
-		    tr("Message has successfully been sent to all recipients.") +
-		    "</b>");
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
-		this->accept(); /* Set return code to accepted. */
-		emit doActionAfterSentMsgSignal(userName, m_lastAttAddPath);
-	} else {
-		for (int i = 0; i < result.count(); ++i) {
-			QString msg = result.at(i);
-			detailText += msg.replace("§", ": ");
-		}
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Message sending error"));
-		msgBox.setText("<b>" +
-		    tr("Message has NOT been sent to all recipients.") +
-		    "</b>");
-		detailText += "<br/><br/><b>" +
-		    tr("Do you want to close the Send message form?") + "</b>";
-		msgBox.setInformativeText(detailText);
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		msgBox.setDefaultButton(QMessageBox::No);
-		if (msgBox.exec() == QMessageBox::Yes) {
-			this->close(); /* Set return code to closed. */
-			emit doActionAfterSentMsgSignal(userName,
-			    m_lastAttAddPath);
-		}
-	}
 }
 
 void DlgSendMessage::fillContentAsForward(void)

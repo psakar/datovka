@@ -164,12 +164,34 @@ private slots:
 	 */
 	void sendMessage(void);
 
+	/*!
+	 * @brief Gathers status after sending messages via ISDS interface.
+	 *     Shows result table if all data collected.
+	 *
+	 * @param[in] userName User name identifying the sender account.
+	 * @param[in] transactId Unique transaction identifier.
+	 * @param[in] result Sending status.
+	 * @param[in] resultDesc Result description string.
+	 * @param[in] dbIDRecipient Recipient data box identifier.
+	 * @param[in] recipientName Recipient data box name.
+	 * @param[in] isPDZ True if message was attempted to send as commercial
+	 *                  message.
+	 * @param[in] dmId Sent message identifier.
+	 */
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
 	    bool isPDZ, qint64 dmId);
-	void sendMessageMojeIdAction(const QString &userName,
-	    const QStringList &result, const QString &error);
+
+	/*!
+	 * @brief Gathers status after sending messages via WebDatovka.
+	 *
+	 * @param[in] userName User name identifying the sender account.
+	 * @param[in] results List of result state descriptions.
+	 * @param[in] error Error description.
+	 */
+	void collectSendMessageStatusWebDatovka(const QString &userName,
+	    const QStringList &results, const QString &error);
 
 private:
 	/*!
@@ -289,9 +311,9 @@ private:
 	void sendMessageWebDatovka(
 	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
 
-	QTimer m_keepAliveTimer;
-	const QList<Task::AccountDescr> m_messageDbSetList;
-	const QList<MessageDb::MsgId> m_msgIds;
+	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
+	const QList<Task::AccountDescr> m_messageDbSetList; /*!< Available accounts.*/
+	const QList<MessageDb::MsgId> m_msgIds; /*!< Message identifiers. */
 	QString m_dbId;
 	QString m_senderName;
 	const Action m_action;
