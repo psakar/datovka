@@ -489,7 +489,7 @@ void DlgSendMessage::initContent(void)
 	}
 
 	if (ACT_REPLY == m_action) {
-		fillDlgAsReply();
+		fillContentAsReply();
 	} else {
 		if (m_dbOpenAddressing) {
 			this->payReplyCheckBox->setEnabled(true);
@@ -502,9 +502,9 @@ void DlgSendMessage::initContent(void)
 		this->payRecipient->setEnabled(false);
 		this->payRecipient->hide();
 		if (ACT_NEW_FROM_TMP == m_action) {
-			fillDlgFromTmpMsg();
+			fillContentFromTemplate();
 		} else if (ACT_FORWARD == m_action) {
-			fillDlgAsForward();
+			fillContentAsForward();
 		}
 	}
 
@@ -621,447 +621,6 @@ void DlgSendMessage::setAccountInfo(int item)
 
 /* ========================================================================= */
 /*
-/*
- * Func: Fill Send Message Dialog as reply.
- */
-void DlgSendMessage::fillDlgAsReply(void)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	if (m_msgIds.size() != 1) {
-		logWarningNL("%s",
-		    "Expected one message to generate reply from.");
-		return;
-	}
-	const MessageDb::MsgId &msgId(m_msgIds.first());
-
-	bool hideOptionalWidget = true;
-
-	this->fromComboBox->setEnabled(false);
-
-	MessageDb *messageDb =
-	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
-	Q_ASSERT(Q_NULLPTR != messageDb);
-
-	MessageDb::PartialEnvelopeData envData =
-	    messageDb->msgsReplyData(msgId.dmId);
-	m_dmType = envData.dmType;
-	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
-
-	this->subjectText->setText("Re: " + envData.dmAnnotation);
-
-	if (!envData.dmSenderRefNumber.isEmpty()) {
-		this->dmRecipientRefNumber->setText(envData.dmSenderRefNumber);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmSenderIdent.isEmpty()) {
-		this->dmRecipientIdent->setText(envData.dmSenderIdent);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmRecipientRefNumber.isEmpty()) {
-		this->dmSenderRefNumber->setText(envData.dmRecipientRefNumber);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmRecipientIdent.isEmpty()) {
-		this->dmSenderIdent->setText(envData.dmRecipientIdent);
-		hideOptionalWidget = false;
-	}
-
-	this->optionalWidget->setHidden(hideOptionalWidget);
-	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
-	this->payRecipient->setEnabled(false);
-	this->payRecipient->setChecked(false);
-	this->payRecipient->hide();
-
-	bool pdz;
-	if (!m_dbEffectiveOVM) {
-		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDSender);
-		this->payReplyCheckBox->show();
-		this->payReplyCheckBox->setEnabled(true);
-	} else {
-		this->payReplyCheckBox->setEnabled(false);
-		this->payReplyCheckBox->hide();
-		pdz = false;
-	}
-
-	if (m_dmType == "I") {
-		this->addRecipient->setEnabled(false);
-		this->removeRecipient->setEnabled(false);
-		this->findRecipient->setEnabled(false);
-		this->replyLabel->show();
-		this->replyLabel->setEnabled(true);
-		this->payReplyCheckBox->hide();
-		this->payReplyCheckBox->setEnabled(false);
-		this->payRecipient->setEnabled(true);
-		this->payRecipient->setChecked(true);
-		this->payRecipient->show();
-		pdz = true;
-	}
-
-	m_recipientTableModel.appendData(envData.dbIDSender, -1,
-	    envData.dmSender, envData.dmSenderAddress, QString(), pdz);
-}
-
-void DlgSendMessage::fillDlgAsForward(void)
-{
-	debugFuncCall();
-
-	if (m_msgIds.size() == 0) {
-		logWarningNL("%s",
-		    "Expected at lease one message to generate reply from.");
-		return;
-	}
-
-	/* Fill attachments with messages. */
-	foreach (const MessageDb::MsgId &msgId, m_msgIds) {
-		MessageDb *messageDb =
-		    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
-		if (Q_NULLPTR == messageDb) {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		/* If only a single message if forwarded. */
-		if (m_msgIds.size() == 1) {
-			MessageDb::PartialEnvelopeData envData(
-			    messageDb->msgsReplyData(msgId.dmId));
-
-			this->subjectText->setText("Fwd: " + envData.dmAnnotation);
-		}
-
-		QByteArray msgBase64(messageDb->msgsMessageBase64(msgId.dmId));
-		if (msgBase64.isEmpty()) {
-			continue;
-		}
-
-		m_attachmentModel.appendAttachmentEntry(msgBase64,
-		    dzPrefix(messageDb, msgId.dmId) + QString("DZ_%1.zfo").arg(msgId.dmId));
-	}
-}
-
-/* ========================================================================= */
-/*
- * Func: Fill Send Message Dialog from template message.
- */
-void DlgSendMessage::fillDlgFromTmpMsg(void)
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	if (m_msgIds.size() != 1) {
-		logWarningNL("%s",
-		    "Expected one message to generate reply from.");
-		return;
-	}
-	const MessageDb::MsgId &msgId(m_msgIds.first());
-
-	bool hideOptionalWidget = true;
-
-	MessageDb *messageDb =
-	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
-	Q_ASSERT(Q_NULLPTR != messageDb);
-
-	MessageDb::PartialEnvelopeData envData =
-	    messageDb->msgsReplyData(msgId.dmId);
-	m_dmType = envData.dmType;
-	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
-
-	this->subjectText->setText(envData.dmAnnotation);
-
-	/* Fill in optional fields.  */
-	if (!envData.dmSenderRefNumber.isEmpty()) {
-		this->dmSenderRefNumber->setText(envData.dmSenderRefNumber);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmSenderIdent.isEmpty()) {
-		this->dmSenderIdent->setText(envData.dmSenderIdent);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmRecipientRefNumber.isEmpty()) {
-		this->dmRecipientRefNumber->setText(envData.dmRecipientRefNumber);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmRecipientIdent.isEmpty()) {
-		this->dmRecipientIdent->setText(envData.dmRecipientIdent);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmToHands.isEmpty()) {
-		this->dmToHands->setText(envData.dmToHands);
-		hideOptionalWidget = false;
-	}
-	/* set check boxes */
-	this->dmPersonalDelivery->setChecked(envData.dmPersonalDelivery);
-	this->dmAllowSubstDelivery->setChecked(envData.dmAllowSubstDelivery);
-	/* fill optional LegalTitle - Law, year, ... */
-	if (!envData.dmLegalTitleLaw.isEmpty()) {
-		this->dmLegalTitleLaw->setText(envData.dmLegalTitleLaw);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmLegalTitleYear.isEmpty()) {
-		this->dmLegalTitleYear->setText(envData.dmLegalTitleYear);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmLegalTitleSect.isEmpty()) {
-		this->dmLegalTitleSect->setText(envData.dmLegalTitleSect);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmLegalTitlePar.isEmpty()) {
-		this->dmLegalTitlePar->setText(envData.dmLegalTitlePar);
-		hideOptionalWidget = false;
-	}
-	if (!envData.dmLegalTitlePoint.isEmpty()) {
-		this->dmLegalTitlePoint->setText(envData.dmLegalTitlePoint);
-		hideOptionalWidget = false;
-	}
-
-	this->optionalWidget->setHidden(hideOptionalWidget);
-	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
-
-	bool pdz;
-	if (!m_dbEffectiveOVM) {
-		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDRecipient);
-		this->payReplyCheckBox->show();
-		this->payReplyCheckBox->setEnabled(true);
-	} else {
-		this->payReplyCheckBox->setEnabled(false);
-		this->payReplyCheckBox->hide();
-		pdz = false;
-	}
-
-	/* message is received -> recipient == sender */
-	if (m_dbId != envData.dbIDRecipient) {
-		m_recipientTableModel.appendData(envData.dbIDRecipient, -1,
-		    envData.dmRecipient, envData.dmRecipientAddress, QString(),
-		    pdz);
-	}
-
-	/* fill attachments from template message */
-	QList<MessageDb::FileData> msgFileList =
-	    messageDb->getFilesFromMessage(msgId.dmId);
-
-	foreach (const MessageDb::FileData &fileData, msgFileList) {
-		m_attachmentModel.appendAttachmentEntry(
-		    fileData.dmEncodedContent, fileData.dmFileDescr);
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Dialog informs user that message contains one or more PDZs.
- */
-int DlgSendMessage::showInfoAboutPDZ(int pdzCnt)
-/* ========================================================================= */
-{
-	QString title;
-	QString info;
-
-	if (pdzCnt > 1) {
-		title = tr("Message contains non-OVM recipients.");
-		info = tr("Your message contains %1 non-OVM recipients "
-		    "therefore this message will be sent as a "
-		    "commercial messages (PDZ) for these recipients.").
-		    arg(pdzCnt);
-		info += "\n\n";
-		info += tr("Do you want to send all messages?");
-	} else {
-		title = tr("Message contains non-OVM recipient.");
-		info = tr("Your message contains non-OVM recipient "
-		    "therefore this message will be sent as a "
-		    "commercial message (PDZ) for this recipient.");
-		info += "\n\n";
-		info += tr("Do you want to send message?");
-	}
-
-	info += "\n\n" + tr("Your remaining credit is ") + m_pdzCredit + " Kč";
-
-	QMessageBox msgBox;
-	msgBox.setIcon(QMessageBox::Information);
-	msgBox.setText(title);
-	msgBox.setInformativeText(info);
-	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-	msgBox.setDefaultButton(QMessageBox::Yes);
-	return msgBox.exec();
-}
-
-bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
-{
-	/* Load attachments. */
-	for (int row = 0; row < m_attachmentModel.rowCount(); ++row) {
-		IsdsDocument document;
-		QModelIndex index;
-
-		document.isXml = false;
-
-		index = m_attachmentModel.index(row, DbFlsTblModel::FNAME_COL);
-		if (!index.isValid()) {
-			Q_ASSERT(0);
-			continue;
-		}
-		document.dmFileDescr = index.data().toString();
-
-		/*
-		 * First document must have dmFileMetaType set to
-		 * FILEMETATYPE_MAIN. Remaining documents have
-		 * FILEMETATYPE_ENCLOSURE.
-		 */
-
-		/*
-		 * Since 2011 Mime Type can be empty and MIME type will
-		 * be filled up on the ISDS server. It allows sending files
-		 * with special mime types without recognition by application.
-		 */
-		document.dmMimeType = QStringLiteral("");
-
-		index =
-		    m_attachmentModel.index(row, DbFlsTblModel::CONTENT_COL);
-		if (!index.isValid()) {
-			Q_ASSERT(0);
-			continue;
-		}
-		document.data = QByteArray::fromBase64(
-		    index.data(Qt::DisplayRole).toByteArray());
-
-		documents.append(document);
-	}
-
-	return true;
-}
-
-bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
-{
-	QString dmType;
-
-	/* Set mandatory fields of envelope. */
-	envelope.dmID.clear();
-	envelope.dmAnnotation = this->subjectText->text();
-
-	/* Set optional fields. */
-	envelope.dmSenderIdent = this->dmSenderIdent->text();
-	envelope.dmRecipientIdent = this->dmRecipientIdent->text();
-	envelope.dmSenderRefNumber = this->dmSenderRefNumber->text();
-	envelope.dmRecipientRefNumber = this->dmRecipientRefNumber->text();
-	envelope._using_dmLegalTitleLaw =
-	    !this->dmLegalTitleLaw->text().isEmpty();
-	if (envelope._using_dmLegalTitleLaw) {
-		envelope.dmLegalTitleLaw =
-		    this->dmLegalTitleLaw->text().toLong();
-	}
-	envelope._using_dmLegalTitleYear =
-	    !this->dmLegalTitleYear->text().isEmpty();
-	if (envelope._using_dmLegalTitleYear) {
-		envelope.dmLegalTitleYear =
-		    this->dmLegalTitleYear->text().toLong();
-	}
-	envelope.dmLegalTitleSect = this->dmLegalTitleSect->text();
-	envelope.dmLegalTitlePar = this->dmLegalTitlePar->text();
-	envelope.dmLegalTitlePoint = this->dmLegalTitlePoint->text();
-	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
-
-	/* Only OVM can change. */
-	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
-		envelope.dmAllowSubstDelivery = true;
-	} else {
-		envelope.dmAllowSubstDelivery =
-		    this->dmAllowSubstDelivery->isChecked();
-	}
-
-	if (m_dmType == "I") {
-		if (this->payRecipient->isChecked()) {
-			dmType = "O";
-		} else {
-			dmType = "K";
-		}
-		if (!m_dmSenderRefNumber.isEmpty()) {
-			envelope.dmRecipientRefNumber = m_dmSenderRefNumber;
-		}
-	} else {
-		if (this->payReplyCheckBox->isChecked()) {
-			dmType = "I";
-		}
-	}
-
-	envelope.dmType = dmType;
-
-
-	envelope.dmOVM = m_dbEffectiveOVM;
-
-	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
-
-	return true;
-}
-
-
-bool DlgSendMessage::buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const
-{
-	/* Set mandatory fields of envelope. */
-	envelope.dmAnnotation = this->subjectText->text();
-
-	/* Set optional fields. */
-	envelope.dmSenderIdent = this->dmSenderIdent->text();
-	envelope.dmRecipientIdent = this->dmRecipientIdent->text();
-	envelope.dmSenderRefNumber = this->dmSenderRefNumber->text();
-	envelope.dmRecipientRefNumber = this->dmRecipientRefNumber->text();
-	envelope.dmLegalTitleLaw = this->dmLegalTitleLaw->text();
-	envelope.dmLegalTitleYear = this->dmLegalTitleYear->text();
-	envelope.dmLegalTitleSect = this->dmLegalTitleSect->text();
-	envelope.dmLegalTitlePar = this->dmLegalTitlePar->text();
-	envelope.dmLegalTitlePoint = this->dmLegalTitlePoint->text();
-	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
-	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
-	envelope.dmOVM = m_dbEffectiveOVM;
-
-	/* Only OVM can change. */
-	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
-		envelope.dmAllowSubstDelivery = true;
-	} else {
-		envelope.dmAllowSubstDelivery =
-		    this->dmAllowSubstDelivery->isChecked();
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Load attachments into json for sending via webdatovka.
- */
-bool DlgSendMessage::buildFileListWebDatovka(QList<JsonLayer::File> &fileList)
-   const
-/* ========================================================================= */
-{
-	QModelIndex index;
-
-	for (int row = 0; row < m_attachmentModel.rowCount(); ++row) {
-
-		index = m_attachmentModel.index(row, DbFlsTblModel::FNAME_COL);
-		if (!index.isValid()) {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		JsonLayer::File file;
-		file.fName = index.data().toString();
-
-		index =
-		    m_attachmentModel.index(row, DbFlsTblModel::CONTENT_COL);
-		if (!index.isValid()) {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		file.fContent = index.data(Qt::DisplayRole).toByteArray();
-		fileList.append(file);
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
  * Send message/multiple message.
  */
 void DlgSendMessage::sendMessage(void)
@@ -1121,12 +680,12 @@ void DlgSendMessage::sendMessage(void)
 	if (pdzCnt > 0) {
 		if (m_dmType == "I") {
 			if (!this->payRecipient->isChecked()) {
-				if (QMessageBox::No == showInfoAboutPDZ(pdzCnt)) {
+				if (QMessageBox::No == notifyOfPDZ(pdzCnt)) {
 					return;
 				}
 			}
 		} else {
-			if (QMessageBox::No == showInfoAboutPDZ(pdzCnt)) {
+			if (QMessageBox::No == notifyOfPDZ(pdzCnt)) {
 				return;
 			}
 		}
@@ -1345,6 +904,255 @@ void DlgSendMessage::sendMessageMojeIdAction(const QString &userName,
 	}
 }
 
+void DlgSendMessage::fillContentAsForward(void)
+{
+	debugFuncCall();
+
+	if (m_msgIds.size() == 0) {
+		logWarningNL("%s",
+		    "Expected at least one message to generate message from.");
+		return;
+	}
+
+	/* Fill attachments with messages. */
+	foreach (const MessageDb::MsgId &msgId, m_msgIds) {
+		MessageDb *messageDb =
+		    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
+		if (Q_NULLPTR == messageDb) {
+			Q_ASSERT(0);
+			continue;
+		}
+
+		/* If only a single message if forwarded. */
+		if (m_msgIds.size() == 1) {
+			MessageDb::PartialEnvelopeData envData(
+			    messageDb->msgsReplyData(msgId.dmId));
+
+			this->subjectText->setText("Fwd: " + envData.dmAnnotation);
+		}
+
+		QByteArray msgBase64(messageDb->msgsMessageBase64(msgId.dmId));
+		if (msgBase64.isEmpty()) {
+			continue;
+		}
+
+		m_attachmentModel.appendAttachmentEntry(msgBase64,
+		    dzPrefix(messageDb, msgId.dmId) + QString("DZ_%1.zfo").arg(msgId.dmId));
+	}
+}
+
+void DlgSendMessage::fillContentAsReply(void)
+{
+	debugFuncCall();
+
+	if (m_msgIds.size() != 1) {
+		logWarningNL("%s",
+		    "Expected one message to generate reply from.");
+		return;
+	}
+	const MessageDb::MsgId &msgId(m_msgIds.first());
+
+	bool hideOptionalWidget = true;
+
+	this->fromComboBox->setEnabled(false);
+
+	MessageDb *messageDb =
+	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
+	Q_ASSERT(Q_NULLPTR != messageDb);
+
+	MessageDb::PartialEnvelopeData envData =
+	    messageDb->msgsReplyData(msgId.dmId);
+	m_dmType = envData.dmType;
+	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
+
+	this->subjectText->setText("Re: " + envData.dmAnnotation);
+
+	if (!envData.dmSenderRefNumber.isEmpty()) {
+		this->dmRecipientRefNumber->setText(envData.dmSenderRefNumber);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmSenderIdent.isEmpty()) {
+		this->dmRecipientIdent->setText(envData.dmSenderIdent);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmRecipientRefNumber.isEmpty()) {
+		this->dmSenderRefNumber->setText(envData.dmRecipientRefNumber);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmRecipientIdent.isEmpty()) {
+		this->dmSenderIdent->setText(envData.dmRecipientIdent);
+		hideOptionalWidget = false;
+	}
+
+	this->optionalWidget->setHidden(hideOptionalWidget);
+	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
+	this->payRecipient->setEnabled(false);
+	this->payRecipient->setChecked(false);
+	this->payRecipient->hide();
+
+	bool pdz;
+	if (!m_dbEffectiveOVM) {
+		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDSender);
+		this->payReplyCheckBox->show();
+		this->payReplyCheckBox->setEnabled(true);
+	} else {
+		this->payReplyCheckBox->setEnabled(false);
+		this->payReplyCheckBox->hide();
+		pdz = false;
+	}
+
+	if (m_dmType == "I") {
+		this->addRecipient->setEnabled(false);
+		this->removeRecipient->setEnabled(false);
+		this->findRecipient->setEnabled(false);
+		this->replyLabel->show();
+		this->replyLabel->setEnabled(true);
+		this->payReplyCheckBox->hide();
+		this->payReplyCheckBox->setEnabled(false);
+		this->payRecipient->setEnabled(true);
+		this->payRecipient->setChecked(true);
+		this->payRecipient->show();
+		pdz = true;
+	}
+
+	m_recipientTableModel.appendData(envData.dbIDSender, -1,
+	    envData.dmSender, envData.dmSenderAddress, QString(), pdz);
+}
+
+void DlgSendMessage::fillContentFromTemplate(void)
+{
+	debugFuncCall();
+
+	if (m_msgIds.size() != 1) {
+		logWarningNL("%s",
+		    "Expected one message to generate message from.");
+		return;
+	}
+	const MessageDb::MsgId &msgId(m_msgIds.first());
+
+	bool hideOptionalWidget = true;
+
+	MessageDb *messageDb =
+	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
+	Q_ASSERT(Q_NULLPTR != messageDb);
+
+	MessageDb::PartialEnvelopeData envData =
+	    messageDb->msgsReplyData(msgId.dmId);
+	m_dmType = envData.dmType;
+	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
+
+	this->subjectText->setText(envData.dmAnnotation);
+
+	/* Fill in optional fields.  */
+	if (!envData.dmSenderRefNumber.isEmpty()) {
+		this->dmSenderRefNumber->setText(envData.dmSenderRefNumber);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmSenderIdent.isEmpty()) {
+		this->dmSenderIdent->setText(envData.dmSenderIdent);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmRecipientRefNumber.isEmpty()) {
+		this->dmRecipientRefNumber->setText(envData.dmRecipientRefNumber);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmRecipientIdent.isEmpty()) {
+		this->dmRecipientIdent->setText(envData.dmRecipientIdent);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmToHands.isEmpty()) {
+		this->dmToHands->setText(envData.dmToHands);
+		hideOptionalWidget = false;
+	}
+	/* set check boxes */
+	this->dmPersonalDelivery->setChecked(envData.dmPersonalDelivery);
+	this->dmAllowSubstDelivery->setChecked(envData.dmAllowSubstDelivery);
+	/* fill optional LegalTitle - Law, year, ... */
+	if (!envData.dmLegalTitleLaw.isEmpty()) {
+		this->dmLegalTitleLaw->setText(envData.dmLegalTitleLaw);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmLegalTitleYear.isEmpty()) {
+		this->dmLegalTitleYear->setText(envData.dmLegalTitleYear);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmLegalTitleSect.isEmpty()) {
+		this->dmLegalTitleSect->setText(envData.dmLegalTitleSect);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmLegalTitlePar.isEmpty()) {
+		this->dmLegalTitlePar->setText(envData.dmLegalTitlePar);
+		hideOptionalWidget = false;
+	}
+	if (!envData.dmLegalTitlePoint.isEmpty()) {
+		this->dmLegalTitlePoint->setText(envData.dmLegalTitlePoint);
+		hideOptionalWidget = false;
+	}
+
+	this->optionalWidget->setHidden(hideOptionalWidget);
+	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
+
+	bool pdz;
+	if (!m_dbEffectiveOVM) {
+		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDRecipient);
+		this->payReplyCheckBox->show();
+		this->payReplyCheckBox->setEnabled(true);
+	} else {
+		this->payReplyCheckBox->setEnabled(false);
+		this->payReplyCheckBox->hide();
+		pdz = false;
+	}
+
+	/* message is received -> recipient == sender */
+	if (m_dbId != envData.dbIDRecipient) {
+		m_recipientTableModel.appendData(envData.dbIDRecipient, -1,
+		    envData.dmRecipient, envData.dmRecipientAddress, QString(),
+		    pdz);
+	}
+
+	/* fill attachments from template message */
+	QList<MessageDb::FileData> msgFileList =
+	    messageDb->getFilesFromMessage(msgId.dmId);
+
+	foreach (const MessageDb::FileData &fileData, msgFileList) {
+		m_attachmentModel.appendAttachmentEntry(
+		    fileData.dmEncodedContent, fileData.dmFileDescr);
+	}
+}
+
+int DlgSendMessage::notifyOfPDZ(int pdzCnt) const
+{
+	QString title;
+	QString info;
+
+	if (pdzCnt > 1) {
+		title = tr("Message contains non-OVM recipients.");
+		info = tr("Your message contains %1 non-OVM recipients "
+		    "therefore this message will be sent as a "
+		    "commercial messages (PDZ) for these recipients.").
+		    arg(pdzCnt);
+		info += "\n\n";
+		info += tr("Do you want to send all messages?");
+	} else {
+		title = tr("Message contains non-OVM recipient.");
+		info = tr("Your message contains non-OVM recipient "
+		    "therefore this message will be sent as a "
+		    "commercial message (PDZ) for this recipient.");
+		info += "\n\n";
+		info += tr("Do you want to send message?");
+	}
+
+	info += "\n\n" + tr("Your remaining credit is ") + m_pdzCredit + " Kč";
+
+	QMessageBox msgBox;
+	msgBox.setIcon(QMessageBox::Information);
+	msgBox.setText(title);
+	msgBox.setInformativeText(info);
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::Yes);
+	return msgBox.exec();
+}
+
 bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 {
 	int aSize = m_attachmentModel.totalAttachmentSize();
@@ -1525,4 +1333,168 @@ bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,
 	}
 
 	return ret;
+}
+
+bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
+{
+	QString dmType;
+
+	/* Set mandatory fields of envelope. */
+	envelope.dmID.clear();
+	envelope.dmAnnotation = this->subjectText->text();
+
+	/* Set optional fields. */
+	envelope.dmSenderIdent = this->dmSenderIdent->text();
+	envelope.dmRecipientIdent = this->dmRecipientIdent->text();
+	envelope.dmSenderRefNumber = this->dmSenderRefNumber->text();
+	envelope.dmRecipientRefNumber = this->dmRecipientRefNumber->text();
+	envelope._using_dmLegalTitleLaw =
+	    !this->dmLegalTitleLaw->text().isEmpty();
+	if (envelope._using_dmLegalTitleLaw) {
+		envelope.dmLegalTitleLaw =
+		    this->dmLegalTitleLaw->text().toLong();
+	}
+	envelope._using_dmLegalTitleYear =
+	    !this->dmLegalTitleYear->text().isEmpty();
+	if (envelope._using_dmLegalTitleYear) {
+		envelope.dmLegalTitleYear =
+		    this->dmLegalTitleYear->text().toLong();
+	}
+	envelope.dmLegalTitleSect = this->dmLegalTitleSect->text();
+	envelope.dmLegalTitlePar = this->dmLegalTitlePar->text();
+	envelope.dmLegalTitlePoint = this->dmLegalTitlePoint->text();
+	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
+
+	/* Only OVM can change. */
+	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
+		envelope.dmAllowSubstDelivery = true;
+	} else {
+		envelope.dmAllowSubstDelivery =
+		    this->dmAllowSubstDelivery->isChecked();
+	}
+
+	if (m_dmType == "I") {
+		if (this->payRecipient->isChecked()) {
+			dmType = "O";
+		} else {
+			dmType = "K";
+		}
+		if (!m_dmSenderRefNumber.isEmpty()) {
+			envelope.dmRecipientRefNumber = m_dmSenderRefNumber;
+		}
+	} else {
+		if (this->payReplyCheckBox->isChecked()) {
+			dmType = "I";
+		}
+	}
+
+	envelope.dmType = dmType;
+
+
+	envelope.dmOVM = m_dbEffectiveOVM;
+
+	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
+
+	return true;
+}
+
+bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
+{
+	/* Load attachments. */
+	for (int row = 0; row < m_attachmentModel.rowCount(); ++row) {
+		IsdsDocument document;
+		QModelIndex index;
+
+		document.isXml = false;
+
+		index = m_attachmentModel.index(row, DbFlsTblModel::FNAME_COL);
+		if (!index.isValid()) {
+			Q_ASSERT(0);
+			continue;
+		}
+		document.dmFileDescr = index.data().toString();
+
+		/*
+		 * First document must have dmFileMetaType set to
+		 * FILEMETATYPE_MAIN. Remaining documents have
+		 * FILEMETATYPE_ENCLOSURE.
+		 */
+
+		/*
+		 * Since 2011 Mime Type can be empty and MIME type will
+		 * be filled up on the ISDS server. It allows sending files
+		 * with special mime types without recognition by application.
+		 */
+		document.dmMimeType = QStringLiteral("");
+
+		index =
+		    m_attachmentModel.index(row, DbFlsTblModel::CONTENT_COL);
+		if (!index.isValid()) {
+			Q_ASSERT(0);
+			continue;
+		}
+		document.data = QByteArray::fromBase64(
+		    index.data(Qt::DisplayRole).toByteArray());
+
+		documents.append(document);
+	}
+
+	return true;
+}
+
+void DlgSendMessage::buildEnvelopeWebDatovka(
+    JsonLayer::Envelope &envelope) const
+{
+	/* Set mandatory fields of envelope. */
+	envelope.dmAnnotation = this->subjectText->text();
+
+	/* Set optional fields. */
+	envelope.dmSenderIdent = this->dmSenderIdent->text();
+	envelope.dmRecipientIdent = this->dmRecipientIdent->text();
+	envelope.dmSenderRefNumber = this->dmSenderRefNumber->text();
+	envelope.dmRecipientRefNumber = this->dmRecipientRefNumber->text();
+	envelope.dmLegalTitleLaw = this->dmLegalTitleLaw->text();
+	envelope.dmLegalTitleYear = this->dmLegalTitleYear->text();
+	envelope.dmLegalTitleSect = this->dmLegalTitleSect->text();
+	envelope.dmLegalTitlePar = this->dmLegalTitlePar->text();
+	envelope.dmLegalTitlePoint = this->dmLegalTitlePoint->text();
+	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
+	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
+	envelope.dmOVM = m_dbEffectiveOVM;
+
+	/* Only OVM can change. */
+	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
+		envelope.dmAllowSubstDelivery = true;
+	} else {
+		envelope.dmAllowSubstDelivery =
+		    this->dmAllowSubstDelivery->isChecked();
+	}
+}
+
+void DlgSendMessage::buildFileListWebDatovka(
+    QList<JsonLayer::File> &fileList) const
+{
+	QModelIndex index;
+
+	for (int row = 0; row < m_attachmentModel.rowCount(); ++row) {
+
+		index = m_attachmentModel.index(row, DbFlsTblModel::FNAME_COL);
+		if (!index.isValid()) {
+			Q_ASSERT(0);
+			continue;
+		}
+
+		JsonLayer::File file;
+		file.fName = index.data(Qt::DisplayRole).toString();
+
+		index =
+		    m_attachmentModel.index(row, DbFlsTblModel::CONTENT_COL);
+		if (!index.isValid()) {
+			Q_ASSERT(0);
+			continue;
+		}
+
+		file.fContent = index.data(Qt::DisplayRole).toByteArray();
+		fileList.append(file);
+	}
 }

@@ -167,15 +167,28 @@ private:
 	 */
 	void initContent(void);
 
-	void fillDlgAsReply(void);
-	void fillDlgAsForward(void);
-	void fillDlgFromTmpMsg(void);
-	int showInfoAboutPDZ(int pdzCnt);
+	/*!
+	 * @brief Set dialogue content with ZFO attachments.
+	 */
+	void fillContentAsForward(void);
 
-	bool buildDocuments(QList<IsdsDocument> &documents) const;
-	bool buildEnvelope(IsdsEnvelope &envelope) const;
-	bool buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
-	bool buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
+	/*!
+	 * @brief Set the dialogue content as reply.
+	 */
+	void fillContentAsReply(void);
+
+	/*!
+	 * @brief Set the dialogue content from template message.
+	 */
+	void fillContentFromTemplate(void);
+
+	/*!
+	 * @brief Creates a notification QMessageBox informing the user about
+	 *     the number of created commercial messages.
+	 * @return QMessageBox::StandardButton value describing the pressed
+	 *         button.
+	 */
+	int notifyOfPDZ(int pdzCount) const;
 
 	/*!
 	 * @brief Calculates and shows total attachment size.
@@ -219,6 +232,36 @@ private:
 	 */
 	static
 	bool queryISDSBoxEOVM(const QString &userName, const QString &boxId);
+
+	/*!
+	 * @brief Sets envelope content according to dialogue content.
+	 *
+	 * @param[out] envelope Envelope to be set.
+	 * @return True on success.
+	 */
+	bool buildEnvelope(IsdsEnvelope &envelope) const;
+
+	/*!
+	 * @brief Appends attachments to list of document descriptors.
+	 *
+	 * @param[out] documents List to append data to.
+	 * @return True on success.
+	 */
+	bool buildDocuments(QList<IsdsDocument> &documents) const;
+
+	/*!
+	 * @brief Construct JSON envelope description.
+	 *
+	 * @param[out] envelope Envelope to be set.
+	 */
+	void buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
+
+	/*!
+	 * @brief Construct list of JSON attachment descriptions.
+	 *
+	 * @param[out] fileList File list to append entries to.
+	 */
+	void buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
 
 	QTimer m_keepAliveTimer;
 	const QList<Task::AccountDescr> m_messageDbSetList;
