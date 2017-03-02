@@ -196,23 +196,32 @@ private slots:
 private:
 	/*!
 	 * @brief Initialises the dialogue content.
+	 *
+	 * @param[in] action Specifies how the dialogue should be initialised.
+	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
 	 */
-	void initContent(void);
+	void initContent(Action action, const QList<MessageDb::MsgId> &msgIds);
 
 	/*!
 	 * @brief Set dialogue content with ZFO attachments.
+	 *
+	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
 	 */
-	void fillContentAsForward(void);
+	void fillContentAsForward(const QList<MessageDb::MsgId> &msgIds);
 
 	/*!
 	 * @brief Set the dialogue content as reply.
+	 *
+	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
 	 */
-	void fillContentAsReply(void);
+	void fillContentAsReply(const QList<MessageDb::MsgId> &msgIds);
 
 	/*!
 	 * @brief Set the dialogue content from template message.
+	 *
+	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
 	 */
-	void fillContentFromTemplate(void);
+	void fillContentFromTemplate(const QList<MessageDb::MsgId> &msgIds);
 
 	/*!
 	 * @brief Creates a notification QMessageBox informing the user about
@@ -313,10 +322,8 @@ private:
 
 	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
 	const QList<Task::AccountDescr> m_messageDbSetList; /*!< Available accounts.*/
-	const QList<MessageDb::MsgId> m_msgIds; /*!< Message identifiers. */
 	QString m_dbId;
 	QString m_senderName;
-	const Action m_action;
 	QString m_userName;
 	QString m_dbType;
 	bool m_dbEffectiveOVM;

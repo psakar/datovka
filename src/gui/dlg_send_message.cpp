@@ -85,10 +85,8 @@ DlgSendMessage::DlgSendMessage(
     : QDialog(parent),
     m_keepAliveTimer(),
     m_messageDbSetList(messageDbSetList),
-    m_msgIds(msgIds),
     m_dbId(),
     m_senderName(),
-    m_action(action),
     m_userName(userName),
     m_dbType(),
     m_dbEffectiveOVM(false),
@@ -117,7 +115,7 @@ DlgSendMessage::DlgSendMessage(
 	attachmentTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
-	initContent();
+	initContent(action, msgIds);
 
 	Q_ASSERT(Q_NULLPTR != m_dbSet);
 }
@@ -608,7 +606,8 @@ void DlgSendMessage::collectSendMessageStatusWebDatovka(const QString &userName,
 	}
 }
 
-void DlgSendMessage::initContent(void)
+void DlgSendMessage::initContent(Action action,
+    const QList<MessageDb::MsgId> &msgIds)
 {
 	if (isWebDatovkaAccount(m_userName)) {
 		m_isWebDatovkaAccount = true;
@@ -755,8 +754,8 @@ void DlgSendMessage::initContent(void)
 		this->dmAllowSubstDelivery->hide();
 	}
 
-	if (ACT_REPLY == m_action) {
-		fillContentAsReply();
+	if (ACT_REPLY == action) {
+		fillContentAsReply(msgIds);
 	} else {
 		if (m_dbOpenAddressing) {
 			this->payReplyCheckBox->setEnabled(true);
@@ -768,28 +767,28 @@ void DlgSendMessage::initContent(void)
 
 		this->payRecipient->setEnabled(false);
 		this->payRecipient->hide();
-		if (ACT_NEW_FROM_TMP == m_action) {
-			fillContentFromTemplate();
-		} else if (ACT_FORWARD == m_action) {
-			fillContentAsForward();
+		if (ACT_NEW_FROM_TMP == action) {
+			fillContentFromTemplate(msgIds);
+		} else if (ACT_FORWARD == action) {
+			fillContentAsForward(msgIds);
 		}
 	}
 
 	this->adjustSize();
 }
 
-void DlgSendMessage::fillContentAsForward(void)
+void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 {
 	debugFuncCall();
 
-	if (m_msgIds.size() == 0) {
+	if (msgIds.size() == 0) {
 		logWarningNL("%s",
 		    "Expected at least one message to generate message from.");
 		return;
 	}
 
 	/* Fill attachments with messages. */
-	foreach (const MessageDb::MsgId &msgId, m_msgIds) {
+	foreach (const MessageDb::MsgId &msgId, msgIds) {
 		MessageDb *messageDb =
 		    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
 		if (Q_NULLPTR == messageDb) {
@@ -798,7 +797,7 @@ void DlgSendMessage::fillContentAsForward(void)
 		}
 
 		/* If only a single message if forwarded. */
-		if (m_msgIds.size() == 1) {
+		if (msgIds.size() == 1) {
 			MessageDb::PartialEnvelopeData envData(
 			    messageDb->msgsReplyData(msgId.dmId));
 
@@ -815,16 +814,16 @@ void DlgSendMessage::fillContentAsForward(void)
 	}
 }
 
-void DlgSendMessage::fillContentAsReply(void)
+void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 {
 	debugFuncCall();
 
-	if (m_msgIds.size() != 1) {
+	if (msgIds.size() != 1) {
 		logWarningNL("%s",
 		    "Expected one message to generate reply from.");
 		return;
 	}
-	const MessageDb::MsgId &msgId(m_msgIds.first());
+	const MessageDb::MsgId &msgId(msgIds.first());
 
 	bool hideOptionalWidget = true;
 
@@ -893,16 +892,17 @@ void DlgSendMessage::fillContentAsReply(void)
 	    envData.dmSender, envData.dmSenderAddress, QString(), pdz);
 }
 
-void DlgSendMessage::fillContentFromTemplate(void)
+void DlgSendMessage::fillContentFromTemplate(
+    const QList<MessageDb::MsgId> &msgIds)
 {
 	debugFuncCall();
 
-	if (m_msgIds.size() != 1) {
+	if (msgIds.size() != 1) {
 		logWarningNL("%s",
 		    "Expected one message to generate message from.");
 		return;
 	}
-	const MessageDb::MsgId &msgId(m_msgIds.first());
+	const MessageDb::MsgId &msgId(msgIds.first());
 
 	bool hideOptionalWidget = true;
 
