@@ -450,6 +450,20 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	    dbOpenAddressingText);
 }
 
+void DlgSendMessage::sendMessage(void)
+{
+	debugSlotCall();
+
+	const QList<BoxContactsModel::PartialEntry> recipEntries(
+	    m_recipientTableModel.partialBoxEntries(BoxContactsModel::ANY));
+
+	if (!m_isWebDatovkaAccount) {
+		sendMessageISDS(recipEntries);
+	} else {
+		sendMessageWebDatovka(recipEntries);
+	}
+}
+
 void DlgSendMessage::initContent(void)
 {
 	if (isWebDatovkaAccount(m_userName)) {
@@ -616,142 +630,6 @@ void DlgSendMessage::initContent(void)
 	}
 
 	this->adjustSize();
-}
-
-
-/* ========================================================================= */
-/*
- * Send message/multiple message.
- */
-void DlgSendMessage::sendMessage(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	const QList<BoxContactsModel::PartialEntry> recipEntries(
-	    m_recipientTableModel.partialBoxEntries(BoxContactsModel::ANY));
-
-	if (m_isWebDatovkaAccount) {
-
-		/* Get account ID */
-		int accountID = getWebDatovkaAccountId(m_userName);
-
-		/* Create recipient list. */
-		JsonLayer::Recipient recipient;
-		QList<JsonLayer::Recipient> recipientList;
-		foreach (const BoxContactsModel::PartialEntry &e,
-		         recipEntries) {
-			recipient.recipientDbId = e.id;
-			recipient.toHands = this->dmToHands->text();
-			recipient.recipientName = e.name;
-			recipient.recipientAddress = e.address;
-			recipientList.append(recipient);
-		}
-
-		JsonLayer::Envelope envelope;
-		buildEnvelopeWebDatovka(envelope);
-		QList<JsonLayer::File> fileList;
-		buildFileListWebDatovka(fileList);
-
-		TaskSendMessageMojeId *task;
-		task = new (std::nothrow) TaskSendMessageMojeId(m_userName, accountID,
-		    recipientList, envelope, fileList);
-		task->setAutoDelete(true);
-		globWorkPool.assignHi(task);
-
-		return;
-	}
-
-	QString detailText;
-
-	/* List of unique identifiers. */
-	QList<QString> taskIdentifiers;
-	const QDateTime currentTime(QDateTime::currentDateTimeUtc());
-
-	int pdzCnt = 0; /* Number of paid messages. */
-
-	/* Compute number of messages which the sender has to pay for. */
-	foreach (const BoxContactsModel::PartialEntry &e, recipEntries) {
-		if (e.pdz) {
-			++pdzCnt;
-		}
-	}
-
-	if (pdzCnt > 0) {
-		if (m_dmType == "I") {
-			if (!this->payRecipient->isChecked()) {
-				if (QMessageBox::No == notifyOfPDZ(pdzCnt)) {
-					return;
-				}
-			}
-		} else {
-			if (QMessageBox::No == notifyOfPDZ(pdzCnt)) {
-				return;
-			}
-		}
-	}
-
-	IsdsMessage message;
-
-	/* Attach envelope and attachment files to message structure. */
-	if (!buildDocuments(message.documents)) {
-		detailText = tr("An error occurred while loading attachments into message.");
-		goto finish;
-	}
-	if (!buildEnvelope(message.envelope)) {
-		detailText = tr("An error occurred during message envelope creation.");
-		goto finish;
-	}
-
-	this->setCursor(Qt::WaitCursor);
-	this->setEnabled(false);
-
-	/*
-	 * Generate unique identifiers.
-	 * These must be complete before creating first task.
-	 */
-	foreach (const BoxContactsModel::PartialEntry &e, recipEntries) {
-		QString taskIdentifier(m_userName + "_" + e.id + "_" +
-		    currentTime.toString() + "_" +
-		    DlgChangePwd::generateRandomString(6));
-
-		taskIdentifiers.append(taskIdentifier);
-	}
-	m_transactIds = taskIdentifiers.toSet();
-	m_sentMsgResultList.clear();
-
-	/* Send message to all recipients. */
-	for (int i = 0; i < recipEntries.size(); ++i) {
-		const BoxContactsModel::PartialEntry &e(recipEntries.at(i));
-
-		/* Clear fields. */
-		message.envelope.dmID.clear();
-
-		/* Set new recipient. */
-		message.envelope.dbIDRecipient = e.id;
-		message.envelope.dmToHands = this->dmToHands->text();
-
-		TaskSendMessage *task;
-
-		task = new (std::nothrow) TaskSendMessage(m_userName, m_dbSet,
-		    taskIdentifiers.at(i), message, e.name, e.address, e.pdz);
-		task->setAutoDelete(true);
-		globWorkPool.assignHi(task);
-	}
-
-	return;
-
-finish:
-	QMessageBox msgBox;
-	msgBox.setIcon(QMessageBox::Critical);
-	msgBox.setWindowTitle(tr("Send message error"));
-	msgBox.setText(tr("It has not been possible to send a message "
-	    "to the server Datové schránky."));
-	detailText += "\n\n" + tr("The message will be discarded.");
-	msgBox.setInformativeText(detailText);
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.exec();
-	this->close();
 }
 
 void DlgSendMessage::collectSendMessageStatus(const QString &userName,
@@ -1442,6 +1320,97 @@ bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
 	return true;
 }
 
+void DlgSendMessage::sendMessageISDS(
+    const QList<BoxContactsModel::PartialEntry> &recipEntries)
+{
+	QString detailText;
+
+	/* List of unique identifiers. */
+	QList<QString> taskIdentifiers;
+	const QDateTime currentTime(QDateTime::currentDateTimeUtc());
+
+	int pdzCnt = 0; /* Number of paid messages. */
+
+	/* Compute number of messages which the sender has to pay for. */
+	foreach (const BoxContactsModel::PartialEntry &e, recipEntries) {
+		if (e.pdz) {
+			++pdzCnt;
+		}
+	}
+
+	if (pdzCnt > 0) {
+		if (m_dmType == "I") {
+			if (!this->payRecipient->isChecked()) {
+				if (QMessageBox::No == notifyOfPDZ(pdzCnt)) {
+					return;
+				}
+			}
+		} else {
+			if (QMessageBox::No == notifyOfPDZ(pdzCnt)) {
+				return;
+			}
+		}
+	}
+
+	IsdsMessage message;
+
+	/* Attach envelope and attachment files to message structure. */
+	if (!buildDocuments(message.documents)) {
+		detailText = tr("An error occurred while loading attachments into message.");
+		goto finish;
+	}
+	if (!buildEnvelope(message.envelope)) {
+		detailText = tr("An error occurred during message envelope creation.");
+		goto finish;
+	}
+
+	this->setCursor(Qt::WaitCursor);
+	this->setEnabled(false);
+
+	/*
+	 * Generate unique identifiers.
+	 * These must be complete before creating first task.
+	 */
+	foreach (const BoxContactsModel::PartialEntry &e, recipEntries) {
+		taskIdentifiers.append(m_userName + "_" + e.id + "_" +
+		    currentTime.toString() + "_" +
+		    DlgChangePwd::generateRandomString(6));
+	}
+	m_transactIds = taskIdentifiers.toSet();
+	m_sentMsgResultList.clear();
+
+	/* Send message to all recipients. */
+	for (int i = 0; i < recipEntries.size(); ++i) {
+		const BoxContactsModel::PartialEntry &e(recipEntries.at(i));
+
+		/* Clear fields. */
+		message.envelope.dmID.clear();
+
+		/* Set new recipient. */
+		message.envelope.dbIDRecipient = e.id;
+		message.envelope.dmToHands = this->dmToHands->text();
+
+		TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
+		    m_userName, m_dbSet, taskIdentifiers.at(i), message,
+		    e.name, e.address, e.pdz);
+		task->setAutoDelete(true);
+		globWorkPool.assignHi(task);
+	}
+
+	return;
+
+finish:
+	QMessageBox msgBox;
+	msgBox.setIcon(QMessageBox::Critical);
+	msgBox.setWindowTitle(tr("Send message error"));
+	msgBox.setText(tr("It has not been possible to send a message to the ISDS server."));
+	detailText += "\n\n" + tr("The message will be discarded.");
+	msgBox.setInformativeText(detailText);
+	msgBox.setStandardButtons(QMessageBox::Ok);
+	msgBox.exec();
+	this->close();
+}
+
 void DlgSendMessage::buildEnvelopeWebDatovka(
     JsonLayer::Envelope &envelope) const
 {
@@ -1497,4 +1466,32 @@ void DlgSendMessage::buildFileListWebDatovka(
 		file.fContent = index.data(Qt::DisplayRole).toByteArray();
 		fileList.append(file);
 	}
+}
+
+void DlgSendMessage::sendMessageWebDatovka(
+    const QList<BoxContactsModel::PartialEntry> &recipEntries)
+{
+	/* Get account ID */
+	int accountID = getWebDatovkaAccountId(m_userName);
+
+	/* Create recipient list. */
+	JsonLayer::Recipient recipient;
+	QList<JsonLayer::Recipient> recipientList;
+	foreach (const BoxContactsModel::PartialEntry &e, recipEntries) {
+		recipient.recipientDbId = e.id;
+		recipient.toHands = this->dmToHands->text();
+		recipient.recipientName = e.name;
+		recipient.recipientAddress = e.address;
+		recipientList.append(recipient);
+	}
+
+	JsonLayer::Envelope envelope;
+	buildEnvelopeWebDatovka(envelope);
+	QList<JsonLayer::File> fileList;
+	buildFileListWebDatovka(fileList);
+
+	TaskSendMessageMojeId *task = new (std::nothrow) TaskSendMessageMojeId(
+	    m_userName, accountID, recipientList, envelope, fileList);
+	task->setAutoDelete(true);
+	globWorkPool.assignHi(task);
 }

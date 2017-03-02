@@ -159,7 +159,11 @@ private slots:
 	 */
 	void setAccountInfo(int fromComboIdx);
 
+	/*!
+	 * @brief Send message/multiple messages.
+	 */
 	void sendMessage(void);
+
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
@@ -256,6 +260,14 @@ private:
 	bool buildDocuments(QList<IsdsDocument> &documents) const;
 
 	/*!
+	 * @brief Send message via standard ISDS interface for third party apps.
+	 *
+	 * @param[in] recipEntries List of recipients.
+	 */
+	void sendMessageISDS(
+	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
+
+	/*!
 	 * @brief Construct JSON envelope description.
 	 *
 	 * @param[out] envelope Envelope to be set.
@@ -268,6 +280,14 @@ private:
 	 * @param[out] fileList File list to append entries to.
 	 */
 	void buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
+
+	/*!
+	 * @brief Send messages via WebDatovka interface.
+	 *
+	 * @param[in] recipEntries List of recipients.
+	 */
+	void sendMessageWebDatovka(
+	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
 
 	QTimer m_keepAliveTimer;
 	const QList<Task::AccountDescr> m_messageDbSetList;
