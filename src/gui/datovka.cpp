@@ -8403,11 +8403,16 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 	/* remember import path */
 	m_on_import_database_dir_activate = newDbDir;
 
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	QApplication::processEvents();
+
 	TaskSplitDb *task = new (::std::nothrow) TaskSplitDb(msgDbSet,
 	    userName, dbDir, newDbDir, itemSettings.isTestAccount());
 	task->setAutoDelete(false);
 	/* This will block the GUI and all workers. */
 	globWorkPool.runSingle(task);
+
+	QApplication::restoreOverrideCursor();
 
 	if (task->m_success) {
 		showStatusTextWithTimeout(tr("Split of message database finished"));
@@ -8432,8 +8437,6 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 	msgBox.setWindowTitle(tr("Database split result"));
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
-
-	QApplication::restoreOverrideCursor();
 
 	clearStatusBar();
 
