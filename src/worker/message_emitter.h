@@ -92,6 +92,17 @@ signals:
 	    const QString &resultDesc);
 
 	/*!
+	 * @brief Emitted when message import finishes.
+	 *
+	 * @param[in] userName      Account user name.
+	 * @param[in] errImportList List of unsuccess imports (description).
+	 * @param[in] totalMsg      Total number of messages.
+	 * @param[in] importedMsg   Total number of imported messages.
+	 */
+	void importMessageFinished(const QString &userName,
+	    const QStringList &errImportList, int totalMsgs, int importedMsgs);
+
+	/*!
 	 * @brief This signal is emitted when counted value is changed
 	 *
 	 * @param[in] label Progress bar label.

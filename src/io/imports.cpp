@@ -21,12 +21,28 @@
  * the two.
  */
 
+#include <QMessageBox>
+
+#include "src/common.h"
 #include "src/io/imports.h"
 #include "src/log/log.h"
 #include "src/worker/pool.h"
+#include "src/worker/task_import_message.h"
 #include "src/worker/task_import_zfo.h"
 
-void ImportZfo::importZfoIntoDatabase(const QStringList &fileList,
+void Imports::importDbMsgsIntoDatabase(MessageDbSet &dbSet,
+    const QStringList &dbFileList, const QString &userName, const QString &dbId)
+{
+	debugFuncCall();
+
+	TaskImportMessage *task;
+	task = new (std::nothrow) TaskImportMessage(userName, &dbSet,
+	    dbFileList, dbId);
+	task->setAutoDelete(true);
+	globWorkPool.assignLo(task);
+}
+
+void Imports::importZfoIntoDatabase(const QStringList &fileList,
     const QList<Task::AccountDescr> &databaseList,
     enum ImportZFODialog::ZFOtype zfoType, bool authenticate,
     QSet<QString> &zfoFilesToImport,

@@ -740,6 +740,12 @@ private slots:
 	    const QString &token, QString userName, QString pwd, QString otp,
 	    bool syncALL, const QString &certPath);
 
+	/*!
+	 * @brief Show information about import message results.
+	 */
+	void showImportMessageResults(const QString &userName,
+	    const QStringList &errImportList, int totalMsgs, int importedMsgs);
+
 private:
 
 	QTimer m_timerSyncAccounts;
@@ -1123,25 +1129,6 @@ private:
 	 */
 	void exportExpirMessagesToZFO(const QString &userName,
 	    const QList<MessageDb::MsgId> &expirMsgIds);
-
-	/*!
-	 * @brief Import of messages from database to selected account.
-	 */
-	void doMsgsImportFromDatabase(const QStringList &dbFileList,
-	    const QString &userName);
-
-	/*!
-	 * @brief Split database filename into mandatory entries.
-	 *
-	 * @param[in] inDbFileName - input database file name.
-	 * @param[out] dbUserName - username entry.
-	 * @paran[out] dbYear - year entry if exists or NULL.
-	 * @paran[out] dbTestingFlag - true if account is testing or false
-	 * @paran[out] errMsg - error message to user
-	 * @return true if database filename is correct
-	 */
-	bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
-	    QString &dbYear, bool &dbTestingFlag, QString &errMsg);
 
 	/*!
 	 * @brief Split message database into new databases

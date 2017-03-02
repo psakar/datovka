@@ -28,22 +28,35 @@
 #include "src/worker/task.h"
 
 /*!
- * @brief Provides zfo import to local database.
+ * @brief Provides zfo and message import to local database.
  */
-class ImportZfo {
+class Imports {
 
 public:
 	/*!
+	 * @brief Import messages from external databases to local database.
+	 *
+	 * @param[in] dbSet      Account target database set.
+	 * @param[in] dbFileList List of external databases to import.
+	 * @param[in] userName   Account username.
+	 * @param[in] dbId       Databox ID for import.
+	 */
+	static
+	void importDbMsgsIntoDatabase(MessageDbSet &dbSet,
+	    const QStringList &dbFileList, const QString &userName,
+	    const QString &dbId);
+
+	/*!
 	 * @brief Import ZFO file(s) into database by ZFO type.
 	 *
-	 * @param[in] fileList          - List of file path to import.
-	 * @param[in] databaseList      - List of databases.
-	 * @param[in] zfoType           - ZFO type for import.
-	 * @param[in] authenticate      - Check ZFO validity in the ISDS.
-	 * @param[out] zfoFilesToImport - List of valid ZFOs for import.
-	 * @param[out] zfoFilesInvalid  - List of invalid ZFOs.
-	 * @param[out] numFilesToImport - Number of valid ZFOs for import.
-	 * @param[out] errTxt           - Error text.
+	 * @param[in] fileList          List of file path to import.
+	 * @param[in] databaseList      List of databases.
+	 * @param[in] zfoType           ZFO type for import.
+	 * @param[in] authenticate      Check ZFO validity in the ISDS.
+	 * @param[out] zfoFilesToImport List of valid ZFOs for import.
+	 * @param[out] zfoFilesInvalid  List of invalid ZFOs.
+	 * @param[out] numFilesToImport Number of valid ZFOs for import.
+	 * @param[out] errTxt           Error text.
 	 */
 	static
 	void importZfoIntoDatabase(const QStringList &fileList,
@@ -59,7 +72,7 @@ private:
 	 *
 	 * @note Just prevent any instances of this class.
 	 */
-	ImportZfo(void);
+	Imports(void);
 };
 
 #endif /* _IMPORTS_H_ */
