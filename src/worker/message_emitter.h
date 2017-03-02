@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,6 +111,13 @@ signals:
 	void progressChange(const QString &label, int value);
 
 	/*!
+	 * @brief This signal is emitted when account is changed.
+	 *
+	 * @param[in] account username.
+	 */
+	void refreshAccountList(const QString &userName);
+
+	/*!
 	 * @brief Emitted when send message finishes.
 	 *
 	 * @param[in] userName      Account identifier (user login name).
@@ -139,11 +146,11 @@ signals:
 	    const QStringList &resultList, const QString &errStr);
 
 	/*!
-	 * @brief This signal is emitted when account is changed.
+	 * @brief This signal is emitted when status bar text is changed
 	 *
-	 * @param[in] account username.
+	 * @param[in] text Status bar text.
 	 */
-	void refreshAccountList(const QString &userName);
+	void statusBarChange(const QString &text);
 };
 
 /*!

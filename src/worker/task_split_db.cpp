@@ -57,6 +57,11 @@ void TaskSplitDb::run(void)
 		return;
 	}
 
+	if (m_newDbDir.isEmpty()) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	logDebugLv0NL("Starting database split task in thread '%p'",
 	    (void *) QThread::currentThreadId());
 
@@ -96,8 +101,7 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 	float diff = 0.0;
 	int flags = 0;
 
-	errStr = QObject::tr("Action was canceled and original "
-	    "database file was returned back.");
+	errStr = QObject::tr("Action was canceled and original database file was returned back.");
 
 	/* is testing account db */
 	if (isTestAccount) {
@@ -119,6 +123,8 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 	}
 
 	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 10);
+	emit globMsgProcEmitter.statusBarChange(
+	    QObject::tr("Copying origin database file to selected location"));
 
 	/* copy current account dbset to new location and open here */
 	if (!dbSet->copyToLocation(newDbDir)) {
@@ -166,7 +172,10 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 	for (int i = 0; i < years; ++i) {
 
 		diff += delta;
+
 		emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, (20 + diff));
+		emit globMsgProcEmitter.statusBarChange(
+		    QObject::tr("Creating a new database file for year %1").arg(yearList.at(i)));
 
 		QString newDbName = userName + "_" + yearList.at(i);
 
@@ -216,40 +225,53 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 	/* set back original database path and removed previous connection */
 	if (!dbSet->openLocation(dbDir, dbSet->organisation(),
 	    MessageDbSet::CM_MUST_EXIST)) {
-		errStr = QObject::tr("Error to set and open original database for account '%1'").arg(userName);
-		errStr = QObject::tr("Action was canceled and the origin database "
+		errStr = QObject::tr("Error to set and open original database for account '%1'.").arg(userName);
+		errStr += " ";
+		errStr += QObject::tr("Action was canceled and the origin database "
 		    "is now used from location:\n'%1'").arg(newDbDir);
 		return false;
 	}
 
+	emit globMsgProcEmitter.statusBarChange(
+	    QObject::tr("Replacing of new database files to origin database location"));
 	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 90);
 
 	/* move new database set to origin database path */
 	if (!dstDbSet->moveToLocation(dbDir)) {
 		errStr = QObject::tr("Error when move new databases for account '%1'").arg(userName);
-		errStr = QObject::tr("Action was canceled because new databases "
-		    "cannot move from\n'%1'\nto origin path\n'%2'").arg(newDbDir).arg(dbDir)
-		+ "\n\n" + QObject::tr("Probably not enough disk space. "
-		    "The origin database is still used.");
+		errStr += " ";
+		errStr += QObject::tr("Action was canceled because new databases "
+		    "cannot move from\n'%1'\nto origin path\n'%2'").arg(newDbDir).arg(dbDir);
+		errStr += "\n\n";
+		errStr += QObject::tr("Probably not enough disk space. The origin database is still used.");
 		return false;
 	}
+
+	emit globMsgProcEmitter.statusBarChange(
+	    QObject::tr("Deleting of old database from origin location"));
 
 	/* delete origin database file */
 	if (!dbSet->deleteLocation()) {
 		errStr = QObject::tr("Error when removed origin database for account '%1'").arg(userName);
-		errStr = QObject::tr("Action was canceled. Please, remove the "
-		    "origin database file manually from origin location:\n'%1'").arg(dbDir);
+		errStr += " ";
+		errStr += QObject::tr("Action was canceled.");
+		errStr += " ";
+		errStr += QObject::tr("Please, remove the origin database file manually "
+		    "from origin location:\n'%1'").arg(dbDir);
 		return false;
 	}
 
+	emit globMsgProcEmitter.statusBarChange(QObject::tr("Opening of new database files"));
 	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 95);
 
 	/* open new database set in the origin location */
 	if (!dbSet->openLocation(dbDir, dbSet->organisation(),
 	    MessageDbSet::CM_MUST_EXIST)) {
 		errStr = QObject::tr("A problem when opening new databases for account '%1'").arg(userName);
-		errStr = QObject::tr("Action was done but it cannot open new database files. "
-		    "Please, restart the application.");
+		errStr += " ";
+		errStr += QObject::tr("Action was done but it cannot open new database files.");
+		errStr += " ";
+		errStr += QObject::tr("Please, restart the application.");
 		return false;
 	}
 

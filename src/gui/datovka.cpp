@@ -323,14 +323,16 @@ MainWindow::MainWindow(QWidget *parent)
 	    SLOT(showImportMessageResults(QString, QStringList, int, int)));
 	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
 	    this, SLOT(updateProgressBar(QString, int)));
+	connect(&globMsgProcEmitter, SIGNAL(statusBarChange(QString)),
+	    this, SLOT(updateStatusBarText(QString)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
 	connect(&globMsgProcEmitter,
-	    SIGNAL(sendMessageMojeIdFinished(QString, QStringList, QString)), this,
-	    SLOT(sendMessageMojeIdAction(QString, QStringList,  QString)));
+	    SIGNAL(sendMessageMojeIdFinished(QString, QStringList, QString)),
+	    this, SLOT(sendMessageMojeIdAction(QString, QStringList,  QString)));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(refreshAccountList(QString)), this,
 	    SLOT(refreshAccountList(QString)));
@@ -573,60 +575,30 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 	delete reply;
 }
 
-
-/* ========================================================================= */
-/*
- * Show text in the status bar with timeout
- */
 void MainWindow::showStatusTextWithTimeout(const QString &qStr)
-/* ========================================================================= */
 {
 	clearStatusBar();
 	mui_statusBar->showMessage((qStr), TIMER_STATUS_TIMEOUT_MS);
 }
 
-
-/* ========================================================================= */
-/*
- * Show text in the status bar without timeout
- */
 void MainWindow::showStatusTextPermanently(const QString &qStr)
-/* ========================================================================= */
 {
 	clearStatusBar();
 	mui_statusBar->showMessage((qStr), 0);
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: Clear progress bar and set default text
- */
 void MainWindow::clearProgressBar(void)
-/* ========================================================================= */
 {
 	mui_statusProgressBar->setFormat(PL_IDLE);
 	mui_statusProgressBar->setValue(0);
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: Clear status bar
- */
 void MainWindow::clearStatusBar(void)
-/* ========================================================================= */
 {
 	mui_statusBar->clearMessage();
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: Update ProgressBar text and value.
- */
 void MainWindow::updateProgressBar(const QString &label, int value)
- /* ========================================================================= */
 {
 	if (value == -1) {
 		mui_statusProgressBar->setMaximum(0);
@@ -640,18 +612,10 @@ void MainWindow::updateProgressBar(const QString &label, int value)
 	mui_statusProgressBar->repaint();
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: Update StatusBar text.
- */
 void MainWindow::updateStatusBarText(const QString &text)
-/* ========================================================================= */
 {
-	//debugSlotCall();
-	showStatusTextWithTimeout(text);
+	showStatusTextPermanently(text);
 }
-
 
 /* ========================================================================= */
 MainWindow::~MainWindow(void)
