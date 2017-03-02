@@ -343,6 +343,113 @@ void DlgSendMessage::pingIsdsServer(void) const
 	globWorkPool.assignHi(task);
 }
 
+void DlgSendMessage::setAccountInfo(int fromComboIdx)
+{
+	debugSlotCall();
+
+	/* Get user name for selected account. */
+	const QString userName(
+	    this->fromComboBox->itemData(fromComboIdx).toString());
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Remove all recipients if account was changed. */
+	if (m_userName != userName) {
+		m_recipientTableModel.removeRows(0,
+		    m_recipientTableModel.rowCount());
+		m_userName = userName;
+	}
+
+	if (isWebDatovkaAccount(m_userName)) {
+		m_isWebDatovkaAccount = true;
+	}
+
+	if (!m_isWebDatovkaAccount) {
+
+		m_isLogged = true;
+		m_keepAliveTimer.stop();
+		{
+			TaskKeepAlive *task =
+			    new (std::nothrow) TaskKeepAlive(m_userName);
+			task->setAutoDelete(false);
+			globWorkPool.runSingle(task);
+
+			m_isLogged = task->m_isAlive;
+
+			delete task;
+		}
+		if (!m_isLogged) {
+			if (Q_NULLPTR != m_mv) {
+				m_isLogged = m_mv->connectToIsds(m_userName);
+			}
+		}
+		m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
+
+		/* Check for presence of struct isds_ctx . */
+		if (NULL == globIsdsSessions.session(m_userName)) {
+			logErrorNL("%s", "Missing ISDS session.");
+			m_isLogged = false;
+		}
+	} else {
+		if (!wdSessions.isConnectedToWebdatovka(m_userName)) {
+			if (Q_NULLPTR != m_mv) {
+				m_mv->loginToMojeId(m_userName);
+			}
+		}
+		m_isLogged = true;
+	}
+
+	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
+		if (acnt.userName == m_userName) {
+			m_dbSet = acnt.messageDbSet;
+			break;
+		}
+	}
+
+	const AcntSettings &accountInfo(AccountModel::globAccounts[m_userName]);
+	m_dbId = globAccountDbPtr->dbId(m_userName + "___True");
+	Q_ASSERT(!m_dbId.isEmpty());
+	m_senderName =
+	    globAccountDbPtr->senderNameGuess(m_userName + "___True");
+	QList<QString> accountData =
+	    globAccountDbPtr->getUserDataboxInfo(m_userName + "___True");
+	if (!accountData.isEmpty()) {
+		m_dbType = accountData.at(0);
+		m_dbEffectiveOVM = (accountData.at(1) == "1");
+		m_dbOpenAddressing = (accountData.at(2) == "1");
+	}
+	if (globPref.use_global_paths) {
+		m_lastAttAddPath = globPref.add_file_to_attachments_path;
+	} else {
+		m_lastAttAddPath = accountInfo.lastAttachAddPath();
+	}
+
+	if (!m_isWebDatovkaAccount) {
+		if (m_dbOpenAddressing) {
+			m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
+		}
+	}
+
+	QString dbOpenAddressingText;
+	if (!m_dbEffectiveOVM) {
+		if (m_dbOpenAddressing) {
+			dbOpenAddressingText =
+			    " - " + tr("sending of PDZ: enabled") + "; " +
+			    tr("remaining credit: ") + m_pdzCredit + " Kč";
+		} else {
+			dbOpenAddressingText =
+			    " - " + tr("sending of PDZ: disabled");
+		}
+	}
+
+	this->fromUser->setText("<strong>" +
+	    AccountModel::globAccounts[m_userName].accountName() +
+	    "</strong>" + " (" + m_userName + ") - " + m_dbType +
+	    dbOpenAddressingText);
+}
+
 void DlgSendMessage::initContent(void)
 {
 	if (isWebDatovkaAccount(m_userName)) {
@@ -509,113 +616,6 @@ void DlgSendMessage::initContent(void)
 	}
 
 	this->adjustSize();
-}
-
-
-/* ========================================================================= */
-/*
- * Slot: Set info data and database for selected account
- */
-void DlgSendMessage::setAccountInfo(int item)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	/* Get user name for selected account. */
-	const QString userName = this->fromComboBox->itemData(item).toString();
-
-	if (!userName.isEmpty()) {
-		/* If account was changed, remove all recipients. */
-		m_recipientTableModel.removeRows(0,
-		    m_recipientTableModel.rowCount());
-		m_userName = userName;
-	}
-
-	if (isWebDatovkaAccount(m_userName)) {
-		m_isWebDatovkaAccount = true;
-	}
-
-	if (!m_isWebDatovkaAccount) {
-
-		struct isds_ctx *session = NULL;
-		m_isLogged = true;
-		m_keepAliveTimer.stop();
-		{
-			TaskKeepAlive *task;
-			task = new (std::nothrow) TaskKeepAlive(m_userName);
-			task->setAutoDelete(false);
-			globWorkPool.runSingle(task);
-
-			m_isLogged = task->m_isAlive;
-
-			delete task;
-		}
-		if (!m_isLogged) {
-			if (m_mv) {
-				m_isLogged = m_mv->connectToIsds(m_userName);
-			}
-		}
-		m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
-
-		session = globIsdsSessions.session(m_userName);
-		if (NULL == session) {
-			logErrorNL("%s", "Missing ISDS session.");
-			m_isLogged = false;
-		}
-	} else {
-		if (!wdSessions.isConnectedToWebdatovka(m_userName)) {
-			m_mv->loginToMojeId(m_userName);
-		}
-		m_isLogged = true;
-	}
-
-	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
-		if (acnt.userName == m_userName) {
-			m_dbSet = acnt.messageDbSet;
-			break;
-		}
-	}
-
-	const AcntSettings &accountInfo(AccountModel::globAccounts[m_userName]);
-	m_dbId = globAccountDbPtr->dbId(m_userName + "___True");
-	Q_ASSERT(!m_dbId.isEmpty());
-	m_senderName =
-	    globAccountDbPtr->senderNameGuess(m_userName + "___True");
-	QList<QString> accountData =
-	    globAccountDbPtr->getUserDataboxInfo(m_userName + "___True");
-	if (!accountData.isEmpty()) {
-		m_dbType = accountData.at(0);
-		m_dbEffectiveOVM = (accountData.at(1) == "1");
-		m_dbOpenAddressing = (accountData.at(2) == "1");
-	}
-	if (globPref.use_global_paths) {
-		m_lastAttAddPath = globPref.add_file_to_attachments_path;
-	} else {
-		m_lastAttAddPath = accountInfo.lastAttachAddPath();
-	}
-
-	if (!m_isWebDatovkaAccount) {
-		if (m_dbOpenAddressing) {
-			m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
-		}
-	}
-
-	QString dbOpenAddressingText = "";
-	if (!m_dbEffectiveOVM) {
-		if (m_dbOpenAddressing) {
-			dbOpenAddressingText =
-			    " - " + tr("sending of PDZ: enabled") + "; " +
-			    tr("remaining credit: ") + m_pdzCredit + " Kč";
-		} else {
-			dbOpenAddressingText =
-			    " - " + tr("sending of PDZ: disabled");
-		}
-	}
-
-	this->fromUser->setText("<strong>" +
-	    AccountModel::globAccounts[m_userName].accountName() +
-	    "</strong>" + " (" + m_userName + ") - " + m_dbType +
-	    dbOpenAddressingText);
 }
 
 

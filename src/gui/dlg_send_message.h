@@ -152,6 +152,13 @@ private slots:
 	 */
 	void pingIsdsServer(void) const;
 
+	/*!
+	 * @brief Set account information and database for selected account.
+	 *
+	 * @param[in] fromComboIdx Index of selected 'From' combo box item.
+	 */
+	void setAccountInfo(int fromComboIdx);
+
 	void sendMessage(void);
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
@@ -159,7 +166,6 @@ private slots:
 	    bool isPDZ, qint64 dmId);
 	void sendMessageMojeIdAction(const QString &userName,
 	    const QStringList &result, const QString &error);
-	void setAccountInfo(int item);
 
 private:
 	/*!
