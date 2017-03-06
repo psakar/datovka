@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public:
 	virtual
 	void run(void) Q_DECL_OVERRIDE;
 
-	long m_heller; /*!< Credit in hundredths of crowns. */
+	qint64 m_heller; /*!< Credit in hundredths of crowns. */
 
 private:
 	/*!
@@ -65,7 +65,7 @@ private:
 	 * @retrun Credit in heller, -1 on error.
 	 */
 	static
-	long downloadCreditFromISDS(const QString &userName,
+	qint64 downloadCreditFromISDS(const QString &userName,
 	    const QString &dbId);
 
 	const QString m_userName; /*!< Account identifier (user login name). */

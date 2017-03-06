@@ -35,6 +35,7 @@
 #include "src/common.h"
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
+#include "src/models/data_box_contacts_model.h"
 #include "src/models/files_model.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
@@ -53,109 +54,318 @@
  */
 const QString &dzPrefix(MessageDb *messageDb, qint64 dmId);
 
+/*!
+ * @brief Send message dialogue.
+ */
 class DlgSendMessage : public QDialog, public Ui::SendMessage {
     Q_OBJECT
 
 public:
+	/*!
+	 * @brief Action to be performed.
+	 */
 	enum Action {
-		ACT_NEW,
-		ACT_REPLY,
-		ACT_FORWARD,
-		ACT_NEW_FROM_TMP
+		ACT_NEW, /* Create new message. */
+		ACT_REPLY, /* Fill dialogue as a reply on a message. */
+		ACT_FORWARD, /* Forward supplied messages at ZFO attachments. */
+		ACT_NEW_FROM_TMP /* Use existing message as a template. */
 	};
 
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] messageDbSetList List of available accounts.
+	 * @param[in] action What king of action should be performed.
+	 * @param[in] msgIds  List of messages used to fill the dialogue.
+	 * @param[in] userName The account the dialogue has been invoked from.
+	 * @param[in] mw Pointer to main window.
+	 * @param[in] parent Parent widget.
+	 */
 	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
-	    Action action, const QList<MessageDb::MsgId> &msgIds,
-	    const QString &userName, class MainWindow *mv, QWidget *parent = 0);
+	    enum Action action, const QList<MessageDb::MsgId> &msgIds,
+	    const QString &userName, class MainWindow *mw,
+	    QWidget *parent = Q_NULLPTR);
 
 signals:
-	void doActionAfterSentMsgSignal(const QString, const QString);
+	/*!
+	 * @brief This signal is emitted whenever the attachment path has been
+	 *     used and should be stored.
+	 *
+	 * @param[in] userName User name identifying the related account.
+	 * @param[in] attDir Used attachment directory.
+	 */
+	void usedAttachmentPath(const QString &userName, const QString &attDir);
 
 private slots:
-	void on_cancelButton_clicked(void);
-	void showOptionalForm(int);
-	void showOptionalFormAndSet(int);
+	/*!
+	 * @brief Check input fields sanity and activate search button.
+	 */
+	void checkInputFields(void);
+
+	/*!
+	 * @brief Add recipient from contacts held in database.
+	 */
+	void addRecipientFromLocalContact(void);
+
+	/*!
+	 * @brief Add recipients found via ISDS search.
+	 */
+	void addRecipientFromISDSSearch(void);
+
+	/*!
+	 * @brief Manually add a data box identifier.
+	 */
+	void addRecipientManually(void);
+
+	/*!
+	 * @brief Activates control elements based on selected recipients.
+	 *
+	 * @param[in] selected Newly selected items.
+	 * @param[in] deselected Deselected items.
+	 */
+	void recipientSelectionChanged(const QItemSelection &selected,
+	    const QItemSelection &deselected);
+
+	/*!
+	 * @brief Deletes selected row from the recipient list.
+	 */
+	void deleteRecipientEntries(void);
+
+	/*!
+	 * @brief Show/hide optional form elements.
+	 */
+	void showOptionalForm(void);
+
+	/*!
+	 * @brief Add attachment file.
+	 */
 	void addAttachmentFile(void);
+
+	/*!
+	 * @brief Activates control elements based on selected attachments.
+	 *
+	 * @param[in] selected Newly selected items.
+	 * @param[in] deselected Deselected items.
+	 */
+	void attachmentSelectionChanged(const QItemSelection &selected,
+	    const QItemSelection &deselected);
+
+	/*!
+	 * @brief Remove selected attachment entries.
+	 */
 	void deleteSelectedAttachmentFiles(void);
 
-	/*
+	/*!
 	 * @brief Open attachment in default application.
 	 *
-	 * @param index Index identifying the line. If invalid index passed then
-	 *              selected item is taken from the selection model.
+	 * @param[in] index Index identifying the line. If invalid index passed
+	 *                  then selected item is taken from the selection
+	 *                  model.
 	 */
 	void openSelectedAttachment(const QModelIndex &index = QModelIndex());
-	void addRecipientFromLocalContact(void);
-	void deleteRecipientData(void);
-	void findAndAddRecipient(void);
-	void recItemSelect(void);
-	void checkInputFields(void);
+
+	/*!
+	 * @brief ISDS connection keep-alive function.
+	 */
+	void pingIsdsServer(void) const;
+
+	/*!
+	 * @brief Set account information and database for selected account.
+	 *
+	 * @param[in] fromComboIdx Index of selected 'From' combo box item.
+	 */
+	void setAccountInfo(int fromComboIdx);
+
+	/*!
+	 * @brief Send message/multiple messages.
+	 */
 	void sendMessage(void);
+
+	/*!
+	 * @brief Gathers status after sending messages via ISDS interface.
+	 *     Shows result table if all data collected.
+	 *
+	 * @param[in] userName User name identifying the sender account.
+	 * @param[in] transactId Unique transaction identifier.
+	 * @param[in] result Sending status.
+	 * @param[in] resultDesc Result description string.
+	 * @param[in] dbIDRecipient Recipient data box identifier.
+	 * @param[in] recipientName Recipient data box name.
+	 * @param[in] isPDZ True if message was attempted to send as commercial
+	 *                  message.
+	 * @param[in] dmId Sent message identifier.
+	 */
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
 	    bool isPDZ, qint64 dmId);
-	void sendMessageMojeIdAction(const QString &userName,
-	    const QStringList &result, const QString &error);
-	void pingIsdsServer(void);
-	void addDbIdToRecipientList(void);
-	void attachmentDataChanged(const QModelIndex &topLeft,
-	    const QModelIndex &bottomRight, const QVector<int> &roles);
-	void attachmentSelectionChanged(const QItemSelection &selected,
-	    const QItemSelection &deselected);
-	void setAccountInfo(int item);
+
+	/*!
+	 * @brief Gathers status after sending messages via WebDatovka.
+	 *
+	 * @param[in] userName User name identifying the sender account.
+	 * @param[in] results List of result state descriptions.
+	 * @param[in] error Error description.
+	 */
+	void collectSendMessageStatusWebDatovka(const QString &userName,
+	    const QStringList &results, const QString &error);
 
 private:
-	QTimer m_keepAliveTimer;
-	const QList<Task::AccountDescr> m_messageDbSetList;
-	const QList<MessageDb::MsgId> m_msgIds;
-	QString m_dbId;
-	QString m_senderName;
-	const Action m_action;
-	QString m_userName;
-	QString m_dbType;
-	bool m_dbEffectiveOVM;
-	bool m_dbOpenAddressing;
-	QString m_lastAttAddPath;
-	QString m_pdzCredit;
-	QString m_dmType;
-	QString m_dmSenderRefNumber;
-	class MainWindow *m_mv;
-	MessageDbSet *m_dbSet;
-	bool m_isLogged;
-	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
-	bool m_isWebDatovkaAccount;
+	/*!
+	 * @brief Initialises the dialogue content.
+	 *
+	 * @param[in] action Specifies how the dialogue should be initialised.
+	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
+	 */
+	void initContent(enum Action action,
+	    const QList<MessageDb::MsgId> &msgIds);
 
-	/* Used to collect sending results. */
-	QSet<QString> m_transactIds;
-	QList<TaskSendMessage::ResultData> m_sentMsgResultList;
+	/*!
+	 * @brief Set dialogue content with ZFO attachments.
+	 *
+	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
+	 */
+	void fillContentAsForward(const QList<MessageDb::MsgId> &msgIds);
 
-	void initNewMessageDialog(void);
+	/*!
+	 * @brief Set the dialogue content as reply.
+	 *
+	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
+	 */
+	void fillContentAsReply(const QList<MessageDb::MsgId> &msgIds);
+
+	/*!
+	 * @brief Set the dialogue content from template message.
+	 *
+	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
+	 */
+	void fillContentFromTemplate(const QList<MessageDb::MsgId> &msgIds);
+
+	/*!
+	 * @brief Creates a notification QMessageBox informing the user about
+	 *     the number of created commercial messages.
+	 * @return QMessageBox::StandardButton value describing the pressed
+	 *         button.
+	 */
+	int notifyOfPDZ(int pdzCount) const;
+
+	/*!
+	 * @brief Calculates and shows total attachment size.
+	 */
 	bool calculateAndShowTotalAttachSize(void);
-	void fillDlgAsReply(void);
-	void fillDlgAsForward(void);
-	void fillDlgFromTmpMsg(void);
-	int showInfoAboutPDZ(int pdzCnt);
 
-	bool buildDocuments(QList<IsdsDocument> &documents) const;
-	bool buildEnvelope(IsdsEnvelope &envelope) const;
-	bool buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
-	bool buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
+	/*!
+	 * @brief Append data box into recipient list.
+	 *
+	 * @param[in] boxId Data box identifier.
+	 */
+	void addRecipientBox(const QString &boxId);
 
-	/*
-	 * Insert list of databoxes into recipient list.
-	*/
-	void insertDataboxesToRecipientList(const QStringList &dbIDs);
+	/*!
+	 * @brief Appends data boxes into recipient list.
+	 *
+	 * @note This is a convenience method that calls addRecipientBox().
+	 *
+	 * @param[in] boxIds List of data box identifiers.
+	 */
+	void addRecipientBoxes(const QStringList &boxIds);
 
-
+	/*!
+	 * @brief Queries ISDS for remaining PDZ credit.
+	 *
+	 * @param[in] userName User name identifying the account.
+	 * @param[in] dnId Data box identifier.
+	 * @return String containing the amount of remaining credit in Czech
+	 *         crowns.
+	 */
 	static
 	QString getPDZCreditFromISDS(const QString &userName,
 	    const QString &dbId);
 
+	/*!
+	 * @brief Query ISDS whether data box has effective OVM set.
+	 *
+	 * @param[in] userName User account to generate the query from.
+	 * @param[in] boxId Data box to ask for OVM status.
+	 * @return True if \a boxId has effective OVM status set.
+	 */
 	static
-	QString getUserInfoFromIsds(const QString &userName,
-	    const QString &idDbox);
+	bool queryISDSBoxEOVM(const QString &userName, const QString &boxId);
 
+	/*!
+	 * @brief Sets envelope content according to dialogue content.
+	 *
+	 * @param[out] envelope Envelope to be set.
+	 * @return True on success.
+	 */
+	bool buildEnvelope(IsdsEnvelope &envelope) const;
+
+	/*!
+	 * @brief Appends attachments to list of document descriptors.
+	 *
+	 * @param[out] documents List to append data to.
+	 * @return True on success.
+	 */
+	bool buildDocuments(QList<IsdsDocument> &documents) const;
+
+	/*!
+	 * @brief Send message via standard ISDS interface for third party apps.
+	 *
+	 * @param[in] recipEntries List of recipients.
+	 */
+	void sendMessageISDS(
+	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
+
+	/*!
+	 * @brief Construct JSON envelope description.
+	 *
+	 * @param[out] envelope Envelope to be set.
+	 */
+	void buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
+
+	/*!
+	 * @brief Construct list of JSON attachment descriptions.
+	 *
+	 * @param[out] fileList File list to append entries to.
+	 */
+	void buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
+
+	/*!
+	 * @brief Send messages via WebDatovka interface.
+	 *
+	 * @param[in] recipEntries List of recipients.
+	 */
+	void sendMessageWebDatovka(
+	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
+
+	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
+	const QList<Task::AccountDescr> m_messageDbSetList; /*!< Available accounts.*/
+
+	QString m_userName; /*!< Selected user name (login). */
+	QString m_dbId; /*!< Name of data box associated with selected user. */
+	QString m_senderName; /*!< Sender (data box) name. */
+	QString m_dbType; /*!< Data box type identifier string. */
+	bool m_dbEffectiveOVM; /*! True if selected data box has effective OVM. */
+	bool m_dbOpenAddressing; /*! True if selected box has open addressing.  */
+	bool m_isLogged; /*!< True if account has already logged in. */
+	bool m_isWebDatovkaAccount; /*!< True if this is a WebDatovka account. */
+
+	QString m_lastAttAddPath; /*! Last attachment location. */
+	QString m_pdzCredit; /*! String containing credit value. */
+
+	QString m_dmType; /*!< Message type. */
+	QString m_dmSenderRefNumber; /*!< Message reference number. */
+
+	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
+
+	BoxContactsModel m_recipientTableModel; /*!< Model of data boxes. */
+	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
+
+	/* Used to collect sending results. */
+	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */
+	QList<TaskSendMessage::ResultData> m_sentMsgResultList; /*!< Send status list. */
+
+	class MainWindow *const m_mw; /*!< Pointer to main window. */
 };
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -484,6 +484,18 @@ bool DbFlsTblModel::appendAttachmentEntry(const QByteArray &base64content,
 
 	/* Check data duplicity. */
 	return insertVector(rowVect, rowCount(), true);
+}
+
+qint64 DbFlsTblModel::totalAttachmentSize(void) const
+{
+	qint64 sum = 0;
+
+	for (int row = 0; row < rowCount(); ++row) {
+		sum += data(index(row, FSIZE_COL),
+		    Qt::DisplayRole).toLongLong();
+	}
+
+	return sum;
 }
 
 /*!

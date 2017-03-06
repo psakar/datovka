@@ -30,7 +30,7 @@
 #include "src/worker/task_search_owner_fulltext.h"
 
 /*!
- * @brief List of data boxes and additional informaction.
+ * @brief List of data boxes and additional information.
  */
 class BoxContactsModel : public TblModel {
 	Q_OBJECT
@@ -47,6 +47,33 @@ public:
 		POST_CODE_COL = 5, /* Postal code. */
 		PDZ_COL = 6, /* Commercial message. */
 		MAX_COL = 7 /* Number of columns. */
+	};
+
+	/*!
+	 * @brief Used for identifying check state for entries.
+	 */
+	enum EntryState {
+		UNCHECKED, /* Unchecked entries. */
+		CHECKED, /* Checked entries. */
+		ANY /* Unchecked and checked entries. */
+	};
+
+	/*!
+	 * @brief Used for returning model entries.
+	 */
+	class PartialEntry {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		PartialEntry(void)
+		    : id(), name(), address(), pdz(false)
+		{}
+
+		QString id; /*!< Data box identifier. */
+		QString name; /*!< Data box name. */
+		QString address; /*!< Data box subject address. */
+		bool pdz; /*!< True only if true held in the model. */
 	};
 
 	/*!
@@ -117,6 +144,19 @@ public:
 	void appendData(const QList<MessageDb::ContactEntry> &entryList);
 
 	/*!
+	 * @brief Appends single entry to the model.
+	 *
+	 * @param[in] id Box identifier.
+	 * @param[in] type Data box type.
+	 * @param[in] name Box name.
+	 * @param[in] addr Data box subject address.
+	 * @param[in] postCode Postal code.
+	 * @param[in] pdz True if sending of PDZ is necessary.
+	 */
+	void appendData(const QString &id, int type, const QString &name,
+	    const QString &addr, const QString postCode, const QVariant &pdz);
+
+	/*!
 	 * @brief Returns true if there are some items checked.
 	 *
 	 * @return True if something checked.
@@ -124,11 +164,28 @@ public:
 	bool somethingChecked(void) const;
 
 	/*!
-	 * @brief Returns list of box identifiers that have been checked.
+	 * @brief Returns true if model contains supplied data box identifier.
 	 *
+	 * @oaram[in] boxId Data box identifier.
+	 * @return True if model contains provided identifier.
+	 */
+	bool containsBoxId(const QString &boxId) const;
+
+	/*!
+	 * @brief Returns list of box identifiers according to required state.
+	 *
+	 * @param[in] entryState Specifies the checked state of required data.
 	 * @return List of data box identifiers.
 	 */
-	QStringList checkedBoxIds(void) const;
+	QStringList boxIdentifiers(enum EntryState entryState) const;
+
+	/*!
+	 * @brief Returns list of entries according to required state.
+	 *
+	 * @Param[in] entryState Specifies the checked state of required data.
+	 * @return List of partial entries.
+	 */
+	QList<PartialEntry> partialBoxEntries(enum EntryState entryState) const;
 };
 
 #endif /* _DATA_BOX_CONTACTS_MODEL_H_ */

@@ -29,6 +29,7 @@
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
+#include "src/worker/task_keep_alive.h"
 
 #define CBOX_TARGET_ALL 0
 #define CBOX_TARGET_ADDRESS 1
@@ -207,7 +208,8 @@ void DlgDsSearch::addSelectedDbIDs(void)
 	setBreakDownloadLoop(); /* Break download loop. */
 
 	if (m_dbIdList != Q_NULLPTR) {
-		m_dbIdList->append(m_contactTableModel.checkedBoxIds());
+		m_dbIdList->append(m_contactTableModel.boxIdentifiers(
+		    BoxContactsModel::CHECKED));
 	}
 }
 
@@ -216,13 +218,11 @@ void DlgDsSearch::setBreakDownloadLoop(void)
 	m_breakDownloadLoop = true;
 }
 
-void DlgDsSearch::pingIsdsServer(void)
+void DlgDsSearch::pingIsdsServer(void) const
 {
-	if (globIsdsSessions.isConnectedToIsds(m_userName)) {
-		qDebug() << "Connection to ISDS is alive :)";
-	} else {
-		qDebug() << "Connection to ISDS is dead :(";
-	}
+	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
+	task->setAutoDelete(true);
+	globWorkPool.assignHi(task);
 }
 
 void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)

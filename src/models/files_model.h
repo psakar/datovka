@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,6 +185,13 @@ public:
 	 */
 	bool appendAttachmentEntry(const QByteArray &base64content,
 	    const QString &fName);
+
+	/*!
+	 * @brief Computes size of files held by the model.
+	 *
+	 * @returns Total attachment data size.
+	 */
+	qint64 totalAttachmentSize(void) const;
 
 	/*!
 	 * @brief Generate sorted list containing only one index per line each.

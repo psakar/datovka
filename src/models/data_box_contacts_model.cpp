@@ -55,10 +55,26 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 		break;
 	case BOX_TYPE_COL:
-		return convertDbTypeToString(_data(index, role).toInt());
+		{
+			QVariant entry(_data(index, role));
+
+			if (!entry.isNull()) {
+				return convertDbTypeToString(entry.toInt());
+			} else {
+				return entry;
+			}
+		}
 		break;
 	case PDZ_COL:
-		return _data(index, role).toBool() ? tr("yes") : tr("no");
+		{
+			QVariant entry(_data(index, role));
+
+			if (!entry.isNull()) {
+				return entry.toBool() ? tr("yes") : tr("no");
+			} else {
+				return entry;
+			}
+		}
 		break;
 	default:
 		return _data(index, role);
@@ -207,6 +223,37 @@ void BoxContactsModel::appendData(
 	endInsertRows();
 }
 
+void BoxContactsModel::appendData(const QString &id, int type,
+    const QString &name, const QString &addr, const QString postCode,
+    const QVariant &pdz)
+{
+	if (id.isEmpty() || name.isEmpty() || addr.isEmpty()) {
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), rowCount(), rowCount());
+
+	{
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		row[CHECKBOX_COL] = false;
+		row[BOX_ID_COL] = id;
+		if (type >= 0) {
+			row[BOX_TYPE_COL] = type;
+		}
+		row[BOX_NAME_COL] = name;
+		row[ADDRESS_COL] = addr;
+		row[POST_CODE_COL] = postCode;
+		row[PDZ_COL] = pdz;
+
+		m_data[m_rowCount++] = row;
+	}
+
+	endInsertRows();
+}
+
 bool BoxContactsModel::somethingChecked(void) const
 {
 	for (int row = 0; row < m_rowCount; ++row) {
@@ -218,15 +265,64 @@ bool BoxContactsModel::somethingChecked(void) const
 	return false;
 }
 
-QStringList BoxContactsModel::checkedBoxIds(void) const
+bool BoxContactsModel::containsBoxId(const QString &boxId) const
+{
+	for (int row = 0; row < m_rowCount; ++row) {
+		if (m_data[row][BOX_ID_COL].toString() == boxId) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/*!
+ * @brief Compares the check state according to required criteria.
+ *
+ * @param[in] checked Check state from the model.
+ * @param[in] entryState User required check state.
+ * @return True if state matches the criteria.
+ */
+static inline
+bool checkStateMatch(bool checked, enum BoxContactsModel::EntryState entryState)
+{
+	return (!checked && (entryState == BoxContactsModel::UNCHECKED)) ||
+	    (checked && (entryState == BoxContactsModel::CHECKED)) ||
+	    (entryState == BoxContactsModel::ANY);
+}
+
+QStringList BoxContactsModel::boxIdentifiers(enum EntryState entryState) const
 {
 	QStringList ids;
 
 	for (int row = 0; row < m_rowCount; ++row) {
-		if (m_data[row][CHECKBOX_COL].toBool()) {
+		if (checkStateMatch(m_data[row][CHECKBOX_COL].toBool(),
+		        entryState)) {
 			ids.append(m_data[row][BOX_ID_COL].toString());
 		}
 	}
 
 	return ids;
+}
+
+QList<BoxContactsModel::PartialEntry> BoxContactsModel::partialBoxEntries(
+    enum EntryState entryState) const
+{
+	QList<PartialEntry> entries;
+
+	for (int row = 0; row < m_rowCount; ++row) {
+		if (checkStateMatch(m_data[row][CHECKBOX_COL].toBool(),
+		        entryState)) {
+			PartialEntry entry;
+
+			entry.id = m_data[row][BOX_ID_COL].toString();
+			entry.name = m_data[row][BOX_NAME_COL].toString();
+			entry.address = m_data[row][ADDRESS_COL].toString();
+			entry.pdz = m_data[row][PDZ_COL].toBool();
+
+			entries.append(entry);
+		}
+	}
+
+	return entries;
 }
