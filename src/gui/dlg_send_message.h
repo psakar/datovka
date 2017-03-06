@@ -61,15 +61,25 @@ class DlgSendMessage : public QDialog, public Ui::SendMessage {
     Q_OBJECT
 
 public:
+	/*!
+	 * @brief Action to be performed.
+	 */
 	enum Action {
-		ACT_NEW,
-		ACT_REPLY,
-		ACT_FORWARD,
-		ACT_NEW_FROM_TMP
+		ACT_NEW, /* Create new message. */
+		ACT_REPLY, /* Fill dialogue as a reply on a message. */
+		ACT_FORWARD, /* Forward supplied messages at ZFO attachments. */
+		ACT_NEW_FROM_TMP /* Use existing message as a template. */
 	};
 
 	/*!
 	 * @brief Constructor.
+	 *
+	 * @param[in] messageDbSetList List of available accounts.
+	 * @param[in] action What king of action should be performed.
+	 * @param[in] msgIds  List of messages used to fill the dialogue.
+	 * @param[in] userName The account the dialogue has been invoked from.
+	 * @param[in] mw Pointer to main window.
+	 * @param[in] parent Parent widget.
 	 */
 	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
 	    Action action, const QList<MessageDb::MsgId> &msgIds,
@@ -138,7 +148,7 @@ private slots:
 	 */
 	void deleteSelectedAttachmentFiles(void);
 
-	/*
+	/*!
 	 * @brief Open attachment in default application.
 	 *
 	 * @param[in] index Index identifying the line. If invalid index passed
