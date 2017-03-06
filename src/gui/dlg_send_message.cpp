@@ -55,6 +55,14 @@
 #include "src/worker/task_search_owner.h"
 #include "ui_dlg_send_message.h"
 
+/*
+ * Message types as defined in ISDS alnd used in libisds.
+ * For details see linisds.h .
+ */
+#define DMTYPE_INIT "I"
+#define DMTYPE_COMM "K"
+#define DMTYPE_RESP "O"
+
 const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
 {
 	const static QString nothing;
@@ -205,10 +213,11 @@ void DlgSendMessage::recipientSelectionChanged(const QItemSelection &selected,
 	Q_UNUSED(deselected);
 
 	/*
-	 * 'I' means contractual PDZ that initiates a reply (prepaid?) PDZ.
-	 * It should not be possible to delete recipients for those messages.
+	 * DMTYPE_INIT means contractual PDZ that initiates a reply (prepaid?)
+	 * PDZ. It should not be possible to delete recipients for those
+	 * messages.
 	 */
-	removeRecipient->setEnabled((m_dmType != QStringLiteral("I")) &&
+	removeRecipient->setEnabled((m_dmType != QStringLiteral(DMTYPE_INIT)) &&
 	    recipientTableView->selectionModel()->selectedRows(0).size() > 0);
 }
 
@@ -876,7 +885,7 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 		pdz = false;
 	}
 
-	if (m_dmType == "I") {
+	if (m_dmType == QStringLiteral(DMTYPE_INIT)) {
 		this->addRecipient->setEnabled(false);
 		this->removeRecipient->setEnabled(false);
 		this->findRecipient->setEnabled(false);
@@ -1249,18 +1258,18 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 		    this->dmAllowSubstDelivery->isChecked();
 	}
 
-	if (m_dmType == "I") {
+	if (m_dmType == QStringLiteral(DMTYPE_INIT)) {
 		if (this->payRecipient->isChecked()) {
-			dmType = "O";
+			dmType = QStringLiteral(DMTYPE_RESP);
 		} else {
-			dmType = "K";
+			dmType = QStringLiteral(DMTYPE_COMM);
 		}
 		if (!m_dmSenderRefNumber.isEmpty()) {
 			envelope.dmRecipientRefNumber = m_dmSenderRefNumber;
 		}
 	} else {
 		if (this->payReplyCheckBox->isChecked()) {
-			dmType = "I";
+			dmType = QStringLiteral(DMTYPE_INIT);
 		}
 	}
 
@@ -1336,7 +1345,7 @@ void DlgSendMessage::sendMessageISDS(
 	}
 
 	if (pdzCnt > 0) {
-		if (m_dmType == "I") {
+		if (m_dmType == QStringLiteral(DMTYPE_INIT)) {
 			if (!this->payRecipient->isChecked()) {
 				if (QMessageBox::No == notifyOfPDZ(pdzCnt)) {
 					return;
