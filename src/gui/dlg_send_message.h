@@ -322,27 +322,32 @@ private:
 
 	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
 	const QList<Task::AccountDescr> m_messageDbSetList; /*!< Available accounts.*/
-	QString m_dbId;
-	QString m_senderName;
-	QString m_userName;
-	QString m_dbType;
-	bool m_dbEffectiveOVM;
-	bool m_dbOpenAddressing;
-	QString m_lastAttAddPath;
-	QString m_pdzCredit;
-	QString m_dmType;
-	QString m_dmSenderRefNumber;
-	class MainWindow *m_mv;
-	MessageDbSet *m_dbSet;
-	bool m_isLogged;
-	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
-	bool m_isWebDatovkaAccount;
+
+	QString m_userName; /*!< Selected user name (login). */
+	QString m_dbId; /*!< Name of data box associated with selected user. */
+	QString m_senderName; /*!< Sender (data box) name. */
+	QString m_dbType; /*!< Data box type identifier string. */
+	bool m_dbEffectiveOVM; /*! True if selected data box has effective OVM. */
+	bool m_dbOpenAddressing; /*! True if selected box has open addressing.  */
+	bool m_isLogged; /*!< True if account has already logged in. */
+	bool m_isWebDatovkaAccount; /*!< True if this is a WebDatovka account. */
+
+	QString m_lastAttAddPath; /*! Last attachment location. */
+	QString m_pdzCredit; /*! String containing credit value. */
+
+	QString m_dmType; /*!< Message type. */
+	QString m_dmSenderRefNumber; /*!< Message reference number. */
+
+	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 
 	BoxContactsModel m_recipientTableModel; /*!< Model of data boxes. */
+	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
 
 	/* Used to collect sending results. */
-	QSet<QString> m_transactIds;
-	QList<TaskSendMessage::ResultData> m_sentMsgResultList;
+	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */
+	QList<TaskSendMessage::ResultData> m_sentMsgResultList; /*!< Send status list. */
+
+	class MainWindow *m_mv; /*!< Pointer to main window. */
 };
 
 

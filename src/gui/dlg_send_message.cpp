@@ -85,24 +85,24 @@ DlgSendMessage::DlgSendMessage(
     : QDialog(parent),
     m_keepAliveTimer(),
     m_messageDbSetList(messageDbSetList),
+    m_userName(userName),
     m_dbId(),
     m_senderName(),
-    m_userName(userName),
     m_dbType(),
     m_dbEffectiveOVM(false),
     m_dbOpenAddressing(false),
-    m_lastAttAddPath(""),
+    m_isLogged(false),
+    m_isWebDatovkaAccount(false),
+    m_lastAttAddPath(),
     m_pdzCredit("0"),
     m_dmType(),
     m_dmSenderRefNumber(),
-    m_mv(mv),
     m_dbSet(Q_NULLPTR),
-    m_isLogged(false),
-    m_attachmentModel(),
-    m_isWebDatovkaAccount(false),
     m_recipientTableModel(this),
+    m_attachmentModel(this),
     m_transactIds(),
-    m_sentMsgResultList()
+    m_sentMsgResultList(),
+    m_mv(mv)
 {
 	setupUi(this);
 
@@ -116,6 +116,8 @@ DlgSendMessage::DlgSendMessage(
 	    QAbstractItemView::SelectRows);
 
 	initContent(action, msgIds);
+
+	Q_ASSERT(!m_dbId.isEmpty());
 
 	Q_ASSERT(Q_NULLPTR != m_dbSet);
 }
@@ -1263,7 +1265,6 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 	}
 
 	envelope.dmType = dmType;
-
 
 	envelope.dmOVM = m_dbEffectiveOVM;
 
