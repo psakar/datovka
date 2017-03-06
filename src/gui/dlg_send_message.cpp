@@ -89,7 +89,7 @@ const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
 DlgSendMessage::DlgSendMessage(
     const QList<Task::AccountDescr> &messageDbSetList,
     Action action, const QList<MessageDb::MsgId> &msgIds,
-    const QString &userName, class MainWindow *mv, QWidget *parent)
+    const QString &userName, class MainWindow *mw, QWidget *parent)
     : QDialog(parent),
     m_keepAliveTimer(),
     m_messageDbSetList(messageDbSetList),
@@ -110,7 +110,7 @@ DlgSendMessage::DlgSendMessage(
     m_attachmentModel(this),
     m_transactIds(),
     m_sentMsgResultList(),
-    m_mv(mv)
+    m_mw(mw)
 {
 	setupUi(this);
 
@@ -390,8 +390,8 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 			delete task;
 		}
 		if (!m_isLogged) {
-			if (Q_NULLPTR != m_mv) {
-				m_isLogged = m_mv->connectToIsds(m_userName);
+			if (Q_NULLPTR != m_mw) {
+				m_isLogged = m_mw->connectToIsds(m_userName);
 			}
 		}
 		m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
@@ -403,8 +403,8 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		}
 	} else {
 		if (!wdSessions.isConnectedToWebdatovka(m_userName)) {
-			if (Q_NULLPTR != m_mv) {
-				m_mv->loginToMojeId(m_userName);
+			if (Q_NULLPTR != m_mw) {
+				m_mw->loginToMojeId(m_userName);
 			}
 		}
 		m_isLogged = true;

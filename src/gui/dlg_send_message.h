@@ -73,7 +73,7 @@ public:
 	 */
 	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
 	    Action action, const QList<MessageDb::MsgId> &msgIds,
-	    const QString &userName, class MainWindow *mv,
+	    const QString &userName, class MainWindow *mw,
 	    QWidget *parent = Q_NULLPTR);
 
 signals:
@@ -347,7 +347,7 @@ private:
 	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */
 	QList<TaskSendMessage::ResultData> m_sentMsgResultList; /*!< Send status list. */
 
-	class MainWindow *m_mv; /*!< Pointer to main window. */
+	class MainWindow *const m_mw; /*!< Pointer to main window. */
 };
 
 
