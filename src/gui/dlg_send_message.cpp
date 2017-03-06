@@ -304,8 +304,7 @@ void DlgSendMessage::addAttachmentFile(void)
 		fileNames = dialog.selectedFiles();
 		if (!globPref.use_global_paths) {
 			m_lastAttAddPath = dialog.directory().absolutePath();
-			emit doActionAfterSentMsgSignal(m_userName,
-			    m_lastAttAddPath);
+			emit usedAttachmentPath(m_userName, m_lastAttAddPath);
 		}
 	}
 
@@ -570,7 +569,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 		}
 	}
 
-	emit doActionAfterSentMsgSignal(m_userName, m_lastAttAddPath);
+	emit usedAttachmentPath(m_userName, m_lastAttAddPath);
 }
 
 void DlgSendMessage::collectSendMessageStatusWebDatovka(const QString &userName,
@@ -593,7 +592,7 @@ void DlgSendMessage::collectSendMessageStatusWebDatovka(const QString &userName,
 		msgBox.setDefaultButton(QMessageBox::Ok);
 		msgBox.exec();
 		this->accept(); /* Set return code to accepted. */
-		emit doActionAfterSentMsgSignal(userName, m_lastAttAddPath);
+		emit usedAttachmentPath(userName, m_lastAttAddPath);
 	} else {
 		for (int i = 0; i < results.count(); ++i) {
 			QString msg = results.at(i);
@@ -611,8 +610,7 @@ void DlgSendMessage::collectSendMessageStatusWebDatovka(const QString &userName,
 		msgBox.setDefaultButton(QMessageBox::No);
 		if (msgBox.exec() == QMessageBox::Yes) {
 			this->close(); /* Set return code to closed. */
-			emit doActionAfterSentMsgSignal(userName,
-			    m_lastAttAddPath);
+			emit usedAttachmentPath(userName, m_lastAttAddPath);
 		}
 	}
 }

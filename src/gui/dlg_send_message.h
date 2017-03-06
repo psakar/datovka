@@ -87,7 +87,14 @@ public:
 	    QWidget *parent = Q_NULLPTR);
 
 signals:
-	void doActionAfterSentMsgSignal(const QString, const QString);
+	/*!
+	 * @brief This signal is emitted whenever the attachment path has been
+	 *     used and should be stored.
+	 *
+	 * @param[in] userName User name identifying the related account.
+	 * @param[in] attDir Used attachment directory.
+	 */
+	void usedAttachmentPath(const QString &userName, const QString &attDir);
 
 private slots:
 	/*!

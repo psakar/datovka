@@ -718,7 +718,7 @@ private slots:
 	/*!
 	 * @brief Store last add attachment path.
 	 */
-	void doActionAfterSentMsgSlot(const QString &userName,
+	void storeAttachmentPath(const QString &userName,
 	    const QString &lastDir);
 
 	/*!

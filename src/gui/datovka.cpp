@@ -4930,8 +4930,8 @@ void MainWindow::openSendMessageDialog(int action)
 	showStatusTextWithTimeout(tr("Create and send a message."));
 
 	connect(sendMsgDialog,
-	    SIGNAL(doActionAfterSentMsgSignal(const QString, const QString)),
-	    this, SLOT(doActionAfterSentMsgSlot(const QString, const QString)));
+	    SIGNAL(usedAttachmentPath(const QString, const QString)),
+	    this, SLOT(storeAttachmentPath(const QString, const QString)));
 
 	sendMsgDialog->setAttribute(Qt::WA_DeleteOnClose, true);
 	sendMsgDialog->show();
@@ -4942,7 +4942,7 @@ void MainWindow::openSendMessageDialog(int action)
 /*
  * Slot: Store last add attachment path.
  */
-void MainWindow::doActionAfterSentMsgSlot(const QString &userName,
+void MainWindow::storeAttachmentPath(const QString &userName,
     const QString &lastDir)
 /* ========================================================================= */
 {
