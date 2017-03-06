@@ -1131,34 +1131,6 @@ private:
 	    const QList<MessageDb::MsgId> &expirMsgIds);
 
 	/*!
-	 * @brief Split message database into new databases
-	 * contain messages for single years.
-	 * @param[in] userName - username of account.
-	 * @return true if success
-	 */
-	bool splitMsgDbByYears(const QString &userName);
-
-	/*!
-	 * @brief Show error message box
-	 * @param[in] msgTitle - title of message box.
-	 * @param[in] msgText - main text of message box.
-	 * @param[in] msgInformativeText - info text of message box.
-	 */
-	void showErrMessageBox(const QString &msgTitle,
-	    const QString &msgText, const QString &msgInformativeText);
-
-	/*!
-	 * @brief Set back original database path if error during
-	 *    database splitting
-	 * @param[in] dbset - MessageDbSet.
-	 * @param[in] dbDir - origin database dir.
-	 * @param[in] userName - username of account.
-	 * @return true if success
-	 */
-	bool setBackOriginDb(MessageDbSet *dbset, const QString &dbDir,
-	    const QString &userName);
-
-	/*!
 	 * @brief Show dialog for webdatovka account
 	 *        that action is not implemented.
 	 * @param[in] userName - account username.

@@ -352,6 +352,7 @@ SOURCES += \
     src/worker/task_search_owner_fulltext.cpp \
     src/worker/task_send_message.cpp \
     src/worker/task_send_message_mojeid.cpp \
+    src/worker/task_split_db.cpp \
     src/worker/task_sync_mojeid.cpp \
     src/worker/task_tag_sync_mojeid.cpp \
     src/worker/task_vacuum_db_set.cpp \
@@ -456,6 +457,7 @@ HEADERS += \
     src/worker/task_search_owner_fulltext.h \
     src/worker/task_send_message.h \
     src/worker/task_send_message_mojeid.h \
+    src/worker/task_split_db.h \
     src/worker/task_sync_mojeid.h \
     src/worker/task_tag_sync_mojeid.h \
     src/worker/task_vacuum_db_set.h \
