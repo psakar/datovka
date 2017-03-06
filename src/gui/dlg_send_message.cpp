@@ -88,7 +88,7 @@ const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
 
 DlgSendMessage::DlgSendMessage(
     const QList<Task::AccountDescr> &messageDbSetList,
-    Action action, const QList<MessageDb::MsgId> &msgIds,
+    enum Action action, const QList<MessageDb::MsgId> &msgIds,
     const QString &userName, class MainWindow *mw, QWidget *parent)
     : QDialog(parent),
     m_keepAliveTimer(),
@@ -615,7 +615,7 @@ void DlgSendMessage::collectSendMessageStatusWebDatovka(const QString &userName,
 	}
 }
 
-void DlgSendMessage::initContent(Action action,
+void DlgSendMessage::initContent(enum Action action,
     const QList<MessageDb::MsgId> &msgIds)
 {
 	if (isWebDatovkaAccount(m_userName)) {

@@ -82,7 +82,7 @@ public:
 	 * @param[in] parent Parent widget.
 	 */
 	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
-	    Action action, const QList<MessageDb::MsgId> &msgIds,
+	    enum Action action, const QList<MessageDb::MsgId> &msgIds,
 	    const QString &userName, class MainWindow *mw,
 	    QWidget *parent = Q_NULLPTR);
 
@@ -217,7 +217,8 @@ private:
 	 * @param[in] action Specifies how the dialogue should be initialised.
 	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
 	 */
-	void initContent(Action action, const QList<MessageDb::MsgId> &msgIds);
+	void initContent(enum Action action,
+	    const QList<MessageDb::MsgId> &msgIds);
 
 	/*!
 	 * @brief Set dialogue content with ZFO attachments.
