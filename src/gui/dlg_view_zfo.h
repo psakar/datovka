@@ -88,7 +88,7 @@ private slots:
 	/*!
 	 * @brief View signature details.
 	 */
-	void showSignatureDetails(void);
+	void showSignatureDetailsDialog(void);
 
 private:
 	/*!
