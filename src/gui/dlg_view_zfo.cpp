@@ -153,7 +153,7 @@ void DlgViewZfo::openSelectedAttachment(const QModelIndex &index)
 	    index);
 }
 
-void DlgViewZfo::showSignatureDetails(void)
+void DlgViewZfo::showSignatureDetailsDialog(void)
 {
 	Q_ASSERT(NULL != m_message);
 	Q_ASSERT(NULL != m_message->envelope);
@@ -273,7 +273,7 @@ void DlgViewZfo::setUpDialogue(void)
 
 	/* Signature details. */
 	connect(signaturePushButton, SIGNAL(clicked()), this,
-	    SLOT(showSignatureDetails()));
+	    SLOT(showSignatureDetailsDialog()));
 }
 
 QString DlgViewZfo::messageDescriptionHtml(int attachmentCount,

@@ -21,10 +21,8 @@
  * the two.
  */
 
-
 #ifndef _COMMON_H_
 #define _COMMON_H_
-
 
 #include <QLocale>
 #include <QSettings>
@@ -39,7 +37,6 @@
 #define ICON_3PARTY_PATH ":/icons/3party/"
 
 #define ID_ISDS_SYS_DATABOX "aaaaaaa"
-
 #define ISDS_PING_TIMEOUT_MS 10000
 #define ISDS_CONNECT_TIMEOUT_MS 10000 /* libisds connection time-out. */
 #define ISDS_DOWNLOAD_TIMEOUT_MS 300000
@@ -109,7 +106,6 @@ enum MessageDirection {
 	MSG_SENT = 2
 };
 
-
 /*
  * Defined roles across the application.
  */
@@ -123,7 +119,6 @@ enum MessageDirection {
                                                    * to boolean values which
                                                    * are displayed as icons.
                                                    */
-
 
 #define strongAccountInfoLine(title, value) \
 	(QString("<div><strong>") + (title) + ": </strong>" + (value) + \
@@ -149,7 +144,6 @@ enum MessageDirection {
 
 #define messageTableInfoEndPdf() (QString("</table>"))
 
-
 /*!
  * @brief Date/time format used in the application.
  */
@@ -163,120 +157,192 @@ extern
 QLocale programLocale;
 
 /*!
- * @brief Translates message type to text.
+ * @brief Adds attachment into email.
+ *
+ * @param[in,out] message Message body.
+ * @param[in] attachName  Attachment file name.
+ * @param[in] base64      Attagment content in Base64.
+ * @param[in] boundary    Boundary string.
  */
-const QString dmTypeToText(const QString &dmType);
-
+void addAttachmentToEmailMessage(QString &message, const QString &attachName,
+    const QByteArray &base64, const QString &boundary);
 
 /*!
  * @brief Translates author type to text.
+ *
+ * @param[in] authorType Author type string.
+ * @return Author type description.
  */
 const QString authorTypeToText(const QString &authorType);
 
-
-/*!
- * @brief Returns message status description.
- */
-const QString msgStatusToText(int status);
-
-
-/*!
- * @brief Return dec index from hex.
- */
-int convertHexToDecIndex(int value);
-
-/*!
- * @brief Return hash algorithm as string
- */
-QString convertHashAlg(int value);
-
- /*!
- * @brief Return hash algorithm as int
- */
-int convertHashAlg2(QString value);
-
-/*!
- * @brief Return attachment type as string
- */
-QString convertAttachmentType(int value);
-
-/*!
- * @brief Convert type of author to string
- */
-QString convertSenderTypeToString(int value);
-
-/*!
- * @brief Convert type of databox to string
- */
-QString convertDbTypeToString(int value);
-
-/*!
- * Convert type of user to string
- */
-const QString & convertUserTypeToString(int value);
-
-/*!
- * @brief Convert type of databox to int
- */
-int convertDbTypeToInt(QString value);
-
-/*!
- * @brief Convert event type to string
- */
-QString convertEventTypeToString(int value);
-
-/*!
- * @brief Return privilegs as html string from number representation.
- */
-QString convertUserPrivilsToString(int userPrivils);
-
-/*!
- * @brief Return sender databox type as string from number representation.
- */
-QString convertSenderDbTypesToString(int value);
-
-/*!
- * @brief Convert state box to text
- */
-QString getdbStateText(int value);
-
-/*!
- * @brief Converts base64 encoded string into plain text.
- */
-QString fromBase64(const QString &base64);
-
-/*!
- * @brief Converts string into base64.
- */
-QString toBase64(const QString &plain);
-
 /*!
  * @brief Computes the size of real (decoded from base64) data.
+ *
+ * @param[in] b64 Data in Base64.
+ * @return Size of real data.
  */
 int base64RealSize(const QByteArray &b64);
 
 /*!
- * @brief Test if selected account is WebDatovka (MojeId) account.
+ * @brief Return attachment type as string.
+ *
+ * @param[in] value Attachment type value.
+ * @return Attachment type description.
  */
-bool isWebDatovkaAccount(const QString &userName);
+QString convertAttachmentType(int value);
+
+/*!
+ * @brief Convert type of databox to int.
+ *
+ * @param[in] value databox type string.
+ * @return databox int.
+ */
+int convertDbTypeToInt(QString value);
+
+/*!
+ * @brief Convert type of databox to string.
+ *
+ * @param[in] value databox type value.
+ * @return Databox type description.
+ */
+QString convertDbTypeToString(int value);
+
+/*!
+ * @brief Convert event type to string.
+ *
+ * @param[in] value event type value.
+ * @return Event description.
+ */
+QString convertEventTypeToString(int value);
+
+/*!
+ * @brief Return hash algorithm as string.
+ *
+ * @param[in] value Hash algorithm value.
+ * @return Hash algorithm type string.
+ */
+QString convertHashAlg(int value);
+
+ /*!
+ * @brief Return hash algorithm as int.
+ *
+ * @param[in] value Hash algorithm string.
+ * @return Hash algorithm type value.
+ */
+int convertHashAlg2(QString value);
+
+/*!
+ * @brief Return dec index from hex.
+ *
+ * @param[in] value Decadical value.
+ * @return Hexadecimal value.
+ */
+int convertHexToDecIndex(int value);
+
+/*!
+ * @brief Return sender databox type as string from number representation.
+ *
+ * @param[in] value Sender databox type value.
+ * @return Sender databox type description.
+ */
+QString convertSenderDbTypesToString(int value);
+
+/*!
+ * @brief Convert type of author to string.
+ *
+ * @param[in] value Author type value.
+ * @return Author type description.
+ */
+QString convertSenderTypeToString(int value);
+
+/*!
+ * @brief Return privilegs as html string from number representation.
+ *
+ * @param[in] userPrivils Privilegy value.
+ * @return Privilegy description.
+ */
+QString convertUserPrivilsToString(int userPrivils);
+
+/*!
+ * Convert type of user to string.
+ *
+ * @param[in] value user type value.
+ * @return User description.
+ */
+const QString & convertUserTypeToString(int value);
+
+/*!
+ * @brief Creates email header and message body.
+ *
+ * @param[in,out] message Message body.
+ * @param[in] subj        Subject string.
+ * @param[in] boundary    Boundary string.
+ */
+void createEmailMessage(QString &message, const QString &subj,
+    const QString &boundary);
+
+/*!
+ * @brief Translates message type to text.
+ *
+ * @param[in] dmType Message type value.
+ * @return Message type description.
+ */
+const QString dmTypeToText(const QString &dmType);
+
+/*!
+ * @brief Adds last line into email.
+ *
+ * @param[in,out] message Message body.
+ * @param[in] boundary    Boundary string.
+ */
+void finishEmailMessage(QString &message, const QString &boundary);
+
+/*!
+ * @brief Converts base64 encoded string into plain text.
+ *
+ * @param[in] base64 String in Base64.
+ * @return Decoded string.
+ */
+QString fromBase64(const QString &base64);
+
+/*!
+ * @brief Convert state box to text
+ *
+ * @param[in] value databox status value.
+ * @return Databox status string.
+ */
+QString getdbStateText(int value);
 
 /*!
  * @brief Get/create WebDatovka (MojeId) username.
+ *
+ * @param[in] userId    Wedatovka user ID.
+ * @param[in] accountId Wedatovka account ID.
+ * @return Username of account.
  */
 QString getWebDatovkaUsername(const QString &userId, const QString &accountId);
 
 /*!
  * Get account id from username of WebDatovka account.
+ *
+ * @param[in] userName Account user name.
+ * @return Account id of webdatovka account.
  */
 int getWebDatovkaAccountId(const QString &userName);
 
 /*!
  * Get user id from username of WebDatovka account.
+ *
+ * @param[in] userName Account user name.
+ * @return user id of webdatovka account.
  */
 int getWebDatovkaUserId(const QString &userName);
 
 /*!
  * Get name prefix of tag database from username (WebDatovka).
+ *
+ * @param[in] userName  Account user name.
+ * @return tag database prefix of webdatovka account.
  */
 QString getWebDatovkaTagDbPrefix(const QString &userName);
 
@@ -292,5 +358,29 @@ QString getWebDatovkaTagDbPrefix(const QString &userName);
  */
 bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
     QString &dbYear, bool &dbTestingFlag, QString &errMsg);
+
+/*!
+ * @brief Test if selected account is WebDatovka (MojeId) account.
+ *
+ * @param[in] userName  Account user name.
+ * @return true if account is webdatovka account.
+ */
+bool isWebDatovkaAccount(const QString &userName);
+
+/*!
+ * @brief Returns message status description.
+ *
+ * @param[in] status Message status value.
+ * @return message status description.
+ */
+const QString msgStatusToText(int status);
+
+/*!
+ * @brief Converts string to base64.
+ *
+ * @param[in] plain Plain input string.
+ * @return text string in Base64.
+ */
+QString toBase64(const QString &plain);
 
 #endif /* _COMMON_H_ */

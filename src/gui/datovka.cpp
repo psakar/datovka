@@ -32,8 +32,6 @@
 #include <QInputDialog>
 #include <QMenu>
 #include <QMessageBox>
-#include <QMimeDatabase>
-#include <QMimeType>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QPrinter>
@@ -253,9 +251,13 @@ enum MessageDirection messageDirection(const QModelIndex &acntIdx,
 	return ret;
 }
 
-/* ========================================================================= */
+MainWindow::~MainWindow(void)
+{
+	saveSettings();
+	delete ui;
+}
+
 MainWindow::MainWindow(QWidget *parent)
-/* ========================================================================= */
     : QMainWindow(parent),
     m_accountModel(this),
     m_messageListProxyModel(this),
@@ -463,13 +465,7 @@ MainWindow::MainWindow(QWidget *parent)
 	    + acntStrg + "   ");
 }
 
-
-/* ========================================================================= */
-/*
- * Do actions after main window initialization.
- */
 void MainWindow::setWindowsAfterInit(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -478,7 +474,7 @@ void MainWindow::setWindowsAfterInit(void)
 	}
 
 	if (ui->accountList->model()->rowCount() <= 0) {
-		addNewAccount();
+		showAddNewAccountDialog();
 	} else {
 		if (globPref.download_at_start &&
 		    ui->actionSync_all_accounts->isEnabled()) {
@@ -497,13 +493,7 @@ void MainWindow::setWindowsAfterInit(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Sent and check a new version of Datovka
- */
 void MainWindow::checkNewDatovkaVersion(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -523,13 +513,7 @@ void MainWindow::checkNewDatovkaVersion(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Version response slot
- */
 void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -617,23 +601,7 @@ void MainWindow::updateStatusBarText(const QString &text)
 	showStatusTextPermanently(text);
 }
 
-/* ========================================================================= */
-MainWindow::~MainWindow(void)
-/* ========================================================================= */
-{
-	/* Save settings on exit. */
-	saveSettings();
-
-	delete ui;
-}
-
-
-/* ========================================================================= */
-/*
- * Shows the application preferences dialog.
- */
-void MainWindow::applicationPreferences(void)
-/* ========================================================================= */
+void MainWindow::showPreferencesDialog(void)
 {
 	debugSlotCall();
 
@@ -656,13 +624,7 @@ void MainWindow::applicationPreferences(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Proxy settings dialogue.
- */
-void MainWindow::proxySettings(void)
-/* ========================================================================= */
+void MainWindow::showProxySettingsDialog(void)
 {
 	debugSlotCall();
 
@@ -673,7 +635,6 @@ void MainWindow::proxySettings(void)
 	}
 	dlgProxy->deleteLater();
 }
-
 
 /* ========================================================================= */
 /*
@@ -1479,14 +1440,7 @@ void MainWindow::messageItemStoreSelection(qint64 msgId)
 	}
 }
 
-
-
-/* ========================================================================= */
-/*
- * Saves account export paths.
- */
 void MainWindow::storeExportPath(const QString &userName)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -1499,8 +1453,6 @@ void MainWindow::storeExportPath(const QString &userName)
 	accountInfo.setLastZFOExportPath(m_on_export_zfo_activate);
 	saveSettings();
 }
-
-
 
 /* ========================================================================= */
 /*
@@ -2152,7 +2104,6 @@ void MainWindow::collectDownloadMessageMojeId(const QString &usrName,
 		}
 	}
 }
-
 
 void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
     int direction, int result, const QString &errDesc,
@@ -4014,8 +3965,6 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 	return dbSet;
 }
 
-
-
 /* ========================================================================= */
 /*
  * Get storage paths to selected account item.
@@ -4042,7 +3991,6 @@ void MainWindow::setAccountStoragePaths(const QString &userName)
 		m_on_export_zfo_activate = itemSettings.lastZFOExportPath();
 	}
 }
-
 
 /* ========================================================================= */
 /*
@@ -4175,7 +4123,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(synchroniseAllAccounts()));
 	    /* Separator. */
 	connect(ui->actionAdd_account, SIGNAL(triggered()),
-	    this, SLOT(addNewAccount()));
+	    this, SLOT(showAddNewAccountDialog()));
 	connect(ui->actionAdd_mojeID_account, SIGNAL(triggered()),
 	    this, SLOT(addNewMojeIDAccount()));
 	connect(ui->actionDelete_account, SIGNAL(triggered()),
@@ -4185,10 +4133,10 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(showImportDatabaseDialog()));
 	    /* Separator. */
 	connect(ui->actionProxy_settings, SIGNAL(triggered()),
-	    this, SLOT(proxySettings()));
+	    this, SLOT(showProxySettingsDialog()));
 	   /* Separator. */
 	connect(ui->actionPreferences, SIGNAL(triggered()),
-	    this, SLOT(applicationPreferences()));
+	    this, SLOT(showPreferencesDialog()));
 	/* actionQuit -- connected in ui file. */
 
 	/* Data box menu. */
@@ -4238,7 +4186,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(createAndSendMessageFromTmpl()));
 	    /* Separator. */
 	connect(ui->actionSignature_detail, SIGNAL(triggered()),
-	    this, SLOT(showSignatureDetails()));
+	    this, SLOT(showSignatureDetailsDialog()));
 	connect(ui->actionAuthenticate_message, SIGNAL(triggered()),
 	    this, SLOT(verifySelectedMessage()));
 	    /* Separator. */
@@ -4280,25 +4228,25 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionAuthenticate_message_file, SIGNAL(triggered()),
 	    this, SLOT(authenticateMessageFile()));
 	connect(ui->actionView_message_from_ZPO_file, SIGNAL(triggered()),
-	    this, SLOT(viewMessageFromZFO()));
+	    this, SLOT(showViewMessageFromZFODialog()));
 	connect(ui->actionExport_correspondence_overview, SIGNAL(triggered()),
-	    this, SLOT(exportCorrespondenceOverview()));
+	    this, SLOT(showExportCorrespondenceOverviewDialog()));
 	connect(ui->actionCheck_message_timestamp_expiration, SIGNAL(triggered()),
 	    this, SLOT(showMsgTmstmpExpirDialog()));
 	    /* Separator. */
 	connect(ui->actionMsgAdvancedSearch, SIGNAL(triggered()),
-	    this, SLOT(showMsgAdvancedSearchDlg()));
+	    this, SLOT(showMsgAdvancedSearchDialog()));
 	    /* Separator. */
 	connect(ui->actionTag_settings, SIGNAL(triggered()),
-	    this, SLOT(showTagDlg()));
+	    this, SLOT(showTagDialog()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()),
-	    this, SLOT(aboutApplication()));
+	    this, SLOT(showAboutApplicationDialog()));
 	connect(ui->actionHomepage, SIGNAL(triggered()),
 	    this, SLOT(goHome()));
 	connect(ui->actionHelp, SIGNAL(triggered()),
-	    this, SLOT(showHelp()));
+	    this, SLOT(showAppHelpInTheBrowser()));
 
 	/* Actions that are not shown in the top menu. */
 	connect(ui->actionEmail_selected_attachments, SIGNAL(triggered()),
@@ -4805,53 +4753,31 @@ void MainWindow::saveSettings(void) const
 	confFileRemovePwdQuotes(globPref.saveConfPath());
 }
 
-
-/* ========================================================================= */
-/*
- * Create new message from selected account.
- */
 void MainWindow::createAndSendMessage(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
-	openSendMessageDialog(DlgSendMessage::ACT_NEW);
+	showSendMessageDialog(DlgSendMessage::ACT_NEW);
 }
 
-
-/* ========================================================================= */
-/*
- * Create reply from selected message.
- */
 void MainWindow::createAndSendMessageReply(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
-	openSendMessageDialog(DlgSendMessage::ACT_REPLY);
+	showSendMessageDialog(DlgSendMessage::ACT_REPLY);
 }
 
 void MainWindow::createAndSendMessageWithZfos(void)
 {
 	debugSlotCall();
-	openSendMessageDialog(DlgSendMessage::ACT_FORWARD);
+	showSendMessageDialog(DlgSendMessage::ACT_FORWARD);
 }
 
-/* ========================================================================= */
-/*
- * Create message from template (selected message).
- */
 void MainWindow::createAndSendMessageFromTmpl(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
-	openSendMessageDialog(DlgSendMessage::ACT_NEW_FROM_TMP);
+	showSendMessageDialog(DlgSendMessage::ACT_NEW_FROM_TMP);
 }
 
-/* ========================================================================= */
-/*
- * Open send message dialog and send message.
- */
-void MainWindow::openSendMessageDialog(int action)
-/* ========================================================================= */
+void MainWindow::showSendMessageDialog(int action)
 {
 	debugFuncCall();
 
@@ -4937,14 +4863,8 @@ void MainWindow::openSendMessageDialog(int action)
 	sendMsgDialog->show();
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: Store last add attachment path.
- */
 void MainWindow::storeAttachmentPath(const QString &userName,
     const QString &lastDir)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -4956,13 +4876,7 @@ void MainWindow::storeAttachmentPath(const QString &userName,
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Add account action and dialog.
- */
-void MainWindow::addNewAccount(void)
-/* ========================================================================= */
+void MainWindow::showAddNewAccountDialog(void)
 {
 	debugSlotCall();
 
@@ -5403,19 +5317,11 @@ void MainWindow::findDatabox(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Clear message filter text
- */
 void MainWindow::clearFilterField(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
-
 	mui_filterLine->clear();
 }
-
 
 /* ========================================================================= */
 /*
@@ -5787,28 +5693,13 @@ void MainWindow::refreshAccountList(const QString &userName)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * About application dialog.
- */
-void MainWindow::aboutApplication(void)
-/* ========================================================================= */
+void MainWindow::showAboutApplicationDialog(void)
 {
-	debugSlotCall();
-
 	QDialog *da = new DlgAbout(this);
 	da->exec();
 	da->deleteLater();
 }
-
-
-/* ========================================================================= */
-/*
- * Show import database directory dialog.
- */
 void MainWindow::showImportDatabaseDialog(void)
-/* ========================================================================= */
 {
 	QDialog *prepareCreateAccount = new CreateAccountFromDbDialog(this);
 	connect(prepareCreateAccount,
@@ -5818,13 +5709,7 @@ void MainWindow::showImportDatabaseDialog(void)
 	prepareCreateAccount->deleteLater();
 }
 
-
-/* ========================================================================= */
-/*
- * Prepare import database directory.
- */
 void MainWindow::prepareCreateAccountFromDatabaseFile(bool fromDirectory)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -6193,13 +6078,7 @@ void MainWindow::verifySelectedMessage(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * View message from file dialog.
- */
-void MainWindow::viewMessageFromZFO(void)
-/* ========================================================================= */
+void MainWindow::showViewMessageFromZFODialog(void)
 {
 	debugSlotCall();
 
@@ -6220,13 +6099,7 @@ void MainWindow::viewMessageFromZFO(void)
 	dlgViewZfo->deleteLater();
 }
 
-
-/* ========================================================================= */
-/*
- * Export correspondence overview dialog.
- */
-void MainWindow::exportCorrespondenceOverview(void)
-/* ========================================================================= */
+void MainWindow::showExportCorrespondenceOverviewDialog(void)
 {
 	debugSlotCall();
 
@@ -6407,31 +6280,16 @@ void MainWindow::showImportZFOActionDialog(void)
 	clearProgressBar();
 }
 
-
-/* ========================================================================= */
-/*
- * Show help/manual in a internet browser.
- */
-void MainWindow::showHelp(void)
-/* ========================================================================= */
+void MainWindow::showAppHelpInTheBrowser(void)
 {
-	debugSlotCall();
-
 	QDesktopServices::openUrl(QUrl(DATOVKA_ONLINE_HELP_URL,
 	    QUrl::TolerantMode));
 }
 
-
-/* ========================================================================= */
-/*
- * Go to homepage.
- */
 void MainWindow::goHome(void)
-/* ========================================================================= */
 {
-	debugSlotCall();
-
-	QDesktopServices::openUrl(QUrl(DATOVKA_HOMEPAGE_URL, QUrl::TolerantMode));
+	QDesktopServices::openUrl(QUrl(DATOVKA_HOMEPAGE_URL,
+	    QUrl::TolerantMode));
 }
 
 void MainWindow::viewSelectedMessageViaFilter(QObject *mwPtr)
@@ -6561,79 +6419,6 @@ bool MainWindow::messageMissingOfferDownload(MessageDb::MsgId &msgId,
 		    arg(msgId.dmId));
 		return false;
 	}
-}
-
-
-/*!
- * @brief Creates email header and message body.
- */
-static
-void createEmailMessage(QString &message, const QString &subj,
-    const QString &boundary)
-{
-	message.clear();
-
-	const QString newLine("\n"); /* "\r\n" ? */
-
-	/* Rudimentary header. */
-	message += "Subject: " + subj + newLine;
-	message += "MIME-Version: 1.0" + newLine;
-	message += "Content-Type: multipart/mixed;" + newLine +
-	    " boundary=\"" + boundary + "\"" + newLine;
-
-	/* Body. */
-	message += newLine;
-	message += "--" + boundary + newLine;
-	message += "Content-Type: text/plain; charset=UTF-8" + newLine;
-	message += "Content-Transfer-Encoding: 8bit" + newLine;
-
-//	message += newLine + newLine + newLine + newLine;
-	message += newLine;
-	message += "-- " + newLine; /* Must contain the space. */
-	message += " " + QObject::tr("Created using Datovka") + " " VERSION "." + newLine;
-	message += " <URL: " DATOVKA_HOMEPAGE_URL ">" + newLine;
-}
-
-/*!
- * @brief Adds attachment into email.
- */
-static
-void addAttachmentToEmailMessage(QString &message, const QString &attachName,
-    const QByteArray &base64, const QString &boundary)
-{
-	const QString newLine("\n"); /* "\r\n" ? */
-
-	QMimeDatabase mimeDb;
-
-	QMimeType mimeType(
-	    mimeDb.mimeTypeForData(QByteArray::fromBase64(base64)));
-
-	message += newLine;
-	message += "--" + boundary + newLine;
-	message += "Content-Type: " + mimeType.name() + "; charset=UTF-8;" + newLine +
-	    " name=\"" + attachName +  "\"" + newLine;
-	message += "Content-Transfer-Encoding: base64" + newLine;
-	message += "Content-Disposition: attachment;" + newLine +
-	    " filename=\"" + attachName + "\"" + newLine;
-
-	for (int i = 0; i < base64.size(); ++i) {
-		if ((i % 60) == 0) {
-			message += newLine;
-		}
-		message += base64.at(i);
-	}
-	message += newLine;
-}
-
-/*!
- * @brief Adds last line into email.
- */
-static
-void finishEmailMessage(QString &message, const QString &boundary)
-{
-	const QString newLine("\n"); /* "\r\n" ? */
-
-	message += newLine + "--" + boundary + "--" + newLine;
 }
 
 void MainWindow::exportSelectedMessagesAsZFO(void)
@@ -7114,23 +6899,11 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * View signature details.
- */
-void MainWindow::showSignatureDetails(void)
-/* ========================================================================= */
+void MainWindow::showSignatureDetailsDialog(void)
 {
 	debugSlotCall();
 
-	/* First column. */
-	QModelIndexList firstMsgColumnIdxs(currentFrstColMessageIndexes());
-	if (1 != firstMsgColumnIdxs.size()) {
-		return;
-	}
-
-	const MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
+	const MessageDb::MsgId msgId(msgMsgId(currentSingleMessageIndex()));
 	if (msgId.dmId < 0) {
 		Q_ASSERT(0);
 		return;
@@ -7796,13 +7569,7 @@ void MainWindow::messageItemsSetProcessStatus(
 	updateExistingAccountModelUnread(currentAccountModelIndex());
 }
 
-
-/* ========================================================================= */
-/*
- * Show advanced message search dialogue.
- */
-void MainWindow::showMsgAdvancedSearchDlg(void)
-/* ========================================================================= */
+void MainWindow::showMsgAdvancedSearchDialog(void)
 {
 	debugSlotCall();
 
@@ -7869,21 +7636,11 @@ void MainWindow::showMsgAdvancedSearchDlg(void)
 	m_searchDlgActive = true;
 }
 
-
-/* ========================================================================= */
-/*
- * On message dialogue exit.
- */
 void MainWindow::msgAdvancedDlgFinished(int result)
-/* ========================================================================= */
 {
 	Q_UNUSED(result);
-
-	debugSlotCall();
-
 	m_searchDlgActive = false;
 }
-
 
 /* ========================================================================= */
 /*
@@ -8332,7 +8089,6 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 }
 
 void MainWindow::splitMsgDbByYearsSlot(void)
-
 {
 	debugSlotCall();
 
@@ -8718,19 +8474,12 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionEmail_selected_attachments->isEnabled();
 }
 
-/* ========================================================================= */
-/*
- * Slot: Show tags manager dialog for tags settings.
- */
-void MainWindow::showTagDlg(void)
-/* ========================================================================= */
- {
+void MainWindow::showTagDialog(void)
+{
 	debugSlotCall();
-
 	modifyTags(m_accountModel.userName(currentAccountModelIndex()),
 	    QList<qint64>(), QList<qint64>());
 }
-
 
 /* ========================================================================= */
 /*
@@ -8775,13 +8524,7 @@ void MainWindow::addOrDeleteMsgTags(void)
 	modifyTags(userName, msgIdList, msgIdWebDatovkaList);
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: Vacuum message database.
- */
 void MainWindow::vacuumMsgDbSlot(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
 

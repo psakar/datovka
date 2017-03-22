@@ -480,12 +480,12 @@ private slots:
 	/*!
 	 * @brief Shows the application preferences dialog.
 	 */
-	void applicationPreferences(void);
+	void showPreferencesDialog(void);
 
 	/*!
-	 * @brief Add account action and dialog.
+	 * @brief Show add new account dialog.
 	 */
-	void addNewAccount(void);
+	void showAddNewAccountDialog(void);
 
 	/*!
 	 * @brief Add mojeID account action and dialog.
@@ -520,7 +520,7 @@ private slots:
 	/*!
 	 * @brief Proxy settings dialogue.
 	 */
-	void proxySettings(void);
+	void showProxySettingsDialog(void);
 
 	/*!
 	 * @brief Move selected account up.
@@ -540,7 +540,7 @@ private slots:
 	/*!
 	 * @brief View signature details.
 	 */
-	void showSignatureDetails(void);
+	void showSignatureDetailsDialog(void);
 
 	/*!
 	 * @brief Export selected message into ZFO files.
@@ -606,12 +606,12 @@ private slots:
 	/*!
 	 * @brief View message from file dialog.
 	 */
-	void viewMessageFromZFO(void);
+	void showViewMessageFromZFODialog(void);
 
 	/*!
 	 * @brief Export correspondence overview dialog.
 	 */
-	void exportCorrespondenceOverview(void);
+	void showExportCorrespondenceOverviewDialog(void);
 
 	/*!
 	 * @brief Show dialog with settings of import ZFO file(s) into database.
@@ -621,12 +621,12 @@ private slots:
 	/*!
 	 * @brief About application dialog.
 	 */
-	void aboutApplication(void);
+	void showAboutApplicationDialog(void);
 
 	/*!
 	 * @brief Show help/manual in a internet browser.
 	 */
-	void showHelp(void);
+	void showAppHelpInTheBrowser(void);
 
 	/*!
 	 * @brief Go to homepage.
@@ -693,7 +693,7 @@ private slots:
 	/*!
 	 * @brief Show advanced message search dialogue.
 	 */
-	void showMsgAdvancedSearchDlg(void);
+	void showMsgAdvancedSearchDialog(void);
 
 	/*!
 	 * @brief On message dialogue exit.
@@ -724,7 +724,7 @@ private slots:
 	/*!
 	 * @brief Show tags manager dialog for tags settings.
 	 */
-	void showTagDlg(void);
+	void showTagDialog(void);
 
 	/*!
 	 * @brief Add/delete tags to/from selected messages.
@@ -897,9 +897,11 @@ private:
 	void setAttachmentActionVisibility(int numSelected) const;
 
 	/*!
-	 * @brief Open send message dialog and send message.
+	 * @brief Show send message dialog and send message(s).
+	 *
+	 * @param[in] action Defines send action (new,reply,forward,template).
 	 */
-	void openSendMessageDialog(int action);
+	void showSendMessageDialog(int action);
 
 	/*!
 	 * @brief Active/Inactive account menu and buttons in the mainwindow.
