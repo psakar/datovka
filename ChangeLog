@@ -1,4 +1,4 @@
-4.8.0 /
+4.8.0 / 2017-03-28
  * Added full-text data box search which is now the default method to search
    for data boxes.
  * Fixed problems with placing the main application window when starting the
