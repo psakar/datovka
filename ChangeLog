@@ -1,3 +1,11 @@
+4.8.0 /
+ * Added full-text data box search which is now the default method to search
+   for data boxes.
+ * Fixed problems with placing the main application window when starting the
+   application on a smaller screen than it has been closed before.
+ * Refactoring of code related to message imports and exports.
+ * Reduced the amount of code in main application window.
+
 4.7.1 / 2017-01-19
  * User is notified about existent files when storing all attachments.
  * Added forward message action.
