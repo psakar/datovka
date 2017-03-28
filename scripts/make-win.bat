@@ -119,7 +119,7 @@ copy "release\datovka-portable.exe" %DATOVKAPORTPATH%
 copy "AUTHORS" %DATOVKAPORTPATH%
 copy "COPYING" %DATOVKAPORTPATH%
 copy "Changelog" %DATOVKAPORTPATH%
-copy "scripts\datovka-log.bat" %DATOVKAPORTPATH%
+copy "scripts\datovka-portable-log.bat" %DATOVKAPORTPATH%
 xcopy "dlls\*" %DATOVKAPORTPATH% /E
 copy "locale\datovka_cs.qm" "%DATOVKAPORTPATH%\locale"
 @echo Run 7-ZIP and create ZIP archive of portable Datovka ...
