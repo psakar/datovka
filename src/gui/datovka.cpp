@@ -4016,7 +4016,6 @@ bool MainWindow::ensureConfPresence(void)
 }
 
 
-#define SH_OFFS 50 /* Menu bar + top tool-bar. */
 /* ========================================================================= */
 /*
  * Sets geometry from settings.
@@ -4444,8 +4443,6 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 
 	settings.endGroup();
 }
-#undef SH_OFFS
-
 
 /* ========================================================================= */
 /*
