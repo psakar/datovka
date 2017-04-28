@@ -4047,15 +4047,18 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 		m_geometry = QRect(x, y, w, h);
 		this->showMaximized();
 	}
+	this->adjustSize();
 
 	/* Splitter geometry. */
 
 	// set mainspliter - hSplitterAccount
+	w = ui->centralWidgetWindows->width();
 	QList<int> sizes = ui->hSplitterAccount->sizes();
 	int tmp = settings.value("panes/hpaned1", 226).toInt();
 	sizes[0] = tmp;
-	sizes[1] = w - sizes[0];;
+	sizes[1] = w - ui->hSplitterAccount->handleWidth() - sizes[0];
 	ui->hSplitterAccount->setSizes(sizes);
+	ui->hSplitterAccount->adjustSize();
 
 	// set messagelistspliter - vSplitterMessage
 	sizes = ui->vSplitterMessage->sizes();
