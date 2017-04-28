@@ -4056,7 +4056,9 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	QList<int> sizes = ui->hSplitterAccount->sizes();
 	int tmp = settings.value("panes/hpaned1", 226).toInt();
 	sizes[0] = tmp;
-	sizes[1] = w - ui->hSplitterAccount->handleWidth() - sizes[0];
+	sizes[1] = w
+	    - ui->hSplitterAccount->handleWidth()
+	    - sizes[0];
 	ui->hSplitterAccount->setSizes(sizes);
 	ui->hSplitterAccount->adjustSize();
 
@@ -4069,7 +4071,11 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	// set message/mesageinfospliter - hSplitterMessageInfo
 	sizes = ui->hSplitterMessageInfo->sizes();
 	sizes[0] = settings.value("panes/message_display_pane", 505).toInt();
-	sizes[1] = w - tmp - sizes[0];
+	sizes[1] = w
+	    - tmp
+	    - ui->hSplitterAccount->handleWidth()
+	    - ui->hSplitterMessageInfo->handleWidth()
+	    - sizes[0];
 	ui->hSplitterMessageInfo->setSizes(sizes);
 }
 
