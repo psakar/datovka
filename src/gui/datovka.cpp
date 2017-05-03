@@ -4036,6 +4036,10 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	int h = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_H,
 	    defaultDimensions.height()).toInt();
 	this->setGeometry(x, y, w, h);
+	this->adjustSize();
+	/* Update the window and force repaint. */
+	this->update();
+	this->repaint();
 
 	/* Adjust for screen size. */
 	this->setGeometry(Dimensions::windowOnScreenDimensions(this));
@@ -4045,8 +4049,16 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	if (max) {
 		m_geometry = QRect(x, y, w, h);
 		this->showMaximized();
+		this->update();
+		this->repaint();
 	}
-	this->adjustSize();
+
+	/*
+	 * It appears that repaint does not immediately call the event.
+	 * Therefore the event loop is enforced to process pending events.
+	 */
+	QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents |
+	    QEventLoop::ExcludeSocketNotifiers);
 
 	/* Splitter geometry. */
 
