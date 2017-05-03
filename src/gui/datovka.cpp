@@ -4074,13 +4074,11 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	ui->hSplitterAccount->adjustSize();
 
 	// set messagelistspliter - vSplitterMessage
+	h = ui->centralWidgetWindows->height();
 	sizes = ui->vSplitterMessage->sizes();
 	sizes[0] = settings.value("panes/message_pane", 265).toInt();
 	sizes[1] = h -
 	    ui->vSplitterMessage->handleWidth()
-	    - ui->menubar->height()
-	    - ui->toolBar->height()
-	    - ui->statusBar->height()
 	    - sizes[0];
 	ui->vSplitterMessage->setSizes(sizes);
 
