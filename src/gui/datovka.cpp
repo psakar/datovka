@@ -4060,6 +4060,15 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents |
 	    QEventLoop::ExcludeSocketNotifiers);
 
+	/* Set minimal size of splitter content and disable collapsing. */
+	ui->accountList->setMinimumSize(QSize(100, 100));
+	ui->hSplitterAccount->setChildrenCollapsible(false);
+	ui->messageList->setMinimumSize(QSize(100, 100));
+	ui->vSplitterMessage->setChildrenCollapsible(false);
+	ui->messageInfo->setMinimumSize(QSize(100, 100));
+	ui->messageAttachmentList->setMinimumSize(QSize(100, 100));
+	ui->hSplitterMessageInfo->setChildrenCollapsible(false);
+
 	/* Splitter geometry. */
 
 	// set mainspliter - hSplitterAccount
