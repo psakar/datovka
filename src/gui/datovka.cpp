@@ -4035,8 +4035,23 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	    defaultDimensions.width()).toInt();
 	int h = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_H,
 	    defaultDimensions.height()).toInt();
+
+	bool max = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_MAX,
+	    false).toBool();
+
 	this->setGeometry(x, y, w, h);
-	this->adjustSize();
+	if (!max) {
+		/*
+		 * adjustSize() causes problems in Cinnamon WM in maximised
+		 * mode. That's why its called only when not maximised.
+		 */
+		this->adjustSize();
+		/*
+		 * adjustSize() shrinks the window in Cinnamon WM. Therefore,
+		 * set window geometry again.
+		 */
+		this->setGeometry(x, y, w, h);
+	}
 	/* Update the window and force repaint. */
 	this->update();
 	this->repaint();
@@ -4044,8 +4059,6 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	/* Adjust for screen size. */
 	this->setGeometry(Dimensions::windowOnScreenDimensions(this));
 
-	bool max = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_MAX,
-	    false).toBool();
 	if (max) {
 		m_geometry = QRect(x, y, w, h);
 		this->showMaximized();
