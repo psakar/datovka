@@ -4016,7 +4016,6 @@ bool MainWindow::ensureConfPresence(void)
 }
 
 
-#define SH_OFFS 50 /* Menu bar + top tool-bar. */
 /* ========================================================================= */
 /*
  * Sets geometry from settings.
@@ -4036,37 +4035,83 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	    defaultDimensions.width()).toInt();
 	int h = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_H,
 	    defaultDimensions.height()).toInt();
+
+	bool max = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_MAX,
+	    false).toBool();
+
 	this->setGeometry(x, y, w, h);
+	if (!max) {
+		/*
+		 * adjustSize() causes problems in Cinnamon WM in maximised
+		 * mode. That's why its called only when not maximised.
+		 */
+		this->adjustSize();
+		/*
+		 * adjustSize() shrinks the window in Cinnamon WM. Therefore,
+		 * set window geometry again.
+		 */
+		this->setGeometry(x, y, w, h);
+	}
+	/* Update the window and force repaint. */
+	this->update();
+	this->repaint();
 
 	/* Adjust for screen size. */
 	this->setGeometry(Dimensions::windowOnScreenDimensions(this));
 
-	bool max = settings.value(WIN_POSITION_HEADER "/" WIN_POSITION_MAX,
-	    false).toBool();
 	if (max) {
 		m_geometry = QRect(x, y, w, h);
 		this->showMaximized();
+		this->update();
+		this->repaint();
 	}
+
+	/*
+	 * It appears that repaint does not immediately call the event.
+	 * Therefore the event loop is enforced to process pending events.
+	 */
+	QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents |
+	    QEventLoop::ExcludeSocketNotifiers);
+
+	/* Set minimal size of splitter content and disable collapsing. */
+	ui->accountList->setMinimumSize(QSize(100, 100));
+	ui->hSplitterAccount->setChildrenCollapsible(false);
+	ui->messageList->setMinimumSize(QSize(100, 100));
+	ui->vSplitterMessage->setChildrenCollapsible(false);
+	ui->messageInfo->setMinimumSize(QSize(100, 100));
+	ui->messageAttachmentList->setMinimumSize(QSize(100, 100));
+	ui->hSplitterMessageInfo->setChildrenCollapsible(false);
 
 	/* Splitter geometry. */
 
 	// set mainspliter - hSplitterAccount
+	w = ui->centralWidgetWindows->width();
 	QList<int> sizes = ui->hSplitterAccount->sizes();
 	int tmp = settings.value("panes/hpaned1", 226).toInt();
 	sizes[0] = tmp;
-	sizes[1] = w - sizes[0];;
+	sizes[1] = w
+	    - ui->hSplitterAccount->handleWidth()
+	    - sizes[0];
 	ui->hSplitterAccount->setSizes(sizes);
+	ui->hSplitterAccount->adjustSize();
 
 	// set messagelistspliter - vSplitterMessage
+	h = ui->centralWidgetWindows->height();
 	sizes = ui->vSplitterMessage->sizes();
 	sizes[0] = settings.value("panes/message_pane", 265).toInt();
-	sizes[1] = h - SH_OFFS - sizes[0];
+	sizes[1] = h -
+	    ui->vSplitterMessage->handleWidth()
+	    - sizes[0];
 	ui->vSplitterMessage->setSizes(sizes);
 
 	// set message/mesageinfospliter - hSplitterMessageInfo
 	sizes = ui->hSplitterMessageInfo->sizes();
 	sizes[0] = settings.value("panes/message_display_pane", 505).toInt();
-	sizes[1] = w - tmp - sizes[0];
+	sizes[1] = w
+	    - tmp
+	    - ui->hSplitterAccount->handleWidth()
+	    - ui->hSplitterMessageInfo->handleWidth()
+	    - sizes[0];
 	ui->hSplitterMessageInfo->setSizes(sizes);
 }
 
@@ -4430,8 +4475,6 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 
 	settings.endGroup();
 }
-#undef SH_OFFS
-
 
 /* ========================================================================= */
 /*
