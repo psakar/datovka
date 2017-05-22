@@ -274,6 +274,7 @@ void DlgTags::handleSelectionChanged(void)
 void DlgTags::fillTagsToListView(void)
 {
 	TagItemList tagList(m_tagDbPtr->getAllTags());
+	tagList.sortNames();
 
 	m_tagsModel->setTagList(tagList);
 }
