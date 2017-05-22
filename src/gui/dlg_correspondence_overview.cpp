@@ -21,7 +21,7 @@
  * the two.
  */
 
-
+#include <QDebug>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QPrinter>

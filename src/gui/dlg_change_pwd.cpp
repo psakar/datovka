@@ -105,9 +105,9 @@ void DlgChangePwd::pingIsdsServer(void)
 /* ========================================================================= */
 {
 	if (globIsdsSessions.isConnectedToIsds(m_userName)) {
-		qDebug() << "Connection to ISDS is alive :)";
+		qDebug("%s", "Connection to ISDS is alive :)");
 	} else {
-		qDebug() << "Connection to ISDS is dead :(";
+		qDebug("%s", "Connection to ISDS is dead :(");
 	}
 }
 

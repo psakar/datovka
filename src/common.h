@@ -24,11 +24,10 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+#include <QDir>
 #include <QLocale>
 #include <QSettings>
 #include <QString>
-#include <QDebug>
-#include <QDir>
 
 #define ICON_14x14_PATH ":/icons/14x14/"
 #define ICON_16x16_PATH ":/icons/16x16/"
