@@ -139,6 +139,12 @@ public:
 	 * @return Size of the element.
 	 */
 	QSize sizeHint(const QStyleOptionViewItem &option) const;
+
+	/*!
+	 * @brief Performs a locale-aware sorting of the tag list according to
+	 *     tag names.
+	 */
+	void sortNames(void);
 };
 
 Q_DECLARE_METATYPE(TagItem)
