@@ -24,6 +24,7 @@
 #ifndef _LOCALISATION_H_
 #define _LOCALISATION_H_
 
+#include <QCollator>
 #include <QLocale>
 #include <QString>
 
@@ -59,6 +60,8 @@ public:
 
 	static
 	QLocale programLocale; /*!< Global locale instance. */
+	static
+	QCollator stringCollator; /*!< Used for localised string collation. */
 
 	static
 	const QString langCs; /*!< Czech language code. */

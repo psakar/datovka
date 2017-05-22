@@ -24,6 +24,7 @@
 #include "src/localisation/localisation.h"
 
 QLocale Localisation::programLocale;
+QCollator Localisation::stringCollator;
 
 const QString Localisation::langCs(QStringLiteral("cs"));
 const QString Localisation::langEn(QStringLiteral("en"));
@@ -39,6 +40,8 @@ void Localisation::setProgramLocale(const QString &langCode)
 		/* Use system locale. */
 		programLocale = QLocale::system();
 	}
+
+	stringCollator.setLocale(programLocale);
 }
 
 QString Localisation::shortLangName(const QString &langCode)
