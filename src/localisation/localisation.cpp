@@ -21,38 +21,34 @@
  * the two.
  */
 
-#ifndef _DLG_PREFERENCES_H_
-#define _DLG_PREFERENCES_H_
+#include "src/localisation/localisation.h"
 
+QLocale Localisation::programLocale;
 
-#include <QDialog>
+const QString Localisation::langCs(QStringLiteral("cs"));
+const QString Localisation::langEn(QStringLiteral("en"));
+const QString Localisation::langSystem(QStringLiteral("system"));
 
-#include "src/common.h"
-#include "ui_dlg_preferences.h"
+void Localisation::setProgramLocale(const QString &langCode)
+{
+	if (langCode == langCs) {
+		programLocale = QLocale(QLocale::Czech, QLocale::CzechRepublic);
+	} else if (langCode == langEn) {
+		programLocale = QLocale(QLocale::English, QLocale::UnitedKingdom);
+	} else {
+		/* Use system locale. */
+		programLocale = QLocale::system();
+	}
+}
 
-
-class DlgPreferences : public QDialog, public Ui::Preferences {
-    Q_OBJECT
-
-public:
-	DlgPreferences(QWidget *parent = Q_NULLPTR);
-
-private slots:
-	void setActiveTimerSetup(int);
-	void setActiveCheckBox(int);
-	void saveChanges(void) const;
-	void setSavePath(void);
-	void setAddFilePath(void);
-
-private:
-	void initPrefDialog(void);
-
-	static
-	int getLangugeIndex(const QString &language);
-
-	static
-	const QString &getIndexFromLanguge(int index);
-};
-
-
-#endif /* _DLG_PREFERENCES_H_ */
+QString Localisation::shortLangName(const QString &langCode)
+{
+	if (langCode == langCs) {
+		return langCs;
+	} else if (langCode == langEn) {
+		return langEn;
+	} else {
+		/* Use system locale. */
+		return QLocale::system().name();
+	}
+}

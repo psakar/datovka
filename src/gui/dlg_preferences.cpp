@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,11 @@
 
 #include "src/dimensions/dimensions.h"
 #include "src/gui/dlg_preferences.h"
+#include "src/localisation/localisation.h"
 #include "src/settings/preferences.h"
 #include "ui_dlg_preferences.h"
 
-DlgPreferences::DlgPreferences(QWidget * parent)
+DlgPreferences::DlgPreferences(QWidget *parent)
     : QDialog(parent)
 {
 	setupUi(this);
@@ -172,9 +173,9 @@ void DlgPreferences::initPrefDialog(void)
 
 int DlgPreferences::getLangugeIndex(const QString &language)
 {
-	if (langCs == language) {
+	if (Localisation::langCs == language) {
 		return 1;
-	} else if (langEn == language) {
+	} else if (Localisation::langEn == language) {
 		return 2;
 	} else {
 		return 0;
@@ -182,25 +183,20 @@ int DlgPreferences::getLangugeIndex(const QString &language)
 }
 
 
-const QString & DlgPreferences::getIndexFromLanguge(int index)
+const QString &DlgPreferences::getIndexFromLanguge(int index)
 {
 	switch (index) {
 	case 1:
-		return langCs;
+		return Localisation::langCs;
 		break;
 	case 2:
-		return langEn;
+		return Localisation::langEn;
 		break;
 	default:
-		return langSystem;
+		return Localisation::langSystem;
 		break;
 	}
 }
-
-const QString DlgPreferences::langCs("cs");
-const QString DlgPreferences::langEn("en");
-const QString DlgPreferences::langSystem("system");
-
 
 void DlgPreferences::setActiveTimerSetup(int state)
 {

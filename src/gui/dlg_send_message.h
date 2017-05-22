@@ -32,7 +32,6 @@
 #include <QTimer>
 #include <QTreeView>
 
-#include "src/common.h"
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
 #include "src/models/data_box_contacts_model.h"

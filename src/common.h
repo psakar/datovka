@@ -25,7 +25,6 @@
 #define _COMMON_H_
 
 #include <QDir>
-#include <QLocale>
 #include <QSettings>
 #include <QString>
 
@@ -150,10 +149,6 @@ extern
 const QString dateTimeDisplayFormat;
 extern
 const QString dateDisplayFormat;
-
-/* Global locale instance. */
-extern
-QLocale programLocale;
 
 /*!
  * @brief Adds attachment into email.

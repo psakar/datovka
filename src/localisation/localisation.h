@@ -21,38 +21,51 @@
  * the two.
  */
 
-#ifndef _DLG_PREFERENCES_H_
-#define _DLG_PREFERENCES_H_
+#ifndef _LOCALISATION_H_
+#define _LOCALISATION_H_
 
+#include <QLocale>
+#include <QString>
 
-#include <QDialog>
-
-#include "src/common.h"
-#include "ui_dlg_preferences.h"
-
-
-class DlgPreferences : public QDialog, public Ui::Preferences {
-    Q_OBJECT
-
-public:
-	DlgPreferences(QWidget *parent = Q_NULLPTR);
-
-private slots:
-	void setActiveTimerSetup(int);
-	void setActiveCheckBox(int);
-	void saveChanges(void) const;
-	void setSavePath(void);
-	void setAddFilePath(void);
+/*!
+ * @brief Encapsulates localisation specific settings.
+ */
+class Localisation {
 
 private:
-	void initPrefDialog(void);
+	/*!
+	 * @Brief Private constructor.
+	 */
+	Localisation(void);
+
+public:
+	/*!
+	 * @brief Sets program locale according to supplied language code.
+	 *
+	 * @param[in] langCode Language code.
+	 */
+	static
+	void setProgramLocale(const QString &langCode);
+
+	/*!
+	 * @brief Returns short language code (eg. "cs", "en").
+	 *
+	 * @param[in] langCode Language code.
+	 * @return Short language ode or language code used by system if
+	 *     \a langCode is unknown.
+	 */
+	static
+	QString shortLangName(const QString &langCode);
 
 	static
-	int getLangugeIndex(const QString &language);
+	QLocale programLocale; /*!< Global locale instance. */
 
 	static
-	const QString &getIndexFromLanguge(int index);
+	const QString langCs; /*!< Czech language code. */
+	static
+	const QString langEn; /*!< English language code. */
+	static
+	const QString langSystem; /*!< System-set language. */
 };
 
-
-#endif /* _DLG_PREFERENCES_H_ */
+#endif /* _LOCALISATION_H_ */
