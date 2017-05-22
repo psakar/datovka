@@ -31,8 +31,6 @@
 const QString dateTimeDisplayFormat("dd.MM.yyyy HH:mm:ss");
 const QString dateDisplayFormat("dd.MM.yyyy");
 
-QLocale programLocale;
-
 void addAttachmentToEmailMessage(QString &message, const QString &attachName,
     const QByteArray &base64, const QString &boundary)
 {

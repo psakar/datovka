@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,6 +139,12 @@ public:
 	 * @return Size of the element.
 	 */
 	QSize sizeHint(const QStyleOptionViewItem &option) const;
+
+	/*!
+	 * @brief Performs a locale-aware sorting of the tag list according to
+	 *     tag names.
+	 */
+	void sortNames(void);
 };
 
 Q_DECLARE_METATYPE(TagItem)

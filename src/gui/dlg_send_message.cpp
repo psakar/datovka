@@ -40,6 +40,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/io/wd_sessions.h"
 #include "src/io/message_db.h"
+#include "src/localisation/localisation.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/views/attachment_table_view.h"
@@ -1188,7 +1189,7 @@ QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
 		return "0";
 	}
 
-	return programLocale.toString((float)credit / 100, 'f', 2);
+	return Localisation::programLocale.toString((float)credit / 100, 'f', 2);
 }
 
 bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,

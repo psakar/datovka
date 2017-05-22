@@ -24,6 +24,7 @@
 #include <QString>
 
 #include "src/delegates/tag_item.h"
+#include "src/localisation/localisation.h"
 #include "src/models/sort_filter_proxy_model.h"
 
 const QString SortFilterProxyModel::blankFilterEditStyle(
@@ -99,7 +100,7 @@ bool SortFilterProxyModel::lessThan(const QModelIndex &sourceLeft,
 		Q_ASSERT(rightData.canConvert<TagItem>());
 		TagItem leftTagItem(qvariant_cast<TagItem>(leftData));
 		TagItem rightTagItem(qvariant_cast<TagItem>(rightData));
-		return QString::localeAwareCompare(leftTagItem.name,
+		return Localisation::stringCollator.compare(leftTagItem.name,
 		    rightTagItem.name) < 0;
 	} else if (leftData.canConvert<TagItemList>()) {
 		Q_ASSERT(rightData.canConvert<TagItemList>());
@@ -119,7 +120,7 @@ bool SortFilterProxyModel::lessThan(const QModelIndex &sourceLeft,
 			}
 
 			/* None of the lists are empty. */
-			int ret = QString::localeAwareCompare(
+			int ret = Localisation::stringCollator.compare(
 			    leftTagList.first().name,
 			    rightTagList.first().name);
 			if (ret < 0) {

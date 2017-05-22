@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,9 +105,9 @@ void DlgChangePwd::pingIsdsServer(void)
 /* ========================================================================= */
 {
 	if (globIsdsSessions.isConnectedToIsds(m_userName)) {
-		qDebug() << "Connection to ISDS is alive :)";
+		qDebug("%s", "Connection to ISDS is alive :)");
 	} else {
-		qDebug() << "Connection to ISDS is dead :(";
+		qDebug("%s", "Connection to ISDS is dead :(");
 	}
 }
 

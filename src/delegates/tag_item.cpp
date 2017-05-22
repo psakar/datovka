@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,13 @@
  * the two.
  */
 
+#include <algorithm> /* std::sort */
 #include <QPainter>
 #include <QRegExp>
 
 #include "src/delegates/tag_item.h"
 #include "src/dimensions/dimensions.h"
+#include "src/localisation/localisation.h"
 #include "src/log/log.h"
 
 #define DFLT_COLOUR "ffffff"
@@ -185,4 +187,20 @@ QSize TagItemList::sizeHint(const QStyleOptionViewItem &option) const
 
 	/* Don't care about vertical dimensions here. */
 	return QSize(width, 1);
+}
+
+/*!
+ * @brief Used for sorting tag lists.
+ */
+class TagItemLess {
+public:
+	bool operator()(const TagItem &a, const TagItem &b) const
+	{
+		return Localisation::stringCollator.compare(a.name, b.name) < 0;
+	}
+};
+
+void TagItemList::sortNames(void)
+{
+	::std::sort(this->begin(), this->end(), TagItemLess());
 }

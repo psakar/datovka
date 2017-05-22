@@ -24,11 +24,9 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
-#include <QLocale>
+#include <QDir>
 #include <QSettings>
 #include <QString>
-#include <QDebug>
-#include <QDir>
 
 #define ICON_14x14_PATH ":/icons/14x14/"
 #define ICON_16x16_PATH ":/icons/16x16/"
@@ -151,10 +149,6 @@ extern
 const QString dateTimeDisplayFormat;
 extern
 const QString dateDisplayFormat;
-
-/* Global locale instance. */
-extern
-QLocale programLocale;
 
 /*!
  * @brief Adds attachment into email.

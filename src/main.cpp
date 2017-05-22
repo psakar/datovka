@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@
 #include "src/io/tag_db.h"
 #include "src/io/tag_db_container.h"
 #include "src/io/sqlite/db.h"
+#include "src/localisation/localisation.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/settings/proxy.h"
@@ -337,19 +338,9 @@ void loadLocalisation(QApplication &app)
 	logInfo("Loading application localisation from path '%s'.\n",
 	    localisationDir.toUtf8().constData());
 
-	localisationFile = "datovka_";
+	localisationFile = "datovka_" + Localisation::shortLangName(language);
 
-	if (language == "cs") {
-		localisationFile += "cs";
-		programLocale = QLocale(QLocale::Czech, QLocale::CzechRepublic);
-	} else if (language == "en") {
-		localisationFile += "en";
-		programLocale = QLocale(QLocale::English, QLocale::UnitedKingdom);
-	} else {
-		/* Use system locale. */
-		localisationFile += QLocale::system().name();
-		programLocale = QLocale::system();
-	}
+	Localisation::setProgramLocale(language);
 
 	if (!appTranslator.load(localisationFile, localisationDir)) {
 		logWarning("Could not load localisation file '%s' "
@@ -366,15 +357,14 @@ void loadLocalisation(QApplication &app)
 	logInfo("Loading Qt localisation from path '%s'.\n",
 	    localisationDir.toUtf8().constData());
 
-	localisationFile = "qtbase_";
-
-	if (language == "cs") {
-		localisationFile += "cs";
-	} else if (language == "en") {
-		localisationFile = QString();
-	} else {
-		/* Use system locale. */
-		localisationFile += QLocale::system().name();
+	{
+		const QString langName(Localisation::shortLangName(language));
+		if (langName != Localisation::langEn) {
+			localisationFile =
+			    "qtbase_" + Localisation::shortLangName(language);
+		} else {
+			localisationFile = QString();
+		}
 	}
 
 	if (!localisationFile.isEmpty() &&
