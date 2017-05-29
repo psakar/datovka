@@ -1079,12 +1079,47 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 	return true;
 }
 
+#if 0
+/*!
+ * @brief Returns true if user has the privilege to to search for data boxes.
+ *
+ * @param[in] userName User name identifying the account.
+ * @return True if user is able to search for data boxes.
+ */
+static
+bool hasPrivilSearchDb(const QString &userName)
+{
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	const QString acndDbKey(userName + "___True");
+	DbEntry userEntry = globAccountDbPtr->userEntry(acndDbKey);
+	const QString key("userPrivils");
+	if (!userEntry.hasValue(key)) {
+		return false;
+	}
+	int privils = userEntry.value(key).toInt();
+	return privils & PRIVIL_SEARCH_DB;
+}
+#endif
+
 void DlgSendMessage::addRecipientBox(const QString &boxId)
 {
 	/* Ignore existent entry. */
 	if (boxId.isEmpty() || m_recipientTableModel.containsBoxId(boxId)) {
 		return;
 	}
+
+	/*
+	 * If we are manually adding the recipient then we may not be able to
+	 * download information about the data box.
+	 *
+	 * TODO -- If we have been searching for the data box then we are
+	 * downloading the information about the data box for the second time.
+	 * This is not optimal.
+	 */
 
 	/* Search for box information according to supplied identifier. */
 	TaskSearchOwnerFulltext *task =
@@ -1094,6 +1129,9 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
+	enum TaskSearchOwnerFulltext::Result result = task->m_result;
+	QString errMsg = task->m_isdsError;
+	QString longErrMsg = task->m_isdsLongError;
 	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
 	delete task; task = Q_NULLPTR;
 
@@ -1145,16 +1183,30 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 			return;
 		}
 	} else if (foundBoxes.isEmpty()) {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setWindowTitle(tr("Wrong recipient"));
-		msgBox.setText(tr(
-		    "Recipient with data box ID '%1' does not exist.")
-		    .arg(boxId));
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
-		return;
+		if (result == TaskSearchOwnerFulltext::SOF_SUCCESS) {
+			/* No data box found. */
+			QMessageBox msgBox;
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle(tr("Wrong Recipient"));
+			msgBox.setText(tr(
+			    "Recipient with data box ID '%1' does not exist.")
+			    .arg(boxId));
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
+			return;
+		} else {
+			/* Search error. */
+			QMessageBox msgBox;
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle(tr("Recipient Search Failed"));
+			msgBox.setText(tr("Information about recipient could not be obtained. Do you still want to add the box '%1' to the recipient list?").arg(boxId));
+			msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+			msgBox.setDefaultButton(QMessageBox::No);
+			if (QMessageBox::No == msgBox.exec()) {
+				return;
+			}
+		}
 	} else {
 		Q_ASSERT(0);
 		return;
