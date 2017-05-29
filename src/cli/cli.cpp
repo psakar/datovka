@@ -1026,11 +1026,12 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 			/* Store new message into database. */
 			qint64 dmId =
 			    QString(sent_message->envelope->dmID).toLongLong();
-			const QString dbIDSender = globAccountDbPtr->dbId(
-			    map["username"].toString() + "___True");
-			const QString dmSender = globAccountDbPtr->
-			    senderNameGuess(map["username"].toString() +
-			    "___True");
+			const QString acntDbKey(AccountDb::keyFromLogin(
+			    map["username"].toString()));
+			const QString dbIDSender(
+			    globAccountDbPtr->dbId(acntDbKey));
+			const QString dmSender(
+			    globAccountDbPtr->senderNameGuess(acntDbKey));
 			QDateTime deliveryTime = timevalToDateTime(
 			    sent_message->envelope->dmDeliveryTime);
 			MessageDb *messageDb =

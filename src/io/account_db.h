@@ -208,6 +208,15 @@ public:
 	 */
 	QList<QString> getUserDataboxInfo(const QString &key) const;
 
+	/*!
+	 * @brief Return key used to access user entries in account database.
+	 *
+	 * @param[in] userName User name to construct key from.
+	 * @return Key value in format 'login___True'
+	 */
+	static
+	QString keyFromLogin(const QString &login);
+
 private:
 	/*!
 	 * @brief Returns list of tables.

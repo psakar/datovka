@@ -165,9 +165,8 @@ bool connectToIsdsCLI(IsdsSessions &isdsSessions, AcntSettings acntSettings,
 		/* Notify only once. */
 		acntSettings._setPwdExpirDlgShown(true);
 
-		const QString key(userName + "___True");
-
-		int daysTo = globAccountDbPtr->pwdExpiresInDays(key,
+		int daysTo = globAccountDbPtr->pwdExpiresInDays(
+		    AccountDb::keyFromLogin(userName),
 		    PWD_EXPIRATION_NOTIFICATION_DAYS);
 
 		if (daysTo >= 0) {

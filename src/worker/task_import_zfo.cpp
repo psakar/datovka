@@ -318,7 +318,7 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 		resultDesc.clear();
 
 		const QString databoxID(globAccountDbPtr->dbId(
-		    acnt.userName + "___True"));
+		    AccountDb::keyFromLogin(acnt.userName)));
 		if ((databoxID != dbIDSender) && (databoxID != dbIDRecipient)) {
 			continue;
 		}

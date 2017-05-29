@@ -62,7 +62,7 @@ bool TaskDownloadOwnerInfoMojeId::downloadOwnerInfo(int id, QString &error)
 
 	if (jsonlayer.getAccountInfo(id, aInfo, error)) {
 		return globAccountDbPtr->insertAccountIntoDb(
-		    aInfo.key + "___True",
+		    AccountDb::keyFromLogin(aInfo.key),
 		    aInfo.dbID,
 		    aInfo.dbType,
 		    aInfo.ic.toInt(),

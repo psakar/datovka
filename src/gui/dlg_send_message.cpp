@@ -418,12 +418,12 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	}
 
 	const AcntSettings &accountInfo(AccountModel::globAccounts[m_userName]);
-	m_dbId = globAccountDbPtr->dbId(m_userName + "___True");
+	const QString acntDbKey(AccountDb::keyFromLogin(m_userName));
+	m_dbId = globAccountDbPtr->dbId(acntDbKey);
 	Q_ASSERT(!m_dbId.isEmpty());
-	m_senderName =
-	    globAccountDbPtr->senderNameGuess(m_userName + "___True");
-	QList<QString> accountData =
-	    globAccountDbPtr->getUserDataboxInfo(m_userName + "___True");
+	m_senderName = globAccountDbPtr->senderNameGuess(acntDbKey);
+	const QList<QString> accountData(
+	    globAccountDbPtr->getUserDataboxInfo(acntDbKey));
 	if (!accountData.isEmpty()) {
 		m_dbType = accountData.at(0);
 		m_dbEffectiveOVM = (accountData.at(1) == "1");
@@ -1094,8 +1094,8 @@ bool hasPrivilSearchDb(const QString &userName)
 		return false;
 	}
 
-	const QString acndDbKey(userName + "___True");
-	DbEntry userEntry = globAccountDbPtr->userEntry(acndDbKey);
+	const QString acntDbKey(AccountDb::keyFromLogin(userName));
+	DbEntry userEntry = globAccountDbPtr->userEntry(acntDbKey);
 	const QString key("userPrivils");
 	if (!userEntry.hasValue(key)) {
 		return false;

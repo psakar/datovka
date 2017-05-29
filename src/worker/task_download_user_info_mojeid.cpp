@@ -61,7 +61,7 @@ bool TaskDownloadUserInfoMojeId::downloadUserInfo(int id, QString &error)
 
 	if (jsonlayer.getUserInfo(id, uInfo, error)) {
 		return globAccountDbPtr->insertUserIntoDb(
-		    uInfo.key + "___True",
+		    AccountDb::keyFromLogin(uInfo.key),
 		    uInfo.userType,
 		    uInfo.userPrivils,
 		    uInfo.pnFirstName,

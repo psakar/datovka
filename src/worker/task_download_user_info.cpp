@@ -87,10 +87,8 @@ bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
 
 	Q_ASSERT(NULL != userInfo);
 
-	QString key = userName + "___True";
-
 	bool ret = globAccountDbPtr->insertUserIntoDb(
-	    key,
+	    AccountDb::keyFromLogin(userName),
 	    convertUserTypeToString(*userInfo->userType),
 	    (int) *userInfo->userPrivils,
 	    userInfo->personName ? userInfo->personName->pnFirstName : NULL,

@@ -1865,7 +1865,8 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		saveAttachPath = m_save_attach_dir;
 	}
 
-	const QString dbId(globAccountDbPtr->dbId(userName + "___True"));
+	const QString dbId(
+	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (Q_NULLPTR == dbSet) {
@@ -1917,7 +1918,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		}
 	}
 
-	const QString dbId(globAccountDbPtr->dbId(userName + "___True"));
+	const QString dbId(
+	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (Q_NULLPTR == dbSet) {
@@ -3253,8 +3255,8 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	bool downloadReceivedMessages = globPref.auto_download_whole_messages;
 	if (downloadReceivedMessages) {
 		/* Method connectToIsds() acquires account information. */
-		const QString acndDbKey(userName + "___True");
-		DbEntry userEntry = globAccountDbPtr->userEntry(acndDbKey);
+		const QString acntDbKey(AccountDb::keyFromLogin(userName));
+		DbEntry userEntry = globAccountDbPtr->userEntry(acntDbKey);
 		const QString key("userPrivils");
 		if (userEntry.hasValue(key)) {
 			int privils = userEntry.value(key).toInt();
@@ -3392,8 +3394,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	html.append(strongAccountInfoLine(tr("Account name"),
 	    AccountModel::globAccounts[userName].accountName()));
 
-	const QString acndDbKey = userName + "___True";
-	if (globAccountDbPtr->dbId(acndDbKey).isEmpty()) {
+	const QString acntDbKey(AccountDb::keyFromLogin(userName));
+	if (globAccountDbPtr->dbId(acntDbKey).isEmpty()) {
 		/*
 		 * Generate this message if no account information can
 		 * be obtained.
@@ -3412,7 +3414,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	    QString("</strong></div>"));
 	html.append("</td></tr><tr><td>");
 
-	userEntry = globAccountDbPtr->userEntry(acndDbKey);
+	userEntry = globAccountDbPtr->userEntry(acntDbKey);
 	html.append(strongAccountInfoLine(tr("User name"), userName));
 	/* Print non-empty entries. */
 	for (int i = 0; i < userinfTbl.knownAttrs.size(); ++i) {
@@ -3468,7 +3470,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 
 	html.append("</td><td></td><td>");
 
-	accountEntry = globAccountDbPtr->accountEntry(acndDbKey);
+	accountEntry = globAccountDbPtr->accountEntry(acntDbKey);
 	/* Print non-empty entries. */
 	for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
 		const QString &key = accntinfTbl.knownAttrs[i].first;
@@ -3531,7 +3533,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 
 lastPart:
 
-	QString info = globAccountDbPtr->getPwdExpirFromDb(acndDbKey);
+	QString info = globAccountDbPtr->getPwdExpirFromDb(acntDbKey);
 	if (info.isEmpty()) {
 		info = tr("unknown or without expiration");
 	} else {
@@ -5014,7 +5016,8 @@ void MainWindow::deleteAccount(const QString &userName)
 	    (YesNoCheckboxDialog::YesUnchecked == retVal)) {
 		/* Delete account from model. */
 		m_accountModel.deleteAccount(userName);
-		globAccountDbPtr->deleteAccountInfo(userName + "___True");
+		globAccountDbPtr->deleteAccountInfo(
+		    AccountDb::keyFromLogin(userName));
 	}
 
 	if (YesNoCheckboxDialog::YesChecked == retVal) {
@@ -5075,7 +5078,8 @@ void MainWindow::changeAccountPassword(void)
 	}
 
 	/* Method connectToIsds() acquires account information. */
-	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+	const QString dbId(
+	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	Q_ASSERT(!dbId.isEmpty());
 
 	const AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
@@ -5332,8 +5336,9 @@ void MainWindow::findDatabox(void)
 	}
 
 	/* Method connectToIsds() acquires account information. */
-	const QList<QString> accountData =
-	    globAccountDbPtr->getUserDataboxInfo(userName + "___True");
+	const QList<QString> accountData(
+	    globAccountDbPtr->getUserDataboxInfo(
+	        AccountDb::keyFromLogin(userName)));
 
 	if (accountData.isEmpty()) {
 		return;
@@ -6156,7 +6161,8 @@ void MainWindow::showExportCorrespondenceOverviewDialog(void)
 		return;
 	}
 
-	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+	const QString dbId(
+	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	setAccountStoragePaths(userName);
 
@@ -6522,7 +6528,8 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 		return;
 	}
 
-	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+	const QString dbId(
+	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	QString errStr;
 
 	foreach (MessageDb::MsgId msgId, msgIds) {
@@ -7257,9 +7264,9 @@ bool MainWindow::connectToIsds(const QString &userName)
 		/* Notify only once. */
 		settingsCopy._setPwdExpirDlgShown(true);
 
-		const QString key(userName + "___True");
+		const QString acntDbKey(AccountDb::keyFromLogin(userName));
 
-		int daysTo = globAccountDbPtr->pwdExpiresInDays(key,
+		int daysTo = globAccountDbPtr->pwdExpiresInDays(acntDbKey,
 		    PWD_EXPIRATION_NOTIFICATION_DAYS);
 
 		if (daysTo >= 0) {
@@ -7271,7 +7278,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 
 			/* Password change dialogue. */
 			const QDateTime dbDateTime(QDateTime::fromString(
-			    globAccountDbPtr->getPwdExpirFromDb(key),
+			    globAccountDbPtr->getPwdExpirFromDb(acntDbKey),
 			    "yyyy-MM-dd HH:mm:ss.000000"));
 			if (QMessageBox::Yes == showDialogueAboutPwdExpir(
 			        settingsCopy.accountName(), userName, daysTo,
@@ -7279,7 +7286,8 @@ bool MainWindow::connectToIsds(const QString &userName)
 				showStatusTextWithTimeout(tr(
 				    "Change password of account \"%1\".")
 				    .arg(settingsCopy.accountName()));
-				QString dbId = globAccountDbPtr->dbId(key);
+				const QString dbId(
+				    globAccountDbPtr->dbId(acntDbKey));
 				QDialog *changePwd = new DlgChangePwd(
 				    dbId, userName, this);
 				changePwd->exec();
@@ -8057,7 +8065,8 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 	QString lastPath = newDir;
 	QString errStr;
 
-	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+	const QString dbId(
+	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	foreach (MessageDb::MsgId mId, expirMsgIds) {
 		if (Exports::EXP_NOT_MSG_DATA ==
@@ -8123,7 +8132,8 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 		return;
 	}
 
-	QString dbId = globAccountDbPtr->dbId(userName + "___True");
+	const QString dbId(
+	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	Imports::importDbMsgsIntoDatabase(*dbSet, dbFileList, userName, dbId);
 
@@ -9083,7 +9093,8 @@ void MainWindow::doExportOfSelectedFiles(
 		return;
 	}
 
-	const QString dbId = globAccountDbPtr->dbId(userName + "___True");
+	const QString dbId(
+	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	setAccountStoragePaths(userName);
 	lastPath = m_on_export_zfo_activate;

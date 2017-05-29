@@ -492,9 +492,10 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 			goto fail;
 		}
 
-		QString dbId = globAccountDbPtr->dbId(userName + "___True");
-		QString senderName =
-		    globAccountDbPtr->senderNameGuess(userName + "___True");
+		const QString acntDbKey(AccountDb::keyFromLogin(userName));
+		const QString dbId(globAccountDbPtr->dbId(acntDbKey));
+		const QString senderName(
+		    globAccountDbPtr->senderNameGuess(acntDbKey));
 
 		if (!messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
 		        senderName, message->envelope->dbIDRecipient,
