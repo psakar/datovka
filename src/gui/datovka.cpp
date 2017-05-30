@@ -2856,16 +2856,16 @@ void MainWindow::deleteMessage(void)
 		    "from ISDS then these messages will be lost forever.");
 	}
 
-	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
+	QDialog *yesNoCheckDlg = new DlgYesNoCheckbox(dlgTitleText,
 	    questionText, checkBoxText, detailText, this);
 	int retVal = yesNoCheckDlg->exec();
 	yesNoCheckDlg->deleteLater();
 	bool delMsgIsds = false;
 
-	if (retVal == YesNoCheckboxDialog::YesChecked) {
+	if (retVal == DlgYesNoCheckbox::YesChecked) {
 		/* Delete message(s) in the local db and ISDS */
 		delMsgIsds = true;
-	} else if (retVal == YesNoCheckboxDialog::YesUnchecked) {
+	} else if (retVal == DlgYesNoCheckbox::YesUnchecked) {
 		/* Delete message(s) only local */
 		delMsgIsds = false;
 	} else {
@@ -5007,20 +5007,20 @@ void MainWindow::deleteAccount(const QString &userName)
 	    "accessible messages that are not stored on the ISDS server "
 	    "will be lost.");
 
-	QDialog *yesNoCheckDlg = new YesNoCheckboxDialog(dlgTitleText,
+	QDialog *yesNoCheckDlg = new DlgYesNoCheckbox(dlgTitleText,
 	    questionText, checkBoxText, detailText, this);
 	int retVal = yesNoCheckDlg->exec();
 	yesNoCheckDlg->deleteLater();
 
-	if ((YesNoCheckboxDialog::YesChecked == retVal) ||
-	    (YesNoCheckboxDialog::YesUnchecked == retVal)) {
+	if ((DlgYesNoCheckbox::YesChecked == retVal) ||
+	    (DlgYesNoCheckbox::YesUnchecked == retVal)) {
 		/* Delete account from model. */
 		m_accountModel.deleteAccount(userName);
 		globAccountDbPtr->deleteAccountInfo(
 		    AccountDb::keyFromLogin(userName));
 	}
 
-	if (YesNoCheckboxDialog::YesChecked == retVal) {
+	if (DlgYesNoCheckbox::YesChecked == retVal) {
 		if (globMessageDbsPtr->deleteDbSet(dbSet)) {
 			showStatusTextWithTimeout(tr("Account '%1' was deleted "
 			    "together with message database file.")
@@ -5030,7 +5030,7 @@ void MainWindow::deleteAccount(const QString &userName)
 			    "but its message database was not deleted.")
 			    .arg(accountName));
 		}
-	} else if (YesNoCheckboxDialog::YesUnchecked == retVal) {
+	} else if (DlgYesNoCheckbox::YesUnchecked == retVal) {
 		showStatusTextWithTimeout(tr("Account '%1' was deleted.")
 		    .arg(accountName));
 	}
@@ -5047,8 +5047,8 @@ void MainWindow::deleteAccount(const QString &userName)
 		globTagDbPtr->removeAllMsgTagsFromAccount(userName);
 	}
 
-	if ((YesNoCheckboxDialog::YesChecked == retVal) ||
-	    (YesNoCheckboxDialog::YesUnchecked == retVal)) {
+	if ((DlgYesNoCheckbox::YesChecked == retVal) ||
+	    (DlgYesNoCheckbox::YesUnchecked == retVal)) {
 		saveSettings();
 	}
 

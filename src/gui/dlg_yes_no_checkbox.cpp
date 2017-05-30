@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,38 +21,28 @@
  * the two.
  */
 
-#include "dlg_yes_no_checkbox.h"
+#include "src/gui/dlg_yes_no_checkbox.h"
 
-
-YesNoCheckboxDialog::YesNoCheckboxDialog(QString dlgTitleText,
-    QString questionText, QString checkBoxText, QString detailText,
-    QWidget *parent) :
-    QDialog(parent),
-    m_dlgTitleText(dlgTitleText),
-    m_questionText(questionText),
-    m_checkBoxText(checkBoxText),
-    m_detailText(detailText)
+DlgYesNoCheckbox::DlgYesNoCheckbox(const QString &title,
+    const QString &questionText, const QString &checkBoxText,
+    const QString &detailText, QWidget *parent)
+    : QDialog(parent)
 {
 	setupUi(this);
 
-	this->setWindowTitle(m_dlgTitleText);
-	this->labelQuestion->setText(m_questionText);
-	this->advanceDeleteCheckBox->setText(m_checkBoxText);
-	if (m_detailText.isNull() || m_detailText.isEmpty()) {
-		this->labelDetailText->setEnabled(false);
-	} else {
-		this->labelDetailText->setText(m_detailText + "\n");
-		this->labelDetailText->setEnabled(true);
-	}
+	this->setWindowTitle(title);
+	this->labelQuestion->setText(questionText);
+	this->advanceDeleteCheckBox->setText(checkBoxText);
+	this->labelDetailText->setEnabled(!detailText.isEmpty());
+	this->labelDetailText->setText(detailText + "\n");
 
 	this->adjustSize();
 
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(isCheckboxChecked()));
+	connect(this->buttonBox, SIGNAL(accepted()),
+	    this, SLOT(isCheckboxChecked()));
 }
 
-
-void YesNoCheckboxDialog::isCheckboxChecked(void)
+void DlgYesNoCheckbox::isCheckboxChecked(void)
 {
 	if (this->advanceDeleteCheckBox->isChecked()) {
 		done(YesChecked);

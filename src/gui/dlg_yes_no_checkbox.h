@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,40 +21,43 @@
  * the two.
  */
 
-
 #ifndef _DLG_YES_NO_CHECKBOX_H_
 #define _DLG_YES_NO_CHECKBOX_H_
-
 
 #include <QDialog>
 #include "ui_dlg_yes_no_checkbox.h"
 
-
-class YesNoCheckboxDialog : public QDialog, public Ui::YesNoCheckboxDlg
-{
+class DlgYesNoCheckbox : public QDialog, public Ui::YesNoCheckboxDlg {
 	Q_OBJECT
 
 public:
-
+	/*!
+	 * @brief Value returned by exec().
+	 */
 	enum RetVal {
 		No = 0,
 		YesUnchecked = 1,
 		YesChecked = 2
 	};
 
-	YesNoCheckboxDialog(QString dlgTitleText, QString questionText,
-	    QString checkBoxText, QString detailText, QWidget *parent = 0);
+	/*!
+	 * @brief Constructs question dialogue containing a checkbox.
+	 *
+	 * @param[in] title Window title.
+	 * @param[in] questionText Question text.
+	 * @param[in] checkBoxText Text displayed next to the checkbox.
+	 * @param[in] detailText Detailed description text.
+	 * @param[in] parent Window parent.
+	 */
+	DlgYesNoCheckbox(const QString &title, const QString &questionText,
+	    const QString &checkBoxText, const QString &detailText,
+	    QWidget *parent = Q_NULLPTR);
 
 private slots:
-
+	/*!
+	 * @brief Reads checkbox state and calls done().
+	 */
 	void isCheckboxChecked(void);
-
-private:
-
-	QString m_dlgTitleText;
-	QString m_questionText;
-	QString m_checkBoxText;
-	QString m_detailText;
 };
 
 #endif /* _DLG_YES_NO_CHECKBOX_H_ */
