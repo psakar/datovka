@@ -21,32 +21,40 @@
  * the two.
  */
 
+#include <QCheckBox>
+#include <QPushButton>
+
 #include "src/gui/dlg_yes_no_checkbox.h"
 
 DlgYesNoCheckbox::DlgYesNoCheckbox(const QString &title,
     const QString &questionText, const QString &checkBoxText,
     const QString &detailText, QWidget *parent)
-    : QDialog(parent)
+    : QMessageBox(parent),
+    m_yesButton(Q_NULLPTR)
 {
-	setupUi(this);
-
 	this->setWindowTitle(title);
-	this->labelQuestion->setText(questionText);
-	this->advanceDeleteCheckBox->setText(checkBoxText);
-	this->labelDetailText->setEnabled(!detailText.isEmpty());
-	this->labelDetailText->setText(detailText + "\n");
 
-	this->adjustSize();
+	this->setIcon(QMessageBox::Icon::Question);
 
-	connect(this->buttonBox, SIGNAL(accepted()),
-	    this, SLOT(isCheckboxChecked()));
+	m_yesButton = this->addButton(QMessageBox::Yes);
+	this->addButton(QMessageBox::No);
+	this->setDefaultButton(QMessageBox::No);
+
+	this->setText(questionText);
+
+	this->setCheckBox(new (std::nothrow) QCheckBox(checkBoxText, this));
+
+	this->setInformativeText(detailText);
+
+	connect(this, SIGNAL(buttonClicked(QAbstractButton *)),
+	    this, SLOT(buttonClicked(QAbstractButton *)));
 }
 
-void DlgYesNoCheckbox::isCheckboxChecked(void)
+void DlgYesNoCheckbox::buttonClicked(QAbstractButton *button)
 {
-	if (this->advanceDeleteCheckBox->isChecked()) {
-		done(YesChecked);
+	if (m_yesButton == button) {
+		done(this->checkBox()->isChecked() ? YesChecked : YesUnchecked);
 	} else {
-		done(YesUnchecked);
+		done(No);
 	}
 }

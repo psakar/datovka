@@ -24,10 +24,9 @@
 #ifndef _DLG_YES_NO_CHECKBOX_H_
 #define _DLG_YES_NO_CHECKBOX_H_
 
-#include <QDialog>
-#include "ui_dlg_yes_no_checkbox.h"
+#include <QMessageBox>
 
-class DlgYesNoCheckbox : public QDialog, public Ui::YesNoCheckboxDlg {
+class DlgYesNoCheckbox : public QMessageBox {
 	Q_OBJECT
 
 public:
@@ -55,9 +54,12 @@ public:
 
 private slots:
 	/*!
-	 * @brief Reads checkbox state and calls done().
+	 * @brief Check whether the dialogue has been accepted, calls done().
 	 */
-	void isCheckboxChecked(void);
+	void buttonClicked(QAbstractButton *button);
+
+private:
+	const QAbstractButton *m_yesButton; /*!< Pointer to accept button. */
 };
 
 #endif /* _DLG_YES_NO_CHECKBOX_H_ */
