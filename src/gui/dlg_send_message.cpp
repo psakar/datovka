@@ -27,13 +27,14 @@
 #include <QDir>
 #include <QMimeDatabase>
 
-#include "dlg_send_message.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
-#include "src/model_interaction/attachment_interaction.h"
 #include "src/gui/dlg_search_mojeid.h"
+#include "src/gui/dlg_send_message.h"
+#include "src/gui/dlg_yes_no_checkbox.h"
+#include "src/model_interaction/attachment_interaction.h"
 #include "src/models/accounts_model.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
@@ -418,12 +419,12 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	}
 
 	const AcntSettings &accountInfo(AccountModel::globAccounts[m_userName]);
-	m_dbId = globAccountDbPtr->dbId(m_userName + "___True");
+	const QString acntDbKey(AccountDb::keyFromLogin(m_userName));
+	m_dbId = globAccountDbPtr->dbId(acntDbKey);
 	Q_ASSERT(!m_dbId.isEmpty());
-	m_senderName =
-	    globAccountDbPtr->senderNameGuess(m_userName + "___True");
-	QList<QString> accountData =
-	    globAccountDbPtr->getUserDataboxInfo(m_userName + "___True");
+	m_senderName = globAccountDbPtr->senderNameGuess(acntDbKey);
+	const QList<QString> accountData(
+	    globAccountDbPtr->getUserDataboxInfo(acntDbKey));
 	if (!accountData.isEmpty()) {
 		m_dbType = accountData.at(0);
 		m_dbEffectiveOVM = (accountData.at(1) == "1");
@@ -1086,6 +1087,15 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 		return;
 	}
 
+	/*
+	 * If we are manually adding the recipient then we may not be able to
+	 * download information about the data box.
+	 *
+	 * TODO -- If we have been searching for the data box then we are
+	 * downloading the information about the data box for the second time.
+	 * This is not optimal.
+	 */
+
 	/* Search for box information according to supplied identifier. */
 	TaskSearchOwnerFulltext *task =
 	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, boxId,
@@ -1094,6 +1104,9 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
+	enum TaskSearchOwnerFulltext::Result result = task->m_result;
+	QString errMsg = task->m_isdsError;
+	QString longErrMsg = task->m_isdsLongError;
 	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
 	delete task; task = Q_NULLPTR;
 
@@ -1145,16 +1158,41 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 			return;
 		}
 	} else if (foundBoxes.isEmpty()) {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setWindowTitle(tr("Wrong recipient"));
-		msgBox.setText(tr(
-		    "Recipient with data box ID '%1' does not exist.")
-		    .arg(boxId));
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
-		return;
+		if (result == TaskSearchOwnerFulltext::SOF_SUCCESS) {
+			/* No data box found. */
+			QMessageBox msgBox;
+			msgBox.setIcon(QMessageBox::Critical);
+			msgBox.setWindowTitle(tr("Wrong Recipient"));
+			msgBox.setText(tr(
+			    "Recipient with data box ID '%1' does not exist.")
+			    .arg(boxId));
+			msgBox.setStandardButtons(QMessageBox::Ok);
+			msgBox.setDefaultButton(QMessageBox::Ok);
+			msgBox.exec();
+			return;
+		} else {
+			/* Search error. */
+			DlgYesNoCheckbox questionDlg(tr("Recipient Search Failed"),
+			    tr("Information about recipient data box could not be obtained.") +
+			    QStringLiteral("\n") +
+			    tr("Do you still want to add the box '%1' into the recipient list?").arg(boxId),
+			    tr("Enable commercial messages (PDZ)."),
+			    !longErrMsg.isEmpty() ?
+			        tr("Obtained ISDS error") + QStringLiteral(": ") + longErrMsg :
+			        QString());
+			int retVal = questionDlg.exec();
+			switch (retVal) {
+			case DlgYesNoCheckbox::YesChecked:
+				pdz = true;
+				break;
+			case DlgYesNoCheckbox::YesUnchecked:
+				pdz = false;
+				break;
+			default:
+				return;
+				break;
+			}
+		}
 	} else {
 		Q_ASSERT(0);
 		return;

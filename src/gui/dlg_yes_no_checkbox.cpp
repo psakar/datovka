@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,42 +21,40 @@
  * the two.
  */
 
-#include "dlg_yes_no_checkbox.h"
+#include <QCheckBox>
+#include <QPushButton>
 
+#include "src/gui/dlg_yes_no_checkbox.h"
 
-YesNoCheckboxDialog::YesNoCheckboxDialog(QString dlgTitleText,
-    QString questionText, QString checkBoxText, QString detailText,
-    QWidget *parent) :
-    QDialog(parent),
-    m_dlgTitleText(dlgTitleText),
-    m_questionText(questionText),
-    m_checkBoxText(checkBoxText),
-    m_detailText(detailText)
+DlgYesNoCheckbox::DlgYesNoCheckbox(const QString &title,
+    const QString &questionText, const QString &checkBoxText,
+    const QString &detailText, QWidget *parent)
+    : QMessageBox(parent),
+    m_yesButton(Q_NULLPTR)
 {
-	setupUi(this);
+	this->setWindowTitle(title);
 
-	this->setWindowTitle(m_dlgTitleText);
-	this->labelQuestion->setText(m_questionText);
-	this->advanceDeleteCheckBox->setText(m_checkBoxText);
-	if (m_detailText.isNull() || m_detailText.isEmpty()) {
-		this->labelDetailText->setEnabled(false);
-	} else {
-		this->labelDetailText->setText(m_detailText + "\n");
-		this->labelDetailText->setEnabled(true);
-	}
+	this->setIcon(QMessageBox::Icon::Question);
 
-	this->adjustSize();
+	m_yesButton = this->addButton(QMessageBox::Yes);
+	this->addButton(QMessageBox::No);
+	this->setDefaultButton(QMessageBox::No);
 
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(isCheckboxChecked()));
+	this->setText(questionText);
+
+	this->setCheckBox(new (std::nothrow) QCheckBox(checkBoxText, this));
+
+	this->setInformativeText(detailText);
+
+	connect(this, SIGNAL(buttonClicked(QAbstractButton *)),
+	    this, SLOT(buttonClicked(QAbstractButton *)));
 }
 
-
-void YesNoCheckboxDialog::isCheckboxChecked(void)
+void DlgYesNoCheckbox::buttonClicked(QAbstractButton *button)
 {
-	if (this->advanceDeleteCheckBox->isChecked()) {
-		done(YesChecked);
+	if (m_yesButton == button) {
+		done(this->checkBox()->isChecked() ? YesChecked : YesUnchecked);
 	} else {
-		done(YesUnchecked);
+		done(No);
 	}
 }

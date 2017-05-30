@@ -147,8 +147,10 @@ enum TaskGetAccountListMojeId::Result TaskGetAccountListMojeId::getAccountList(
 bool TaskGetAccountListMojeId::updateMojeIdAccountData(const QString &userName,
     const JsonLayer::AccountData &aData)
 {
+	const QString acntDbKey(AccountDb::keyFromLogin(userName));
+
 	bool ret = globAccountDbPtr->insertAccountIntoDb(
-	    userName + "___True",
+	    acntDbKey,
 	    aData.ownerInfo.dbID,
 	    aData.ownerInfo.dbType,
 	    aData.ownerInfo.ic.toInt(),
@@ -176,7 +178,7 @@ bool TaskGetAccountListMojeId::updateMojeIdAccountData(const QString &userName,
 	);
 
 	ret = globAccountDbPtr->insertUserIntoDb(
-	    userName + "___True",
+	    acntDbKey,
 	    aData.userInfo.userType,
 	    aData.userInfo.userPrivils,
 	    aData.userInfo.pnFirstName,

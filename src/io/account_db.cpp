@@ -685,6 +685,13 @@ fail:
 	return QList<QString>();
 }
 
+QString AccountDb::keyFromLogin(const QString &login)
+{
+	Q_ASSERT(!login.isEmpty());
+
+	return login + QStringLiteral("___True");
+}
+
 QList<class SQLiteTbl *> AccountDb::listOfTables(void)
 {
 	static QList<class SQLiteTbl *> tables;

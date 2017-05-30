@@ -487,8 +487,7 @@ FORMS += \
     src/gui/ui/dlg_tag.ui \
     src/gui/ui/dlg_tags.ui \
     src/gui/ui/dlg_timestamp_expir.ui \
-    src/gui/ui/dlg_view_zfo.ui \
-    src/gui/ui/dlg_yes_no_checkbox.ui
+    src/gui/ui/dlg_view_zfo.ui
 
 RESOURCES += \
     res/resources.qrc
