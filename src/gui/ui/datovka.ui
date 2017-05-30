@@ -52,7 +52,7 @@
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QTreeView" name="accountList">
+      <widget class="LoweredTreeView" name="accountList">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -1235,6 +1235,11 @@ sent reply on this message</string>
    <class>LoweredTableView</class>
    <extends>QTableView</extends>
    <header>lowered_table_view.h</header>
+  </customwidget>
+  <customwidget>
+   <class>LoweredTreeView</class>
+   <extends>QTreeView</extends>
+   <header>lowered_tree_view.h</header>
   </customwidget>
  </customwidgets>
  <resources>

@@ -21,15 +21,37 @@
  * the two.
  */
 
-#ifndef _LOWERED_TABLE_VIEW_H_
-#define _LOWERED_TABLE_VIEW_H_
+#ifndef _LOWERED_TREE_VIEW_H_
+#define _LOWERED_TREE_VIEW_H_
 
-#include <QTableView>
+#include <QItemDelegate>
+#include <QTreeView>
 
 /*!
- * @brief Table view with lowered row height.
+ * @brief Used to enforce row height.
+ *
+ * @note QTreeView normally takes row height from sizeHint().
  */
-class LoweredTableView : public QTableView {
+class LoweredItemDelegate : public QItemDelegate {
+	Q_OBJECT
+
+public:
+	/*!
+	 * @brief Returns size hint with enforced row height.
+	 *
+	 * @param[in] option Style option.
+	 * @param[in] index Index identifying the displayed element.
+	 * @return Size hint with enforced row height.
+	 */
+	virtual
+	QSize sizeHint(const QStyleOptionViewItem &option,
+	    const QModelIndex &index) const Q_DECL_OVERRIDE;
+};
+
+/*!
+ * @brief Tree view with lowered row height.
+ */
+class LoweredTreeView : public QTreeView {
 	Q_OBJECT
 
 public:
@@ -38,12 +60,12 @@ public:
 	 *
 	 * @param[in] parent Parent widget.
 	 */
-	explicit LoweredTableView(QWidget *parent = Q_NULLPTR);
+	explicit LoweredTreeView(QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Sets narrowed row size.
 	 */
-	void setNarrowedLineHeight(void) const;
+	void setNarrowedLineHeight(void);
 };
 
-#endif /* _LOWERED_TABLE_VIEW_H_ */
+#endif /* _LOWERED_TREE_VIEW_H_ */

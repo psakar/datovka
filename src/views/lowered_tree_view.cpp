@@ -24,15 +24,22 @@
 #include <QHeaderView>
 
 #include "src/dimensions/dimensions.h"
-#include "src/views/lowered_table_view.h"
+#include "src/views/lowered_tree_view.h"
 
-LoweredTableView::LoweredTableView(QWidget *parent)
-    : QTableView(parent)
+QSize LoweredItemDelegate::sizeHint(const QStyleOptionViewItem &option,
+    const QModelIndex &index) const
+{
+	return QSize(QItemDelegate::sizeHint(option, index).width(),
+	    Dimensions::tableLineHeight(option));
+}
+
+LoweredTreeView::LoweredTreeView(QWidget *parent)
+    : QTreeView(parent)
 {
 }
 
-void LoweredTableView::setNarrowedLineHeight(void) const
+void LoweredTreeView::setNarrowedLineHeight(void)
 {
-	verticalHeader()->setDefaultSectionSize(
-	    Dimensions::tableLineHeight(viewOptions()));
+	setItemDelegate(new (std::nothrow) LoweredItemDelegate());
+	setUniformRowHeights(true);
 }

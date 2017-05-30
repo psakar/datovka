@@ -326,6 +326,7 @@ SOURCES += \
     src/views/attachment_table_view.cpp \
     src/views/lowered_table_view.cpp \
     src/views/lowered_table_widget.cpp \
+    src/views/lowered_tree_view.cpp \
     src/views/table_home_end_filter.cpp \
     src/views/table_key_press_filter.cpp \
     src/views/table_space_selection_filter.cpp \
@@ -431,6 +432,7 @@ HEADERS += \
     src/views/attachment_table_view.h \
     src/views/lowered_table_view.h \
     src/views/lowered_table_widget.h \
+    src/views/lowered_tree_view.h \
     src/views/table_home_end_filter.h \
     src/views/table_key_press_filter.h \
     src/views/table_space_selection_filter.h \
