@@ -1,4 +1,4 @@
-4.8.2 /
+4.8.2 / 2017-05-30
  * Fixed problems with sending messages from accounts that cannot search for
    data boxes.
  * Fixed tag ordering. Tag sorting is now locale-aware.
