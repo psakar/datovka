@@ -1199,11 +1199,13 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 		} else {
 			/* Search error. */
 			DlgYesNoCheckbox questionDlg(tr("Recipient Search Failed"),
-			    tr("Information about recipient could not be obtained.") +
+			    tr("Information about recipient data box could not be obtained.") +
 			    QStringLiteral("\n") +
-			    tr("Do you still want to add the box '%1' to the recipient list?").arg(boxId),
-			    tr("Allow sending of commercial messages (PDZ)."),
-			    QString());
+			    tr("Do you still want to add the box '%1' into the recipient list?").arg(boxId),
+			    tr("Enable commercial messages (PDZ)."),
+			    !longErrMsg.isEmpty() ?
+			        tr("Obtained ISDS error") + QStringLiteral(": ") + longErrMsg :
+			        QString());
 			int retVal = questionDlg.exec();
 			switch (retVal) {
 			case DlgYesNoCheckbox::YesChecked:
