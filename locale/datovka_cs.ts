@@ -1685,7 +1685,7 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="1166"/>
         <source>Recipient with data box ID &apos;%1&apos; does not exist.</source>
-        <translation>Příjemce se datovkou schránkou &apos;%1&apos; neexistuje.</translation>
+        <translation>Příjemce s datovou schránkou &apos;%1&apos; neexistuje.</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="1402"/>
