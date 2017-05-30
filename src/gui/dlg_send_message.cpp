@@ -27,13 +27,14 @@
 #include <QDir>
 #include <QMimeDatabase>
 
-#include "dlg_send_message.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
-#include "src/model_interaction/attachment_interaction.h"
 #include "src/gui/dlg_search_mojeid.h"
+#include "src/gui/dlg_send_message.h"
+#include "src/gui/dlg_yes_no_checkbox.h"
+#include "src/model_interaction/attachment_interaction.h"
 #include "src/models/accounts_model.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
@@ -1197,14 +1198,23 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 			return;
 		} else {
 			/* Search error. */
-			QMessageBox msgBox;
-			msgBox.setIcon(QMessageBox::Critical);
-			msgBox.setWindowTitle(tr("Recipient Search Failed"));
-			msgBox.setText(tr("Information about recipient could not be obtained. Do you still want to add the box '%1' to the recipient list?").arg(boxId));
-			msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-			msgBox.setDefaultButton(QMessageBox::No);
-			if (QMessageBox::No == msgBox.exec()) {
+			DlgYesNoCheckbox questionDlg(tr("Recipient Search Failed"),
+			    tr("Information about recipient could not be obtained.") +
+			    QStringLiteral("\n") +
+			    tr("Do you still want to add the box '%1' to the recipient list?").arg(boxId),
+			    tr("Allow sending of commercial messages (PDZ)."),
+			    QString());
+			int retVal = questionDlg.exec();
+			switch (retVal) {
+			case DlgYesNoCheckbox::YesChecked:
+				pdz = true;
+				break;
+			case DlgYesNoCheckbox::YesUnchecked:
+				pdz = false;
+				break;
+			default:
 				return;
+				break;
 			}
 		}
 	} else {
