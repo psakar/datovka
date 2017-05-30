@@ -1080,32 +1080,6 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 	return true;
 }
 
-#if 0
-/*!
- * @brief Returns true if user has the privilege to to search for data boxes.
- *
- * @param[in] userName User name identifying the account.
- * @return True if user is able to search for data boxes.
- */
-static
-bool hasPrivilSearchDb(const QString &userName)
-{
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	const QString acntDbKey(AccountDb::keyFromLogin(userName));
-	DbEntry userEntry = globAccountDbPtr->userEntry(acntDbKey);
-	const QString key("userPrivils");
-	if (!userEntry.hasValue(key)) {
-		return false;
-	}
-	int privils = userEntry.value(key).toInt();
-	return privils & PRIVIL_SEARCH_DB;
-}
-#endif
-
 void DlgSendMessage::addRecipientBox(const QString &boxId)
 {
 	/* Ignore existent entry. */
