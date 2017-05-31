@@ -81,10 +81,37 @@ private:
 	 */
 	void updateExportedMsgList(const QDate &fromDate, const QDate &toDate);
 
-	QString msgInCsv(const MessageDb::MsgId &mId) const;
-	QString msgInHtml(const MessageDb::MsgId &mId) const;
-	bool exportMessagesToCsv(const QString &fileName) const;
-	bool exportMessagesToHtml(const QString &fileName) const;
+	/*!
+	 * @brief Construct a CSV message entry.
+	 *
+	 * @param[in] mId Message identifier structure.
+	 * @return String containing CSV message entry, empty string on error.
+	 */
+	QString msgCsvEntry(const MessageDb::MsgId &mId) const;
+
+	/*!
+	 * @brief Construct a HTML message entry.
+	 *
+	 * @param[in] mId Message identifier structure.
+	 * @return String containing HTML message entry, empty string on error.
+	 */
+	QString msgHtmlEntry(const MessageDb::MsgId &mId) const;
+
+	/*!
+	 * @brief Export message overview to CSV file.
+	 *
+	 * @param[in] fileName Name of the saved file.
+	 * @return False on failure.
+	 */
+	bool writeCsvOverview(const QString &fileName) const;
+
+	/*!
+	 * @brief Export message overview to HTML file.
+	 *
+	 * @param[in] fileName Name of the saved file.
+	 * @return False on failure.
+	 */
+	bool writeHtmlOverview(const QString &fileName) const;
 
 	const MessageDbSet &m_messDbSet;
 	const QString m_userName;

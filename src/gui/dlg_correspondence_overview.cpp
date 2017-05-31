@@ -120,13 +120,8 @@ void DlgCorrespondenceOverview::updateExportedMsgList(const QDate &fromDate,
 	    QStringLiteral(")"));
 }
 
-
-/* ========================================================================= */
-/*
- * Add message to HTML.
- */
-QString DlgCorrespondenceOverview::msgInHtml(const MessageDb::MsgId &mId) const
-/* ========================================================================= */
+QString DlgCorrespondenceOverview::msgCsvEntry(
+    const MessageDb::MsgId &mId) const
 {
 	if (!mId.isValid()) {
 		Q_ASSERT(0);
@@ -135,79 +130,121 @@ QString DlgCorrespondenceOverview::msgInHtml(const MessageDb::MsgId &mId) const
 
 	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
 	    mId.deliveryTime);
-	Q_ASSERT(0 != messageDb);
+	Q_ASSERT(Q_NULLPTR != messageDb);
 
-	QStringList messageItems = messageDb->getMsgForHtmlExport(mId.dmId);
+	QStringList messageItems(messageDb->getMsgForCsvExport(mId.dmId));
 	if (messageItems.empty()) {
 		return QString();
 	}
 
-	return "<div><table><tr><td><table>"
-	    "<tr><td><b>"
-	    + QString::number(mId.dmId) +
-	    "</b></td></tr>"
-	    "<tr><td class=\"smaller\">"
-	    + messageItems.at(3) +
-	    "</td></tr>"
-	    "<tr><td class=\"smaller\">"
-	    + messageItems.at(4) +
-	    "</td></tr>"
-	    "</table></td><td><table><tr><td>"
-	     + tr("Subject:") +
-	    "</td><td><i><b>"
-	    + messageItems.at(2) +
-	    "</b></i></td></tr><tr><td>"
-	    + tr("Sender:") +
-	    "</td><td><i>"
-	    + messageItems.at(0) +
-	    "</i></td></tr><tr><td>"
-	    + tr("Recipient:") +
-	    "</td><td><i>"
-	    + messageItems.at(1) +
-	    "</i></td></tr></table></td></tr></table></div>";
-}
-
-
-/* ========================================================================= */
-/*
- * Add message to CSV.
- */
-QString DlgCorrespondenceOverview::msgInCsv(const MessageDb::MsgId &mId) const
-/* ========================================================================= */
-{
-	if (!mId.isValid()) {
-		Q_ASSERT(0);
-		return QString();
-	}
-
-	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
-	    mId.deliveryTime);
-	Q_ASSERT(0 != messageDb);
-
-	QStringList messageItems = messageDb->getMsgForCsvExport(mId.dmId);
-	if (messageItems.empty()) {
-		return QString();
-	}
-
-	QString content = QString::number(mId.dmId);
+	QString content(QString::number(mId.dmId));
 
 	for (int i = 0; i < messageItems.count(); ++i) {
-		content += "," + messageItems.at(i);
+		content += QStringLiteral(",") + messageItems.at(i);
 	}
 
 	return content;
 }
 
-
-/* ========================================================================= */
-/*
- * Export messages to HTML.
- */
-bool DlgCorrespondenceOverview::exportMessagesToHtml(
-    const QString &fileName) const
-/* ========================================================================= */
+QString DlgCorrespondenceOverview::msgHtmlEntry(
+    const MessageDb::MsgId &mId) const
 {
-	qDebug() << "Files are export to HTML format";
+	if (!mId.isValid()) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
+	    mId.deliveryTime);
+	Q_ASSERT(Q_NULLPTR != messageDb);
+
+	QStringList messageItems(messageDb->getMsgForHtmlExport(mId.dmId));
+	if (messageItems.empty()) {
+		return QString();
+	}
+
+	return
+	    QStringLiteral("<div><table><tr><td><table>"
+	                   "<tr><td><b>")
+	    + QString::number(mId.dmId) +
+	    QStringLiteral("</b></td></tr>"
+	                   "<tr><td class=\"smaller\">")
+	    + messageItems.at(3) +
+	    QStringLiteral("</td></tr>"
+	                   "<tr><td class=\"smaller\">")
+	    + messageItems.at(4) +
+	    QStringLiteral("</td></tr>"
+	                   "</table></td><td><table><tr><td>")
+	    + tr("Subject:") +
+	    QStringLiteral("</td><td><i><b>")
+	    + messageItems.at(2) +
+	    QStringLiteral("</b></i></td></tr><tr><td>")
+	    + tr("Sender:") +
+	    QStringLiteral("</td><td><i>")
+	    + messageItems.at(0) +
+	    QStringLiteral("</i></td></tr><tr><td>")
+	    + tr("Recipient:") +
+	    QStringLiteral("</td><td><i>")
+	    + messageItems.at(1) +
+	    QStringLiteral("</i></td></tr></table></td></tr></table></div>");
+}
+
+bool DlgCorrespondenceOverview::writeCsvOverview(const QString &fileName) const
+{
+	qDebug("Files are going be be exported to CSV file '%s'.",
+	    fileName.toUtf8().constData());
+
+	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	QFile fout(fileName);
+	if (!fout.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		return false;
+	}
+
+	QTextStream f(&fout);
+	/* Generate CSV header. */
+	f << QStringLiteral("ID,") +
+	    tr("Status") + QStringLiteral(",") +
+	    tr("Message type") + QStringLiteral(",") +
+	    tr("Delivery time") + QStringLiteral(",") +
+	    tr("Acceptance time") + QStringLiteral(",") +
+	    tr("Subject") + QStringLiteral(",") +
+	    tr("Sender") + QStringLiteral(",") +
+	    tr("Sender Address") + QStringLiteral(",") +
+	    tr("Recipient") + QStringLiteral(",") +
+	    tr("Recipient Address") + QStringLiteral(",") +
+	    tr("Our file mark") + QStringLiteral(",") +
+	    tr("Our reference number") + QStringLiteral(",") +
+	    tr("Your file mark") + QStringLiteral(",") +
+	    tr("Your reference number") + QStringLiteral("\n");
+
+	/* Sent messages. */
+	if (this->sentCheckBox->isChecked()) {
+		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
+			f << msgCsvEntry(mId) + QStringLiteral("\n");
+		}
+	}
+
+	/* Received messages. */
+	if (this->receivedCheckBox->isChecked()) {
+		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
+			f << msgCsvEntry(mId) + QStringLiteral("\n");
+		}
+	}
+
+	fout.flush();
+	fout.close();
+
+	return true;
+}
+
+bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &fileName) const
+{
+	qDebug("Files are going be be exported to HTML file '%s'.",
+	    fileName.toUtf8().constData());
 
 	if (fileName.isEmpty()) {
 		Q_ASSERT(0);
@@ -226,15 +263,15 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 	 */
 	f.setCodec("UTF-8");
 	/* Generate HTML header. */
-	f << "<!DOCTYPE html\n"
+	f << QStringLiteral("<!DOCTYPE html\n"
 	    "   PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
 	    "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"
 	    "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
 	    "<head>\n"
 	    "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
-	    "<title>"
+	    "<title>")
 	    + tr("Correspondence overview") +
-	    "</title>\n"
+	    QStringLiteral("</title>\n"
 	    "<style type=\"text/css\">\n"
 	    "   td {padding: 0px 5px; }\n"
 	    "   div { border-bottom: solid 1px black;}\n"
@@ -243,107 +280,50 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 	    "</style>\n"
 	    "</head>\n"
 	    "<body>\n"
-	    "<h1>"
+	    "<h1>")
 	    + tr("Correspondence overview") +
-	    "</h1>\n"
-	    "<table><tr><td>\n"
+	    QStringLiteral("</h1>\n"
+	    "<table><tr><td>\n")
 	    + tr("From date:") +
-	    "</td><td>"
+	    QStringLiteral("</td><td>")
 	    + this->fromCalendarWidget->selectedDate().toString("dd.MM.yyyy") +
-	    "</td></tr><tr><td>"
+	    QStringLiteral("</td></tr><tr><td>")
 	    + tr("To date:") +
-	    "</td><td>"
+	    QStringLiteral("</td><td>")
 	    + this->toCalendarWidget->selectedDate().toString("dd.MM.yyyy") +
-	    "</td></tr><tr><td>"
+	    QStringLiteral("</td></tr><tr><td>")
 	    + tr("Generated:") +
-	    "</td><td>"
+	    QStringLiteral("</td><td>")
 	    + QDateTime().currentDateTime().toString("dd.MM.yyyy hh:mm:ss") +
-	    "</td></tr></table>\n";
+	    QStringLiteral("</td></tr></table>\n");
 
-
-	/* sent messages */
+	/* Sent messages. */
 	if (this->sentCheckBox->isChecked()) {
-
-		f << "<h2>" << tr("Sent") << "</h2>\n";
+		f << QStringLiteral("<h2>") << tr("Sent")
+		    << QStringLiteral("</h2>\n");
 
 		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
-			f << msgInHtml(mId);
+			f << msgHtmlEntry(mId);
 		}
 	}
 
-	/* received messages */
+	/* Received messages. */
 	if (this->receivedCheckBox->isChecked()) {
-
-		f << "<h2>" << tr("Received") << "</h2>\n";
+		f << QStringLiteral("<h2>") << tr("Received")
+		    << QStringLiteral("</h2>\n");
 
 		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
-			f << msgInHtml(mId);
+			f << msgHtmlEntry(mId);
 		}
 	}
 
-	f << "</body>\n</html>";
+	f << QStringLiteral("</body>\n</html>");
 
-	if (!fout.flush()) {
-		return false;
-	}
+	fout.flush();
 	fout.close();
 
 	return true;
 }
-
-
-/* ========================================================================= */
-/*
- * Export messages to CSV.
- */
-bool DlgCorrespondenceOverview::exportMessagesToCsv(
-    const QString &fileName) const
-/* ========================================================================= */
-{
-	qDebug() << "Files are export to CSV format";
-
-	if (fileName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	QFile fout(fileName);
-	if (!fout.open(QIODevice::WriteOnly | QIODevice::Text)) {
-		return false;
-	}
-
-	QTextStream f(&fout);
-	/* Generate CSV header. */
-	f << "ID," + tr("Status") + "," + tr("Message type") + "," +
-	    tr("Delivery time") + "," + tr("Acceptance time") + "," +
-	    tr("Subject") + "," + tr("Sender") + "," +
-	    tr("Sender Address") + "," + tr("Recipient") + "," +
-	    tr("Recipient Address") + "," + tr("Our file mark") + "," +
-	    tr("Our reference number") + "," + tr("Your file mark") + "," +
-	    tr("Your reference number") + "\n";
-
-	/* sent messages */
-	if (this->sentCheckBox->isChecked()) {
-		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
-			f << msgInCsv(mId) + "\n";
-		}
-	}
-
-	/* received messages */
-	if (this->receivedCheckBox->isChecked()) {
-		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
-			f << msgInCsv(mId) + "\n";
-		}
-	}
-
-	if (!fout.flush()) {
-		return false;
-	}
-	fout.close();
-
-	return true;
-}
-
 
 /* ========================================================================= */
 /*
@@ -376,7 +356,7 @@ void DlgCorrespondenceOverview::exportData(void)
 		qDebug() << "Correspondence file is exported to:" << exportDir;
 
 		if (this->outputFormatComboBox->currentText() == "HTML") {
-			if (!exportMessagesToHtml(overviewFileName)) {
+			if (!writeHtmlOverview(overviewFileName)) {
 				QMessageBox::warning(this, QObject::tr(
 					"Correspondence overview export error."),
 				    tr("Correspondence overview file '%1' could"
@@ -391,7 +371,7 @@ void DlgCorrespondenceOverview::exportData(void)
 				"overview file was exported to HTML.") +"<br/>";
 			}
 		} else {
-			if (!exportMessagesToCsv(overviewFileName)) {
+			if (!writeCsvOverview(overviewFileName)) {
 				QMessageBox::warning(this, QObject::tr(
 					"Correspondence overview export error"),
 				    tr("Correspondence overview file '%1' could"
