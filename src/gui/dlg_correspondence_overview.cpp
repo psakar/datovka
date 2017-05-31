@@ -22,10 +22,10 @@
  */
 
 #include <QDebug>
+#include <QFileDialog>
 #include <QMessageBox>
-#include <QPushButton>
 #include <QPrinter>
-#include <QTextDocument>
+#include <QPushButton>
 
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/io/exports.h"
@@ -33,20 +33,14 @@
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
 
-
-/* ========================================================================= */
-/*
- * Constructor.
- */
 DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
     const QString &userName, QString &exportCorrespondDir, const QString &dbId,
-    QWidget *parent) :
-    QDialog(parent),
+    QWidget *parent)
+    : QDialog(parent),
     m_messDbSet(dbSet),
     m_userName(userName),
     m_exportCorrespondDir(exportCorrespondDir),
     m_dbId(dbId)
-/* ========================================================================= */
 {
 	setupUi(this);
 
@@ -55,8 +49,8 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	Q_ASSERT(!m_userName.isEmpty());
 
 	QString accountName =
-	    AccountModel::globAccounts[userName].accountName() + " (" +
-	    m_userName + ")";
+	    AccountModel::globAccounts[userName].accountName() +
+	    QStringLiteral(" (") + m_userName + QStringLiteral(")");
 	this->accountName->setText(accountName);
 
 	this->toCalendarWidget->setMinimumDate(this->fromCalendarWidget->selectedDate());
@@ -65,8 +59,8 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	this->toCalendarWidget->setMaximumDate(currentDate);
 	this->fromCalendarWidget->setMaximumDate(currentDate);
 
-	this->outputFormatComboBox->addItem("CSV");
-	this->outputFormatComboBox->addItem("HTML");
+	this->outputFormatComboBox->addItem(QStringLiteral("CSV"));
+	this->outputFormatComboBox->addItem(QStringLiteral("HTML"));
 
 	connect(this->fromCalendarWidget, SIGNAL(clicked(QDate)), this,
 	SLOT(dateCalendarsChange(QDate)));
@@ -74,11 +68,11 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	connect(this->toCalendarWidget, SIGNAL(clicked(QDate)), this,
 	SLOT(dateCalendarsChange(QDate)));
 
-	connect(this->sentCheckBox, SIGNAL(stateChanged(int)), this,
-	SLOT(msgStateChanged(int)));
+	connect(this->sentCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(checkMsgTypeSelection()));
 
-	connect(this->receivedCheckBox, SIGNAL(stateChanged(int)), this,
-	SLOT(msgStateChanged(int)));
+	connect(this->receivedCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(checkMsgTypeSelection()));
 
 	getMsgListFromDates(this->fromCalendarWidget->selectedDate(),
 	    this->toCalendarWidget->selectedDate());
@@ -87,22 +81,10 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	    SLOT(exportData(void)));
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: fires when message type checkboxes change state.
- */
-void DlgCorrespondenceOverview::msgStateChanged(int state)
-/* ========================================================================= */
+void DlgCorrespondenceOverview::checkMsgTypeSelection(void)
 {
-	Q_UNUSED(state);
-
-	if ((!this->sentCheckBox->isChecked()) &&
-	    (!this->receivedCheckBox->isChecked())) {
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	} else {
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
-	}
+	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	    this->sentCheckBox->isChecked() || this->receivedCheckBox->isChecked());
 }
 
 
@@ -135,13 +117,13 @@ void DlgCorrespondenceOverview::getMsgListFromDates(const QDate &fromDate,
 	int sentCnt = 0;
 	int receivedCnt = 0;
 
-	m_messages.sentdmIDs = m_messDbSet.msgsDateInterval(fromDate,
+	m_messages.sentDmIDs = m_messDbSet.msgsDateInterval(fromDate,
 	    toDate, MSG_SENT);
-	sentCnt = m_messages.sentdmIDs.count();
+	sentCnt = m_messages.sentDmIDs.count();
 
-	m_messages.receivedmIDs = m_messDbSet.msgsDateInterval(fromDate,
+	m_messages.receivedDmIDs = m_messDbSet.msgsDateInterval(fromDate,
 	    toDate, MSG_RECEIVED);
-	receivedCnt = m_messages.receivedmIDs.count();
+	receivedCnt = m_messages.receivedDmIDs.count();
 
 	if (sentCnt > 0 || receivedCnt > 0) {
 		ok = true;
@@ -149,7 +131,7 @@ void DlgCorrespondenceOverview::getMsgListFromDates(const QDate &fromDate,
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(ok);
 
-	msgStateChanged(0);
+	checkMsgTypeSelection();
 
 	QString sentInfo = "(" + tr("messages: ") +
 	    QString::number(sentCnt) + ")";
@@ -306,7 +288,7 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 
 		f << "<h2>" << tr("Sent") << "</h2>\n";
 
-		foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+		foreach (const MessageDb::MsgId &mId, m_messages.sentDmIDs) {
 			f << msgInHtml(mId);
 		}
 	}
@@ -316,7 +298,7 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 
 		f << "<h2>" << tr("Received") << "</h2>\n";
 
-		foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+		foreach (const MessageDb::MsgId &mId, m_messages.receivedDmIDs) {
 			f << msgInHtml(mId);
 		}
 	}
@@ -364,14 +346,14 @@ bool DlgCorrespondenceOverview::exportMessagesToCsv(
 
 	/* sent messages */
 	if (this->sentCheckBox->isChecked()) {
-		foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+		foreach (const MessageDb::MsgId &mId, m_messages.sentDmIDs) {
 			f << msgInCsv(mId) + "\n";
 		}
 	}
 
 	/* received messages */
 	if (this->receivedCheckBox->isChecked()) {
-		foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+		foreach (const MessageDb::MsgId &mId, m_messages.receivedDmIDs) {
 			f << msgInCsv(mId) + "\n";
 		}
 	}
@@ -483,7 +465,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+			foreach (const MessageDb::MsgId &mId, m_messages.sentDmIDs) {
 
 				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::ZFO_MESSAGE, exportDir,
@@ -504,7 +486,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+			foreach (const MessageDb::MsgId &mId, m_messages.receivedDmIDs) {
 
 				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::ZFO_MESSAGE, exportDir,
@@ -532,7 +514,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+			foreach (const MessageDb::MsgId &mId, m_messages.sentDmIDs) {
 
 				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::ZFO_DELIVERY, exportDir,
@@ -553,7 +535,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+			foreach (const MessageDb::MsgId &mId, m_messages.receivedDmIDs) {
 
 				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::ZFO_DELIVERY, exportDir,
@@ -580,7 +562,7 @@ void DlgCorrespondenceOverview::exportData(void)
 	if (this->exportMessageEnvelopePDFCheckBox->isChecked()) {
 		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+			foreach (const MessageDb::MsgId &mId, m_messages.sentDmIDs) {
 
 				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::PDF_ENVELOPE, exportDir,
@@ -600,7 +582,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+			foreach (const MessageDb::MsgId &mId, m_messages.receivedDmIDs) {
 
 				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::PDF_ENVELOPE, exportDir,
@@ -626,7 +608,7 @@ void DlgCorrespondenceOverview::exportData(void)
 	if (this->exportDeliveryPDFCheckBox->isChecked()) {
 		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
+			foreach (const MessageDb::MsgId &mId, m_messages.sentDmIDs) {
 
 				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::PDF_DELIVERY, exportDir,
@@ -647,7 +629,7 @@ void DlgCorrespondenceOverview::exportData(void)
 
 		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
+			foreach (const MessageDb::MsgId &mId, m_messages.receivedDmIDs) {
 
 				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
 				    Exports::PDF_DELIVERY, exportDir,

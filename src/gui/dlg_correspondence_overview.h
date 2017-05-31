@@ -21,37 +21,43 @@
  * the two.
  */
 
-
 #ifndef _DLG_CORRESPONDENCE_OVERVIEW_H_
 #define _DLG_CORRESPONDENCE_OVERVIEW_H_
 
 #include <QDialog>
-#include <QFileDialog>
-#include <QTreeView>
-#include <QTableView>
 
-#include "ui_dlg_correspondence_overview.h"
 #include "src/io/message_db_set.h"
-
+#include "ui_dlg_correspondence_overview.h"
 
 class DlgCorrespondenceOverview : public QDialog,
     public Ui::CorrespondenceOverview {
     Q_OBJECT
 
 public:
+	/*!
+	 * @brief Holds list of exported messages.
+	 */
 	class ExportedMessageList {
 	public:
-		QList<MessageDb::MsgId> sentdmIDs;
-		QList<MessageDb::MsgId> receivedmIDs;
+		QList<MessageDb::MsgId> sentDmIDs; /*!< Sent massage identifiers. */
+		QList<MessageDb::MsgId> receivedDmIDs; /*!< Received message identifiers. */
 	};
 
-	DlgCorrespondenceOverview(const MessageDbSet &dbSet, const QString &userName,
-	    QString &exportCorrespondDir, const QString &dbId,
-	    QWidget *parent = 0);
+	/*!
+	 * @brief Constructor.
+	 */
+	DlgCorrespondenceOverview(const MessageDbSet &dbSet,
+	    const QString &userName, QString &exportCorrespondDir,
+	    const QString &dbId, QWidget *parent = Q_NULLPTR);
 
 private slots:
+	/*!
+	 * @brief Check message type selection and enable/disable acceptance
+	 *     button.
+	 */
+	void checkMsgTypeSelection(void);
+
 	void dateCalendarsChange(const QDate &date);
-	void msgStateChanged(int state);
 	void exportData(void);
 
 private:
@@ -66,7 +72,6 @@ private:
 	QString msgInHtml(const MessageDb::MsgId &mId) const;
 	bool exportMessagesToCsv(const QString &fileName) const;
 	bool exportMessagesToHtml(const QString &fileName) const;
-
 };
 
-#endif // _DLG_CORRESPONDENCE_OVERVIEW_H_
+#endif /* _DLG_CORRESPONDENCE_OVERVIEW_H_ */
