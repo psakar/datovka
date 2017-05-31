@@ -29,6 +29,9 @@
 #include "src/io/message_db_set.h"
 #include "ui_dlg_correspondence_overview.h"
 
+/*!
+ * @brief Correspondence overview dialogue.
+ */
 class DlgCorrespondenceOverview : public QDialog,
     public Ui::CorrespondenceOverview {
     Q_OBJECT
@@ -57,21 +60,37 @@ private slots:
 	 */
 	void checkMsgTypeSelection(void);
 
-	void dateCalendarsChange(const QDate &date);
+	/*!
+	 * @brief Obtains lists of messages according to calendar selection.
+	 */
+	void reftectCalendarChange(void);
+
 	void exportData(void);
 
 private:
-	const MessageDbSet &m_messDbSet;
-	const QString m_userName;
-	ExportedMessageList m_messages;
-	QString &m_exportCorrespondDir;
-	const QString &m_dbId;
+	/*!
+	 * @brief Enables/disables the Ok button according to widget content.
+	 */
+	void updateOkButtonActivity(void);
 
-	void getMsgListFromDates(const QDate &fromDate, const QDate &toDate);
+	/*!
+	 * @brief Updates exported message list according to date selection.
+	 *
+	 * @param[in] fromDate Start date.
+	 * @param[in] toData Stop date.
+	 */
+	void updateExportedMsgList(const QDate &fromDate, const QDate &toDate);
+
 	QString msgInCsv(const MessageDb::MsgId &mId) const;
 	QString msgInHtml(const MessageDb::MsgId &mId) const;
 	bool exportMessagesToCsv(const QString &fileName) const;
 	bool exportMessagesToHtml(const QString &fileName) const;
+
+	const MessageDbSet &m_messDbSet;
+	const QString m_userName;
+	ExportedMessageList m_exportedMsgs; /*!< List of exported messages. */
+	QString &m_exportCorrespondDir;
+	const QString &m_dbId;
 };
 
 #endif /* _DLG_CORRESPONDENCE_OVERVIEW_H_ */
