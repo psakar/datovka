@@ -391,6 +391,13 @@ QString DlgCorrespondenceOverview::exportOverview(const QString &dir,
 	return exportDir;
 }
 
+/*!
+ * @brief Appends error string to error list.
+ *
+ * @param[in]     fileType Type of generated file.
+ * @param[in]     dmId Message identifier.
+ * @param[in,out] errList String list to append error message to.
+ */
 static
 void appendError(enum Exports::ExportFileType fileType, qint64 dmId,
     QStringList &errList)
