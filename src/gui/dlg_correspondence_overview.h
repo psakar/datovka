@@ -113,6 +113,16 @@ private:
 	 */
 	bool writeHtmlOverview(const QString &fileName) const;
 
+	/*!
+	 * @brief Export correspondence overview file.
+	 *
+	 * @param[in] dir Suggested directory where to store the file.
+	 * @param[out] summary String to append summary to.
+	 * @return Non-empty path where the file has been stored on success,
+	 *     empty path on failure.
+	 */
+	QString exportOverview(const QString &dir, QString &summary);
+
 	const MessageDbSet &m_messDbSet;
 	const QString m_userName;
 	ExportedMessageList m_exportedMsgs; /*!< List of exported messages. */

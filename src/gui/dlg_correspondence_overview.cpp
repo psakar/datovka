@@ -33,6 +33,9 @@
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
 
+#define CSV_LITERAL QStringLiteral("CSV")
+#define HTML_LITERAL QStringLiteral("HTML")
+
 DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
     const QString &userName, QString &exportCorrespondDir, const QString &dbId,
     QWidget *parent)
@@ -56,8 +59,8 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	this->toCalendarWidget->setMaximumDate(currentDate);
 	this->fromCalendarWidget->setMaximumDate(currentDate);
 
-	this->outputFormatComboBox->addItem(QStringLiteral("CSV"));
-	this->outputFormatComboBox->addItem(QStringLiteral("HTML"));
+	this->outputFormatComboBox->addItem(CSV_LITERAL);
+	this->outputFormatComboBox->addItem(HTML_LITERAL);
 
 	connect(this->fromCalendarWidget, SIGNAL(clicked(QDate)),
 	    this, SLOT(reftectCalendarChange()));
@@ -325,6 +328,57 @@ bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &fileName) const
 	return true;
 }
 
+QString DlgCorrespondenceOverview::exportOverview(const QString &dir,
+    QString &summary)
+{
+	QString exportDir;
+
+	QString overviewFileName(dir + QDir::separator() + tr("Overview") +
+	    QStringLiteral("--") +
+	    this->fromCalendarWidget->selectedDate().toString(Qt::ISODate) +
+	    QStringLiteral("--") +
+	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate));
+	overviewFileName +=
+	    (this->outputFormatComboBox->currentText() == HTML_LITERAL) ?
+	        QStringLiteral(".html") : QStringLiteral(".csv");
+
+	overviewFileName = QFileDialog::getSaveFileName(this,
+	    tr("Select file to save correspondence overview"), overviewFileName,
+	    tr("Files") + QStringLiteral("(*.html *.txt *.csv)"));
+
+	if (!overviewFileName.isEmpty()) {
+		exportDir =
+		    QFileInfo(overviewFileName).absoluteDir().absolutePath();
+		qDebug("Correspondence file is going to be exported into directory '%s'.",
+		    exportDir.toUtf8().constData());
+
+		bool writeHtml =
+		    this->outputFormatComboBox->currentText() == HTML_LITERAL;
+		bool overviewWritten = writeHtml ?
+		    writeHtmlOverview(overviewFileName) :
+		    writeCsvOverview(overviewFileName);
+		if (!overviewWritten) {
+			QMessageBox::warning(this,
+			    tr("Correspondence Overview Export Error"),
+			    tr("Correspondence overview file '%1' could not be written.")
+			        .arg(QDir::toNativeSeparators(overviewFileName)),
+			    QMessageBox::Ok);
+		}
+		summary += (overviewWritten ?
+		    QStringLiteral("<b>1</b> ") : QStringLiteral("<b>0</b> ")) +
+		    (writeHtml ?
+		        tr("correspondence overview file was exported to HTML.") :
+		        tr("correspondence overview file was exported to CSV.")) +
+		    QStringLiteral("<br/>");
+	} else {
+		summary += QStringLiteral("<b>0</b> ") +
+		    tr("correspondence overview file was exported.") +
+		    QStringLiteral("<br/>");
+	}
+
+	return exportDir;
+}
+
 /* ========================================================================= */
 /*
  * Slot: fires when date was changed in CalendarWidgets
@@ -332,68 +386,21 @@ bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &fileName) const
 void DlgCorrespondenceOverview::exportData(void)
 /* ========================================================================= */
 {
-	QString tmpMsg = "";
+	QString tmpMsg;
 	QString exportDir;
 	QString lastPath;
 	QString errrStr;
 
-	QString overviewFileName = m_exportCorrespondDir + QDir::separator() +
-	    tr("Overview") + "--" +
-	    this->fromCalendarWidget->selectedDate().toString(Qt::ISODate) +
-	    "--" +
-	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
-	    (("HTML" == this->outputFormatComboBox->currentText()) ?
-	        ".html" : ".csv");
-
-	overviewFileName = QFileDialog::getSaveFileName(this,
-	    tr("Select file to save correspondence overview"),
-	    overviewFileName, tr("Files") + "(*.html *.txt *.csv)");
-
-	if (!overviewFileName.isEmpty()) {
-		exportDir =
-		    QFileInfo(overviewFileName).absoluteDir().absolutePath();
-		m_exportCorrespondDir = exportDir;
-		qDebug() << "Correspondence file is exported to:" << exportDir;
-
-		if (this->outputFormatComboBox->currentText() == "HTML") {
-			if (!writeHtmlOverview(overviewFileName)) {
-				QMessageBox::warning(this, QObject::tr(
-					"Correspondence overview export error."),
-				    tr("Correspondence overview file '%1' could"
-				    " not be written.").arg(
-				        QDir::toNativeSeparators(
-				            overviewFileName)),
-				    QMessageBox::Ok);
-				tmpMsg += "<b>0</b> " + tr("correspondence "
-				"overview file was exported to HTML.") +"<br/>";
-			} else {
-				tmpMsg += "<b>1</b> " + tr("correspondence "
-				"overview file was exported to HTML.") +"<br/>";
-			}
-		} else {
-			if (!writeCsvOverview(overviewFileName)) {
-				QMessageBox::warning(this, QObject::tr(
-					"Correspondence overview export error"),
-				    tr("Correspondence overview file '%1' could"
-				    " not be written.").arg(
-				        QDir::toNativeSeparators(
-				            overviewFileName)),
-				    QMessageBox::Ok);
-				tmpMsg += "<b>0</b> " + tr("correspondence "
-				"overview file was exported to CSV.") +"<br/>";
-			} else {
-				tmpMsg += "<b>1</b> " + tr("correspondence "
-				"overview file was exported to CSV.") +"<br/>";
-			}
+	{
+		const QString saveDir(
+		    exportOverview(m_exportCorrespondDir, tmpMsg));
+		if (!saveDir.isEmpty()) {
+			m_exportCorrespondDir = saveDir;
 		}
-	} else {
-		tmpMsg += "<b>0</b> " + tr("correspondence overview "
-		    "file was exported.") + "<br/>";
 	}
 
 	QString errorText;
 	QStringList errorList;
-	errorList.clear();
 	int successMsgZFOCnt = 0;
 	int successDelInfoZFOCnt = 0;
 	int successEnvelopePdfCnt = 0;
