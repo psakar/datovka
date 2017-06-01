@@ -21,11 +21,11 @@
  * the two.
  */
 
-#include <QDebug>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPrinter>
 #include <QPushButton>
+#include <QTextStream>
 
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/io/exports.h"
