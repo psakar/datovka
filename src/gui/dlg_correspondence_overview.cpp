@@ -379,6 +379,83 @@ QString DlgCorrespondenceOverview::exportOverview(const QString &dir,
 	return exportDir;
 }
 
+static
+void appendError(enum Exports::ExportFileType fileType, qint64 dmId,
+    QStringList &errList)
+{
+	switch (fileType) {
+	case Exports::ZFO_MESSAGE:
+		qWarning(
+		    QString("DZ '%1' export error.").arg(dmId).toUtf8().constData());
+		errList.append(
+		    QObject::tr("Message '%1' does not contain data necessary for ZFO export.")
+		        .arg(dmId));
+		break;
+	case Exports::ZFO_DELIVERY:
+		qWarning(
+		    QString("DZ '%1' export error").arg(dmId).toUtf8().constData());
+		errList.append(
+		    QObject::tr("Message '%1' does not contain delivery info data necessary for ZFO export.")
+		        .arg(dmId));
+		break;
+	case Exports::PDF_ENVELOPE:
+		qWarning(
+		    QString("OZ '%1' export error").arg(dmId).toUtf8().constData());
+		errList.append(
+		    QObject::tr("Message '%1' does not contain message envelope data necessary for PDF export.")
+		        .arg(dmId));
+		break;
+	case Exports::PDF_DELIVERY:
+		qWarning(
+		    QString("DD '%1' export error").arg(dmId).toUtf8().constData());
+		errList.append(
+		    QObject::tr("Message '%1' does not contain delivery info data necessary for PDF export.")
+		        .arg(dmId));
+		break;
+	case Exports::PDF_DELIV_ATTACH:
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+}
+
+/*!
+ * @brief Exports messages into files of given type.
+ *
+ * @param[in] mIds List of message identifiers.
+ * @param[in] parent Widget parent.
+ * @param[in] dbSet Database set.
+ * @param[in] fileType Type of files to be generated.
+ * @param[in] targetPath Location of created files.
+ * @param[in] userName Login identifying the account.
+ * @param[in] dbId Account database identifier.
+ * @param[in,out] lastPath Last used path.
+ * @param[out] errList List of error strings.
+ */
+static
+int exportMessageData(const QList<MessageDb::MsgId> &mIds,
+    QWidget *parent, const MessageDbSet &dbSet,
+    enum Exports::ExportFileType fileType, const QString &targetPath,
+    const QString &userName, const QString &dbId, QString &lastPath,
+    QStringList &errList)
+{
+	QString errStr;
+
+	int successCnt = 0;
+
+	foreach (const MessageDb::MsgId &mId, mIds) {
+		if (Exports::EXP_SUCCESS == Exports::exportAs(parent, dbSet,
+		        fileType, targetPath, QString(), userName, dbId, mId,
+		        false, lastPath, errStr)) {
+			++successCnt;
+		} else {
+			appendError(fileType, mId.dmId, errList);
+		}
+	}
+
+	return successCnt;
+}
+
 /* ========================================================================= */
 /*
  * Slot: fires when date was changed in CalendarWidgets
@@ -386,20 +463,18 @@ QString DlgCorrespondenceOverview::exportOverview(const QString &dir,
 void DlgCorrespondenceOverview::exportData(void)
 /* ========================================================================= */
 {
-	QString tmpMsg;
+	QString summaryMsg;
 	QString exportDir;
 	QString lastPath;
-	QString errrStr;
 
 	{
 		const QString saveDir(
-		    exportOverview(m_exportCorrespondDir, tmpMsg));
+		    exportOverview(m_exportCorrespondDir, summaryMsg));
 		if (!saveDir.isEmpty()) {
 			m_exportCorrespondDir = saveDir;
 		}
 	}
 
-	QString errorText;
 	QStringList errorList;
 	int successMsgZFOCnt = 0;
 	int successDelInfoZFOCnt = 0;
@@ -417,227 +492,120 @@ void DlgCorrespondenceOverview::exportData(void)
 		        QFileDialog::DontResolveSymlinks); 
 
 		if (exportDir.isEmpty()) {
-			tmpMsg += "<b>0</b> " + tr("messages were successfully "
-			    "exported to ZFO/PDF.") + "<br/>";
+			summaryMsg += QStringLiteral("<b>0</b> ") +
+			    tr("messages were successfully exported to ZFO/PDF.") +
+			    QStringLiteral("<br/>");
 			goto finish;
 		} 
 		m_exportCorrespondDir = exportDir; 
-		qDebug() << "Files will be exported to:" << exportDir;
+		qDebug("Files are going to be exported to directory '%s'.",
+		    exportDir.toUtf8().constData());
 	} 
 
-	/* export message ZFO */
+	/* Export messages to ZFO. */
 	if (this->exportZfoCheckBox->isChecked()) {
-
-		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::ZFO_MESSAGE, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain data necessary for ZFO "
-					    "export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successMsgZFOCnt++;
-				}
-			}
+			successMsgZFOCnt += exportMessageData(
+			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
+			    Exports::ZFO_MESSAGE, exportDir, m_userName,
+			    m_dbId, lastPath, errorList);
 		}
-
-		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::ZFO_MESSAGE, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain data necessary for ZFO "
-					    "export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successMsgZFOCnt++;
-				}
-			}
+			successMsgZFOCnt += exportMessageData(
+			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
+			    Exports::ZFO_MESSAGE, exportDir, m_userName,
+			    m_dbId, lastPath, errorList);
 		}
-		tmpMsg += "<b>" + QString::number(successMsgZFOCnt) +
-		"</b> " + tr("messages were successfully exported to ZFO.") +
-		"<br/>";
+		summaryMsg += QStringLiteral("<b>") +
+		    QString::number(successMsgZFOCnt) +
+		    QStringLiteral("</b> ") +
+		    tr("messages were successfully exported to ZFO.") +
+		    QStringLiteral("<br/>");
 	}
 
-	/* export delivery info ZFO */
+	/* Export delivery info ZFO. */
 	if (this->exportDeliveryZfoCheckBox->isChecked()) {
-
-		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::ZFO_DELIVERY, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain deivery info data "
-					    "necessary for ZFO export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successDelInfoZFOCnt++;
-				}
-			}
+			successDelInfoZFOCnt += exportMessageData(
+			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
+			    Exports::ZFO_DELIVERY, exportDir, m_userName,
+			    m_dbId, lastPath, errorList);
 		}
-
-		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::ZFO_DELIVERY, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain deivery info data "
-					    "necessary for ZFO export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successDelInfoZFOCnt++;
-				}
-			}
+			successDelInfoZFOCnt += exportMessageData(
+			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
+			    Exports::ZFO_DELIVERY, exportDir, m_userName,
+			    m_dbId, lastPath, errorList);
 		}
-		tmpMsg += "<b>" + QString::number(successDelInfoZFOCnt) +
-		"</b> " + tr("delivery infos were successfully "
-		"exported to ZFO.") + "<br/>";
+		summaryMsg += QStringLiteral("<b>") +
+		    QString::number(successDelInfoZFOCnt) +
+		    QStringLiteral("</b> ") +
+		    tr("delivery infos were successfully exported to ZFO.") +
+		    QStringLiteral("<br/>");
 	}
 
-	/* export envelope to PDF */
+	/* Export envelope to PDF. */
 	if (this->exportMessageEnvelopePDFCheckBox->isChecked()) {
-		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::PDF_ENVELOPE, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "OZ" << mId.dmId;
-					errorText = tr("Message '%1' does not "
-					    "contain message envelope data "
-					    "necessary for PDF export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successEnvelopePdfCnt++;
-				}
-			}
+			successEnvelopePdfCnt += exportMessageData(
+			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
+			    Exports::PDF_ENVELOPE, exportDir, m_userName,
+			    m_dbId, lastPath, errorList);
 		}
-
-		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::PDF_ENVELOPE, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "OZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain message envelope data "
-					    "necessary for PDF export.").
-					    arg(QString::number(mId.dmId));
-				} else {
-					successEnvelopePdfCnt++;
-				}
-			}
+			successEnvelopePdfCnt += exportMessageData(
+			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
+			    Exports::PDF_ENVELOPE, exportDir, m_userName,
+			    m_dbId, lastPath, errorList);
 		}
-		tmpMsg += "<b>" + QString::number(successEnvelopePdfCnt) +
-		    "</b> " + tr("message envelopes were successfully "
-		    "exported to PDF.") + "<br/>";
+		summaryMsg += QStringLiteral("<b>") +
+		    QString::number(successEnvelopePdfCnt) +
+		    QStringLiteral("</b> ") +
+		    tr("message envelopes were successfully exported to PDF.") +
+		    QStringLiteral("<br/>");
 	}
 
-	/* export delivery info to PDF */
+	/* Export delivery info to PDF. */
 	if (this->exportDeliveryPDFCheckBox->isChecked()) {
-		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::PDF_DELIVERY, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DD" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain delivery info data "
-					    "necessary for PDF export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successDelInfoPdfCnt++;
-				}
-			}
+			successDelInfoPdfCnt += exportMessageData(
+			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
+			    Exports::PDF_DELIVERY, exportDir, m_userName,
+			    m_dbId, lastPath, errorList);
 		}
-
-		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::PDF_DELIVERY, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DD" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain delivery info data "
-					    "necessary for PDF export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successDelInfoPdfCnt++;
-				}
-			}
+			successDelInfoPdfCnt += exportMessageData(
+			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
+			    Exports::PDF_DELIVERY, exportDir, m_userName,
+			    m_dbId, lastPath, errorList);
 		}
-		tmpMsg += "<b>" + QString::number(successDelInfoPdfCnt) +
-		    "</b> " + tr("delivery infos were successfully "
-		    "exported to PDF.")  + "<br/>";
+		summaryMsg += QStringLiteral("<b>") +
+		    QString::number(successDelInfoPdfCnt) +
+		    QStringLiteral("</b> ") +
+		    tr("delivery infos were successfully exported to PDF.") +
+		    QStringLiteral("<br/>");
 	}
-
-	//msgBoxProc.close();
 
 finish:
-
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Information);
 	msgBox.setWindowTitle(tr("Export results"));
-	msgBox.setText(tr("Export of correspondence overview finished "
-	    "with these results:"));
+	msgBox.setText(
+	    tr("Export of correspondence overview finished with these results:"));
 
 	if (!errorList.isEmpty()) {
-		tmpMsg += "<br/><b>" + tr("Some errors occurred "
-		    "during export.")  + "</b><br/>" +
-		    tr("See detail for more info...") + "<br/><br/>";
+		summaryMsg += QStringLiteral("<br/><b>") +
+		    tr("Some errors occurred during export.") +
+		    QStringLiteral("</b><br/>") +
+		    tr("See detail for more info...") +
+		    QStringLiteral("<br/><br/>");
 	}
-	msgBox.setInformativeText(tmpMsg);
+	msgBox.setInformativeText(summaryMsg);
 
-	QString msg = "";
+	QString msg;
 	if (!errorList.isEmpty()) {
 		for (int i = 0; i < errorList.count(); ++i) {
-			msg += errorList.at(i) + "\n";
+			msg += errorList.at(i) + QStringLiteral("\n");
 		}
 		msgBox.setDetailedText(msg);
 	}
