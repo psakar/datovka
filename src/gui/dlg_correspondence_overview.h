@@ -21,52 +21,126 @@
  * the two.
  */
 
-
 #ifndef _DLG_CORRESPONDENCE_OVERVIEW_H_
 #define _DLG_CORRESPONDENCE_OVERVIEW_H_
 
 #include <QDialog>
-#include <QFileDialog>
-#include <QTreeView>
-#include <QTableView>
 
-#include "ui_dlg_correspondence_overview.h"
 #include "src/io/message_db_set.h"
+#include "ui_dlg_correspondence_overview.h"
 
-
+/*!
+ * @brief Correspondence overview dialogue.
+ */
 class DlgCorrespondenceOverview : public QDialog,
     public Ui::CorrespondenceOverview {
     Q_OBJECT
 
 public:
+	/*!
+	 * @brief Holds list of exported messages.
+	 */
 	class ExportedMessageList {
 	public:
-		QList<MessageDb::MsgId> sentdmIDs;
-		QList<MessageDb::MsgId> receivedmIDs;
+		QList<MessageDb::MsgId> sentDmIDs; /*!< Sent massage identifiers. */
+		QList<MessageDb::MsgId> receivedDmIDs; /*!< Received message identifiers. */
 	};
 
-	DlgCorrespondenceOverview(const MessageDbSet &dbSet, const QString &userName,
-	    QString &exportCorrespondDir, const QString &dbId,
-	    QWidget *parent = 0);
+	/*!
+	 * @brief Constructor.
+	 */
+	DlgCorrespondenceOverview(const MessageDbSet &dbSet,
+	    const QString &dbId, const QString &userName,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Calls the dialogue and preforms export action.
+	 */
+	static
+	void exportData(const MessageDbSet &dbSet, const QString &dbId,
+	    const QString &userName, QString &exportCorrespondDir,
+	    QWidget *parent = Q_NULLPTR);
 
 private slots:
-	void dateCalendarsChange(const QDate &date);
-	void msgStateChanged(int state);
-	void exportData(void);
+	/*!
+	 * @brief Check message type selection and enable/disable acceptance
+	 *     button.
+	 */
+	void checkMsgTypeSelection(void);
+
+	/*!
+	 * @brief Obtains lists of messages according to calendar selection.
+	 */
+	void reftectCalendarChange(void);
 
 private:
-	const MessageDbSet &m_messDbSet;
-	const QString m_userName;
-	ExportedMessageList m_messages;
-	QString &m_exportCorrespondDir;
-	const QString &m_dbId;
+	/*!
+	 * @brief Enables/disables the Ok button according to widget content.
+	 */
+	void updateOkButtonActivity(void);
 
-	void getMsgListFromDates(const QDate &fromDate, const QDate &toDate);
-	QString msgInCsv(const MessageDb::MsgId &mId) const;
-	QString msgInHtml(const MessageDb::MsgId &mId) const;
-	bool exportMessagesToCsv(const QString &fileName) const;
-	bool exportMessagesToHtml(const QString &fileName) const;
+	/*!
+	 * @brief Updates exported message list according to date selection.
+	 *
+	 * @param[in] fromDate Start date.
+	 * @param[in] toData Stop date.
+	 */
+	void updateExportedMsgList(const QDate &fromDate, const QDate &toDate);
 
+	/*!
+	 * @brief Construct a CSV message entry.
+	 *
+	 * @param[in] mId Message identifier structure.
+	 * @return String containing CSV message entry, empty string on error.
+	 */
+	QString msgCsvEntry(const MessageDb::MsgId &mId) const;
+
+	/*!
+	 * @brief Construct a HTML message entry.
+	 *
+	 * @param[in] mId Message identifier structure.
+	 * @return String containing HTML message entry, empty string on error.
+	 */
+	QString msgHtmlEntry(const MessageDb::MsgId &mId) const;
+
+	/*!
+	 * @brief Export message overview to CSV file.
+	 *
+	 * @param[in] fileName Name of the saved file.
+	 * @return False on failure.
+	 */
+	bool writeCsvOverview(const QString &fileName) const;
+
+	/*!
+	 * @brief Export message overview to HTML file.
+	 *
+	 * @param[in] fileName Name of the saved file.
+	 * @return False on failure.
+	 */
+	bool writeHtmlOverview(const QString &fileName) const;
+
+	/*!
+	 * @brief Export correspondence overview file.
+	 *
+	 * @param[in] dir Suggested directory where to store the file.
+	 * @param[out] summary String to append summary to.
+	 * @return Non-empty path where the file has been stored on success,
+	 *     empty path on failure.
+	 */
+	QString exportOverview(const QString &dir, QString &summary);
+
+	/*!
+	 * @brief Export all data that have been selected in the dialogue.
+	 *
+	 * @param[in]     userName User login identifying the account.
+	 * @param[in,out] exportCorrespondDir Location where to store the data.
+	 */
+	void exportChosenData(const QString &userName,
+	    QString &exportCorrespondDir);
+
+	const MessageDbSet &m_messDbSet; /*!< Database set to be accessed. */
+	const QString &m_dbId; /*!< Account database identifier. */
+	ExportedMessageList m_exportedMsgs; /*!< List of exported messages. */
 };
 
-#endif // _DLG_CORRESPONDENCE_OVERVIEW_H_
+#endif /* _DLG_CORRESPONDENCE_OVERVIEW_H_ */

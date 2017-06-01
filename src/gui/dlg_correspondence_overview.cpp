@@ -21,11 +21,11 @@
  * the two.
  */
 
-#include <QDebug>
+#include <QFileDialog>
 #include <QMessageBox>
-#include <QPushButton>
 #include <QPrinter>
-#include <QTextDocument>
+#include <QPushButton>
+#include <QTextStream>
 
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/io/exports.h"
@@ -33,140 +33,110 @@
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
 
+#define CSV_LITERAL QStringLiteral("CSV")
+#define HTML_LITERAL QStringLiteral("HTML")
 
-/* ========================================================================= */
-/*
- * Constructor.
- */
 DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
-    const QString &userName, QString &exportCorrespondDir, const QString &dbId,
-    QWidget *parent) :
-    QDialog(parent),
+    const QString &dbId, const QString &userName, QWidget *parent)
+    : QDialog(parent),
     m_messDbSet(dbSet),
-    m_userName(userName),
-    m_exportCorrespondDir(exportCorrespondDir),
-    m_dbId(dbId)
-/* ========================================================================= */
+    m_dbId(dbId),
+    m_exportedMsgs()
 {
 	setupUi(this);
 
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	Q_ASSERT(!userName.isEmpty());
 
-	Q_ASSERT(!m_userName.isEmpty());
-
-	QString accountName =
-	    AccountModel::globAccounts[userName].accountName() + " (" +
-	    m_userName + ")";
-	this->accountName->setText(accountName);
+	this->accountName->setText(
+	    AccountModel::globAccounts[userName].accountName() +
+	    QStringLiteral(" (") + userName + QStringLiteral(")"));
 
 	this->toCalendarWidget->setMinimumDate(this->fromCalendarWidget->selectedDate());
 
-	QDate currentDate = QDate().currentDate();
+	QDate currentDate(QDate().currentDate());
 	this->toCalendarWidget->setMaximumDate(currentDate);
 	this->fromCalendarWidget->setMaximumDate(currentDate);
 
-	this->outputFormatComboBox->addItem("CSV");
-	this->outputFormatComboBox->addItem("HTML");
+	this->outputFormatComboBox->addItem(CSV_LITERAL);
+	this->outputFormatComboBox->addItem(HTML_LITERAL);
 
-	connect(this->fromCalendarWidget, SIGNAL(clicked(QDate)), this,
-	SLOT(dateCalendarsChange(QDate)));
+	connect(this->fromCalendarWidget, SIGNAL(clicked(QDate)),
+	    this, SLOT(reftectCalendarChange()));
 
-	connect(this->toCalendarWidget, SIGNAL(clicked(QDate)), this,
-	SLOT(dateCalendarsChange(QDate)));
+	connect(this->toCalendarWidget, SIGNAL(clicked(QDate)),
+	    this, SLOT(reftectCalendarChange()));
 
-	connect(this->sentCheckBox, SIGNAL(stateChanged(int)), this,
-	SLOT(msgStateChanged(int)));
+	connect(this->sentCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(checkMsgTypeSelection()));
 
-	connect(this->receivedCheckBox, SIGNAL(stateChanged(int)), this,
-	SLOT(msgStateChanged(int)));
+	connect(this->receivedCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(checkMsgTypeSelection()));
 
-	getMsgListFromDates(this->fromCalendarWidget->selectedDate(),
+	updateExportedMsgList(this->fromCalendarWidget->selectedDate(),
 	    this->toCalendarWidget->selectedDate());
-
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(exportData(void)));
+	updateOkButtonActivity();
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: fires when message type checkboxes change state.
- */
-void DlgCorrespondenceOverview::msgStateChanged(int state)
-/* ========================================================================= */
+void DlgCorrespondenceOverview::exportData(const MessageDbSet &dbSet,
+    const QString &dbId, const QString &userName, QString &exportCorrespondDir,
+    QWidget *parent)
 {
-	Q_UNUSED(state);
-
-	if ((!this->sentCheckBox->isChecked()) &&
-	    (!this->receivedCheckBox->isChecked())) {
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	} else {
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return;
 	}
+
+	DlgCorrespondenceOverview dlg(dbSet, dbId, userName, parent);
+	if (QDialog::Accepted != dlg.exec()) {
+		return;
+	}
+
+	dlg.exportChosenData(userName, exportCorrespondDir);
 }
 
-
-/* ========================================================================= */
-/*
- * Slot: fires when date was changed in CalendarWidgets
- */
-void DlgCorrespondenceOverview::dateCalendarsChange(const QDate &date)
-/* ========================================================================= */
+void DlgCorrespondenceOverview::checkMsgTypeSelection(void)
 {
-	Q_UNUSED(date);
+	updateOkButtonActivity();
+}
 
+void DlgCorrespondenceOverview::reftectCalendarChange(void)
+{
 	this->toCalendarWidget->setMinimumDate(
 	    this->fromCalendarWidget->selectedDate());
 
-	getMsgListFromDates(this->fromCalendarWidget->selectedDate(),
+	updateExportedMsgList(this->fromCalendarWidget->selectedDate(),
 	    this->toCalendarWidget->selectedDate());
+	updateOkButtonActivity();
 }
 
+void DlgCorrespondenceOverview::updateOkButtonActivity(void)
+{
+	/* Enabled the button if there are some messages to be exported. */
+	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	    (this->sentCheckBox->isChecked() &&
+	     (m_exportedMsgs.sentDmIDs.count() > 0)) ||
+	    (this->receivedCheckBox->isChecked() &&
+	     (m_exportedMsgs.receivedDmIDs.count() > 0)));
+}
 
-/* ========================================================================= */
-/*
- * Slot: fires when date was changed in CalendarWidgets
- */
-void DlgCorrespondenceOverview::getMsgListFromDates(const QDate &fromDate,
+void DlgCorrespondenceOverview::updateExportedMsgList(const QDate &fromDate,
     const QDate &toDate)
-/* ========================================================================= */
 {
-	bool ok = false;
-	int sentCnt = 0;
-	int receivedCnt = 0;
-
-	m_messages.sentdmIDs = m_messDbSet.msgsDateInterval(fromDate,
+	m_exportedMsgs.sentDmIDs = m_messDbSet.msgsDateInterval(fromDate,
 	    toDate, MSG_SENT);
-	sentCnt = m_messages.sentdmIDs.count();
-
-	m_messages.receivedmIDs = m_messDbSet.msgsDateInterval(fromDate,
+	m_exportedMsgs.receivedDmIDs = m_messDbSet.msgsDateInterval(fromDate,
 	    toDate, MSG_RECEIVED);
-	receivedCnt = m_messages.receivedmIDs.count();
 
-	if (sentCnt > 0 || receivedCnt > 0) {
-		ok = true;
-	}
-
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(ok);
-
-	msgStateChanged(0);
-
-	QString sentInfo = "(" + tr("messages: ") +
-	    QString::number(sentCnt) + ")";
-	QString receivedInfo = "(" + tr("messages: ") +
-	    QString::number(receivedCnt) + ")";
-
-	this->sentCntLabel->setText(sentInfo);
-	this->receivedCntLabel->setText(receivedInfo);
+	this->sentCntLabel->setText(QStringLiteral("(") + tr("messages: ") +
+	    QString::number(m_exportedMsgs.sentDmIDs.count()) +
+	    QStringLiteral(")"));
+	this->receivedCntLabel->setText(QStringLiteral("(") + tr("messages: ") +
+	    QString::number(m_exportedMsgs.receivedDmIDs.count()) +
+	    QStringLiteral(")"));
 }
 
-
-/* ========================================================================= */
-/*
- * Add message to HTML.
- */
-QString DlgCorrespondenceOverview::msgInHtml(const MessageDb::MsgId &mId) const
-/* ========================================================================= */
+QString DlgCorrespondenceOverview::msgCsvEntry(
+    const MessageDb::MsgId &mId) const
 {
 	if (!mId.isValid()) {
 		Q_ASSERT(0);
@@ -175,79 +145,121 @@ QString DlgCorrespondenceOverview::msgInHtml(const MessageDb::MsgId &mId) const
 
 	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
 	    mId.deliveryTime);
-	Q_ASSERT(0 != messageDb);
+	Q_ASSERT(Q_NULLPTR != messageDb);
 
-	QStringList messageItems = messageDb->getMsgForHtmlExport(mId.dmId);
+	QStringList messageItems(messageDb->getMsgForCsvExport(mId.dmId));
 	if (messageItems.empty()) {
 		return QString();
 	}
 
-	return "<div><table><tr><td><table>"
-	    "<tr><td><b>"
-	    + QString::number(mId.dmId) +
-	    "</b></td></tr>"
-	    "<tr><td class=\"smaller\">"
-	    + messageItems.at(3) +
-	    "</td></tr>"
-	    "<tr><td class=\"smaller\">"
-	    + messageItems.at(4) +
-	    "</td></tr>"
-	    "</table></td><td><table><tr><td>"
-	     + tr("Subject:") +
-	    "</td><td><i><b>"
-	    + messageItems.at(2) +
-	    "</b></i></td></tr><tr><td>"
-	    + tr("Sender:") +
-	    "</td><td><i>"
-	    + messageItems.at(0) +
-	    "</i></td></tr><tr><td>"
-	    + tr("Recipient:") +
-	    "</td><td><i>"
-	    + messageItems.at(1) +
-	    "</i></td></tr></table></td></tr></table></div>";
-}
-
-
-/* ========================================================================= */
-/*
- * Add message to CSV.
- */
-QString DlgCorrespondenceOverview::msgInCsv(const MessageDb::MsgId &mId) const
-/* ========================================================================= */
-{
-	if (!mId.isValid()) {
-		Q_ASSERT(0);
-		return QString();
-	}
-
-	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
-	    mId.deliveryTime);
-	Q_ASSERT(0 != messageDb);
-
-	QStringList messageItems = messageDb->getMsgForCsvExport(mId.dmId);
-	if (messageItems.empty()) {
-		return QString();
-	}
-
-	QString content = QString::number(mId.dmId);
+	QString content(QString::number(mId.dmId));
 
 	for (int i = 0; i < messageItems.count(); ++i) {
-		content += "," + messageItems.at(i);
+		content += QStringLiteral(",") + messageItems.at(i);
 	}
 
 	return content;
 }
 
-
-/* ========================================================================= */
-/*
- * Export messages to HTML.
- */
-bool DlgCorrespondenceOverview::exportMessagesToHtml(
-    const QString &fileName) const
-/* ========================================================================= */
+QString DlgCorrespondenceOverview::msgHtmlEntry(
+    const MessageDb::MsgId &mId) const
 {
-	qDebug() << "Files are export to HTML format";
+	if (!mId.isValid()) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
+	    mId.deliveryTime);
+	Q_ASSERT(Q_NULLPTR != messageDb);
+
+	QStringList messageItems(messageDb->getMsgForHtmlExport(mId.dmId));
+	if (messageItems.empty()) {
+		return QString();
+	}
+
+	return
+	    QStringLiteral("<div><table><tr><td><table>"
+	                   "<tr><td><b>")
+	    + QString::number(mId.dmId) +
+	    QStringLiteral("</b></td></tr>"
+	                   "<tr><td class=\"smaller\">")
+	    + messageItems.at(3) +
+	    QStringLiteral("</td></tr>"
+	                   "<tr><td class=\"smaller\">")
+	    + messageItems.at(4) +
+	    QStringLiteral("</td></tr>"
+	                   "</table></td><td><table><tr><td>")
+	    + tr("Subject:") +
+	    QStringLiteral("</td><td><i><b>")
+	    + messageItems.at(2) +
+	    QStringLiteral("</b></i></td></tr><tr><td>")
+	    + tr("Sender:") +
+	    QStringLiteral("</td><td><i>")
+	    + messageItems.at(0) +
+	    QStringLiteral("</i></td></tr><tr><td>")
+	    + tr("Recipient:") +
+	    QStringLiteral("</td><td><i>")
+	    + messageItems.at(1) +
+	    QStringLiteral("</i></td></tr></table></td></tr></table></div>");
+}
+
+bool DlgCorrespondenceOverview::writeCsvOverview(const QString &fileName) const
+{
+	qDebug("Files are going be be exported to CSV file '%s'.",
+	    fileName.toUtf8().constData());
+
+	if (fileName.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	QFile fout(fileName);
+	if (!fout.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		return false;
+	}
+
+	QTextStream f(&fout);
+	/* Generate CSV header. */
+	f << QStringLiteral("ID,") +
+	    tr("Status") + QStringLiteral(",") +
+	    tr("Message type") + QStringLiteral(",") +
+	    tr("Delivery time") + QStringLiteral(",") +
+	    tr("Acceptance time") + QStringLiteral(",") +
+	    tr("Subject") + QStringLiteral(",") +
+	    tr("Sender") + QStringLiteral(",") +
+	    tr("Sender Address") + QStringLiteral(",") +
+	    tr("Recipient") + QStringLiteral(",") +
+	    tr("Recipient Address") + QStringLiteral(",") +
+	    tr("Our file mark") + QStringLiteral(",") +
+	    tr("Our reference number") + QStringLiteral(",") +
+	    tr("Your file mark") + QStringLiteral(",") +
+	    tr("Your reference number") + QStringLiteral("\n");
+
+	/* Sent messages. */
+	if (this->sentCheckBox->isChecked()) {
+		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
+			f << msgCsvEntry(mId) + QStringLiteral("\n");
+		}
+	}
+
+	/* Received messages. */
+	if (this->receivedCheckBox->isChecked()) {
+		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
+			f << msgCsvEntry(mId) + QStringLiteral("\n");
+		}
+	}
+
+	fout.flush();
+	fout.close();
+
+	return true;
+}
+
+bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &fileName) const
+{
+	qDebug("Files are going be be exported to HTML file '%s'.",
+	    fileName.toUtf8().constData());
 
 	if (fileName.isEmpty()) {
 		Q_ASSERT(0);
@@ -266,15 +278,15 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 	 */
 	f.setCodec("UTF-8");
 	/* Generate HTML header. */
-	f << "<!DOCTYPE html\n"
+	f << QStringLiteral("<!DOCTYPE html\n"
 	    "   PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
 	    "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"
 	    "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
 	    "<head>\n"
 	    "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n"
-	    "<title>"
+	    "<title>")
 	    + tr("Correspondence overview") +
-	    "</title>\n"
+	    QStringLiteral("</title>\n"
 	    "<style type=\"text/css\">\n"
 	    "   td {padding: 0px 5px; }\n"
 	    "   div { border-bottom: solid 1px black;}\n"
@@ -283,177 +295,202 @@ bool DlgCorrespondenceOverview::exportMessagesToHtml(
 	    "</style>\n"
 	    "</head>\n"
 	    "<body>\n"
-	    "<h1>"
+	    "<h1>")
 	    + tr("Correspondence overview") +
-	    "</h1>\n"
-	    "<table><tr><td>\n"
+	    QStringLiteral("</h1>\n"
+	    "<table><tr><td>\n")
 	    + tr("From date:") +
-	    "</td><td>"
+	    QStringLiteral("</td><td>")
 	    + this->fromCalendarWidget->selectedDate().toString("dd.MM.yyyy") +
-	    "</td></tr><tr><td>"
+	    QStringLiteral("</td></tr><tr><td>")
 	    + tr("To date:") +
-	    "</td><td>"
+	    QStringLiteral("</td><td>")
 	    + this->toCalendarWidget->selectedDate().toString("dd.MM.yyyy") +
-	    "</td></tr><tr><td>"
+	    QStringLiteral("</td></tr><tr><td>")
 	    + tr("Generated:") +
-	    "</td><td>"
+	    QStringLiteral("</td><td>")
 	    + QDateTime().currentDateTime().toString("dd.MM.yyyy hh:mm:ss") +
-	    "</td></tr></table>\n";
+	    QStringLiteral("</td></tr></table>\n");
 
-
-	/* sent messages */
+	/* Sent messages. */
 	if (this->sentCheckBox->isChecked()) {
+		f << QStringLiteral("<h2>") << tr("Sent")
+		    << QStringLiteral("</h2>\n");
 
-		f << "<h2>" << tr("Sent") << "</h2>\n";
-
-		foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
-			f << msgInHtml(mId);
+		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
+			f << msgHtmlEntry(mId);
 		}
 	}
 
-	/* received messages */
+	/* Received messages. */
 	if (this->receivedCheckBox->isChecked()) {
+		f << QStringLiteral("<h2>") << tr("Received")
+		    << QStringLiteral("</h2>\n");
 
-		f << "<h2>" << tr("Received") << "</h2>\n";
-
-		foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
-			f << msgInHtml(mId);
+		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
+			f << msgHtmlEntry(mId);
 		}
 	}
 
-	f << "</body>\n</html>";
+	f << QStringLiteral("</body>\n</html>");
 
-	if (!fout.flush()) {
-		return false;
-	}
+	fout.flush();
 	fout.close();
 
 	return true;
 }
 
-
-/* ========================================================================= */
-/*
- * Export messages to CSV.
- */
-bool DlgCorrespondenceOverview::exportMessagesToCsv(
-    const QString &fileName) const
-/* ========================================================================= */
+QString DlgCorrespondenceOverview::exportOverview(const QString &dir,
+    QString &summary)
 {
-	qDebug() << "Files are export to CSV format";
-
-	if (fileName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	QFile fout(fileName);
-	if (!fout.open(QIODevice::WriteOnly | QIODevice::Text)) {
-		return false;
-	}
-
-	QTextStream f(&fout);
-	/* Generate CSV header. */
-	f << "ID," + tr("Status") + "," + tr("Message type") + "," +
-	    tr("Delivery time") + "," + tr("Acceptance time") + "," +
-	    tr("Subject") + "," + tr("Sender") + "," +
-	    tr("Sender Address") + "," + tr("Recipient") + "," +
-	    tr("Recipient Address") + "," + tr("Our file mark") + "," +
-	    tr("Our reference number") + "," + tr("Your file mark") + "," +
-	    tr("Your reference number") + "\n";
-
-	/* sent messages */
-	if (this->sentCheckBox->isChecked()) {
-		foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
-			f << msgInCsv(mId) + "\n";
-		}
-	}
-
-	/* received messages */
-	if (this->receivedCheckBox->isChecked()) {
-		foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
-			f << msgInCsv(mId) + "\n";
-		}
-	}
-
-	if (!fout.flush()) {
-		return false;
-	}
-	fout.close();
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Slot: fires when date was changed in CalendarWidgets
- */
-void DlgCorrespondenceOverview::exportData(void)
-/* ========================================================================= */
-{
-	QString tmpMsg = "";
 	QString exportDir;
-	QString lastPath;
-	QString errrStr;
 
-	QString overviewFileName = m_exportCorrespondDir + QDir::separator() +
-	    tr("Overview") + "--" +
+	QString overviewFileName(dir + QDir::separator() + tr("Overview") +
+	    QStringLiteral("--") +
 	    this->fromCalendarWidget->selectedDate().toString(Qt::ISODate) +
-	    "--" +
-	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate) +
-	    (("HTML" == this->outputFormatComboBox->currentText()) ?
-	        ".html" : ".csv");
+	    QStringLiteral("--") +
+	    this->toCalendarWidget->selectedDate().toString(Qt::ISODate));
+	overviewFileName +=
+	    (this->outputFormatComboBox->currentText() == HTML_LITERAL) ?
+	        QStringLiteral(".html") : QStringLiteral(".csv");
 
 	overviewFileName = QFileDialog::getSaveFileName(this,
-	    tr("Select file to save correspondence overview"),
-	    overviewFileName, tr("Files") + "(*.html *.txt *.csv)");
+	    tr("Select file to save correspondence overview"), overviewFileName,
+	    tr("Files") + QStringLiteral("(*.html *.txt *.csv)"));
 
 	if (!overviewFileName.isEmpty()) {
 		exportDir =
 		    QFileInfo(overviewFileName).absoluteDir().absolutePath();
-		m_exportCorrespondDir = exportDir;
-		qDebug() << "Correspondence file is exported to:" << exportDir;
+		qDebug("Correspondence file is going to be exported into directory '%s'.",
+		    exportDir.toUtf8().constData());
 
-		if (this->outputFormatComboBox->currentText() == "HTML") {
-			if (!exportMessagesToHtml(overviewFileName)) {
-				QMessageBox::warning(this, QObject::tr(
-					"Correspondence overview export error."),
-				    tr("Correspondence overview file '%1' could"
-				    " not be written.").arg(
-				        QDir::toNativeSeparators(
-				            overviewFileName)),
-				    QMessageBox::Ok);
-				tmpMsg += "<b>0</b> " + tr("correspondence "
-				"overview file was exported to HTML.") +"<br/>";
-			} else {
-				tmpMsg += "<b>1</b> " + tr("correspondence "
-				"overview file was exported to HTML.") +"<br/>";
-			}
-		} else {
-			if (!exportMessagesToCsv(overviewFileName)) {
-				QMessageBox::warning(this, QObject::tr(
-					"Correspondence overview export error"),
-				    tr("Correspondence overview file '%1' could"
-				    " not be written.").arg(
-				        QDir::toNativeSeparators(
-				            overviewFileName)),
-				    QMessageBox::Ok);
-				tmpMsg += "<b>0</b> " + tr("correspondence "
-				"overview file was exported to CSV.") +"<br/>";
-			} else {
-				tmpMsg += "<b>1</b> " + tr("correspondence "
-				"overview file was exported to CSV.") +"<br/>";
-			}
+		bool writeHtml =
+		    this->outputFormatComboBox->currentText() == HTML_LITERAL;
+		bool overviewWritten = writeHtml ?
+		    writeHtmlOverview(overviewFileName) :
+		    writeCsvOverview(overviewFileName);
+		if (!overviewWritten) {
+			QMessageBox::warning(this,
+			    tr("Correspondence Overview Export Error"),
+			    tr("Correspondence overview file '%1' could not be written.")
+			        .arg(QDir::toNativeSeparators(overviewFileName)),
+			    QMessageBox::Ok);
 		}
+		summary += (overviewWritten ?
+		    QStringLiteral("<b>1</b> ") : QStringLiteral("<b>0</b> ")) +
+		    (writeHtml ?
+		        tr("correspondence overview file was exported to HTML.") :
+		        tr("correspondence overview file was exported to CSV.")) +
+		    QStringLiteral("<br/>");
 	} else {
-		tmpMsg += "<b>0</b> " + tr("correspondence overview "
-		    "file was exported.") + "<br/>";
+		summary += QStringLiteral("<b>0</b> ") +
+		    tr("correspondence overview file was exported.") +
+		    QStringLiteral("<br/>");
 	}
 
-	QString errorText;
+	return exportDir;
+}
+
+/*!
+ * @brief Appends error string to error list.
+ *
+ * @param[in]     fileType Type of generated file.
+ * @param[in]     dmId Message identifier.
+ * @param[in,out] errList String list to append error message to.
+ */
+static
+void appendError(enum Exports::ExportFileType fileType, qint64 dmId,
+    QStringList &errList)
+{
+	switch (fileType) {
+	case Exports::ZFO_MESSAGE:
+		qWarning(
+		    QString("DZ '%1' export error.").arg(dmId).toUtf8().constData());
+		errList.append(
+		    QObject::tr("Message '%1' does not contain data necessary for ZFO export.")
+		        .arg(dmId));
+		break;
+	case Exports::ZFO_DELIVERY:
+		qWarning(
+		    QString("DZ '%1' export error").arg(dmId).toUtf8().constData());
+		errList.append(
+		    QObject::tr("Message '%1' does not contain delivery info data necessary for ZFO export.")
+		        .arg(dmId));
+		break;
+	case Exports::PDF_ENVELOPE:
+		qWarning(
+		    QString("OZ '%1' export error").arg(dmId).toUtf8().constData());
+		errList.append(
+		    QObject::tr("Message '%1' does not contain message envelope data necessary for PDF export.")
+		        .arg(dmId));
+		break;
+	case Exports::PDF_DELIVERY:
+		qWarning(
+		    QString("DD '%1' export error").arg(dmId).toUtf8().constData());
+		errList.append(
+		    QObject::tr("Message '%1' does not contain delivery info data necessary for PDF export.")
+		        .arg(dmId));
+		break;
+	case Exports::PDF_DELIV_ATTACH:
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+}
+
+/*!
+ * @brief Exports messages into files of given type.
+ *
+ * @param[in] mIds List of message identifiers.
+ * @param[in] parent Widget parent.
+ * @param[in] dbSet Database set.
+ * @param[in] fileType Type of files to be generated.
+ * @param[in] targetPath Location of created files.
+ * @param[in] userName Login identifying the account.
+ * @param[in] dbId Account database identifier.
+ * @param[in,out] lastPath Last used path.
+ * @param[out] errList List of error strings.
+ */
+static
+int exportMessageData(const QList<MessageDb::MsgId> &mIds,
+    QWidget *parent, const MessageDbSet &dbSet,
+    enum Exports::ExportFileType fileType, const QString &targetPath,
+    const QString &userName, const QString &dbId, QString &lastPath,
+    QStringList &errList)
+{
+	QString errStr;
+
+	int successCnt = 0;
+
+	foreach (const MessageDb::MsgId &mId, mIds) {
+		if (Exports::EXP_SUCCESS == Exports::exportAs(parent, dbSet,
+		        fileType, targetPath, QString(), userName, dbId, mId,
+		        false, lastPath, errStr)) {
+			++successCnt;
+		} else {
+			appendError(fileType, mId.dmId, errList);
+		}
+	}
+
+	return successCnt;
+}
+
+void DlgCorrespondenceOverview::exportChosenData(const QString &userName,
+    QString &exportCorrespondDir)
+{
+	QString summaryMsg;
+	QString exportDir;
+	QString lastPath;
+
+	{
+		const QString saveDir(
+		    exportOverview(exportCorrespondDir, summaryMsg));
+		if (!saveDir.isEmpty()) {
+			exportCorrespondDir = saveDir;
+		}
+	}
+
 	QStringList errorList;
-	errorList.clear();
 	int successMsgZFOCnt = 0;
 	int successDelInfoZFOCnt = 0;
 	int successEnvelopePdfCnt = 0;
@@ -465,232 +502,125 @@ void DlgCorrespondenceOverview::exportData(void)
 	    this->exportDeliveryPDFCheckBox->isChecked()) {
 		exportDir = QFileDialog::getExistingDirectory(this,
 		    tr("Select directory for export of ZFO/PDF file(s)"),
-		    m_exportCorrespondDir,
+		    exportCorrespondDir,
 		    QFileDialog::ShowDirsOnly |
 		        QFileDialog::DontResolveSymlinks); 
 
 		if (exportDir.isEmpty()) {
-			tmpMsg += "<b>0</b> " + tr("messages were successfully "
-			    "exported to ZFO/PDF.") + "<br/>";
+			summaryMsg += QStringLiteral("<b>0</b> ") +
+			    tr("messages were successfully exported to ZFO/PDF.") +
+			    QStringLiteral("<br/>");
 			goto finish;
 		} 
-		m_exportCorrespondDir = exportDir; 
-		qDebug() << "Files will be exported to:" << exportDir;
+		exportCorrespondDir = exportDir;
+		qDebug("Files are going to be exported to directory '%s'.",
+		    exportDir.toUtf8().constData());
 	} 
 
-	/* export message ZFO */
+	/* Export messages to ZFO. */
 	if (this->exportZfoCheckBox->isChecked()) {
-
-		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::ZFO_MESSAGE, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain data necessary for ZFO "
-					    "export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successMsgZFOCnt++;
-				}
-			}
+			successMsgZFOCnt += exportMessageData(
+			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
+			    Exports::ZFO_MESSAGE, exportDir, userName,
+			    m_dbId, lastPath, errorList);
 		}
-
-		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::ZFO_MESSAGE, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain data necessary for ZFO "
-					    "export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successMsgZFOCnt++;
-				}
-			}
+			successMsgZFOCnt += exportMessageData(
+			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
+			    Exports::ZFO_MESSAGE, exportDir, userName,
+			    m_dbId, lastPath, errorList);
 		}
-		tmpMsg += "<b>" + QString::number(successMsgZFOCnt) +
-		"</b> " + tr("messages were successfully exported to ZFO.") +
-		"<br/>";
+		summaryMsg += QStringLiteral("<b>") +
+		    QString::number(successMsgZFOCnt) +
+		    QStringLiteral("</b> ") +
+		    tr("messages were successfully exported to ZFO.") +
+		    QStringLiteral("<br/>");
 	}
 
-	/* export delivery info ZFO */
+	/* Export delivery info ZFO. */
 	if (this->exportDeliveryZfoCheckBox->isChecked()) {
-
-		/* sent ZFO */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::ZFO_DELIVERY, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain deivery info data "
-					    "necessary for ZFO export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successDelInfoZFOCnt++;
-				}
-			}
+			successDelInfoZFOCnt += exportMessageData(
+			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
+			    Exports::ZFO_DELIVERY, exportDir, userName,
+			    m_dbId, lastPath, errorList);
 		}
-
-		/* received ZFO */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::ZFO_DELIVERY, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain deivery info data "
-					    "necessary for ZFO export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successDelInfoZFOCnt++;
-				}
-			}
+			successDelInfoZFOCnt += exportMessageData(
+			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
+			    Exports::ZFO_DELIVERY, exportDir, userName,
+			    m_dbId, lastPath, errorList);
 		}
-		tmpMsg += "<b>" + QString::number(successDelInfoZFOCnt) +
-		"</b> " + tr("delivery infos were successfully "
-		"exported to ZFO.") + "<br/>";
+		summaryMsg += QStringLiteral("<b>") +
+		    QString::number(successDelInfoZFOCnt) +
+		    QStringLiteral("</b> ") +
+		    tr("delivery infos were successfully exported to ZFO.") +
+		    QStringLiteral("<br/>");
 	}
 
-	/* export envelope to PDF */
+	/* Export envelope to PDF. */
 	if (this->exportMessageEnvelopePDFCheckBox->isChecked()) {
-		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::PDF_ENVELOPE, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "OZ" << mId.dmId;
-					errorText = tr("Message '%1' does not "
-					    "contain message envelope data "
-					    "necessary for PDF export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successEnvelopePdfCnt++;
-				}
-			}
+			successEnvelopePdfCnt += exportMessageData(
+			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
+			    Exports::PDF_ENVELOPE, exportDir, userName,
+			    m_dbId, lastPath, errorList);
 		}
-
-		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::PDF_ENVELOPE, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "OZ" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain message envelope data "
-					    "necessary for PDF export.").
-					    arg(QString::number(mId.dmId));
-				} else {
-					successEnvelopePdfCnt++;
-				}
-			}
+			successEnvelopePdfCnt += exportMessageData(
+			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
+			    Exports::PDF_ENVELOPE, exportDir, userName,
+			    m_dbId, lastPath, errorList);
 		}
-		tmpMsg += "<b>" + QString::number(successEnvelopePdfCnt) +
-		    "</b> " + tr("message envelopes were successfully "
-		    "exported to PDF.") + "<br/>";
+		summaryMsg += QStringLiteral("<b>") +
+		    QString::number(successEnvelopePdfCnt) +
+		    QStringLiteral("</b> ") +
+		    tr("message envelopes were successfully exported to PDF.") +
+		    QStringLiteral("<br/>");
 	}
 
-	/* export delivery info to PDF */
+	/* Export delivery info to PDF. */
 	if (this->exportDeliveryPDFCheckBox->isChecked()) {
-		/* sent PDF */
 		if (this->sentCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.sentdmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::PDF_DELIVERY, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DD" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain delivery info data "
-					    "necessary for PDF export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successDelInfoPdfCnt++;
-				}
-			}
+			successDelInfoPdfCnt += exportMessageData(
+			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
+			    Exports::PDF_DELIVERY, exportDir, userName,
+			    m_dbId, lastPath, errorList);
 		}
-
-		/* received PDF */
 		if (this->receivedCheckBox->isChecked()) {
-			foreach (const MessageDb::MsgId &mId, m_messages.receivedmIDs) {
-
-				if (Exports::EXP_SUCCESS != Exports::exportAs(this, m_messDbSet,
-				    Exports::PDF_DELIVERY, exportDir,
-				    QString(), m_userName, m_dbId, mId, false,
-				    lastPath, errrStr)) {
-					qDebug() << "DD" << mId.dmId
-					    << "export error";
-					errorText = tr("Message '%1' does not "
-					    "contain delivery info data "
-					    "necessary for PDF export.").
-					    arg(QString::number(mId.dmId));
-					errorList.append(errorText);
-				} else {
-					successDelInfoPdfCnt++;
-				}
-			}
+			successDelInfoPdfCnt += exportMessageData(
+			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
+			    Exports::PDF_DELIVERY, exportDir, userName,
+			    m_dbId, lastPath, errorList);
 		}
-		tmpMsg += "<b>" + QString::number(successDelInfoPdfCnt) +
-		    "</b> " + tr("delivery infos were successfully "
-		    "exported to PDF.")  + "<br/>";
+		summaryMsg += QStringLiteral("<b>") +
+		    QString::number(successDelInfoPdfCnt) +
+		    QStringLiteral("</b> ") +
+		    tr("delivery infos were successfully exported to PDF.") +
+		    QStringLiteral("<br/>");
 	}
-
-	//msgBoxProc.close();
 
 finish:
-
 	QMessageBox msgBox(this);
 	msgBox.setIcon(QMessageBox::Information);
 	msgBox.setWindowTitle(tr("Export results"));
-	msgBox.setText(tr("Export of correspondence overview finished "
-	    "with these results:"));
+	msgBox.setText(
+	    tr("Export of correspondence overview finished with these results:"));
 
 	if (!errorList.isEmpty()) {
-		tmpMsg += "<br/><b>" + tr("Some errors occurred "
-		    "during export.")  + "</b><br/>" +
-		    tr("See detail for more info...") + "<br/><br/>";
+		summaryMsg += QStringLiteral("<br/><b>") +
+		    tr("Some errors occurred during export.") +
+		    QStringLiteral("</b><br/>") +
+		    tr("See detail for more info...") +
+		    QStringLiteral("<br/><br/>");
 	}
-	msgBox.setInformativeText(tmpMsg);
+	msgBox.setInformativeText(summaryMsg);
 
-	QString msg = "";
+	QString msg;
 	if (!errorList.isEmpty()) {
 		for (int i = 0; i < errorList.count(); ++i) {
-			msg += errorList.at(i) + "\n";
+			msg += errorList.at(i) + QStringLiteral("\n");
 		}
 		msgBox.setDetailedText(msg);
 	}

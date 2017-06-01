@@ -6166,11 +6166,8 @@ void MainWindow::showExportCorrespondenceOverviewDialog(void)
 
 	setAccountStoragePaths(userName);
 
-	QDialog *correspondence_overview = new DlgCorrespondenceOverview(
-	    *dbSet, userName, m_export_correspond_dir, dbId, this);
-
-	correspondence_overview->exec();
-	correspondence_overview->deleteLater();
+	DlgCorrespondenceOverview::exportData(*dbSet, dbId, userName,
+	    m_export_correspond_dir, this);
 	storeExportPath(userName);
 }
 
