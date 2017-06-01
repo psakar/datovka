@@ -50,8 +50,16 @@ public:
 	 * @brief Constructor.
 	 */
 	DlgCorrespondenceOverview(const MessageDbSet &dbSet,
+	    const QString &dbId, const QString &userName,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Calls the dialogue and preforms export action.
+	 */
+	static
+	void exportData(const MessageDbSet &dbSet, const QString &dbId,
 	    const QString &userName, QString &exportCorrespondDir,
-	    const QString &dbId, QWidget *parent = Q_NULLPTR);
+	    QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -64,8 +72,6 @@ private slots:
 	 * @brief Obtains lists of messages according to calendar selection.
 	 */
 	void reftectCalendarChange(void);
-
-	void exportData(void);
 
 private:
 	/*!
@@ -123,11 +129,18 @@ private:
 	 */
 	QString exportOverview(const QString &dir, QString &summary);
 
-	const MessageDbSet &m_messDbSet;
-	const QString m_userName;
+	/*!
+	 * @brief Export all data that have been selected in the dialogue.
+	 *
+	 * @param[in]     userName User login identifying the account.
+	 * @param[in,out] exportCorrespondDir Location where to store the data.
+	 */
+	void exportChosenData(const QString &userName,
+	    QString &exportCorrespondDir);
+
+	const MessageDbSet &m_messDbSet; /*!< Database set to be accessed. */
+	const QString &m_dbId; /*!< Account database identifier. */
 	ExportedMessageList m_exportedMsgs; /*!< List of exported messages. */
-	QString &m_exportCorrespondDir;
-	const QString &m_dbId;
 };
 
 #endif /* _DLG_CORRESPONDENCE_OVERVIEW_H_ */

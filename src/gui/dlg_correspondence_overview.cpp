@@ -37,21 +37,19 @@
 #define HTML_LITERAL QStringLiteral("HTML")
 
 DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
-    const QString &userName, QString &exportCorrespondDir, const QString &dbId,
-    QWidget *parent)
+    const QString &dbId, const QString &userName, QWidget *parent)
     : QDialog(parent),
     m_messDbSet(dbSet),
-    m_userName(userName),
-    m_exportCorrespondDir(exportCorrespondDir),
-    m_dbId(dbId)
+    m_dbId(dbId),
+    m_exportedMsgs()
 {
 	setupUi(this);
 
-	Q_ASSERT(!m_userName.isEmpty());
+	Q_ASSERT(!userName.isEmpty());
 
 	this->accountName->setText(
 	    AccountModel::globAccounts[userName].accountName() +
-	    QStringLiteral(" (") + m_userName + QStringLiteral(")"));
+	    QStringLiteral(" (") + userName + QStringLiteral(")"));
 
 	this->toCalendarWidget->setMinimumDate(this->fromCalendarWidget->selectedDate());
 
@@ -77,9 +75,23 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	updateExportedMsgList(this->fromCalendarWidget->selectedDate(),
 	    this->toCalendarWidget->selectedDate());
 	updateOkButtonActivity();
+}
 
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(exportData(void)));
+void DlgCorrespondenceOverview::exportData(const MessageDbSet &dbSet,
+    const QString &dbId, const QString &userName, QString &exportCorrespondDir,
+    QWidget *parent)
+{
+	if (userName.isEmpty()) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	DlgCorrespondenceOverview dlg(dbSet, dbId, userName, parent);
+	if (QDialog::Accepted != dlg.exec()) {
+		return;
+	}
+
+	dlg.exportChosenData(userName, exportCorrespondDir);
 }
 
 void DlgCorrespondenceOverview::checkMsgTypeSelection(void)
@@ -456,12 +468,8 @@ int exportMessageData(const QList<MessageDb::MsgId> &mIds,
 	return successCnt;
 }
 
-/* ========================================================================= */
-/*
- * Slot: fires when date was changed in CalendarWidgets
- */
-void DlgCorrespondenceOverview::exportData(void)
-/* ========================================================================= */
+void DlgCorrespondenceOverview::exportChosenData(const QString &userName,
+    QString &exportCorrespondDir)
 {
 	QString summaryMsg;
 	QString exportDir;
@@ -469,9 +477,9 @@ void DlgCorrespondenceOverview::exportData(void)
 
 	{
 		const QString saveDir(
-		    exportOverview(m_exportCorrespondDir, summaryMsg));
+		    exportOverview(exportCorrespondDir, summaryMsg));
 		if (!saveDir.isEmpty()) {
-			m_exportCorrespondDir = saveDir;
+			exportCorrespondDir = saveDir;
 		}
 	}
 
@@ -487,7 +495,7 @@ void DlgCorrespondenceOverview::exportData(void)
 	    this->exportDeliveryPDFCheckBox->isChecked()) {
 		exportDir = QFileDialog::getExistingDirectory(this,
 		    tr("Select directory for export of ZFO/PDF file(s)"),
-		    m_exportCorrespondDir,
+		    exportCorrespondDir,
 		    QFileDialog::ShowDirsOnly |
 		        QFileDialog::DontResolveSymlinks); 
 
@@ -497,7 +505,7 @@ void DlgCorrespondenceOverview::exportData(void)
 			    QStringLiteral("<br/>");
 			goto finish;
 		} 
-		m_exportCorrespondDir = exportDir; 
+		exportCorrespondDir = exportDir;
 		qDebug("Files are going to be exported to directory '%s'.",
 		    exportDir.toUtf8().constData());
 	} 
@@ -507,13 +515,13 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->sentCheckBox->isChecked()) {
 			successMsgZFOCnt += exportMessageData(
 			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
-			    Exports::ZFO_MESSAGE, exportDir, m_userName,
+			    Exports::ZFO_MESSAGE, exportDir, userName,
 			    m_dbId, lastPath, errorList);
 		}
 		if (this->receivedCheckBox->isChecked()) {
 			successMsgZFOCnt += exportMessageData(
 			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
-			    Exports::ZFO_MESSAGE, exportDir, m_userName,
+			    Exports::ZFO_MESSAGE, exportDir, userName,
 			    m_dbId, lastPath, errorList);
 		}
 		summaryMsg += QStringLiteral("<b>") +
@@ -528,13 +536,13 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->sentCheckBox->isChecked()) {
 			successDelInfoZFOCnt += exportMessageData(
 			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
-			    Exports::ZFO_DELIVERY, exportDir, m_userName,
+			    Exports::ZFO_DELIVERY, exportDir, userName,
 			    m_dbId, lastPath, errorList);
 		}
 		if (this->receivedCheckBox->isChecked()) {
 			successDelInfoZFOCnt += exportMessageData(
 			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
-			    Exports::ZFO_DELIVERY, exportDir, m_userName,
+			    Exports::ZFO_DELIVERY, exportDir, userName,
 			    m_dbId, lastPath, errorList);
 		}
 		summaryMsg += QStringLiteral("<b>") +
@@ -549,13 +557,13 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->sentCheckBox->isChecked()) {
 			successEnvelopePdfCnt += exportMessageData(
 			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
-			    Exports::PDF_ENVELOPE, exportDir, m_userName,
+			    Exports::PDF_ENVELOPE, exportDir, userName,
 			    m_dbId, lastPath, errorList);
 		}
 		if (this->receivedCheckBox->isChecked()) {
 			successEnvelopePdfCnt += exportMessageData(
 			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
-			    Exports::PDF_ENVELOPE, exportDir, m_userName,
+			    Exports::PDF_ENVELOPE, exportDir, userName,
 			    m_dbId, lastPath, errorList);
 		}
 		summaryMsg += QStringLiteral("<b>") +
@@ -570,13 +578,13 @@ void DlgCorrespondenceOverview::exportData(void)
 		if (this->sentCheckBox->isChecked()) {
 			successDelInfoPdfCnt += exportMessageData(
 			    m_exportedMsgs.sentDmIDs, this, m_messDbSet,
-			    Exports::PDF_DELIVERY, exportDir, m_userName,
+			    Exports::PDF_DELIVERY, exportDir, userName,
 			    m_dbId, lastPath, errorList);
 		}
 		if (this->receivedCheckBox->isChecked()) {
 			successDelInfoPdfCnt += exportMessageData(
 			    m_exportedMsgs.receivedDmIDs, this, m_messDbSet,
-			    Exports::PDF_DELIVERY, exportDir, m_userName,
+			    Exports::PDF_DELIVERY, exportDir, userName,
 			    m_dbId, lastPath, errorList);
 		}
 		summaryMsg += QStringLiteral("<b>") +
