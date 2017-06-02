@@ -789,13 +789,11 @@ process of all accounts on the background</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="189"/>
         <location filename="../src/gui/dlg_correspondence_overview.cpp" line="233"/>
         <source>Delivery time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="194"/>
         <location filename="../src/gui/dlg_correspondence_overview.cpp" line="234"/>
         <source>Acceptance time</source>
         <translation type="unfinished"></translation>
@@ -821,6 +819,16 @@ process of all accounts on the background</source>
         <location filename="../src/gui/dlg_correspondence_overview.cpp" line="207"/>
         <location filename="../src/gui/dlg_correspondence_overview.cpp" line="238"/>
         <source>Recipient</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="189"/>
+        <source>Delivery</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="194"/>
+        <source>Acceptance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

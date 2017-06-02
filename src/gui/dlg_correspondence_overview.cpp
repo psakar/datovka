@@ -186,12 +186,12 @@ QString DlgCorrespondenceOverview::msgHtmlEntry(
 	    + QString::number(mId.dmId) +
 	    QStringLiteral("</b></td></tr>"
 	                   "<tr><td>")
-	    + tr("Delivery time") +
+	    + tr("Delivery") +
 	    QStringLiteral(":</td><td class=\"smaller\">")
 	    + messageItems.at(3) +
 	    QStringLiteral("</td></tr>"
 	                   "<tr><td>")
-	    + tr("Acceptance time") +
+	    + tr("Acceptance") +
 	    QStringLiteral(":</td><td class=\"smaller\">")
 	    + messageItems.at(4) +
 	    QStringLiteral("</td></tr>"
