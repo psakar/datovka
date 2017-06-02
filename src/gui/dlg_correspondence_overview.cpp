@@ -180,26 +180,32 @@ QString DlgCorrespondenceOverview::msgHtmlEntry(
 
 	return
 	    QStringLiteral("<div><table><tr><td><table>"
-	                   "<tr><td><b>")
+	                   "<tr><td>")
+	    + QStringLiteral("Id:") +
+	    QStringLiteral("</td><td><b>")
 	    + QString::number(mId.dmId) +
 	    QStringLiteral("</b></td></tr>"
-	                   "<tr><td class=\"smaller\">")
+	                   "<tr><td>")
+	    + tr("Delivery time") +
+	    QStringLiteral(":</td><td class=\"smaller\">")
 	    + messageItems.at(3) +
 	    QStringLiteral("</td></tr>"
-	                   "<tr><td class=\"smaller\">")
+	                   "<tr><td>")
+	    + tr("Acceptance time") +
+	    QStringLiteral(":</td><td class=\"smaller\">")
 	    + messageItems.at(4) +
 	    QStringLiteral("</td></tr>"
 	                   "</table></td><td><table><tr><td>")
-	    + tr("Subject:") +
-	    QStringLiteral("</td><td><i><b>")
+	    + tr("Subject") +
+	    QStringLiteral(":</td><td><i><b>")
 	    + messageItems.at(2) +
 	    QStringLiteral("</b></i></td></tr><tr><td>")
-	    + tr("Sender:") +
-	    QStringLiteral("</td><td><i>")
+	    + tr("Sender") +
+	    QStringLiteral(":</td><td><i>")
 	    + messageItems.at(0) +
 	    QStringLiteral("</i></td></tr><tr><td>")
-	    + tr("Recipient:") +
-	    QStringLiteral("</td><td><i>")
+	    + tr("Recipient") +
+	    QStringLiteral(":</td><td><i>")
 	    + messageItems.at(1) +
 	    QStringLiteral("</i></td></tr></table></td></tr></table></div>");
 }

@@ -3973,8 +3973,8 @@ QStringList MessageDb::getMsgForHtmlExport(qint64 dmId) const
 	QString queryStr;
 	QStringList messageItems;
 
-	queryStr =
-	    "SELECT dmSender, dmRecipient, dmAnnotation, dmDeliveryTime "
+	queryStr = "SELECT dmSender, dmRecipient, dmAnnotation, "
+	    "dmDeliveryTime, dmAcceptanceTime "
 	    "FROM messages WHERE dmID = :dmId";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -3988,10 +3988,12 @@ QStringList MessageDb::getMsgForHtmlExport(qint64 dmId) const
 		messageItems.append(query.value(0).toString());
 		messageItems.append(query.value(1).toString());
 		messageItems.append(query.value(2).toString());
-		QDateTime dateTime =
-		    dateTimeFromDbFormat(query.value(3).toString());
-		messageItems.append(dateTime.toString("dd.MM.yyyy"));
-		messageItems.append(dateTime.toString("hh:mm:ss"));
+		messageItems.append(
+		    dateTimeFromDbFormat(query.value(3).toString())
+		        .toString("dd.MM.yyyy hh:mm:ss"));
+		messageItems.append(
+		    dateTimeFromDbFormat(query.value(4).toString())
+		        .toString("dd.MM.yyyy hh:mm:ss"));
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: %s.",
