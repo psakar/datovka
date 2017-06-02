@@ -1480,7 +1480,7 @@ QString MessageDb::envelopeInfoHtmlToPdf(qint64 dmId,
 			tmp = QObject::tr("yes");
 		}
 		html += messageTableInfoPdf(
-		    QObject::tr("Prohibit Delivery by Fiction"), tmp);
+		    QObject::tr("Prohibit Acceptance through Fiction"), tmp);
 
 		html += messageTableInfoEndPdf();
 	} else {
@@ -1586,7 +1586,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
 
 	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; "
 	    "font-size: 20px;\"><tr><td>" +
-	    strongMessagePdf(QObject::tr("Advice of Delivery")) +
+	    strongMessagePdf(QObject::tr("Advice of Acceptance")) +
 	    "</td><td align=\"right\">" +
 	    QObject::tr("Message ID:") + " " +
 	    strongMessagePdf(QString::number(dmId)) +
@@ -1705,7 +1705,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
 			tmp = QObject::tr("yes");
 		}
 		html += messageTableInfoPdf(
-		    QObject::tr("Prohibit Delivery by Fiction"), tmp);
+		    QObject::tr("Prohibit Acceptance through Fiction"), tmp);
 
 		html += messageTableInfoEndPdf();
 

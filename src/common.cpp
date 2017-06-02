@@ -537,7 +537,7 @@ const QString msgStatusToText(int status)
 		 */
 		return QObject::tr("10 days have passed since the delivery of "
 		    "the public message which has not been accepted by "
-		    "logging-in (assumption of delivery by fiction in nonOVM "
+		    "logging-in (assumption of acceptance through fiction in non-OVM "
 		    "DS); this state cannot occur for commercial messages.");
 		break;
 	case 6:

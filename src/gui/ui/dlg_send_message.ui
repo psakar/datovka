@@ -513,12 +513,12 @@
    <item>
     <widget class="QCheckBox" name="dmAllowSubstDelivery">
      <property name="toolTip">
-      <string>Even if recipient did not read this message,
-message is considered as delivered after 
-(currently) 10 days. This is delivery through fiction.</string>
+      <string>Even if the recipient did not read this message,
+the message is considered to be accepted after
+(currently) 10 days. This is acceptance through fiction.</string>
      </property>
      <property name="text">
-      <string>Allow delivery through fiction</string>
+      <string>Allow acceptance through fiction</string>
      </property>
      <property name="checked">
       <bool>true</bool>
