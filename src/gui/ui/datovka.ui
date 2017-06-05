@@ -925,10 +925,10 @@ sent reply on this message</string>
   </action>
   <action name="actionOpen_delivery_info_externally">
    <property name="text">
-    <string>Open delivery info externally</string>
+    <string>Open acceptance info externally</string>
    </property>
    <property name="toolTip">
-    <string>Pass the delivery information of the selected message to an external application</string>
+    <string>Pass the acceptance information of the selected message to an external application</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -936,10 +936,10 @@ sent reply on this message</string>
   </action>
   <action name="actionExport_delivery_info_as_ZFO">
    <property name="text">
-    <string>Export delivery info as ZFO</string>
+    <string>Export acceptance info as ZFO</string>
    </property>
    <property name="toolTip">
-    <string>Export the delivery information of the selected message as ZFO file</string>
+    <string>Export the acceptance information of the selected message as ZFO file</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
@@ -947,10 +947,10 @@ sent reply on this message</string>
   </action>
   <action name="actionExport_delivery_info_as_PDF">
    <property name="text">
-    <string>Export delivery info as PDF</string>
+    <string>Export acceptance info as PDF</string>
    </property>
    <property name="toolTip">
-    <string>Export the delivery information of the selected message as PDF file</string>
+    <string>Export the acceptance information of the selected message as PDF file</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

@@ -331,18 +331,6 @@ jednu číslici a jedno velké písmeno.</translation>
         <source>Clear</source>
         <translation>Vyčistit</translation>
     </message>
-    <message>
-        <source>ID</source>
-        <translation type="vanished">ID</translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Jméno</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation type="vanished">Adresa</translation>
-    </message>
 </context>
 <context>
     <name>CorrespondenceOverview</name>
@@ -403,7 +391,7 @@ jednu číslici a jedno velké písmeno.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="246"/>
-        <source>ZFO delivery info files</source>
+        <source>ZFO acceptance info files</source>
         <translation>Doručenky ve formátu ZFO</translation>
     </message>
     <message>
@@ -413,7 +401,7 @@ jednu číslici a jedno velké písmeno.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="260"/>
-        <source>PDF delivery info files</source>
+        <source>PDF acceptance info files</source>
         <translation>Doručenku do PDF</translation>
     </message>
 </context>
@@ -761,244 +749,209 @@ všech účtů na pozadí aplikace</translation>
     </message>
 </context>
 <context>
-    <name>DlgContacts</name>
-    <message>
-        <source>no</source>
-        <translation type="vanished">ne</translation>
-    </message>
-    <message>
-        <source>yes</source>
-        <translation type="vanished">ano</translation>
-    </message>
-</context>
-<context>
     <name>DlgCorrespondenceOverview</name>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="154"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="156"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="130"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="133"/>
         <source>messages: </source>
         <translation>zpráv: </translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="196"/>
-        <source>Subject:</source>
-        <translation>Předmět:</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="200"/>
-        <source>Sender:</source>
-        <translation>Odesílatel:</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="204"/>
-        <source>Recipient:</source>
-        <translation>Příjemce:</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="307"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="323"/>
         <source>Sent</source>
         <translation>Odeslané</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="317"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="333"/>
         <source>Received</source>
         <translation>Přijaté</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="276"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="287"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="294"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="305"/>
         <source>Correspondence overview</source>
         <translation>Přehled korespondence</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="290"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="308"/>
         <source>From date:</source>
         <translation>Od data:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="294"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="312"/>
         <source>To date:</source>
         <translation>Do data:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="298"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="316"/>
         <source>Generated:</source>
         <translation>Vygenerováno:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="357"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="231"/>
         <source>Status</source>
         <translation>Stav</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="357"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="232"/>
         <source>Message type</source>
         <translation>Typ zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="358"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="233"/>
         <source>Delivery time</source>
+        <translation>Čas dodání</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="234"/>
+        <source>Acceptance time</source>
         <translation>Čas doručení</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="358"/>
-        <source>Acceptance time</source>
-        <translation>Čas přijetí</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="359"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="199"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="235"/>
         <source>Subject</source>
         <translation>Předmět</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="359"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="203"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="236"/>
         <source>Sender</source>
         <translation>Odesílatel</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="360"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="237"/>
         <source>Sender Address</source>
         <translation>Adresa odesílatele</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="360"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="207"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="238"/>
         <source>Recipient</source>
         <translation>Adresát</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="361"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="189"/>
+        <source>Delivery</source>
+        <translation>Dodání</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="194"/>
+        <source>Acceptance</source>
+        <translation>Doručení</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="239"/>
         <source>Recipient Address</source>
         <translation>Adresa příjemce</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="361"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="240"/>
         <source>Our file mark</source>
         <translation>Naše spisová značka</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="362"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="241"/>
         <source>Our reference number</source>
         <translation>Naše číslo jednací</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="362"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="242"/>
         <source>Your file mark</source>
         <translation>Vaše spisová značka</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="363"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="243"/>
         <source>Your reference number</source>
         <translation>Vaše číslo jednací</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="409"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="364"/>
         <source>Select file to save correspondence overview</source>
         <translation>Vybrat soubor pro uložení přehledu korespondence</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="427"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="430"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="380"/>
+        <source>Correspondence Overview Export Error</source>
+        <translation>Chyba při exportu přehledu korespondence</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="388"/>
         <source>correspondence overview file was exported to HTML.</source>
         <translation>soubor s přehledem korespondence byl exportován do HTML.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="442"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="445"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="389"/>
         <source>correspondence overview file was exported to CSV.</source>
         <translation>soubor s přehledem korespondence byl exportován do CSV.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="450"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="393"/>
         <source>correspondence overview file was exported.</source>
         <translation>soubor s přehledem korespondence byl exportován.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="467"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="510"/>
         <source>Select directory for export of ZFO/PDF file(s)</source>
         <translation>Vyberte adresář pro export ZFO/PDF souborů</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="473"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="517"/>
         <source>messages were successfully exported to ZFO/PDF.</source>
         <translation>zpráv bylo úspěšně exportováno do ZFO/PDF.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="494"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="515"/>
-        <source>Message &apos;%1&apos; does not contain data necessary for ZFO export.</source>
-        <translation>Zpráva &apos;%1&apos; neobsahuje potřebná data pro export do ZFO souboru.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="526"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="543"/>
         <source>messages were successfully exported to ZFO.</source>
         <translation>zpráv bylo úspěšně exportováno do ZFO.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="543"/>
         <location filename="../src/gui/dlg_correspondence_overview.cpp" line="564"/>
-        <source>Message &apos;%1&apos; does not contain deivery info data necessary for ZFO export.</source>
-        <translation>Zpráva &apos;%1&apos; neobsahuje data potřebná pro export doručenky do ZFO souboru.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="575"/>
-        <source>delivery infos were successfully exported to ZFO.</source>
+        <source>acceptance infos were successfully exported to ZFO.</source>
         <translation>doručenek bylo exportováno do ZFO.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="590"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="611"/>
-        <source>Message &apos;%1&apos; does not contain message envelope data necessary for PDF export.</source>
-        <translation>Zpráva &apos;%1&apos; neobsahuje data potřebná pro export obálky do PDF souboru.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="621"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="585"/>
         <source>message envelopes were successfully exported to PDF.</source>
         <translation>obálek zpráv bylo úspěšně exportováno do PDF.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="637"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="658"/>
-        <source>Message &apos;%1&apos; does not contain delivery info data necessary for PDF export.</source>
-        <translation>Ke zprávě &apos;%1&apos; chybí data doručenky, která jsou potřeba pro export do PDF.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="669"/>
-        <source>delivery infos were successfully exported to PDF.</source>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="606"/>
+        <source>acceptance infos were successfully exported to PDF.</source>
         <translation>doručenek bylo exportováno do PDF.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="679"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="613"/>
         <source>Export results</source>
         <translation>Výsledky exportu</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="680"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="615"/>
         <source>Export of correspondence overview finished with these results:</source>
         <translation>Export přehledu korespondence skončil s tímto výsledkem:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="684"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="619"/>
         <source>Some errors occurred during export.</source>
         <translation>Během exportu se vyskytly nějaké chyby.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="686"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="621"/>
         <source>See detail for more info...</source>
         <translation>Více informací v podrobnostech...</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="401"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="354"/>
         <source>Overview</source>
         <translation>Prehled</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="410"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="365"/>
         <source>Files</source>
         <translation>Soubory</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="422"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="437"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="381"/>
         <source>Correspondence overview file &apos;%1&apos; could not be written.</source>
         <translation>Soubor s přehledem korespondence &apos;%1&apos; nemohl být zapsán.</translation>
     </message>
@@ -1234,22 +1187,6 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation>Zobrazeno</translation>
     </message>
     <message>
-        <source>OVM – Orgán veřejné moci</source>
-        <translation type="vanished">OVM – Orgán veřejné moci</translation>
-    </message>
-    <message>
-        <source>PO – Právnická osoba</source>
-        <translation type="vanished">PO – Právnická osoba</translation>
-    </message>
-    <message>
-        <source>PFO – Podnikající fyzická osoba</source>
-        <translation type="vanished">PFO – Podnikající fyzická osoba</translation>
-    </message>
-    <message>
-        <source>FO – Fyzická osoba</source>
-        <translation type="vanished">FO – Fyzická osoba</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="366"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="373"/>
         <source>Subject Name:</source>
@@ -1269,17 +1206,9 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation>Jméno:</translation>
     </message>
     <message>
-        <source>Enter PFO last name or company name.</source>
-        <translation type="vanished">Zadejte příjmení PFO nebo název firmy.</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="387"/>
         <source>Last Name:</source>
         <translation>Příjmení:</translation>
-    </message>
-    <message>
-        <source>Enter last name or birth last name of FO.</source>
-        <translation type="vanished">Zadejte příjmení nebo rodné příjmení FO.</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="444"/>
@@ -1296,26 +1225,10 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation>Toto je speciální ID &quot;systémové schránky&quot; systému Datových schránek. Momentálně není možné zasílat zprávy do této schránky. Hledejte dál.</translation>
     </message>
     <message>
-        <source>It is not possible find databox because</source>
-        <translation type="vanished">Není možné najít datovou schránku protože</translation>
-    </message>
-    <message>
-        <source>It is not possible find databox because error occurred during search process!</source>
-        <translation type="vanished">Není možné najít datovou schráku protože v průběhu vyhledávání nastala chyba.</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="560"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="623"/>
         <source>Search error</source>
         <translation>Chyba při vyhledávání</translation>
-    </message>
-    <message>
-        <source>no</source>
-        <translation type="vanished">ne</translation>
-    </message>
-    <message>
-        <source>yes</source>
-        <translation type="vanished">ano</translation>
     </message>
 </context>
 <context>
@@ -1399,7 +1312,7 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
     <message>
         <location filename="../src/gui/dlg_msg_search.cpp" line="94"/>
         <source>Delivery Year</source>
-        <translation>Rok doručení</translation>
+        <translation>Rok dodání</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_msg_search.cpp" line="95"/>
@@ -1457,14 +1370,6 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <location filename="../src/gui/dlg_send_message.cpp" line="453"/>
         <source>sending of PDZ: disabled</source>
         <translation>posílání PDZ: zakázáno</translation>
-    </message>
-    <message>
-        <source>no</source>
-        <translation type="vanished">ne</translation>
-    </message>
-    <message>
-        <source>yes</source>
-        <translation type="vanished">ano</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="284"/>
@@ -1594,36 +1499,16 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation>Nebylo možné odeslat zprávu na server ISDS.</translation>
     </message>
     <message>
-        <source>Message has successfully been sent to &lt;i&gt;%1 (%2)&lt;/i&gt; as PDZ with number &lt;i&gt;%3&lt;/i&gt;.</source>
-        <translation type="vanished">Zpráva byla úspěšně odeslána příjemci &lt;i&gt;%1 (%2)&lt;/i&gt; jako PDZ s číslem &lt;i&gt;%3&lt;/i&gt;.</translation>
-    </message>
-    <message>
-        <source>Message has successfully been sent to &lt;i&gt;%1 (%2)&lt;/i&gt; as message number &lt;i&gt;%3&lt;/i&gt;.</source>
-        <translation type="vanished">Zpráva byla úspěšně odeslána příjemci &lt;i&gt;%1 (%2)&lt;/i&gt; jako zpráva číslo &lt;i&gt;%3&lt;/i&gt;.</translation>
-    </message>
-    <message>
-        <source>Message has NOT been sent to &lt;i&gt;%1 (%2)&lt;/i&gt;. Server says: %3</source>
-        <translation type="vanished">Zpráva NEbyla odeslána příjemci &lt;i&gt;%1 (%2)&lt;/i&gt;. Server říká: %3</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="549"/>
         <location filename="../src/gui/dlg_send_message.cpp" line="589"/>
         <source>Message sent</source>
         <translation>Zpráva odeslána</translation>
     </message>
     <message>
-        <source>Message has successfully been sent to all recipients.</source>
-        <translation type="vanished">Zpráva byla úspěšně odeslána všem příjemcům.</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="561"/>
         <location filename="../src/gui/dlg_send_message.cpp" line="605"/>
         <source>Message sending error</source>
         <translation>Chyba odesílání zprávy</translation>
-    </message>
-    <message>
-        <source>Message has NOT been sent to all recipients.</source>
-        <translation type="vanished">Zpráva NEbyla odeslána všem příjemcům</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="565"/>
@@ -1661,7 +1546,7 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="1133"/>
         <source>The message cannot be delivered.</source>
-        <translation>Zprávu nelze doručit.</translation>
+        <translation>Zprávu nelze dodat.</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="1148"/>
@@ -1679,10 +1564,6 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation>Jako uživatel &apos;%1&apos; nebudete moct odeslat zprávu do schránky &apos;%2&apos;.</translation>
     </message>
     <message>
-        <source>Wrong recipient</source>
-        <translation type="vanished">Chybný příjemce</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="1166"/>
         <source>Recipient with data box ID &apos;%1&apos; does not exist.</source>
         <translation>Příjemce s datovou schránkou &apos;%1&apos; neexistuje.</translation>
@@ -1696,10 +1577,6 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <location filename="../src/gui/dlg_send_message.cpp" line="1406"/>
         <source>An error occurred during message envelope creation.</source>
         <translation>Nastala chyba v průběhu vytváření obálky zprávy.</translation>
-    </message>
-    <message>
-        <source>It has not been possible to send a message to the server Datové schránky.</source>
-        <translation type="vanished">Nebylo možné odeslat zprávu serveru Datových schránek.</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_send_message.cpp" line="1450"/>
@@ -1924,12 +1801,12 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
     <message>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="378"/>
         <source>Delivery time</source>
-        <translation>Čas doručení</translation>
+        <translation>Čas dodání</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="383"/>
         <source>Acceptance time</source>
-        <translation>Čas přijetí</translation>
+        <translation>Čas doručení</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_view_zfo.cpp" line="298"/>
@@ -1960,10 +1837,6 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
 <context>
     <name>DsSearch</name>
     <message>
-        <source>Enter the ID, IČ or at least three letters from the name of the data box you look for:</source>
-        <translation type="vanished">Zadejte ID, IČ nebo alespoň tři písmena z názvu hledané datové schránky:</translation>
-    </message>
-    <message>
         <location filename="../src/gui/ui/dlg_ds_search.ui" line="14"/>
         <source>Search recipient</source>
         <translation>Vyhledat příjemce</translation>
@@ -1987,14 +1860,16 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_ds_search.ui" line="86"/>
-        <source>Your account is not of type OVM or ne-OVM. You have Post Data Messages activated.
-This means you can only search for accounts of type OVM and accounts
-that have Post Data Messages delivery activated.
-Because of this limitation the results of your current search might not 
+        <source>Your account is not of type OVM (i.e. non-OVM). Sending of post data messages
+from your account is activated. This means that you can only search for accounts
+of the type OVM and accounts that have the the receiving of post data messages
+activated. Because of this limitation the results of your current search may not
 contain all otherwise matching databoxes.</source>
-        <translation>Váš účet není typu OVM. Máte však aktivované Poštovní datové zprávy.
-To znamená, že můžete vyhledávat pouze datové schránky typu OVM
-nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</translation>
+        <translation>Váš účet není typu OVM (tedy ne-OVM). Zasílání poštovních datových zpráv z Vašeho
+účtu je aktivní. To znamená, že můžete vyhledávat pouze datové schránky typu OVM
+nebo schránky, které mají aktivován příjem poštovních datových zpráv. Díky tomuto
+omezení nemusí výsledek tohoto vyhledávání obsahovat všechny jinak odpovídající
+datové zprávy.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_ds_search.ui" line="93"/>
@@ -2040,26 +1915,6 @@ nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</tr
         <location filename="../src/gui/ui/dlg_ds_search.ui" line="195"/>
         <source>Search</source>
         <translation>Vyhledat</translation>
-    </message>
-    <message>
-        <source>ID</source>
-        <translation type="vanished">ID</translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Jméno</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation type="vanished">Adresa</translation>
-    </message>
-    <message>
-        <source>Postal code</source>
-        <translation type="vanished">Směrovací číslo</translation>
-    </message>
-    <message>
-        <source>PDZ</source>
-        <translation type="vanished">PDZ</translation>
     </message>
 </context>
 <context>
@@ -2119,7 +1974,7 @@ nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</tr
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_import_zfo.ui" line="65"/>
-        <source>Message and delivery info ZFO file(s)</source>
+        <source>Message and acceptance info ZFO file(s)</source>
         <translation>Zprávy a doručenky současně</translation>
     </message>
     <message>
@@ -2129,7 +1984,7 @@ nebo schránky, které mají aktivován příjem Poštovní datové zprávy.</tr
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_import_zfo.ui" line="85"/>
-        <source>Only delivery info ZFO file(s)</source>
+        <source>Only acceptance info ZFO file(s)</source>
         <translation>Pouze doručenky</translation>
     </message>
     <message>
@@ -2178,7 +2033,7 @@ zanést neplatná data.</translation>
     <name>ImportZFODialog</name>
     <message>
         <location filename="../src/gui/dlg_import_zfo.cpp" line="35"/>
-        <source>Here you can import whole messages and message delivery information from ZFO files into local database. The message or delivery information import will succeed only for those files whose validity can be approved by the Datové schránky server (working connection to server is required). Delivery information ZFO will be inserted into local database only if a corresponding complete message already exists in the database.</source>
+        <source>Here you can import whole messages and message acceptance information from ZFO files into local database. The message or acceptance information import will succeed only for those files whose validity can be approved by the Datové schránky server (working connection to server is required). Acceptance information ZFO will be inserted into local database only if a corresponding complete message already exists in the database.</source>
         <translation>Zde můžete importovat celé zprávy a doručenky ze ZFO souborů do místní databáze. Import zprávy nebo doručenky proběhne úspěšně jen pro ty soubory, jejichž správnost se podaří ověřit na serveru Datové schránky (je vyžadováno funkční spojení se serverem). ZFO doručenky jde vložit do databáze pouze tehdy, pokud již v databázi existuje odpovídající zpráva.</translation>
     </message>
 </context>
@@ -2568,17 +2423,17 @@ všech účtů na pozadí aplikace</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8343"/>
+        <location filename="../src/gui/datovka.cpp" line="8340"/>
         <source>Search: </source>
         <translation>Vyhledat: </translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8359"/>
+        <location filename="../src/gui/datovka.cpp" line="8356"/>
         <source>Clear search field</source>
         <translation>Vymazat pole</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8288"/>
+        <location filename="../src/gui/datovka.cpp" line="8285"/>
         <source>Mode: offline</source>
         <translation>Režim: nepřipojeno (offline)</translation>
     </message>
@@ -2591,10 +2446,6 @@ všech účtů na pozadí aplikace</translation>
         <location filename="../src/gui/ui/datovka.ui" line="517"/>
         <source>Add new account</source>
         <translation>Vytvořit nový účet</translation>
-    </message>
-    <message>
-        <source>Save attachments</source>
-        <translation type="vanished">Uložit všechny přílohy</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3386"/>
@@ -2701,7 +2552,7 @@ všech účtů na pozadí aplikace</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3654"/>
-        <location filename="../src/gui/datovka.cpp" line="8265"/>
+        <location filename="../src/gui/datovka.cpp" line="8262"/>
         <source>Datovka - Free client for Datové schránky</source>
         <translation>Datovka - Svobodný klient pro Datové schránky</translation>
     </message>
@@ -2801,12 +2652,12 @@ všech účtů na pozadí aplikace</translation>
         <translation>Změnit adresář pro ukládání dat pro aktuální účet</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7424"/>
+        <location filename="../src/gui/datovka.cpp" line="7421"/>
         <source>Connection to ISDS or user authentication failed!</source>
         <translation>Připojení k serveru datové schránky se nezdařilo nebo selhala autorizace uživatele!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7426"/>
+        <location filename="../src/gui/datovka.cpp" line="7423"/>
         <source>Please check your internet connection and try again or it is possible that your password (certificate) has expired - in this case, you need to use the official web interface of Datové schránky to change it.</source>
         <translation>Zkontrolujte prosím připojení k internetu a zkuste to znovu. Také je možné, že vaše heslo (certifikát) již vypršelo - v tomto případě musíte použít oficiální webové rozhraní Datové schránky a heslo si změnit.</translation>
     </message>
@@ -2819,7 +2670,7 @@ všech účtů na pozadí aplikace</translation>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5937"/>
         <location filename="../src/gui/datovka.cpp" line="6135"/>
-        <location filename="../src/gui/datovka.cpp" line="6276"/>
+        <location filename="../src/gui/datovka.cpp" line="6273"/>
         <source>ZFO file (*.zfo)</source>
         <translation>Soubor ZFO (*.zfo)</translation>
     </message>
@@ -2938,7 +2789,7 @@ všech účtů na pozadí aplikace</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="1941"/>
-        <location filename="../src/gui/datovka.cpp" line="6518"/>
+        <location filename="../src/gui/datovka.cpp" line="6515"/>
         <source>Select target folder to save</source>
         <translation>Vyberte cílovou složku pro uložení</translation>
     </message>
@@ -2953,87 +2804,87 @@ všech účtů na pozadí aplikace</translation>
         <translation>Některé přílohy zprávy &apos;%1&apos; nebyly uloženy do cílové složky!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6452"/>
+        <location filename="../src/gui/datovka.cpp" line="6449"/>
         <source>First you must download the complete message to continue with the action.</source>
         <translation>Před pokračováním akce musíte nejdříve stáhnout úplnou zprávu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7011"/>
+        <location filename="../src/gui/datovka.cpp" line="7008"/>
         <source>Invalid certificate data</source>
         <translation>Neplatná data certifikátu</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7012"/>
+        <location filename="../src/gui/datovka.cpp" line="7009"/>
         <source>The certificate or the supplied pass-phrase are invalid.</source>
         <translation>Certifikát nebo zadané heslo jsou neplatné.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7014"/>
+        <location filename="../src/gui/datovka.cpp" line="7011"/>
         <source>Please enter a path to a valid certificate and/or provide a correct key to unlock the certificate.</source>
         <translation>Prosím zadejte cestu k platnému certifikátu a/nebo zadejte správný klíč pro odemknutí certifikátu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7017"/>
+        <location filename="../src/gui/datovka.cpp" line="7014"/>
         <source>Bad certificate data for account &quot;%1&quot;.</source>
         <translation>Špatná data certifikátu pro účet &quot;%1&quot;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7035"/>
+        <location filename="../src/gui/datovka.cpp" line="7032"/>
         <source>The log-in method used in account &quot;%1&quot; is not implemented.</source>
         <translation>Přihlašovací metoda použitá v účtu &quot;%1&quot; není implementována.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7142"/>
+        <location filename="../src/gui/datovka.cpp" line="7139"/>
         <source>Account &quot;%1&quot; requires authentication via OTP&lt;br/&gt;security code for connection to data box.</source>
         <translation>Pro připojení ke schránce pro účet &quot;%1&quot; je&lt;br/&gt;vyžadována OTP autentizace bezpečnostním kódem.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7172"/>
+        <location filename="../src/gui/datovka.cpp" line="7169"/>
         <source>Account &quot;%1&quot; requires authentication via security code for connection to data box.</source>
         <translation>Účet &quot;%1&quot; vyžaduje pro přihlášení k datové schránce autorizaci bezpečnostním kódem OTP.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7175"/>
+        <location filename="../src/gui/datovka.cpp" line="7172"/>
         <source>Security code will be sent to you via a Premium SMS.</source>
         <translation>Bezpečnostní kód Vám bude zaslán Prémiovou SMS zprávou.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7177"/>
+        <location filename="../src/gui/datovka.cpp" line="7174"/>
         <source>Do you want to send a Premium SMS with a security code into your mobile phone?</source>
         <translation>Chcete zaslat Prémiovou SMS s bezpečnostním kódem do Vašeho mobilu?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8052"/>
+        <location filename="../src/gui/datovka.cpp" line="8049"/>
         <source>Select target folder for export</source>
         <translation>Vyberte cílový adresář pro export</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8203"/>
+        <location filename="../src/gui/datovka.cpp" line="8200"/>
         <source>Database file error</source>
         <translation>Chyba databazového souboru</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8236"/>
+        <location filename="../src/gui/datovka.cpp" line="8233"/>
         <source>Split of message database for account &apos;%1&apos; was not successfully. Please, restart the application for loading original database.</source>
         <translation>Rozdělení databáze zpráv pro účet &apos;%1&apos; nebylo úspěšné. Prosím, restartujte aplikaci pro načtení původní databáze.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8246"/>
+        <location filename="../src/gui/datovka.cpp" line="8243"/>
         <source>Database split result</source>
         <translation>Výsledek rozdělení databáze</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8352"/>
+        <location filename="../src/gui/datovka.cpp" line="8349"/>
         <source>Enter sought expression</source>
         <translation>Zadete hledaný výraz</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9139"/>
+        <location filename="../src/gui/datovka.cpp" line="9136"/>
         <source>Import of messages to account %1 finished</source>
         <translation>Import zpráv na účet %1 skončil</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8308"/>
+        <location filename="../src/gui/datovka.cpp" line="8305"/>
         <source>In Progress</source>
         <translation>Vyřizuje se</translation>
     </message>
@@ -3080,22 +2931,10 @@ všech účtů na pozadí aplikace</translation>
         <translation>Nepřečtené</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6861"/>
-        <location filename="../src/gui/datovka.cpp" line="6947"/>
+        <location filename="../src/gui/datovka.cpp" line="6858"/>
+        <location filename="../src/gui/datovka.cpp" line="6944"/>
         <source>Cannot write file &apos;%1&apos;.</source>
         <translation>Nemohu uložit soubor &apos;%1&apos;.</translation>
-    </message>
-    <message>
-        <source>Error saving attachments of message &apos;%1&apos;.</source>
-        <translation type="vanished">Chyba při ukládání příloh zprávy &apos;%1&apos;.</translation>
-    </message>
-    <message>
-        <source>In total %1 attachment files could not be written.</source>
-        <translation type="vanished">Celkem &apos;%1&apos; souborů s přílohami nemohlo být uloženo.</translation>
-    </message>
-    <message>
-        <source>These are:</source>
-        <translation type="vanished">Jsou to:</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="2133"/>
@@ -3152,496 +2991,306 @@ všech účtů na pozadí aplikace</translation>
         <translation>Smazat tyto zprávy také z ISDS</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6298"/>
+        <location filename="../src/gui/datovka.cpp" line="6295"/>
         <source>No ZFO files to import.</source>
         <translation>Žádné ZFO soubory k importování.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6304"/>
+        <location filename="../src/gui/datovka.cpp" line="6301"/>
         <source>There is no account to import of ZFO files into.</source>
         <translation>Není účet, do kterého lze importovat ZFO soubory.</translation>
     </message>
     <message>
-        <source>Import of ZFO files ... Planned</source>
-        <translation type="vanished">Import ZFO souborů ... Naplánováno</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="6448"/>
+        <location filename="../src/gui/datovka.cpp" line="6445"/>
         <source>Complete message &apos;%1&apos; is missing.</source>
         <translation>Chybí úplná zpráva &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6454"/>
+        <location filename="../src/gui/datovka.cpp" line="6451"/>
         <source>Do you want to download the complete message now?</source>
         <translation>Chcete nyní stáhnout úplnou zprávu?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6462"/>
+        <location filename="../src/gui/datovka.cpp" line="6459"/>
         <source>Complete message &apos;%1&apos; has been downloaded.</source>
         <translation>Úplná zpráva &apos;%1&apos; byla stažena.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6467"/>
+        <location filename="../src/gui/datovka.cpp" line="6464"/>
         <source>Complete message &apos;%1&apos; has not been downloaded.</source>
         <translation>Úplná zpráva &apos;%1&apos; nebyla stažena.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6568"/>
+        <location filename="../src/gui/datovka.cpp" line="6565"/>
         <source>Data message</source>
         <translation>Datová zpráva</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6568"/>
+        <location filename="../src/gui/datovka.cpp" line="6565"/>
         <source>Data messages</source>
         <translation>Datové zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6663"/>
+        <location filename="../src/gui/datovka.cpp" line="6660"/>
         <source>Attachments of message</source>
         <translation>Přílohy zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6663"/>
+        <location filename="../src/gui/datovka.cpp" line="6660"/>
         <source>Attachments of messages</source>
         <translation>Přílohy zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6764"/>
+        <location filename="../src/gui/datovka.cpp" line="6761"/>
         <source>Attachment of message %1</source>
         <translation>Příloha zprávy %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6764"/>
+        <location filename="../src/gui/datovka.cpp" line="6761"/>
         <source>Attachments of message %1</source>
         <translation>Přílohy zprávy %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7349"/>
+        <location filename="../src/gui/datovka.cpp" line="7346"/>
         <source>Datovka is currently processing some tasks.</source>
         <translation>Datovka právě zpracovává úlohy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7350"/>
+        <location filename="../src/gui/datovka.cpp" line="7347"/>
         <source>Do you want to abort pending actions and close Datovka?</source>
         <translation>Přejete si zrušit nedokončené akce a zavřít Datovku?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7461"/>
-        <location filename="../src/gui/datovka.cpp" line="7465"/>
+        <location filename="../src/gui/datovka.cpp" line="7458"/>
+        <location filename="../src/gui/datovka.cpp" line="7462"/>
         <source>Adding new account failed</source>
         <translation>Přidávání nového účtu selhalo</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7462"/>
+        <location filename="../src/gui/datovka.cpp" line="7459"/>
         <source>Account could not be added because an error occurred.</source>
         <translation>Účet nemohl být přidán, protože nastala chyba.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7466"/>
+        <location filename="../src/gui/datovka.cpp" line="7463"/>
         <source>Account could not be added because account already exists.</source>
         <translation>Účet nemohl být přidán, protože účet již existuje.</translation>
     </message>
     <message>
-        <source>This file does not contain a valid database filename.</source>
-        <translation type="vanished">Tento soubor neobsahuje správný název databáze.</translation>
-    </message>
-    <message>
-        <source>This file does not contain a valid username in the database filename.</source>
-        <translation type="vanished">Tento soubor neobsahuje platné uživatelské jméno v názvu databáze.</translation>
-    </message>
-    <message>
-        <source>This database file does not contain valid year in the database filename.</source>
-        <translation type="vanished">Tento soubor neobsahuje platný rok v názvu databáze.</translation>
-    </message>
-    <message>
-        <source>This file does not contain valid database filename.</source>
-        <translation type="vanished">Tento soubor neobsahuje správný název databáze.</translation>
-    </message>
-    <message>
-        <source>This database file does not contain valid database filename.</source>
-        <translation type="vanished">Tento soubor neobsahuje správný název databáze.</translation>
-    </message>
-    <message>
-        <source>This file does not contain a valid account type flag or filename has wrong format.</source>
-        <translation type="vanished">Tento soubor neobsahuje informaci o typu účtu v názvu databáze.</translation>
-    </message>
-    <message>
-        <source>This file does not contain a valid message database or filename has wrong format.</source>
-        <translation type="vanished">Tento soubor pravděpodobně neobsahuje platnou databázi zpráv nebo souboru má špatný formát.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="8101"/>
+        <location filename="../src/gui/datovka.cpp" line="8098"/>
         <source>Import of mesages from database</source>
         <translation>Import zpráv z databáze</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8102"/>
+        <location filename="../src/gui/datovka.cpp" line="8099"/>
         <source>This action allow to import messages from selected database files into current account. Keep in mind that this action may takes a few minutes based on number of messages in the imported database. Import progress will be displayed in the status bar.</source>
         <translation>Tato akce umožňuje importovat zprávy z vybraných databázových souborů do aktuálního účtu. Mějte na paměti, že tato akce může trvat i několik minut v závislosti na počtu zpráv v importované databázi. Průběh importu zpráv se bude zobrazovat ve stavovém panelu aplikace.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8107"/>
-        <location filename="../src/gui/datovka.cpp" line="8163"/>
-        <location filename="../src/gui/datovka.cpp" line="8629"/>
+        <location filename="../src/gui/datovka.cpp" line="8104"/>
+        <location filename="../src/gui/datovka.cpp" line="8160"/>
+        <location filename="../src/gui/datovka.cpp" line="8626"/>
         <source>Do you want to continue?</source>
         <translation>Chcete pokračovat?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8116"/>
+        <location filename="../src/gui/datovka.cpp" line="8113"/>
         <source>Select database file(s)</source>
         <translation>Vyberte databázové soubory</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8117"/>
+        <location filename="../src/gui/datovka.cpp" line="8114"/>
         <source>DB file (*.db)</source>
         <translation>DB soubor (*.db)</translation>
     </message>
     <message>
-        <source>Import of messages from %1 to account %2</source>
-        <translation type="vanished">Import zpráv z %1 do účtu %2</translation>
-    </message>
-    <message>
-        <source>Import of messages from %1 to account %2 is running</source>
-        <translation type="vanished">Import zpráv z %1 do účtu %2 běží</translation>
-    </message>
-    <message>
-        <source>Database import: %1</source>
-        <translation type="vanished">Import zpráv: %1</translation>
-    </message>
-    <message>
-        <source>This database file cannot import into selected account because username of account and username of database file do not correspond.</source>
-        <translation type="vanished">Zprávy z této databáze nemohou být importovány to aktuálního účtu protože uživatelská jména účtu a databáze si neodpovídají.</translation>
-    </message>
-    <message>
-        <source>Failed to open import database file.</source>
-        <translation type="vanished">Chyba při otevírání databáze zpráv.</translation>
-    </message>
-    <message>
-        <source>Failed to open database file of target account &apos;%1&apos;</source>
-        <translation type="vanished">Chyba při otevírání databáze zpráv cílového účtu &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>Importing of message %1 into account %2 ...</source>
-        <translation type="vanished">Importuji zprávu %1 do účtu %2 ...</translation>
-    </message>
-    <message>
-        <source>Message &apos;%1&apos; already exists in database for this account.</source>
-        <translation type="vanished">Zpráva &apos;%1 již existuje v databázi pro tento účet.</translation>
-    </message>
-    <message>
-        <source>Message &apos;%1&apos; cannot be imported into this account. Message does not contain any valid ID of databox corresponding with this account.</source>
-        <translation type="vanished">Zpráva &apos;%1&apos; nebyla importována do aktuálního účtu. Zpráva neobsahuje identifikátor datové schránky korespondující s tímto účtem.</translation>
-    </message>
-    <message>
-        <source>Message &apos;%1&apos; cannot be inserted into database of this account. An error occurred during insertion procedure.</source>
-        <translation type="vanished">Zpráva &apos;%1&apos; nebyla vložena do databáze aktuálního účtu. Zpráva neobsahuje validní informace pro import nebo se vyskytla neočekávaná chyba během importu.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="9144"/>
+        <location filename="../src/gui/datovka.cpp" line="9141"/>
         <source>Messages import result</source>
         <translation>Výsledek importu zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9145"/>
+        <location filename="../src/gui/datovka.cpp" line="9142"/>
         <source>Import of messages into account &apos;%1&apos; finished with result:</source>
         <translation>Import zpráv do účtu &apos;%1&apos; skončil s tímto výsledkem:</translation>
     </message>
     <message>
-        <source>Source database file: &apos;%1&apos;</source>
-        <translation type="vanished">Zdrojový databázový soubor: &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="9150"/>
+        <location filename="../src/gui/datovka.cpp" line="9147"/>
         <source>Imported messages: %1</source>
         <translation>Importováno zpráv: &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9152"/>
+        <location filename="../src/gui/datovka.cpp" line="9149"/>
         <source>Non-imported messages: %1</source>
         <translation>Ignorováno zpráv: &apos;%1&apos;</translation>
     </message>
     <message>
-        <source>Import of messages from %1 to account %2 finished</source>
-        <translation type="vanished">Import zpráv z %1 do účtu %2 skončil</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="8150"/>
+        <location filename="../src/gui/datovka.cpp" line="8147"/>
         <source>Database split</source>
         <translation>Rozdělení databáze</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8151"/>
+        <location filename="../src/gui/datovka.cpp" line="8148"/>
         <source>This action split current account message database into several new databases which will contain messages relevant by year only. It is recommended for large database because the performance of application will be better.</source>
         <translation>Tato akce umožňuje rozdělit stávající databázi zpráv do několika menších databází podle roku dodání zpráv. Akce je doporučena spíše pro účty s velkou databází, která obsahuje mnoho zpráv. Rozdělení databáze může vést ke zrychlení aplikace i rychlejšímu přístupu k datům jednotlivých zpráv.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8155"/>
+        <location filename="../src/gui/datovka.cpp" line="8152"/>
         <source>Original database file will copy to selected directory and new database files will created in the same location. If action finished with success, new databases will be used instead of original. Restart of application is required.</source>
         <translation>Aktuální databáze zpráv bude zkopírována do vybrané složky. Nové databázové soubory budou vytvořeny do stejné složky. Jestli-že bude proces rozdělení úspěšný, původní databáze bude nehrazena novými databázemi. Poté je třeba provést restart aplikace.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8161"/>
+        <location filename="../src/gui/datovka.cpp" line="8158"/>
         <source>Note: Keep in mind that this action may takes a few minutes based on number of messages in the database.</source>
         <translation>Poznámka: Mějte na paměti, že tato akce může trvat i několik minut v závislosti na počtu zpráv v databázi.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8200"/>
+        <location filename="../src/gui/datovka.cpp" line="8197"/>
         <source>Split of message database finished with error</source>
         <translation>Rozdělení databáze skončilo s chybou</translation>
     </message>
     <message>
-        <source>Database split: %1</source>
-        <translation type="vanished">Rozdělení databáze: %1</translation>
-    </message>
-    <message>
-        <source>Action was canceled and original database file was returned back.</source>
-        <translation type="vanished">Akce byla zrušena a původní databáze byla navrácena zpět.</translation>
-    </message>
-    <message>
-        <source>Existing file &apos;%1&apos; could not be deleted.</source>
-        <translation type="vanished">Existující soubor &apos;%1&apos; nemohl být smazán.</translation>
-    </message>
-    <message>
-        <source>Error to set and open original database for account &apos;%1&apos;</source>
-        <translation type="vanished">Nepodařilo se nastavit a otevřít původní databázi pro účet &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>Action was canceled and the origin database is now used from location:
-&apos;%1&apos;</source>
-        <translation type="vanished">Akce byla zrušena a původní databáze byla nově načtena z:
-&apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>Action was canceled because new databases cannot move from
-&apos;%1&apos;
-to origin path
-&apos;%2&apos;</source>
-        <translation type="vanished">Akce byla zrušena protože se nepodařilo přesunout nové databáze z
-&apos;%1&apos;
-do původního umístění
-&apos;%2&apos;</translation>
-    </message>
-    <message>
-        <source>Opening of new database files</source>
-        <translation type="vanished">Otevírání nových databázových souborů</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="8585"/>
+        <location filename="../src/gui/datovka.cpp" line="8582"/>
         <source>Vacuum cannot be performed on databases in memory.</source>
         <translation>Vakuum nelze aplikovat na databáze v paměti.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8589"/>
+        <location filename="../src/gui/datovka.cpp" line="8586"/>
         <source>Database operation error</source>
         <translation>Chyba funkce databáze</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8590"/>
+        <location filename="../src/gui/datovka.cpp" line="8587"/>
         <source>Database clean-up cannot be performed on database in memory.</source>
         <translation>Pročištění databáze nelze provést s databází v paměti.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8591"/>
+        <location filename="../src/gui/datovka.cpp" line="8588"/>
         <source>Cannot call VACUUM on database in memory.</source>
         <translation>Nelze volat VACUUM na databázi v paměti.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8624"/>
+        <location filename="../src/gui/datovka.cpp" line="8621"/>
         <source>Clean message database</source>
         <translation>Pročisti databázi zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8625"/>
+        <location filename="../src/gui/datovka.cpp" line="8622"/>
         <source>Performs a message database clean-up for the selected account. This action will block the entire application. The action may take several minutes to be completed. Furthermore, it requires more than %1 of free disk space to successfully proceed.</source>
         <translation>Provede pročištění databáze zpráv ve zvoleném účtu. Tato akce zablokuje celou aplikaci. Dokončení akce může trvat několik minut. Akce navíc k úspěšnému dokončení vyžaduje více jak %1 volného místa na disku.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8637"/>
+        <location filename="../src/gui/datovka.cpp" line="8634"/>
         <source>Performing database clean-up.</source>
         <translation>Provádím pročišťování databáze.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8646"/>
+        <location filename="../src/gui/datovka.cpp" line="8643"/>
         <source>Database clean-up finished.</source>
         <translation>Počištění databáze dokončeno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8651"/>
+        <location filename="../src/gui/datovka.cpp" line="8648"/>
         <source>Database clean-up successful</source>
         <translation>Pročištění úspěšně dokončeno</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8652"/>
+        <location filename="../src/gui/datovka.cpp" line="8649"/>
         <source>The database clean-up has finished successfully.</source>
         <translation>Pročištění databáze bylo úspěšně dokončeno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8656"/>
+        <location filename="../src/gui/datovka.cpp" line="8653"/>
         <source>Database clean-up failure</source>
         <translation>Pročištění selhalo</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8657"/>
+        <location filename="../src/gui/datovka.cpp" line="8654"/>
         <source>The database clean-up failed with error message: %1</source>
         <translation>Pročišťování databáze selhalo s chybovým hlášením: %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8676"/>
+        <location filename="../src/gui/datovka.cpp" line="8673"/>
         <source>You have to be logged into the WebDatovka if you want to modify tags.</source>
         <translation>Musíte být přihlášeni do WebDatovky, aby bylo možné upravovat tagy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8766"/>
+        <location filename="../src/gui/datovka.cpp" line="8763"/>
         <source>Add account(s) error</source>
         <translation>Chyba přidávání účtu</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8787"/>
+        <location filename="../src/gui/datovka.cpp" line="8784"/>
         <source>There aren&apos;t any Webdatovka accounts for this mojeID identity.</source>
         <translation>Pro tuto mojeID identitu nejsou žádné účty ve WebDatovce.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8794"/>
-        <location filename="../src/gui/datovka.cpp" line="8803"/>
+        <location filename="../src/gui/datovka.cpp" line="8791"/>
+        <location filename="../src/gui/datovka.cpp" line="8800"/>
         <source>You are login into wrong mojeID identity.</source>
         <translation>Jste přihlášeni do špatné mojeID identity.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8797"/>
+        <location filename="../src/gui/datovka.cpp" line="8794"/>
         <source>Please enter correct mojeID login for account &apos;%1&apos;.</source>
         <translation>Zadejte prosím správné mojeID přihlašovací jméno &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8808"/>
+        <location filename="../src/gui/datovka.cpp" line="8805"/>
         <source>New mojeID identity has some account(s).</source>
         <translation>Nová modeID identita má nějaké účty.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8809"/>
+        <location filename="../src/gui/datovka.cpp" line="8806"/>
         <source>Do you want to add account(s) for this mojeID identity to Datovka?</source>
         <translation>Chcete přidat účet pro tuto mojeID identitu do Datovky?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8824"/>
+        <location filename="../src/gui/datovka.cpp" line="8821"/>
         <source>Some account(s) were removed from Webdatovka for this mojeID identity.</source>
         <translation>Některé účty byly odebrány z WebDatovky pro tuto mojeID identitu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8830"/>
+        <location filename="../src/gui/datovka.cpp" line="8827"/>
         <source>Do you want to also remove these accounts from Datovka?</source>
         <translation>Chcete také odebrat tyto účty z Datovky?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8941"/>
+        <location filename="../src/gui/datovka.cpp" line="8938"/>
         <source>This action is not supported for MojeID account &apos;%1&apos;</source>
         <translation>Tato akce není podporována pro mojeID účet &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="9026"/>
+        <location filename="../src/gui/datovka.cpp" line="9023"/>
         <source>Login problem</source>
         <translation>Problém přihlášení</translation>
     </message>
     <message>
-        <source>Database file for account &apos;%1&apos; does not exist.</source>
-        <translation type="vanished">Databázový soubor pro účet &apos;%1&apos; neexistuje.</translation>
-    </message>
-    <message>
-        <source>Database file cannot split by years because this account already use database files split according to years.</source>
-        <translation type="vanished">Databázový soubor nelze rozdělit podle roků. Tento účet již má databázi rozdělenou přes jednotlivé roky.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="8188"/>
+        <location filename="../src/gui/datovka.cpp" line="8185"/>
         <source>Select directory for new databases</source>
         <translation>Vyberte složku pro nové databáze</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8204"/>
+        <location filename="../src/gui/datovka.cpp" line="8201"/>
         <source>Database file cannot split into same directory.</source>
         <translation>Databázový soubor nelze rozdělit do stejné složky.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8205"/>
+        <location filename="../src/gui/datovka.cpp" line="8202"/>
         <source>Please, you must choose another directory.</source>
         <translation>Prosím, vyberte jinou složku.</translation>
     </message>
     <message>
-        <source>Copying origin database file to selected location</source>
-        <translation type="vanished">Kopírování původní databáze do vybrané složky</translation>
-    </message>
-    <message>
-        <source>Cannot copy database file for account &apos;%1&apos; to &apos;%2&apos;</source>
-        <translation type="vanished">Nebylo možné zkopírovat původní databázi pro účet &apos;%1&apos; do &apos;%2&apos;</translation>
-    </message>
-    <message>
-        <source>Probably not enough disk space.</source>
-        <translation type="vanished">Pravděpodobně není dostatek místa na disku.</translation>
-    </message>
-    <message>
-        <source>Set of new database files for account &apos;%1&apos; could not be created.</source>
-        <translation type="vanished">Nové databázové soubory pro účet &apos;%1&apos; nebudou vytvořeny.</translation>
-    </message>
-    <message>
-        <source>Creating a new database file for year %1</source>
-        <translation type="vanished">Vytvářím novou databázi pro rok %1</translation>
-    </message>
-    <message>
-        <source>New database file for account &apos;%1&apos; corresponds with year &apos;%2&apos; could not be created.</source>
-        <translation type="vanished">Nový databázový soubor pro účet &apos;%1&apos; korespondující s rokem &apos;%2&apos; nebyl vytvořen.</translation>
-    </message>
-    <message>
-        <source>Messages were not copied.</source>
-        <translation type="vanished">Zprávy nebyly zkopírovány.</translation>
-    </message>
-    <message>
-        <source>Messages correspond with year &apos;%1&apos; for account &apos;%2&apos; were not copied.</source>
-        <translation type="vanished">Zprávy korespondující s rokem &apos;%1&apos; pro účet &apos;%2&apos; nebyly zkopírovány.</translation>
-    </message>
-    <message>
-        <source>Replacing of new database files to origin database location</source>
-        <translation type="vanished">Přemisťování nových databázových souborů do původní složky</translation>
-    </message>
-    <message>
-        <source>Error when move new databases for account &apos;%1&apos;</source>
-        <translation type="vanished">Chyba při přesouvání nových databázových souborů pro účet &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>Probably not enough disk space. The origin database is still used.</source>
-        <translation type="vanished">Pravděpodobně není dostatek místa na disku. Bude použita původní databáze.</translation>
-    </message>
-    <message>
-        <source>Deleting of old database from origin location</source>
-        <translation type="vanished">Mazání staré databáze z původní lokace</translation>
-    </message>
-    <message>
-        <source>Error when removed origin database for account &apos;%1&apos;</source>
-        <translation type="vanished">Nepodařilo se odstranit původní databázi pro účet &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>Action was canceled. Please, remove the origin database file manually from origin location:
-&apos;%1&apos;</source>
-        <translation type="vanished">Akce byla zrušena. Prosím, odstraňte ručně původní databázi z adresáře:
-&apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>A problem when opening new databases for account &apos;%1&apos;</source>
-        <translation type="vanished">Objevil se problém s otevřením nových databázových souborů pro účet &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>Action was done but it cannot open new database files. Please, restart the application.</source>
-        <translation type="vanished">Akce rozdělení sice proběhla, nepodařilo se však otevřít nové databáze. Prosím, restartujte aplikaci.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="8227"/>
+        <location filename="../src/gui/datovka.cpp" line="8224"/>
         <source>Split of message database finished</source>
         <translation>Rozdělení databáze zpráv skončilo</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8229"/>
+        <location filename="../src/gui/datovka.cpp" line="8226"/>
         <source>Congratulation: message database for account &apos;%1&apos; was split successfully. Please, restart the application for loading of new databases.</source>
         <translation>Gratulujeme: databáze zpráv pro účet &apos;%1&apos; byla úspěšně rozdělena. Prosím, restartujte aplikaci pro načtení nových databází zpráv.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8232"/>
+        <location filename="../src/gui/datovka.cpp" line="8229"/>
         <source>Note: Original database file was backup to:</source>
         <translation>Původní databáze byla přesunuta do:</translation>
     </message>
@@ -3714,8 +3363,8 @@ do původního umístění
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5773"/>
-        <location filename="../src/gui/datovka.cpp" line="6233"/>
-        <location filename="../src/gui/datovka.cpp" line="7804"/>
+        <location filename="../src/gui/datovka.cpp" line="6230"/>
+        <location filename="../src/gui/datovka.cpp" line="7801"/>
         <source>Select directory</source>
         <translation>Vybrat adresář pro import</translation>
     </message>
@@ -3736,7 +3385,7 @@ do původního umístění
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5804"/>
-        <location filename="../src/gui/datovka.cpp" line="8121"/>
+        <location filename="../src/gui/datovka.cpp" line="8118"/>
         <source>Database file(s) not selected.</source>
         <translation>Databázové soubory nebyly vybrány.</translation>
     </message>
@@ -3839,78 +3488,62 @@ Please download complete message from ISDS and try again.</source>
 Prosím, stáhněte kompletní zprávu ze serveru Datové schránky a zkuste to znova.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6262"/>
-        <location filename="../src/gui/datovka.cpp" line="6266"/>
-        <location filename="../src/gui/datovka.cpp" line="7832"/>
-        <location filename="../src/gui/datovka.cpp" line="7836"/>
+        <location filename="../src/gui/datovka.cpp" line="6259"/>
+        <location filename="../src/gui/datovka.cpp" line="6263"/>
+        <location filename="../src/gui/datovka.cpp" line="7829"/>
+        <location filename="../src/gui/datovka.cpp" line="7833"/>
         <source>ZFO file(s) not found in selected directory.</source>
         <translation>V adresáři nebyly nalezeny ZFO soubory.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6265"/>
-        <location filename="../src/gui/datovka.cpp" line="7835"/>
+        <location filename="../src/gui/datovka.cpp" line="6262"/>
+        <location filename="../src/gui/datovka.cpp" line="7832"/>
         <source>No ZFO file(s)</source>
         <translation>Žádné ZFO soubory</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6275"/>
+        <location filename="../src/gui/datovka.cpp" line="6272"/>
         <source>Select ZFO file(s)</source>
         <translation>Vyberte ZFO soubory</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6281"/>
+        <location filename="../src/gui/datovka.cpp" line="6278"/>
         <source>ZFO file(s) not selected.</source>
         <translation>Nebyly vybrány ZFO soubory.</translation>
     </message>
     <message>
-        <source>Export of message &quot;%1&quot; to ZFO was successful!</source>
-        <translation type="vanished">Export zprávy &apos;%1&apos; do ZFO proběhl úspěšně!</translation>
-    </message>
-    <message>
-        <source>Export of message &quot;%1&quot; to ZFO was not successful.</source>
-        <translation type="vanished">Export zprávy &quot;%1&quot; do souboru ZFO nebyl úspěšný.</translation>
-    </message>
-    <message>
-        <source>Error exporting message &apos;%1&apos;.</source>
-        <translation type="vanished">Chyba při exportu zprávy &apos;%1&apos;.</translation>
-    </message>
-    <message>
-        <source>Error exporting message delivery info &apos;%1&apos;.</source>
-        <translation type="vanished">Chyba při exportu doručenky zprávy &apos;%1&apos;.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="6851"/>
+        <location filename="../src/gui/datovka.cpp" line="6848"/>
         <source>Message &apos;%1&apos; stored to temporary file &apos;%2&apos;.</source>
         <translation>Zpráva &apos;%1&apos; uložena do dočasného souboru &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6857"/>
+        <location filename="../src/gui/datovka.cpp" line="6854"/>
         <source>Message &apos;%1&apos; couldn&apos;t be stored to temporary file.</source>
         <translation>Zpráva &apos;%1&apos; nemohla být uložena do dočasného souboru.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6860"/>
-        <location filename="../src/gui/datovka.cpp" line="6946"/>
+        <location filename="../src/gui/datovka.cpp" line="6857"/>
+        <location filename="../src/gui/datovka.cpp" line="6943"/>
         <source>Error opening message &apos;%1&apos;.</source>
         <translation>Chyba při otevírání zprávy &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6937"/>
-        <source>Message delivery information &apos;%1&apos; stored to temporary file &apos;%2&apos;.</source>
+        <location filename="../src/gui/datovka.cpp" line="6934"/>
+        <source>Message acceptance information &apos;%1&apos; stored to temporary file &apos;%2&apos;.</source>
         <translation>Doručenka zprávy &apos;%1&apos; uložena do dočasného souboru &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6943"/>
-        <source>Message delivery information &apos;%1&apos; couldn&apos;t be stored to temporary file.</source>
+        <location filename="../src/gui/datovka.cpp" line="6940"/>
+        <source>Message acceptance information &apos;%1&apos; couldn&apos;t be stored to temporary file.</source>
         <translation>Doručenka zprávy &apos;%1&apos; nemohla být uložena do dočasného souboru.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7110"/>
+        <location filename="../src/gui/datovka.cpp" line="7107"/>
         <source>Password required</source>
         <translation>Vyžadováno heslo</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7111"/>
+        <location filename="../src/gui/datovka.cpp" line="7108"/>
         <source>Account: %1
 User name: %2
 Certificate file: %3
@@ -3921,33 +3554,33 @@ Soubor certifikátu: %3
 Zadejte heslo pro odemčení souboru certifikátu:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7030"/>
-        <location filename="../src/gui/datovka.cpp" line="7058"/>
-        <location filename="../src/gui/datovka.cpp" line="7078"/>
-        <location filename="../src/gui/datovka.cpp" line="7097"/>
-        <location filename="../src/gui/datovka.cpp" line="7158"/>
-        <location filename="../src/gui/datovka.cpp" line="7182"/>
-        <location filename="../src/gui/datovka.cpp" line="7200"/>
+        <location filename="../src/gui/datovka.cpp" line="7027"/>
+        <location filename="../src/gui/datovka.cpp" line="7055"/>
+        <location filename="../src/gui/datovka.cpp" line="7075"/>
+        <location filename="../src/gui/datovka.cpp" line="7094"/>
+        <location filename="../src/gui/datovka.cpp" line="7155"/>
+        <location filename="../src/gui/datovka.cpp" line="7179"/>
+        <location filename="../src/gui/datovka.cpp" line="7197"/>
         <source>It was not possible to connect to your data box from account &quot;%1&quot;.</source>
         <translation>Nepodařilo se přihlásit k datové schránce z účtu &quot;%1&quot;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7707"/>
+        <location filename="../src/gui/datovka.cpp" line="7704"/>
         <source>Password expiration</source>
         <translation>Expirace hesla</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7710"/>
+        <location filename="../src/gui/datovka.cpp" line="7707"/>
         <source>According to the last available information, your password for account &apos;%1&apos; (login &apos;%2&apos;) expired %3 days ago (%4).</source>
         <translation>Podle nejnovějších dostupných informací Vaše heslo pro účet &apos;%1&apos; (přihlašovací jméno &apos;%2&apos;) vypršelo před %3 dnem/dny (%4).</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7721"/>
+        <location filename="../src/gui/datovka.cpp" line="7718"/>
         <source>According to the last available information, your password for account &apos;%1&apos; (login &apos;%2&apos;) will expire in %3 days (%4).</source>
         <translation>Podle nejnovějších dostupných informací Vaše heslo pro účet &apos;%1&apos; (přihlašovací jméno &apos;%2&apos;) vyprší za %3 dny/dnů (%4).</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7726"/>
+        <location filename="../src/gui/datovka.cpp" line="7723"/>
         <source>You can change your password now, or later using the &apos;Change password&apos; command. Your new password will be valid for 90 days.
 
 Change password now?</source>
@@ -3956,7 +3589,7 @@ Change password now?</source>
 Změnit heslo nyní?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7140"/>
+        <location filename="../src/gui/datovka.cpp" line="7137"/>
         <source>Enter OTP security code</source>
         <translation>Zadejte OTP bezpečnostní kód</translation>
     </message>
@@ -4012,22 +3645,6 @@ Změnit heslo nyní?</translation>
         <location filename="../src/gui/datovka.cpp" line="1892"/>
         <source>Saving attachment of message &apos;%1&apos; to file was not successful!</source>
         <translation>Nepodařilo se uložit přílohu zprávy &apos;%1&apos;!</translation>
-    </message>
-    <message>
-        <source>Error saving attachment.</source>
-        <translation type="vanished">Chyba při ukládání přílohy.</translation>
-    </message>
-    <message>
-        <source>Some files already exist.</source>
-        <translation type="vanished">Některé soubory již existují.</translation>
-    </message>
-    <message>
-        <source>Some attachments of message &apos;%1&apos; were not saved to disk!</source>
-        <translation type="vanished">Některé přílohy zprávy &apos;%1&apos; nebyly uloženy na disk!</translation>
-    </message>
-    <message>
-        <source>All attachments of message &apos;%1&apos; were saved.</source>
-        <translation type="vanished">Všechny přílohy zprávy &apos;%1&apos; byly uloženy na disk.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="1978"/>
@@ -4123,7 +3740,7 @@ Změnit heslo nyní?</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3322"/>
-        <location filename="../src/gui/datovka.cpp" line="6393"/>
+        <location filename="../src/gui/datovka.cpp" line="6390"/>
         <source>You have to be logged into the WebDatovka if you want to download complete message.</source>
         <translation>Musíte být přihlášeni do WebDatovky, aby bylo možné stahovat kompletní zprávy.</translation>
     </message>
@@ -4217,35 +3834,19 @@ Změnit heslo nyní?</translation>
         <translation>Musíte být přihlášeni do WebDatovky, aby bylo možné vyhledávat datové schránky.</translation>
     </message>
     <message>
-        <source>The selection does not contain any valid ZFO files.</source>
-        <translation type="vanished">Nebyly nalezeny žádné použitelné ZFO soubory k importu.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="7145"/>
+        <location filename="../src/gui/datovka.cpp" line="7142"/>
         <source>Enter OTP security code for account</source>
         <translation>Zadejte OTP bezpečnostní kód pro účet</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3656"/>
-        <location filename="../src/gui/datovka.cpp" line="8267"/>
+        <location filename="../src/gui/datovka.cpp" line="8264"/>
         <source>Portable version</source>
         <translation>Přenosná verze</translation>
     </message>
     <message>
-        <source>PDF file (*.pdf)</source>
-        <translation type="vanished">PDF soubor (*.pdf)</translation>
-    </message>
-    <message>
-        <source>Export of message delivery info &quot;%1&quot; to PDF was not successful!</source>
-        <translation type="vanished">Export informací o doručení zprávy &quot;%1&quot; do souboru PDF nebyl úspěšný!</translation>
-    </message>
-    <message>
-        <source>Export of message delivery info &quot;%1&quot; to PDF was successful.</source>
-        <translation type="vanished">Export informací o doručení zprávy &quot;%1&quot; do souboru PDF byl úspěšný.</translation>
-    </message>
-    <message>
         <location filename="../src/gui/datovka.cpp" line="5087"/>
-        <location filename="../src/gui/datovka.cpp" line="7286"/>
+        <location filename="../src/gui/datovka.cpp" line="7283"/>
         <source>Change password of account &quot;%1&quot;.</source>
         <translation>Změnit heslo pro účet &quot;%1&quot;.</translation>
     </message>
@@ -4313,188 +3914,152 @@ Try again.</source>
 Zkuste to znova.</translation>
     </message>
     <message>
-        <source>Wrong ZFO format. This file does not contain correct data for import.</source>
-        <translation type="vanished">Špatný formát ZFO. Soubor neobsahuje platná data zprávy pro import do databáze.</translation>
-    </message>
-    <message>
         <location filename="../src/gui/datovka.cpp" line="1384"/>
-        <location filename="../src/gui/datovka.cpp" line="6603"/>
-        <location filename="../src/gui/datovka.cpp" line="6699"/>
+        <location filename="../src/gui/datovka.cpp" line="6600"/>
+        <location filename="../src/gui/datovka.cpp" line="6696"/>
         <source>Message export error!</source>
         <translation>Chyba exportu zprávy!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7715"/>
+        <location filename="../src/gui/datovka.cpp" line="7712"/>
         <source>You have to change your password from the ISDS web interface. Your new password will be valid for 90 days.</source>
         <translation>Heslo si změňte ve webovém rozhraní ISDS. Vaše nové heslo bude platné 90 dnů.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7782"/>
-        <location filename="../src/gui/datovka.cpp" line="7794"/>
+        <location filename="../src/gui/datovka.cpp" line="7779"/>
+        <location filename="../src/gui/datovka.cpp" line="7791"/>
         <source>Checking time stamps in account &apos;%1&apos;...</source>
         <translation>Kontrola časových razítek v účtu &apos;%1&apos;...</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7977"/>
+        <location filename="../src/gui/datovka.cpp" line="7974"/>
         <source>Time stamp expiration check results</source>
         <translation>Výsledky kontroly expirace časových razítek</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7962"/>
+        <location filename="../src/gui/datovka.cpp" line="7959"/>
         <source>Time stamp expiration check in account &apos;%1&apos; finished with result:</source>
         <translation>Kontrola časových razítek v účtu &apos;%1&apos; skončila s výsledkem:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7882"/>
+        <location filename="../src/gui/datovka.cpp" line="7879"/>
         <source>Loading of ZFO file(s) failed!</source>
         <translation>Načítání ZFO souborů selhalo!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7921"/>
+        <location filename="../src/gui/datovka.cpp" line="7918"/>
         <source>Time stamp expiration check of ZFO files finished with result:</source>
         <translation>Kontrola časových razítek ZFO souborů skončila s výsledkem:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7924"/>
+        <location filename="../src/gui/datovka.cpp" line="7921"/>
         <source>Total of ZFO files: %1</source>
         <translation>Celkem ZFO souborů: %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7926"/>
+        <location filename="../src/gui/datovka.cpp" line="7923"/>
         <source>ZFO files with time stamp expiring within %1 days: %2</source>
         <translation>ZFO souborů s časovým razítkem expirujícím do %1 dnů: %2</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7930"/>
+        <location filename="../src/gui/datovka.cpp" line="7927"/>
         <source>Unchecked ZFO files: %1</source>
         <translation>Nezkontrolovaných ZFO souborů: %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7966"/>
-        <location filename="../src/gui/datovka.cpp" line="9148"/>
+        <location filename="../src/gui/datovka.cpp" line="7963"/>
+        <location filename="../src/gui/datovka.cpp" line="9145"/>
         <source>Total of messages in database: %1</source>
         <translation>Celkem zpráv v databázi: %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7968"/>
+        <location filename="../src/gui/datovka.cpp" line="7965"/>
         <source>Messages with time stamp expiring within %1 days: %2</source>
         <translation>Zpráv s časovým razítkem expirujícím do %1 dnů: %2</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7972"/>
+        <location filename="../src/gui/datovka.cpp" line="7969"/>
         <source>Unchecked messages: %1</source>
         <translation>Nezkontrolovaných zpráv: %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7982"/>
+        <location filename="../src/gui/datovka.cpp" line="7979"/>
         <source>See details for more info...</source>
         <translation>Více informací naleznete v podrobnostech...</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7985"/>
+        <location filename="../src/gui/datovka.cpp" line="7982"/>
         <source>Do you want to export the expiring messages to ZFO?</source>
         <translation>Chcete exportovat expirující zprávy do ZFO?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7993"/>
-        <location filename="../src/gui/datovka.cpp" line="8009"/>
+        <location filename="../src/gui/datovka.cpp" line="7990"/>
+        <location filename="../src/gui/datovka.cpp" line="8006"/>
         <source>Time stamp of message %1 expires within specified interval.</source>
         <translation>Časové razítko zprávy %1 expiruje do určeného limitu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8001"/>
-        <location filename="../src/gui/datovka.cpp" line="8017"/>
+        <location filename="../src/gui/datovka.cpp" line="7998"/>
+        <location filename="../src/gui/datovka.cpp" line="8014"/>
         <source>Time stamp of message %1 is not present.</source>
         <translation>Časové razítko zprávy %1 není k dispozici.</translation>
     </message>
     <message>
-        <source>Export ZFO</source>
-        <translation type="vanished">Exportovat ZFO</translation>
-    </message>
-    <message>
-        <source>Export of message &quot;%1&quot; to ZFO was not successful!</source>
-        <translation type="vanished">Export zprávy &quot;%1&quot; do souboru ZFO nebyl úspěšný!</translation>
-    </message>
-    <message>
-        <source>Delivery info export error!</source>
-        <translation type="vanished">Chyba exportu informací o doručení!</translation>
-    </message>
-    <message>
-        <source>Export of message delivery info &quot;%1&quot; to ZFO was not successful!</source>
-        <translation type="vanished">Export informací o doručení zprávy &quot;%1&quot; do souboru ZFO nebyl úspěšný!</translation>
-    </message>
-    <message>
-        <source>Export of message delivery info &quot;%1&quot; to ZFO was successful.</source>
-        <translation type="vanished">Export informací o doručení zprávy &quot;%1&quot; do souboru ZFO byl úspěšný.</translation>
-    </message>
-    <message>
-        <source>Printing of delivery info &quot;%1&quot; to PDF. Please wait...</source>
-        <translation type="vanished">Probíhá tisk informací o dodání zprávy &quot;%1&quot; do PDF. Prosím čekejte...</translation>
-    </message>
-    <message>
-        <source>Export of message envelope &quot;%1&quot; to PDF was not successful!</source>
-        <translation type="vanished">Export obálky zprávy &quot;%1&quot; do souboru PDF nebyl úspěšný!</translation>
-    </message>
-    <message>
-        <source>Export of message envelope &quot;%1&quot; to PDF was successful.</source>
-        <translation type="vanished">Export obálky zprávy &quot;%1&quot; do souboru PDF byl úspěšný.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="6829"/>
-        <location filename="../src/gui/datovka.cpp" line="6915"/>
+        <location filename="../src/gui/datovka.cpp" line="6826"/>
+        <location filename="../src/gui/datovka.cpp" line="6912"/>
         <source>Datovka - Export error!</source>
         <translation>Datovka - chyba exportu!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6830"/>
-        <location filename="../src/gui/datovka.cpp" line="6916"/>
+        <location filename="../src/gui/datovka.cpp" line="6827"/>
+        <location filename="../src/gui/datovka.cpp" line="6913"/>
         <source>Cannot export the message </source>
         <translation>Nelze exportovat zprávu </translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="6833"/>
-        <location filename="../src/gui/datovka.cpp" line="6919"/>
+        <location filename="../src/gui/datovka.cpp" line="6830"/>
+        <location filename="../src/gui/datovka.cpp" line="6916"/>
         <source>First you must download message before its export...</source>
         <translation>Musíte nejprve stáhnout kompletní zprávu před exportem...</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7171"/>
+        <location filename="../src/gui/datovka.cpp" line="7168"/>
         <source>SMS code for account </source>
         <translation>SMS kód pro účet </translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="21"/>
-        <location filename="../src/gui/datovka.cpp" line="7340"/>
+        <location filename="../src/gui/datovka.cpp" line="7337"/>
         <source>Datovka</source>
         <translation>Datovka</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7417"/>
+        <location filename="../src/gui/datovka.cpp" line="7414"/>
         <source>New account error</source>
         <translation>Chyba nového účtu</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7420"/>
+        <location filename="../src/gui/datovka.cpp" line="7417"/>
         <source>It was not possible to get user info and databox info from ISDS server for account</source>
         <translation>Nebylo možné získat informace o uživateli a jeho datové schránce ze serveru ISDS pro účet</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7432"/>
+        <location filename="../src/gui/datovka.cpp" line="7429"/>
         <source>Account</source>
         <translation>Účet</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7435"/>
+        <location filename="../src/gui/datovka.cpp" line="7432"/>
         <source>was not created!</source>
         <translation>nebyl vytvořen!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8278"/>
+        <location filename="../src/gui/datovka.cpp" line="8275"/>
         <source>Welcome...</source>
         <translation>Vítejte...</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8282"/>
+        <location filename="../src/gui/datovka.cpp" line="8279"/>
         <source>Storage: disk | disk</source>
         <translation>Úložiště: disk | disk</translation>
     </message>
@@ -4502,26 +4067,6 @@ Zkuste to znova.</translation>
         <location filename="../src/gui/datovka.cpp" line="3538"/>
         <source>unknown or without expiration</source>
         <translation>Neznámý nebo bez expirace</translation>
-    </message>
-    <message>
-        <source>Save message as ZFO file</source>
-        <translation type="vanished">Uložit zprávu do souboru ZFO</translation>
-    </message>
-    <message>
-        <source>Save delivery info as ZFO file</source>
-        <translation type="vanished">Uložit doručenku do soubor ZFO</translation>
-    </message>
-    <message>
-        <source>Save delivery info as PDF file</source>
-        <translation type="vanished">Uložit doručenku do soubor PDF</translation>
-    </message>
-    <message>
-        <source>Save message envelope as PDF file</source>
-        <translation type="vanished">Uložit obálku zprávy do soubor PDF</translation>
-    </message>
-    <message>
-        <source>Printing of message envelope &quot;%1&quot; to PDF. Please wait...</source>
-        <translation type="vanished">Probíhá tisk obálky zprávy &quot;%1&quot; do PDF. Prosím čekejte...</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="5873"/>
@@ -4534,8 +4079,8 @@ Zkuste to znova.</translation>
         <translation>Účet s názvem &apos;%1&apos; byl vytvořen (uživatelské jméno &apos;%1&apos;).</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7006"/>
-        <location filename="../src/gui/datovka.cpp" line="9030"/>
+        <location filename="../src/gui/datovka.cpp" line="7003"/>
+        <location filename="../src/gui/datovka.cpp" line="9027"/>
         <source>Mode: online</source>
         <translation>Režim: připojeno (online)</translation>
     </message>
@@ -4616,12 +4161,12 @@ Zpráva je buď ve stavu nevyřízeno, vyřizuje se
 nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8306"/>
+        <location filename="../src/gui/datovka.cpp" line="8303"/>
         <source>Unsettled</source>
         <translation>Nevyřízeno</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8310"/>
+        <location filename="../src/gui/datovka.cpp" line="8307"/>
         <source>Settled</source>
         <translation>Vyřízeno</translation>
     </message>
@@ -4844,17 +4389,17 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="931"/>
-        <source>Pass the delivery information of the selected message to an external application</source>
+        <source>Pass the acceptance information of the selected message to an external application</source>
         <translation>Předat doručenku vybrané zprávy externí aplikaci</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="942"/>
-        <source>Export the delivery information of the selected message as ZFO file</source>
+        <source>Export the acceptance information of the selected message as ZFO file</source>
         <translation>Exportovat doručenku vybrané zprávy jako ZFO soubor</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="953"/>
-        <source>Export the delivery information of the selected message as PDF file</source>
+        <source>Export the acceptance information of the selected message as PDF file</source>
         <translation>Exportovat doručenku vybrané zprávy jako PDF soubor</translation>
     </message>
     <message>
@@ -5067,17 +4612,17 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="928"/>
-        <source>Open delivery info externally</source>
+        <source>Open acceptance info externally</source>
         <translation>Otevřít doručenku pomocí externí aplikace</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="939"/>
-        <source>Export delivery info as ZFO</source>
+        <source>Export acceptance info as ZFO</source>
         <translation>Exportovat doručenku do ZFO</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="950"/>
-        <source>Export delivery info as PDF</source>
+        <source>Export acceptance info as PDF</source>
         <translation>Exportovat doručenku do PDF</translation>
     </message>
     <message>
@@ -5333,7 +4878,7 @@ přílohy).</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1291"/>
-        <source>Delivery info file name:</source>
+        <source>Acceptance info file name:</source>
         <translation>Jméno souboru doručenky:</translation>
     </message>
     <message>
@@ -5342,9 +4887,34 @@ přílohy).</translation>
         <translation>Jméno souboru přílohy:</translation>
     </message>
     <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1428"/>
+        <source>acceptance year (YYYY)</source>
+        <translation>rok doručení (YYYY)</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1442"/>
+        <source>acceptance month (MM)</source>
+        <translation>měsíc doručení (MM)</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1456"/>
+        <source>acceptance day (DD)</source>
+        <translation>den doručení (DD)</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1470"/>
+        <source>acceptance minute (mm)</source>
+        <translation>minuta doručení (mm)</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1484"/>
+        <source>acceptance hour (hh)</source>
+        <translation>hodina doručení (hh)</translation>
+    </message>
+    <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1783"/>
-        <source>Saves delivery info for every attachment file separately.
-The delivery info file name has to contain the original
+        <source>Saves acceptance info for every attachment file separately.
+The acceptance info file name has to contain the original
 attachment file name (parameter %f is required).</source>
         <translation>Uloží zvlášť doručenku pro každý soubor přílohy.
 Název souboru doručenky musí obsahovat původní
@@ -5463,12 +5033,12 @@ Pamatování cest pro jednotlivé účty bude vypnuto.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1193"/>
-        <source>Save signed delivery info to ZFO</source>
+        <source>Save signed acceptance info to ZFO</source>
         <translation>Ulož podepsanou doručenku jako ZFO</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1210"/>
-        <source>Save delivery info to PDF</source>
+        <source>Save acceptance info to PDF</source>
         <translation>Ulož doručenku jako PDF</translation>
     </message>
     <message>
@@ -5616,41 +5186,16 @@ soubor do cesty, kam se ukládají přílohy.</translation>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1189"/>
         <source>When saving all attachments also save
-signed delivery info as ZFO to the same path.</source>
+signed acceptance info as ZFO to the same path.</source>
         <translation>Uložit také podepsanou doručenku jako ZFO
 soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1206"/>
         <source>When saving all attachments also save
-delivery info as PDF to the same path.</source>
+acceptance info as PDF to the same path.</source>
         <translation>Uložit také informace o doručení jako PDF
 soubor do cesty, kam se ukládají přílohy.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1428"/>
-        <source>delivery year (YYYY)</source>
-        <translation>rok doručení (YYYY)</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1442"/>
-        <source>delivery month (MM)</source>
-        <translation>měsíc doručení (MM)</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1456"/>
-        <source>delivery day (DD)</source>
-        <translation>den doručení (DD)</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1470"/>
-        <source>delivery minute (mm)</source>
-        <translation>minuta doručení (mm)</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1484"/>
-        <source>delivery hour (hh)</source>
-        <translation>hodina doručení (hh)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1558"/>
@@ -5699,7 +5244,7 @@ soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_preferences.ui" line="1788"/>
-        <source>Save delivery info for every attachment file. Format:</source>
+        <source>Save acceptance info for every attachment file. Format:</source>
         <translation>Uložit doručenku pro každý soubor přílohy. Formát:</translation>
     </message>
     <message>
@@ -5938,6 +5483,11 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <translation>Zpráva dodána do ISDS (zapsán čas dodání).</translation>
     </message>
     <message>
+        <location filename="../src/common.cpp" line="538"/>
+        <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of acceptance through fiction in non-OVM DS); this state cannot occur for commercial messages.</source>
+        <translation>Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u ne-OVM DS); tento stav nemůže nastat v případě poštovních datových zpráv.</translation>
+    </message>
+    <message>
         <location filename="../src/common.cpp" line="553"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation>Zpráva byla přečtena (na portále nebo akcí ESS).</translation>
@@ -5951,11 +5501,6 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <location filename="../src/common.cpp" line="517"/>
         <source>Data message including its attachments signed with time-stamp.</source>
         <translation>Datová zpráva včetně písemností podepsána časovým razítkem.</translation>
-    </message>
-    <message>
-        <location filename="../src/common.cpp" line="538"/>
-        <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of delivery by fiction in nonOVM DS); this state cannot occur for commercial messages.</source>
-        <translation>Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u ne-OVM DS); tento stav nemůže nastat v případě poštovních datových zpráv.</translation>
     </message>
     <message>
         <location filename="../src/common.cpp" line="548"/>
@@ -6081,16 +5626,6 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <location filename="../src/common.cpp" line="391"/>
         <source>An error occurred while checking the status.</source>
         <translation>Došlo k chybě při zjišťování stavu.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="420"/>
-        <source>Correspondence overview export error.</source>
-        <translation>Chyba při exportu přehledu korespondence.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="435"/>
-        <source>Correspondence overview export error</source>
-        <translation>Chyba při exportu přehledu korespondence</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="330"/>
@@ -6290,6 +5825,21 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <translation>Sekce</translation>
     </message>
     <message>
+        <location filename="../src/io/db_tables.cpp" line="285"/>
+        <source>Acceptance through fiction enabled</source>
+        <translation>Doručení fikcí povoleno</translation>
+    </message>
+    <message>
+        <location filename="../src/io/db_tables.cpp" line="287"/>
+        <source>Delivery time</source>
+        <translation>Čas dodání</translation>
+    </message>
+    <message>
+        <location filename="../src/io/db_tables.cpp" line="288"/>
+        <source>Acceptance time</source>
+        <translation>Čas doručení</translation>
+    </message>
+    <message>
         <location filename="../src/io/db_tables.cpp" line="275"/>
         <source>Your reference number</source>
         <translation>Vaše číslo jednací</translation>
@@ -6333,21 +5883,6 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <location filename="../src/io/db_tables.cpp" line="284"/>
         <source>Personal delivery</source>
         <translation>Doručení do vlastních rukou</translation>
-    </message>
-    <message>
-        <location filename="../src/io/db_tables.cpp" line="285"/>
-        <source>Enable delivery by fiction</source>
-        <translation>Povoleno doručení fikcí</translation>
-    </message>
-    <message>
-        <location filename="../src/io/db_tables.cpp" line="287"/>
-        <source>Delivered</source>
-        <translation>Čas dodání</translation>
-    </message>
-    <message>
-        <location filename="../src/io/db_tables.cpp" line="288"/>
-        <source>Accepted</source>
-        <translation>Čas doručení</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="289"/>
@@ -6433,6 +5968,11 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <translation>Služba: připojit se k datové schránce.</translation>
     </message>
     <message>
+        <location filename="../src/main.cpp" line="218"/>
+        <source>Service: download acceptance info of message with signature and time stamp of MV.</source>
+        <translation>Služba: stáhnout informace o doručení zprávy s podpisem a časovým razítkem MV.</translation>
+    </message>
+    <message>
         <location filename="../src/main.cpp" line="571"/>
         <source>Application is loading...</source>
         <translation>Aplikace se načítá...</translation>
@@ -6463,11 +6003,6 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <translation>Služba: stáhnout kompletní zprávu s podpisem a časovým razítkem MV.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="218"/>
-        <source>Service: download delivery info of message with signature and time stamp of MV.</source>
-        <translation>Služba: stáhnout informace o doručení zprávy s podpisem a časovým razítkem MV.</translation>
-    </message>
-    <message>
         <location filename="../src/main.cpp" line="224"/>
         <source>Service: get information about user (role, privileges, ...).</source>
         <translation>Služba: stáhnout informace o uživateli (role, oprávnění, ...).</translation>
@@ -6494,7 +6029,7 @@ soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1589"/>
-        <source>Advice of Delivery</source>
+        <source>Advice of Acceptance</source>
         <translation>Doručenka</translation>
     </message>
     <message>
@@ -6608,12 +6143,6 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <translation>Osobní doručení</translation>
     </message>
     <message>
-        <location filename="../src/io/message_db.cpp" line="1483"/>
-        <location filename="../src/io/message_db.cpp" line="1708"/>
-        <source>Prohibit Delivery by Fiction</source>
-        <translation>Zakázat doručení fikcí</translation>
-    </message>
-    <message>
         <location filename="../src/io/message_db.cpp" line="1552"/>
         <source>List of attachments</source>
         <translation>Seznam příloh</translation>
@@ -6621,13 +6150,13 @@ soubor do cesty, kam se ukládají přílohy.</translation>
     <message>
         <location filename="../src/io/message_db.cpp" line="1714"/>
         <source>Delivery/Acceptance Information</source>
-        <translation>Informace o dodání a doručení</translation>
+        <translation>Informace o dodání/doručení</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1403"/>
         <location filename="../src/io/message_db.cpp" line="1716"/>
         <source>Delivery</source>
-        <translation>Dodejka</translation>
+        <translation>Dodání</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1030"/>
@@ -6640,9 +6169,15 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <translation>Stáhněte kompletní zprávu pro ověření jejího časového razítka.</translation>
     </message>
     <message>
+        <location filename="../src/io/message_db.cpp" line="1483"/>
+        <location filename="../src/io/message_db.cpp" line="1708"/>
+        <source>Prohibit Acceptance through Fiction</source>
+        <translation>Zakázat doručení fikcí</translation>
+    </message>
+    <message>
         <location filename="../src/io/message_db.cpp" line="1719"/>
         <source>Acceptance</source>
-        <translation>Doručenka</translation>
+        <translation>Doručení</translation>
     </message>
     <message>
         <location filename="../src/io/message_db.cpp" line="1178"/>
@@ -6995,22 +6530,22 @@ soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
         <location filename="../src/worker/task_import_zfo.cpp" line="377"/>
-        <source>This file (delivery info) has not been inserted into database because there isn&apos;t any related message with id &apos;%1&apos; in the databases.</source>
+        <source>This file (acceptance info) has not been inserted into database because there isn&apos;t any related message with id &apos;%1&apos; in the databases.</source>
         <translation>Tento soubor (doručenka) nebyl vložen do databáze, protože v databázi nebyla nalezena žádná odpovídající zpráva s id &apos;%1&apos;.</translation>
     </message>
     <message>
         <location filename="../src/worker/task_import_zfo.cpp" line="384"/>
-        <source>Delivery info for message &apos;%1&apos; already exists in the local database, account &apos;%2&apos;.</source>
+        <source>Acceptance info for message &apos;%1&apos; already exists in the local database, account &apos;%2&apos;.</source>
         <translation>Doručenka &apos;%1&apos; již v lokální databázi existuje, účet &apos;%2&apos;.</translation>
     </message>
     <message>
         <location filename="../src/worker/task_import_zfo.cpp" line="408"/>
-        <source>Delivery info for message &apos;%1&apos; could not be authenticated by ISDS server.</source>
+        <source>Acceptance info for message &apos;%1&apos; could not be authenticated by ISDS server.</source>
         <translation>Doručenka zprávy &apos;%1&apos; nemohla být ověřena serverem ISDS.</translation>
     </message>
     <message>
         <location filename="../src/worker/task_import_zfo.cpp" line="423"/>
-        <source>Imported delivery info for message &apos;%1&apos;, account &apos;%2&apos;.</source>
+        <source>Imported acceptance info for message &apos;%1&apos;, account &apos;%2&apos;.</source>
         <translation>Importována doručenka zprávy &apos;%1&apos;, účet &apos;%2&apos;.</translation>
     </message>
     <message>
@@ -7045,7 +6580,7 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <location filename="../src/io/exports.cpp" line="107"/>
         <location filename="../src/io/exports.cpp" line="113"/>
         <location filename="../src/io/exports.cpp" line="119"/>
-        <source>delivery info</source>
+        <source>acceptance info</source>
         <translation>doručenka</translation>
     </message>
     <message>
@@ -7278,6 +6813,26 @@ do původního umístění
         <source>Please, restart the application.</source>
         <translation>Prosím, restartujte aplikaci.</translation>
     </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="416"/>
+        <source>Message &apos;%1&apos; does not contain data necessary for ZFO export.</source>
+        <translation>Zpráva &apos;%1&apos; neobsahuje potřebná data pro export do ZFO souboru.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="423"/>
+        <source>Message &apos;%1&apos; does not contain acceptance info data necessary for ZFO export.</source>
+        <translation>Zpráva &apos;%1&apos; neobsahuje data potřebná pro export doručenky do ZFO souboru.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="430"/>
+        <source>Message &apos;%1&apos; does not contain message envelope data necessary for PDF export.</source>
+        <translation>Zpráva &apos;%1&apos; neobsahuje data potřebná pro export obálky do PDF souboru.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="437"/>
+        <source>Message &apos;%1&apos; does not contain acceptance info data necessary for PDF export.</source>
+        <translation>Ke zprávě &apos;%1&apos; chybí data doručenky, která jsou potřeba pro export do PDF.</translation>
+    </message>
 </context>
 <context>
     <name>SendMessage</name>
@@ -7423,6 +6978,20 @@ do původního umístění
         <translation>Příjemci:</translation>
     </message>
     <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="516"/>
+        <source>Even if the recipient did not read this message,
+the message is considered to be accepted after
+(currently) 10 days. This is acceptance through fiction.</source>
+        <translation>I když si příjemce nepřečetl zprávu,
+bude zpráva považována za doručenou 
+(aktuálně) po 10 dnech. Toto je doručení fikcí.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="521"/>
+        <source>Allow acceptance through fiction</source>
+        <translation>Povolit doručení fikcí</translation>
+    </message>
+    <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="733"/>
         <source>Attachment size is larger than 20 MB. Message cannot be sent!</source>
         <translation>Velikost příloh je větší než 20 MB. Zprávu nebude možné odeslat!</translation>
@@ -7480,51 +7049,6 @@ do původního umístění
         <translation>Vložit ID DS</translation>
     </message>
     <message>
-        <source>Id</source>
-        <translation type="vanished">ID</translation>
-    </message>
-    <message>
-        <source>Databox ID</source>
-        <translation type="vanished">ID datové schránky</translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Jméno</translation>
-    </message>
-    <message>
-        <source>Full name of recipient
-or name of organization</source>
-        <translation type="vanished">Plné jméno příjemce
-nebo název organizace</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation type="vanished">Adresa</translation>
-    </message>
-    <message>
-        <source>Address of recipient</source>
-        <translation type="vanished">Adresa příjemce</translation>
-    </message>
-    <message>
-        <source>PDZ</source>
-        <translation type="vanished">PDZ</translation>
-    </message>
-    <message>
-        <source>The message for recipient will be
-sent as Poštovní Datová Zpráva</source>
-        <translation type="vanished">Zpráva bude odeslána jako
-placená Poštovní Datová Zpráva</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="516"/>
-        <source>Even if recipient did not read this message,
-message is considered as delivered after 
-(currently) 10 days. This is delivery through fiction.</source>
-        <translation>Jestli-že si příjemce nepřečte zprávu,
-bude zpráva považována za doručenou 
-(aktuálně) po 10 dnech. Toto je doručení fikcí.</translation>
-    </message>
-    <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="559"/>
         <source>You will pay the transfer charges of the reply message.
 This is useful when the recipient does not have sending
@@ -7547,11 +7071,6 @@ neumožňuje zasílání poštovních datových zpráv.</translation>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="674"/>
         <source>Open selected file in associated application</source>
         <translation>Otevřít vybraný soubor v externí aplikaci</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="521"/>
-        <source>Allow delivery through fiction</source>
-        <translation>Povolit doručení fikcí</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="537"/>

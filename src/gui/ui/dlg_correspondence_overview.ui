@@ -243,7 +243,7 @@
       <item>
        <widget class="QCheckBox" name="exportDeliveryZfoCheckBox">
         <property name="text">
-         <string>ZFO delivery info files</string>
+         <string>ZFO acceptance info files</string>
         </property>
        </widget>
       </item>
@@ -257,7 +257,7 @@
       <item>
        <widget class="QCheckBox" name="exportDeliveryPDFCheckBox">
         <property name="text">
-         <string>PDF delivery info files</string>
+         <string>PDF acceptance info files</string>
         </property>
        </widget>
       </item>

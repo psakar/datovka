@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -282,10 +282,10 @@ namespace MsgsTbl {
 	{"dmLegalTitlePar",       {DB_TEXT, QObject::tr("Paragraph")}},
 	{"dmLegalTitlePoint",     {DB_TEXT, QObject::tr("Letter")}},
 	{"dmPersonalDelivery",    {DB_BOOLEAN, QObject::tr("Personal delivery")}},
-	{"dmAllowSubstDelivery",  {DB_BOOLEAN, QObject::tr("Enable delivery by fiction")}},
+	{"dmAllowSubstDelivery",  {DB_BOOLEAN, QObject::tr("Acceptance through fiction enabled")}},
 	{"dmQTimestamp",          {DB_TEXT, ""}},
-	{"dmDeliveryTime",        {DB_DATETIME, QObject::tr("Delivered")}},
-	{"dmAcceptanceTime",      {DB_DATETIME, QObject::tr("Accepted")}},
+	{"dmDeliveryTime",        {DB_DATETIME, QObject::tr("Delivery time")}},
+	{"dmAcceptanceTime",      {DB_DATETIME, QObject::tr("Acceptance time")}},
 	{"dmMessageStatus",       {DB_INTEGER, QObject::tr("Status")}},
 	{"dmAttachmentSize",      {DB_INTEGER, QObject::tr("Attachment size")}},
 	{"_dmType",               {DB_TEXT, ""}}

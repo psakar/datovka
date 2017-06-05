@@ -215,7 +215,7 @@ int setupCmdLineParser(QCommandLineParser &parser)
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_DEL_INFO,
-	        QObject::tr("Service: download delivery info of message "
+	        QObject::tr("Service: download acceptance info of message "
 	        "with signature and time stamp of MV."),
 	        QObject::tr("string-of-parameters")))) {
 		return -1;

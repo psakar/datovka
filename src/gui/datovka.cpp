@@ -6931,13 +6931,13 @@ void MainWindow::openDeliveryInfoExternally(void)
 	fileName = writeTemporaryFile(fileName, data);
 	if (!fileName.isEmpty()) {
 		showStatusTextWithTimeout(
-		    tr("Message delivery information '%1' stored to temporary file '%2'.")
+		    tr("Message acceptance information '%1' stored to temporary file '%2'.")
 		        .arg(msgId.dmId).arg(fileName));
 		QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
 		/* TODO -- Handle openUrl() return value. */
 	} else {
 		showStatusTextWithTimeout(
-		    tr("Message delivery information '%1' couldn't be stored to temporary file.")
+		    tr("Message acceptance information '%1' couldn't be stored to temporary file.")
 		        .arg(msgId.dmId));
 		QMessageBox::warning(this,
 		    tr("Error opening message '%1'.").arg(msgId.dmId),

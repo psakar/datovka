@@ -180,26 +180,32 @@ QString DlgCorrespondenceOverview::msgHtmlEntry(
 
 	return
 	    QStringLiteral("<div><table><tr><td><table>"
-	                   "<tr><td><b>")
+	                   "<tr><td>")
+	    + QStringLiteral("Id:") +
+	    QStringLiteral("</td><td><b>")
 	    + QString::number(mId.dmId) +
 	    QStringLiteral("</b></td></tr>"
-	                   "<tr><td class=\"smaller\">")
+	                   "<tr><td>")
+	    + tr("Delivery") +
+	    QStringLiteral(":</td><td class=\"smaller\">")
 	    + messageItems.at(3) +
 	    QStringLiteral("</td></tr>"
-	                   "<tr><td class=\"smaller\">")
+	                   "<tr><td>")
+	    + tr("Acceptance") +
+	    QStringLiteral(":</td><td class=\"smaller\">")
 	    + messageItems.at(4) +
 	    QStringLiteral("</td></tr>"
 	                   "</table></td><td><table><tr><td>")
-	    + tr("Subject:") +
-	    QStringLiteral("</td><td><i><b>")
+	    + tr("Subject") +
+	    QStringLiteral(":</td><td><i><b>")
 	    + messageItems.at(2) +
 	    QStringLiteral("</b></i></td></tr><tr><td>")
-	    + tr("Sender:") +
-	    QStringLiteral("</td><td><i>")
+	    + tr("Sender") +
+	    QStringLiteral(":</td><td><i>")
 	    + messageItems.at(0) +
 	    QStringLiteral("</i></td></tr><tr><td>")
-	    + tr("Recipient:") +
-	    QStringLiteral("</td><td><i>")
+	    + tr("Recipient") +
+	    QStringLiteral(":</td><td><i>")
 	    + messageItems.at(1) +
 	    QStringLiteral("</i></td></tr></table></td></tr></table></div>");
 }
@@ -414,7 +420,7 @@ void appendError(enum Exports::ExportFileType fileType, qint64 dmId,
 		qWarning(
 		    QString("DZ '%1' export error").arg(dmId).toUtf8().constData());
 		errList.append(
-		    QObject::tr("Message '%1' does not contain delivery info data necessary for ZFO export.")
+		    QObject::tr("Message '%1' does not contain acceptance info data necessary for ZFO export.")
 		        .arg(dmId));
 		break;
 	case Exports::PDF_ENVELOPE:
@@ -428,7 +434,7 @@ void appendError(enum Exports::ExportFileType fileType, qint64 dmId,
 		qWarning(
 		    QString("DD '%1' export error").arg(dmId).toUtf8().constData());
 		errList.append(
-		    QObject::tr("Message '%1' does not contain delivery info data necessary for PDF export.")
+		    QObject::tr("Message '%1' does not contain acceptance info data necessary for PDF export.")
 		        .arg(dmId));
 		break;
 	case Exports::PDF_DELIV_ATTACH:
@@ -555,7 +561,7 @@ void DlgCorrespondenceOverview::exportChosenData(const QString &userName,
 		summaryMsg += QStringLiteral("<b>") +
 		    QString::number(successDelInfoZFOCnt) +
 		    QStringLiteral("</b> ") +
-		    tr("delivery infos were successfully exported to ZFO.") +
+		    tr("acceptance infos were successfully exported to ZFO.") +
 		    QStringLiteral("<br/>");
 	}
 
@@ -597,7 +603,7 @@ void DlgCorrespondenceOverview::exportChosenData(const QString &userName,
 		summaryMsg += QStringLiteral("<b>") +
 		    QString::number(successDelInfoPdfCnt) +
 		    QStringLiteral("</b> ") +
-		    tr("delivery infos were successfully exported to PDF.") +
+		    tr("acceptance infos were successfully exported to PDF.") +
 		    QStringLiteral("<br/>");
 	}
 

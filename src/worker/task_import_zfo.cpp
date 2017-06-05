@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -374,14 +374,14 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 	if ((NULL == messageDb) ||
 	    (-1 == messageDb->msgsStatusIfExists(dmId))) {
 		/* Corresponding message does not exist in database. */
-		resultDesc = QObject::tr("This file (delivery info) has not "
+		resultDesc = QObject::tr("This file (acceptance info) has not "
 		    "been inserted into database because there isn't any "
 		    "related message with id '%1' in the databases.").arg(dmId);
 		return TaskImportZfo::IMP_DB_MISSING_MSG;
 	}
 
 	if (messageDb->isDeliveryInfoRawDb(dmId)) {
-		resultDesc = QObject::tr("Delivery info for message '%1' "
+		resultDesc = QObject::tr("Acceptance info for message '%1' "
 		    "already exists in the local database, account '%2'.").
 		    arg(dmId).arg(accountName);
 		return TaskImportZfo::IMP_DB_EXISTS;
@@ -405,7 +405,7 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 			return TaskImportZfo::IMP_ISDS_ERROR;
 			break;
 		default:
-			resultDesc = QObject::tr("Delivery info for message "
+			resultDesc = QObject::tr("Acceptance info for message "
 			    "'%1' could not be authenticated by ISDS server.").
 			    arg(dmId);
 			return TaskImportZfo::IMP_AUTH_ERR;
@@ -421,7 +421,7 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 	}
 
 	resultDesc += QObject::tr(
-	    "Imported delivery info for message '%1', account '%2'.").
+	    "Imported acceptance info for message '%1', account '%2'.").
 	    arg(dmId).arg(accountName);
 	return TaskImportZfo::IMP_SUCCESS;
 }

@@ -83,10 +83,10 @@
         </font>
        </property>
        <property name="toolTip">
-        <string>Your account is not of type OVM or ne-OVM. You have Post Data Messages activated.
-This means you can only search for accounts of type OVM and accounts
-that have Post Data Messages delivery activated.
-Because of this limitation the results of your current search might not 
+        <string>Your account is not of type OVM (i.e. non-OVM). Sending of post data messages
+from your account is activated. This means that you can only search for accounts
+of the type OVM and accounts that have the the receiving of post data messages
+activated. Because of this limitation the results of your current search may not
 contain all otherwise matching databoxes.</string>
        </property>
        <property name="text">

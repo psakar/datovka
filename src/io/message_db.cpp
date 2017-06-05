@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1480,7 +1480,7 @@ QString MessageDb::envelopeInfoHtmlToPdf(qint64 dmId,
 			tmp = QObject::tr("yes");
 		}
 		html += messageTableInfoPdf(
-		    QObject::tr("Prohibit Delivery by Fiction"), tmp);
+		    QObject::tr("Prohibit Acceptance through Fiction"), tmp);
 
 		html += messageTableInfoEndPdf();
 	} else {
@@ -1586,7 +1586,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
 
 	html += "<table width=\"100%\" style=\"padding: 30px 30px 30px 30px; "
 	    "font-size: 20px;\"><tr><td>" +
-	    strongMessagePdf(QObject::tr("Advice of Delivery")) +
+	    strongMessagePdf(QObject::tr("Advice of Acceptance")) +
 	    "</td><td align=\"right\">" +
 	    QObject::tr("Message ID:") + " " +
 	    strongMessagePdf(QString::number(dmId)) +
@@ -1705,7 +1705,7 @@ QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
 			tmp = QObject::tr("yes");
 		}
 		html += messageTableInfoPdf(
-		    QObject::tr("Prohibit Delivery by Fiction"), tmp);
+		    QObject::tr("Prohibit Acceptance through Fiction"), tmp);
 
 		html += messageTableInfoEndPdf();
 
@@ -3973,8 +3973,8 @@ QStringList MessageDb::getMsgForHtmlExport(qint64 dmId) const
 	QString queryStr;
 	QStringList messageItems;
 
-	queryStr =
-	    "SELECT dmSender, dmRecipient, dmAnnotation, dmDeliveryTime "
+	queryStr = "SELECT dmSender, dmRecipient, dmAnnotation, "
+	    "dmDeliveryTime, dmAcceptanceTime "
 	    "FROM messages WHERE dmID = :dmId";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -3988,10 +3988,12 @@ QStringList MessageDb::getMsgForHtmlExport(qint64 dmId) const
 		messageItems.append(query.value(0).toString());
 		messageItems.append(query.value(1).toString());
 		messageItems.append(query.value(2).toString());
-		QDateTime dateTime =
-		    dateTimeFromDbFormat(query.value(3).toString());
-		messageItems.append(dateTime.toString("dd.MM.yyyy"));
-		messageItems.append(dateTime.toString("hh:mm:ss"));
+		messageItems.append(
+		    dateTimeFromDbFormat(query.value(3).toString())
+		        .toString("dd.MM.yyyy hh:mm:ss"));
+		messageItems.append(
+		    dateTimeFromDbFormat(query.value(4).toString())
+		        .toString("dd.MM.yyyy hh:mm:ss"));
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: %s.",

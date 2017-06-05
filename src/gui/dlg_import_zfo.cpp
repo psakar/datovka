@@ -33,11 +33,11 @@ ImportZFODialog::ImportZFODialog(enum ImportZFODialog::ZFOtype &zfoType,
 {
 	setupUi(this);
 	this->info->setText(tr("Here you can import whole messages and "
-	    "message delivery information from ZFO files into local database."
-	    " The message or delivery information import will succeed only "
+	    "message acceptance information from ZFO files into local database."
+	    " The message or acceptance information import will succeed only "
 	    "for those files whose validity can be approved by the Datové "
 	    "schránky server (working connection to server is required). "
-	    "Delivery information ZFO will be inserted into local database "
+	    "Acceptance information ZFO will be inserted into local database "
 	    "only if a corresponding complete message already exists in the "
 	    "database."));
 

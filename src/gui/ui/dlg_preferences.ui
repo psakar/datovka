@@ -1187,10 +1187,10 @@ message envelope as PDF to the same path.</string>
               </property>
               <property name="toolTip">
                <string>When saving all attachments also save
-signed delivery info as ZFO to the same path.</string>
+signed acceptance info as ZFO to the same path.</string>
               </property>
               <property name="text">
-               <string>Save signed delivery info to ZFO</string>
+               <string>Save signed acceptance info to ZFO</string>
               </property>
              </widget>
             </item>
@@ -1204,10 +1204,10 @@ signed delivery info as ZFO to the same path.</string>
               </property>
               <property name="toolTip">
                <string>When saving all attachments also save
-delivery info as PDF to the same path.</string>
+acceptance info as PDF to the same path.</string>
               </property>
               <property name="text">
-               <string>Save delivery info to PDF</string>
+               <string>Save acceptance info to PDF</string>
               </property>
              </widget>
             </item>
@@ -1288,7 +1288,7 @@ file name including its suffix).</string>
                </font>
               </property>
               <property name="text">
-               <string>Delivery info file name:</string>
+               <string>Acceptance info file name:</string>
               </property>
              </widget>
             </item>
@@ -1425,7 +1425,7 @@ file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>delivery year (YYYY)</string>
+                 <string>acceptance year (YYYY)</string>
                 </property>
                </widget>
               </item>
@@ -1439,7 +1439,7 @@ file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>delivery month (MM)</string>
+                 <string>acceptance month (MM)</string>
                 </property>
                </widget>
               </item>
@@ -1453,7 +1453,7 @@ file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>delivery day (DD)</string>
+                 <string>acceptance day (DD)</string>
                 </property>
                </widget>
               </item>
@@ -1467,7 +1467,7 @@ file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>delivery minute (mm)</string>
+                 <string>acceptance minute (mm)</string>
                 </property>
                </widget>
               </item>
@@ -1481,7 +1481,7 @@ file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>delivery hour (hh)</string>
+                 <string>acceptance hour (hh)</string>
                 </property>
                </widget>
               </item>
@@ -1780,12 +1780,12 @@ file name including its suffix).</string>
                </font>
               </property>
               <property name="toolTip">
-               <string>Saves delivery info for every attachment file separately.
-The delivery info file name has to contain the original
+               <string>Saves acceptance info for every attachment file separately.
+The acceptance info file name has to contain the original
 attachment file name (parameter %f is required).</string>
               </property>
               <property name="text">
-               <string>Save delivery info for every attachment file. Format:</string>
+               <string>Save acceptance info for every attachment file. Format:</string>
               </property>
              </widget>
             </item>

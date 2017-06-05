@@ -62,7 +62,7 @@
       <item>
        <widget class="QRadioButton" name="allZFO">
         <property name="text">
-         <string>Message and delivery info ZFO file(s)</string>
+         <string>Message and acceptance info ZFO file(s)</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -82,7 +82,7 @@
       <item>
        <widget class="QRadioButton" name="deliveryZFO">
         <property name="text">
-         <string>Only delivery info ZFO file(s)</string>
+         <string>Only acceptance info ZFO file(s)</string>
         </property>
        </widget>
       </item>
