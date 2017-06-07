@@ -192,7 +192,7 @@ QString tagHtmlString(const TagItemList &tagList, bool useColours)
 		foreach (const TagItem &tag, tagList) {
 			QColor bgCol(QStringLiteral("#") + tag.colour);
 			QColor textCol(
-			    TagItem::adjustForegroundColour(Qt::black, textCol));
+			    TagItem::adjustForegroundColour(Qt::black, bgCol));
 			QString tagStr(
 			    QStringLiteral("<span style=\"background-color: "));
 			tagStr += bgCol.name();
