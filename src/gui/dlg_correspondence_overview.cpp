@@ -60,6 +60,9 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	this->outputFormatComboBox->addItem(CSV_LITERAL);
 	this->outputFormatComboBox->addItem(HTML_LITERAL);
 
+	connect(this->outputFormatComboBox, SIGNAL(currentIndexChanged(QString)),
+	    this, SLOT(reftectOverviewTypeChange(QString)));
+
 	connect(this->fromCalendarWidget, SIGNAL(clicked(QDate)),
 	    this, SLOT(reftectCalendarChange()));
 
@@ -71,6 +74,8 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 
 	connect(this->receivedCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(checkMsgTypeSelection()));
+
+	this->groupBox->setEnabled(false);
 
 	updateExportedMsgList(this->fromCalendarWidget->selectedDate(),
 	    this->toCalendarWidget->selectedDate());
@@ -92,6 +97,11 @@ void DlgCorrespondenceOverview::exportData(const MessageDbSet &dbSet,
 	}
 
 	dlg.exportChosenData(userName, exportCorrespondDir);
+}
+
+void DlgCorrespondenceOverview::reftectOverviewTypeChange(const QString &text)
+{
+	this->groupBox->setEnabled(text == HTML_LITERAL);
 }
 
 void DlgCorrespondenceOverview::checkMsgTypeSelection(void)

@@ -63,6 +63,14 @@ public:
 
 private slots:
 	/*!
+	 * @brief Activates/deactivates dialogue parts depending on overview
+	 *     type selection.
+	 *
+	 * @param[in] text Displayed text.
+	 */
+	void reftectOverviewTypeChange(const QString &text);
+
+	/*!
 	 * @brief Check message type selection and enable/disable acceptance
 	 *     button.
 	 */
@@ -75,7 +83,7 @@ private slots:
 
 private:
 	/*!
-	 * @brief Enables/disables the Ok button according to widget content.
+	 * @brief Enables/disables the OK button according to widget content.
 	 */
 	void updateOkButtonActivity(void);
 
