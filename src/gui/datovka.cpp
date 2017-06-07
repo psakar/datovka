@@ -6156,7 +6156,7 @@ void MainWindow::showExportCorrespondenceOverviewDialog(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -6167,7 +6167,7 @@ void MainWindow::showExportCorrespondenceOverviewDialog(void)
 	setAccountStoragePaths(userName);
 
 	DlgCorrespondenceOverview::exportData(*dbSet, dbId, userName,
-	    m_export_correspond_dir, this);
+	    *globTagDbPtr, m_export_correspond_dir, this);
 	storeExportPath(userName);
 }
 

@@ -27,6 +27,7 @@
 #include <QDialog>
 
 #include "src/io/message_db_set.h"
+#include "src/io/tag_db.h"
 #include "ui_dlg_correspondence_overview.h"
 
 /*!
@@ -50,7 +51,7 @@ public:
 	 * @brief Constructor.
 	 */
 	DlgCorrespondenceOverview(const MessageDbSet &dbSet,
-	    const QString &dbId, const QString &userName,
+	    const QString &dbId, const QString &userName, TagDb &tagDb,
 	    QWidget *parent = Q_NULLPTR);
 
 	/*!
@@ -58,7 +59,7 @@ public:
 	 */
 	static
 	void exportData(const MessageDbSet &dbSet, const QString &dbId,
-	    const QString &userName, QString &exportCorrespondDir,
+	    const QString &userName, TagDb &tagDb, QString &exportCorrespondDir,
 	    QWidget *parent = Q_NULLPTR);
 
 private slots:
@@ -106,10 +107,12 @@ private:
 	/*!
 	 * @brief Construct a HTML message entry.
 	 *
+	 * @param[in] userName User login identifying the account.
 	 * @param[in] mId Message identifier structure.
 	 * @return String containing HTML message entry, empty string on error.
 	 */
-	QString msgHtmlEntry(const MessageDb::MsgId &mId) const;
+	QString msgHtmlEntry(const QString &userName,
+	    const MessageDb::MsgId &mId) const;
 
 	/*!
 	 * @brief Export message overview to CSV file.
@@ -122,20 +125,24 @@ private:
 	/*!
 	 * @brief Export message overview to HTML file.
 	 *
+	 * @param[in] userName User login identifying the account.
 	 * @param[in] fileName Name of the saved file.
 	 * @return False on failure.
 	 */
-	bool writeHtmlOverview(const QString &fileName) const;
+	bool writeHtmlOverview(const QString &userName,
+	    const QString &fileName) const;
 
 	/*!
 	 * @brief Export correspondence overview file.
 	 *
+	 * @param[in] userName User login identifying the account.
 	 * @param[in] dir Suggested directory where to store the file.
 	 * @param[out] summary String to append summary to.
 	 * @return Non-empty path where the file has been stored on success,
 	 *     empty path on failure.
 	 */
-	QString exportOverview(const QString &dir, QString &summary);
+	QString exportOverview(const QString &userName, const QString &dir,
+	    QString &summary);
 
 	/*!
 	 * @brief Export all data that have been selected in the dialogue.
@@ -148,6 +155,7 @@ private:
 
 	const MessageDbSet &m_messDbSet; /*!< Database set to be accessed. */
 	const QString &m_dbId; /*!< Account database identifier. */
+	TagDb &m_tagDb; /*!< Tag database. */
 	ExportedMessageList m_exportedMsgs; /*!< List of exported messages. */
 };
 
