@@ -216,13 +216,13 @@ QString tagHtmlString(const TagItemList &tagList, bool useColours)
  * @param[in] tagDb Tag database.
  * @param[in] userName User name identifying account.
  * @param[in] msgId Message identifier.
- * @param[in] useColors True if coloured tags should be generated.
+ * @param[in] useColours True if coloured tags should be generated.
  * @return Tag entry if some tags found. Return empty string on error or when
  *     no tags found.
  */
 static
 QString tagHtmlEntry(TagDb &tagDb, const QString &userName, qint64 msgId,
-    bool useColors)
+    bool useColours)
 {
 	if (userName.isEmpty() || (msgId < 0)) {
 		Q_ASSERT(0);
@@ -244,7 +244,7 @@ QString tagHtmlEntry(TagDb &tagDb, const QString &userName, qint64 msgId,
 	    QStringLiteral("<table><tr><td><table><tr><td valign=\"top\">")
 	    + QObject::tr("Tags") +
 	    QStringLiteral(":</td><td>"));
-	retStr += tagHtmlString(tagList, useColors);
+	retStr += tagHtmlString(tagList, useColours);
 	retStr += QStringLiteral("</td></tr></table></td></tr></table>");
 
 	return retStr;
