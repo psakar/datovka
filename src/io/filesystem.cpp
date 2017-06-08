@@ -42,6 +42,17 @@
  */
 #define ILL_FNAME_REP "_"
 
+/*!
+ * @brief Replace some problematic characters when constructing a file name.
+ *
+ * @param[in,out] str String to be modified.
+ */
+static inline
+void replaceCharacters(QString &str)
+{
+	str.replace(QChar(' '), QChar('-')).replace(QChar('\t'), QChar('-'));
+}
+
 QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
     const QString &userName, const QString &attachName,
     const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
@@ -57,42 +68,31 @@ QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
 		dmAcceptanceTime = QDateTime::currentDateTime();
 	}
 
-	QPair<QString, QString> pair;
-	QList< QPair<QString, QString> > knowAtrrList;
+	/* Replace problematic characters. */
+	replaceCharacters(dmAnnotation);
+	replaceCharacters(dmSender);
 
-	pair.first = "%Y";
-	pair.second = dmAcceptanceTime.date().toString("yyyy");
-	knowAtrrList.append(pair);
-	pair.first = "%M";
-	pair.second = dmAcceptanceTime.date().toString("MM");
-	knowAtrrList.append(pair);
-	pair.first = "%D";
-	pair.second = dmAcceptanceTime.date().toString("dd");
-	knowAtrrList.append(pair);
-	pair.first = "%h";
-	pair.second = dmAcceptanceTime.time().toString("hh");
-	knowAtrrList.append(pair);
-	pair.first = "%m";
-	pair.second = dmAcceptanceTime.time().toString("mm");
-	knowAtrrList.append(pair);
-	pair.first = "%i";
-	pair.second = QString::number(dmId);
-	knowAtrrList.append(pair);
-	pair.first = "%s";
-	pair.second = dmAnnotation.replace(" ", "-").replace("\t", "-");
-	knowAtrrList.append(pair);
-	pair.first = "%S";
-	pair.second = dmSender.replace(" ", "-").replace("\t", "-");
-	knowAtrrList.append(pair);
-	pair.first = "%d";
-	pair.second = dbId;
-	knowAtrrList.append(pair);
-	pair.first = "%u";
-	pair.second = userName;
-	knowAtrrList.append(pair);
-	pair.first = "%f";
-	pair.second = attachName;
-	knowAtrrList.append(pair);
+	/* Construct list of format attributes that can be replaced. */
+	typedef QPair<QString, QString> StringPairType;
+	QList<StringPairType> knowAtrrList;
+
+	knowAtrrList.append(StringPairType(QStringLiteral("%Y"),
+	    dmAcceptanceTime.date().toString("yyyy")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%M"),
+	    dmAcceptanceTime.date().toString("MM")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%D"),
+	    dmAcceptanceTime.date().toString("dd")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%h"),
+	    dmAcceptanceTime.time().toString("hh")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%m"),
+	    dmAcceptanceTime.time().toString("mm")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%i"),
+	    QString::number(dmId)));
+	knowAtrrList.append(StringPairType(QStringLiteral("%s"), dmAnnotation));
+	knowAtrrList.append(StringPairType(QStringLiteral("%S"), dmSender));
+	knowAtrrList.append(StringPairType(QStringLiteral("%d"), dbId));
+	knowAtrrList.append(StringPairType(QStringLiteral("%u"), userName));
+	knowAtrrList.append(StringPairType(QStringLiteral("%f"), attachName));
 
 	for (int i = 0; i < knowAtrrList.length(); ++i) {
 		format.replace(knowAtrrList[i].first, knowAtrrList[i].second);
