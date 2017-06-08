@@ -37,10 +37,11 @@
 #define HTML_LITERAL QStringLiteral("HTML")
 
 DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
-    const QString &dbId, const QString &userName, QWidget *parent)
+    const QString &dbId, const QString &userName, TagDb &tagDb, QWidget *parent)
     : QDialog(parent),
     m_messDbSet(dbSet),
     m_dbId(dbId),
+    m_tagDb(tagDb),
     m_exportedMsgs()
 {
 	setupUi(this);
@@ -60,6 +61,9 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	this->outputFormatComboBox->addItem(CSV_LITERAL);
 	this->outputFormatComboBox->addItem(HTML_LITERAL);
 
+	connect(this->outputFormatComboBox, SIGNAL(currentIndexChanged(QString)),
+	    this, SLOT(reftectOverviewTypeChange(QString)));
+
 	connect(this->fromCalendarWidget, SIGNAL(clicked(QDate)),
 	    this, SLOT(reftectCalendarChange()));
 
@@ -72,26 +76,33 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	connect(this->receivedCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(checkMsgTypeSelection()));
 
+	this->groupBox->setEnabled(false);
+
 	updateExportedMsgList(this->fromCalendarWidget->selectedDate(),
 	    this->toCalendarWidget->selectedDate());
 	updateOkButtonActivity();
 }
 
 void DlgCorrespondenceOverview::exportData(const MessageDbSet &dbSet,
-    const QString &dbId, const QString &userName, QString &exportCorrespondDir,
-    QWidget *parent)
+    const QString &dbId, const QString &userName, TagDb &tagDb,
+    QString &exportCorrespondDir, QWidget *parent)
 {
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	DlgCorrespondenceOverview dlg(dbSet, dbId, userName, parent);
+	DlgCorrespondenceOverview dlg(dbSet, dbId, userName, tagDb, parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return;
 	}
 
 	dlg.exportChosenData(userName, exportCorrespondDir);
+}
+
+void DlgCorrespondenceOverview::reftectOverviewTypeChange(const QString &text)
+{
+	this->groupBox->setEnabled(text == HTML_LITERAL);
 }
 
 void DlgCorrespondenceOverview::checkMsgTypeSelection(void)
@@ -161,7 +172,85 @@ QString DlgCorrespondenceOverview::msgCsvEntry(
 	return content;
 }
 
-QString DlgCorrespondenceOverview::msgHtmlEntry(
+/*!
+ * @brief Creates HTML string containing tag list.
+ *
+ * @param[in] tagList List of tags.
+ * @param[in] useColours If colour entries should be added.
+ * @return HTML string.
+ */
+static
+QString tagHtmlString(const TagItemList &tagList, bool useColours)
+{
+	QStringList tagStrings;
+
+	if (!useColours) {
+		foreach (const TagItem &tag, tagList) {
+			tagStrings.append(tag.name);
+		}
+	} else {
+		foreach (const TagItem &tag, tagList) {
+			QColor bgCol(QStringLiteral("#") + tag.colour);
+			QColor textCol(
+			    TagItem::adjustForegroundColour(Qt::black, bgCol));
+			QString tagStr(
+			    QStringLiteral("<span style=\"background-color: "));
+			tagStr += bgCol.name();
+			tagStr += QStringLiteral("; color: ");
+			tagStr += textCol.name();
+			tagStr += QStringLiteral(";\">");
+			tagStr += QStringLiteral("&nbsp;");
+			tagStr += tag.name;
+			tagStr += QStringLiteral("&nbsp;");
+			tagStr += QStringLiteral("</span>");
+			tagStrings.append(tagStr);
+		}
+	}
+
+	return tagStrings.join(QStringLiteral(", "));
+}
+
+/*!
+ * @brief Creates tag-related HTML entry.
+ *
+ * @param[in] tagDb Tag database.
+ * @param[in] userName User name identifying account.
+ * @param[in] msgId Message identifier.
+ * @param[in] useColours True if coloured tags should be generated.
+ * @return Tag entry if some tags found. Return empty string on error or when
+ *     no tags found.
+ */
+static
+QString tagHtmlEntry(TagDb &tagDb, const QString &userName, qint64 msgId,
+    bool useColours)
+{
+	if (userName.isEmpty() || (msgId < 0)) {
+		Q_ASSERT(0);
+		return QString();
+	}
+
+	TagItemList tagList(tagDb.getMessageTags(userName, msgId));
+	if (tagList.isEmpty()) {
+		return QString();
+	}
+	tagList.sortNames();
+
+	QStringList tagStrings;
+	foreach (const TagItem &tag, tagList) {
+		tagStrings.append(tag.name);
+	}
+
+	QString retStr(
+	    QStringLiteral("<table><tr><td><table><tr><td valign=\"top\">")
+	    + QObject::tr("Tags") +
+	    QStringLiteral(":</td><td>"));
+	retStr += tagHtmlString(tagList, useColours);
+	retStr += QStringLiteral("</td></tr></table></td></tr></table>");
+
+	return retStr;
+}
+
+QString DlgCorrespondenceOverview::msgHtmlEntry(const QString &userName,
     const MessageDb::MsgId &mId) const
 {
 	if (!mId.isValid()) {
@@ -178,7 +267,7 @@ QString DlgCorrespondenceOverview::msgHtmlEntry(
 		return QString();
 	}
 
-	return
+	QString retStr(
 	    QStringLiteral("<div><table><tr><td><table>"
 	                   "<tr><td>")
 	    + QStringLiteral("Id:") +
@@ -207,7 +296,14 @@ QString DlgCorrespondenceOverview::msgHtmlEntry(
 	    + tr("Recipient") +
 	    QStringLiteral(":</td><td><i>")
 	    + messageItems.at(1) +
-	    QStringLiteral("</i></td></tr></table></td></tr></table></div>");
+	    QStringLiteral("</i></td></tr></table></td></tr></table>"));
+	if (this->addTagsCheckBox->checkState() == Qt::Checked) {
+		retStr += tagHtmlEntry(m_tagDb, userName, mId.dmId,
+		    this->colourTagsCheckBox->checkState() == Qt::Checked);
+	}
+	retStr += QStringLiteral("</div>");
+
+	return retStr;
 }
 
 bool DlgCorrespondenceOverview::writeCsvOverview(const QString &fileName) const
@@ -262,7 +358,8 @@ bool DlgCorrespondenceOverview::writeCsvOverview(const QString &fileName) const
 	return true;
 }
 
-bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &fileName) const
+bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &userName,
+    const QString &fileName) const
 {
 	qDebug("Files are going be be exported to HTML file '%s'.",
 	    fileName.toUtf8().constData());
@@ -285,7 +382,7 @@ bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &fileName) const
 	f.setCodec("UTF-8");
 	/* Generate HTML header. */
 	f << QStringLiteral("<!DOCTYPE html\n"
-	    "   PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\""
+	    "   PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" "
 	    "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"
 	    "<html xmlns=\"http://www.w3.org/1999/xhtml\">\n"
 	    "<head>\n"
@@ -324,7 +421,7 @@ bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &fileName) const
 		    << QStringLiteral("</h2>\n");
 
 		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.sentDmIDs) {
-			f << msgHtmlEntry(mId);
+			f << msgHtmlEntry(userName, mId);
 		}
 	}
 
@@ -334,7 +431,7 @@ bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &fileName) const
 		    << QStringLiteral("</h2>\n");
 
 		foreach (const MessageDb::MsgId &mId, m_exportedMsgs.receivedDmIDs) {
-			f << msgHtmlEntry(mId);
+			f << msgHtmlEntry(userName, mId);
 		}
 	}
 
@@ -346,8 +443,8 @@ bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &fileName) const
 	return true;
 }
 
-QString DlgCorrespondenceOverview::exportOverview(const QString &dir,
-    QString &summary)
+QString DlgCorrespondenceOverview::exportOverview(const QString &userName,
+    const QString &dir, QString &summary)
 {
 	QString exportDir;
 
@@ -373,7 +470,7 @@ QString DlgCorrespondenceOverview::exportOverview(const QString &dir,
 		bool writeHtml =
 		    this->outputFormatComboBox->currentText() == HTML_LITERAL;
 		bool overviewWritten = writeHtml ?
-		    writeHtmlOverview(overviewFileName) :
+		    writeHtmlOverview(userName, overviewFileName) :
 		    writeCsvOverview(overviewFileName);
 		if (!overviewWritten) {
 			QMessageBox::warning(this,
@@ -490,7 +587,7 @@ void DlgCorrespondenceOverview::exportChosenData(const QString &userName,
 
 	{
 		const QString saveDir(
-		    exportOverview(exportCorrespondDir, summaryMsg));
+		    exportOverview(userName, exportCorrespondDir, summaryMsg));
 		if (!saveDir.isEmpty()) {
 			exportCorrespondDir = saveDir;
 		}

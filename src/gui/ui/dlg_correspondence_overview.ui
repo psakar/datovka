@@ -228,38 +228,73 @@
     </widget>
    </item>
    <item>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>HTML overview:</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_6">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QCheckBox" name="addTagsCheckBox">
+          <property name="text">
+           <string>Add tags</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="colourTagsCheckBox">
+          <property name="text">
+           <string>Colour tags</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QGroupBox" name="ExportFiles">
      <property name="title">
       <string>Export selected messages also as:</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_5">
       <item>
-       <widget class="QCheckBox" name="exportZfoCheckBox">
-        <property name="text">
-         <string>ZFO message files</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QCheckBox" name="exportZfoCheckBox">
+          <property name="text">
+           <string>ZFO message files</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="exportMessageEnvelopePDFCheckBox">
+          <property name="text">
+           <string>PDF envelope files</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QCheckBox" name="exportDeliveryZfoCheckBox">
-        <property name="text">
-         <string>ZFO acceptance info files</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="exportMessageEnvelopePDFCheckBox">
-        <property name="text">
-         <string>PDF envelope files</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="exportDeliveryPDFCheckBox">
-        <property name="text">
-         <string>PDF acceptance info files</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QCheckBox" name="exportDeliveryZfoCheckBox">
+          <property name="text">
+           <string>ZFO acceptance info files</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="exportDeliveryPDFCheckBox">
+          <property name="text">
+           <string>PDF acceptance info files</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
