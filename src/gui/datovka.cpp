@@ -1885,7 +1885,8 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		    .arg(msgId.dmId));
 		if (!globPref.use_global_paths) {
 			m_save_attach_dir =
-			    QFileInfo(fileName).absoluteDir().absolutePath();
+			    QFileInfo(savedFileName).absoluteDir()
+			        .absolutePath();
 			storeExportPath(userName);
 		}
 	} else {
