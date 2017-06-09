@@ -43,6 +43,11 @@ void LoweredTreeView::setNarrowedLineHeight(void)
 	setItemDelegate(new (std::nothrow) LoweredItemDelegate());
 	setUniformRowHeights(true);
 
-	/* Force header height. */
-	header()->setFixedHeight(Dimensions::tableLineHeight(viewOptions()));
+	/*
+	 * Force header height.
+	 *
+	 * TODO -- Find a better solution, the following line does not work
+	 *     on Windows.
+	 */
+	//header()->setFixedHeight(Dimensions::tableLineHeight(viewOptions()));
 }
