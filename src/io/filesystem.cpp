@@ -34,27 +34,56 @@
 #include "src/log/log.h"
 
 /*!
- * @brief Illegal characters in file name.
+ * @brief Replace some problematic characters when constructing a file name.
+ *
+ * @param[in,out] str String to be modified.
  */
-#define ILL_FNAME_CH "\\/:*?\"<>|"
+static inline
+void replaceNameChars(QString &str)
+{
+	/*
+	 * Intentionally also replace characters that could be interpreted
+	 * as directory separators.
+	 */
+	str.replace(QChar(' '), QChar('-')).replace(QChar('\t'), QChar('-'))
+	    .replace(QChar('/'), QChar('-')).replace(QChar('\\'), QChar('-'));
+}
+
+/*!
+ * @brief Illegal characters in file names without directory separators.
+ */
+#define ILL_FNAME_CH_NO_SEP ":*?\"<>|"
+/*!
+ * @brief Illegal characters in file name with directory separators.
+ */
+#define ILL_FNAME_CH "\\/" ILL_FNAME_CH_NO_SEP
 /*!
  * @brief Replacement character for illegal characters.
  */
 #define ILL_FNAME_REP "_"
 
 /*!
- * @brief Replace some problematic characters when constructing a file name.
+ * @brief Replace illegal characters when constructing a file name.
  *
  * @param[in,out] str String to be modified.
+ * @param[in]     replaceSeparators Whether to replace directory separators.
  */
 static inline
-void replaceCharacters(QString &str)
+void replaceIllegalChars(QString &str, bool replaceSeparators)
 {
-	str.replace(QChar(' '), QChar('-')).replace(QChar('\t'), QChar('-'));
+	static const QRegExp regExpNoSep(
+	    "[" + QRegExp::escape(ILL_FNAME_CH_NO_SEP) + "]");
+	static const QRegExp regExp("[" + QRegExp::escape(ILL_FNAME_CH) + "]");
+
+	str.replace(replaceSeparators ? regExp : regExpNoSep, ILL_FNAME_REP);
 }
 
-QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
-    const QString &userName, const QString &attachName,
+#undef ILL_FNAME_CH_NO_SEP
+#undef ILL_FNAME_CH
+#undef ILL_FNAME_REP
+
+QString fileSubpathFromFormat(QString format, bool prohibitDirSep, qint64 dmId,
+    const QString &dbId, const QString &userName, const QString &attachName,
     const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
     QString dmAnnotation, QString dmSender)
 {
@@ -69,8 +98,8 @@ QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
 	}
 
 	/* Replace problematic characters. */
-	replaceCharacters(dmAnnotation);
-	replaceCharacters(dmSender);
+	replaceNameChars(dmAnnotation);
+	replaceNameChars(dmSender);
 
 	/* Construct list of format attributes that can be replaced. */
 	typedef QPair<QString, QString> StringPairType;
@@ -98,10 +127,23 @@ QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
 		format.replace(knowAtrrList[i].first, knowAtrrList[i].second);
 	}
 
-	format.replace(QRegExp("[" + QRegExp::escape(ILL_FNAME_CH) + "]"),
-	    ILL_FNAME_REP);
+	replaceIllegalChars(format, prohibitDirSep);
 
-	return format;
+	return QDir::toNativeSeparators(format);
+}
+
+bool createDirStructureRecursive(const QString &filePath)
+{
+	if (filePath.isEmpty()) {
+		return false;
+	}
+
+	QDir fileDir(QFileInfo(filePath).absoluteDir());
+	if (fileDir.exists()) {
+		return true;
+	}
+
+	return fileDir.mkpath(".");
 }
 
 QString nonconflictingFileName(QString filePath)
@@ -167,8 +209,7 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
 	}
 
 	QString nameCopy(fileName);
-	nameCopy.replace(QRegExp("[" + QRegExp::escape(ILL_FNAME_CH) + "]"),
-	    ILL_FNAME_REP);
+	replaceIllegalChars(nameCopy, true);
 
 	/* StandardLocation::writableLocation(QStandardPaths::TempLocation) ? */
 	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + nameCopy);

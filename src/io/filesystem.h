@@ -39,13 +39,15 @@
 #define DEFAULT_DELIVERY_ATTACH_FORMAT "DD-%i-%f"
 
 /*!
- * @brief Create file name according to the format string.
+ * @brief Create partial file path according to the format string.
  *
  * @note The format string knows these attributes:
  *     "%Y", "%M", "%D", "%h", "%m", "%i", "%s", "%S", "%d", "%u", "%f"
+ * @note Directory structure must be created explicitly.
  *
  * @param[in] format           Format string, DEFAULT_TMP_FORMAT is used when
- *                             empty.
+ *                             empty. Directory separators may be used here.
+ * @param[in] prohibitDirSep   True if directory separators should be prohibited.
  * @param[in] dmId             Message id.
  * @param[in] dbId             Data box identifier.
  * @param[in] userName         User identifier (login).
@@ -57,10 +59,19 @@
  * @param[in] dmSender         Message sender.
  * @return File name.
  */
-QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
-    const QString &userName, const QString &attachName,
+QString fileSubpathFromFormat(QString format, bool prohibitDirSep, qint64 dmId,
+    const QString &dbId, const QString &userName, const QString &attachName,
     const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
     QString dmAnnotation, QString dmSender);
+
+/*!
+ * @brief Creates directory structure to store file into.
+ *
+ * @param[in] filePath File path. File need not be existent.
+ * @return True if directory structure already exists or was successfully
+ *     created, false on error.
+ */
+bool createDirStructureRecursive(const QString &filePath);
 
 /*!
  * @brief Check if file with given path exists.

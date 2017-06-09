@@ -1875,7 +1875,7 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	}
 
 	QString fileName(Exports::attachmentSavePathWithFileName(*dbSet,
-	    saveAttachPath, filename, dbId, userName, msgId));
+	    saveAttachPath, filename, dbId, userName, msgId, true));
 
 	QString savedFileName(AttachmentInteraction::saveAttachmentToFile(this,
 	    attIdx, fileName));

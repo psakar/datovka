@@ -33,9 +33,9 @@
 #include "src/settings/preferences.h"
 
 QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,
-    const QString &targetPath, const QString &attachFileName,
+    const QString &targetPath, const QString &attachName,
     const QString &dbId, const QString &userName,
-    const MessageDb::MsgId &msgId)
+    const MessageDb::MsgId &msgId, bool prohibitDirSep)
 {
 	debugFuncCall();
 
@@ -52,8 +52,9 @@ QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
 
-	QString fileName = fileNameFromFormat(globPref.attachment_filename_format,
-	    msgId.dmId, dbId, userName, attachFileName, entry.dmDeliveryTime,
+	QString fileName = fileSubpathFromFormat(
+	    globPref.attachment_filename_format, prohibitDirSep,
+	    msgId.dmId, dbId, userName, attachName, entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 	if (fileName.isEmpty()) {
 		return QString();
@@ -148,9 +149,14 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
 
-	// create new file name with format string
-	QString fileName = fileNameFromFormat(fileNameformat, msgId.dmId,
-	    dbId, userName, attachFileName, entry.dmDeliveryTime,
+	bool prohibitDirSep = askLocation;
+
+	/*
+	 * Create new file name with format string. Allow subdirectories
+	 * if the user should not be asked after location.
+	 */
+	QString fileName = fileSubpathFromFormat(fileNameformat, prohibitDirSep,
+	    msgId.dmId, dbId, userName, attachFileName, entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
 	fileName = targetPath + QDir::separator() + fileName + fileSufix;
@@ -166,6 +172,8 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 		    QObject::tr("Save %1 as file (*%2)").
 		         arg(fileTypeStr).arg(fileSufix),
 		    fileName, QObject::tr("File (*%1)").arg(fileSufix));
+	} else {
+		createDirStructureRecursive(fileName);
 	}
 
 	Q_ASSERT(!fileName.isEmpty());
@@ -248,8 +256,8 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 
 	// save attachments to target folder
 	foreach (const MessageDb::FileData &attach, attachList) {
-		QString filename(attach.dmFileDescr);
-		if (filename.isEmpty()) {
+		QString attName(attach.dmFileDescr);
+		if (attName.isEmpty()) {
 			Q_ASSERT(0);
 			errStr = QObject::tr("Some files of message \"%1\""
 			    " were not saved to disk!").arg(msgID);
@@ -258,15 +266,17 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 		}
 
 		// create new file name with format string
-		filename = attachmentSavePathWithFileName(dbSet, newTargetPath,
-		    filename, dbId, userName, msgId);
+		attName = attachmentSavePathWithFileName(dbSet, newTargetPath,
+		    attName, dbId, userName, msgId, true);
+
+		/* Don't create subdirectories. */
 
 		QByteArray data(
 		    QByteArray::fromBase64(attach.dmEncodedContent));
 
 		// save file to disk
 		if (WF_SUCCESS !=
-		    writeFile(nonconflictingFileName(filename), data)) {
+		    writeFile(nonconflictingFileName(attName), data)) {
 		    	errStr = QObject::tr("Some files of message \"%1\""
 			    " were not saved to disk!").arg(msgID);
 			attachWriteSuccess = false;
@@ -275,7 +285,8 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 	}
 
 	// create new file name with format string
-	QString fileName = fileNameFromFormat(globPref.message_filename_format,
+	QString fileName = fileSubpathFromFormat(
+	    globPref.message_filename_format, true,
 	    msgId.dmId, dbId, userName, QString(), entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
@@ -331,8 +342,8 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 
 	// save attachments to target folder
 	foreach (const MessageDb::FileData &attach, attachList) {
-		QString filename(attach.dmFileDescr);
-		if (filename.isEmpty()) {
+		QString attName(attach.dmFileDescr);
+		if (attName.isEmpty()) {
 			Q_ASSERT(0);
 			errStr = QObject::tr("Some files of message \"%1\""
 			    " were not saved to disk!").arg(msgID);
@@ -341,15 +352,18 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 		}
 
 		// create new file name with format string
-		filename = attachmentSavePathWithFileName(dbSet, targetPath,
-		    filename, dbId, userName, msgId);
+		attName = attachmentSavePathWithFileName(dbSet, targetPath,
+		    attName, dbId, userName, msgId, false);
+
+		/* Recursively create subdirectories. */
+		createDirStructureRecursive(attName);
 
 		QByteArray data(
 		    QByteArray::fromBase64(attach.dmEncodedContent));
 
 		// save file to disk
 		if (WF_SUCCESS !=
-		    writeFile(nonconflictingFileName(filename), data)) {
+		    writeFile(nonconflictingFileName(attName), data)) {
 		    	errStr = QObject::tr("Some files of message \"%1\""
 			    " were not saved to disk!").arg(msgID);
 			attachWriteSuccess = false;
