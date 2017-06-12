@@ -1875,7 +1875,7 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	}
 
 	QString fileName(Exports::attachmentSavePathWithFileName(*dbSet,
-	    saveAttachPath, filename, dbId, userName, msgId));
+	    saveAttachPath, filename, dbId, userName, msgId, true));
 
 	QString savedFileName(AttachmentInteraction::saveAttachmentToFile(this,
 	    attIdx, fileName));
@@ -1885,7 +1885,8 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		    .arg(msgId.dmId));
 		if (!globPref.use_global_paths) {
 			m_save_attach_dir =
-			    QFileInfo(fileName).absoluteDir().absolutePath();
+			    QFileInfo(savedFileName).absoluteDir()
+			        .absolutePath();
 			storeExportPath(userName);
 		}
 	} else {
@@ -1942,7 +1943,6 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (attSaveDir.isEmpty()) {
-		Q_ASSERT(0);
 		return;
 	}
 

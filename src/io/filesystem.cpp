@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,16 +34,56 @@
 #include "src/log/log.h"
 
 /*!
- * @brief Illegal characters in file name.
+ * @brief Replace some problematic characters when constructing a file name.
+ *
+ * @param[in,out] str String to be modified.
  */
-#define ILL_FNAME_CH "\\/:*?\"<>|"
+static inline
+void replaceNameChars(QString &str)
+{
+	/*
+	 * Intentionally also replace characters that could be interpreted
+	 * as directory separators.
+	 */
+	str.replace(QChar(' '), QChar('-')).replace(QChar('\t'), QChar('-'))
+	    .replace(QChar('/'), QChar('-')).replace(QChar('\\'), QChar('-'));
+}
+
+/*!
+ * @brief Illegal characters in file names without directory separators.
+ */
+#define ILL_FNAME_CH_NO_SEP ":*?\"<>|"
+/*!
+ * @brief Illegal characters in file name with directory separators.
+ */
+#define ILL_FNAME_CH "\\/" ILL_FNAME_CH_NO_SEP
 /*!
  * @brief Replacement character for illegal characters.
  */
 #define ILL_FNAME_REP "_"
 
-QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
-    const QString &userName, const QString &attachName,
+/*!
+ * @brief Replace illegal characters when constructing a file name.
+ *
+ * @param[in,out] str String to be modified.
+ * @param[in]     replaceSeparators Whether to replace directory separators.
+ */
+static inline
+void replaceIllegalChars(QString &str, bool replaceSeparators)
+{
+	static const QRegExp regExpNoSep(
+	    "[" + QRegExp::escape(ILL_FNAME_CH_NO_SEP) + "]");
+	static const QRegExp regExp("[" + QRegExp::escape(ILL_FNAME_CH) + "]");
+
+	str.replace(replaceSeparators ? regExp : regExpNoSep, ILL_FNAME_REP);
+}
+
+#undef ILL_FNAME_CH_NO_SEP
+#undef ILL_FNAME_CH
+#undef ILL_FNAME_REP
+
+QString fileSubpathFromFormat(QString format, bool prohibitDirSep, qint64 dmId,
+    const QString &dbId, const QString &userName, const QString &attachName,
     const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
     QString dmAnnotation, QString dmSender)
 {
@@ -57,51 +97,53 @@ QString fileNameFromFormat(QString format, qint64 dmId, const QString &dbId,
 		dmAcceptanceTime = QDateTime::currentDateTime();
 	}
 
-	QPair<QString, QString> pair;
-	QList< QPair<QString, QString> > knowAtrrList;
+	/* Replace problematic characters. */
+	replaceNameChars(dmAnnotation);
+	replaceNameChars(dmSender);
 
-	pair.first = "%Y";
-	pair.second = dmAcceptanceTime.date().toString("yyyy");
-	knowAtrrList.append(pair);
-	pair.first = "%M";
-	pair.second = dmAcceptanceTime.date().toString("MM");
-	knowAtrrList.append(pair);
-	pair.first = "%D";
-	pair.second = dmAcceptanceTime.date().toString("dd");
-	knowAtrrList.append(pair);
-	pair.first = "%h";
-	pair.second = dmAcceptanceTime.time().toString("hh");
-	knowAtrrList.append(pair);
-	pair.first = "%m";
-	pair.second = dmAcceptanceTime.time().toString("mm");
-	knowAtrrList.append(pair);
-	pair.first = "%i";
-	pair.second = QString::number(dmId);
-	knowAtrrList.append(pair);
-	pair.first = "%s";
-	pair.second = dmAnnotation.replace(" ", "-").replace("\t", "-");
-	knowAtrrList.append(pair);
-	pair.first = "%S";
-	pair.second = dmSender.replace(" ", "-").replace("\t", "-");
-	knowAtrrList.append(pair);
-	pair.first = "%d";
-	pair.second = dbId;
-	knowAtrrList.append(pair);
-	pair.first = "%u";
-	pair.second = userName;
-	knowAtrrList.append(pair);
-	pair.first = "%f";
-	pair.second = attachName;
-	knowAtrrList.append(pair);
+	/* Construct list of format attributes that can be replaced. */
+	typedef QPair<QString, QString> StringPairType;
+	QList<StringPairType> knowAtrrList;
+
+	knowAtrrList.append(StringPairType(QStringLiteral("%Y"),
+	    dmAcceptanceTime.date().toString("yyyy")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%M"),
+	    dmAcceptanceTime.date().toString("MM")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%D"),
+	    dmAcceptanceTime.date().toString("dd")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%h"),
+	    dmAcceptanceTime.time().toString("hh")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%m"),
+	    dmAcceptanceTime.time().toString("mm")));
+	knowAtrrList.append(StringPairType(QStringLiteral("%i"),
+	    QString::number(dmId)));
+	knowAtrrList.append(StringPairType(QStringLiteral("%s"), dmAnnotation));
+	knowAtrrList.append(StringPairType(QStringLiteral("%S"), dmSender));
+	knowAtrrList.append(StringPairType(QStringLiteral("%d"), dbId));
+	knowAtrrList.append(StringPairType(QStringLiteral("%u"), userName));
+	knowAtrrList.append(StringPairType(QStringLiteral("%f"), attachName));
 
 	for (int i = 0; i < knowAtrrList.length(); ++i) {
 		format.replace(knowAtrrList[i].first, knowAtrrList[i].second);
 	}
 
-	format.replace(QRegExp("[" + QRegExp::escape(ILL_FNAME_CH) + "]"),
-	    ILL_FNAME_REP);
+	replaceIllegalChars(format, prohibitDirSep);
 
-	return format;
+	return QDir::toNativeSeparators(format);
+}
+
+bool createDirStructureRecursive(const QString &filePath)
+{
+	if (filePath.isEmpty()) {
+		return false;
+	}
+
+	QDir fileDir(QFileInfo(filePath).absoluteDir());
+	if (fileDir.exists()) {
+		return true;
+	}
+
+	return fileDir.mkpath(".");
 }
 
 QString nonconflictingFileName(QString filePath)
@@ -167,8 +209,7 @@ QString writeTemporaryFile(const QString &fileName, const QByteArray &data,
 	}
 
 	QString nameCopy(fileName);
-	nameCopy.replace(QRegExp("[" + QRegExp::escape(ILL_FNAME_CH) + "]"),
-	    ILL_FNAME_REP);
+	replaceIllegalChars(nameCopy, true);
 
 	/* StandardLocation::writableLocation(QStandardPaths::TempLocation) ? */
 	QTemporaryFile fout(QDir::tempPath() + QDir::separator() + nameCopy);

@@ -58,21 +58,24 @@ public:
 	};
 
 	/*!
-	 * @brief Generates file path where store attachment into.
+	 * @brief Generates file path containing attachment name according
+	 *     to set format.
 	 *
-	 * @param[in] dbSet      - Account database set.
-	 * @param[in] targetPath - Path to target folder for export.
-	 * @param[in] attachFileName - Attachment file name.
-	 * @param[in] userName     - Account username.
-	 * @param[in] dbId         - Databox ID for export.
-	 * @param[in] msgId        - Message ID for export.
+	 * @param[in] dbSet Account database set.
+	 * @param[in] targetPath Path to target folder for export.
+	 * @param[in] attachName Attachment file name.
+	 * @param[in] userName Account username.
+	 * @param[in] dbId Data box ID for export.
+	 * @param[in] msgId Message ID for export.
+	 * @param[in] prohibitDirSep True if directory separators should be
+	 *                           prohibited when generating file name.
 	 * @return New target path with file name for saving.
 	 */
 	static
 	QString attachmentSavePathWithFileName(const MessageDbSet &dbSet,
-	    const QString &targetPath, const QString &attachFileName,
+	    const QString &targetPath, const QString &attachName,
 	    const QString &dbId, const QString &userName,
-	    const MessageDb::MsgId &msgId);
+	    const MessageDb::MsgId &msgId, bool prohibitDirSep);
 
 	/*!
 	 * @brief Export message data as ZFO/PDF file.
