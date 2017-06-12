@@ -564,12 +564,15 @@ int exportMessageData(const QList<MessageDb::MsgId> &mIds,
 	QString errStr;
 
 	int successCnt = 0;
+	Exports::ExportError ret;
 
 	foreach (const MessageDb::MsgId &mId, mIds) {
-		if (Exports::EXP_SUCCESS == Exports::exportAs(parent, dbSet,
-		        fileType, targetPath, QString(), userName, dbId, mId,
-		        false, lastPath, errStr)) {
+		ret = Exports::exportAs(parent, dbSet, fileType, targetPath,
+		    QString(), userName, dbId, mId, false, lastPath, errStr);
+		if (Exports::EXP_SUCCESS == ret) {
 			++successCnt;
+		} else if (Exports::EXP_CANCELED == ret) {
+			break;
 		} else {
 			appendError(fileType, mId.dmId, errList);
 		}

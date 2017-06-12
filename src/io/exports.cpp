@@ -172,6 +172,10 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 		    QObject::tr("Save %1 as file (*%2)").
 		         arg(fileTypeStr).arg(fileSufix),
 		    fileName, QObject::tr("File (*%1)").arg(fileSufix));
+		if (fileName.isEmpty()) {
+			// export was canceled
+			return EXP_CANCELED;
+		}
 	} else {
 		createDirStructureRecursive(fileName);
 	}

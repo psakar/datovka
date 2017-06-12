@@ -8061,17 +8061,21 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 
 	QString lastPath = newDir;
 	QString errStr;
-
 	const QString dbId(
 	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
+	Exports::ExportError ret;
 
 	foreach (MessageDb::MsgId mId, expirMsgIds) {
-		if (Exports::EXP_NOT_MSG_DATA ==
-		    Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE, newDir,
-		    QString(), userName, dbId, mId, false, lastPath, errStr)) {
+		ret = Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE,
+		    newDir, QString(), userName, dbId, mId, false, lastPath,
+		    errStr);
+		if (Exports::EXP_CANCELED == ret) {
+			break;
+		} else if(Exports::EXP_NOT_MSG_DATA == ret) {
 			if (messageMissingOfferDownload(mId, errStr)) {
-			    Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE, newDir,
-			    QString(), userName, dbId, mId, false, lastPath, errStr);
+			    Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE,
+			    newDir, QString(), userName, dbId, mId, false,
+			    lastPath, errStr);
 			}
 		}
 		if (!lastPath.isEmpty()) {
@@ -9096,20 +9100,22 @@ void MainWindow::doExportOfSelectedFiles(
 
 	setAccountStoragePaths(userName);
 	lastPath = m_on_export_zfo_activate;
+	Exports::ExportError ret;
 
 	foreach (MessageDb::MsgId msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
-		if (Exports::EXP_NOT_MSG_DATA ==
-		    Exports::exportAs(this, *dbSet, expFileType,
-		    m_on_export_zfo_activate, QString(),
-		    userName, dbId, msgId, true, lastPath, errStr)) {
+		ret = Exports::exportAs(this, *dbSet, expFileType,
+		    m_on_export_zfo_activate, QString(), userName, dbId, msgId,
+		    true, lastPath, errStr);
+		if (Exports::EXP_CANCELED == ret) {
+			break;
+		} else if (Exports::EXP_NOT_MSG_DATA == ret) {
 			if (messageMissingOfferDownload(msgId, errStr)) {
 				Exports::exportAs(this, *dbSet, expFileType,
-				    m_on_export_zfo_activate, QString(),
-				    userName, dbId, msgId, true, lastPath, errStr);
+				    m_on_export_zfo_activate, QString(), userName,
+				    dbId, msgId, true, lastPath, errStr);
 			}
 		}
-
 		if (!lastPath.isEmpty()) {
 			m_on_export_zfo_activate = lastPath;
 			storeExportPath(userName);
