@@ -1943,7 +1943,6 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 
 	if (attSaveDir.isEmpty()) {
-		Q_ASSERT(0);
 		return;
 	}
 
