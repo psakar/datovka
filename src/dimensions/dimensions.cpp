@@ -30,7 +30,7 @@
 
 const qreal Dimensions::m_margin = 0.4;
 const qreal Dimensions::m_padding = 0.1;
-const qreal Dimensions::m_lineHeight = 1.5;
+const qreal Dimensions::m_lineHeight = 1.35;
 const qreal Dimensions::m_screenRatio = 0.8;
 const QRect Dimensions::m_dfltWinRect(40, 40, 400, 300);
 

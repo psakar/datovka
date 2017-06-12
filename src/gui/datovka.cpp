@@ -8254,6 +8254,7 @@ void MainWindow::setUpUi(void)
 {
 	ui->setupUi(this);
 	/* Set default line height for table views/widgets. */
+	ui->accountList->setNarrowedLineHeight();
 	ui->messageList->setNarrowedLineHeight();
 	ui->messageAttachmentList->setNarrowedLineHeight();
 
