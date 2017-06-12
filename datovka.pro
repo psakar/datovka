@@ -272,6 +272,7 @@ SOURCES += \
     src/gui/dlg_contacts.cpp \
     src/gui/dlg_correspondence_overview.cpp \
     src/gui/dlg_create_account.cpp \
+    src/gui/dlg_document_service.cpp \
     src/gui/dlg_ds_search.cpp \
     src/gui/dlg_import_zfo.cpp \
     src/gui/dlg_import_zfo_result.cpp \
@@ -379,6 +380,7 @@ HEADERS += \
     src/gui/dlg_contacts.h \
     src/gui/dlg_correspondence_overview.h \
     src/gui/dlg_create_account.h \
+    src/gui/dlg_document_service.h \
     src/gui/dlg_ds_search.h \
     src/gui/dlg_import_zfo.h \
     src/gui/dlg_import_zfo_result.h \
@@ -477,6 +479,7 @@ FORMS += \
     src/gui/ui/dlg_contacts.ui \
     src/gui/ui/dlg_correspondence_overview.ui \
     src/gui/ui/dlg_create_account.ui \
+    src/gui/ui/dlg_document_service.ui \
     src/gui/ui/dlg_ds_search.ui \
     src/gui/ui/dlg_import_zfo_result.ui \
     src/gui/ui/dlg_import_zfo.ui \

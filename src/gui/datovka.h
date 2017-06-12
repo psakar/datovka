@@ -505,6 +505,11 @@ private slots:
 	void showProxySettingsDialog(void);
 
 	/*!
+	 * @brief Document service dialogue.
+	 */
+	void showDocumentServiceDialogue(void);
+
+	/*!
 	 * @brief Move selected account up.
 	 */
 	void moveSelectedAccountUp(void);

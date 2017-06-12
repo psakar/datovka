@@ -366,6 +366,8 @@ sent reply on this message</string>
     <addaction name="separator"/>
     <addaction name="actionProxy_settings"/>
     <addaction name="separator"/>
+    <addaction name="actionDocument_service_settings"/>
+    <addaction name="separator"/>
     <addaction name="actionPreferences"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -1222,6 +1224,15 @@ sent reply on this message</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionDocument_service_settings">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Document service settings</string>
    </property>
   </action>
  </widget>

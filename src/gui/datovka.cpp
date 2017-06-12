@@ -54,6 +54,7 @@
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
+#include "src/gui/dlg_document_service.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/gui/dlg_search_mojeid.h"
 #include "src/gui/dlg_msg_search.h"
@@ -634,6 +635,17 @@ void MainWindow::showProxySettingsDialog(void)
 		saveSettings();
 	}
 	dlgProxy->deleteLater();
+}
+
+void MainWindow::showDocumentServiceDialogue(void)
+{
+	debugSlotCall();
+
+	QDialog *dlgDocService = new DlgDocumentService(QString(), QString(),
+	    this);
+	dlgDocService->exec();
+
+	dlgDocService->deleteLater();
 }
 
 /* ========================================================================= */
@@ -4181,7 +4193,10 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionProxy_settings, SIGNAL(triggered()),
 	    this, SLOT(showProxySettingsDialog()));
-	   /* Separator. */
+	    /* Separator */
+	connect(ui->actionDocument_service_settings, SIGNAL(triggered()),
+	    this, SLOT(showDocumentServiceDialogue()));
+	    /* Separator. */
 	connect(ui->actionPreferences, SIGNAL(triggered()),
 	    this, SLOT(showPreferencesDialog()));
 	/* actionQuit -- connected in ui file. */
@@ -8386,7 +8401,9 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionImport_database_directory->isEnabled();
 	    /* Separator. */
 	ui->actionProxy_settings->isEnabled();
-	   /* Separator. */
+	    /* Separator. */
+	ui->actionDocument_service_settings->isEnabled();
+	    /* Separator. */
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/gear_16.png"), QSize(), QIcon::Normal, QIcon::Off);
