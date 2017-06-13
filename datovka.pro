@@ -291,6 +291,7 @@ SOURCES += \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
     src/io/dbs.cpp \
+    src/io/document_service_db.cpp \
     src/io/exports.cpp \
     src/io/file_downloader.cpp \
     src/io/filesystem.cpp \
@@ -399,6 +400,7 @@ HEADERS += \
     src/io/account_db.h \
     src/io/db_tables.h \
     src/io/dbs.h \
+    src/io/document_service_db.h \
     src/io/exports.h \
     src/io/file_downloader.h \
     src/io/filesystem.h \
