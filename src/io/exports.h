@@ -51,6 +51,7 @@ public:
 	 */
 	enum ExportError {
 		EXP_SUCCESS = 0,
+		EXP_CANCELED,
 		EXP_DB_ERROR,
 		EXP_NOT_MSG_DATA,
 		EXP_WRITE_FILE_ERROR,
