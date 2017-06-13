@@ -35,6 +35,31 @@
 class DocumentServiceDb : public SQLiteDb {
 
 public:
+	class ServiceInfoEntry {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		ServiceInfoEntry(void)
+		    : url(), token(), name(), tokenName(), logoSvg()
+		{
+		}
+
+		/*!
+		 * @brief Return true in entry is valid.
+		 */
+		inline
+		bool isValid(void) const {
+			return !url.isEmpty() && !token.isEmpty();
+		}
+
+		QString url; /*!< Service URL. */
+		QString token; /*!< Service access token. */
+		QString name; /*!< Service name. */
+		QString tokenName; /*!< Token name. */
+		QByteArray logoSvg; /*!< Raw SVG data. */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 *
@@ -49,6 +74,29 @@ public:
 	 * @return True on success, false on any error.
 	 */
 	bool openDb(const QString &fileName);
+
+	/*!
+	 * @brief Erases all database entries.
+	 *
+	 * @return True on success.
+	 */
+	bool deleteAllEntries(void);
+
+	/*!
+	 * @brief Update service info entry.
+	 *
+	 * @note There can be only one service info entry.
+	 *
+	 * @param[in] entry Service info entry.
+	 */
+	bool updateServiceInfo(const ServiceInfoEntry &entry);
+
+	/*!
+	 * @brief Obtain service information from database.
+	 *
+	 * @return Invalid service info if no valid service information found.
+	 */
+	ServiceInfoEntry serviceInfo(void) const;
 
 private:
 	/*!
