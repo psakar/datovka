@@ -1,3 +1,15 @@
+4.8.3 /
+ * Fixed problems with remembering location of saved attachment files.
+ * Directory structure can be created when exporting correspondence overview.
+ * Line height of account list and message table has been adjusted to be the
+   same.
+ * Fixed confusion between the terms of delivery (dodani) and
+   acceptance (doruceni) in Czech localisation.
+ * Process of exporting multiple selected messages can be aborted by clicking
+   Cancel button.
+ * Tags can be stored into HTML correspondence overview.
+ * HTML correspondence overview now contains both delivery and acceptance times.
+
 4.8.2 / 2017-05-30
  * Fixed problems with sending messages from accounts that cannot search for
    data boxes.
