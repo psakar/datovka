@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,7 @@ public:
 	QString saveToConf; /*!< Configuration file to save to. */
 	const QString accountDbFile; /*!< Account db file. */
 	const QString tagDbFile; /*!< Tag db file. */
+	const QString documentServiceDbFile; /*!< Document service db file. */
 	const QString tagWebDatovkaDbFile;  /*!< Tag webdatovka db file. */
 	bool auto_download_whole_messages;
 	bool default_download_signed; /*!< Default downloading method. */
@@ -144,6 +145,13 @@ public:
 	 * @return Whole path to tag database file.
 	 */
 	QString tagDbPath(void) const;
+
+	/*!
+	 * @brief Returns whole document service db path.
+	 *
+	 * @return Whole path to document service database file.
+	 */
+	QString documentServiceDbPath(void) const;
 
 	/*!
 	 * @brief Returns whole webdatovka tag db path.
