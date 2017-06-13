@@ -24,8 +24,10 @@
 #ifndef _DLG_DOCUMENT_SERVICE_H_
 #define _DLG_DOCUMENT_SERVICE_H_
 
+#include <QByteArray>
 #include <QDialog>
 
+#include "src/document_service/io/document_service_connection.h"
 #include "src/settings/document_service.h"
 
 namespace Ui {
@@ -75,13 +77,32 @@ private slots:
 	 */
 	void eraseContent(void);
 
+	/*!
+	 * @brief Notifies the user about communication error.
+	 *
+	 * @param[in] errMsg Error message.
+	 */
+	void notifyCommunicationError(const QString &errMsg);
+
 private:
 	/*!
 	 * @brief Loads service information from storage.
 	 */
 	void loadStoredServiceInfo(void);
 
+	/*!
+	 * @brief Set window content according to service info response.
+	 *
+	 * @param[in] logoSvg Raw SVG data.
+	 * @param[in] name Service name.
+	 * @param[in] tokenName Access token name.
+	 */
+	void setResponseContent(const QByteArray &logoSvg, const QString &name,
+	    const QString &tokenName);
+
 	Ui::DlgDocumentService *m_ui; /*!< UI generated from UI file. */
+
+	DocumentServiceConnection m_dsc; /*!< Connection to document service. */
 };
 
 #endif /* _DLG_DOCUMENT_SERVICE_H_ */

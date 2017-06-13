@@ -21,14 +21,34 @@
  * the two.
  */
 
+#include <QMessageBox>
+
+#include "src/document_service/json/service_info.h"
 #include "src/gui/dlg_document_service.h"
 #include "src/io/document_service_db.h"
 #include "ui_dlg_document_service.h"
 
+/*!
+ * @brief Return disabled palette.
+ */
+static
+const QPalette &disableEditPalette(void)
+{
+        static QPalette palette;
+        static bool prepared = false;
+        if (!prepared) {
+                palette.setColor(QPalette::Base, Qt::lightGray);
+                palette.setColor(QPalette::Text, Qt::darkGray);
+                prepared = true;
+        }
+        return palette;
+}
+
 DlgDocumentService::DlgDocumentService(const QString &urlStr,
     const QString &tokenStr, QWidget *parent)
     : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgDocumentService)
+    m_ui(new (std::nothrow) Ui::DlgDocumentService),
+    m_dsc(false, this)
 {
 	m_ui->setupUi(this);
 
@@ -38,6 +58,11 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
 	m_ui->infoButton->setEnabled(false);
 	m_ui->eraseButton->setEnabled(!m_ui->urlLine->text().isEmpty() ||
 	    !m_ui->tokenLine->text().isEmpty());
+
+	m_ui->nameLine->setReadOnly(true);
+	m_ui->nameLine->setPalette(disableEditPalette());
+	m_ui->tokenNameLine->setReadOnly(true);
+	m_ui->tokenNameLine->setPalette(disableEditPalette());
 
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
@@ -50,6 +75,9 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
 	    this, SLOT(callServiceInfo()));
 	connect(m_ui->eraseButton, SIGNAL(clicked(bool)),
 	    this, SLOT(eraseContent()));
+
+	connect(&m_dsc, SIGNAL(connectionError(QString)),
+	    this, SLOT(notifyCommunicationError(QString)));
 
 	loadStoredServiceInfo();
 }
@@ -100,7 +128,28 @@ void DlgDocumentService::activateServiceButtons(void)
 
 void DlgDocumentService::callServiceInfo(void)
 {
-	/* TODO -- Check connection. */
+	QByteArray response;
+
+	m_dsc.setConnection(m_ui->urlLine->text(), m_ui->tokenLine->text());
+
+	if (m_dsc.communicate(DocumentServiceConnection::SRVC_GET_ALL_CLIENTS,
+	        QByteArray(), response)) {
+		if (!response.isEmpty()) {
+			bool ok = false;
+			ServiceInfoResp siResp(
+			    ServiceInfoResp::fromJson(response, &ok));
+			if (!ok || !siResp.isValid()) {
+				return;
+			}
+
+			setResponseContent(siResp.logoSvg(), siResp.name(),
+			    siResp.tokenName());
+		} else {
+			return;
+		}
+	} else {
+		return;
+	}
 
 	m_ui->infoButton->setEnabled(false);
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
@@ -114,6 +163,11 @@ void DlgDocumentService::eraseContent(void)
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 }
 
+void DlgDocumentService::notifyCommunicationError(const QString &errMsg)
+{
+	QMessageBox::critical(this, tr("Communication Error"), errMsg);
+}
+
 void DlgDocumentService::loadStoredServiceInfo(void)
 {
 	if (Q_NULLPTR == globDocumentServiceDbPtr) {
@@ -125,4 +179,15 @@ void DlgDocumentService::loadStoredServiceInfo(void)
 	if (!entry.isValid()) {
 		return;
 	}
+
+	setResponseContent(entry.logoSvg, entry.name, entry.tokenName);
+}
+
+void DlgDocumentService::setResponseContent(const QByteArray &logoSvg,
+    const QString &name, const QString &tokenName)
+{
+	/* TODO -- Set SVG. */
+
+	m_ui->nameLine->setText(name);
+	m_ui->tokenNameLine->setText(tokenName);
 }

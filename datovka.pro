@@ -264,6 +264,9 @@ SOURCES += \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
+    src/document_service/io/document_service_connection.cpp \
+    src/document_service/json/helper.cpp \
+    src/document_service/json/service_info.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -374,6 +377,9 @@ HEADERS += \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
+    src/document_service/io/document_service_connection.h \
+    src/document_service/json/helper.h \
+    src/document_service/json/service_info.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \
