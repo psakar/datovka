@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,5 +52,10 @@ extern SQLiteTbl msgcrtdtTbl; /*!< Table 'message_certificate_data'. */
  */
 extern SQLiteTbl tagTbl; /*!< Table 'tag'. */
 extern SQLiteTbl msgtagsTbl; /*!< Table 'message_tags'. */
+
+/*
+ * Document service database.
+ */
+extern SQLiteTbl srvcInfTbl; /*!< Table 'service_info'. */
 
 #endif /* _DB_TABLES_H_ */

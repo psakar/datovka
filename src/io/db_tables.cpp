@@ -680,3 +680,39 @@ namespace MsgTagsTbl {
 SQLiteTbl msgtagsTbl(MsgTagsTbl::tabName, MsgTagsTbl::knownAttrs,
     MsgTagsTbl::attrProps, MsgTagsTbl::colConstraints,
     MsgTagsTbl::tblConstraint);
+
+namespace SrvcInfTbl {
+	const QString tabName("service_info");
+
+	const QVector< QPair<QString, enum EntryType> > knownAttrs = {
+	{"url", DB_TEXT}, /* NOT NULL */
+	{"token", DB_TEXT}, /* NOT_NULL */
+	{"name", DB_TEXT},
+	{"token_name", DB_TEXT},
+	{"logo_svg", DB_TEXT}
+	/*
+	 *  PRIMARY KEY (url)
+	 */
+	};
+
+	const QMap<QString, QString> colConstraints = {
+	    {"url", "NOT NULL"},
+	    {"token", "NOT NULL"}
+	};
+
+	const QString tblConstraint(
+	    ",\n"
+	    "        PRIMARY KEY (url)"
+	);
+
+	const QMap<QString, SQLiteTbl::AttrProp> attrProps = {
+	{"url",        {DB_TEXT, ""}},
+	{"token",      {DB_TEXT, ""}},
+	{"name",       {DB_TEXT, ""}},
+	{"token_name", {DB_TEXT, ""}},
+	{"logo_svg",   {DB_TEXT, ""}}
+	};
+} /* namespace SrvcInfTbl */
+SQLiteTbl srvcInfTbl(SrvcInfTbl::tabName, SrvcInfTbl::knownAttrs,
+    SrvcInfTbl::attrProps, SrvcInfTbl::colConstraints,
+    SrvcInfTbl::tblConstraint);
