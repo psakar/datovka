@@ -22,6 +22,7 @@
  */
 
 #include "src/gui/dlg_document_service.h"
+#include "src/io/document_service_db.h"
 #include "ui_dlg_document_service.h"
 
 DlgDocumentService::DlgDocumentService(const QString &urlStr,
@@ -33,9 +34,95 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
 
 	m_ui->urlLine->setText(urlStr);
 	m_ui->tokenLine->setText(tokenStr);
+
+	m_ui->infoButton->setEnabled(false);
+	m_ui->eraseButton->setEnabled(!m_ui->urlLine->text().isEmpty() ||
+	    !m_ui->tokenLine->text().isEmpty());
+
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+
+	connect(m_ui->urlLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(activateServiceButtons()));
+	connect(m_ui->tokenLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(activateServiceButtons()));
+
+	connect(m_ui->infoButton, SIGNAL(clicked(bool)),
+	    this, SLOT(callServiceInfo()));
+	connect(m_ui->eraseButton, SIGNAL(clicked(bool)),
+	    this, SLOT(eraseContent()));
+
+	loadStoredServiceInfo();
 }
 
 DlgDocumentService::~DlgDocumentService(void)
 {
 	delete m_ui;
+}
+
+bool DlgDocumentService::updateSettings(
+    DocumentServiceSettings &docSrvcSettings, QWidget *parent)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		return false;
+	}
+
+	DocumentServiceDb::ServiceInfoEntry entry(
+	    globDocumentServiceDbPtr->serviceInfo());
+
+	DlgDocumentService dlg(docSrvcSettings.url, docSrvcSettings.token,
+	    parent);
+	if (QDialog::Accepted != dlg.exec()) {
+		return false;
+	}
+
+	if ((docSrvcSettings.url == dlg.m_ui->urlLine->text()) &&
+	    (docSrvcSettings.token == dlg.m_ui->tokenLine->text())) {
+		/* No change. */
+		return false;
+	}
+
+	/* Save changes. */
+	docSrvcSettings.url = dlg.m_ui->urlLine->text();
+	docSrvcSettings.token = dlg.m_ui->tokenLine->text();
+
+	return true;
+}
+
+void DlgDocumentService::activateServiceButtons(void)
+{
+	m_ui->infoButton->setEnabled(!m_ui->urlLine->text().isEmpty() &&
+	    !m_ui->tokenLine->text().isEmpty());
+	m_ui->eraseButton->setEnabled(!m_ui->urlLine->text().isEmpty() ||
+	    !m_ui->tokenLine->text().isEmpty());
+
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+}
+
+void DlgDocumentService::callServiceInfo(void)
+{
+	/* TODO -- Check connection. */
+
+	m_ui->infoButton->setEnabled(false);
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+}
+
+void DlgDocumentService::eraseContent(void)
+{
+	m_ui->urlLine->setText(QString());
+	m_ui->tokenLine->setText(QString());
+
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+}
+
+void DlgDocumentService::loadStoredServiceInfo(void)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		return;
+	}
+
+	DocumentServiceDb::ServiceInfoEntry entry(
+	    globDocumentServiceDbPtr->serviceInfo());
+	if (!entry.isValid()) {
+		return;
+	}
 }

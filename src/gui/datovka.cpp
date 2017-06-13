@@ -82,6 +82,7 @@
 #include "src/io/wd_sessions.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
+#include "src/settings/document_service.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
 #include "src/worker/message_emitter.h"
@@ -641,11 +642,9 @@ void MainWindow::showDocumentServiceDialogue(void)
 {
 	debugSlotCall();
 
-	QDialog *dlgDocService = new DlgDocumentService(QString(), QString(),
-	    this);
-	dlgDocService->exec();
-
-	dlgDocService->deleteLater();
+	if (DlgDocumentService::updateSettings(globDocumentServiceSet, this)) {
+		saveSettings();
+	}
 }
 
 /* ========================================================================= */
@@ -4519,6 +4518,9 @@ void MainWindow::loadSettings(void)
 	/* Proxy settings. */
 	globProxSet.loadFromSettings(settings);
 
+	/* Document service settings. */
+	globDocumentServiceSet.loadFromSettings(settings);
+
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
 	ui->accountList->setModel(&m_accountModel);
@@ -4803,6 +4805,9 @@ void MainWindow::saveSettings(void) const
 
 	/* Proxy settings. */
 	globProxSet.saveToSettings(settings);
+
+	/* Document service settings. */
+	globDocumentServiceSet.saveToSettings(settings);
 
 	/* Global preferences. */
 	globPref.saveToSettings(settings);

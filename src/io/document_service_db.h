@@ -69,7 +69,7 @@ public:
 	/*!
 	 * @brief Open database file.
 	 *
-	 * @param[in] fileName      File name.
+	 * @param[in] fileName File name.
 	 * @return True on success, false on any error.
 	 */
 	bool openDb(const QString &fileName);

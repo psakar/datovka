@@ -26,6 +26,8 @@
 
 #include <QDialog>
 
+#include "src/settings/document_service.h"
+
 namespace Ui {
 	class DlgDocumentService;
 }
@@ -36,7 +38,7 @@ namespace Ui {
 class DlgDocumentService : public QDialog {
 	Q_OBJECT
 
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 *
@@ -47,12 +49,38 @@ public:
 	explicit DlgDocumentService(const QString &urlStr,
 	    const QString &tokenStr, QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @Brief Destructor.
 	 */
 	~DlgDocumentService(void);
 
+	static
+	bool updateSettings(DocumentServiceSettings &docSrvcSettings,
+	    QWidget *parent = Q_NULLPTR);
+
+private slots:
+	/*!
+	 * @brief Enables service-related buttons.
+	 */
+	void activateServiceButtons(void);
+
+	/*!
+	 * @brief calls service info and displays results.
+	 */
+	void callServiceInfo(void);
+
+	/*!
+	 * @brief Erases all entries.
+	 */
+	void eraseContent(void);
+
 private:
+	/*!
+	 * @brief Loads service information from storage.
+	 */
+	void loadStoredServiceInfo(void);
+
 	Ui::DlgDocumentService *m_ui; /*!< UI generated from UI file. */
 };
 
