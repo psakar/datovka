@@ -1,4 +1,4 @@
-4.8.3 /
+4.8.3 / 2017-06-13
  * Fixed problems with remembering location of saved attachment files.
  * Directory structure can be created when exporting correspondence overview.
  * Line height of account list and message table has been adjusted to be the
