@@ -95,8 +95,8 @@ bool insertServiceInfo(QSqlDatabase &db,
 	QSqlQuery query(db);
 
 	QString queryStr = "INSERT INTO service_info "
-	    "(url, token, name, token_name, logo_svg) VALUES "
-	    "(:url, :token, :name, :tokenName, :logoSvg)";
+	    "(url, name, token_name, logo_svg) VALUES "
+	    "(:url, :name, :tokenName, :logoSvg)";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -104,7 +104,6 @@ bool insertServiceInfo(QSqlDatabase &db,
 	}
 
 	query.bindValue(":url", entry.url);
-	query.bindValue(":token", entry.token);
 	query.bindValue(":name", entry.name);
 	query.bindValue(":tokenName", entry.tokenName);
 	query.bindValue(":logoSvg", entry.logoSvg.toBase64());
@@ -147,7 +146,7 @@ DocumentServiceDb::ServiceInfoEntry DocumentServiceDb::serviceInfo(void) const
 {
 	QSqlQuery query(m_db);
 
-	QString queryStr = "SELECT url, token, name, token_name, logo_svg "
+	QString queryStr = "SELECT url, name, token_name, logo_svg "
 	    "FROM service_info";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -161,9 +160,8 @@ DocumentServiceDb::ServiceInfoEntry DocumentServiceDb::serviceInfo(void) const
 			ServiceInfoEntry entry;
 
 			entry.url = query.value(0).toString();
-			entry.token = query.value(1).toString();
-			entry.name = query.value(2).toString();
-			entry.tokenName = query.value(3).toString();
+			entry.name = query.value(1).toString();
+			entry.tokenName = query.value(2).toString();
 			entry.logoSvg = QByteArray::fromBase64(
 			    query.value(3).toByteArray());
 

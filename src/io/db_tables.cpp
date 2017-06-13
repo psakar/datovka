@@ -686,7 +686,6 @@ namespace SrvcInfTbl {
 
 	const QVector< QPair<QString, enum EntryType> > knownAttrs = {
 	{"url", DB_TEXT}, /* NOT NULL */
-	{"token", DB_TEXT}, /* NOT_NULL */
 	{"name", DB_TEXT},
 	{"token_name", DB_TEXT},
 	{"logo_svg", DB_TEXT}
@@ -696,8 +695,7 @@ namespace SrvcInfTbl {
 	};
 
 	const QMap<QString, QString> colConstraints = {
-	    {"url", "NOT NULL"},
-	    {"token", "NOT NULL"}
+	    {"url", "NOT NULL"}
 	};
 
 	const QString tblConstraint(
@@ -707,7 +705,6 @@ namespace SrvcInfTbl {
 
 	const QMap<QString, SQLiteTbl::AttrProp> attrProps = {
 	{"url",        {DB_TEXT, ""}},
-	{"token",      {DB_TEXT, ""}},
 	{"name",       {DB_TEXT, ""}},
 	{"token_name", {DB_TEXT, ""}},
 	{"logo_svg",   {DB_TEXT, ""}}

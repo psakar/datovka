@@ -41,7 +41,7 @@ public:
 		 * @brief Constructor.
 		 */
 		ServiceInfoEntry(void)
-		    : url(), token(), name(), tokenName(), logoSvg()
+		    : url(), name(), tokenName(), logoSvg()
 		{
 		}
 
@@ -50,11 +50,10 @@ public:
 		 */
 		inline
 		bool isValid(void) const {
-			return !url.isEmpty() && !token.isEmpty();
+			return !url.isEmpty();
 		}
 
 		QString url; /*!< Service URL. */
-		QString token; /*!< Service access token. */
 		QString name; /*!< Service name. */
 		QString tokenName; /*!< Token name. */
 		QByteArray logoSvg; /*!< Raw SVG data. */
