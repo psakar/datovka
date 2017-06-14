@@ -507,28 +507,28 @@ void appendError(enum Exports::ExportFileType fileType, qint64 dmId,
 {
 	switch (fileType) {
 	case Exports::ZFO_MESSAGE:
-		qWarning(
+		qWarning("%s",
 		    QString("DZ '%1' export error.").arg(dmId).toUtf8().constData());
 		errList.append(
 		    QObject::tr("Message '%1' does not contain data necessary for ZFO export.")
 		        .arg(dmId));
 		break;
 	case Exports::ZFO_DELIVERY:
-		qWarning(
+		qWarning("%s",
 		    QString("DZ '%1' export error").arg(dmId).toUtf8().constData());
 		errList.append(
 		    QObject::tr("Message '%1' does not contain acceptance info data necessary for ZFO export.")
 		        .arg(dmId));
 		break;
 	case Exports::PDF_ENVELOPE:
-		qWarning(
+		qWarning("%s",
 		    QString("OZ '%1' export error").arg(dmId).toUtf8().constData());
 		errList.append(
 		    QObject::tr("Message '%1' does not contain message envelope data necessary for PDF export.")
 		        .arg(dmId));
 		break;
 	case Exports::PDF_DELIVERY:
-		qWarning(
+		qWarning("%s",
 		    QString("DD '%1' export error").arg(dmId).toUtf8().constData());
 		errList.append(
 		    QObject::tr("Message '%1' does not contain acceptance info data necessary for PDF export.")
