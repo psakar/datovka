@@ -30,6 +30,8 @@
 #include "src/io/document_service_db.h"
 #include "ui_dlg_document_service.h"
 
+#define IGNORE_SSL_ERRORS true
+
 /*!
  * @brief Return disabled palette.
  */
@@ -50,7 +52,7 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
     const QString &tokenStr, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgDocumentService),
-    m_dsc(false, this),
+    m_dsc(IGNORE_SSL_ERRORS, this),
     m_logoSvg()
 {
 	m_ui->setupUi(this);
@@ -148,7 +150,7 @@ void DlgDocumentService::callServiceInfo(void)
 
 	m_dsc.setConnection(m_ui->urlLine->text(), m_ui->tokenLine->text());
 
-	if (m_dsc.communicate(DocumentServiceConnection::SRVC_GET_ALL_CLIENTS,
+	if (m_dsc.communicate(DocumentServiceConnection::SRVC_SERVICE_INFO,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
