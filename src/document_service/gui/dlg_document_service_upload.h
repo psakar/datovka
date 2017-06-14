@@ -82,6 +82,13 @@ private slots:
 	 */
 	void filterHierarchy(const QString &text);
 
+	/*!
+	 * @brief Notifies the user about communication error.
+	 *
+	 * @param[in] errMsg Error message.
+	 */
+	void notifyCommunicationError(const QString &errMsg);
+
 private:
 
 	Ui::DlgDocumentServiceUpload *m_ui; /*!< UI generated from UI file. */

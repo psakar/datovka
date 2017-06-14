@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QMessageBox>
 #include <QString>
 
 #include "src/document_service/gui/dlg_document_service_upload.h"
@@ -51,6 +52,9 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 
 	m_ui->uploadView->setModel(&m_uploadProxyModel);
 	m_uploadProxyModel.setSourceModel(&m_uploadModel);
+
+	connect(&m_dsc, SIGNAL(connectionError(QString)),
+	    this, SLOT(notifyCommunicationError(QString)));
 }
 
 DlgDocumentServiceUpload::~DlgDocumentServiceUpload(void)
@@ -90,12 +94,17 @@ void DlgDocumentServiceUpload::callUploadHierarchy(void)
 			UploadHierarchyResp uhRes(
 			    UploadHierarchyResp::fromJson(response, &ok));
 			if (!ok || !uhRes.isValid()) {
+				QMessageBox::critical(this,
+				    tr("Communication Error"),
+				    tr("Received invalid response."));
 				return;
 			}
 
 			m_uploadModel.setHierarchy(uhRes);
 			m_ui->uploadView->expandAll();
 		} else {
+			QMessageBox::critical(this, tr("Communication Error"),
+			    tr("Received empty response."));
 			return;
 		}
 	} else {
@@ -124,4 +133,9 @@ void DlgDocumentServiceUpload::filterHierarchy(const QString &text)
 		m_ui->filterLine->setStyleSheet(
 		    SortFilterProxyModel::notFoundFilterEditStyle);
 	}
+}
+
+void DlgDocumentServiceUpload::notifyCommunicationError(const QString &errMsg)
+{
+	QMessageBox::critical(this, tr("Communication Error"), errMsg);
 }
