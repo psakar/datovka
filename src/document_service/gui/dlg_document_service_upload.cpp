@@ -44,6 +44,9 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Upload Message into Document Service"));
 
+	connect(m_ui->reloadButton, SIGNAL(clicked(bool)),
+	    this, SLOT(callUploadHierarchy()));
+
 	m_ui->filterLine->setClearButtonEnabled(true);
 	connect(m_ui->filterLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterHierarchy(QString)));
