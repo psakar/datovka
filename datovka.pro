@@ -264,6 +264,7 @@ SOURCES += \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
+    src/document_service/gui/dlg_document_service.cpp \
     src/document_service/gui/dlg_document_service_upload.cpp \
     src/document_service/io/document_service_connection.cpp \
     src/document_service/json/helper.cpp \
@@ -276,7 +277,6 @@ SOURCES += \
     src/gui/dlg_contacts.cpp \
     src/gui/dlg_correspondence_overview.cpp \
     src/gui/dlg_create_account.cpp \
-    src/gui/dlg_document_service.cpp \
     src/gui/dlg_ds_search.cpp \
     src/gui/dlg_import_zfo.cpp \
     src/gui/dlg_import_zfo_result.cpp \
@@ -378,6 +378,7 @@ HEADERS += \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
+    src/document_service/gui/dlg_document_service.h \
     src/document_service/gui/dlg_document_service_upload.h \
     src/document_service/io/document_service_connection.h \
     src/document_service/json/helper.h \
@@ -390,7 +391,6 @@ HEADERS += \
     src/gui/dlg_contacts.h \
     src/gui/dlg_correspondence_overview.h \
     src/gui/dlg_create_account.h \
-    src/gui/dlg_document_service.h \
     src/gui/dlg_ds_search.h \
     src/gui/dlg_import_zfo.h \
     src/gui/dlg_import_zfo_result.h \
@@ -483,6 +483,7 @@ HEADERS += \
     src/worker/task_verify_message.h
 
 FORMS += \
+    src/document_service/ui/dlg_document_service.ui \
     src/document_service/ui/dlg_document_service_upload.ui \
     src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
@@ -492,7 +493,6 @@ FORMS += \
     src/gui/ui/dlg_contacts.ui \
     src/gui/ui/dlg_correspondence_overview.ui \
     src/gui/ui/dlg_create_account.ui \
-    src/gui/ui/dlg_document_service.ui \
     src/gui/ui/dlg_ds_search.ui \
     src/gui/ui/dlg_import_zfo_result.ui \
     src/gui/ui/dlg_import_zfo.ui \

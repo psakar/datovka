@@ -25,8 +25,8 @@
 #include <QMessageBox>
 #include <QSvgRenderer>
 
+#include "src/document_service/gui/dlg_document_service.h"
 #include "src/document_service/json/service_info.h"
-#include "src/gui/dlg_document_service.h"
 #include "src/io/document_service_db.h"
 #include "ui_dlg_document_service.h"
 
