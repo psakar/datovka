@@ -128,8 +128,8 @@ bool DlgDocumentService::updateSettings(
 	}
 
 	/* Save changes to settings. */
-	docSrvcSettings.url = dlg.m_ui->urlLine->text();
-	docSrvcSettings.token = dlg.m_ui->tokenLine->text();
+	docSrvcSettings.url = dlg.m_ui->urlLine->text().trimmed();
+	docSrvcSettings.token = dlg.m_ui->tokenLine->text().trimmed();
 
 	return true;
 }
@@ -148,7 +148,8 @@ void DlgDocumentService::callServiceInfo(void)
 {
 	QByteArray response;
 
-	m_dsc.setConnection(m_ui->urlLine->text(), m_ui->tokenLine->text());
+	m_dsc.setConnection(m_ui->urlLine->text().trimmed(),
+	    m_ui->tokenLine->text().trimmed());
 
 	if (m_dsc.communicate(DocumentServiceConnection::SRVC_SERVICE_INFO,
 	        QByteArray(), response)) {
