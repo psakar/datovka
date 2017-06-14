@@ -156,17 +156,17 @@ void DlgDocumentService::callServiceInfo(void)
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
-			ServiceInfoResp siResp(
+			ServiceInfoResp siRes(
 			    ServiceInfoResp::fromJson(response, &ok));
-			if (!ok || !siResp.isValid()) {
+			if (!ok || !siRes.isValid()) {
 				QMessageBox::critical(this,
 				    tr("Communication Error"),
 				    tr("Received invalid response."));
 				return;
 			}
 
-			setResponseContent(siResp.logoSvg(), siResp.name(),
-			    siResp.tokenName());
+			setResponseContent(siRes.logoSvg(), siRes.name(),
+			    siRes.tokenName());
 		} else {
 			QMessageBox::critical(this, tr("Communication Error"),
 			    tr("Received empty response."));

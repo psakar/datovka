@@ -45,9 +45,12 @@ private:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] urlStr String containing service location URL.
+	 * @param[in] tokenStr String containing service token.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgDocumentServiceUpload(QWidget *parent = Q_NULLPTR);
+	explicit DlgDocumentServiceUpload(const QString &urlStr,
+	    const QString &tokenStr, QWidget *parent = Q_NULLPTR);
 
 public:
 	/*!
@@ -68,6 +71,11 @@ public:
 
 private slots:
 	/*!
+	 * @brief Download upload hierarchy and set model.
+	 */
+	void callUploadHierarchy(void);
+
+	/*!
 	 * @brief Filter upload hierarchy.
 	 *
 	 * @param[in] text Filter text.
@@ -75,7 +83,11 @@ private slots:
 	void filterHierarchy(const QString &text);
 
 private:
+
 	Ui::DlgDocumentServiceUpload *m_ui; /*!< UI generated from UI file. */
+
+	const QString m_url; /*!< Service URL. */
+	const QString m_token; /*!< Service token. */
 
 	DocumentServiceConnection m_dsc; /*!< Connection to document service. */
 

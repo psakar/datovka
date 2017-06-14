@@ -24,14 +24,18 @@
 #include <QString>
 
 #include "src/document_service/gui/dlg_document_service_upload.h"
+#include "src/document_service/json/upload_hierarchy.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "ui_dlg_document_service_upload.h"
 
 #define IGNORE_SSL_ERRORS true
 
-DlgDocumentServiceUpload::DlgDocumentServiceUpload(QWidget *parent)
+DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
+    const QString &tokenStr, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgDocumentServiceUpload),
+    m_url(urlStr),
+    m_token(tokenStr),
     m_dsc(IGNORE_SSL_ERRORS, this),
     m_uploadModel(),
     m_uploadProxyModel()
@@ -57,10 +61,46 @@ DlgDocumentServiceUpload::~DlgDocumentServiceUpload(void)
 bool DlgDocumentServiceUpload::uploadMessage(
     const DocumentServiceSettings &docSrvcSettings, QWidget *parent)
 {
-	DlgDocumentServiceUpload dlg(parent);
+	if (!docSrvcSettings.isSet()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	DlgDocumentServiceUpload dlg(docSrvcSettings.url,
+	    docSrvcSettings.token, parent);
+	dlg.callUploadHierarchy();
 	dlg.exec();
 
 	return true;
+}
+
+void DlgDocumentServiceUpload::callUploadHierarchy(void)
+{
+	QByteArray response;
+
+	/* Clear model. */
+	m_uploadModel.setHierarchy(UploadHierarchyResp());
+
+	m_dsc.setConnection(m_url, m_token);
+
+	if (m_dsc.communicate(DocumentServiceConnection::SRVC_UPLOAD_HIERARCHY,
+	        QByteArray(), response)) {
+		if (!response.isEmpty()) {
+			bool ok = false;
+			UploadHierarchyResp uhRes(
+			    UploadHierarchyResp::fromJson(response, &ok));
+			if (!ok || !uhRes.isValid()) {
+				return;
+			}
+
+			m_uploadModel.setHierarchy(uhRes);
+			m_ui->uploadView->expandAll();
+		} else {
+			return;
+		}
+	} else {
+		return;
+	}
 }
 
 void DlgDocumentServiceUpload::filterHierarchy(const QString &text)
