@@ -231,7 +231,7 @@ void DocumentServiceConnection::handleSslErrors(QNetworkReply *reply,
 		errMsg = errList.join(QStringLiteral("; "));
 	}
 
-	qCritical(errMsg.toUtf8().constData());
+	qCritical("%s", errMsg.toUtf8().constData());
 	emit connectionError(errMsg);
 
 	if (m_ignoreSslErrors) {
