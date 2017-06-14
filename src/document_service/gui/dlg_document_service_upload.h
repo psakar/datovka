@@ -27,6 +27,8 @@
 #include <QDialog>
 
 #include "src/document_service/io/document_service_connection.h"
+#include "src/document_service/models/upload_hierarchy_model.h"
+#include "src/document_service/models/upload_hierarchy_proxy_model.h"
 #include "src/settings/document_service.h"
 
 namespace Ui {
@@ -64,10 +66,21 @@ public:
 	bool uploadMessage(const DocumentServiceSettings &docSrvcSettings,
 	    QWidget *parent = Q_NULLPTR);
 
+private slots:
+	/*!
+	 * @brief Filter upload hierarchy.
+	 *
+	 * @param[in] text Filter text.
+	 */
+	void filterHierarchy(const QString &text);
+
 private:
 	Ui::DlgDocumentServiceUpload *m_ui; /*!< UI generated from UI file. */
 
 	DocumentServiceConnection m_dsc; /*!< Connection to document service. */
+
+	UploadHierarchyModel m_uploadModel; /*!< Upload hierarchy model. */
+	UploadHierarchyProxyModel m_uploadProxyModel; /*!< Used for filtering. */
 };
 
 #endif /* _DLG_DOCUMENT_SERVICE_UPLOAD_H_ */

@@ -32,13 +32,6 @@
 class UploadHierarchyProxyModel : public QSortFilterProxyModel {
 	Q_OBJECT
 public:
-	static
-	const QString blankFilterEditStyle; /*!< Blank filter line style. */
-	static
-	const QString foundFilterEditStyle; /*!< Found filter line style. */
-	static
-	const QString notFoundFilterEditStyle; /*!< Not found filter line style. */
-
 	/*!
 	 * @brief Constructor.
 	 *

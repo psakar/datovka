@@ -21,7 +21,10 @@
  * the two.
  */
 
+#include <QString>
+
 #include "src/document_service/gui/dlg_document_service_upload.h"
+#include "src/models/sort_filter_proxy_model.h"
 #include "ui_dlg_document_service_upload.h"
 
 #define IGNORE_SSL_ERRORS true
@@ -29,10 +32,21 @@
 DlgDocumentServiceUpload::DlgDocumentServiceUpload(QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgDocumentServiceUpload),
-    m_dsc(IGNORE_SSL_ERRORS, this)
+    m_dsc(IGNORE_SSL_ERRORS, this),
+    m_uploadModel(),
+    m_uploadProxyModel()
 {
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Upload Message into Document Service"));
+
+	m_ui->filterLine->setClearButtonEnabled(true);
+	connect(m_ui->filterLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(filterHierarchy(QString)));
+
+	m_ui->uploadView->setNarrowedLineHeight();
+
+	m_ui->uploadView->setModel(&m_uploadProxyModel);
+	m_uploadProxyModel.setSourceModel(&m_uploadModel);
 }
 
 DlgDocumentServiceUpload::~DlgDocumentServiceUpload(void)
@@ -47,4 +61,27 @@ bool DlgDocumentServiceUpload::uploadMessage(
 	dlg.exec();
 
 	return true;
+}
+
+void DlgDocumentServiceUpload::filterHierarchy(const QString &text)
+{
+	m_uploadProxyModel.setFilterRole(UploadHierarchyModel::ROLE_FILTER);
+
+	m_uploadProxyModel.setFilterRegExp(QRegExp(text,
+	    Qt::CaseInsensitive, QRegExp::FixedString));
+
+	m_uploadProxyModel.setFilterKeyColumn(0);
+
+	m_ui->uploadView->expandAll();
+
+	if (text.isEmpty()) {
+		m_ui->filterLine->setStyleSheet(
+		    SortFilterProxyModel::blankFilterEditStyle);
+	} else if (m_uploadProxyModel.rowCount() != 0) {
+		m_ui->filterLine->setStyleSheet(
+		    SortFilterProxyModel::foundFilterEditStyle);
+	} else {
+		m_ui->filterLine->setStyleSheet(
+		    SortFilterProxyModel::notFoundFilterEditStyle);
+	}
 }

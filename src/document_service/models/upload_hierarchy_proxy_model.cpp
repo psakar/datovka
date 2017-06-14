@@ -23,13 +23,6 @@
 
 #include "src/document_service/models/upload_hierarchy_proxy_model.h"
 
-const QString UploadHierarchyProxyModel::blankFilterEditStyle(
-    "QLineEdit{background: white;}");
-const QString UploadHierarchyProxyModel::foundFilterEditStyle(
-    "QLineEdit{background: #afffaf;}");
-const QString UploadHierarchyProxyModel::notFoundFilterEditStyle(
-    "QLineEdit{background: #ffafaf;}");
-
 UploadHierarchyProxyModel::UploadHierarchyProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)
 {
