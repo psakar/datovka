@@ -83,6 +83,11 @@ private slots:
 	void filterHierarchy(const QString &text);
 
 	/*!
+	 * @brief Checks selection and activates OK button.
+	 */
+	void uploadHierarchySelectionChanged(void);
+
+	/*!
 	 * @brief Notifies the user about communication error.
 	 *
 	 * @param[in] errMsg Error message.
@@ -100,6 +105,8 @@ private:
 
 	UploadHierarchyModel m_uploadModel; /*!< Upload hierarchy model. */
 	UploadHierarchyProxyModel m_uploadProxyModel; /*!< Used for filtering. */
+
+	QStringList m_selectedUploadIds; /* Upload location identifiers. */
 };
 
 #endif /* _DLG_DOCUMENT_SERVICE_UPLOAD_H_ */

@@ -39,7 +39,8 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
     m_token(tokenStr),
     m_dsc(IGNORE_SSL_ERRORS, this),
     m_uploadModel(),
-    m_uploadProxyModel()
+    m_uploadProxyModel(),
+    m_selectedUploadIds()
 {
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Upload Message into Document Service"));
@@ -55,6 +56,11 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 
 	m_ui->uploadView->setModel(&m_uploadProxyModel);
 	m_uploadProxyModel.setSourceModel(&m_uploadModel);
+	connect(m_ui->uploadView->selectionModel(),
+	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+	    this, SLOT(uploadHierarchySelectionChanged()));
+
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
 	connect(&m_dsc, SIGNAL(connectionError(QString)),
 	    this, SLOT(notifyCommunicationError(QString)));
@@ -136,6 +142,28 @@ void DlgDocumentServiceUpload::filterHierarchy(const QString &text)
 		m_ui->filterLine->setStyleSheet(
 		    SortFilterProxyModel::notFoundFilterEditStyle);
 	}
+}
+
+void DlgDocumentServiceUpload::uploadHierarchySelectionChanged(void)
+{
+	m_selectedUploadIds.clear();
+
+	const QModelIndexList indexes(
+	    m_ui->uploadView->selectionModel()->selectedIndexes());
+
+	/* Entries with empty identifiers should not be able to be selected. */
+	foreach (const QModelIndex &index, indexes) {
+		const QString uploadId(
+		    index.data(UploadHierarchyModel::ROLE_ID).toString());
+		if (!uploadId.isEmpty()) {
+			m_selectedUploadIds.append(uploadId);
+		} else {
+			Q_ASSERT(0);
+		}
+	}
+
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	    !indexes.isEmpty());
 }
 
 void DlgDocumentServiceUpload::notifyCommunicationError(const QString &errMsg)
