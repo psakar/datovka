@@ -21,7 +21,9 @@
  * the two.
  */
 
+#include <QGraphicsSvgItem>
 #include <QMessageBox>
+#include <QSvgRenderer>
 
 #include "src/document_service/json/service_info.h"
 #include "src/gui/dlg_document_service.h"
@@ -51,6 +53,7 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
     m_dsc(false, this)
 {
 	m_ui->setupUi(this);
+	setUpGraphicsView();
 
 	m_ui->urlLine->setText(urlStr);
 	m_ui->tokenLine->setText(tokenStr);
@@ -139,12 +142,17 @@ void DlgDocumentService::callServiceInfo(void)
 			ServiceInfoResp siResp(
 			    ServiceInfoResp::fromJson(response, &ok));
 			if (!ok || !siResp.isValid()) {
+				QMessageBox::critical(this,
+				    tr("Communication Error"),
+				    tr("Received invalid response."));
 				return;
 			}
 
 			setResponseContent(siResp.logoSvg(), siResp.name(),
 			    siResp.tokenName());
 		} else {
+			QMessageBox::critical(this, tr("Communication Error"),
+			    tr("Received empty response."));
 			return;
 		}
 	} else {
@@ -168,6 +176,61 @@ void DlgDocumentService::notifyCommunicationError(const QString &errMsg)
 	QMessageBox::critical(this, tr("Communication Error"), errMsg);
 }
 
+void DlgDocumentService::setUpGraphicsView(void)
+{
+	QGraphicsView *gv = m_ui->graphicsView;
+
+	gv->resize(100, m_ui->graphicsView->height());
+
+	gv->setScene(new (std::nothrow) QGraphicsScene(this));
+	gv->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+	gv->setDragMode(QGraphicsView::ScrollHandDrag);
+	gv->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+
+	// Prepare background check-board pattern
+	QPixmap tilePixmap(64, 64);
+	tilePixmap.fill(Qt::white);
+	QPainter tilePainter(&tilePixmap);
+	QColor color(220, 220, 220);
+	tilePainter.fillRect(0, 0, 32, 32, color);
+	tilePainter.fillRect(32, 32, 32, 32, color);
+	tilePainter.end();
+
+	gv->setBackgroundBrush(tilePixmap);
+}
+
+void DlgDocumentService::displaySvg(const QByteArray &svgData)
+{
+	if (svgData.isEmpty()) {
+		return;
+	}
+
+	QGraphicsView *gv = m_ui->graphicsView;
+	QGraphicsScene *s = m_ui->graphicsView->scene();
+
+	QGraphicsSvgItem *svgItem = new (std::nothrow) QGraphicsSvgItem();
+	{
+		QSvgRenderer *svgRenderer = new (std::nothrow) QSvgRenderer(svgData, this);
+		svgItem->setSharedRenderer(svgRenderer);
+	}
+
+	s->clear();
+	gv->resetTransform();
+
+	svgItem->setFlags(QGraphicsItem::ItemClipsToShape);
+	svgItem->setCacheMode(QGraphicsItem::NoCache);
+	svgItem->setZValue(0);
+
+	QGraphicsRectItem *backgroundItem = new (std::nothrow) QGraphicsRectItem(svgItem->boundingRect());
+	backgroundItem->setBrush(Qt::white);
+	backgroundItem->setPen(Qt::NoPen);
+	backgroundItem->setVisible(false);
+	backgroundItem->setZValue(-1);
+
+	s->addItem(backgroundItem);
+	s->addItem(svgItem);
+}
+
 void DlgDocumentService::loadStoredServiceInfo(void)
 {
 	if (Q_NULLPTR == globDocumentServiceDbPtr) {
@@ -186,8 +249,7 @@ void DlgDocumentService::loadStoredServiceInfo(void)
 void DlgDocumentService::setResponseContent(const QByteArray &logoSvg,
     const QString &name, const QString &tokenName)
 {
-	/* TODO -- Set SVG. */
-
+	displaySvg(logoSvg);
 	m_ui->nameLine->setText(name);
 	m_ui->tokenNameLine->setText(tokenName);
 }
