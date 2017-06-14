@@ -53,10 +53,17 @@ private:
 
 public:
 	/*!
-	 * @Brief Destructor.
+	 * @brief Destructor.
 	 */
 	~DlgDocumentService(void);
 
+	/*!
+	 * @brief Update document service settings.
+	 *
+	 * @param[in] docSrvcSettings Settings structure to be modified.
+	 * @param[in] parent Window parent widget.
+	 * @return True when data have been updated, false else.
+	 */
 	static
 	bool updateSettings(DocumentServiceSettings &docSrvcSettings,
 	    QWidget *parent = Q_NULLPTR);
@@ -115,6 +122,7 @@ private:
 	Ui::DlgDocumentService *m_ui; /*!< UI generated from UI file. */
 
 	DocumentServiceConnection m_dsc; /*!< Connection to document service. */
+	QByteArray m_logoSvg; /*!< Raw SVG data. */
 };
 
 #endif /* _DLG_DOCUMENT_SERVICE_H_ */

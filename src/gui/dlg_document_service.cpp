@@ -50,7 +50,8 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
     const QString &tokenStr, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgDocumentService),
-    m_dsc(false, this)
+    m_dsc(false, this),
+    m_logoSvg()
 {
 	m_ui->setupUi(this);
 	setUpGraphicsView();
@@ -97,22 +98,34 @@ bool DlgDocumentService::updateSettings(
 		return false;
 	}
 
-	DocumentServiceDb::ServiceInfoEntry entry(
-	    globDocumentServiceDbPtr->serviceInfo());
-
 	DlgDocumentService dlg(docSrvcSettings.url, docSrvcSettings.token,
 	    parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return false;
 	}
 
-	if ((docSrvcSettings.url == dlg.m_ui->urlLine->text()) &&
-	    (docSrvcSettings.token == dlg.m_ui->tokenLine->text())) {
-		/* No change. */
-		return false;
+	if (!docSrvcSettings.url.isEmpty()) {
+		Q_ASSERT(!docSrvcSettings.token.isEmpty());
+
+		/* Update entry. */
+		DocumentServiceDb::ServiceInfoEntry entry;
+		entry.url = dlg.m_ui->urlLine->text();
+		entry.name = dlg.m_ui->nameLine->text();
+		entry.tokenName = dlg.m_ui->tokenNameLine->text();
+		entry.logoSvg = dlg.m_logoSvg;
+		globDocumentServiceDbPtr->updateServiceInfo(entry);
+
+		if (docSrvcSettings.url != dlg.m_ui->urlLine->text()) {
+			/* Erase all message-related data as URL has changed. */
+			/* TODO */
+		}
+	} else {
+		Q_ASSERT(docSrvcSettings.token.isEmpty());
+
+		globDocumentServiceDbPtr->deleteAllEntries();
 	}
 
-	/* Save changes. */
+	/* Save changes to settings. */
 	docSrvcSettings.url = dlg.m_ui->urlLine->text();
 	docSrvcSettings.token = dlg.m_ui->tokenLine->text();
 
@@ -169,6 +182,7 @@ void DlgDocumentService::eraseContent(void)
 	m_ui->tokenLine->setText(QString());
 
 	setUpGraphicsView();
+	m_logoSvg = QByteArray();
 	m_ui->nameLine->setText(QString());
 	m_ui->tokenNameLine->setText(QString());
 
@@ -254,6 +268,7 @@ void DlgDocumentService::setResponseContent(const QByteArray &logoSvg,
     const QString &name, const QString &tokenName)
 {
 	displaySvg(logoSvg);
+	m_logoSvg = logoSvg;
 	m_ui->nameLine->setText(name);
 	m_ui->tokenNameLine->setText(tokenName);
 }
