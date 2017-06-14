@@ -168,6 +168,10 @@ void DlgDocumentService::eraseContent(void)
 	m_ui->urlLine->setText(QString());
 	m_ui->tokenLine->setText(QString());
 
+	setUpGraphicsView();
+	m_ui->nameLine->setText(QString());
+	m_ui->tokenNameLine->setText(QString());
+
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 }
 
@@ -180,14 +184,14 @@ void DlgDocumentService::setUpGraphicsView(void)
 {
 	QGraphicsView *gv = m_ui->graphicsView;
 
-	gv->resize(100, m_ui->graphicsView->height());
+//	gv->resize(100, m_ui->graphicsView->height());
 
 	gv->setScene(new (std::nothrow) QGraphicsScene(this));
 	gv->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
 	gv->setDragMode(QGraphicsView::ScrollHandDrag);
 	gv->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
-	// Prepare background check-board pattern
+	/* Prepare background check-board pattern. */
 	QPixmap tilePixmap(64, 64);
 	tilePixmap.fill(Qt::white);
 	QPainter tilePainter(&tilePixmap);
