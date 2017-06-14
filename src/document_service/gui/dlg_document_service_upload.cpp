@@ -32,6 +32,7 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(QWidget *parent)
     m_dsc(IGNORE_SSL_ERRORS, this)
 {
 	m_ui->setupUi(this);
+	setWindowTitle(tr("Upload Message into Document Service"));
 }
 
 DlgDocumentServiceUpload::~DlgDocumentServiceUpload(void)

@@ -56,6 +56,7 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
     m_logoSvg()
 {
 	m_ui->setupUi(this);
+	setWindowTitle(tr("Document Service Settings"));
 	setUpGraphicsView();
 
 	m_ui->urlLine->setText(urlStr);

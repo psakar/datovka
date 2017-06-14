@@ -269,6 +269,9 @@ SOURCES += \
     src/document_service/io/document_service_connection.cpp \
     src/document_service/json/helper.cpp \
     src/document_service/json/service_info.cpp \
+    src/document_service/json/upload_hierarchy.cpp \
+    src/document_service/models/upload_hierarchy_model.cpp \
+    src/document_service/models/upload_hierarchy_proxy_model.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -383,6 +386,9 @@ HEADERS += \
     src/document_service/io/document_service_connection.h \
     src/document_service/json/helper.h \
     src/document_service/json/service_info.h \
+    src/document_service/json/upload_hierarchy.h \
+    src/document_service/models/upload_hierarchy_model.h \
+    src/document_service/models/upload_hierarchy_proxy_model.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \
