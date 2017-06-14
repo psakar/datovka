@@ -581,6 +581,11 @@ private slots:
 	void openDeliveryInfoExternally(void);
 
 	/*!
+	 * @brief Upload message into document service.
+	 */
+	void uploadSelectedMessageToDocumentService(void);
+
+	/*!
 	 * @brief Search data box dialog.
 	 */
 	void findDatabox(void);

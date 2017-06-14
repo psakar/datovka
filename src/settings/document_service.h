@@ -51,6 +51,13 @@ public:
 	 */
 	void saveToSettings(QSettings &settings) const;
 
+	/*!
+	 * @brief Test whether document service is set.
+	 *
+	 * @return True is URL and token are set.
+	 */
+	bool isSet(void) const;
+
 	QString url; /*!< Service URL. */
 	QString token; /*!< Service access token. */
 };

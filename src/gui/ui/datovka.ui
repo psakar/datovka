@@ -417,6 +417,8 @@ sent reply on this message</string>
     <addaction name="actionOpen_message_externally"/>
     <addaction name="actionOpen_delivery_info_externally"/>
     <addaction name="separator"/>
+    <addaction name="actionUpload_to_document_service"/>
+    <addaction name="separator"/>
     <addaction name="actionExport_as_ZFO"/>
     <addaction name="actionExport_delivery_info_as_ZFO"/>
     <addaction name="actionExport_delivery_info_as_PDF"/>
@@ -1233,6 +1235,15 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Document service settings</string>
+   </property>
+  </action>
+  <action name="actionUpload_to_document_service">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
+   </property>
+   <property name="text">
+    <string>Upload to document service</string>
    </property>
   </action>
  </widget>

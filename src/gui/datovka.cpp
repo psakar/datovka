@@ -46,6 +46,7 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
+#include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -1308,6 +1309,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addSeparator();
 		menu->addAction(ui->actionOpen_message_externally);
 		menu->addAction(ui->actionOpen_delivery_info_externally);
+		menu->addSeparator();
+		menu->addAction(ui->actionUpload_to_document_service);
 		menu->addSeparator();
 	}
 	menu->addAction(ui->actionExport_as_ZFO);
@@ -4256,6 +4259,9 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()),
 	    this, SLOT(openDeliveryInfoExternally()));
 	    /* Separator. */
+	connect(ui->actionUpload_to_document_service, SIGNAL(triggered()),
+	    this, SLOT(uploadSelectedMessageToDocumentService()));
+	    /* Separator. */
 	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()),
 	    this, SLOT(exportSelectedMessagesAsZFO()));
 	connect(ui->actionExport_delivery_info_as_ZFO, SIGNAL(triggered()),
@@ -4398,6 +4404,9 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	    /* Separator. */
 	ui->actionOpen_message_externally->setEnabled(numSelected == 1);
 	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
+	    /* Separator. */
+	ui->actionUpload_to_document_service->setEnabled(
+	    (numSelected == 1) && globDocumentServiceSet.isSet());
 	    /* Separator. */
 	ui->actionExport_as_ZFO->setEnabled(numSelected > 0);
 	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
@@ -6966,6 +6975,74 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 }
 
+void MainWindow::uploadSelectedMessageToDocumentService(void)
+{
+	debugSlotCall();
+
+	QModelIndex msgIndex;
+	{
+		QModelIndexList msgIndexes(currentFrstColMessageIndexes());
+
+		if (msgIndexes.size() != 1) {
+			/* Do nothing when multiple messages selected. */
+			return;
+		}
+
+		msgIndex = msgIndexes.first();
+	}
+
+	if (!msgIndex.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb::MsgId msgId(msgMsgId(msgIndex));
+	Q_ASSERT(msgId.dmId >= 0);
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (Q_NULLPTR == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
+	if (Q_NULLPTR == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QByteArray msgRaw(messageDb->msgsMessageRaw(msgId.dmId));
+	if (msgRaw.isEmpty()) {
+
+		if (!messageMissingOfferDownload(msgId,
+		        tr("Message export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
+		if (Q_NULLPTR == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL(
+			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
+			    msgId.dmId);
+			return;
+		}
+
+		msgRaw = messageDb->msgsMessageRaw(msgId.dmId);
+		if (msgRaw.isEmpty()) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	/* Generate upload into data service dialogue. */
+	DlgDocumentServiceUpload::uploadMessage(globDocumentServiceSet, this);
+}
+
 void MainWindow::showSignatureDetailsDialog(void)
 {
 	debugSlotCall();
@@ -8495,6 +8572,8 @@ void MainWindow::setMenuActionIcons(void)
 	    /* Separator. */
 	ui->actionOpen_message_externally->isEnabled();
 	ui->actionOpen_delivery_info_externally->isEnabled();
+	    /* Separator. */
+	ui->actionUpload_to_document_service->isEnabled();
 	    /* Separator. */
 	ui->actionExport_as_ZFO->isEnabled();
 	ui->actionExport_delivery_info_as_ZFO->isEnabled();

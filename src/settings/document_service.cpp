@@ -62,3 +62,8 @@ void DocumentServiceSettings::saveToSettings(QSettings &settings) const
 		settings.endGroup();
 	}
 }
+
+bool DocumentServiceSettings::isSet(void) const
+{
+	return !url.isEmpty() && !token.isEmpty();
+}
