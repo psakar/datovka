@@ -264,12 +264,14 @@ SOURCES += \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
+    src/document_service/conversion.cpp \
     src/document_service/gui/dlg_document_service.cpp \
     src/document_service/gui/dlg_document_service_upload.cpp \
     src/document_service/io/document_service_connection.cpp \
     src/document_service/json/entry_error.cpp \
     src/document_service/json/helper.cpp \
     src/document_service/json/service_info.cpp \
+    src/document_service/json/stored_files.cpp \
     src/document_service/json/upload_file.cpp \
     src/document_service/json/upload_hierarchy.cpp \
     src/document_service/models/upload_hierarchy_model.cpp \
@@ -383,12 +385,14 @@ HEADERS += \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
+    src/document_service/conversion.h \
     src/document_service/gui/dlg_document_service.h \
     src/document_service/gui/dlg_document_service_upload.h \
     src/document_service/io/document_service_connection.h \
     src/document_service/json/entry_error.h \
     src/document_service/json/helper.h \
     src/document_service/json/service_info.h \
+    src/document_service/json/stored_files.h \
     src/document_service/json/upload_file.h \
     src/document_service/json/upload_hierarchy.h \
     src/document_service/models/upload_hierarchy_model.h \
