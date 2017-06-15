@@ -45,12 +45,13 @@ private:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] urlStr String containing service location URL.
 	 * @param[in] tokenStr String containing service token.
+	 * @param[in] docSrvcSettings Settings containing URL and token.
+	 * @param[in] dmId Message identifier.
 	 * @param[in] parent Parent widget.
 	 */
 	explicit DlgDocumentServiceUpload(const QString &urlStr,
-	    const QString &tokenStr, QWidget *parent = Q_NULLPTR);
+	    const QString &tokenStr, qint64 dmId, QWidget *parent = Q_NULLPTR);
 
 public:
 	/*!
@@ -62,6 +63,7 @@ public:
 	 * @brief Update document service settings.
 	 *
 	 * @param[in] docSrvcSettings Settings containing URL and token.
+	 * @param[in] dmId Message identifier.
 	 * @param[in] msgFileName Message file name.
 	 * @param[in] msgData Message data.
 	 * @param[in] parent Window parent widget.
@@ -69,7 +71,7 @@ public:
 	 */
 	static
 	bool uploadMessage(const DocumentServiceSettings &docSrvcSettings,
-	    const QString &msgFileName, const QByteArray &msgData,
+	    qint64 dmId, const QString &msgFileName, const QByteArray &msgData,
 	    QWidget *parent = Q_NULLPTR);
 
 private slots:
@@ -103,13 +105,14 @@ private:
 	 *
 	 * @param[in,out] dsc Connection object.
 	 * @param[in]     uploadIds Upload location identifiers.
+	 * @param[in]     dmId Message identifier.
 	 * @param[in]     msgFileName Message file name.
 	 * @param[in]     msgData Message data.
 	 * @param[in]     parent Window parent widget.
 	 * @return True on success.
 	 */
 	static
-	bool uploadFile(DocumentServiceConnection &dsc,
+	bool uploadFile(DocumentServiceConnection &dsc, qint64 dmId,
 	    const QStringList &uploadIds, const QString &msgFileName,
 	    const QByteArray &msgData, QWidget *parent = Q_NULLPTR);
 

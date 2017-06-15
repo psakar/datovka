@@ -24,6 +24,7 @@
 #ifndef _ENTRY_ERROR_H_
 #define _ENTRY_ERROR_H_
 
+#include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS() */
 #include <QString>
 
 class QJsonValue; /* Forward declaration. */
@@ -32,6 +33,8 @@ class QJsonValue; /* Forward declaration. */
  * @brief Encapsulates any error entry.
  */
 class ErrorEntry {
+	Q_DECLARE_TR_FUNCTIONS(ErrorEntry)
+
 public:
 	/*!
 	 * @brief Error codes.
@@ -101,6 +104,13 @@ public:
 	 * @return True on success, false else.
 	 */
 	bool toJsonVal(QJsonValue *jsonVal) const;
+
+	/*!
+	 * @brief Returns translated error description.
+	 *
+	 * @return String containing localised description.
+	 */
+	QString trVerbose(void) const;
 
 private:
 	/*!

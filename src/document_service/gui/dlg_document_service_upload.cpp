@@ -21,19 +21,22 @@
  * the two.
  */
 
+#include <cinttypes>
 #include <QMessageBox>
 #include <QString>
 
 #include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/document_service/json/upload_file.h"
 #include "src/document_service/json/upload_hierarchy.h"
+#include "src/io/document_service_db.h"
 #include "src/models/sort_filter_proxy_model.h"
+#include "src/log/log.h"
 #include "ui_dlg_document_service_upload.h"
 
 #define IGNORE_SSL_ERRORS true
 
 DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
-    const QString &tokenStr, QWidget *parent)
+    const QString &tokenStr, qint64 dmId, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgDocumentServiceUpload),
     m_url(urlStr),
@@ -45,6 +48,10 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 {
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Upload Message into Document Service"));
+
+	m_ui->appealLabel->setText(
+	    tr("Select the location where you want to upload the message '%1' into.")
+	        .arg(dmId));
 
 	connect(m_ui->reloadButton, SIGNAL(clicked(bool)),
 	    this, SLOT(callUploadHierarchy()));
@@ -76,8 +83,8 @@ DlgDocumentServiceUpload::~DlgDocumentServiceUpload(void)
 }
 
 bool DlgDocumentServiceUpload::uploadMessage(
-    const DocumentServiceSettings &docSrvcSettings, const QString &msgFileName,
-    const QByteArray &msgData, QWidget *parent)
+    const DocumentServiceSettings &docSrvcSettings, qint64 dmId,
+    const QString &msgFileName, const QByteArray &msgData, QWidget *parent)
 {
 	if (!docSrvcSettings.isSet()) {
 		Q_ASSERT(0);
@@ -89,8 +96,8 @@ bool DlgDocumentServiceUpload::uploadMessage(
 		return false;
 	}
 
-	DlgDocumentServiceUpload dlg(docSrvcSettings.url,
-	    docSrvcSettings.token, parent);
+	DlgDocumentServiceUpload dlg(docSrvcSettings.url, docSrvcSettings.token,
+	    dmId, parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return false;
 	}
@@ -100,7 +107,9 @@ bool DlgDocumentServiceUpload::uploadMessage(
 		return false;
 	}
 
-	return true;
+	/* The connection should be still working. */
+	return uploadFile(dlg.m_dsc, dmId, dlg.m_selectedUploadIds, msgFileName,
+	    msgData, parent);
 }
 
 void DlgDocumentServiceUpload::callUploadHierarchy(void)
@@ -187,8 +196,53 @@ void DlgDocumentServiceUpload::notifyCommunicationError(const QString &errMsg)
 	QMessageBox::critical(this, tr("Communication Error"), errMsg);
 }
 
+/*!
+ * @brief Process upload file service response.
+ *
+ * @note Stores location into database.
+ *
+ * @param[in] ifRes Response structure.
+ * @param[in] dmId Message identifier.
+ * @patam[in] parent Parent window for potential error dialogues.
+ * @return True if response could be processed and location has been saved.
+ */
+static
+bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
+    QWidget *parent = Q_NULLPTR)
+{
+	if (ufRes.id().isEmpty()) {
+		QString errorMessage(
+		    QObject::tr("Message '%s'could not be uploaded.").arg(dmId));
+		errorMessage += QLatin1String("\n");
+		errorMessage += QObject::tr("Received error") +
+		    QLatin1String(": ") + ufRes.error().trVerbose();
+		errorMessage += QLatin1String("\n");
+		errorMessage += ufRes.error().description();
+
+		QMessageBox::critical(parent, QObject::tr("File Upload Error"),
+		    errorMessage);
+		return false;
+	}
+
+	if (!ufRes.locations().isEmpty()) {
+		if (Q_NULLPTR == globDocumentServiceDbPtr) {
+			return globDocumentServiceDbPtr->updateStoredMsg(dmId,
+			    ufRes.locations());
+		} else {
+			Q_ASSERT(0);
+			return true;
+		}
+	} else {
+		logErrorNL(
+		    "Received empty location list when uploading message '%" PRId64 "'.",
+		    dmId);
+	}
+
+	return false;
+}
+
 bool DlgDocumentServiceUpload::uploadFile(DocumentServiceConnection &dsc,
-    const QStringList &uploadIds, const QString &msgFileName,
+    qint64 dmId, const QStringList &uploadIds, const QString &msgFileName,
     const QByteArray &msgData, QWidget *parent)
 {
 	UploadFileReq ufReq(uploadIds, msgFileName, msgData);
@@ -212,8 +266,7 @@ bool DlgDocumentServiceUpload::uploadFile(DocumentServiceConnection &dsc,
 				return false;
 			}
 
-			/* TODO -- Process response. */
-			return true;
+			return processUploadFileResponse(ufRes, dmId, parent);
 		} else {
 			QMessageBox::critical(parent, tr("Communication Error"),
 			    tr("Received empty response."));

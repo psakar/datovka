@@ -126,6 +126,46 @@ bool ErrorEntry::toJsonVal(QJsonValue *jsonVal) const
 	return true;
 }
 
+QString ErrorEntry::trVerbose(void) const
+{
+	QString retStr(codeToString(m_code) + QLatin1String(" ("));
+	QString explanation;
+
+	switch (m_code) {
+	case ERR_NO_ERROR:
+		explanation = tr("No error occurred");
+		break;
+	case ERR_MALFORMED_REQUEST:
+		explanation = tr("Request was malformed");
+		break;
+	case ERR_MISSING_IDENTIFIER:
+		explanation = tr("Identifier is missing");
+		break;
+	case ERR_WRONG_IDENTIFIER:
+		explanation = tr("Supplied identifier is wrong");
+		break;
+	case ERR_UNSUPPORTED_FILE_FORMAT:
+		explanation = tr("File format is not supported");
+		break;
+	case ERR_ALREADY_PRESENT:
+		explanation = tr("Data are already present");
+		break;
+	case ERR_LIMIT_EXCEEDED:
+		explanation = tr("Service limit was exceeded");
+		break;
+	case ERR_UNSPECIFIED:
+		explanation = tr("Unspecified error");
+		break;
+	default:
+		Q_ASSERT(0);
+		explanation = tr("Unknown error");
+		break;
+	}
+
+	retStr += QLatin1String(") ") + explanation;
+	return retStr;
+}
+
 const QString &ErrorEntry::codeToString(enum Code code)
 {
 	switch (code) {
