@@ -73,7 +73,10 @@ bool deleteTableContent(QSqlDatabase &db, const QString &tblName)
 
 bool DocumentServiceDb::deleteAllEntries(void)
 {
-	return deleteTableContent(m_db, QStringLiteral("service_info"));
+	deleteTableContent(m_db, QStringLiteral("service_info"));
+	deleteTableContent(m_db, QStringLiteral("stored_files_messages"));
+
+	return true;
 }
 
 /*!
@@ -178,11 +181,92 @@ DocumentServiceDb::ServiceInfoEntry DocumentServiceDb::serviceInfo(void) const
 	}
 }
 
+bool DocumentServiceDb::deleteStoredMsg(qint64 dmId)
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "DELETE FROM stored_files_messages "
+	    "WHERE dm_id = :dm_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+	query.bindValue(":dm_id", dmId);
+	if (!query.exec()) {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return true;
+}
+
+#define LIST_SEPARATOR QLatin1String("^")
+
+bool DocumentServiceDb::updateStoredMsg(qint64 dmId,
+    const QStringList &locations)
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "INSERT OR REPLACE INTO stored_files_messages "
+	    "(dm_id, separator, joined_locations) VALUES "
+	    "(:dm_id, :separator, :joined_locations)";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	query.bindValue(":dm_id", dmId);
+	query.bindValue(":separator", LIST_SEPARATOR);
+	query.bindValue(":joined_locations", locations.join(LIST_SEPARATOR));
+
+	if (!query.exec()) {
+		logErrorNL("Cannot exec SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return false;
+	}
+
+	return true;
+}
+
+#undef LIST_SEPARATOR
+
+QStringList DocumentServiceDb::storedMsgLocations(qint64 dmId) const
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr = "SELECT separator, joined_locations "
+	    "FROM stored_files_messages WHERE dm_id = :dm_id";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return QStringList();
+	}
+	query.bindValue(":dm_id", dmId);
+	if (query.exec() && query.isActive()) {
+		query.first();
+		if (query.isValid()) {
+			QString separator(query.value(0).toString());
+			return query.value(1).toString().split(separator);
+		} else {
+			return QStringList();
+		}
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return QStringList();
+	}
+}
+
 QList<class SQLiteTbl *> DocumentServiceDb::listOfTables(void)
 {
 	static QList<class SQLiteTbl *> tables;
 	if (tables.isEmpty()) {
 		tables.append(&srvcInfTbl);
+		tables.append(&strdFlsMsgsTbl);
 	}
 	return tables;
 }

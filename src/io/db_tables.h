@@ -57,5 +57,6 @@ extern SQLiteTbl msgtagsTbl; /*!< Table 'message_tags'. */
  * Document service database.
  */
 extern SQLiteTbl srvcInfTbl; /*!< Table 'service_info'. */
+extern SQLiteTbl strdFlsMsgsTbl; /*!< Table 'stored_files_messages'. */
 
 #endif /* _DB_TABLES_H_ */

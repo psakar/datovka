@@ -97,6 +97,31 @@ public:
 	 */
 	ServiceInfoEntry serviceInfo(void) const;
 
+	/*!
+	 * @brief Deletes stored locations for given message.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @return True on success.
+	 */
+	bool deleteStoredMsg(qint64 dmId);
+
+	/*!
+	 * @brief Inserts or replaces stored locations for given message.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @param[in] locations List of locations to be stored.
+	 * @return True on success.
+	 */
+	bool updateStoredMsg(qint64 dmId, const QStringList &locations);
+
+	/*!
+	 * @brief Reads stored location or given message.
+	 *
+	 * @param[in] dmId Message identifier.
+	 * @return List of locations, empty list on error.
+	 */
+	QStringList storedMsgLocations(qint64 dmId) const;
+
 private:
 	/*!
 	 * @brief Returns list of tables.

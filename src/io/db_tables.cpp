@@ -713,3 +713,36 @@ namespace SrvcInfTbl {
 SQLiteTbl srvcInfTbl(SrvcInfTbl::tabName, SrvcInfTbl::knownAttrs,
     SrvcInfTbl::attrProps, SrvcInfTbl::colConstraints,
     SrvcInfTbl::tblConstraint);
+
+namespace StrdFlsMsgsTbls {
+	const QString tabName("stored_files_messages");
+
+	const QVector< QPair<QString, enum EntryType> > knownAttrs = {
+	{"dm_id", DB_INTEGER}, /* NOT NULL */
+	{"separator", DB_TEXT}, /* NOT NULL */
+	{"joined_locations", DB_TEXT} /* NOT NULL */
+	/*
+	 *  PRIMARY KEY (dm_id)
+	 */
+	};
+
+	const QMap<QString, QString> colConstraints = {
+	    {"dm_id", "NOT NULL"},
+	    {"separator", "NOT NULL"},
+	    {"joined_locations", "NOT NULL"}
+	};
+
+	const QString tblConstraint(
+	    ",\n"
+	    "        PRIMARY KEY (dm_id)"
+	);
+
+	const QMap<QString, SQLiteTbl::AttrProp> attrProps = {
+	{"dm_id",            {DB_INTEGER, ""}},
+	{"separator",        {DB_TEXT, ""}},
+	{"joined_locations", {DB_TEXT, ""}}
+	};
+} /* namespace StrdFlsMsgsTbls */
+SQLiteTbl strdFlsMsgsTbl(StrdFlsMsgsTbls::tabName, StrdFlsMsgsTbls::knownAttrs,
+    StrdFlsMsgsTbls::attrProps, StrdFlsMsgsTbls::colConstraints,
+    StrdFlsMsgsTbls::tblConstraint);
