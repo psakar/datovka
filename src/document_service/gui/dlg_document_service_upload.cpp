@@ -212,7 +212,8 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 {
 	if (ufRes.id().isEmpty()) {
 		QString errorMessage(
-		    QObject::tr("Message '%s'could not be uploaded.").arg(dmId));
+		    QObject::tr("Message '%1' could not be uploaded.")
+		        .arg(dmId));
 		errorMessage += QLatin1String("\n");
 		errorMessage += QObject::tr("Received error") +
 		    QLatin1String(": ") + ufRes.error().trVerbose();
@@ -263,6 +264,8 @@ bool DlgDocumentServiceUpload::uploadFile(DocumentServiceConnection &dsc,
 				QMessageBox::critical(parent,
 				    tr("Communication Error"),
 				    tr("Received invalid response."));
+				logErrorNL("Received invalid response '%s'.",
+				    QString(response).toUtf8().constData());
 				return false;
 			}
 
