@@ -120,7 +120,7 @@ bool DlgDocumentService::updateSettings(
 
 		if (docSrvcSettings.url != dlg.m_ui->urlLine->text()) {
 			/* Erase all message-related data as URL has changed. */
-			/* TODO */
+			globDocumentServiceDbPtr->deleteAllStoredMsg();
 		}
 	} else {
 		Q_ASSERT(docSrvcSettings.token.isEmpty());

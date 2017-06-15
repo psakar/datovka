@@ -98,6 +98,13 @@ public:
 	ServiceInfoEntry serviceInfo(void) const;
 
 	/*!
+	 * @brief Deletes all message-related data.
+	 *
+	 * @return True on success.
+	 */
+	bool deleteAllStoredMsg(void);
+
+	/*!
 	 * @brief Deletes stored locations for given message.
 	 *
 	 * @param[in] dmId Message identifier.

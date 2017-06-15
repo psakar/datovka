@@ -181,6 +181,12 @@ DocumentServiceDb::ServiceInfoEntry DocumentServiceDb::serviceInfo(void) const
 	}
 }
 
+bool DocumentServiceDb::deleteAllStoredMsg(void)
+{
+	return deleteTableContent(m_db,
+	    QStringLiteral("stored_files_messages"));
+}
+
 bool DocumentServiceDb::deleteStoredMsg(qint64 dmId)
 {
 	QSqlQuery query(m_db);
