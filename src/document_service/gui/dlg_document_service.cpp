@@ -107,12 +107,12 @@ bool DlgDocumentService::updateSettings(
 		return false;
 	}
 
-	if (!docSrvcSettings.url.isEmpty()) {
-		Q_ASSERT(!docSrvcSettings.token.isEmpty());
+	if (!dlg.m_ui->urlLine->text().trimmed().isEmpty()) {
+		Q_ASSERT(!dlg.m_ui->tokenLine->text().trimmed().isEmpty());
 
 		/* Update entry. */
 		DocumentServiceDb::ServiceInfoEntry entry;
-		entry.url = dlg.m_ui->urlLine->text();
+		entry.url = dlg.m_ui->urlLine->text().trimmed();
 		entry.name = dlg.m_ui->nameLine->text();
 		entry.tokenName = dlg.m_ui->tokenNameLine->text();
 		entry.logoSvg = dlg.m_logoSvg;
