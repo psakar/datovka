@@ -7040,7 +7040,8 @@ void MainWindow::uploadSelectedMessageToDocumentService(void)
 	}
 
 	/* Generate upload into data service dialogue. */
-	DlgDocumentServiceUpload::uploadMessage(globDocumentServiceSet, this);
+	DlgDocumentServiceUpload::uploadMessage(globDocumentServiceSet,
+	    QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
 }
 
 void MainWindow::showSignatureDetailsDialog(void)

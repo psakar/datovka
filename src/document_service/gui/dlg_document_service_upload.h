@@ -62,11 +62,14 @@ public:
 	 * @brief Update document service settings.
 	 *
 	 * @param[in] docSrvcSettings Settings containing URL and token.
+	 * @param[in] msgFileName Message file name.
+	 * @param[in] msgData Message data.
 	 * @param[in] parent Window parent widget.
 	 * @return True when data have been updated, false else.
 	 */
 	static
 	bool uploadMessage(const DocumentServiceSettings &docSrvcSettings,
+	    const QString &msgFileName, const QByteArray &msgData,
 	    QWidget *parent = Q_NULLPTR);
 
 private slots:
@@ -95,6 +98,20 @@ private slots:
 	void notifyCommunicationError(const QString &errMsg);
 
 private:
+	/*!
+	 * @brief Upload file into document service.
+	 *
+	 * @param[in,out] dsc Connection object.
+	 * @param[in]     uploadIds Upload location identifiers.
+	 * @param[in]     msgFileName Message file name.
+	 * @param[in]     msgData Message data.
+	 * @param[in]     parent Window parent widget.
+	 * @return True on success.
+	 */
+	static
+	bool uploadFile(DocumentServiceConnection &dsc,
+	    const QStringList &uploadIds, const QString &msgFileName,
+	    const QByteArray &msgData, QWidget *parent = Q_NULLPTR);
 
 	Ui::DlgDocumentServiceUpload *m_ui; /*!< UI generated from UI file. */
 

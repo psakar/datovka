@@ -25,6 +25,7 @@
 #include <QString>
 
 #include "src/document_service/gui/dlg_document_service_upload.h"
+#include "src/document_service/json/upload_file.h"
 #include "src/document_service/json/upload_hierarchy.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "ui_dlg_document_service_upload.h"
@@ -64,6 +65,9 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 
 	connect(&m_dsc, SIGNAL(connectionError(QString)),
 	    this, SLOT(notifyCommunicationError(QString)));
+
+	/* Dialogue window is not shown now so using parent instead. */
+	callUploadHierarchy();
 }
 
 DlgDocumentServiceUpload::~DlgDocumentServiceUpload(void)
@@ -72,17 +76,29 @@ DlgDocumentServiceUpload::~DlgDocumentServiceUpload(void)
 }
 
 bool DlgDocumentServiceUpload::uploadMessage(
-    const DocumentServiceSettings &docSrvcSettings, QWidget *parent)
+    const DocumentServiceSettings &docSrvcSettings, const QString &msgFileName,
+    const QByteArray &msgData, QWidget *parent)
 {
 	if (!docSrvcSettings.isSet()) {
 		Q_ASSERT(0);
 		return false;
 	}
 
+	if (msgFileName.isEmpty() || msgData.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
 	DlgDocumentServiceUpload dlg(docSrvcSettings.url,
 	    docSrvcSettings.token, parent);
-	dlg.callUploadHierarchy();
-	dlg.exec();
+	if (QDialog::Accepted != dlg.exec()) {
+		return false;
+	}
+
+	if (dlg.m_selectedUploadIds.isEmpty()) {
+		Q_ASSERT(0);
+		return false;
+	}
 
 	return true;
 }
@@ -169,4 +185,41 @@ void DlgDocumentServiceUpload::uploadHierarchySelectionChanged(void)
 void DlgDocumentServiceUpload::notifyCommunicationError(const QString &errMsg)
 {
 	QMessageBox::critical(this, tr("Communication Error"), errMsg);
+}
+
+bool DlgDocumentServiceUpload::uploadFile(DocumentServiceConnection &dsc,
+    const QStringList &uploadIds, const QString &msgFileName,
+    const QByteArray &msgData, QWidget *parent)
+{
+	UploadFileReq ufReq(uploadIds, msgFileName, msgData);
+	if (!ufReq.isValid()) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	QByteArray response;
+
+	if (dsc.communicate(DocumentServiceConnection::SRVC_UPLOAD_FILE,
+	        ufReq.toJson(), response)) {
+		if (!response.isEmpty()) {
+			bool ok = false;
+			UploadFileResp ufRes(
+			    UploadFileResp::fromJson(response, &ok));
+			if (!ok || !ufRes.isValid()) {
+				QMessageBox::critical(parent,
+				    tr("Communication Error"),
+				    tr("Received invalid response."));
+				return false;
+			}
+
+			/* TODO -- Process response. */
+			return true;
+		} else {
+			QMessageBox::critical(parent, tr("Communication Error"),
+			    tr("Received empty response."));
+			return false;
+		}
+	} else {
+		return false;
+	}
 }
