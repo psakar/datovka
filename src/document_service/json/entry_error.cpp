@@ -162,7 +162,7 @@ QString ErrorEntry::trVerbose(void) const
 		break;
 	}
 
-	retStr += QLatin1String(") ") + explanation;
+	retStr += explanation + QLatin1String(")");
 	return retStr;
 }
 
