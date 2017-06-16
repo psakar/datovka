@@ -460,17 +460,8 @@ StoredFilesResp StoredFilesResp::fromJson(const QByteArray &json, bool *ok)
 		return StoredFilesResp();
 	}
 	{
-		QString limitStr;
-		if (!JsonHelper::readString(jsonObj, keyLimit, limitStr,
+		if (!JsonHelper::readInt(jsonObj, keyLimit, sfr.m_limit,
 		        false)) {
-			if (ok != Q_NULLPTR) {
-				*ok = false;
-			}
-			return StoredFilesResp();
-		}
-		bool iOk = false;
-		sfr.m_limit = limitStr.toInt(&iOk);
-		if (!iOk) {
 			if (ok != Q_NULLPTR) {
 				*ok = false;
 			}
@@ -499,6 +490,9 @@ StoredFilesResp StoredFilesResp::fromJson(const QByteArray &json, bool *ok)
 		}
 	}
 
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
 	return sfr;
 }
 

@@ -63,6 +63,19 @@ public:
 	    QJsonValue &jsonVal);
 
 	/*!
+	 * @brief Reads an integer value from supplied JSON object.
+	 *
+	 * @param[in]  jsonObj JSON object.
+	 * @param[in]  key Key identifying the string.
+	 * @param[out] val Value to be stored.
+	 * @param[in]  acceptNull True if null value should also be accepted.
+	 * @return True on success, false else.
+	 */
+	static
+	bool readInt(const QJsonObject &jsonObj, const QString &key,
+	    int &val, bool acceptNull);
+
+	/*!
 	 * @brief Reads a string value from supplied JSON object.
 	 *
 	 * @param[in]  jsonObj JSON object.

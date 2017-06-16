@@ -73,6 +73,28 @@ bool JsonHelper::readValue(const QJsonObject &jsonObj, const QString &key,
 	return true;
 }
 
+bool JsonHelper::readInt(const QJsonObject &jsonObj, const QString &key,
+    int &val, bool acceptNull)
+{
+	QJsonValue jsonVal;
+	if (!readValue(jsonObj, key, jsonVal)) {
+		return false;
+	}
+	if (jsonVal.isNull()) {
+		val = 0; /* Null value. */
+		return acceptNull;
+	}
+	int readVal = jsonVal.toInt(-1);
+	if (readVal == -1) {
+		qCritical("Value related to key '%s' is not an integer.",
+		    key.toUtf8().constData());
+		return false;
+	}
+
+	val = readVal;
+	return true;
+}
+
 bool JsonHelper::readString(const QJsonObject &jsonObj, const QString &key,
     QString &val, bool acceptNull)
 {
