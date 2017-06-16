@@ -25,6 +25,7 @@
 #define _TASK_DOCUMENT_SERVICE_DOWNLOAD_STORED_MESSAGES_H_
 
 #include <QList>
+#include <QString>
 
 #include "src/document_service/io/document_service_connection.h"
 #include "src/io/document_service_db.h"
@@ -64,9 +65,11 @@ public:
 private:
 	static
 	enum Result downloadStoredMessages(MessageDbSet *dbSet,
-	    DocumentServiceConnection &dsc, const QList<qint64> &exludedDmIds);
+	    const QString &urlStr, const QString &tokenStr,
+	    const QList<qint64> &exludedDmIds);
 
-	DocumentServiceConnection m_dsc; /*!< Connection to document service. */
+	const QString m_url;
+	const QString m_token;
 
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	const QList<qint64> m_exludedDmIds; /*!<

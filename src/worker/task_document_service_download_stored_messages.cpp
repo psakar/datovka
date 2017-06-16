@@ -21,9 +21,11 @@
  * the two.
  */
 
+#include <QByteArray>
 #include <QSet>
 #include <QThread>
 
+#include "src/document_service/json/stored_files.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_document_service_download_stored_messages.h"
@@ -34,14 +36,13 @@ TaskDocumentServiceDownloadStoredMessages::TaskDocumentServiceDownloadStoredMess
     const QString &urlStr, const QString &tokenStr, MessageDbSet *dbSet,
     const QList<qint64> &exludedDmIds)
     : m_result(DS_DSM_ERR),
-    m_dsc(IGNORE_SSL_ERRORS),
+    m_url(urlStr),
+    m_token(tokenStr),
     m_dbSet(dbSet),
     m_exludedDmIds(exludedDmIds)
 {
-	Q_ASSERT(!urlStr.isEmpty() && !tokenStr.isEmpty());
+	Q_ASSERT(!m_url.isEmpty() && !m_token.isEmpty());
 	Q_ASSERT(Q_NULLPTR != m_dbSet);
-
-	m_dsc.setConnection(urlStr, tokenStr);
 }
 
 void TaskDocumentServiceDownloadStoredMessages::run(void)
@@ -51,12 +52,18 @@ void TaskDocumentServiceDownloadStoredMessages::run(void)
 		return;
 	}
 
+	if (m_url.isEmpty() || m_token.isEmpty()) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	logDebugLv0NL("Starting download stored messages from service info in thread '%p'",
 	    (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
 
-	m_result = downloadStoredMessages(m_dbSet, m_dsc, m_exludedDmIds);
+	m_result = downloadStoredMessages(m_dbSet, m_url, m_token,
+	    m_exludedDmIds);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
 
@@ -86,17 +93,75 @@ QList<qint64> obtainDmIds(MessageDbSet *dbSet,
 }
 
 static
+int callStoredFiles(DocumentServiceConnection &dsc, const QList<qint64> &dmIds)
+{
+	if (dmIds.isEmpty()) {
+		Q_ASSERT(0);
+		return -1;
+	}
+
+	StoredFilesReq sfReq(dmIds, QList<qint64>());
+	if (!sfReq.isValid()) {
+		logErrorNL("%s", "Could not create stored_files request.");
+	}
+
+	QByteArray response;
+
+	if (dsc.communicate(DocumentServiceConnection::SRVC_STORED_FILES,
+	        sfReq.toJson(), response)) {
+		if (!response.isEmpty()) {
+			bool ok = false;
+			StoredFilesResp sfRes(StoredFilesResp::fromJson(response, &ok));
+			if (!ok || !sfRes.isValid()) {
+				logErrorNL("%s",
+				    "Communication error. Received invalid response to stored_files service.");
+				logErrorNL("Invalid response '%s'.", response.constData());
+				return -1;
+			}
+
+			return 0; /* TODO */
+		} else {
+			logErrorNL("%s",
+			    "Communication error. Received empty response to stored_files service.");
+			return -1;
+		}
+	} else {
+		logErrorNL("%s",
+		    "Communication error when attempting to access stored_files service.");
+		return -1;
+	}
+}
+
+static
 enum TaskDocumentServiceDownloadStoredMessages::Result updateMessages(
-    DocumentServiceConnection &dsc, const QList<qint64> &dmIds)
+    const QString &urlStr, const QString &tokenStr, const QList<qint64> &dmIds)
 {
 	if (dmIds.isEmpty()) {
 		return TaskDocumentServiceDownloadStoredMessages::DS_DSM_SUCCESS;
 	}
+
+	DocumentServiceConnection dsc(IGNORE_SSL_ERRORS);
+	dsc.setConnection(urlStr, tokenStr);
+
+	int pos = 0; /* Position. */
+	int incr = 1; /* Start with smallest query to obtain maximal size. */
+
+	/* While list is not processed. */
+	while ((pos >= 0) && (pos < dmIds.size())) {
+		QList<qint64> queryList(dmIds.mid(pos, incr));
+
+		int ret = callStoredFiles(dsc, queryList);
+		break;
+
+		pos += incr;
+	}
+
+	return TaskDocumentServiceDownloadStoredMessages::DS_DSM_ERR;
 }
 
 enum TaskDocumentServiceDownloadStoredMessages::Result
 TaskDocumentServiceDownloadStoredMessages::downloadStoredMessages(
-    MessageDbSet *dbSet, DocumentServiceConnection &dsc,
+    MessageDbSet *dbSet, const QString &urlStr, const QString &tokenStr,
     const QList<qint64> &exludedDmIds)
 {
 	if (Q_NULLPTR == dbSet) {
@@ -109,5 +174,5 @@ TaskDocumentServiceDownloadStoredMessages::downloadStoredMessages(
 	}
 
 	QList<qint64> dmIds(obtainDmIds(dbSet, exludedDmIds));
-	return updateMessages(dsc, dmIds);
+	return updateMessages(urlStr, tokenStr, dmIds);
 }
