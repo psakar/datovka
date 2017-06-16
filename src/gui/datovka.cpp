@@ -6997,13 +6997,34 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 		    m_accountModel.userName(m_accountModel.index(row, 0)));
 	}
 
-//	MessageDbSet *dbSet = accountDbSet(userName, this);
-//	if (Q_NULLPTR == dbSet) {
-//		Q_ASSERT(0);
-//		return;
-//	}
+	foreach (const QString &userName, userNames) {
+		logDebugLv0NL(
+		    "Planning download document service stored_files task for '%s'.",
+		    userName.toUtf8().constData());
 
-	qDebug() << "AAA001" << userNames;
+		MessageDbSet *dbSet = accountDbSet(userName, this);
+		if (Q_NULLPTR == dbSet) {
+			Q_ASSERT(0);
+			return;
+		}
+
+		TaskDocumentServiceDownloadStoredMessages *task =
+		    new (::std::nothrow) TaskDocumentServiceDownloadStoredMessages(
+		        globDocumentServiceSet.url,
+		        globDocumentServiceSet.token, dbSet);
+		if (Q_NULLPTR == task) {
+			logErrorNL("Cannot create stored_files task for '%s'.",
+			    userName.toUtf8().constData());
+			continue;
+		}
+		task->setAutoDelete(false);
+		/* This will block the GUI and all workers. */
+		globWorkPool.runSingle(task); /* TODO -- Run in background. */
+
+		delete task; task = Q_NULLPTR;
+
+		break; /* TODO -- Remove. */
+	}
 }
 
 void MainWindow::uploadSelectedMessageToDocumentService(void)
