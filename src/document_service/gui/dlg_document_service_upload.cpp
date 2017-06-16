@@ -226,7 +226,10 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 	}
 
 	if (!ufRes.locations().isEmpty()) {
-		if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		logInfoNL(
+		    "Message '%" PRId64 "'has been stored into document service.",
+		    dmId);
+		if (Q_NULLPTR != globDocumentServiceDbPtr) {
 			return globDocumentServiceDbPtr->updateStoredMsg(dmId,
 			    ufRes.locations());
 		} else {

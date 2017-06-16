@@ -151,7 +151,7 @@ enum TaskDocumentServiceDownloadStoredMessages::Result updateMessages(
 		QList<qint64> queryList(dmIds.mid(pos, incr));
 
 		int ret = callStoredFiles(dsc, queryList);
-		break;
+		break; /* TODO */
 
 		pos += incr;
 	}
