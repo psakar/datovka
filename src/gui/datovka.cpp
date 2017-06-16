@@ -89,11 +89,12 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_authenticate_message.h"
-#include "src/worker/task_erase_message.h"
+#include "src/worker/task_document_service_download_stored_messages.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_download_message_list_mojeid.h"
 #include "src/worker/task_download_message_mojeid.h"
+#include "src/worker/task_erase_message.h"
 #include "src/worker/task_sync_mojeid.h"
 #include "src/worker/task_tag_sync_mojeid.h"
 #include "src/worker/task_download_owner_info.h"
@@ -466,6 +467,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 	mui_statusDbMode->setText(tr("Storage:") + " " + msgStrg + " | "
 	    + acntStrg + "   ");
+
+	/* TODO -- This is only a temporary solution. */
+	ui->actionUpdate_document_service_information->setEnabled(
+	    globDocumentServiceSet.isSet());
 }
 
 void MainWindow::setWindowsAfterInit(void)
@@ -646,6 +651,9 @@ void MainWindow::showDocumentServiceDialogue(void)
 	if (DlgDocumentService::updateSettings(globDocumentServiceSet, this)) {
 		saveSettings();
 	}
+
+	ui->actionUpdate_document_service_information->setEnabled(
+	    globDocumentServiceSet.isSet());
 }
 
 /* ========================================================================= */
@@ -4198,6 +4206,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator */
 	connect(ui->actionDocument_service_settings, SIGNAL(triggered()),
 	    this, SLOT(showDocumentServiceDialogue()));
+	connect(ui->actionUpdate_document_service_information, SIGNAL(triggered()),
+	    this, SLOT(getStoredMsgInfoFromDocumentService()));
 	    /* Separator. */
 	connect(ui->actionPreferences, SIGNAL(triggered()),
 	    this, SLOT(showPreferencesDialog()));
@@ -4365,6 +4375,8 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	// Menu: File
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
+	ui->actionUpdate_document_service_information->setEnabled(
+	    globDocumentServiceSet.isSet());
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
@@ -6975,6 +6987,25 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 }
 
+void MainWindow::getStoredMsgInfoFromDocumentService(void)
+{
+	debugSlotCall();
+
+	QStringList userNames;
+	for (int row = 0; row < m_accountModel.rowCount(); ++row) {
+		userNames.append(
+		    m_accountModel.userName(m_accountModel.index(row, 0)));
+	}
+
+//	MessageDbSet *dbSet = accountDbSet(userName, this);
+//	if (Q_NULLPTR == dbSet) {
+//		Q_ASSERT(0);
+//		return;
+//	}
+
+	qDebug() << "AAA001" << userNames;
+}
+
 void MainWindow::uploadSelectedMessageToDocumentService(void)
 {
 	debugSlotCall();
@@ -8486,6 +8517,7 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionProxy_settings->isEnabled();
 	    /* Separator. */
 	ui->actionDocument_service_settings->isEnabled();
+	ui->actionUpdate_document_service_information->isEnabled();
 	    /* Separator. */
 	{
 		QIcon ico;

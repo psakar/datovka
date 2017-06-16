@@ -68,10 +68,21 @@ public:
 	bool communicate(enum ServiceId srvcId, const QByteArray &requestData,
 	   QByteArray &replyData);
 
+	/*!
+	 * @brief Add certificate to certificate store.
+	 *
+	 * @param[in] filePath Path to certificate file.
+	 * @return True on success.
+	 */
 	static
 	bool addTrustedCertificate(const QString &filePath);
 
 signals:
+	/*!
+	 * @brief Emitted when some error during communication occurs.
+	 *
+	 * @param[in] message Message string containing error description.
+	 */
 	void connectionError(const QString &message);
 
 private slots:

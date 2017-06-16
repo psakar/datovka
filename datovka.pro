@@ -352,6 +352,8 @@ SOURCES += \
     src/worker/task.cpp \
     src/worker/task_authenticate_message.cpp \
     src/worker/task_change_pwd.cpp \
+    src/worker/task_document_service_download_stored_messages.cpp \
+    src/worker/task_document_service_update_stored_messages.cpp \
     src/worker/task_download_credit_info.cpp \
     src/worker/task_download_message.cpp \
     src/worker/task_download_message_mojeid.cpp \
@@ -473,6 +475,8 @@ HEADERS += \
     src/worker/task.h \
     src/worker/task_authenticate_message.h \
     src/worker/task_change_pwd.h \
+    src/worker/task_document_service_download_stored_messages.h \
+    src/worker/task_document_service_update_stored_messages.h \
     src/worker/task_download_credit_info.h \
     src/worker/task_download_message.h \
     src/worker/task_download_message_mojeid.h \
