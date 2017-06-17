@@ -92,7 +92,7 @@ DocumentServiceConnection::DocumentServiceConnection(bool ignoreSslErrors,
     m_baseUrlStr(),
     m_tokenStr(),
     m_agentName(),
-    m_timeOut(3600),
+    m_timeOut(60000), /* Milliseconds. */
     m_ignoreSslErrors(ignoreSslErrors),
     m_nam(this)
 {
