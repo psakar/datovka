@@ -36,22 +36,23 @@
 
 #define IGNORE_SSL_ERRORS true
 
-TaskDocumentServiceDownloadStoredMessages::TaskDocumentServiceDownloadStoredMessages(
-    const QString &urlStr, const QString &tokenStr, MessageDbSet *dbSet,
-    const QList<qint64> &exludedDmIds)
+TaskDocumentServiceStoredMessages::TaskDocumentServiceStoredMessages(
+    const QString &urlStr, const QString &tokenStr, enum Operation operation,
+    MessageDbSet *dbSet, const QList<qint64> &exludedDmIds)
     : m_result(DS_DSM_ERR),
     m_url(urlStr),
     m_token(tokenStr),
+    m_operation(operation),
     m_dbSet(dbSet),
     m_exludedDmIds(exludedDmIds)
 {
 	Q_ASSERT(!m_url.isEmpty() && !m_token.isEmpty());
-	Q_ASSERT(Q_NULLPTR != m_dbSet);
+	Q_ASSERT((DS_UPDATE_STORED == operation) || (Q_NULLPTR != m_dbSet));
 }
 
-void TaskDocumentServiceDownloadStoredMessages::run(void)
+void TaskDocumentServiceStoredMessages::run(void)
 {
-	if (Q_NULLPTR == m_dbSet) {
+	if ((DS_DOWNLOAD_ALL == m_operation) && (Q_NULLPTR == m_dbSet)) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -66,7 +67,7 @@ void TaskDocumentServiceDownloadStoredMessages::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_result = downloadStoredMessages(m_url, m_token, m_dbSet,
+	m_result = downloadStoredMessages(m_url, m_token, m_operation, m_dbSet,
 	    m_exludedDmIds);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
@@ -98,6 +99,26 @@ QList<qint64> obtainDbSetDmIds(const MessageDbSet *dbSet,
 	foreach (const MessageDb::MsgId &msgId, dbSet->getAllMessageIDsFromDB()) {
 		dmIdSet.insert(msgId.dmId);
 	}
+
+	dmIdSet -= exludedDmIds.toSet();
+	return dmIdSet.toList();
+}
+
+/*!
+ * @brief Obtains all message identifiers held in document service database.
+ *
+ * @patam[in] exludedDmIds Message identifiers that should not be queried.
+ * @return List of message identifiers.
+ */
+static
+QList<qint64> obtainHeldDmIds(const QList<qint64> &exludedDmIds)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		Q_ASSERT(0);
+		return QList<qint64>();
+	}
+
+	QSet<qint64> dmIdSet = globDocumentServiceDbPtr->getAllDmIds().toSet();
 
 	dmIdSet -= exludedDmIds.toSet();
 	return dmIdSet.toList();
@@ -137,10 +158,12 @@ bool receivedRequestedContent(const StoredFilesResp &sfRes,
  * @brief Store response into database.
  *
  * @param[in] sfRes Stored files response structure.
+ * @param[in] clear If true then all messages not held within the service will
+ *                  be explicitly removed.
  * @return True on success, false on error.
  */
 static
-bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes)
+bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 {
 	/* Process only messages. */
 
@@ -155,7 +178,12 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes)
 	foreach (const DmEntry &entry, sfRes.dms()) {
 		if (entry.locations().isEmpty()) {
 			/* Not held within the document service. */
-			continue;
+			if (clear) {
+				globDocumentServiceDbPtr->deleteStoredMsg(
+				    entry.dmId());
+			} else {
+				continue;
+			}
 		}
 
 		if (!globDocumentServiceDbPtr->updateStoredMsg(entry.dmId(),
@@ -180,13 +208,15 @@ fail:
 /*!
  * @brief Process response.
  *
+ * @param[in]  clear If true then all messages not held within the service will
+ *                   be explicitly removed.
  * @param[in]  sfRes Stored files response structure.
  * @param[in]  sentDmIds Set identifiers.
  * @param[out] limit Obtained limit.
  * @return Number of processed responses, negative value on error.
  */
 static
-int processStoredFilesResponse(const StoredFilesResp &sfRes,
+int processStoredFilesResponse(bool clear, const StoredFilesResp &sfRes,
     const QList<qint64> &sentDmIds, int &limit)
 {
 	/* Limit should always be received. */
@@ -212,7 +242,7 @@ int processStoredFilesResponse(const StoredFilesResp &sfRes,
 		return -1;
 	}
 
-	if (!storeStoredFilesResponseContent(sfRes)) {
+	if (!storeStoredFilesResponseContent(sfRes, clear)) {
 		return -1;
 	}
 
@@ -222,14 +252,16 @@ int processStoredFilesResponse(const StoredFilesResp &sfRes,
 /*!
  * @brief Call document service and process response.
  *
+ * @param[in]  clear If true then all messages not held within the service will
+ *                   be explicitly removed.
  * @param[in]  dsc Document service connection.
  * @param[in]  dmIds Message identifiers.
  * @param[out] limit Obtained limit.
  * @return Number of processed responses, negative value on error.
  */
 static
-int callStoredFiles(DocumentServiceConnection &dsc, const QList<qint64> &dmIds,
-    int &limit)
+int callStoredFiles(bool clear, DocumentServiceConnection &dsc,
+    const QList<qint64> &dmIds, int &limit)
 {
 	if (dmIds.isEmpty()) {
 		Q_ASSERT(0);
@@ -256,7 +288,8 @@ int callStoredFiles(DocumentServiceConnection &dsc, const QList<qint64> &dmIds,
 				return -1;
 			}
 
-			return processStoredFilesResponse(sfRes, dmIds, limit);
+			return processStoredFilesResponse(clear, sfRes, dmIds,
+			    limit);
 		} else {
 			logErrorNL("%s",
 			    "Communication error. Received empty response to stored_files service.");
@@ -269,12 +302,23 @@ int callStoredFiles(DocumentServiceConnection &dsc, const QList<qint64> &dmIds,
 	}
 }
 
+/*!
+ * @brief Calls stored files service for all supplied message identifiers.
+ *
+ * @param[in] urlStr Document service URL.
+ * @param[in] tokenStr Document service access token.
+ * @param[in] dmIds Message identifiers.
+ * @param[in] clear If true then all messages not held within the service will
+ *                  be explicitly removed.
+ * @return Processing state.
+ */
 static
-enum TaskDocumentServiceDownloadStoredMessages::Result updateMessages(
-    const QString &urlStr, const QString &tokenStr, const QList<qint64> &dmIds)
+enum TaskDocumentServiceStoredMessages::Result updateMessages(
+    const QString &urlStr, const QString &tokenStr, const QList<qint64> &dmIds,
+    bool clear)
 {
 	if (dmIds.isEmpty()) {
-		return TaskDocumentServiceDownloadStoredMessages::DS_DSM_SUCCESS;
+		return TaskDocumentServiceStoredMessages::DS_DSM_SUCCESS;
 	}
 
 	DocumentServiceConnection dsc(IGNORE_SSL_ERRORS);
@@ -288,23 +332,23 @@ enum TaskDocumentServiceDownloadStoredMessages::Result updateMessages(
 	while ((pos >= 0) && (pos < dmIds.size())) {
 		QList<qint64> queryList(dmIds.mid(pos, currentLimit));
 
-		int ret = callStoredFiles(dsc, queryList, nextLimit);
+		int ret = callStoredFiles(clear, dsc, queryList, nextLimit);
 		if (ret < 0) {
-			return TaskDocumentServiceDownloadStoredMessages::DS_DSM_ERR;
+			return TaskDocumentServiceStoredMessages::DS_DSM_ERR;
 		}
 		pos += ret;
 		currentLimit = nextLimit; /* Update limit. */
 	}
 
-	return TaskDocumentServiceDownloadStoredMessages::DS_DSM_ERR;
+	return TaskDocumentServiceStoredMessages::DS_DSM_ERR;
 }
 
-enum TaskDocumentServiceDownloadStoredMessages::Result
-TaskDocumentServiceDownloadStoredMessages::downloadStoredMessages(
-    const QString &urlStr, const QString &tokenStr, const MessageDbSet *dbSet,
-    const QList<qint64> &exludedDmIds)
+enum TaskDocumentServiceStoredMessages::Result
+TaskDocumentServiceStoredMessages::downloadStoredMessages(
+    const QString &urlStr, const QString &tokenStr, enum Operation operation,
+    const MessageDbSet *dbSet, const QList<qint64> &exludedDmIds)
 {
-	if (Q_NULLPTR == dbSet) {
+	if ((DS_DOWNLOAD_ALL == operation) && (Q_NULLPTR == dbSet)) {
 		Q_ASSERT(0);
 		return DS_DSM_ERR;
 	}
@@ -313,6 +357,12 @@ TaskDocumentServiceDownloadStoredMessages::downloadStoredMessages(
 		return DS_DSM_DB_INS_ERR;
 	}
 
-	QList<qint64> dmIds(obtainDbSetDmIds(dbSet, exludedDmIds));
-	return updateMessages(urlStr, tokenStr, dmIds);
+	QList<qint64> dmIds;
+	if (DS_DOWNLOAD_ALL == operation) {
+		dmIds = obtainDbSetDmIds(dbSet, exludedDmIds);
+	} else {
+		dmIds = obtainHeldDmIds(exludedDmIds);
+	}
+	return updateMessages(urlStr, tokenStr, dmIds,
+	    DS_UPDATE_STORED == operation);
 }

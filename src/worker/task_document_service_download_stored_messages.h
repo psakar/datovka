@@ -33,7 +33,7 @@
 /*!
  * @brief Task describing downloading information about stored messages.
  */
-class TaskDocumentServiceDownloadStoredMessages : public Task {
+class TaskDocumentServiceStoredMessages : public Task {
 public:
 	/*!
 	 * @brief Return state describing what happened.
@@ -46,15 +46,25 @@ public:
 	};
 
 	/*!
+	 * @brief Operation to be performed.
+	 */
+	enum Operation {
+		DS_UPDATE_STORED, /*!< Update only messages in document service database. */
+		DS_DOWNLOAD_ALL /*!< Download all messages that are held in database set. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] usrStr Document service URL.
 	 * @param[in] tokenStr Document service access token.
+	 * @param[in] operation Actual action to be performed.
 	 * @param[in] dbSet Database set to be used to obtain message identifiers.
 	 * @patam[in] exludedDmIds Message identifiers that should not be queried.
 	 */
-	explicit TaskDocumentServiceDownloadStoredMessages(
-	    const QString &urlStr, const QString &tokenStr, MessageDbSet *dbSet,
+	explicit TaskDocumentServiceStoredMessages(
+	    const QString &urlStr, const QString &tokenStr,
+	    enum Operation operation, MessageDbSet *dbSet,
 	    const QList<qint64> &exludedDmIds = QList<qint64>());
 
 	/*!
@@ -72,17 +82,20 @@ private:
 	 *
 	 * @param[in] usrStr Document service URL.
 	 * @param[in] tokenStr Document service access token.
+	 * @param[in] operation Actual action to be performed.
 	 * @param[in] dbSet Database set to be used to obtain message identifiers.
 	 * @patam[in] exludedDmIds Message identifiers that should not be queried.
 	 * @return Return state.
 	 */
 	static
 	enum Result downloadStoredMessages(const QString &urlStr,
-	    const QString &tokenStr, const MessageDbSet *dbSet,
-	    const QList<qint64> &exludedDmIds);
+	    const QString &tokenStr, enum Operation operation,
+	    const MessageDbSet *dbSet, const QList<qint64> &exludedDmIds);
 
 	const QString m_url; /*!< String containing document service URL. */
 	const QString m_token; /*!< Document service access token. */
+
+	const enum Operation m_operation; /*!< Operation to be performed. */
 
 	const MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	const QList<qint64> m_exludedDmIds; /*!<

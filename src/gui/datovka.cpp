@@ -7008,10 +7008,12 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 			return;
 		}
 
-		TaskDocumentServiceDownloadStoredMessages *task =
-		    new (::std::nothrow) TaskDocumentServiceDownloadStoredMessages(
+		TaskDocumentServiceStoredMessages *task =
+		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
 		        globDocumentServiceSet.url,
-		        globDocumentServiceSet.token, dbSet);
+		        globDocumentServiceSet.token,
+		        TaskDocumentServiceStoredMessages::DS_UPDATE_STORED,
+		        dbSet);
 		if (Q_NULLPTR == task) {
 			logErrorNL("Cannot create stored_files task for '%s'.",
 			    userName.toUtf8().constData());
