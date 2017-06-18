@@ -208,11 +208,11 @@ bool DocumentServiceDb::deleteStoredMsg(qint64 dmId)
 	return true;
 }
 
-#define LIST_SEPARATOR QLatin1String("^")
-
 bool DocumentServiceDb::updateStoredMsg(qint64 dmId,
     const QStringList &locations)
 {
+#define LIST_SEPARATOR QLatin1String("^")
+
 	QSqlQuery query(m_db);
 
 	QString queryStr = "INSERT OR REPLACE INTO stored_files_messages "
@@ -235,9 +235,31 @@ bool DocumentServiceDb::updateStoredMsg(qint64 dmId,
 	}
 
 	return true;
-}
 
 #undef LIST_SEPARATOR
+}
+
+QList<qint64> DocumentServiceDb::getAllDmIds(void) const
+{
+	QSqlQuery query(m_db);
+
+	QList<qint64> dmIdList;
+
+	QString queryStr = "SELECT dm_id FROM stored_files_messages";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return dmIdList;
+	}
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			dmIdList.append(query.value(0).toLongLong());
+			query.next();
+		}
+	}
+	return dmIdList;
+}
 
 QStringList DocumentServiceDb::storedMsgLocations(qint64 dmId) const
 {

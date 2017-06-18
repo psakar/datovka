@@ -122,6 +122,13 @@ public:
 	bool updateStoredMsg(qint64 dmId, const QStringList &locations);
 
 	/*!
+	 * @brief Obtains all message identifiers.
+	 *
+	 * @return List of message identifiers, empty list on error.
+	 */
+	QList<qint64> getAllDmIds(void) const;
+
+	/*!
 	 * @brief Reads stored location or given message.
 	 *
 	 * @param[in] dmId Message identifier.
