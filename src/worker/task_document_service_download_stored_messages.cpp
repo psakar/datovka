@@ -26,8 +26,10 @@
 #include <QSet>
 #include <QThread>
 
+#include "src/document_service/io/document_service_connection.h"
 #include "src/document_service/json/entry_error.h"
 #include "src/document_service/json/stored_files.h"
+#include "src/io/document_service_db.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_document_service_download_stored_messages.h"
@@ -64,7 +66,7 @@ void TaskDocumentServiceDownloadStoredMessages::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_result = downloadStoredMessages(m_dbSet, m_url, m_token,
+	m_result = downloadStoredMessages(m_url, m_token, m_dbSet,
 	    m_exludedDmIds);
 
 	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
@@ -75,8 +77,15 @@ void TaskDocumentServiceDownloadStoredMessages::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
+/*!
+ * @brief Obtains all message identifiers from message database.
+ *
+ * @param[in] dbSet Database set to be used to obtain message identifiers.
+ * @patam[in] exludedDmIds Message identifiers that should not be queried.
+ * @return List of message identifiers.
+ */
 static
-QList<qint64> obtainDmIds(MessageDbSet *dbSet,
+QList<qint64> obtainDbSetDmIds(const MessageDbSet *dbSet,
     const QList<qint64> &exludedDmIds)
 {
 	if (Q_NULLPTR == dbSet) {
@@ -292,7 +301,7 @@ enum TaskDocumentServiceDownloadStoredMessages::Result updateMessages(
 
 enum TaskDocumentServiceDownloadStoredMessages::Result
 TaskDocumentServiceDownloadStoredMessages::downloadStoredMessages(
-    MessageDbSet *dbSet, const QString &urlStr, const QString &tokenStr,
+    const QString &urlStr, const QString &tokenStr, const MessageDbSet *dbSet,
     const QList<qint64> &exludedDmIds)
 {
 	if (Q_NULLPTR == dbSet) {
@@ -304,6 +313,6 @@ TaskDocumentServiceDownloadStoredMessages::downloadStoredMessages(
 		return DS_DSM_DB_INS_ERR;
 	}
 
-	QList<qint64> dmIds(obtainDmIds(dbSet, exludedDmIds));
+	QList<qint64> dmIds(obtainDbSetDmIds(dbSet, exludedDmIds));
 	return updateMessages(urlStr, tokenStr, dmIds);
 }

@@ -27,8 +27,6 @@
 #include <QList>
 #include <QString>
 
-#include "src/document_service/io/document_service_connection.h"
-#include "src/io/document_service_db.h"
 #include "src/io/message_db_set.h"
 #include "src/worker/task.h"
 
@@ -49,6 +47,11 @@ public:
 
 	/*!
 	 * @brief Constructor.
+	 *
+	 * @param[in] usrStr Document service URL.
+	 * @param[in] tokenStr Document service access token.
+	 * @param[in] dbSet Database set to be used to obtain message identifiers.
+	 * @patam[in] exludedDmIds Message identifiers that should not be queried.
 	 */
 	explicit TaskDocumentServiceDownloadStoredMessages(
 	    const QString &urlStr, const QString &tokenStr, MessageDbSet *dbSet,
@@ -63,15 +66,25 @@ public:
 	enum Result m_result; /*!< Return state. */
 
 private:
+	/*!
+	 * @brief Download stored files information and save to document service
+	 *     database.
+	 *
+	 * @param[in] usrStr Document service URL.
+	 * @param[in] tokenStr Document service access token.
+	 * @param[in] dbSet Database set to be used to obtain message identifiers.
+	 * @patam[in] exludedDmIds Message identifiers that should not be queried.
+	 * @return Return state.
+	 */
 	static
-	enum Result downloadStoredMessages(MessageDbSet *dbSet,
-	    const QString &urlStr, const QString &tokenStr,
+	enum Result downloadStoredMessages(const QString &urlStr,
+	    const QString &tokenStr, const MessageDbSet *dbSet,
 	    const QList<qint64> &exludedDmIds);
 
-	const QString m_url;
-	const QString m_token;
+	const QString m_url; /*!< String containing document service URL. */
+	const QString m_token; /*!< Document service access token. */
 
-	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
+	const MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	const QList<qint64> m_exludedDmIds; /*!<
 	                                     * List of messages that should
 	                                     * not be queried.
