@@ -56,7 +56,7 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] usrStr Document service URL.
+	 * @param[in] urlStr Document service URL.
 	 * @param[in] tokenStr Document service access token.
 	 * @param[in] operation Actual action to be performed.
 	 * @param[in] dbSet Database set to be used to obtain message identifiers.
@@ -80,7 +80,7 @@ private:
 	 * @brief Download stored files information and save to document service
 	 *     database.
 	 *
-	 * @param[in] usrStr Document service URL.
+	 * @param[in] urlStr Document service URL.
 	 * @param[in] tokenStr Document service access token.
 	 * @param[in] operation Actual action to be performed.
 	 * @param[in] dbSet Database set to be used to obtain message identifiers.
