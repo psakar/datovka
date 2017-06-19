@@ -374,18 +374,12 @@ void appendHeaderColumns(DbMsgsTblModel *model, int dfltHdrSize,
 
 	for (int i = 0; i < appendedCols.size(); ++i) {
 		/* Description. */
-		if (!appendedCols.at(i).display.isEmpty()) {
-			model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
-			    appendedCols.at(i).display, Qt::DisplayRole);
-		}
-		if (!appendedCols.at(i).decoration.isNull()) {
-			model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
-			    appendedCols.at(i).decoration, Qt::DecorationRole);
-		}
-		if (!appendedCols.at(i).toolTip.isEmpty()) {
-			model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
-			    appendedCols.at(i).toolTip, Qt::ToolTipRole);
-		}
+		model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+		    appendedCols.at(i).display, Qt::DisplayRole);
+		model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+		    appendedCols.at(i).decoration, Qt::DecorationRole);
+		model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+		    appendedCols.at(i).toolTip, Qt::ToolTipRole);
 		/* Data type. */
 		model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
 		    DB_APPENDED_VARIANT, ROLE_MSGS_DB_ENTRY_TYPE);
