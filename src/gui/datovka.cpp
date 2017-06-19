@@ -296,7 +296,8 @@ MainWindow::MainWindow(QWidget *parent)
 	setUpUi();
 
 	if (0 != globTagDbPtr) {
-		m_msgTblAppendedCols.append(tr("Tags"));
+		m_msgTblAppendedCols.append(
+		    DbMsgsTblModel::AppendedCol(tr("Tags"), QIcon(), tr("User-assigned tags")));
 	}
 
 	/* Single instance emitter. */

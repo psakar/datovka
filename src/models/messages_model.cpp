@@ -22,7 +22,6 @@
  */
 
 #include <QFont>
-#include <QIcon>
 
 #include "src/common.h"
 #include "src/delegates/tag_item.h"
@@ -322,10 +321,10 @@ bool DbMsgsTblModel::setType(enum DbMsgsTblModel::Type type)
 
 	switch (m_type) {
 	case DUMMY_RCVD:
-		return setRcvdHeader(QStringList()); /* FIXME */
+		return setRcvdHeader(QList<DbMsgsTblModel::AppendedCol>()); /* FIXME */
 		break;
 	case DUMMY_SNT:
-		return setSntHeader(QStringList()); /* FIXME */
+		return setSntHeader(QList<DbMsgsTblModel::AppendedCol>()); /* FIXME */
 		break;
 	default:
 		return true;
@@ -364,7 +363,36 @@ const QVector<QString> &DbMsgsTblModel::sntItemIds(void)
 	return ids;
 }
 
-bool DbMsgsTblModel::setRcvdHeader(const QStringList &appendedCols)
+static
+void appendHeaderColumns(DbMsgsTblModel *model, int dfltHdrSize,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+{
+	if ((model == Q_NULLPTR) || (dfltHdrSize < 0)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	for (int i = 0; i < appendedCols.size(); ++i) {
+		/* Description. */
+		if (!appendedCols.at(i).display.isEmpty()) {
+			model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+			    appendedCols.at(i).display, Qt::DisplayRole);
+		}
+		if (!appendedCols.at(i).decoration.isNull()) {
+			model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+			    appendedCols.at(i).decoration, Qt::DecorationRole);
+		}
+		if (!appendedCols.at(i).toolTip.isEmpty()) {
+			model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+			    appendedCols.at(i).toolTip, Qt::ToolTipRole);
+		}
+		/* Data type. */
+		model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+		    DB_APPENDED_VARIANT, ROLE_MSGS_DB_ENTRY_TYPE);
+	}
+}
+
+bool DbMsgsTblModel::setRcvdHeader(const QList<AppendedCol> &appendedCols)
 {
 	for (int i = 0; i < rcvdItemIds().size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
@@ -408,19 +436,12 @@ bool DbMsgsTblModel::setRcvdHeader(const QStringList &appendedCols)
 		}
 	}
 
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		/* Description. */
-		setHeaderData(rcvdItemIds().size() + i, Qt::Horizontal,
-		    appendedCols.at(i), Qt::DisplayRole);
-		/* Data type. */
-		setHeaderData(rcvdItemIds().size() + i, Qt::Horizontal,
-		    DB_APPENDED_VARIANT, ROLE_MSGS_DB_ENTRY_TYPE);
-	}
+	appendHeaderColumns(this, rcvdItemIds().size(), appendedCols);
 
 	return true;
 }
 
-bool DbMsgsTblModel::setSntHeader(const QStringList &appendedCols)
+bool DbMsgsTblModel::setSntHeader(const QList<AppendedCol> &appendedCols)
 {
 	for (int i = 0; i < sntItemIds().size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
@@ -447,14 +468,7 @@ bool DbMsgsTblModel::setSntHeader(const QStringList &appendedCols)
 		}
 	}
 
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		/* Description. */
-		setHeaderData(sntItemIds().size() + i, Qt::Horizontal,
-		    appendedCols.at(i), Qt::DisplayRole);
-		/* Data type. */
-		setHeaderData(sntItemIds().size() + i, Qt::Horizontal,
-		    DB_APPENDED_VARIANT, ROLE_MSGS_DB_ENTRY_TYPE);
-	}
+	appendHeaderColumns(this, sntItemIds().size(), appendedCols);
 
 	return true;
 }

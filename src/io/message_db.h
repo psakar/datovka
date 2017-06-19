@@ -731,7 +731,8 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsRcvdModel(const QStringList &appendedCols);
+	QAbstractTableModel *msgsRcvdModel(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
@@ -742,7 +743,7 @@ protected: /* These function are used from within a database container. */
 	 * @note The model must not be freed.
 	 */
 	QAbstractTableModel *msgsRcvdWithin90DaysModel(
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return received messages within given year.
@@ -754,7 +755,7 @@ protected: /* These function are used from within a database container. */
 	 * @note The model must not be freed.
 	 */
 	QAbstractTableModel *msgsRcvdInYearModel(const QString &year,
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -803,7 +804,8 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsSntModel(const QStringList &appendedCols);
+	QAbstractTableModel *msgsSntModel(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
@@ -814,7 +816,7 @@ protected: /* These function are used from within a database container. */
 	 * @note The model must not be freed.
 	 */
 	QAbstractTableModel *msgsSntWithin90DaysModel(
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return sent messages within given year.
@@ -826,7 +828,7 @@ protected: /* These function are used from within a database container. */
 	 * @note The model must not be freed.
 	 */
 	QAbstractTableModel *msgsSntInYearModel(const QString &year,
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -1015,7 +1017,7 @@ protected: /* These function are used from within a database container. */
 	 * @return True on success.
 	 */
 	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query,
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Query received messages within past 90 days.
@@ -1025,7 +1027,7 @@ protected: /* These function are used from within a database container. */
 	 * @return True on success.
 	 */
 	bool msgsSntWithin90DaysQuery(QSqlQuery &query,
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 

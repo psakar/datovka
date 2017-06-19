@@ -24,6 +24,8 @@
 #ifndef _MESSAGES_MODEL_H_
 #define _MESSAGES_MODEL_H_
 
+#include <QIcon>
+#include <QList>
 #include <QString>
 #include <QVariant>
 #include <QVector>
@@ -66,6 +68,25 @@ public:
 		WORKING_SNT, /*!< Ordinary model created from SQL query. */
 		DUMMY_RCVD, /*!< Empty received dummy. */
 		DUMMY_SNT /*!< Empty sent dummy. */
+	};
+
+	/*!
+	 * @brief Describes appended header entry.
+	 */
+	class AppendedCol {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		explicit AppendedCol(const QString &dis,
+		    const QIcon &dec = QIcon(), const QString &tip = QString())
+		    : display(dis), decoration(dec), toolTip(tip)
+		{
+		}
+
+		QString display; /*!< What to show on display role. */
+		QIcon decoration; /*!< What to display on decoration role. */
+		QString toolTip; /*!< What to display in tool tip. */
 	};
 
 	/*!
@@ -148,14 +169,14 @@ public:
 	 *
 	 * @return False on error.
 	 */
-	bool setRcvdHeader(const QStringList &appendedCols);
+	bool setRcvdHeader(const QList<AppendedCol> &appendedCols);
 
 	/*!
 	 * @Brief Set header data for sent model.
 	 *
 	 * @return False on error.
 	 */
-	bool setSntHeader(const QStringList &appendedCols);
+	bool setSntHeader(const QList<AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Override message as being read.

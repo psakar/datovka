@@ -1196,7 +1196,7 @@ private:
 	QString m_import_zfo_path;
 	QRect m_geometry; /* Non-maximised window geometry. */
 
-	QStringList m_msgTblAppendedCols; /*< Appended columns. */
+	QList<DbMsgsTblModel::AppendedCol> m_msgTblAppendedCols; /*< Appended columns. */
 
 	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
 	int m_numFilesToImport; /*!< Input ZFO count. */

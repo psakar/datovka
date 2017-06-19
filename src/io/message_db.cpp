@@ -85,7 +85,8 @@ MessageDb::MessageDb(const QString &connectionName)
 /*
  * Return all received messages model.
  */
-QAbstractTableModel *MessageDb::msgsRcvdModel(const QStringList &appendedCols)
+QAbstractTableModel *MessageDb::msgsRcvdModel(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -136,7 +137,7 @@ fail:
  * Return received messages within past 90 days.
  */
 QAbstractTableModel *MessageDb::msgsRcvdWithin90DaysModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -162,7 +163,7 @@ fail:
  * Return received messages within given year.
  */
 QAbstractTableModel *MessageDb::msgsRcvdInYearModel(const QString &year,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -402,7 +403,8 @@ fail:
 /*
  * Return all sent messages model.
  */
-QAbstractTableModel * MessageDb::msgsSntModel(const QStringList &appendedCols)
+QAbstractTableModel * MessageDb::msgsSntModel(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -450,7 +452,7 @@ fail:
  * Return sent messages within past 90 days.
  */
 QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -476,7 +478,7 @@ fail:
  * Return sent messages within given year.
  */
 QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &year,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 /* ========================================================================= */
 {
 	QSqlQuery query(m_db);
@@ -4541,7 +4543,7 @@ bool MessageDb::reopenDb(const QString &newFileName)
 }
 
 bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
@@ -4582,7 +4584,7 @@ fail:
 }
 
 bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
