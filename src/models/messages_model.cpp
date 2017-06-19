@@ -52,17 +52,64 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 {
 	int dataType;
 
-	/* Leave additional to delegates. */
+#define TAGS_OFFS 1 /* Tags are located behind upload information. */
+
+	/* Draw upload information. */
+	/* TODO -- This is only a temporal solution. */
 	switch (m_type) {
 	case WORKING_RCVD:
 	case DUMMY_RCVD:
-		if (index.column() > PROCSNG_COL) {
+		if (index.column() == (PROCSNG_COL + TAGS_OFFS)) {
+			QStringList locations(
+			    _data(index, Qt::DisplayRole).toStringList());
+			switch (role) {
+			case Qt::DecorationRole:
+				return locations.isEmpty() ? QVariant() : QIcon(ICON_3PARTY_PATH "up_16.png");
+				break;
+			case Qt::ToolTipRole:
+				return locations.join("\n");
+				break;
+			default:
+				return QVariant();
+				break;
+			}
+		}
+		break;
+	case WORKING_SNT:
+	case DUMMY_SNT:
+		if (index.column() == (ATTDOWN_COL + TAGS_OFFS)) {
+			QStringList locations(
+			    _data(index, Qt::DisplayRole).toStringList());
+			switch (role) {
+			case Qt::DecorationRole:
+				return locations.isEmpty() ? QVariant() : QIcon(ICON_3PARTY_PATH "up_16.png");
+				break;
+			case Qt::ToolTipRole:
+				return locations.join("\n");
+				break;
+			default:
+				return QVariant();
+				break;
+			}
+		}
+		break;
+	default:
+		Q_ASSERT(0);
+		return QVariant();
+		break;
+	}
+
+	/* Leave additional tags to delegates. */
+	switch (m_type) {
+	case WORKING_RCVD:
+	case DUMMY_RCVD:
+		if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
 			return _data(index, role);
 		}
 		break;
 	case WORKING_SNT:
 	case DUMMY_SNT:
-		if (index.column() > ATTDOWN_COL) {
+		if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
 			return _data(index, role);
 		}
 		break;
@@ -71,6 +118,8 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 		break;
 	}
+
+#undef TAGS_OFFS
 
 	switch (role) {
 	case Qt::DisplayRole:

@@ -295,10 +295,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	setUpUi();
 
-	if (0 != globTagDbPtr) {
-		m_msgTblAppendedCols.append(
-		    DbMsgsTblModel::AppendedCol(tr("Tags"), QIcon(), tr("User-assigned tags")));
-	}
+	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
+	    QString(), QIcon(ICON_3PARTY_PATH "up_16.png"),
+	    tr("Uploaded to document service")));
+
+	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
+	    tr("Tags"), QIcon(), tr("User-assigned tags")));
 
 	/* Single instance emitter. */
 	connect(&globSingleInstanceEmitter, SIGNAL(messageReceived(QString)),
@@ -841,6 +843,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	if (0 != msgTblMdl) {
 		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
 		Q_ASSERT(0 != mdl);
+		mdl->fillDocumentServiceColumn(-2);
 		mdl->fillTagsColumn(userName, -1);
 		/* TODO -- Add some labels. */
 	}
@@ -7094,9 +7097,21 @@ void MainWindow::uploadSelectedMessageToDocumentService(void)
 		}
 	}
 
+	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
+	if (messageModel == Q_NULLPTR) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	/* Generate upload into data service dialogue. */
 	DlgDocumentServiceUpload::uploadMessage(globDocumentServiceSet,
 	    msgId.dmId, QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
+
+	QList<qint64> msgIdList;
+	msgIdList.append(msgId.dmId);
+
+	messageModel->refillDocumentServiceColumn(msgIdList, -2);
 }
 
 void MainWindow::showSignatureDetailsDialog(void)
