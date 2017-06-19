@@ -25,12 +25,13 @@
 
 #include "src/common.h"
 #include "src/delegates/tag_item.h"
-#include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
+#include "src/io/document_service_db.h"
+#include "src/io/message_db.h"
+#include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/io/tag_db_container.h"
 #include "src/models/messages_model.h"
-#include "src/io/message_db.h"
 
 const int DbMsgsTblModel::rcvdMsgsColCnt(8);
 const int DbMsgsTblModel::sntMsgsColCnt(7);
@@ -621,6 +622,68 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 			    tagDb->getMessageTags(userName, dmId));
 			tagList.sortNames();
 			m_data[row][col] = QVariant::fromValue(tagList);
+			emit dataChanged(TblModel::index(row, col),
+			    TblModel::index(row, col));
+		}
+	}
+
+	return true;
+}
+
+bool DbMsgsTblModel::fillDocumentServiceColumn(int col)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		return false;
+	}
+
+	/* Check indexes into column. */
+	if (col >= 0) {
+		if (col > columnCount()) {
+			return false;
+		}
+	} else {
+		col += columnCount();
+		if (col < 0) {
+			return false;
+		}
+	}
+
+	for (int row = 0; row < rowCount(); ++row) {
+		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
+		m_data[row][col] =
+		    globDocumentServiceDbPtr->storedMsgLocations(dmId);
+	}
+
+	emit dataChanged(TblModel::index(0, col),
+	    TblModel::index(rowCount() - 1, col));
+
+	return true;
+}
+
+bool DbMsgsTblModel::refillDocumentServiceColumn(const QList<qint64> &dmIds,
+    int col)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		return false;
+	}
+
+	/* Check indexes into column. */
+	if (col >= 0) {
+		if (col > columnCount()) {
+			return false;
+		}
+	} else {
+		col += columnCount();
+		if (col < 0) {
+			return false;
+		}
+	}
+
+	for (int row = 0; row < rowCount(); ++row) {
+		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
+		if (dmIds.contains(dmId)) {
+			m_data[row][col] =
+			    globDocumentServiceDbPtr->storedMsgLocations(dmId);
 			emit dataChanged(TblModel::index(row, col),
 			    TblModel::index(row, col));
 		}

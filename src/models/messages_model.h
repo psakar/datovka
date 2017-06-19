@@ -246,6 +246,23 @@ public:
 	bool refillTagsColumn(const QString &userName,
 	    const QList<qint64> &dmIds, int col);
 
+	/*!
+	 * @brief Fills the model with document service information.
+	 *
+	 * @param[in] col Negative number specifying the column to write into.
+	 * @return True on success.
+	 */
+	bool fillDocumentServiceColumn(int col);
+
+	/*!
+	 * @brief Reload document service information in given rows.
+	 *
+	 * @param[in] dmIds List of message ids for which to load tags.
+	 * @param[in] col Negative number specifying the column to write into.
+	 * @return True on success.
+	 */
+	bool refillDocumentServiceColumn(const QList<qint64> &dmIds, int col);
+
 private:
 	/* Make these methods private so nobody is likely to mess with them. */
 	virtual
