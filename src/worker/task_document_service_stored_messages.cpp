@@ -32,7 +32,7 @@
 #include "src/io/document_service_db.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/task_document_service_download_stored_messages.h"
+#include "src/worker/task_document_service_stored_messages.h"
 
 #define IGNORE_SSL_ERRORS true
 

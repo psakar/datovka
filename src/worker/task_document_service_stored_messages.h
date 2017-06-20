@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _TASK_DOCUMENT_SERVICE_DOWNLOAD_STORED_MESSAGES_H_
-#define _TASK_DOCUMENT_SERVICE_DOWNLOAD_STORED_MESSAGES_H_
+#ifndef _TASK_DOCUMENT_SERVICE_STORED_MESSAGES_H_
+#define _TASK_DOCUMENT_SERVICE_STORED_MESSAGES_H_
 
 #include <QList>
 #include <QString>
@@ -104,4 +104,4 @@ private:
 	                                     */
 };
 
-#endif /* _TASK_DOCUMENT_SERVICE_DOWNLOAD_STORED_MESSAGES_H_ */
+#endif /* _TASK_DOCUMENT_SERVICE_STORED_MESSAGES_H_ */
