@@ -647,6 +647,56 @@ void MainWindow::showProxySettingsDialog(void)
 	dlgProxy->deleteLater();
 }
 
+/*!
+ * @brief Shows all columns except the supplied ones.
+ *
+ * @param[in] view Table view.
+ * @param[in] cols List of negative column indexes.
+ */
+static
+void showAllColumnsExcept(QTableView *view, QList<int> cols)
+{
+	if (Q_NULLPTR == view) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QAbstractItemModel *model = view->model();
+	if (Q_NULLPTR == model) {
+		return;
+	}
+
+	for (int col = 0; col < model->columnCount(); ++col) {
+		view->setColumnHidden(col, false);
+	}
+
+	foreach (int negCol, cols) {
+		int col = model->columnCount() + negCol;
+		if ((col < 0) || (col >= model->columnCount())) {
+			Q_ASSERT(0);
+			continue;
+		}
+		view->setColumnHidden(col, true);
+	}
+}
+
+/*!
+ * @brief Shows/hides message table columns according to functionality.
+ *
+ * @param[in] view Table view.
+ */
+static
+void showColumnsAccordingToFunctionality(QTableView *view)
+{
+	QList<int> negCols;
+
+	if (!globDocumentServiceSet.isSet()) {
+		negCols.append(DbMsgsTblModel::DOC_SRVC_NEG_COL);
+	}
+
+	showAllColumnsExcept(view, negCols);
+}
+
 void MainWindow::showDocumentServiceDialogue(void)
 {
 	debugSlotCall();
@@ -657,6 +707,8 @@ void MainWindow::showDocumentServiceDialogue(void)
 
 	ui->actionUpdate_document_service_information->setEnabled(
 	    globDocumentServiceSet.isSet());
+
+	showColumnsAccordingToFunctionality(ui->messageList);
 }
 
 /* ========================================================================= */
@@ -691,7 +743,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 
 		/* Decouple model and show banner page. */
-		ui->messageList->setModel(0);
+		ui->messageList->setModel(Q_NULLPTR);
 		ui->messageStackedWidget->setCurrentIndex(0);
 		ui->accountTextInfo->setHtml(createDatovkaBanner(
 		    QCoreApplication::applicationVersion()));
@@ -730,7 +782,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		}
 
 		/* Decouple model and show banner page. */
-		ui->messageList->setModel(0);
+		ui->messageList->setModel(Q_NULLPTR);
 		ui->messageStackedWidget->setCurrentIndex(0);
 		QString htmlMessage = "<div style=\"margin-left: 12px;\">"
 		    "<h3>" + tr("Database access error") + "</h3>" "<br/>";
@@ -843,8 +895,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	if (0 != msgTblMdl) {
 		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
 		Q_ASSERT(0 != mdl);
-		mdl->fillDocumentServiceColumn(-2);
-		mdl->fillTagsColumn(userName, -1);
+		mdl->fillDocumentServiceColumn(
+		    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+		mdl->fillTagsColumn(userName, DbMsgsTblModel::TAGS_NEG_COL);
 		/* TODO -- Add some labels. */
 	}
 
@@ -899,6 +952,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
 		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
+		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setReceivedColumnWidths();
 		received = true;
@@ -913,6 +967,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
 		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
+		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setSentColumnWidths();
 		received = false;
@@ -7111,7 +7166,8 @@ void MainWindow::uploadSelectedMessageToDocumentService(void)
 	QList<qint64> msgIdList;
 	msgIdList.append(msgId.dmId);
 
-	messageModel->refillDocumentServiceColumn(msgIdList, -2);
+	messageModel->refillDocumentServiceColumn(msgIdList,
+	    DbMsgsTblModel::DOC_SRVC_NEG_COL);
 }
 
 void MainWindow::showSignatureDetailsDialog(void)
@@ -8914,7 +8970,8 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList,
 		return;
 	}
 
-	messageModel->refillTagsColumn(userName, msgIdList, -1);
+	messageModel->refillTagsColumn(userName, msgIdList,
+	    DbMsgsTblModel::TAGS_NEG_COL);
 }
 
 /* ========================================================================= */

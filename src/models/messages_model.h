@@ -55,7 +55,9 @@ public:
 		ACCEPT_COL = 4, /* Acceptance time column. */
 		READLOC_COL = 5, /* Read locally. */
 		ATTDOWN_COL = 6, /* Attachments downloaded. */
-		PROCSNG_COL = 7 /* Processing state. */
+		PROCSNG_COL = 7, /* Processing state. */
+		DOC_SRVC_NEG_COL = -2, /* Document service. */
+		TAGS_NEG_COL = -1 /* Tags. */
 	};
 
 	/*!
