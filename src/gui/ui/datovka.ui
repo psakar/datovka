@@ -1232,7 +1232,7 @@ sent reply on this message</string>
   <action name="actionDocument_service_settings">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Document service settings</string>
@@ -1241,7 +1241,7 @@ sent reply on this message</string>
   <action name="actionUpload_to_document_service">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Upload to document service</string>
@@ -1250,7 +1250,7 @@ sent reply on this message</string>
   <action name="actionUpdate_document_service_information">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Update document service information</string>

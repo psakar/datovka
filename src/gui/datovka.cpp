@@ -296,7 +296,7 @@ MainWindow::MainWindow(QWidget *parent)
 	setUpUi();
 
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
-	    QString(), QIcon(ICON_3PARTY_PATH "up_16.png"),
+	    QString(), QIcon(ICON_3PARTY_PATH "briefcase_16.png"),
 	    tr("Uploaded to document service")));
 
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
@@ -8611,8 +8611,18 @@ void MainWindow::setMenuActionIcons(void)
 	    /* Separator. */
 	ui->actionProxy_settings->isEnabled();
 	    /* Separator. */
-	ui->actionDocument_service_settings->isEnabled();
-	ui->actionUpdate_document_service_information->isEnabled();
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionDocument_service_settings->setIcon(ico);
+	}
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionUpdate_document_service_information->setIcon(ico);
+	}
 	    /* Separator. */
 	{
 		QIcon ico;
@@ -8701,7 +8711,12 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionOpen_message_externally->isEnabled();
 	ui->actionOpen_delivery_info_externally->isEnabled();
 	    /* Separator. */
-	ui->actionUpload_to_document_service->isEnabled();
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionUpload_to_document_service->setIcon(ico);
+	}
 	    /* Separator. */
 	ui->actionExport_as_ZFO->isEnabled();
 	ui->actionExport_delivery_info_as_ZFO->isEnabled();
