@@ -24,6 +24,7 @@
         <file>icons/3party/block_16.png</file>
         <file>icons/3party/bookmark_16.png</file>
         <file>icons/3party/briefcase_16.png</file>
+        <file>icons/3party/briefcase_grey_16.png</file>
         <file>icons/3party/bubble_16.png</file>
         <file>icons/3party/buy_16.png</file>
         <file>icons/3party/calendar_16.png</file>
@@ -155,6 +156,7 @@
         <file>icons/3party/buy_32.png</file>
         <file>icons/3party/bubble_32.png</file>
         <file>icons/3party/briefcase_32.png</file>
+        <file>icons/3party/briefcase_grey_32.png</file>
         <file>icons/3party/bookmark_32.png</file>
         <file>icons/3party/block_32.png</file>
         <file>icons/3party/address_32.png</file>

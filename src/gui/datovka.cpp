@@ -296,7 +296,7 @@ MainWindow::MainWindow(QWidget *parent)
 	setUpUi();
 
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
-	    QString(), QIcon(ICON_3PARTY_PATH "briefcase_16.png"),
+	    QString(), QIcon(ICON_3PARTY_PATH "briefcase_grey_16.png"),
 	    tr("Uploaded to document service")));
 
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
