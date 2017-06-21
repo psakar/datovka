@@ -202,6 +202,9 @@ void DlgDocumentService::setUpGraphicsView(void)
 {
 	QGraphicsView *gv = m_ui->graphicsView;
 
+	gv->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	gv->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
 	gv->resize(150, 150);
 
 	gv->setScene(new (std::nothrow) QGraphicsScene(this));
