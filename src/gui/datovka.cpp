@@ -7105,9 +7105,16 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 		globWorkPool.runSingle(task); /* TODO -- Run in background. */
 
 		delete task; task = Q_NULLPTR;
-
-		break; /* TODO -- Remove. */
 	}
+
+	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
+	if (messageModel == Q_NULLPTR) {
+		Q_ASSERT(0);
+		return;
+	}
+	messageModel->fillDocumentServiceColumn(
+	    DbMsgsTblModel::DOC_SRVC_NEG_COL);
 }
 
 void MainWindow::uploadSelectedMessageToDocumentService(void)
