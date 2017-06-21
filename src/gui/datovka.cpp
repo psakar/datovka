@@ -7056,6 +7056,27 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 		    m_accountModel.userName(m_accountModel.index(row, 0)));
 	}
 
+	/* Update already held information. */
+	{
+		TaskDocumentServiceStoredMessages *task =
+		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
+		        globDocumentServiceSet.url,
+		        globDocumentServiceSet.token,
+		        TaskDocumentServiceStoredMessages::DS_UPDATE_STORED,
+		        Q_NULLPTR);
+		if (Q_NULLPTR == task) {
+			logErrorNL("%s",
+			    "Cannot create stored_files update task.");
+			return;
+		}
+		task->setAutoDelete(false);
+		/* This will block the GUI and all workers. */
+		globWorkPool.runSingle(task); /* TODO -- Run in background. */
+
+		delete task; task = Q_NULLPTR;
+	}
+
+	/* Download information about all messages. */
 	foreach (const QString &userName, userNames) {
 		logDebugLv0NL(
 		    "Planning download document service stored_files task for '%s'.",
@@ -7071,7 +7092,7 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
 		        globDocumentServiceSet.url,
 		        globDocumentServiceSet.token,
-		        TaskDocumentServiceStoredMessages::DS_UPDATE_STORED,
+		        TaskDocumentServiceStoredMessages::DS_DOWNLOAD_ALL,
 		        dbSet);
 		if (Q_NULLPTR == task) {
 			logErrorNL("Cannot create stored_files task for '%s'.",
