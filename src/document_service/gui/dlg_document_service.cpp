@@ -202,7 +202,7 @@ void DlgDocumentService::setUpGraphicsView(void)
 {
 	QGraphicsView *gv = m_ui->graphicsView;
 
-//	gv->resize(100, m_ui->graphicsView->height());
+	gv->resize(150, 150);
 
 	gv->setScene(new (std::nothrow) QGraphicsScene(this));
 	gv->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
@@ -221,6 +221,28 @@ void DlgDocumentService::setUpGraphicsView(void)
 	gv->setBackgroundBrush(tilePixmap);
 }
 
+/*!
+ * @brief Resize graphics item to fit graphics view.
+ *
+ * @param[in]     gv Graphics view.
+ * @param[in,out] gi Graphics item to be resized.
+ */
+static
+void resizeGraphicsItem(const QGraphicsView *gv, QGraphicsItem *gi)
+{
+	if ((Q_NULLPTR == gv) || (Q_NULLPTR == gi)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	qreal wscale = gv->geometry().size().width() /
+	    gi->boundingRect().size().width();
+	qreal hscale = gv->geometry().size().height() /
+	    gi->boundingRect().size().height();
+
+	gi->setScale((wscale < hscale) ? wscale : hscale);
+}
+
 void DlgDocumentService::displaySvg(const QByteArray &svgData)
 {
 	if (svgData.isEmpty()) {
@@ -231,8 +253,10 @@ void DlgDocumentService::displaySvg(const QByteArray &svgData)
 	QGraphicsScene *s = m_ui->graphicsView->scene();
 
 	QGraphicsSvgItem *svgItem = new (std::nothrow) QGraphicsSvgItem();
+	svgItem->setObjectName(QStringLiteral("svgItem"));;
 	{
-		QSvgRenderer *svgRenderer = new (std::nothrow) QSvgRenderer(svgData, this);
+		QSvgRenderer *svgRenderer =
+		    new (std::nothrow) QSvgRenderer(svgData, this);
 		svgItem->setSharedRenderer(svgRenderer);
 	}
 
@@ -242,14 +266,18 @@ void DlgDocumentService::displaySvg(const QByteArray &svgData)
 	svgItem->setFlags(QGraphicsItem::ItemClipsToShape);
 	svgItem->setCacheMode(QGraphicsItem::NoCache);
 	svgItem->setZValue(0);
+	resizeGraphicsItem(gv, svgItem);
 
-	QGraphicsRectItem *backgroundItem = new (std::nothrow) QGraphicsRectItem(svgItem->boundingRect());
+#if 0
+	QGraphicsRectItem *backgroundItem =
+	    new (std::nothrow) QGraphicsRectItem(svgItem->boundingRect());
 	backgroundItem->setBrush(Qt::white);
 	backgroundItem->setPen(Qt::NoPen);
 	backgroundItem->setVisible(false);
 	backgroundItem->setZValue(-1);
 
 	s->addItem(backgroundItem);
+#endif
 	s->addItem(svgItem);
 }
 
