@@ -101,6 +101,13 @@ private slots:
 
 private:
 	/*!
+	 * @brief Loads document service logo and sets the logo label.
+	 *
+	 * @param[in] width Sets the image width (and height).
+	 */
+	void loadDocumentServicePixmap(int width);
+
+	/*!
 	 * @brief Upload file into document service.
 	 *
 	 * @param[in,out] dsc Connection object.

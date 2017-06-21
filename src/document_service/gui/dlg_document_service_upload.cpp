@@ -22,8 +22,11 @@
  */
 
 #include <cinttypes>
+#include <QImage>
 #include <QMessageBox>
+#include <QPainter>
 #include <QString>
+#include <QSvgRenderer>
 
 #include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/document_service/json/upload_file.h"
@@ -49,8 +52,9 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Upload Message into Document Service"));
 
+	loadDocumentServicePixmap(64);
 	m_ui->appealLabel->setText(
-	    tr("Select the location where you want to upload the message '%1' into.")
+	    tr("Select the location where you want\nto upload the message '%1' into.")
 	        .arg(dmId));
 
 	connect(m_ui->reloadButton, SIGNAL(clicked(bool)),
@@ -194,6 +198,32 @@ void DlgDocumentServiceUpload::uploadHierarchySelectionChanged(void)
 void DlgDocumentServiceUpload::notifyCommunicationError(const QString &errMsg)
 {
 	QMessageBox::critical(this, tr("Communication Error"), errMsg);
+}
+
+void DlgDocumentServiceUpload::loadDocumentServicePixmap(int width)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		return;
+	}
+
+	QSvgRenderer renderer(this);
+	{
+		DocumentServiceDb::ServiceInfoEntry entry(
+		    globDocumentServiceDbPtr->serviceInfo());
+		if (!entry.isValid() || entry.logoSvg.isEmpty()) {
+			return;
+		}
+		renderer.load(entry.logoSvg);
+	}
+
+	QImage image(width, width, QImage::Format_ARGB32);
+	QPainter painter(&image);
+	renderer.render(&painter);
+
+	QPixmap pixmap;
+	pixmap.convertFromImage(image);
+
+	m_ui->pixmapLabel->setPixmap(pixmap);
 }
 
 /*!
