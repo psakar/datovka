@@ -22,15 +22,13 @@
  */
 
 #include <cinttypes>
-#include <QImage>
 #include <QMessageBox>
-#include <QPainter>
 #include <QString>
-#include <QSvgRenderer>
 
 #include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/document_service/json/upload_file.h"
 #include "src/document_service/json/upload_hierarchy.h"
+#include "src/graphics/graphics.h"
 #include "src/io/document_service_db.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/log/log.h"
@@ -206,24 +204,15 @@ void DlgDocumentServiceUpload::loadDocumentServicePixmap(int width)
 		return;
 	}
 
-	QSvgRenderer renderer(this);
-	{
-		DocumentServiceDb::ServiceInfoEntry entry(
-		    globDocumentServiceDbPtr->serviceInfo());
-		if (!entry.isValid() || entry.logoSvg.isEmpty()) {
-			return;
-		}
-		renderer.load(entry.logoSvg);
+	DocumentServiceDb::ServiceInfoEntry entry(
+	    globDocumentServiceDbPtr->serviceInfo());
+	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
+		return;
 	}
-
-	QImage image(width, width, QImage::Format_ARGB32);
-	QPainter painter(&image);
-	renderer.render(&painter);
-
-	QPixmap pixmap;
-	pixmap.convertFromImage(image);
-
-	m_ui->pixmapLabel->setPixmap(pixmap);
+	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, width));
+	if (!pixmap.isNull()) {
+		m_ui->pixmapLabel->setPixmap(pixmap);
+	}
 }
 
 /*!
