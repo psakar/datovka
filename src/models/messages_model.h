@@ -249,6 +249,12 @@ public:
 	    const QList<qint64> &dmIds, int col);
 
 	/*!
+	 * @brief Sets document service notification icon.
+	 * @return True on success.
+	 */
+	bool setDocumentServiceIcon(void);
+
+	/*!
 	 * @brief Fills the model with document service information.
 	 *
 	 * @param[in] col Negative number specifying the column to write into.
@@ -286,6 +292,8 @@ private:
 	                          * Number of columns when displaying sent
 	                          * messages (without added columns).
 	                          */
+
+	QIcon m_dsIco; /*!< Document service icon. */
 };
 
 #endif /* _MESSAGES_MODEL_H_ */

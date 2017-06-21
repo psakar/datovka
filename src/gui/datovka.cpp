@@ -895,6 +895,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	if (0 != msgTblMdl) {
 		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
 		Q_ASSERT(0 != mdl);
+		mdl->setDocumentServiceIcon();
 		mdl->fillDocumentServiceColumn(
 		    DbMsgsTblModel::DOC_SRVC_NEG_COL);
 		mdl->fillTagsColumn(userName, DbMsgsTblModel::TAGS_NEG_COL);

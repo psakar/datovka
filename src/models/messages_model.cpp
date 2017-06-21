@@ -25,6 +25,7 @@
 
 #include "src/common.h"
 #include "src/delegates/tag_item.h"
+#include "src/graphics/graphics.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/document_service_db.h"
@@ -44,7 +45,8 @@ const int DbMsgsTblModel::sntMsgsColCnt(7);
 
 DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
     : TblModel(parent),
-    m_type(type)
+    m_type(type),
+    m_dsIco(ICON_3PARTY_PATH "up_16.png")
 {
 }
 
@@ -64,7 +66,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			    _data(index, Qt::DisplayRole).toStringList());
 			switch (role) {
 			case Qt::DecorationRole:
-				return locations.isEmpty() ? QVariant() : QIcon(ICON_3PARTY_PATH "up_16.png");
+				return locations.isEmpty() ? QVariant() : m_dsIco;
 				break;
 			case Qt::ToolTipRole:
 				return locations.join("\n");
@@ -82,7 +84,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			    _data(index, Qt::DisplayRole).toStringList());
 			switch (role) {
 			case Qt::DecorationRole:
-				return locations.isEmpty() ? QVariant() : QIcon(ICON_3PARTY_PATH "up_16.png");
+				return locations.isEmpty() ? QVariant() : m_dsIco;
 				break;
 			case Qt::ToolTipRole:
 				return locations.join("\n");
@@ -676,6 +678,29 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 		}
 	}
 
+	return true;
+}
+
+bool DbMsgsTblModel::setDocumentServiceIcon(void)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
+		return false;
+	}
+
+	DocumentServiceDb::ServiceInfoEntry entry(
+	    globDocumentServiceDbPtr->serviceInfo());
+	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
+		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
+		return false;
+	}
+	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, 16));
+	if (pixmap.isNull()) {
+		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
+		return false;
+	}
+
+	m_dsIco = QIcon(pixmap);
 	return true;
 }
 
