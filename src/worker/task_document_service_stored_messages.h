@@ -64,7 +64,7 @@ public:
 	 */
 	explicit TaskDocumentServiceStoredMessages(
 	    const QString &urlStr, const QString &tokenStr,
-	    enum Operation operation, MessageDbSet *dbSet,
+	    enum Operation operation, const MessageDbSet *dbSet,
 	    const QList<qint64> &exludedDmIds = QList<qint64>());
 
 	/*!

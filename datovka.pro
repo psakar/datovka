@@ -266,6 +266,7 @@ SOURCES += \
     src/dimensions/dimensions.cpp \
     src/document_service/conversion.cpp \
     src/document_service/gui/dlg_document_service.cpp \
+    src/document_service/gui/dlg_document_service_stored.cpp \
     src/document_service/gui/dlg_document_service_upload.cpp \
     src/document_service/io/document_service_connection.cpp \
     src/document_service/json/entry_error.cpp \
@@ -389,6 +390,7 @@ HEADERS += \
     src/dimensions/dimensions.h \
     src/document_service/conversion.h \
     src/document_service/gui/dlg_document_service.h \
+    src/document_service/gui/dlg_document_service_stored.h \
     src/document_service/gui/dlg_document_service_upload.h \
     src/document_service/io/document_service_connection.h \
     src/document_service/json/entry_error.h \
@@ -502,6 +504,7 @@ HEADERS += \
 
 FORMS += \
     src/document_service/ui/dlg_document_service.ui \
+    src/document_service/ui/dlg_document_service_stored.ui \
     src/document_service/ui/dlg_document_service_upload.ui \
     src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \

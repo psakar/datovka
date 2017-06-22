@@ -38,7 +38,7 @@
 
 TaskDocumentServiceStoredMessages::TaskDocumentServiceStoredMessages(
     const QString &urlStr, const QString &tokenStr, enum Operation operation,
-    MessageDbSet *dbSet, const QList<qint64> &exludedDmIds)
+    const MessageDbSet *dbSet, const QList<qint64> &exludedDmIds)
     : m_result(DS_DSM_ERR),
     m_url(urlStr),
     m_token(tokenStr),

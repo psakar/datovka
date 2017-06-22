@@ -47,6 +47,7 @@
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
 #include "src/document_service/gui/dlg_document_service.h"
+#include "src/document_service/gui/dlg_document_service_stored.h"
 #include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
@@ -7067,55 +7068,18 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 		    m_accountModel.userName(m_accountModel.index(row, 0)));
 	}
 
-	/* Update already held information. */
-	{
-		TaskDocumentServiceStoredMessages *task =
-		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
-		        globDocumentServiceSet.url,
-		        globDocumentServiceSet.token,
-		        TaskDocumentServiceStoredMessages::DS_UPDATE_STORED,
-		        Q_NULLPTR);
-		if (Q_NULLPTR == task) {
-			logErrorNL("%s",
-			    "Cannot create stored_files update task.");
-			return;
-		}
-		task->setAutoDelete(false);
-		/* This will block the GUI and all workers. */
-		globWorkPool.runSingle(task); /* TODO -- Run in background. */
-
-		delete task; task = Q_NULLPTR;
-	}
-
-	/* Download information about all messages. */
+	QList<DlgDocumentServiceStored::AcntData> accounts;
 	foreach (const QString &userName, userNames) {
-		logDebugLv0NL(
-		    "Planning download document service stored_files task for '%s'.",
-		    userName.toUtf8().constData());
-
 		MessageDbSet *dbSet = accountDbSet(userName, this);
 		if (Q_NULLPTR == dbSet) {
 			Q_ASSERT(0);
 			return;
 		}
-
-		TaskDocumentServiceStoredMessages *task =
-		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
-		        globDocumentServiceSet.url,
-		        globDocumentServiceSet.token,
-		        TaskDocumentServiceStoredMessages::DS_DOWNLOAD_ALL,
-		        dbSet);
-		if (Q_NULLPTR == task) {
-			logErrorNL("Cannot create stored_files task for '%s'.",
-			    userName.toUtf8().constData());
-			continue;
-		}
-		task->setAutoDelete(false);
-		/* This will block the GUI and all workers. */
-		globWorkPool.runSingle(task); /* TODO -- Run in background. */
-
-		delete task; task = Q_NULLPTR;
+		accounts.append(DlgDocumentServiceStored::AcntData(QString(), userName, dbSet));
 	}
+
+	DlgDocumentServiceStored::updateStoredInformation(
+	    globDocumentServiceSet, accounts, this);
 
 	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
 	    m_messageListProxyModel.sourceModel());
