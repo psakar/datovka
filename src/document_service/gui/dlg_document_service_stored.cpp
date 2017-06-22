@@ -25,11 +25,19 @@
 #include <QTimer>
 
 #include "src/document_service/gui/dlg_document_service_stored.h"
+#include "src/graphics/graphics.h"
 #include "src/io/document_service_db.h"
 #include "src/log/log.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_document_service_stored_messages.h"
 #include "ui_dlg_document_service_stored.h"
+
+#define LOGO_EDGE 64
+
+#define PROGRESS_MIN 0
+#define PROGRESS_MAX 100
+
+#define RUN_DELAY_MS 500
 
 DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
     const QString &tokenStr, const QList<AcntData> &accounts, QWidget *parent)
@@ -37,7 +45,8 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
     m_ui(new (std::nothrow) Ui::DlgDocumentServiceStored),
     m_url(urlStr),
     m_token(tokenStr),
-    m_accounts(accounts)
+    m_accounts(accounts),
+    m_taskIncr(PROGRESS_MAX / (1.0 + accounts.size()))
 {
 	Q_ASSERT(!m_url.isEmpty());
 	Q_ASSERT(!m_token.isEmpty());
@@ -45,9 +54,14 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Document Service Stored Messages"));
 
+	loadDocumentServicePixmap(LOGO_EDGE);
+
+	m_ui->taskProgress->setRange(PROGRESS_MIN, PROGRESS_MAX);
+	m_ui->taskProgress->setValue(PROGRESS_MIN);
+
 	m_ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 
-	QTimer::singleShot(500, this, SLOT(downloadAndStore()));
+	QTimer::singleShot(RUN_DELAY_MS, this, SLOT(downloadAndStore()));
 }
 
 DlgDocumentServiceStored::~DlgDocumentServiceStored(void)
@@ -74,11 +88,31 @@ bool DlgDocumentServiceStored::updateStoredInformation(
 	return true;
 }
 
+void DlgDocumentServiceStored::loadDocumentServicePixmap(int width)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		return;
+	}
+
+	DocumentServiceDb::ServiceInfoEntry entry(
+	    globDocumentServiceDbPtr->serviceInfo());
+	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
+		return;
+	}
+	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, width));
+	if (!pixmap.isNull()) {
+		m_ui->pixmapLabel->setPixmap(pixmap);
+	}
+}
+
 void DlgDocumentServiceStored::downloadAndStore(void)
 {
+	QProgressBar *pBar = m_ui->taskProgress;
+
 	QCoreApplication::processEvents();
 
 	/* Update already held information. */
+	m_ui->taskLabel->setText(tr("Updating stored information about messages."));
 	{
 		TaskDocumentServiceStoredMessages *task =
 		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
@@ -96,10 +130,16 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 
 		delete task; task = Q_NULLPTR;
 	}
+	pBar->setValue(pBar->value() + m_taskIncr);
 
 	foreach (const AcntData &account, m_accounts) {
+		m_ui->taskLabel->setText(
+		    tr("Downloading information about messages from account %1 (%2).")
+		        .arg(account.accountName).arg(account.userName));
+
 		if (account.dbSet == Q_NULLPTR) {
 			Q_ASSERT(0);
+			pBar->setValue(pBar->value() + m_taskIncr);
 			continue;
 		}
 
@@ -114,6 +154,7 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 		if (Q_NULLPTR == task) {
 			logErrorNL("Cannot create stored_files task for '%s'.",
 			    account.userName.toUtf8().constData());
+			pBar->setValue(pBar->value() + m_taskIncr);
 			continue;
 		}
 		task->setAutoDelete(false);
@@ -121,7 +162,11 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 		globWorkPool.runSingle(task); /* TODO -- Run in background. */
 
 		delete task; task = Q_NULLPTR;
+
+		pBar->setValue(pBar->value() + m_taskIncr);
 	}
+
+	pBar->setValue(PROGRESS_MAX);
 
 	QCoreApplication::processEvents();
 

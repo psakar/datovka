@@ -7075,7 +7075,9 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 			Q_ASSERT(0);
 			return;
 		}
-		accounts.append(DlgDocumentServiceStored::AcntData(QString(), userName, dbSet));
+		accounts.append(DlgDocumentServiceStored::AcntData(
+		    AccountModel::globAccounts[userName].accountName(),
+		    userName, dbSet));
 	}
 
 	DlgDocumentServiceStored::updateStoredInformation(

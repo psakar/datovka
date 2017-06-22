@@ -50,11 +50,11 @@ public:
 	public:
 		AcntData(const QString &aName, const QString &uName,
 		    const MessageDbSet *dSet)
-		    : acountName(aName), userName(uName), dbSet(dSet)
+		    : accountName(aName), userName(uName), dbSet(dSet)
 		{
 		}
 
-		QString acountName; /*!< Account name. */
+		QString accountName; /*!< Account name. */
 		QString userName; /*!< User name (login). */
 		const MessageDbSet *dbSet; /*!< Database set related to account. */
 	};
@@ -91,14 +91,26 @@ public:
 	    const QList<AcntData> &accounts, QWidget *parent = Q_NULLPTR);
 
 private slots:
+	/*!
+	 * @brief Performs the download action.
+	 */
 	void downloadAndStore(void);
 
 private:
+	/*!
+	 * @brief Loads document service logo and sets the logo label.
+	 *
+	 * @param[in] width Sets the image width (and height).
+	 */
+	void loadDocumentServicePixmap(int width);
+
 	Ui::DlgDocumentServiceStored *m_ui; /*!< UI generated from UI file. */
 
 	const QString m_url; /*!< Document service URL. */
 	const QString m_token; /*!< Document service access token. */
 	const QList<AcntData> &m_accounts; /*!< Account to use. */
+
+	int m_taskIncr; /*!< Task progress bar increment. */
 };
 
 #endif /* _DLG_DOCUMENT_SERVICE_STORED_H_ */

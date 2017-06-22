@@ -36,6 +36,8 @@
 
 #define IGNORE_SSL_ERRORS true
 
+#define LOGO_EDGE 64
+
 DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
     const QString &tokenStr, qint64 dmId, QWidget *parent)
     : QDialog(parent),
@@ -50,7 +52,7 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Upload Message into Document Service"));
 
-	loadDocumentServicePixmap(64);
+	loadDocumentServicePixmap(LOGO_EDGE);
 	m_ui->appealLabel->setText(
 	    tr("Select the location where you want\nto upload the message '%1' into.")
 	        .arg(dmId));
