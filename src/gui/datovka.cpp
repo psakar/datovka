@@ -5529,7 +5529,12 @@ void MainWindow::setReceivedColumnWidths(void)
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last three columns display icons. */
-	for (; i < DbMsgsTblModel::rcvdItemIds().size(); ++i) {
+	int max = DbMsgsTblModel::rcvdItemIds().size();
+	if (globDocumentServiceSet.isSet()) {
+		/* Add one column if document service is activated. */
+		++max;
+	}
+	for (; i < max; ++i) {
 		ui->messageList->setColumnWidth(i, 24);
 	}
 	if (m_sort_order == "SORT_ASCENDING") {
@@ -5559,7 +5564,12 @@ void MainWindow::setSentColumnWidths(void)
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last column displays an icon. */
-	for (; i < DbMsgsTblModel::rcvdItemIds().size(); ++i) {
+	int max = DbMsgsTblModel::rcvdItemIds().size();
+	if (globDocumentServiceSet.isSet()) {
+		/* Add one column if document service is activated. */
+		++max;
+	}
+	for (; i < max; ++i) {
 		ui->messageList->setColumnWidth(i, 24);
 	}
 	if (m_sort_order == "SORT_ASCENDING") {
