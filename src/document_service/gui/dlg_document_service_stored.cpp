@@ -130,7 +130,7 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 		}
 
 		m_ui->taskLabel->setText(
-		    tr("Downloading information about messages from account %1 (%2).")
+		    tr("Downloading information about messages from account:\n%1 (%2).")
 		        .arg(account.accountName).arg(account.userName));
 
 		if (account.dbSet == Q_NULLPTR) {
