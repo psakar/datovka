@@ -93,8 +93,6 @@
     <property name="title">
      <string>Service</string>
     </property>
-    <addaction name="ui_actionGetAllClients"/>
-    <addaction name="separator"/>
     <addaction name="ui_actionServiceInfo"/>
     <addaction name="ui_actionUploadHierarchy"/>
     <addaction name="ui_actionUploadFile"/>

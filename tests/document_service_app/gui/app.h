@@ -43,8 +43,6 @@ public:
 private slots:
 	void filterHierarchy(const QString &text);
 
-	void callSrvcGetAllClients(void);
-
 	void callSrvcServiceInfo(void);
 
 	void callSrvcUploadHierarchy(void);

@@ -123,27 +123,6 @@ void MainWindow::filterHierarchy(const QString &text)
 	}
 }
 
-void MainWindow::callSrvcGetAllClients(void)
-{
-	ui_textEdit->clear();
-
-	QByteArray response;
-
-	if (m_dsc.communicate(DocumentServiceConnection::SRVC_GET_ALL_CLIENTS,
-	        QByteArray(), response)) {
-		QString responseStr(JsonHelper::toIndentedString(response));
-		if (!response.isEmpty() && responseStr.isEmpty()) {
-			ui_textEdit->append(QStringLiteral("Could not parse obtained response.\n"));
-			ui_textEdit->append(QStringLiteral("\n"));
-			ui_textEdit->append(QString::fromUtf8(response));
-		} else {
-			ui_textEdit->append(responseStr);
-		}
-	} else {
-		ui_textEdit->append(QStringLiteral("Service failed."));
-	}
-}
-
 void MainWindow::callSrvcServiceInfo(void)
 {
 	ui_textEdit->clear();
