@@ -96,6 +96,11 @@ private slots:
 	 */
 	void downloadAndStore(void);
 
+	/*!
+	 * @brief Set variable to cancel the download loop.
+	 */
+	void cancelLoop(void);
+
 private:
 	/*!
 	 * @brief Loads document service logo and sets the logo label.
@@ -111,6 +116,8 @@ private:
 	const QList<AcntData> &m_accounts; /*!< Account to use. */
 
 	int m_taskIncr; /*!< Task progress bar increment. */
+
+	bool m_cancel; /*!< Set by slot to cancel loop. */
 };
 
 #endif /* _DLG_DOCUMENT_SERVICE_STORED_H_ */

@@ -46,7 +46,8 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
     m_url(urlStr),
     m_token(tokenStr),
     m_accounts(accounts),
-    m_taskIncr(PROGRESS_MAX / (1.0 + accounts.size()))
+    m_taskIncr(PROGRESS_MAX / (1.0 + accounts.size())),
+    m_cancel(false)
 {
 	Q_ASSERT(!m_url.isEmpty());
 	Q_ASSERT(!m_token.isEmpty());
@@ -60,6 +61,8 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
 	m_ui->taskProgress->setValue(PROGRESS_MIN);
 
 	m_ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
+
+	connect(m_ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancelLoop()));
 
 	QTimer::singleShot(RUN_DELAY_MS, this, SLOT(downloadAndStore()));
 }
@@ -88,23 +91,6 @@ bool DlgDocumentServiceStored::updateStoredInformation(
 	return true;
 }
 
-void DlgDocumentServiceStored::loadDocumentServicePixmap(int width)
-{
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
-		return;
-	}
-
-	DocumentServiceDb::ServiceInfoEntry entry(
-	    globDocumentServiceDbPtr->serviceInfo());
-	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
-		return;
-	}
-	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, width));
-	if (!pixmap.isNull()) {
-		m_ui->pixmapLabel->setPixmap(pixmap);
-	}
-}
-
 void DlgDocumentServiceStored::downloadAndStore(void)
 {
 	QProgressBar *pBar = m_ui->taskProgress;
@@ -112,8 +98,14 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 	QCoreApplication::processEvents();
 
 	/* Update already held information. */
-	m_ui->taskLabel->setText(tr("Updating stored information about messages."));
 	{
+		if (m_cancel) {
+			goto cancel;
+		}
+
+		m_ui->taskLabel->setText(
+		    tr("Updating stored information about messages."));
+
 		TaskDocumentServiceStoredMessages *task =
 		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
 		        m_url, m_token,
@@ -133,6 +125,10 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 	pBar->setValue(pBar->value() + m_taskIncr);
 
 	foreach (const AcntData &account, m_accounts) {
+		if (m_cancel) {
+			goto cancel;
+		}
+
 		m_ui->taskLabel->setText(
 		    tr("Downloading information about messages from account %1 (%2).")
 		        .arg(account.accountName).arg(account.userName));
@@ -166,9 +162,32 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 		pBar->setValue(pBar->value() + m_taskIncr);
 	}
 
+cancel:
 	pBar->setValue(PROGRESS_MAX);
 
 	QCoreApplication::processEvents();
 
 	this->close();
+}
+
+void DlgDocumentServiceStored::cancelLoop(void)
+{
+	m_cancel = true;
+}
+
+void DlgDocumentServiceStored::loadDocumentServicePixmap(int width)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		return;
+	}
+
+	DocumentServiceDb::ServiceInfoEntry entry(
+	    globDocumentServiceDbPtr->serviceInfo());
+	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
+		return;
+	}
+	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, width));
+	if (!pixmap.isNull()) {
+		m_ui->pixmapLabel->setPixmap(pixmap);
+	}
 }
