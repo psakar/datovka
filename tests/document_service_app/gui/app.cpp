@@ -127,31 +127,36 @@ void MainWindow::callSrvcServiceInfo(void)
 {
 	ui_textEdit->clear();
 
-	/* Create dummy response. */
-	QByteArray jsonSI(
-	    jsonServiceInfo(QLatin1String(SVG_PATH),
-	        QStringLiteral("Dummy Document Dervice"),
-	        QStringLiteral("Dummy Token")));
-	ServiceInfoResp sires(ServiceInfoResp::fromJson(jsonSI));
-
 	QByteArray response;
 	if (m_dsc.communicate(DocumentServiceConnection::SRVC_SERVICE_INFO,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
-			sires = ServiceInfoResp::fromJson(response);
+			bool ok = false;
+			ServiceInfoResp siRes(
+			    ServiceInfoResp::fromJson(response, &ok));
 			ui_textEdit->append(JsonHelper::toIndentedString(response));
+			if (!ok || !siRes.isValid()) {
+				QMessageBox::critical(this,
+				    tr("Communication Error"),
+				    tr("Received invalid response."));
+				return;
+			}
+
+			/* Show dialogue. */
+			DialogueServiceInfo dlg(siRes, qobject_cast<QWidget *>(this));
+			dlg.exec();
 		} else {
 			ui_textEdit->append(QStringLiteral("Empty response."));
-			ui_textEdit->append(QStringLiteral("Using dummy response."));
+			QMessageBox::critical(this, tr("Communication Error"),
+			    tr("Received empty response."));
+			return;
 		}
 	} else {
-		ui_textEdit->append(QStringLiteral("Service failed."));
-		ui_textEdit->append(QStringLiteral("Using dummy response."));
+		ui_textEdit->append(QStringLiteral("Service call failed."));
+		QMessageBox::critical(this, tr("Communication Error"),
+		    tr("Service failed."));
+		return;
 	}
-
-	/* Show dialogue. */
-	DialogueServiceInfo dlg(sires, qobject_cast<QWidget *>(this));
-	dlg.exec();
 }
 
 void MainWindow::callSrvcUploadHierarchy(void)
@@ -159,28 +164,35 @@ void MainWindow::callSrvcUploadHierarchy(void)
 	ui_textEdit->clear();
 	m_uploadModel.setHierarchy(UploadHierarchyResp());
 
-	/* Create dummy response. */
-	UploadHierarchyResp uhres(
-	    UploadHierarchyResp::fromJson(jsonUploadHierarchy()));
-
 	QByteArray response;
 	if (m_dsc.communicate(DocumentServiceConnection::SRVC_UPLOAD_HIERARCHY,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
-			uhres = UploadHierarchyResp::fromJson(response);
+			bool ok = false;
+			UploadHierarchyResp uhRes(
+			    UploadHierarchyResp::fromJson(response, &ok));
 			ui_textEdit->append(JsonHelper::toIndentedString(response));
+			if (!ok || !uhRes.isValid()) {
+				QMessageBox::critical(this,
+				    tr("Communication Error"),
+				    tr("Received invalid response."));
+				return;
+			}
+
+			m_uploadModel.setHierarchy(uhRes);
+			ui_treeView->expandAll();
 		} else {
 			ui_textEdit->append(QStringLiteral("Empty response."));
-			ui_textEdit->append(QStringLiteral("Using dummy response."));
+			QMessageBox::critical(this, tr("Communication Error"),
+			    tr("Received empty response."));
+			return;
 		}
 	} else {
-		ui_textEdit->append(QStringLiteral("Service failed."));
-		ui_textEdit->append(QStringLiteral("Using dummy response."));
+		ui_textEdit->append(QStringLiteral("Service call failed."));
+		QMessageBox::critical(this, tr("Communication Error"),
+		    tr("Service failed."));
+		return;
 	}
-
-	m_uploadModel.setHierarchy(uhres);
-
-	ui_treeView->expandAll();
 }
 
 /*!
@@ -256,19 +268,31 @@ void MainWindow::callSrvcUploadFile(void)
 	ui_textEdit->append(ufreq.toJson());
 
 	QByteArray response;
-	UploadFileResp ufres(UploadFileResp::fromJson(QByteArray()));
 	if (m_dsc.communicate(DocumentServiceConnection::SRVC_UPLOAD_FILE,
 	        ufreq.toJson(), response)) {
 		if (!response.isEmpty()) {
-			ufres = UploadFileResp::fromJson(response);
+			bool ok = false;
+			UploadFileResp ufRes(
+			    UploadFileResp::fromJson(response, &ok));
 			ui_textEdit->append(JsonHelper::toIndentedString(response));
+			if (!ok || !ufRes.isValid()) {
+				QMessageBox::critical(this,
+				    tr("Communication Error"),
+				    tr("Received invalid response."));
+				return;
+			}
+
 		} else {
 			ui_textEdit->append(QStringLiteral("Empty response."));
-			ui_textEdit->append(QStringLiteral("Using dummy response."));
+			QMessageBox::critical(this, tr("Communication Error"),
+			    tr("Received empty response."));
+			return;
 		}
 	} else {
-		ui_textEdit->append(QStringLiteral("Service failed."));
-		ui_textEdit->append(QStringLiteral("Using dummy response."));
+		ui_textEdit->append(QStringLiteral("Service call failed."));
+		QMessageBox::critical(this, tr("Communication Error"),
+		    tr("Service failed."));
+		return;
 	}
 }
 
@@ -284,24 +308,39 @@ void MainWindow::callSrvcStoredFiles(void)
 
 	StoredFilesReq sfreq(ids.dmIds, ids.diIds);
 	if (!sfreq.isValid()) {
-		ui_textEdit->append(QStringLiteral("Could not create stored files request."));
+		ui_textEdit->append(
+		    QStringLiteral("Could not create stored files request."));
 		return;
 	}
 
 	ui_textEdit->append(sfreq.toJson());
 
 	QByteArray response;
-	StoredFilesResp sfres(StoredFilesResp::fromJson(QByteArray()));
 	if (m_dsc.communicate(DocumentServiceConnection::SRVC_STORED_FILES,
 	        sfreq.toJson(), response)) {
 		if (!response.isEmpty()) {
-			sfres = StoredFilesResp::fromJson(response);
+			bool ok = false;
+			StoredFilesResp sfRes(
+			    StoredFilesResp::fromJson(response, &ok));
 			ui_textEdit->append(JsonHelper::toIndentedString(response));
+			if (!ok || !sfRes.isValid()) {
+				QMessageBox::critical(this,
+				    tr("Communication Error"),
+				    tr("Received invalid response."));
+				return;
+			}
+
 		} else {
 			ui_textEdit->append(QStringLiteral("Empty response."));
+			QMessageBox::critical(this, tr("Communication Error"),
+			    tr("Received empty response."));
+			return;
 		}
 	} else {
-		ui_textEdit->append(QStringLiteral("Service failed."));
+		ui_textEdit->append(QStringLiteral("Service call failed."));
+		QMessageBox::critical(this, tr("Communication Error"),
+		    tr("Service failed."));
+		return;
 	}
 }
 
@@ -345,9 +384,6 @@ void MainWindow::connectTopMenuBarActions(void)
 	connect(ui_actionQuit, SIGNAL(triggered()), this, SLOT(close()));
 
 	/* Service menu. */
-	connect(ui_actionGetAllClients, SIGNAL(triggered()),
-	    this, SLOT(callSrvcGetAllClients()));
-	    /* Separator. */
 	connect(ui_actionServiceInfo, SIGNAL(triggered()),
 	    this, SLOT(callSrvcServiceInfo()));
 	connect(ui_actionUploadHierarchy, SIGNAL(triggered()),
