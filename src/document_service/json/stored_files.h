@@ -24,7 +24,9 @@
 #ifndef _STORED_FILES_H_
 #define _STORED_FILES_H_
 
+#include <QByteArray>
 #include <QList>
+#include <QStringList>
 
 #include "src/document_service/json/entry_error.h"
 
@@ -101,11 +103,6 @@ private:
 	QList<qint64> m_dmIds; /*!< Data message identifiers. */
 	QList<qint64> m_diIds; /*!< Delivery info identifiers. */
 };
-
-/*!
- * @brief Returns stored files request.
- */
-StoredFilesReq storedFilesRequest(void);
 
 /*!
  * @brief Encapsulates stored_files data message entry structure.
@@ -342,10 +339,5 @@ private:
 	int m_limit; /*!< Request limit, must be greater than zero. */
 	ErrorEntry m_error; /*!< Encountered error. */
 };
-
-/*!
- * @brief Returns JSON data.
- */
-QByteArray jsonStoredFilesResp(void);
 
 #endif /* _STORED_FILES_H_ */

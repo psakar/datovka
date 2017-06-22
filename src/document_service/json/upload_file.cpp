@@ -21,8 +21,6 @@
  * the two.
  */
 
-#include <QFile>
-#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -157,49 +155,6 @@ QByteArray UploadFileReq::toJson(void) const
 	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
 }
 
-UploadFileReq uploadFileRequest(const QStringList &ids, const QString &filePath)
-{
-	if (ids.isEmpty()) {
-		qCritical("%s", "No identifier provided.");
-		return UploadFileReq(QStringList(), QString(), QByteArray());
-	}
-	foreach (const QString &id, ids) {
-		if (id.isEmpty()) {
-			qCritical("%s", "Empty identifier provided.");
-			return UploadFileReq(QStringList(), QString(),
-			    QByteArray());
-		}
-	}
-
-	if (filePath.isEmpty()) {
-		qCritical("%s", "No path to SVG file.");
-		return UploadFileReq(QStringList(), QString(), QByteArray());
-	}
-
-	QByteArray fileContent;
-	{
-		QFile file(filePath);
-		if (!file.open(QIODevice::ReadOnly)) {
-			qCritical("Cannot open file '%s',",
-			    filePath.toUtf8().constData());
-			return UploadFileReq(QStringList(), QString(),
-			    QByteArray());
-		}
-
-		fileContent = file.readAll();
-
-		file.close();
-	}
-
-	QString fileName;
-	{
-		QFileInfo fileInfo(filePath);
-		fileName = fileInfo.fileName();
-	}
-
-	return UploadFileReq(ids, fileName, fileContent);
-}
-
 UploadFileResp::UploadFileResp(void)
     : m_id(),
     m_error(),
@@ -300,18 +255,6 @@ QByteArray UploadFileResp::toJson(void) const
 	m_error.toJsonVal(&jsonVal);
 	jsonObj.insert(keyError, jsonVal);
 	jsonObj.insert(keyLocations, QJsonArray::fromStringList(m_locations));
-
-	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
-}
-
-QByteArray jsonUploadFileResp(void)
-{
-	QJsonObject jsonObj;
-	jsonObj.insert(keyId, QStringLiteral("aabbccddee"));
-	jsonObj.insert(keyError, QJsonValue());
-	QStringList locationList;
-	locationList << "tady" << "a tady" << "a také tady";
-	jsonObj.insert(keyLocations, QJsonArray::fromStringList(locationList));
 
 	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
 }

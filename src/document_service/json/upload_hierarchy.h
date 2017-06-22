@@ -24,8 +24,10 @@
 #ifndef _UPLOAD_HIERARCHY_H_
 #define _UPLOAD_HIERARCHY_H_
 
+#include <QByteArray>
 #include <QList>
 #include <QString>
+#include <QStringList>
 
 class QJsonObject; /* Forward declaration. */
 
@@ -200,10 +202,5 @@ public:
 private:
 	NodeEntry *m_root; /*!< Tree root. */
 };
-
-/*!
- * @brief Returns JSON data.
- */
-QByteArray jsonUploadHierarchy(void);
 
 #endif /* _UPLOAD_HIERARCHY_H_ */

@@ -21,7 +21,6 @@
  * the two.
  */
 
-#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -131,40 +130,6 @@ QByteArray ServiceInfoResp::toJson(void) const
 	jsonObj.insert(keyName, !m_name.isNull() ? m_name : QJsonValue());
 	jsonObj.insert(keyTokenName, !m_tokenName.isNull() ?
 	    m_tokenName : QJsonValue());
-
-	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
-}
-
-QByteArray jsonServiceInfo(const QString &svgPath, const QString &name,
-    const QString &tokenName)
-{
-	if (svgPath.isEmpty()) {
-		qCritical("%s", "No path to SVG file.");
-		return QByteArray();
-	}
-
-	QByteArray svgData;
-	{
-		QFile file(svgPath);
-		if (!file.open(QIODevice::ReadOnly)) {
-			qCritical("Cannot open file '%s',",
-			    svgPath.toUtf8().constData());
-			return QByteArray();
-		}
-
-		svgData = file.readAll();
-
-		file.close();
-	}
-	if (svgData.isEmpty()) {
-		qCritical("File '%s' is empty.", svgPath.toUtf8().constData());
-		return QByteArray();
-	}
-
-	QJsonObject jsonObj;
-	jsonObj.insert(keyLogoSvg, QString::fromUtf8(svgData.toBase64()));
-	jsonObj.insert(keyName, name);
-	jsonObj.insert(keyTokenName, tokenName);
 
 	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
 }

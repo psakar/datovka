@@ -25,8 +25,9 @@
 #define _UPLOAD_FILE_H_
 
 #include <QByteArray>
-#include <QString>
 #include <QList>
+#include <QString>
+#include <QStringList>
 
 #include "src/document_service/json/entry_error.h"
 
@@ -113,12 +114,6 @@ private:
 };
 
 /*!
- * @brief Returns upload file request.
- */
-UploadFileReq uploadFileRequest(const QStringList &ids,
-    const QString &filePath);
-
-/*!
  * @brief Encapsulates the upload_file response.
  */
 class UploadFileResp {
@@ -200,10 +195,5 @@ private:
 	ErrorEntry m_error; /*!< Brief error entry. */
 	QStringList m_locations; /*!< Where the uploaded file is located in the service. */
 };
-
-/*!
- * @brief Returns JSON data.
- */
-QByteArray jsonUploadFileResp(void);
 
 #endif /* _UPLOAD_FILE_H_ */

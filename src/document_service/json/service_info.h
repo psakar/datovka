@@ -108,10 +108,4 @@ private:
 	QString m_tokenName; /*!< Obtained token identifier. */
 };
 
-/*!
- * @brief Returns JSON data.
- */
-QByteArray jsonServiceInfo(const QString &svgPath, const QString &name,
-    const QString &tokenName);
-
 #endif /* _SERVICE_INFO_H_ */

@@ -169,15 +169,6 @@ QByteArray StoredFilesReq::toJson(void) const
 	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
 }
 
-StoredFilesReq storedFilesRequest(void)
-{
-	QList<qint64> dmIds, diIds;
-	dmIds << 2 << 4 << 6 << 8;
-	diIds << 1 << 3 << 5 << 7;
-
-	return StoredFilesReq(dmIds, diIds);
-}
-
 DmEntry::DmEntry(void)
     : m_dmId(-1),
     m_locations()
@@ -521,38 +512,6 @@ QByteArray StoredFilesResp::toJson(void) const
 	QJsonValue jsonVal;
 	m_error.toJsonVal(&jsonVal);
 	jsonObj.insert(keyError, jsonVal);
-
-	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
-}
-
-QByteArray jsonStoredFilesResp(void)
-{
-	QJsonObject jsonObj;
-	{
-		QJsonArray dms;
-		QJsonValue jsonVal;
-
-		DmEntry(1, QStringList()).toJsonVal(&jsonVal);
-		dms.append(jsonVal);
-
-		QStringList locations; locations << "tady" << " a tady" << "a také tady";
-		DmEntry(2, locations).toJsonVal(&jsonVal);
-		dms.append(jsonVal);
-
-		jsonObj.insert(keyDms, dms);
-	}
-	{
-		QJsonArray dis;
-		QJsonValue jsonVal;
-
-		DiEntry(3, QStringList("někde jinde")).toJsonVal(&jsonVal);
-		dis.append(jsonVal);
-
-		jsonObj.insert(keyDis, dis);
-	}
-
-	jsonObj.insert(keyLimit, QString::number(200));
-	jsonObj.insert(keyError, QJsonValue());
 
 	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
 }
