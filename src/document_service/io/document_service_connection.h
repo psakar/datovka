@@ -39,7 +39,6 @@ class DocumentServiceConnection : public QObject {
 
 public:
 	enum ServiceId {
-		SRVC_GET_ALL_CLIENTS,
 		SRVC_SERVICE_INFO,
 		SRVC_UPLOAD_HIERARCHY,
 		SRVC_UPLOAD_FILE,

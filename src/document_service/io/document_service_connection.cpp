@@ -37,7 +37,6 @@
 static
 const QString &serviceName(enum DocumentServiceConnection::ServiceId srvcId)
 {
-	static const QString SrvGetAllClients(QStringLiteral("clients"));
 	static const QString SrvServiceInfo(QStringLiteral("service_info"));
 	static const QString SrvUploadHierarchy(QStringLiteral("upload_hierarchy"));
 	static const QString SrvUploadFile(QStringLiteral("upload_file"));
@@ -45,9 +44,6 @@ const QString &serviceName(enum DocumentServiceConnection::ServiceId srvcId)
 	static const QString InvalidService;
 
 	switch (srvcId) {
-	case DocumentServiceConnection::SRVC_GET_ALL_CLIENTS:
-		return SrvGetAllClients;
-		break;
 	case DocumentServiceConnection::SRVC_SERVICE_INFO:
 		return SrvServiceInfo;
 		break;
