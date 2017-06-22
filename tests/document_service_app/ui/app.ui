@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_1">
+      <item>
+       <widget class="QSplitter" name="ui_vSplitter">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <widget class="QWidget" name="verticalLayoutWidget">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <layout class="QFormLayout" name="formLayout">
+            <item row="1" column="0">
+             <widget class="QLabel" name="ui_baseUrlLabel">
+              <property name="text">
+               <string>Base URL:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLineEdit" name="ui_baseUrlLine"/>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="ui_tokenLabel">
+              <property name="text">
+               <string>Token:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLineEdit" name="ui_tokenLine"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="ui_filterLabel">
+              <property name="text">
+               <string>Filter:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="ui_filterLine"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QTreeView" name="ui_treeView"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QTextEdit" name="ui_textEdit"/>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="ui_menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="ui_menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="ui_actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="ui_menuService">
+    <property name="title">
+     <string>Service</string>
+    </property>
+    <addaction name="ui_actionGetAllClients"/>
+    <addaction name="separator"/>
+    <addaction name="ui_actionServiceInfo"/>
+    <addaction name="ui_actionUploadHierarchy"/>
+    <addaction name="ui_actionUploadFile"/>
+    <addaction name="ui_actionStoredFiles"/>
+   </widget>
+   <widget class="QMenu" name="ui_menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="ui_actionAbout"/>
+   </widget>
+   <addaction name="ui_menuFile"/>
+   <addaction name="ui_menuService"/>
+   <addaction name="ui_menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="ui_actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+   <property name="toolTip">
+    <string>Quit the application</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="ui_actionGetAllClients">
+   <property name="text">
+    <string>Get All Clients</string>
+   </property>
+  </action>
+  <action name="ui_actionServiceInfo">
+   <property name="text">
+    <string>Service Info</string>
+   </property>
+  </action>
+  <action name="ui_actionUploadHierarchy">
+   <property name="text">
+    <string>Upload Hierarchy</string>
+   </property>
+  </action>
+  <action name="ui_actionUploadFile">
+   <property name="text">
+    <string>Upload File</string>
+   </property>
+  </action>
+  <action name="ui_actionStoredFiles">
+   <property name="text">
+    <string>Stored Files</string>
+   </property>
+  </action>
+  <action name="ui_actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
