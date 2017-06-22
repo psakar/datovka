@@ -26,6 +26,7 @@
 
 #include <QList>
 #include <QString>
+#include <QStringList>
 
 #include "src/io/sqlite/db.h"
 

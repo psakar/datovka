@@ -25,6 +25,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QSqlRecord>
+#include <QVariant>
 
 #include "src/io/db_tables.h"
 #include "src/io/document_service_db.h"
