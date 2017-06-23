@@ -4984,8 +4984,10 @@ void MainWindow::showSendMessageDialog(int action)
 			}
 
 			if (!messageDb->msgsStoredWhole(msgId.dmId)) {
-				messageMissingOfferDownload(msgId,
-				    tr("Full message not present!"));
+				if (!messageMissingOfferDownload(msgId,
+				    tr("Full message not present!"))) {
+					return;
+				}
 			}
 
 			msgIds.append(msgId);
