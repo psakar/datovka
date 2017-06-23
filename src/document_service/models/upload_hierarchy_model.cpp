@@ -150,8 +150,6 @@ QVariant UploadHierarchyModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 		break;
 	}
-
-	return QVariant(); /* This line is not necessary. */
 }
 
 QVariant UploadHierarchyModel::headerData(int section,
