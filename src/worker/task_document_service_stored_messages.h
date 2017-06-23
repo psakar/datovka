@@ -73,6 +73,13 @@ public:
 	virtual
 	void run(void) Q_DECL_OVERRIDE;
 
+	/*!
+	 * @brief Returns task identifier.
+	 *
+	 * @return Task identifier string.
+	 */
+	const QString &id(void) const;
+
 	enum Result m_result; /*!< Return state. */
 
 private:
@@ -91,6 +98,8 @@ private:
 	enum Result downloadStoredMessages(const QString &urlStr,
 	    const QString &tokenStr, enum Operation operation,
 	    const MessageDbSet *dbSet, const QList<qint64> &exludedDmIds);
+
+	const QString m_id; /*!< Task identifier. */
 
 	const QString m_url; /*!< String containing document service URL. */
 	const QString m_token; /*!< Document service access token. */

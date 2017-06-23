@@ -92,9 +92,14 @@ public:
 
 private slots:
 	/*!
-	 * @brief Performs the download action.
+	 * @brief Starts the download action.
 	 */
-	void downloadAndStore(void);
+	void downloadAndStoreStart(void);
+
+	/*!
+	 * @brief Continues with the download action.
+	 */
+	void downloadAndStoreContinue(void);
 
 	/*!
 	 * @brief Set variable to cancel the download loop.
@@ -114,6 +119,7 @@ private:
 	const QString m_url; /*!< Document service URL. */
 	const QString m_token; /*!< Document service access token. */
 	const QList<AcntData> &m_accounts; /*!< Account to use. */
+	int m_accIdx; /*!< Index of next account to be processed. */
 
 	int m_taskIncr; /*!< Task progress bar increment. */
 

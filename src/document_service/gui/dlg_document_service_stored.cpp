@@ -21,13 +21,13 @@
  * the two.
  */
 
-#include <QCoreApplication>
 #include <QTimer>
 
 #include "src/document_service/gui/dlg_document_service_stored.h"
 #include "src/graphics/graphics.h"
 #include "src/io/document_service_db.h"
 #include "src/log/log.h"
+#include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_document_service_stored_messages.h"
 #include "ui_dlg_document_service_stored.h"
@@ -46,6 +46,7 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
     m_url(urlStr),
     m_token(tokenStr),
     m_accounts(accounts),
+    m_accIdx(0),
     m_taskIncr(PROGRESS_MAX / (1.0 + accounts.size())),
     m_cancel(false)
 {
@@ -55,6 +56,9 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Document Service Stored Messages"));
 
+	/* Just to make the progress bar stationary. */
+	m_ui->taskLabel->setText(QStringLiteral("\n"));
+
 	loadDocumentServicePixmap(LOGO_EDGE);
 
 	m_ui->taskProgress->setRange(PROGRESS_MIN, PROGRESS_MAX);
@@ -63,8 +67,11 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
 	m_ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 
 	connect(m_ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancelLoop()));
+	connect(&globMsgProcEmitter,
+	    SIGNAL(documentServiceStoredMessagesFinished(QString)),
+	    this, SLOT(downloadAndStoreContinue()));
 
-	QTimer::singleShot(RUN_DELAY_MS, this, SLOT(downloadAndStore()));
+	QTimer::singleShot(RUN_DELAY_MS, this, SLOT(downloadAndStoreStart()));
 }
 
 DlgDocumentServiceStored::~DlgDocumentServiceStored(void)
@@ -91,11 +98,9 @@ bool DlgDocumentServiceStored::updateStoredInformation(
 	return true;
 }
 
-void DlgDocumentServiceStored::downloadAndStore(void)
+void DlgDocumentServiceStored::downloadAndStoreStart(void)
 {
 	QProgressBar *pBar = m_ui->taskProgress;
-
-	QCoreApplication::processEvents();
 
 	/* Update already held information. */
 	{
@@ -104,7 +109,8 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 		}
 
 		m_ui->taskLabel->setText(
-		    tr("Updating stored information about messages."));
+		    tr("Updating stored information about messages.") +
+		    QStringLiteral("\n"));
 
 		TaskDocumentServiceStoredMessages *task =
 		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
@@ -116,18 +122,31 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 			    "Cannot create stored_files update task.");
 			return;
 		}
-		task->setAutoDelete(false);
-		/* This will block the GUI and all workers. */
-		globWorkPool.runSingle(task); /* TODO -- Run in background. */
+		task->setAutoDelete(true);
+		/* Run in background. */
+		globWorkPool.assignHi(task);
 
-		delete task; task = Q_NULLPTR;
+		return;
 	}
+
+cancel:
+	pBar->setValue(PROGRESS_MAX);
+
+	this->close();
+}
+
+void DlgDocumentServiceStored::downloadAndStoreContinue(void)
+{
+	QProgressBar *pBar = m_ui->taskProgress;
+
 	pBar->setValue(pBar->value() + m_taskIncr);
 
-	foreach (const AcntData &account, m_accounts) {
+	while (m_accIdx < m_accounts.size()) {
 		if (m_cancel) {
 			goto cancel;
 		}
+
+		const AcntData &account(m_accounts.at(m_accIdx));
 
 		m_ui->taskLabel->setText(
 		    tr("Downloading information about messages from account:\n%1 (%2).")
@@ -136,10 +155,9 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 		if (account.dbSet == Q_NULLPTR) {
 			Q_ASSERT(0);
 			pBar->setValue(pBar->value() + m_taskIncr);
+			++m_accIdx;
 			continue;
 		}
-
-		QCoreApplication::processEvents();
 
 		TaskDocumentServiceStoredMessages *task =
 		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
@@ -151,21 +169,19 @@ void DlgDocumentServiceStored::downloadAndStore(void)
 			logErrorNL("Cannot create stored_files task for '%s'.",
 			    account.userName.toUtf8().constData());
 			pBar->setValue(pBar->value() + m_taskIncr);
+			++m_accIdx;
 			continue;
 		}
-		task->setAutoDelete(false);
-		/* This will block the GUI and all workers. */
-		globWorkPool.runSingle(task); /* TODO -- Run in background. */
+		task->setAutoDelete(true);
+		/* Run in background. */
+		globWorkPool.assignHi(task);
 
-		delete task; task = Q_NULLPTR;
-
-		pBar->setValue(pBar->value() + m_taskIncr);
+		++m_accIdx;
+		return;
 	}
 
 cancel:
 	pBar->setValue(PROGRESS_MAX);
-
-	QCoreApplication::processEvents();
 
 	this->close();
 }

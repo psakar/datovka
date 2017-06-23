@@ -23,6 +23,7 @@
 
 #include <cinttypes>
 #include <QByteArray>
+#include <QDateTime>
 #include <QSet>
 #include <QThread>
 
@@ -40,6 +41,8 @@ TaskDocumentServiceStoredMessages::TaskDocumentServiceStoredMessages(
     const QString &urlStr, const QString &tokenStr, enum Operation operation,
     const MessageDbSet *dbSet, const QList<qint64> &exludedDmIds)
     : m_result(DS_DSM_ERR),
+    m_id(QString::number(QDateTime::currentMSecsSinceEpoch()) +
+        QStringLiteral(":") + QString::number((quint64)this)),
     m_url(urlStr),
     m_token(tokenStr),
     m_operation(operation),
@@ -62,8 +65,9 @@ void TaskDocumentServiceStoredMessages::run(void)
 		return;
 	}
 
-	logDebugLv0NL("Starting download stored messages from service info in thread '%p'",
-	    (void *) QThread::currentThreadId());
+	logDebugLv0NL(
+	    "Starting download stored messages from document service task '%s' in thread '%p'.",
+	    m_id.toUtf8().constData(), (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
 
@@ -74,8 +78,15 @@ void TaskDocumentServiceStoredMessages::run(void)
 
 	/* ### Worker task end. ### */
 
-	logDebugLv0NL("Download message task finished in thread '%p'",
-	    (void *) QThread::currentThreadId());
+	logDebugLv0NL("Download stored messages from document service task '%s' finished in thread '%p'.",
+	    m_id.toUtf8().constData(), (void *) QThread::currentThreadId());
+
+	emit globMsgProcEmitter.documentServiceStoredMessagesFinished(m_id);
+}
+
+const QString &TaskDocumentServiceStoredMessages::id(void) const
+{
+	return m_id;
 }
 
 /*!
