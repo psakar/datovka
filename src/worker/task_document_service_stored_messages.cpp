@@ -244,7 +244,8 @@ int processStoredFilesResponse(bool clear, const StoredFilesResp &sfRes,
 		return 0; /* Nothing was processed. Should ask again. */
 		break;
 	default:
-		logErrorNL("Received error '%s'.", sfRes.error().trVerbose());
+		logErrorNL("Received error '%s'.",
+		    sfRes.error().trVerbose().toUtf8().constData());
 		return -1;
 		break;
 	}
