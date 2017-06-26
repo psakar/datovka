@@ -35,8 +35,6 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_document_service_stored_messages.h"
 
-#define IGNORE_SSL_ERRORS true
-
 TaskDocumentServiceStoredMessages::TaskDocumentServiceStoredMessages(
     const QString &urlStr, const QString &tokenStr, enum Operation operation,
     const MessageDbSet *dbSet, const QList<qint64> &exludedDmIds)
@@ -333,7 +331,8 @@ enum TaskDocumentServiceStoredMessages::Result updateMessages(
 		return TaskDocumentServiceStoredMessages::DS_DSM_SUCCESS;
 	}
 
-	DocumentServiceConnection dsc(IGNORE_SSL_ERRORS);
+	DocumentServiceConnection dsc(
+	    DocumentServiceConnection::ignoreSslErrorsDflt);
 	dsc.setConnection(urlStr, tokenStr);
 
 	int pos = 0; /* Position. */

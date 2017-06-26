@@ -34,8 +34,6 @@
 #include "src/log/log.h"
 #include "ui_dlg_document_service_upload.h"
 
-#define IGNORE_SSL_ERRORS true
-
 #define LOGO_EDGE 64
 
 DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
@@ -44,7 +42,7 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
     m_ui(new (std::nothrow) Ui::DlgDocumentServiceUpload),
     m_url(urlStr),
     m_token(tokenStr),
-    m_dsc(IGNORE_SSL_ERRORS, this),
+    m_dsc(DocumentServiceConnection::ignoreSslErrorsDflt, this),
     m_uploadModel(),
     m_uploadProxyModel(),
     m_selectedUploadIds()

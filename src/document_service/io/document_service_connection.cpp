@@ -28,6 +28,9 @@
 
 #include "src/document_service/io/document_service_connection.h"
 
+/* Must be set to false for production releases. */
+const bool DocumentServiceConnection::ignoreSslErrorsDflt = true;
+
 #define logFuncCall() \
 	qDebug("%s()", __func__)
 

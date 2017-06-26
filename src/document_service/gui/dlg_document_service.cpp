@@ -30,8 +30,6 @@
 #include "src/io/document_service_db.h"
 #include "ui_dlg_document_service.h"
 
-#define IGNORE_SSL_ERRORS true
-
 /*!
  * @brief Return disabled palette.
  */
@@ -52,7 +50,7 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
     const QString &tokenStr, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgDocumentService),
-    m_dsc(IGNORE_SSL_ERRORS, this),
+    m_dsc(DocumentServiceConnection::ignoreSslErrorsDflt, this),
     m_logoSvg()
 {
 	m_ui->setupUi(this);

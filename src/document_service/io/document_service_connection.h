@@ -38,12 +38,21 @@ class DocumentServiceConnection : public QObject {
 	Q_OBJECT
 
 public:
+	/*!
+	 * @brief Document service service identifiers.
+	 */
 	enum ServiceId {
 		SRVC_SERVICE_INFO,
 		SRVC_UPLOAD_HIERARCHY,
 		SRVC_UPLOAD_FILE,
 		SRVC_STORED_FILES
 	};
+
+	/*!
+	 * @brief Use for controlling of global behaviour on SSL errors.
+	 */
+	static
+	const bool ignoreSslErrorsDflt;
 
 	/*!
 	 * @brief Constructor.
