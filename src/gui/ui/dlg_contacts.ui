@@ -28,23 +28,16 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="filterLinelabel">
+      <widget class="QLabel" name="filterLabel">
        <property name="text">
         <string>Filter:</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="filterLineEdit">
+      <widget class="QLineEdit" name="filterLine">
        <property name="focusPolicy">
         <enum>Qt::ClickFocus</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="clearPushButton">
-       <property name="text">
-        <string>Clear</string>
        </property>
       </widget>
      </item>
