@@ -145,8 +145,7 @@ void SvgView::displaySvg(const QByteArray &svgData)
 	svgItem->setFlags(QGraphicsItem::ItemClipsToShape);
 	svgItem->setCacheMode(QGraphicsItem::NoCache);
 	svgItem->setZValue(0);
-	/* Leave resizing to resizeEvent(). */
-	//resizeGraphicsItem(this, svgItem);
+	resizeGraphicsItem(this, svgItem);
 
 #if 0
 	QGraphicsRectItem *backgroundItem =
