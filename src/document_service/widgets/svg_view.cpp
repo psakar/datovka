@@ -26,6 +26,14 @@
 
 #include "src/document_service/widgets/svg_view.h"
 
+/*
+ * See following for inspiration:
+ * https://stackoverflow.com/questions/14107144/how-do-i-make-an-image-resize-to-scale-in-qt
+ * https://stackoverflow.com/questions/8551690/how-to-render-a-scaled-svg-to-a-qimage
+ * https://stackoverflow.com/questions/37114430/qt-qgraphicssvgitem-scaleing-and-resizeing
+ * https://stackoverflow.com/questions/16013027/setting-an-image-to-a-label-in-qt
+ */
+
 SvgView::SvgView(QWidget *parent)
     : QGraphicsView(parent),
     m_svgData()
@@ -42,7 +50,6 @@ void SvgView::setSvgData(const QByteArray &svgData)
 		displaySvg(m_svgData);
 	}
 }
-
 
 /*!
  * @brief Resize graphics item to fit graphics view.

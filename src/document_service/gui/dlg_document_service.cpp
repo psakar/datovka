@@ -120,8 +120,6 @@ bool DlgDocumentService::updateSettings(
 			globDocumentServiceDbPtr->deleteAllStoredMsg();
 		}
 	} else {
-		Q_ASSERT(docSrvcSettings.token.isEmpty());
-
 		globDocumentServiceDbPtr->deleteAllEntries();
 	}
 
