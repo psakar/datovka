@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ GlobPreferences dlftlGlobPref;
 /*! Account database file name. */
 #define ACCOUNT_DB_FILE "messages.shelf.db"
 #define TAG_DB_FILE "tag.db"
+#define DOCUMENT_SERVICE_DB_FILE "document_service.db"
 #define TAG_WEBDATOVKA_DB_FILE "mojeid-tag.db"
 
 GlobPreferences::GlobPreferences(void)
@@ -48,6 +49,7 @@ GlobPreferences::GlobPreferences(void)
     saveToConf(DFLT_CONF_FILE),
     accountDbFile(ACCOUNT_DB_FILE),
     tagDbFile(TAG_DB_FILE),
+    documentServiceDbFile(DOCUMENT_SERVICE_DB_FILE),
     tagWebDatovkaDbFile(TAG_WEBDATOVKA_DB_FILE),
     auto_download_whole_messages(false),
     default_download_signed(true),
@@ -452,6 +454,11 @@ QString GlobPreferences::accountDbPath(void) const
 QString GlobPreferences::tagDbPath(void) const
 {
 	return confDir() + QDir::separator() + tagDbFile;
+}
+
+QString GlobPreferences::documentServiceDbPath(void) const
+{
+	return confDir() + QDir::separator() + documentServiceDbFile;
 }
 
 QString GlobPreferences::tagWebDatovkaDbPath(void) const

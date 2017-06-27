@@ -365,7 +365,8 @@ public: /* Database function that have been delegate to the container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsRcvdModel(const QStringList &appendedCols);
+	QAbstractTableModel *msgsRcvdModel(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return received messages within past 90 days.
@@ -376,7 +377,7 @@ public: /* Database function that have been delegate to the container. */
 	 * @note The model must not be freed.
 	 */
 	QAbstractTableModel *msgsRcvdWithin90DaysModel(
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return received messages within given year.
@@ -388,7 +389,7 @@ public: /* Database function that have been delegate to the container. */
 	 * @note The model must not be freed.
 	 */
 	QAbstractTableModel *msgsRcvdInYearModel(const QString &year,
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -437,7 +438,8 @@ public: /* Database function that have been delegate to the container. */
 	 *
 	 * @note The model must not be freed.
 	 */
-	QAbstractTableModel *msgsSntModel(const QStringList &appendedCols);
+	QAbstractTableModel *msgsSntModel(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
@@ -448,7 +450,7 @@ public: /* Database function that have been delegate to the container. */
 	 * @note The model must not be freed.
 	 */
 	QAbstractTableModel *msgsSntWithin90DaysModel(
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Return sent messages within given year.
@@ -460,7 +462,7 @@ public: /* Database function that have been delegate to the container. */
 	 * @note The model must not be freed.
 	 */
 	QAbstractTableModel *msgsSntInYearModel(const QString &year,
-	    const QStringList &appendedCols);
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -594,18 +596,18 @@ private:
 	 */
 	QStringList _yrly_secKeysIn90Days(void) const;
 
-	inline QAbstractTableModel *_sf_msgsRcvdModel(const QStringList &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsRcvdModel(const QStringList &appendedCols);
+	inline QAbstractTableModel *_sf_msgsRcvdModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsRcvdModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
-	inline QAbstractTableModel *_sf_msgsRcvdWithin90DaysModel(const QStringList &appendedCols);
+	inline QAbstractTableModel *_sf_msgsRcvdWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(MessageDb &db, const QString &attachFileName, const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(MessageDb &db, const QString &attachFileName, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_msgsRcvdWithin90DaysModel(MessageDb &db0, MessageDb &db1, const QStringList &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsRcvdWithin90DaysModel(const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_2dbs_msgsRcvdWithin90DaysModel(MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsRcvdWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
-	inline QAbstractTableModel *_sf_msgsRcvdInYearModel(const QString &year, const QStringList &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsRcvdInYearModel(const QString &year, const QStringList &appendedCols);
+	inline QAbstractTableModel *_sf_msgsRcvdInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsRcvdInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	inline QStringList _sf_msgsYears(enum MessageDb::MessageType type, enum Sorting sorting) const;
 	inline QStringList _yrly_msgsYears(enum MessageDb::MessageType type, enum Sorting sorting) const;
@@ -619,18 +621,18 @@ private:
 	inline int _sf_msgsUnreadInYear(enum MessageDb::MessageType type, const QString &year) const;
 	inline int _yrly_msgsUnreadInYear(enum MessageDb::MessageType type, const QString &year) const;
 
-	inline QAbstractTableModel *_sf_msgsSntModel(const QStringList &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsSntModel(const QStringList &appendedCols);
+	inline QAbstractTableModel *_sf_msgsSntModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsSntModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
-	inline QAbstractTableModel *_sf_msgsSntWithin90DaysModel(const QStringList &appendedCols);
+	inline QAbstractTableModel *_sf_msgsSntWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_attach_msgsSntWithin90DaysModel(MessageDb &db, const QString &attachFileName, const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_2dbs_attach_msgsSntWithin90DaysModel(MessageDb &db, const QString &attachFileName, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_msgsSntWithin90DaysModel(MessageDb &db0, MessageDb &db1, const QStringList &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsSntWithin90DaysModel(const QStringList &appendedCols);
+	inline QAbstractTableModel *_yrly_2dbs_msgsSntWithin90DaysModel(MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsSntWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
-	inline QAbstractTableModel *_sf_msgsSntInYearModel(const QString &year, const QStringList &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsSntInYearModel(const QString &year, const QStringList &appendedCols);
+	inline QAbstractTableModel *_sf_msgsSntInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QAbstractTableModel *_yrly_msgsSntInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 
 	inline bool _sf_smsgdtSetAllReceivedLocallyRead(bool read);
 	inline bool _yrly_smsgdtSetAllReceivedLocallyRead(bool read);

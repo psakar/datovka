@@ -46,6 +46,9 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
+#include "src/document_service/gui/dlg_document_service.h"
+#include "src/document_service/gui/dlg_document_service_stored.h"
+#include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -81,16 +84,18 @@
 #include "src/io/wd_sessions.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
+#include "src/settings/document_service.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_authenticate_message.h"
-#include "src/worker/task_erase_message.h"
+#include "src/worker/task_document_service_stored_messages.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_download_message_list_mojeid.h"
 #include "src/worker/task_download_message_mojeid.h"
+#include "src/worker/task_erase_message.h"
 #include "src/worker/task_sync_mojeid.h"
 #include "src/worker/task_tag_sync_mojeid.h"
 #include "src/worker/task_download_owner_info.h"
@@ -291,9 +296,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	setUpUi();
 
-	if (0 != globTagDbPtr) {
-		m_msgTblAppendedCols.append(tr("Tags"));
-	}
+	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
+	    QString(), QIcon(ICON_3PARTY_PATH "briefcase_grey_16.png"),
+	    tr("Uploaded to document service")));
+
+	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
+	    tr("Tags"), QIcon(), tr("User-assigned tags")));
 
 	/* Single instance emitter. */
 	connect(&globSingleInstanceEmitter, SIGNAL(messageReceived(QString)),
@@ -463,6 +471,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 	mui_statusDbMode->setText(tr("Storage:") + " " + msgStrg + " | "
 	    + acntStrg + "   ");
+
+	/* TODO -- This is only a temporary solution. */
+	ui->actionUpdate_document_service_information->setEnabled(
+	    globDocumentServiceSet.isSet());
 }
 
 void MainWindow::setWindowsAfterInit(void)
@@ -636,6 +648,70 @@ void MainWindow::showProxySettingsDialog(void)
 	dlgProxy->deleteLater();
 }
 
+/*!
+ * @brief Shows all columns except the supplied ones.
+ *
+ * @param[in] view Table view.
+ * @param[in] cols List of negative column indexes.
+ */
+static
+void showAllColumnsExcept(QTableView *view, QList<int> cols)
+{
+	if (Q_NULLPTR == view) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QAbstractItemModel *model = view->model();
+	if (Q_NULLPTR == model) {
+		return;
+	}
+
+	for (int col = 0; col < model->columnCount(); ++col) {
+		view->setColumnHidden(col, false);
+	}
+
+	foreach (int negCol, cols) {
+		int col = model->columnCount() + negCol;
+		if ((col < 0) || (col >= model->columnCount())) {
+			Q_ASSERT(0);
+			continue;
+		}
+		view->setColumnHidden(col, true);
+	}
+}
+
+/*!
+ * @brief Shows/hides message table columns according to functionality.
+ *
+ * @param[in] view Table view.
+ */
+static
+void showColumnsAccordingToFunctionality(QTableView *view)
+{
+	QList<int> negCols;
+
+	if (!globDocumentServiceSet.isSet()) {
+		negCols.append(DbMsgsTblModel::DOC_SRVC_NEG_COL);
+	}
+
+	showAllColumnsExcept(view, negCols);
+}
+
+void MainWindow::showDocumentServiceDialogue(void)
+{
+	debugSlotCall();
+
+	if (DlgDocumentService::updateSettings(globDocumentServiceSet, this)) {
+		saveSettings();
+	}
+
+	ui->actionUpdate_document_service_information->setEnabled(
+	    globDocumentServiceSet.isSet());
+
+	showColumnsAccordingToFunctionality(ui->messageList);
+}
+
 /* ========================================================================= */
 /*
  * Redraws widgets according to selected account item.
@@ -668,7 +744,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 
 		/* Decouple model and show banner page. */
-		ui->messageList->setModel(0);
+		ui->messageList->setModel(Q_NULLPTR);
 		ui->messageStackedWidget->setCurrentIndex(0);
 		ui->accountTextInfo->setHtml(createDatovkaBanner(
 		    QCoreApplication::applicationVersion()));
@@ -707,7 +783,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		}
 
 		/* Decouple model and show banner page. */
-		ui->messageList->setModel(0);
+		ui->messageList->setModel(Q_NULLPTR);
 		ui->messageStackedWidget->setCurrentIndex(0);
 		QString htmlMessage = "<div style=\"margin-left: 12px;\">"
 		    "<h3>" + tr("Database access error") + "</h3>" "<br/>";
@@ -820,7 +896,10 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	if (0 != msgTblMdl) {
 		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
 		Q_ASSERT(0 != mdl);
-		mdl->fillTagsColumn(userName, -1);
+		mdl->setDocumentServiceIcon();
+		mdl->fillDocumentServiceColumn(
+		    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+		mdl->fillTagsColumn(userName, DbMsgsTblModel::TAGS_NEG_COL);
 		/* TODO -- Add some labels. */
 	}
 
@@ -875,6 +954,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
 		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
+		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setReceivedColumnWidths();
 		received = true;
@@ -889,6 +969,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
 		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
+		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setSentColumnWidths();
 		received = false;
@@ -1297,6 +1378,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addSeparator();
 		menu->addAction(ui->actionOpen_message_externally);
 		menu->addAction(ui->actionOpen_delivery_info_externally);
+		menu->addSeparator();
+		menu->addAction(ui->actionUpload_to_document_service);
 		menu->addSeparator();
 	}
 	menu->addAction(ui->actionExport_as_ZFO);
@@ -4181,7 +4264,12 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionProxy_settings, SIGNAL(triggered()),
 	    this, SLOT(showProxySettingsDialog()));
-	   /* Separator. */
+	    /* Separator */
+	connect(ui->actionDocument_service_settings, SIGNAL(triggered()),
+	    this, SLOT(showDocumentServiceDialogue()));
+	connect(ui->actionUpdate_document_service_information, SIGNAL(triggered()),
+	    this, SLOT(getStoredMsgInfoFromDocumentService()));
+	    /* Separator. */
 	connect(ui->actionPreferences, SIGNAL(triggered()),
 	    this, SLOT(showPreferencesDialog()));
 	/* actionQuit -- connected in ui file. */
@@ -4241,6 +4329,9 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(openSelectedMessageExternally()));
 	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()),
 	    this, SLOT(openDeliveryInfoExternally()));
+	    /* Separator. */
+	connect(ui->actionUpload_to_document_service, SIGNAL(triggered()),
+	    this, SLOT(uploadSelectedMessageToDocumentService()));
 	    /* Separator. */
 	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()),
 	    this, SLOT(exportSelectedMessagesAsZFO()));
@@ -4345,6 +4436,8 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	// Menu: File
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
+	ui->actionUpdate_document_service_information->setEnabled(
+	    globDocumentServiceSet.isSet());
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
@@ -4384,6 +4477,9 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	    /* Separator. */
 	ui->actionOpen_message_externally->setEnabled(numSelected == 1);
 	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
+	    /* Separator. */
+	ui->actionUpload_to_document_service->setEnabled(
+	    (numSelected == 1) && globDocumentServiceSet.isSet());
 	    /* Separator. */
 	ui->actionExport_as_ZFO->setEnabled(numSelected > 0);
 	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
@@ -4503,6 +4599,9 @@ void MainWindow::loadSettings(void)
 
 	/* Proxy settings. */
 	globProxSet.loadFromSettings(settings);
+
+	/* Document service settings. */
+	globDocumentServiceSet.loadFromSettings(settings);
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
@@ -4789,6 +4888,9 @@ void MainWindow::saveSettings(void) const
 	/* Proxy settings. */
 	globProxSet.saveToSettings(settings);
 
+	/* Document service settings. */
+	globDocumentServiceSet.saveToSettings(settings);
+
 	/* Global preferences. */
 	globPref.saveToSettings(settings);
 
@@ -4882,8 +4984,10 @@ void MainWindow::showSendMessageDialog(int action)
 			}
 
 			if (!messageDb->msgsStoredWhole(msgId.dmId)) {
-				messageMissingOfferDownload(msgId,
-				    tr("Full message not present!"));
+				if (!messageMissingOfferDownload(msgId,
+				    tr("Full message not present!"))) {
+					return;
+				}
 			}
 
 			msgIds.append(msgId);
@@ -5428,7 +5532,12 @@ void MainWindow::setReceivedColumnWidths(void)
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last three columns display icons. */
-	for (; i < DbMsgsTblModel::rcvdItemIds().size(); ++i) {
+	int max = DbMsgsTblModel::rcvdItemIds().size();
+	if (globDocumentServiceSet.isSet()) {
+		/* Add one column if document service is activated. */
+		++max;
+	}
+	for (; i < max; ++i) {
 		ui->messageList->setColumnWidth(i, 24);
 	}
 	if (m_sort_order == "SORT_ASCENDING") {
@@ -5458,7 +5567,12 @@ void MainWindow::setSentColumnWidths(void)
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last column displays an icon. */
-	for (; i < DbMsgsTblModel::rcvdItemIds().size(); ++i) {
+	int max = DbMsgsTblModel::rcvdItemIds().size();
+	if (globDocumentServiceSet.isSet()) {
+		/* Add one column if document service is activated. */
+		++max;
+	}
+	for (; i < max; ++i) {
 		ui->messageList->setColumnWidth(i, 24);
 	}
 	if (m_sort_order == "SORT_ASCENDING") {
@@ -6946,6 +7060,123 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 }
 
+void MainWindow::getStoredMsgInfoFromDocumentService(void)
+{
+	debugSlotCall();
+
+	QStringList userNames;
+	for (int row = 0; row < m_accountModel.rowCount(); ++row) {
+		userNames.append(
+		    m_accountModel.userName(m_accountModel.index(row, 0)));
+	}
+
+	QList<DlgDocumentServiceStored::AcntData> accounts;
+	foreach (const QString &userName, userNames) {
+		MessageDbSet *dbSet = accountDbSet(userName, this);
+		if (Q_NULLPTR == dbSet) {
+			Q_ASSERT(0);
+			return;
+		}
+		accounts.append(DlgDocumentServiceStored::AcntData(
+		    AccountModel::globAccounts[userName].accountName(),
+		    userName, dbSet));
+	}
+
+	DlgDocumentServiceStored::updateStoredInformation(
+	    globDocumentServiceSet, accounts, this);
+
+	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
+	if (messageModel == Q_NULLPTR) {
+		Q_ASSERT(0);
+		return;
+	}
+	messageModel->fillDocumentServiceColumn(
+	    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+}
+
+void MainWindow::uploadSelectedMessageToDocumentService(void)
+{
+	debugSlotCall();
+
+	QModelIndex msgIndex;
+	{
+		QModelIndexList msgIndexes(currentFrstColMessageIndexes());
+
+		if (msgIndexes.size() != 1) {
+			/* Do nothing when multiple messages selected. */
+			return;
+		}
+
+		msgIndex = msgIndexes.first();
+	}
+
+	if (!msgIndex.isValid()) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
+	MessageDb::MsgId msgId(msgMsgId(msgIndex));
+	Q_ASSERT(msgId.dmId >= 0);
+
+	MessageDbSet *dbSet = accountDbSet(userName, this);
+	if (Q_NULLPTR == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
+	if (Q_NULLPTR == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QByteArray msgRaw(messageDb->msgsMessageRaw(msgId.dmId));
+	if (msgRaw.isEmpty()) {
+
+		if (!messageMissingOfferDownload(msgId,
+		        tr("Message export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
+		if (Q_NULLPTR == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL(
+			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
+			    msgId.dmId);
+			return;
+		}
+
+		msgRaw = messageDb->msgsMessageRaw(msgId.dmId);
+		if (msgRaw.isEmpty()) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
+	if (messageModel == Q_NULLPTR) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Generate upload into data service dialogue. */
+	DlgDocumentServiceUpload::uploadMessage(globDocumentServiceSet,
+	    msgId.dmId, QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
+
+	QList<qint64> msgIdList;
+	msgIdList.append(msgId.dmId);
+
+	messageModel->refillDocumentServiceColumn(msgIdList,
+	    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+}
+
 void MainWindow::showSignatureDetailsDialog(void)
 {
 	debugSlotCall();
@@ -8386,7 +8617,20 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionImport_database_directory->isEnabled();
 	    /* Separator. */
 	ui->actionProxy_settings->isEnabled();
-	   /* Separator. */
+	    /* Separator. */
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionDocument_service_settings->setIcon(ico);
+	}
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionUpdate_document_service_information->setIcon(ico);
+	}
+	    /* Separator. */
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/gear_16.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -8473,6 +8717,13 @@ void MainWindow::setMenuActionIcons(void)
 	    /* Separator. */
 	ui->actionOpen_message_externally->isEnabled();
 	ui->actionOpen_delivery_info_externally->isEnabled();
+	    /* Separator. */
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionUpload_to_document_service->setIcon(ico);
+	}
 	    /* Separator. */
 	ui->actionExport_as_ZFO->isEnabled();
 	ui->actionExport_delivery_info_as_ZFO->isEnabled();
@@ -8741,7 +8992,8 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList,
 		return;
 	}
 
-	messageModel->refillTagsColumn(userName, msgIdList, -1);
+	messageModel->refillTagsColumn(userName, msgIdList,
+	    DbMsgsTblModel::TAGS_NEG_COL);
 }
 
 /* ========================================================================= */

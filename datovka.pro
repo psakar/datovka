@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT += core gui network sql
+QT += core gui network svg sql
 QT += printsupport
 
 TEMPLATE = app
@@ -264,6 +264,21 @@ SOURCES += \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
+    src/document_service/conversion.cpp \
+    src/document_service/gui/dlg_document_service.cpp \
+    src/document_service/gui/dlg_document_service_stored.cpp \
+    src/document_service/gui/dlg_document_service_upload.cpp \
+    src/document_service/io/document_service_connection.cpp \
+    src/document_service/json/entry_error.cpp \
+    src/document_service/json/helper.cpp \
+    src/document_service/json/service_info.cpp \
+    src/document_service/json/stored_files.cpp \
+    src/document_service/json/upload_file.cpp \
+    src/document_service/json/upload_hierarchy.cpp \
+    src/document_service/models/upload_hierarchy_model.cpp \
+    src/document_service/models/upload_hierarchy_proxy_model.cpp \
+    src/document_service/widgets/svg_view.cpp \
+    src/graphics/graphics.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -290,6 +305,7 @@ SOURCES += \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
     src/io/dbs.cpp \
+    src/io/document_service_db.cpp \
     src/io/exports.cpp \
     src/io/file_downloader.cpp \
     src/io/filesystem.cpp \
@@ -321,6 +337,7 @@ SOURCES += \
     src/models/table_model.cpp \
     src/models/tags_model.cpp \
     src/settings/accounts.cpp \
+    src/settings/document_service.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
     src/single/single_instance.cpp \
@@ -338,6 +355,7 @@ SOURCES += \
     src/worker/task.cpp \
     src/worker/task_authenticate_message.cpp \
     src/worker/task_change_pwd.cpp \
+    src/worker/task_document_service_stored_messages.cpp \
     src/worker/task_download_credit_info.cpp \
     src/worker/task_download_message.cpp \
     src/worker/task_download_message_mojeid.cpp \
@@ -371,6 +389,21 @@ HEADERS += \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
+    src/document_service/conversion.h \
+    src/document_service/gui/dlg_document_service.h \
+    src/document_service/gui/dlg_document_service_stored.h \
+    src/document_service/gui/dlg_document_service_upload.h \
+    src/document_service/io/document_service_connection.h \
+    src/document_service/json/entry_error.h \
+    src/document_service/json/helper.h \
+    src/document_service/json/service_info.h \
+    src/document_service/json/stored_files.h \
+    src/document_service/json/upload_file.h \
+    src/document_service/json/upload_hierarchy.h \
+    src/document_service/models/upload_hierarchy_model.h \
+    src/document_service/models/upload_hierarchy_proxy_model.h \
+    src/document_service/widgets/svg_view.h \
+    src/graphics/graphics.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \
@@ -397,6 +430,7 @@ HEADERS += \
     src/io/account_db.h \
     src/io/db_tables.h \
     src/io/dbs.h \
+    src/io/document_service_db.h \
     src/io/exports.h \
     src/io/file_downloader.h \
     src/io/filesystem.h \
@@ -427,6 +461,7 @@ HEADERS += \
     src/models/table_model.h \
     src/models/tags_model.h \
     src/settings/accounts.h \
+    src/settings/document_service.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
     src/single/single_instance.h \
@@ -445,6 +480,7 @@ HEADERS += \
     src/worker/task.h \
     src/worker/task_authenticate_message.h \
     src/worker/task_change_pwd.h \
+    src/worker/task_document_service_stored_messages.h \
     src/worker/task_download_credit_info.h \
     src/worker/task_download_message.h \
     src/worker/task_download_message_mojeid.h \
@@ -469,6 +505,9 @@ HEADERS += \
     src/worker/task_verify_message.h
 
 FORMS += \
+    src/document_service/ui/dlg_document_service.ui \
+    src/document_service/ui/dlg_document_service_stored.ui \
+    src/document_service/ui/dlg_document_service_upload.ui \
     src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
     src/gui/ui/dlg_account_from_db.ui \

@@ -14,7 +14,8 @@ DEFINES += \
 
 QMAKE_CXXFLAGS = \
 	-g -O0 -std=c++11 \
-	-Wall -Wextra -pedantic
+	-Wall -Wextra -pedantic \
+	-Wdate-time -Wformat -Werror=format-security
 
 INCLUDEPATH += \
 	$${top_srcdir}

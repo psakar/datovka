@@ -24,6 +24,8 @@
 #ifndef _MESSAGES_MODEL_H_
 #define _MESSAGES_MODEL_H_
 
+#include <QIcon>
+#include <QList>
 #include <QString>
 #include <QVariant>
 #include <QVector>
@@ -53,7 +55,9 @@ public:
 		ACCEPT_COL = 4, /* Acceptance time column. */
 		READLOC_COL = 5, /* Read locally. */
 		ATTDOWN_COL = 6, /* Attachments downloaded. */
-		PROCSNG_COL = 7 /* Processing state. */
+		PROCSNG_COL = 7, /* Processing state. */
+		DOC_SRVC_NEG_COL = -2, /* Document service. */
+		TAGS_NEG_COL = -1 /* Tags. */
 	};
 
 	/*!
@@ -66,6 +70,25 @@ public:
 		WORKING_SNT, /*!< Ordinary model created from SQL query. */
 		DUMMY_RCVD, /*!< Empty received dummy. */
 		DUMMY_SNT /*!< Empty sent dummy. */
+	};
+
+	/*!
+	 * @brief Describes appended header entry.
+	 */
+	class AppendedCol {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		explicit AppendedCol(const QString &dis,
+		    const QIcon &dec = QIcon(), const QString &tip = QString())
+		    : display(dis), decoration(dec), toolTip(tip)
+		{
+		}
+
+		QString display; /*!< What to show on display role. */
+		QIcon decoration; /*!< What to display on decoration role. */
+		QString toolTip; /*!< What to display in tool tip. */
 	};
 
 	/*!
@@ -148,14 +171,14 @@ public:
 	 *
 	 * @return False on error.
 	 */
-	bool setRcvdHeader(const QStringList &appendedCols);
+	bool setRcvdHeader(const QList<AppendedCol> &appendedCols);
 
 	/*!
 	 * @Brief Set header data for sent model.
 	 *
 	 * @return False on error.
 	 */
-	bool setSntHeader(const QStringList &appendedCols);
+	bool setSntHeader(const QList<AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Override message as being read.
@@ -225,6 +248,29 @@ public:
 	bool refillTagsColumn(const QString &userName,
 	    const QList<qint64> &dmIds, int col);
 
+	/*!
+	 * @brief Sets document service notification icon.
+	 * @return True on success.
+	 */
+	bool setDocumentServiceIcon(void);
+
+	/*!
+	 * @brief Fills the model with document service information.
+	 *
+	 * @param[in] col Negative number specifying the column to write into.
+	 * @return True on success.
+	 */
+	bool fillDocumentServiceColumn(int col);
+
+	/*!
+	 * @brief Reload document service information in given rows.
+	 *
+	 * @param[in] dmIds List of message ids for which to load tags.
+	 * @param[in] col Negative number specifying the column to write into.
+	 * @return True on success.
+	 */
+	bool refillDocumentServiceColumn(const QList<qint64> &dmIds, int col);
+
 private:
 	/* Make these methods private so nobody is likely to mess with them. */
 	virtual
@@ -246,6 +292,8 @@ private:
 	                          * Number of columns when displaying sent
 	                          * messages (without added columns).
 	                          */
+
+	QIcon m_dsIco; /*!< Document service icon. */
 };
 
 #endif /* _MESSAGES_MODEL_H_ */

@@ -151,6 +151,11 @@ signals:
 	 * @param[in] text Status bar text.
 	 */
 	void statusBarChange(const QString &text);
+
+	/*!
+	 * @brief Emitted when document service stored messages task finishes.
+	 */
+	void documentServiceStoredMessagesFinished(const QString &taskId);
 };
 
 /*!

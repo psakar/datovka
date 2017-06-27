@@ -22,16 +22,17 @@
  */
 
 #include <QFont>
-#include <QIcon>
 
 #include "src/common.h"
 #include "src/delegates/tag_item.h"
-#include "src/io/tag_db.h" /* Direct access to tag database, */
+#include "src/graphics/graphics.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
+#include "src/io/document_service_db.h"
+#include "src/io/message_db.h"
+#include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/io/tag_db_container.h"
 #include "src/models/messages_model.h"
-#include "src/io/message_db.h"
 
 const int DbMsgsTblModel::rcvdMsgsColCnt(8);
 const int DbMsgsTblModel::sntMsgsColCnt(7);
@@ -44,7 +45,8 @@ const int DbMsgsTblModel::sntMsgsColCnt(7);
 
 DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
     : TblModel(parent),
-    m_type(type)
+    m_type(type),
+    m_dsIco(ICON_3PARTY_PATH "up_16.png")
 {
 }
 
@@ -52,17 +54,64 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 {
 	int dataType;
 
-	/* Leave additional to delegates. */
+#define TAGS_OFFS 1 /* Tags are located behind upload information. */
+
+	/* Draw upload information. */
+	/* TODO -- This is only a temporal solution. */
 	switch (m_type) {
 	case WORKING_RCVD:
 	case DUMMY_RCVD:
-		if (index.column() > PROCSNG_COL) {
+		if (index.column() == (PROCSNG_COL + TAGS_OFFS)) {
+			QStringList locations(
+			    _data(index, Qt::DisplayRole).toStringList());
+			switch (role) {
+			case Qt::DecorationRole:
+				return locations.isEmpty() ? QVariant() : m_dsIco;
+				break;
+			case Qt::ToolTipRole:
+				return locations.join("\n");
+				break;
+			default:
+				return QVariant();
+				break;
+			}
+		}
+		break;
+	case WORKING_SNT:
+	case DUMMY_SNT:
+		if (index.column() == (ATTDOWN_COL + TAGS_OFFS)) {
+			QStringList locations(
+			    _data(index, Qt::DisplayRole).toStringList());
+			switch (role) {
+			case Qt::DecorationRole:
+				return locations.isEmpty() ? QVariant() : m_dsIco;
+				break;
+			case Qt::ToolTipRole:
+				return locations.join("\n");
+				break;
+			default:
+				return QVariant();
+				break;
+			}
+		}
+		break;
+	default:
+		Q_ASSERT(0);
+		return QVariant();
+		break;
+	}
+
+	/* Leave additional tags to delegates. */
+	switch (m_type) {
+	case WORKING_RCVD:
+	case DUMMY_RCVD:
+		if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
 			return _data(index, role);
 		}
 		break;
 	case WORKING_SNT:
 	case DUMMY_SNT:
-		if (index.column() > ATTDOWN_COL) {
+		if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
 			return _data(index, role);
 		}
 		break;
@@ -71,6 +120,8 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 		break;
 	}
+
+#undef TAGS_OFFS
 
 	switch (role) {
 	case Qt::DisplayRole:
@@ -322,10 +373,10 @@ bool DbMsgsTblModel::setType(enum DbMsgsTblModel::Type type)
 
 	switch (m_type) {
 	case DUMMY_RCVD:
-		return setRcvdHeader(QStringList()); /* FIXME */
+		return setRcvdHeader(QList<DbMsgsTblModel::AppendedCol>()); /* FIXME */
 		break;
 	case DUMMY_SNT:
-		return setSntHeader(QStringList()); /* FIXME */
+		return setSntHeader(QList<DbMsgsTblModel::AppendedCol>()); /* FIXME */
 		break;
 	default:
 		return true;
@@ -364,7 +415,30 @@ const QVector<QString> &DbMsgsTblModel::sntItemIds(void)
 	return ids;
 }
 
-bool DbMsgsTblModel::setRcvdHeader(const QStringList &appendedCols)
+static
+void appendHeaderColumns(DbMsgsTblModel *model, int dfltHdrSize,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+{
+	if ((model == Q_NULLPTR) || (dfltHdrSize < 0)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	for (int i = 0; i < appendedCols.size(); ++i) {
+		/* Description. */
+		model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+		    appendedCols.at(i).display, Qt::DisplayRole);
+		model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+		    appendedCols.at(i).decoration, Qt::DecorationRole);
+		model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+		    appendedCols.at(i).toolTip, Qt::ToolTipRole);
+		/* Data type. */
+		model->setHeaderData(dfltHdrSize + i, Qt::Horizontal,
+		    DB_APPENDED_VARIANT, ROLE_MSGS_DB_ENTRY_TYPE);
+	}
+}
+
+bool DbMsgsTblModel::setRcvdHeader(const QList<AppendedCol> &appendedCols)
 {
 	for (int i = 0; i < rcvdItemIds().size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
@@ -408,19 +482,12 @@ bool DbMsgsTblModel::setRcvdHeader(const QStringList &appendedCols)
 		}
 	}
 
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		/* Description. */
-		setHeaderData(rcvdItemIds().size() + i, Qt::Horizontal,
-		    appendedCols.at(i), Qt::DisplayRole);
-		/* Data type. */
-		setHeaderData(rcvdItemIds().size() + i, Qt::Horizontal,
-		    DB_APPENDED_VARIANT, ROLE_MSGS_DB_ENTRY_TYPE);
-	}
+	appendHeaderColumns(this, rcvdItemIds().size(), appendedCols);
 
 	return true;
 }
 
-bool DbMsgsTblModel::setSntHeader(const QStringList &appendedCols)
+bool DbMsgsTblModel::setSntHeader(const QList<AppendedCol> &appendedCols)
 {
 	for (int i = 0; i < sntItemIds().size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
@@ -447,14 +514,7 @@ bool DbMsgsTblModel::setSntHeader(const QStringList &appendedCols)
 		}
 	}
 
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		/* Description. */
-		setHeaderData(sntItemIds().size() + i, Qt::Horizontal,
-		    appendedCols.at(i), Qt::DisplayRole);
-		/* Data type. */
-		setHeaderData(sntItemIds().size() + i, Qt::Horizontal,
-		    DB_APPENDED_VARIANT, ROLE_MSGS_DB_ENTRY_TYPE);
-	}
+	appendHeaderColumns(this, sntItemIds().size(), appendedCols);
 
 	return true;
 }
@@ -613,6 +673,91 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 			    tagDb->getMessageTags(userName, dmId));
 			tagList.sortNames();
 			m_data[row][col] = QVariant::fromValue(tagList);
+			emit dataChanged(TblModel::index(row, col),
+			    TblModel::index(row, col));
+		}
+	}
+
+	return true;
+}
+
+bool DbMsgsTblModel::setDocumentServiceIcon(void)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
+		return false;
+	}
+
+	DocumentServiceDb::ServiceInfoEntry entry(
+	    globDocumentServiceDbPtr->serviceInfo());
+	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
+		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
+		return false;
+	}
+	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, 16));
+	if (pixmap.isNull()) {
+		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
+		return false;
+	}
+
+	m_dsIco = QIcon(pixmap);
+	return true;
+}
+
+bool DbMsgsTblModel::fillDocumentServiceColumn(int col)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		return false;
+	}
+
+	/* Check indexes into column. */
+	if (col >= 0) {
+		if (col > columnCount()) {
+			return false;
+		}
+	} else {
+		col += columnCount();
+		if (col < 0) {
+			return false;
+		}
+	}
+
+	for (int row = 0; row < rowCount(); ++row) {
+		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
+		m_data[row][col] =
+		    globDocumentServiceDbPtr->storedMsgLocations(dmId);
+	}
+
+	emit dataChanged(TblModel::index(0, col),
+	    TblModel::index(rowCount() - 1, col));
+
+	return true;
+}
+
+bool DbMsgsTblModel::refillDocumentServiceColumn(const QList<qint64> &dmIds,
+    int col)
+{
+	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+		return false;
+	}
+
+	/* Check indexes into column. */
+	if (col >= 0) {
+		if (col > columnCount()) {
+			return false;
+		}
+	} else {
+		col += columnCount();
+		if (col < 0) {
+			return false;
+		}
+	}
+
+	for (int row = 0; row < rowCount(); ++row) {
+		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
+		if (dmIds.contains(dmId)) {
+			m_data[row][col] =
+			    globDocumentServiceDbPtr->storedMsgLocations(dmId);
 			emit dataChanged(TblModel::index(row, col),
 			    TblModel::index(row, col));
 		}

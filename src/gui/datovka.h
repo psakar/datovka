@@ -24,7 +24,6 @@
 #ifndef _DATOVKA_H_
 #define _DATOVKA_H_
 
-
 #include <QItemSelection>
 #include <QLabel>
 #include <QLineEdit>
@@ -62,7 +61,7 @@ class MainWindow : public QMainWindow {
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = 0);
+	explicit MainWindow(QWidget *parent = Q_NULLPTR);
 	~MainWindow(void);
 
 	/*!
@@ -505,6 +504,11 @@ private slots:
 	void showProxySettingsDialog(void);
 
 	/*!
+	 * @brief Document service dialogue.
+	 */
+	void showDocumentServiceDialogue(void);
+
+	/*!
 	 * @brief Move selected account up.
 	 */
 	void moveSelectedAccountUp(void);
@@ -574,6 +578,16 @@ private slots:
 	 * @brief Open delivery information externally.
 	 */
 	void openDeliveryInfoExternally(void);
+
+	/*!
+	 * @brief Obtain information about stored messages from document service.
+	 */
+	void getStoredMsgInfoFromDocumentService(void);
+
+	/*!
+	 * @brief Upload message into document service.
+	 */
+	void uploadSelectedMessageToDocumentService(void);
 
 	/*!
 	 * @brief Search data box dialog.
@@ -1182,7 +1196,7 @@ private:
 	QString m_import_zfo_path;
 	QRect m_geometry; /* Non-maximised window geometry. */
 
-	QStringList m_msgTblAppendedCols; /*< Appended columns. */
+	QList<DbMsgsTblModel::AppendedCol> m_msgTblAppendedCols; /*< Appended columns. */
 
 	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
 	int m_numFilesToImport; /*!< Input ZFO count. */

@@ -80,7 +80,7 @@ QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 }
 
 QAbstractTableModel *MessageDbSet::_sf_msgsRcvdModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	if (this->size() == 0) {
 		return &DbMsgsTblModel::dummyModel(
@@ -91,7 +91,7 @@ QAbstractTableModel *MessageDbSet::_sf_msgsRcvdModel(
 }
 
 QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	/* TODO -- Implementation missing and will probably be missing. */
 	Q_UNUSED(appendedCols);
@@ -100,7 +100,7 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdModel(
 }
 
 QAbstractTableModel *MessageDbSet::msgsRcvdModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -118,7 +118,7 @@ QAbstractTableModel *MessageDbSet::msgsRcvdModel(
 }
 
 QAbstractTableModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	if (this->size() == 0) {
 		return &DbMsgsTblModel::dummyModel(
@@ -130,7 +130,7 @@ QAbstractTableModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(
 
 QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(
     MessageDb &db, const QString &attachFileName,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QSqlQuery query(db.m_db);
 	QAbstractTableModel *ret = 0;
@@ -213,7 +213,7 @@ fail:
 }
 
 QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
-    MessageDb &db0, MessageDb &db1, const QStringList &appendedCols)
+    MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QAbstractTableModel *ret = 0;
 
@@ -250,7 +250,7 @@ fail:
 }
 
 QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
@@ -290,7 +290,7 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(
 }
 
 QAbstractTableModel *MessageDbSet::msgsRcvdWithin90DaysModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -308,7 +308,7 @@ QAbstractTableModel *MessageDbSet::msgsRcvdWithin90DaysModel(
 }
 
 QAbstractTableModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	if (this->size() == 0) {
 		return &DbMsgsTblModel::dummyModel(
@@ -319,7 +319,7 @@ QAbstractTableModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year,
 }
 
 QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdInYearModel(
-    const QString &year, const QStringList &appendedCols)
+    const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
@@ -332,7 +332,7 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdInYearModel(
 }
 
 QAbstractTableModel *MessageDbSet::msgsRcvdInYearModel(const QString &year,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -614,7 +614,7 @@ int MessageDbSet::msgsUnreadInYear(enum MessageDb::MessageType type,
 }
 
 QAbstractTableModel *MessageDbSet::_sf_msgsSntModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	if (this->size() == 0) {
 		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SNT);
@@ -624,7 +624,7 @@ QAbstractTableModel *MessageDbSet::_sf_msgsSntModel(
 }
 
 QAbstractTableModel *MessageDbSet::_yrly_msgsSntModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	/* TODO -- Implementation missing and will probably be missing. */
 	Q_UNUSED(appendedCols);
@@ -632,7 +632,8 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsSntModel(
 	return NULL;
 }
 
-QAbstractTableModel *MessageDbSet::msgsSntModel(const QStringList &appendedCols)
+QAbstractTableModel *MessageDbSet::msgsSntModel(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -650,7 +651,7 @@ QAbstractTableModel *MessageDbSet::msgsSntModel(const QStringList &appendedCols)
 }
 
 QAbstractTableModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	if (this->size() == 0) {
 		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SNT);
@@ -661,7 +662,7 @@ QAbstractTableModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(
 
 QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsSntWithin90DaysModel(
     MessageDb &db, const QString &attachFileName,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QSqlQuery query(db.m_db);
 	QAbstractTableModel *ret = 0;
@@ -740,7 +741,8 @@ fail:
 }
 
 QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
-    MessageDb &db0, MessageDb &db1, const QStringList &appendedCols)
+    MessageDb &db0, MessageDb &db1,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QAbstractTableModel *ret = 0;
 
@@ -776,7 +778,7 @@ fail:
 }
 
 QAbstractTableModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
@@ -815,7 +817,7 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(
 }
 
 QAbstractTableModel *MessageDbSet::msgsSntWithin90DaysModel(
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -833,7 +835,7 @@ QAbstractTableModel *MessageDbSet::msgsSntWithin90DaysModel(
 }
 
 QAbstractTableModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	if (this->size() == 0) {
 		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SNT);
@@ -843,7 +845,7 @@ QAbstractTableModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year,
 }
 
 QAbstractTableModel *MessageDbSet::_yrly_msgsSntInYearModel(const QString &year,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
@@ -856,7 +858,7 @@ QAbstractTableModel *MessageDbSet::_yrly_msgsSntInYearModel(const QString &year,
 }
 
 QAbstractTableModel *MessageDbSet::msgsSntInYearModel(const QString &year,
-    const QStringList &appendedCols)
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:

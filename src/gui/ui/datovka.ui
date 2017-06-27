@@ -366,6 +366,9 @@ sent reply on this message</string>
     <addaction name="separator"/>
     <addaction name="actionProxy_settings"/>
     <addaction name="separator"/>
+    <addaction name="actionDocument_service_settings"/>
+    <addaction name="actionUpdate_document_service_information"/>
+    <addaction name="separator"/>
     <addaction name="actionPreferences"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -414,6 +417,8 @@ sent reply on this message</string>
     <addaction name="separator"/>
     <addaction name="actionOpen_message_externally"/>
     <addaction name="actionOpen_delivery_info_externally"/>
+    <addaction name="separator"/>
+    <addaction name="actionUpload_to_document_service"/>
     <addaction name="separator"/>
     <addaction name="actionExport_as_ZFO"/>
     <addaction name="actionExport_delivery_info_as_ZFO"/>
@@ -1224,8 +1229,40 @@ sent reply on this message</string>
     <enum>QAction::NoRole</enum>
    </property>
   </action>
+  <action name="actionDocument_service_settings">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
+   </property>
+   <property name="text">
+    <string>Document service settings</string>
+   </property>
+  </action>
+  <action name="actionUpload_to_document_service">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
+   </property>
+   <property name="text">
+    <string>Upload to document service</string>
+   </property>
+  </action>
+  <action name="actionUpdate_document_service_information">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
+   </property>
+   <property name="text">
+    <string>Update document service information</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>LoweredTreeView</class>
+   <extends>QTreeView</extends>
+   <header>lowered_tree_view.h</header>
+  </customwidget>
   <customwidget>
    <class>AttachmentTableView</class>
    <extends>QTableView</extends>
@@ -1235,11 +1272,6 @@ sent reply on this message</string>
    <class>LoweredTableView</class>
    <extends>QTableView</extends>
    <header>lowered_table_view.h</header>
-  </customwidget>
-  <customwidget>
-   <class>LoweredTreeView</class>
-   <extends>QTreeView</extends>
-   <header>lowered_tree_view.h</header>
   </customwidget>
  </customwidgets>
  <resources>
