@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QPushButton>
 
 #include "src/gui/dlg_contacts.h"
 #include "src/views/table_home_end_filter.h"
@@ -66,11 +67,12 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 	    true);
 
 	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	this->clearPushButton->setEnabled(false);
 
 	fillContactsFromMessageDb();
 
-	connect(this->filterLineEdit, SIGNAL(textChanged(QString)),
+	this->filterLine->setClearButtonEnabled(true);
+
+	connect(this->filterLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterContact(QString)));
 	connect(&m_contactTableModel,
 	    SIGNAL(dataChanged(QModelIndex, QModelIndex)),
@@ -80,8 +82,6 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 	    this, SLOT(setFirstColumnActive(QItemSelection, QItemSelection)));
 	connect(this->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
-	connect(this->clearPushButton, SIGNAL(clicked()),
-	    this, SLOT(clearContactText()));
 	connect(this->buttonBox, SIGNAL(accepted()),
 	    this, SLOT(addSelectedDbIDs()));
 
@@ -132,27 +132,19 @@ void DlgContacts::addSelectedDbIDs(void) const
 
 void DlgContacts::filterContact(const QString &text)
 {
-	this->clearPushButton->setEnabled(!text.isEmpty());
-
 	m_contactListProxyModel.setFilterRegExp(QRegExp(text,
 	    Qt::CaseInsensitive, QRegExp::FixedString));
 	/* Set filter field background colour. */
 	if (text.isEmpty()) {
-		this->filterLineEdit->setStyleSheet(
+		this->filterLine->setStyleSheet(
 		    SortFilterProxyModel::blankFilterEditStyle);
 	} else if (m_contactListProxyModel.rowCount() != 0) {
-		this->filterLineEdit->setStyleSheet(
+		this->filterLine->setStyleSheet(
 		    SortFilterProxyModel::foundFilterEditStyle);
 	} else {
-		this->filterLineEdit->setStyleSheet(
+		this->filterLine->setStyleSheet(
 		    SortFilterProxyModel::notFoundFilterEditStyle);
 	}
-}
-
-void DlgContacts::clearContactText(void)
-{
-	this->filterLineEdit->clear();
-	this->clearPushButton->setEnabled(false);
 }
 
 void DlgContacts::fillContactsFromMessageDb(void)

@@ -77,11 +77,6 @@ private slots:
 	 */
 	void filterContact(const QString &text);
 
-	/*!
-	 * @brief Clear search text in the filter input line.
-	 */
-	void clearContactText(void);
-
 private:
 	/*!
 	 * @brief Get contacts from message database and fill table model.

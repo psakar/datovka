@@ -630,11 +630,6 @@ private slots:
 	void goHome(void);
 
 	/*!
-	 * @brief Clear message filter field.
-	 */
-	void clearFilterField(void);
-
-	/*!
 	 * @brief Filter listed messages.
 	 */
 	void filterMessages(const QString &text);
@@ -1210,7 +1205,6 @@ private:
 	/* User interface elements. */
 	Ui::MainWindow *ui; /*!< User interface as generated from ui files. */
 	QLineEdit *mui_filterLine; /*!< Search filter line object. */
-	QPushButton *mui_clearFilterLineButton; /*!< Clear filter button. */
 	QStatusBar *mui_statusBar; /*!< Status bar. */
 	QLabel *mui_statusDbMode; /*!< Database status label. */
 	QLabel *mui_statusOnlineLabel; /*< On-line/off-line status label. */

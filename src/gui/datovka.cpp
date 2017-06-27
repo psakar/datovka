@@ -288,7 +288,6 @@ MainWindow::MainWindow(QWidget *parent)
     m_msgTblAppendedCols(),
     ui(new Ui::MainWindow),
     mui_filterLine(0),
-    mui_clearFilterLineButton(0),
     mui_statusBar(0),
     mui_statusDbMode(0),
     mui_statusOnlineLabel(0),
@@ -5469,12 +5468,6 @@ void MainWindow::findDatabox(void)
 	}
 }
 
-void MainWindow::clearFilterField(void)
-{
-	debugSlotCall();
-	mui_filterLine->clear();
-}
-
 /* ========================================================================= */
 /*
  * Message filter
@@ -8583,16 +8576,8 @@ void MainWindow::topToolBarSetUp(void)
 	    this, SLOT(filterMessages(QString)));
 	mui_filterLine->setFixedWidth(200);
 	mui_filterLine->setToolTip(tr("Enter sought expression"));
+	mui_filterLine->setClearButtonEnabled(true);
 	ui->toolBar->addWidget(mui_filterLine);
-
-	/* Clear message filter button. */
-	mui_clearFilterLineButton = new QPushButton(this);
-	mui_clearFilterLineButton->setIcon(
-	    QIcon(ICON_3PARTY_PATH "delete_16.png"));
-	mui_clearFilterLineButton->setToolTip(tr("Clear search field"));
-	ui->toolBar->addWidget(mui_clearFilterLineButton);
-	connect(mui_clearFilterLineButton, SIGNAL(clicked()), this,
-	    SLOT(clearFilterField()));
 }
 
 void MainWindow::setMenuActionIcons(void)
