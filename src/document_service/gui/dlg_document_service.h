@@ -93,18 +93,6 @@ private slots:
 
 private:
 	/*!
-	 * @brief Configures graphics view.
-	 */
-	void setUpGraphicsView(void);
-
-	/*!
-	 * @brief Displays SVG image.
-	 *
-	 * @param[in] svgData SVG data to be displayed.
-	 */
-	void displaySvg(const QByteArray &svgData);
-
-	/*!
 	 * @brief Loads service information from storage.
 	 */
 	void loadStoredServiceInfo(void);

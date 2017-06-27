@@ -84,7 +84,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QGraphicsView" name="graphicsView"/>
+      <widget class="SvgView" name="graphicsView"/>
      </item>
      <item>
       <layout class="QFormLayout" name="formLayout_2">
@@ -130,6 +130,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SvgView</class>
+   <extends>QGraphicsView</extends>
+   <header>src/document_service/widgets/svg_view.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

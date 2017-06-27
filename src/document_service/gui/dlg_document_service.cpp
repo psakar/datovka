@@ -21,12 +21,11 @@
  * the two.
  */
 
-#include <QGraphicsSvgItem>
 #include <QMessageBox>
-#include <QSvgRenderer>
 
 #include "src/document_service/gui/dlg_document_service.h"
 #include "src/document_service/json/service_info.h"
+#include "src/document_service/widgets/svg_view.h"
 #include "src/io/document_service_db.h"
 #include "ui_dlg_document_service.h"
 
@@ -55,7 +54,7 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
 {
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Document Service Settings"));
-	setUpGraphicsView();
+	m_ui->graphicsView->setSvgData(QByteArray());
 
 	m_ui->urlLine->setText(urlStr);
 	m_ui->tokenLine->setText(tokenStr);
@@ -183,7 +182,7 @@ void DlgDocumentService::eraseContent(void)
 	m_ui->urlLine->setText(QString());
 	m_ui->tokenLine->setText(QString());
 
-	setUpGraphicsView();
+	m_ui->graphicsView->setSvgData(QByteArray());
 	m_logoSvg = QByteArray();
 	m_ui->nameLine->setText(QString());
 	m_ui->tokenNameLine->setText(QString());
@@ -194,92 +193,6 @@ void DlgDocumentService::eraseContent(void)
 void DlgDocumentService::notifyCommunicationError(const QString &errMsg)
 {
 	QMessageBox::critical(this, tr("Communication Error"), errMsg);
-}
-
-void DlgDocumentService::setUpGraphicsView(void)
-{
-	QGraphicsView *gv = m_ui->graphicsView;
-
-	gv->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	gv->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
-	gv->resize(150, 150);
-
-	gv->setScene(new (std::nothrow) QGraphicsScene(this));
-	gv->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-	gv->setDragMode(QGraphicsView::ScrollHandDrag);
-	gv->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-
-	/* Prepare background check-board pattern. */
-	QPixmap tilePixmap(64, 64);
-	tilePixmap.fill(Qt::white);
-	QPainter tilePainter(&tilePixmap);
-	QColor color(220, 220, 220);
-	tilePainter.fillRect(0, 0, 32, 32, color);
-	tilePainter.fillRect(32, 32, 32, 32, color);
-	tilePainter.end();
-
-	gv->setBackgroundBrush(tilePixmap);
-}
-
-/*!
- * @brief Resize graphics item to fit graphics view.
- *
- * @param[in]     gv Graphics view.
- * @param[in,out] gi Graphics item to be resized.
- */
-static
-void resizeGraphicsItem(const QGraphicsView *gv, QGraphicsItem *gi)
-{
-	if ((Q_NULLPTR == gv) || (Q_NULLPTR == gi)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	qreal wscale = gv->geometry().size().width() /
-	    gi->boundingRect().size().width();
-	qreal hscale = gv->geometry().size().height() /
-	    gi->boundingRect().size().height();
-
-	gi->setScale((wscale < hscale) ? wscale : hscale);
-}
-
-void DlgDocumentService::displaySvg(const QByteArray &svgData)
-{
-	if (svgData.isEmpty()) {
-		return;
-	}
-
-	QGraphicsView *gv = m_ui->graphicsView;
-	QGraphicsScene *s = m_ui->graphicsView->scene();
-
-	QGraphicsSvgItem *svgItem = new (std::nothrow) QGraphicsSvgItem();
-	svgItem->setObjectName(QStringLiteral("svgItem"));;
-	{
-		QSvgRenderer *svgRenderer =
-		    new (std::nothrow) QSvgRenderer(svgData, this);
-		svgItem->setSharedRenderer(svgRenderer);
-	}
-
-	s->clear();
-	gv->resetTransform();
-
-	svgItem->setFlags(QGraphicsItem::ItemClipsToShape);
-	svgItem->setCacheMode(QGraphicsItem::NoCache);
-	svgItem->setZValue(0);
-	resizeGraphicsItem(gv, svgItem);
-
-#if 0
-	QGraphicsRectItem *backgroundItem =
-	    new (std::nothrow) QGraphicsRectItem(svgItem->boundingRect());
-	backgroundItem->setBrush(Qt::white);
-	backgroundItem->setPen(Qt::NoPen);
-	backgroundItem->setVisible(false);
-	backgroundItem->setZValue(-1);
-
-	s->addItem(backgroundItem);
-#endif
-	s->addItem(svgItem);
 }
 
 void DlgDocumentService::loadStoredServiceInfo(void)
@@ -300,7 +213,7 @@ void DlgDocumentService::loadStoredServiceInfo(void)
 void DlgDocumentService::setResponseContent(const QByteArray &logoSvg,
     const QString &name, const QString &tokenName)
 {
-	displaySvg(logoSvg);
+	m_ui->graphicsView->setSvgData(logoSvg);
 	m_logoSvg = logoSvg;
 	m_ui->nameLine->setText(name);
 	m_ui->tokenNameLine->setText(tokenName);
