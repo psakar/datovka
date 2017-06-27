@@ -54,7 +54,6 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
 	Q_ASSERT(!m_token.isEmpty());
 
 	m_ui->setupUi(this);
-	setWindowTitle(tr("Document Service Stored Messages"));
 
 	/* Just to make the progress bar stationary. */
 	m_ui->taskLabel->setText(QStringLiteral("\n"));

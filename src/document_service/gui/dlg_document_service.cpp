@@ -53,7 +53,7 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
     m_logoSvg()
 {
 	m_ui->setupUi(this);
-	setWindowTitle(tr("Document Service Settings"));
+
 	m_ui->graphicsView->setSvgData(QByteArray());
 
 	m_ui->urlLine->setText(urlStr);

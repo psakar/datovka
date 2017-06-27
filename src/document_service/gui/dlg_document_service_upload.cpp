@@ -48,7 +48,6 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
     m_selectedUploadIds()
 {
 	m_ui->setupUi(this);
-	setWindowTitle(tr("Upload Message into Document Service"));
 
 	loadDocumentServicePixmap(LOGO_EDGE);
 	m_ui->appealLabel->setText(
