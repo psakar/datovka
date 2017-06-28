@@ -23,7 +23,6 @@
 
 #include <cinttypes>
 #include <QMessageBox>
-#include <QString>
 
 #include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/document_service/json/upload_file.h"
@@ -242,6 +241,13 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 		    errorMessage);
 		return false;
 	}
+
+	QMessageBox::information(parent, QObject::tr("Successful Upload"),
+	    QObject::tr("Message '%1' was successfully uploaded into the document service.").arg(dmId) +
+	    QStringLiteral("\n") +
+	    QObject::tr("It can be now found in the document service in these locations:") +
+	    QStringLiteral("\n") +
+	    ufRes.locations().join(QStringLiteral("\n")));
 
 	if (!ufRes.locations().isEmpty()) {
 		logInfoNL(

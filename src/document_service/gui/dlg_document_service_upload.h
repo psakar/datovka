@@ -24,7 +24,10 @@
 #ifndef _DLG_DOCUMENT_SERVICE_UPLOAD_H_
 #define _DLG_DOCUMENT_SERVICE_UPLOAD_H_
 
+#include <QByteArray>
 #include <QDialog>
+#include <QString>
+#include <QStringList>
 
 #include "src/document_service/io/document_service_connection.h"
 #include "src/document_service/models/upload_hierarchy_model.h"
@@ -133,7 +136,7 @@ private:
 	UploadHierarchyModel m_uploadModel; /*!< Upload hierarchy model. */
 	UploadHierarchyProxyModel m_uploadProxyModel; /*!< Used for filtering. */
 
-	QStringList m_selectedUploadIds; /* Upload location identifiers. */
+	QStringList m_selectedUploadIds; /*!< Upload location identifiers. */
 };
 
 #endif /* _DLG_DOCUMENT_SERVICE_UPLOAD_H_ */
