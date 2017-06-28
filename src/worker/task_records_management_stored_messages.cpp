@@ -33,9 +33,9 @@
 #include "src/io/records_management_db.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/task_document_service_stored_messages.h"
+#include "src/worker/task_records_management_stored_messages.h"
 
-TaskDocumentServiceStoredMessages::TaskDocumentServiceStoredMessages(
+TaskRecordsManagementStoredMessages::TaskRecordsManagementStoredMessages(
     const QString &urlStr, const QString &tokenStr, enum Operation operation,
     const MessageDbSet *dbSet, const QList<qint64> &exludedDmIds)
     : m_result(DS_DSM_ERR),
@@ -48,12 +48,12 @@ TaskDocumentServiceStoredMessages::TaskDocumentServiceStoredMessages(
     m_exludedDmIds(exludedDmIds)
 {
 	Q_ASSERT(!m_url.isEmpty() && !m_token.isEmpty());
-	Q_ASSERT((DS_UPDATE_STORED == operation) || (Q_NULLPTR != m_dbSet));
+	Q_ASSERT((RM_UPDATE_STORED == operation) || (Q_NULLPTR != m_dbSet));
 }
 
-void TaskDocumentServiceStoredMessages::run(void)
+void TaskRecordsManagementStoredMessages::run(void)
 {
-	if ((DS_DOWNLOAD_ALL == m_operation) && (Q_NULLPTR == m_dbSet)) {
+	if ((RM_DOWNLOAD_ALL == m_operation) && (Q_NULLPTR == m_dbSet)) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -64,7 +64,7 @@ void TaskDocumentServiceStoredMessages::run(void)
 	}
 
 	logDebugLv0NL(
-	    "Starting download stored messages from document service task '%s' in thread '%p'.",
+	    "Starting download stored messages from records management service task '%s' in thread '%p'.",
 	    m_id.toUtf8().constData(), (void *) QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
@@ -76,13 +76,13 @@ void TaskDocumentServiceStoredMessages::run(void)
 
 	/* ### Worker task end. ### */
 
-	logDebugLv0NL("Download stored messages from document service task '%s' finished in thread '%p'.",
+	logDebugLv0NL("Download stored messages from records management service task '%s' finished in thread '%p'.",
 	    m_id.toUtf8().constData(), (void *) QThread::currentThreadId());
 
-	emit globMsgProcEmitter.documentServiceStoredMessagesFinished(m_id);
+	emit globMsgProcEmitter.recordsManagementStoredMessagesFinished(m_id);
 }
 
-const QString &TaskDocumentServiceStoredMessages::id(void) const
+const QString &TaskRecordsManagementStoredMessages::id(void) const
 {
 	return m_id;
 }
@@ -114,7 +114,7 @@ QList<qint64> obtainDbSetDmIds(const MessageDbSet *dbSet,
 }
 
 /*!
- * @brief Obtains all message identifiers held in document service database.
+ * @brief Obtains all message identifiers held in records management database.
  *
  * @patam[in] exludedDmIds Message identifiers that should not be queried.
  * @return List of message identifiers.
@@ -186,7 +186,7 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 
 	foreach (const DmEntry &entry, sfRes.dms()) {
 		if (entry.locations().isEmpty()) {
-			/* Not held within the document service. */
+			/* Not held within the records management service. */
 			if (clear) {
 				globRecordsManagementDbPtr->deleteStoredMsg(
 				    entry.dmId());
@@ -260,11 +260,11 @@ int processStoredFilesResponse(bool clear, const StoredFilesResp &sfRes,
 }
 
 /*!
- * @brief Call document service and process response.
+ * @brief Call records management service and process response.
  *
  * @param[in]  clear If true then all messages not held within the service will
  *                   be explicitly removed.
- * @param[in]  dsc Document service connection.
+ * @param[in]  dsc Records management service connection.
  * @param[in]  dmIds Message identifiers.
  * @param[out] limit Obtained limit.
  * @return Number of processed responses, negative value on error.
@@ -315,20 +315,20 @@ int callStoredFiles(bool clear, DocumentServiceConnection &dsc,
 /*!
  * @brief Calls stored files service for all supplied message identifiers.
  *
- * @param[in] urlStr Document service URL.
- * @param[in] tokenStr Document service access token.
+ * @param[in] urlStr Records management URL.
+ * @param[in] tokenStr Records management access token.
  * @param[in] dmIds Message identifiers.
  * @param[in] clear If true then all messages not held within the service will
  *                  be explicitly removed.
  * @return Processing state.
  */
 static
-enum TaskDocumentServiceStoredMessages::Result updateMessages(
+enum TaskRecordsManagementStoredMessages::Result updateMessages(
     const QString &urlStr, const QString &tokenStr, const QList<qint64> &dmIds,
     bool clear)
 {
 	if (dmIds.isEmpty()) {
-		return TaskDocumentServiceStoredMessages::DS_DSM_SUCCESS;
+		return TaskRecordsManagementStoredMessages::DS_DSM_SUCCESS;
 	}
 
 	DocumentServiceConnection dsc(
@@ -345,21 +345,21 @@ enum TaskDocumentServiceStoredMessages::Result updateMessages(
 
 		int ret = callStoredFiles(clear, dsc, queryList, nextLimit);
 		if (ret < 0) {
-			return TaskDocumentServiceStoredMessages::DS_DSM_ERR;
+			return TaskRecordsManagementStoredMessages::DS_DSM_ERR;
 		}
 		pos += ret;
 		currentLimit = nextLimit; /* Update limit. */
 	}
 
-	return TaskDocumentServiceStoredMessages::DS_DSM_ERR;
+	return TaskRecordsManagementStoredMessages::DS_DSM_ERR;
 }
 
-enum TaskDocumentServiceStoredMessages::Result
-TaskDocumentServiceStoredMessages::downloadStoredMessages(
+enum TaskRecordsManagementStoredMessages::Result
+TaskRecordsManagementStoredMessages::downloadStoredMessages(
     const QString &urlStr, const QString &tokenStr, enum Operation operation,
     const MessageDbSet *dbSet, const QList<qint64> &exludedDmIds)
 {
-	if ((DS_DOWNLOAD_ALL == operation) && (Q_NULLPTR == dbSet)) {
+	if ((RM_DOWNLOAD_ALL == operation) && (Q_NULLPTR == dbSet)) {
 		Q_ASSERT(0);
 		return DS_DSM_ERR;
 	}
@@ -369,11 +369,11 @@ TaskDocumentServiceStoredMessages::downloadStoredMessages(
 	}
 
 	QList<qint64> dmIds;
-	if (DS_DOWNLOAD_ALL == operation) {
+	if (RM_DOWNLOAD_ALL == operation) {
 		dmIds = obtainDbSetDmIds(dbSet, exludedDmIds);
 	} else {
 		dmIds = obtainHeldDmIds(exludedDmIds);
 	}
 	return updateMessages(urlStr, tokenStr, dmIds,
-	    DS_UPDATE_STORED == operation);
+	    RM_UPDATE_STORED == operation);
 }

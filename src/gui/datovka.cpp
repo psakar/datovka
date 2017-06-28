@@ -90,7 +90,6 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_authenticate_message.h"
-#include "src/worker/task_document_service_stored_messages.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_download_message_list_mojeid.h"

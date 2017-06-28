@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _TASK_DOCUMENT_SERVICE_STORED_MESSAGES_H_
-#define _TASK_DOCUMENT_SERVICE_STORED_MESSAGES_H_
+#ifndef _TASK_RECORDS_MANAGEMENT_STORED_MESSAGES_H_
+#define _TASK_RECORDS_MANAGEMENT_STORED_MESSAGES_H_
 
 #include <QList>
 #include <QString>
@@ -33,7 +33,7 @@
 /*!
  * @brief Task describing downloading information about stored messages.
  */
-class TaskDocumentServiceStoredMessages : public Task {
+class TaskRecordsManagementStoredMessages : public Task {
 public:
 	/*!
 	 * @brief Return state describing what happened.
@@ -49,20 +49,20 @@ public:
 	 * @brief Operation to be performed.
 	 */
 	enum Operation {
-		DS_UPDATE_STORED, /*!< Update only messages in document service database. */
-		DS_DOWNLOAD_ALL /*!< Download all messages that are held in database set. */
+		RM_UPDATE_STORED, /*!< Update only messages in records management database. */
+		RM_DOWNLOAD_ALL /*!< Download all messages that are held in database set. */
 	};
 
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] urlStr Document service URL.
-	 * @param[in] tokenStr Document service access token.
+	 * @param[in] urlStr Records management URL.
+	 * @param[in] tokenStr Records management access token.
 	 * @param[in] operation Actual action to be performed.
 	 * @param[in] dbSet Database set to be used to obtain message identifiers.
 	 * @patam[in] exludedDmIds Message identifiers that should not be queried.
 	 */
-	explicit TaskDocumentServiceStoredMessages(
+	explicit TaskRecordsManagementStoredMessages(
 	    const QString &urlStr, const QString &tokenStr,
 	    enum Operation operation, const MessageDbSet *dbSet,
 	    const QList<qint64> &exludedDmIds = QList<qint64>());
@@ -84,11 +84,11 @@ public:
 
 private:
 	/*!
-	 * @brief Download stored files information and save to document service
-	 *     database.
+	 * @brief Download stored files information and save to records
+	 *     management database.
 	 *
-	 * @param[in] urlStr Document service URL.
-	 * @param[in] tokenStr Document service access token.
+	 * @param[in] urlStr Records management URL.
+	 * @param[in] tokenStr Records management access token.
 	 * @param[in] operation Actual action to be performed.
 	 * @param[in] dbSet Database set to be used to obtain message identifiers.
 	 * @patam[in] exludedDmIds Message identifiers that should not be queried.
@@ -101,8 +101,8 @@ private:
 
 	const QString m_id; /*!< Task identifier. */
 
-	const QString m_url; /*!< String containing document service URL. */
-	const QString m_token; /*!< Document service access token. */
+	const QString m_url; /*!< String containing records management URL. */
+	const QString m_token; /*!< Records management access token. */
 
 	const enum Operation m_operation; /*!< Operation to be performed. */
 
@@ -113,4 +113,4 @@ private:
 	                                     */
 };
 
-#endif /* _TASK_DOCUMENT_SERVICE_STORED_MESSAGES_H_ */
+#endif /* _TASK_RECORDS_MANAGEMENT_STORED_MESSAGES_H_ */

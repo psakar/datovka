@@ -29,7 +29,7 @@
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
-#include "src/worker/task_document_service_stored_messages.h"
+#include "src/worker/task_records_management_stored_messages.h"
 #include "ui_dlg_document_service_stored.h"
 
 #define LOGO_EDGE 64
@@ -67,7 +67,7 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
 
 	connect(m_ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancelLoop()));
 	connect(&globMsgProcEmitter,
-	    SIGNAL(documentServiceStoredMessagesFinished(QString)),
+	    SIGNAL(recordsManagementStoredMessagesFinished(QString)),
 	    this, SLOT(downloadAndStoreContinue()));
 
 	QTimer::singleShot(RUN_DELAY_MS, this, SLOT(downloadAndStoreStart()));
@@ -111,10 +111,10 @@ void DlgDocumentServiceStored::downloadAndStoreStart(void)
 		    tr("Updating stored information about messages.") +
 		    QStringLiteral("\n"));
 
-		TaskDocumentServiceStoredMessages *task =
-		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
+		TaskRecordsManagementStoredMessages *task =
+		    new (::std::nothrow) TaskRecordsManagementStoredMessages(
 		        m_url, m_token,
-		        TaskDocumentServiceStoredMessages::DS_UPDATE_STORED,
+		        TaskRecordsManagementStoredMessages::RM_UPDATE_STORED,
 		        Q_NULLPTR);
 		if (Q_NULLPTR == task) {
 			logErrorNL("%s",
@@ -158,10 +158,10 @@ void DlgDocumentServiceStored::downloadAndStoreContinue(void)
 			continue;
 		}
 
-		TaskDocumentServiceStoredMessages *task =
-		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
+		TaskRecordsManagementStoredMessages *task =
+		    new (::std::nothrow) TaskRecordsManagementStoredMessages(
 		        m_url, m_token,
-		        TaskDocumentServiceStoredMessages::DS_DOWNLOAD_ALL,
+		        TaskRecordsManagementStoredMessages::RM_DOWNLOAD_ALL,
 		        account.dbSet);
 		if (Q_NULLPTR == task) {
 			logErrorNL("Cannot create stored_files task for '%s'.",

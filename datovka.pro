@@ -355,7 +355,6 @@ SOURCES += \
     src/worker/task.cpp \
     src/worker/task_authenticate_message.cpp \
     src/worker/task_change_pwd.cpp \
-    src/worker/task_document_service_stored_messages.cpp \
     src/worker/task_download_credit_info.cpp \
     src/worker/task_download_message.cpp \
     src/worker/task_download_message_mojeid.cpp \
@@ -369,6 +368,7 @@ SOURCES += \
     src/worker/task_import_message.cpp \
     src/worker/task_import_zfo.cpp \
     src/worker/task_keep_alive.cpp \
+    src/worker/task_records_management_stored_messages.cpp \
     src/worker/task_search_owner.cpp \
     src/worker/task_search_owner_fulltext.cpp \
     src/worker/task_send_message.cpp \
@@ -480,7 +480,6 @@ HEADERS += \
     src/worker/task.h \
     src/worker/task_authenticate_message.h \
     src/worker/task_change_pwd.h \
-    src/worker/task_document_service_stored_messages.h \
     src/worker/task_download_credit_info.h \
     src/worker/task_download_message.h \
     src/worker/task_download_message_mojeid.h \
@@ -494,6 +493,7 @@ HEADERS += \
     src/worker/task_import_message.h \
     src/worker/task_import_zfo.h \
     src/worker/task_keep_alive.h \
+    src/worker/task_records_management_stored_messages.h \
     src/worker/task_search_owner.h \
     src/worker/task_search_owner_fulltext.h \
     src/worker/task_send_message.h \
