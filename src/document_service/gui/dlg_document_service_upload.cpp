@@ -28,7 +28,7 @@
 #include "src/document_service/json/upload_file.h"
 #include "src/document_service/json/upload_hierarchy.h"
 #include "src/graphics/graphics.h"
-#include "src/io/document_service_db.h"
+#include "src/io/records_management_db.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/log/log.h"
 #include "ui_dlg_document_service_upload.h"
@@ -198,12 +198,12 @@ void DlgDocumentServiceUpload::notifyCommunicationError(const QString &errMsg)
 
 void DlgDocumentServiceUpload::loadDocumentServicePixmap(int width)
 {
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return;
 	}
 
-	DocumentServiceDb::ServiceInfoEntry entry(
-	    globDocumentServiceDbPtr->serviceInfo());
+	RecordsManagementDb::ServiceInfoEntry entry(
+	    globRecordsManagementDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
 		return;
 	}
@@ -253,8 +253,8 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 		logInfoNL(
 		    "Message '%" PRId64 "'has been stored into document service.",
 		    dmId);
-		if (Q_NULLPTR != globDocumentServiceDbPtr) {
-			return globDocumentServiceDbPtr->updateStoredMsg(dmId,
+		if (Q_NULLPTR != globRecordsManagementDbPtr) {
+			return globRecordsManagementDbPtr->updateStoredMsg(dmId,
 			    ufRes.locations());
 		} else {
 			Q_ASSERT(0);

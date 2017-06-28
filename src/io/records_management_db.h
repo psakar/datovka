@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _DOCUMENT_SERVICE_DB_H_
-#define _DOCUMENT_SERVICE_DB_H_
+#ifndef _RECORDS_MANAGEMENT_DB_H_
+#define _RECORDS_MANAGEMENT_DB_H_
 
 #include <QList>
 #include <QString>
@@ -31,9 +31,9 @@
 #include "src/io/sqlite/db.h"
 
 /*!
- * @brief Encapsulates document service database.
+ * @brief Encapsulates records management database.
  */
-class DocumentServiceDb : public SQLiteDb {
+class RecordsManagementDb : public SQLiteDb {
 
 public:
 	class ServiceInfoEntry {
@@ -65,7 +65,7 @@ public:
 	 *
 	 * @param[in] connectionName Connection name.
 	 */
-	explicit DocumentServiceDb(const QString &connectionName);
+	explicit RecordsManagementDb(const QString &connectionName);
 
 	/*!
 	 * @brief Open database file.
@@ -148,8 +148,8 @@ private:
 };
 
 /*!
- * @brief Global document service database.
+ * @brief Global records management database.
  */
-extern DocumentServiceDb *globDocumentServiceDbPtr;
+extern RecordsManagementDb *globRecordsManagementDbPtr;
 
-#endif /* _DOCUMENT_SERVICE_DB_H_ */
+#endif /* _RECORDS_MANAGEMENT_DB_H_ */

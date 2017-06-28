@@ -305,7 +305,6 @@ SOURCES += \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
     src/io/dbs.cpp \
-    src/io/document_service_db.cpp \
     src/io/exports.cpp \
     src/io/file_downloader.cpp \
     src/io/filesystem.cpp \
@@ -318,6 +317,7 @@ SOURCES += \
     src/io/message_db_set_container.cpp \
     src/io/message_db_set_delegated.cpp \
     src/io/message_db_single.cpp \
+    src/io/records_management_db.cpp \
     src/io/sqlite/db.cpp \
     src/io/sqlite/table.cpp \
     src/io/tag_db.cpp \
@@ -430,7 +430,6 @@ HEADERS += \
     src/io/account_db.h \
     src/io/db_tables.h \
     src/io/dbs.h \
-    src/io/document_service_db.h \
     src/io/exports.h \
     src/io/file_downloader.h \
     src/io/filesystem.h \
@@ -442,6 +441,7 @@ HEADERS += \
     src/io/message_db_set.h \
     src/io/message_db_set_container.h \
     src/io/message_db_single.h \
+    src/io/records_management_db.h \
     src/io/sqlite/db.h \
     src/io/sqlite/table.h \
     src/io/tag_db.h \

@@ -39,12 +39,12 @@
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/db_tables.h"
-#include "src/io/document_service_db.h"
 #include "src/io/file_downloader.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
 #include "src/io/tag_db_container.h"
+#include "src/io/records_management_db.h"
 #include "src/io/sqlite/db.h"
 #include "src/localisation/localisation.h"
 #include "src/log/log.h"
@@ -636,16 +636,16 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		globDocumentServiceDbPtr =
-		    new (std::nothrow) DocumentServiceDb("documentServiceDb");
-		if (Q_NULLPTR == globDocumentServiceDbPtr) {
-			logErrorNL("%s", "Cannot allocate document service db.");
+		globRecordsManagementDbPtr =
+		    new (std::nothrow) RecordsManagementDb("recordsManagementDb");
+		if (Q_NULLPTR == globRecordsManagementDbPtr) {
+			logErrorNL("%s", "Cannot allocate records management db.");
 			return EXIT_FAILURE;
 		}
-		/* Open document service database. */
-		if (!globDocumentServiceDbPtr->openDb(globPref.documentServiceDbPath())) {
-			logErrorNL("Error opening document service db '%s'.",
-			    globPref.documentServiceDbPath().toUtf8().constData());
+		/* Open records management database. */
+		if (!globRecordsManagementDbPtr->openDb(globPref.recordsManagementDbPath())) {
+			logErrorNL("Error opening records management db '%s'.",
+			    globPref.recordsManagementDbPath().toUtf8().constData());
 			return EXIT_FAILURE;
 		}
 	}
@@ -709,9 +709,9 @@ int main(int argc, char *argv[])
 	 */
 	//crypto_cleanup_threads();
 
-	if (Q_NULLPTR != globDocumentServiceDbPtr) {
-		delete globDocumentServiceDbPtr;
-		globDocumentServiceDbPtr = Q_NULLPTR;
+	if (Q_NULLPTR != globRecordsManagementDbPtr) {
+		delete globRecordsManagementDbPtr;
+		globRecordsManagementDbPtr = Q_NULLPTR;
 	}
 
 	if (0 != globTagDbPtr) {

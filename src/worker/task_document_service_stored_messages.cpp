@@ -30,7 +30,7 @@
 #include "src/document_service/io/document_service_connection.h"
 #include "src/document_service/json/entry_error.h"
 #include "src/document_service/json/stored_files.h"
-#include "src/io/document_service_db.h"
+#include "src/io/records_management_db.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_document_service_stored_messages.h"
@@ -122,12 +122,12 @@ QList<qint64> obtainDbSetDmIds(const MessageDbSet *dbSet,
 static
 QList<qint64> obtainHeldDmIds(const QList<qint64> &exludedDmIds)
 {
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		Q_ASSERT(0);
 		return QList<qint64>();
 	}
 
-	QSet<qint64> dmIdSet = globDocumentServiceDbPtr->getAllDmIds().toSet();
+	QSet<qint64> dmIdSet = globRecordsManagementDbPtr->getAllDmIds().toSet();
 
 	dmIdSet -= exludedDmIds.toSet();
 	return dmIdSet.toList();
@@ -176,11 +176,11 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 {
 	/* Process only messages. */
 
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return false;
 	}
 
-	if (!globDocumentServiceDbPtr->beginTransaction()) {
+	if (!globRecordsManagementDbPtr->beginTransaction()) {
 		return false;
 	}
 
@@ -188,14 +188,14 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 		if (entry.locations().isEmpty()) {
 			/* Not held within the document service. */
 			if (clear) {
-				globDocumentServiceDbPtr->deleteStoredMsg(
+				globRecordsManagementDbPtr->deleteStoredMsg(
 				    entry.dmId());
 			} else {
 				continue;
 			}
 		}
 
-		if (!globDocumentServiceDbPtr->updateStoredMsg(entry.dmId(),
+		if (!globRecordsManagementDbPtr->updateStoredMsg(entry.dmId(),
 		        entry.locations())) {
 			logErrorNL(
 			    "Could not update information about message '%" PRId64 "'.",
@@ -204,13 +204,13 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 		}
 	}
 
-	if (!globDocumentServiceDbPtr->commitTransaction()) {
+	if (!globRecordsManagementDbPtr->commitTransaction()) {
 		goto fail;
 	}
 	return true;
 
 fail:
-	globDocumentServiceDbPtr->rollbackTransaction();
+	globRecordsManagementDbPtr->rollbackTransaction();
 	return false;
 }
 
@@ -364,7 +364,7 @@ TaskDocumentServiceStoredMessages::downloadStoredMessages(
 		return DS_DSM_ERR;
 	}
 
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return DS_DSM_DB_INS_ERR;
 	}
 

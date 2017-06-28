@@ -26,7 +26,7 @@
 #include "src/document_service/gui/dlg_document_service.h"
 #include "src/document_service/json/service_info.h"
 #include "src/document_service/widgets/svg_view.h"
-#include "src/io/document_service_db.h"
+#include "src/io/records_management_db.h"
 #include "ui_dlg_document_service.h"
 
 /*!
@@ -94,7 +94,7 @@ DlgDocumentService::~DlgDocumentService(void)
 bool DlgDocumentService::updateSettings(
     DocumentServiceSettings &docSrvcSettings, QWidget *parent)
 {
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return false;
 	}
 
@@ -108,19 +108,19 @@ bool DlgDocumentService::updateSettings(
 		Q_ASSERT(!dlg.m_ui->tokenLine->text().trimmed().isEmpty());
 
 		/* Update entry. */
-		DocumentServiceDb::ServiceInfoEntry entry;
+		RecordsManagementDb::ServiceInfoEntry entry;
 		entry.url = dlg.m_ui->urlLine->text().trimmed();
 		entry.name = dlg.m_ui->nameLine->text();
 		entry.tokenName = dlg.m_ui->tokenNameLine->text();
 		entry.logoSvg = dlg.m_logoSvg;
-		globDocumentServiceDbPtr->updateServiceInfo(entry);
+		globRecordsManagementDbPtr->updateServiceInfo(entry);
 
 		if (docSrvcSettings.url != dlg.m_ui->urlLine->text()) {
 			/* Erase all message-related data as URL has changed. */
-			globDocumentServiceDbPtr->deleteAllStoredMsg();
+			globRecordsManagementDbPtr->deleteAllStoredMsg();
 		}
 	} else {
-		globDocumentServiceDbPtr->deleteAllEntries();
+		globRecordsManagementDbPtr->deleteAllEntries();
 	}
 
 	/* Save changes to settings. */
@@ -195,12 +195,12 @@ void DlgDocumentService::notifyCommunicationError(const QString &errMsg)
 
 void DlgDocumentService::loadStoredServiceInfo(void)
 {
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return;
 	}
 
-	DocumentServiceDb::ServiceInfoEntry entry(
-	    globDocumentServiceDbPtr->serviceInfo());
+	RecordsManagementDb::ServiceInfoEntry entry(
+	    globRecordsManagementDbPtr->serviceInfo());
 	if (!entry.isValid()) {
 		return;
 	}

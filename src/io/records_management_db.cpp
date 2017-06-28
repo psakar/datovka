@@ -28,15 +28,15 @@
 #include <QVariant>
 
 #include "src/io/db_tables.h"
-#include "src/io/document_service_db.h"
+#include "src/io/records_management_db.h"
 #include "src/log/log.h"
 
-DocumentServiceDb::DocumentServiceDb(const QString &connectionName)
+RecordsManagementDb::RecordsManagementDb(const QString &connectionName)
     : SQLiteDb(connectionName)
 {
 }
 
-bool DocumentServiceDb::openDb(const QString &fileName)
+bool RecordsManagementDb::openDb(const QString &fileName)
 {
 	return SQLiteDb::openDb(fileName, false, listOfTables());
 }
@@ -72,7 +72,7 @@ bool deleteTableContent(QSqlDatabase &db, const QString &tblName)
 	return true;
 }
 
-bool DocumentServiceDb::deleteAllEntries(void)
+bool RecordsManagementDb::deleteAllEntries(void)
 {
 	deleteTableContent(m_db, QStringLiteral("service_info"));
 	deleteTableContent(m_db, QStringLiteral("stored_files_messages"));
@@ -89,7 +89,7 @@ bool DocumentServiceDb::deleteAllEntries(void)
  */
 static
 bool insertServiceInfo(QSqlDatabase &db,
-    const DocumentServiceDb::ServiceInfoEntry &entry)
+    const RecordsManagementDb::ServiceInfoEntry &entry)
 {
 	if (!entry.isValid()) {
 		Q_ASSERT(0);
@@ -121,7 +121,7 @@ bool insertServiceInfo(QSqlDatabase &db,
 	return true;
 }
 
-bool DocumentServiceDb::updateServiceInfo(const ServiceInfoEntry &entry)
+bool RecordsManagementDb::updateServiceInfo(const ServiceInfoEntry &entry)
 {
 	if (!entry.isValid()) {
 		return false;
@@ -146,7 +146,7 @@ rollback:
 	return false;
 }
 
-DocumentServiceDb::ServiceInfoEntry DocumentServiceDb::serviceInfo(void) const
+RecordsManagementDb::ServiceInfoEntry RecordsManagementDb::serviceInfo(void) const
 {
 	QSqlQuery query(m_db);
 
@@ -182,13 +182,13 @@ DocumentServiceDb::ServiceInfoEntry DocumentServiceDb::serviceInfo(void) const
 	}
 }
 
-bool DocumentServiceDb::deleteAllStoredMsg(void)
+bool RecordsManagementDb::deleteAllStoredMsg(void)
 {
 	return deleteTableContent(m_db,
 	    QStringLiteral("stored_files_messages"));
 }
 
-bool DocumentServiceDb::deleteStoredMsg(qint64 dmId)
+bool RecordsManagementDb::deleteStoredMsg(qint64 dmId)
 {
 	QSqlQuery query(m_db);
 
@@ -209,7 +209,7 @@ bool DocumentServiceDb::deleteStoredMsg(qint64 dmId)
 	return true;
 }
 
-bool DocumentServiceDb::updateStoredMsg(qint64 dmId,
+bool RecordsManagementDb::updateStoredMsg(qint64 dmId,
     const QStringList &locations)
 {
 #define LIST_SEPARATOR QLatin1String("^")
@@ -240,7 +240,7 @@ bool DocumentServiceDb::updateStoredMsg(qint64 dmId,
 #undef LIST_SEPARATOR
 }
 
-QList<qint64> DocumentServiceDb::getAllDmIds(void) const
+QList<qint64> RecordsManagementDb::getAllDmIds(void) const
 {
 	QSqlQuery query(m_db);
 
@@ -262,7 +262,7 @@ QList<qint64> DocumentServiceDb::getAllDmIds(void) const
 	return dmIdList;
 }
 
-QStringList DocumentServiceDb::storedMsgLocations(qint64 dmId) const
+QStringList RecordsManagementDb::storedMsgLocations(qint64 dmId) const
 {
 	QSqlQuery query(m_db);
 
@@ -290,7 +290,7 @@ QStringList DocumentServiceDb::storedMsgLocations(qint64 dmId) const
 	}
 }
 
-QList<class SQLiteTbl *> DocumentServiceDb::listOfTables(void)
+QList<class SQLiteTbl *> RecordsManagementDb::listOfTables(void)
 {
 	static QList<class SQLiteTbl *> tables;
 	if (tables.isEmpty()) {
@@ -300,4 +300,4 @@ QList<class SQLiteTbl *> DocumentServiceDb::listOfTables(void)
 	return tables;
 }
 
-DocumentServiceDb *globDocumentServiceDbPtr = Q_NULLPTR;
+RecordsManagementDb *globRecordsManagementDbPtr = Q_NULLPTR;

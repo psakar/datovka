@@ -25,7 +25,7 @@
 
 #include "src/document_service/gui/dlg_document_service_stored.h"
 #include "src/graphics/graphics.h"
-#include "src/io/document_service_db.h"
+#include "src/io/records_management_db.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
@@ -82,7 +82,7 @@ bool DlgDocumentServiceStored::updateStoredInformation(
     DocumentServiceSettings &docSrvcSettings, const QList<AcntData> &accounts,
     QWidget *parent)
 {
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return false;
 	}
 
@@ -192,12 +192,12 @@ void DlgDocumentServiceStored::cancelLoop(void)
 
 void DlgDocumentServiceStored::loadDocumentServicePixmap(int width)
 {
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return;
 	}
 
-	DocumentServiceDb::ServiceInfoEntry entry(
-	    globDocumentServiceDbPtr->serviceInfo());
+	RecordsManagementDb::ServiceInfoEntry entry(
+	    globRecordsManagementDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
 		return;
 	}
