@@ -79,18 +79,18 @@ DlgDocumentServiceStored::~DlgDocumentServiceStored(void)
 }
 
 bool DlgDocumentServiceStored::updateStoredInformation(
-    DocumentServiceSettings &docSrvcSettings, const QList<AcntData> &accounts,
-    QWidget *parent)
+    const RecordsManagementSettings &recMgmtSettings,
+    const QList<AcntData> &accounts, QWidget *parent)
 {
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return false;
 	}
 
-	if (!docSrvcSettings.isSet()) {
+	if (!recMgmtSettings.isSet()) {
 		return false;
 	}
 
-	DlgDocumentServiceStored dlg(docSrvcSettings.url, docSrvcSettings.token,
+	DlgDocumentServiceStored dlg(recMgmtSettings.url, recMgmtSettings.token,
 	    accounts, parent);
 	dlg.exec();
 
@@ -160,8 +160,7 @@ void DlgDocumentServiceStored::downloadAndStoreContinue(void)
 
 		TaskDocumentServiceStoredMessages *task =
 		    new (::std::nothrow) TaskDocumentServiceStoredMessages(
-		        globDocumentServiceSet.url,
-		        globDocumentServiceSet.token,
+		        m_url, m_token,
 		        TaskDocumentServiceStoredMessages::DS_DOWNLOAD_ALL,
 		        account.dbSet);
 		if (Q_NULLPTR == task) {

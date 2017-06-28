@@ -23,26 +23,26 @@
 
 #include <QByteArray>
 
-#include "src/settings/document_service.h"
+#include "src/settings/records_management.h"
 
-#define DS_GROUP QLatin1String("document_service")
-#define DS_URL QLatin1String("location_url")
-#define DS_TOKEN QLatin1String("access_token")
+#define RM_GROUP QLatin1String("records_management")
+#define RM_URL QLatin1String("location_url")
+#define RM_TOKEN QLatin1String("access_token")
 
-DocumentServiceSettings globDocumentServiceSet;
+RecordsManagementSettings globRecordsManagementSet;
 
-DocumentServiceSettings::DocumentServiceSettings(void)
+RecordsManagementSettings::RecordsManagementSettings(void)
     : url(),
     token()
 {
 }
 
-void DocumentServiceSettings::loadFromSettings(const QSettings &settings)
+void RecordsManagementSettings::loadFromSettings(const QSettings &settings)
 {
-	url = settings.value(DS_GROUP + QLatin1String("/") + DS_URL,
+	url = settings.value(RM_GROUP + QLatin1String("/") + RM_URL,
 	    QString()).toString();
 	token = QByteArray::fromBase64(
-	    settings.value(DS_GROUP + QLatin1String("/") + DS_TOKEN,
+	    settings.value(RM_GROUP + QLatin1String("/") + RM_TOKEN,
 	        QByteArray()).toString().toUtf8());
 
 	if (url.isEmpty() || token.isEmpty()) {
@@ -51,19 +51,19 @@ void DocumentServiceSettings::loadFromSettings(const QSettings &settings)
 	}
 }
 
-void DocumentServiceSettings::saveToSettings(QSettings &settings) const
+void RecordsManagementSettings::saveToSettings(QSettings &settings) const
 {
 	if (!url.isEmpty() && !token.isEmpty()) {
-		settings.beginGroup(DS_GROUP);
+		settings.beginGroup(RM_GROUP);
 
-		settings.setValue(DS_URL, url);
-		settings.setValue(DS_TOKEN, QString(token.toUtf8().toBase64()));
+		settings.setValue(RM_URL, url);
+		settings.setValue(RM_TOKEN, QString(token.toUtf8().toBase64()));
 
 		settings.endGroup();
 	}
 }
 
-bool DocumentServiceSettings::isSet(void) const
+bool RecordsManagementSettings::isSet(void) const
 {
 	return !url.isEmpty() && !token.isEmpty();
 }

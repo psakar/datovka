@@ -28,7 +28,7 @@
 #include <QList>
 #include <QString>
 
-#include "src/settings/document_service.h"
+#include "src/settings/records_management.h"
 
 namespace Ui {
 	class DlgDocumentServiceStored;
@@ -80,14 +80,15 @@ public:
 
 	/*!
 	 * @brief Updates stored information about messages uploaded into
-	 *     document service.
+	 *     records management service.
 	 *
-	 * @param[in] docSrvcSettings Settings structure to be modified.
+	 * @param[in] recMgmtSettings Settings containing URL and token.
 	 * @param[in] accounts List of accounts to take message identifiers from.
 	 * @param[in] parent Parent widget.
 	 */
 	static
-	bool updateStoredInformation(DocumentServiceSettings &docSrvcSettings,
+	bool updateStoredInformation(
+	    const RecordsManagementSettings &recMgmtSettings,
 	    const QList<AcntData> &accounts, QWidget *parent = Q_NULLPTR);
 
 private slots:

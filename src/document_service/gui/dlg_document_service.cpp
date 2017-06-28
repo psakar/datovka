@@ -92,13 +92,13 @@ DlgDocumentService::~DlgDocumentService(void)
 }
 
 bool DlgDocumentService::updateSettings(
-    DocumentServiceSettings &docSrvcSettings, QWidget *parent)
+    RecordsManagementSettings &recMgmtSettings, QWidget *parent)
 {
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return false;
 	}
 
-	DlgDocumentService dlg(docSrvcSettings.url, docSrvcSettings.token,
+	DlgDocumentService dlg(recMgmtSettings.url, recMgmtSettings.token,
 	    parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return false;
@@ -115,7 +115,7 @@ bool DlgDocumentService::updateSettings(
 		entry.logoSvg = dlg.m_logoSvg;
 		globRecordsManagementDbPtr->updateServiceInfo(entry);
 
-		if (docSrvcSettings.url != dlg.m_ui->urlLine->text()) {
+		if (recMgmtSettings.url != dlg.m_ui->urlLine->text()) {
 			/* Erase all message-related data as URL has changed. */
 			globRecordsManagementDbPtr->deleteAllStoredMsg();
 		}
@@ -124,8 +124,8 @@ bool DlgDocumentService::updateSettings(
 	}
 
 	/* Save changes to settings. */
-	docSrvcSettings.url = dlg.m_ui->urlLine->text().trimmed();
-	docSrvcSettings.token = dlg.m_ui->tokenLine->text().trimmed();
+	recMgmtSettings.url = dlg.m_ui->urlLine->text().trimmed();
+	recMgmtSettings.token = dlg.m_ui->tokenLine->text().trimmed();
 
 	return true;
 }

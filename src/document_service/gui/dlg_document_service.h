@@ -28,7 +28,7 @@
 #include <QDialog>
 
 #include "src/document_service/io/document_service_connection.h"
-#include "src/settings/document_service.h"
+#include "src/settings/records_management.h"
 
 namespace Ui {
 	class DlgDocumentService;
@@ -58,14 +58,14 @@ public:
 	~DlgDocumentService(void);
 
 	/*!
-	 * @brief Update document service settings.
+	 * @brief Update record management settings.
 	 *
-	 * @param[in] docSrvcSettings Settings structure to be modified.
+	 * @param[in] recMgmtSettings Settings structure to be modified.
 	 * @param[in] parent Window parent widget.
 	 * @return True when data have been updated, false else.
 	 */
 	static
-	bool updateSettings(DocumentServiceSettings &docSrvcSettings,
+	bool updateSettings(RecordsManagementSettings &recMgmtSettings,
 	    QWidget *parent = Q_NULLPTR);
 
 private slots:

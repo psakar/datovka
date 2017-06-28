@@ -21,21 +21,21 @@
  * the two.
  */
 
-#ifndef _DOCUMENT_SERVICE_H_
-#define _DOCUMENT_SERVICE_H_
+#ifndef _RECORDS_MANAGEMENT_H_
+#define _RECORDS_MANAGEMENT_H_
 
 #include <QSettings>
 #include <QString>
 
 /*
- * @brief Encapsulates document service settings.
+ * @brief Encapsulates records management service settings.
  */
-class DocumentServiceSettings {
+class RecordsManagementSettings {
 public:
 	/*!
 	 * @brief Constructor.
 	 */
-	DocumentServiceSettings(void);
+	RecordsManagementSettings(void);
 
 	/*!
 	 * @brief Load data from supplied settings.
@@ -52,7 +52,7 @@ public:
 	void saveToSettings(QSettings &settings) const;
 
 	/*!
-	 * @brief Test whether document service is set.
+	 * @brief Test whether records management service is set.
 	 *
 	 * @return True is URL and token are set.
 	 */
@@ -65,6 +65,6 @@ public:
 /*!
  * @brief Global instance of the structure.
  */
-extern DocumentServiceSettings globDocumentServiceSet;
+extern RecordsManagementSettings globRecordsManagementSet;
 
-#endif /* _DOCUMENT_SERVICE_H_ */
+#endif /* _RECORDS_MANAGEMENT_H_ */

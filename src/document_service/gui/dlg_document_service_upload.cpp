@@ -83,10 +83,10 @@ DlgDocumentServiceUpload::~DlgDocumentServiceUpload(void)
 }
 
 bool DlgDocumentServiceUpload::uploadMessage(
-    const DocumentServiceSettings &docSrvcSettings, qint64 dmId,
+    const RecordsManagementSettings &recMgmtSettings, qint64 dmId,
     const QString &msgFileName, const QByteArray &msgData, QWidget *parent)
 {
-	if (!docSrvcSettings.isSet()) {
+	if (!recMgmtSettings.isSet()) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -96,7 +96,7 @@ bool DlgDocumentServiceUpload::uploadMessage(
 		return false;
 	}
 
-	DlgDocumentServiceUpload dlg(docSrvcSettings.url, docSrvcSettings.token,
+	DlgDocumentServiceUpload dlg(recMgmtSettings.url, recMgmtSettings.token,
 	    dmId, parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return false;

@@ -32,7 +32,7 @@
 #include "src/document_service/io/document_service_connection.h"
 #include "src/document_service/models/upload_hierarchy_model.h"
 #include "src/document_service/models/upload_hierarchy_proxy_model.h"
-#include "src/settings/document_service.h"
+#include "src/settings/records_management.h"
 
 namespace Ui {
 	class DlgDocumentServiceUpload;
@@ -48,8 +48,8 @@ private:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] urlStr String containing service location URL.
 	 * @param[in] tokenStr String containing service token.
-	 * @param[in] docSrvcSettings Settings containing URL and token.
 	 * @param[in] dmId Message identifier.
 	 * @param[in] parent Parent widget.
 	 */
@@ -65,7 +65,7 @@ public:
 	/*!
 	 * @brief Update document service settings.
 	 *
-	 * @param[in] docSrvcSettings Settings containing URL and token.
+	 * @param[in] recMgmtSettings Settings containing URL and token.
 	 * @param[in] dmId Message identifier.
 	 * @param[in] msgFileName Message file name.
 	 * @param[in] msgData Message data.
@@ -73,7 +73,7 @@ public:
 	 * @return True when data have been updated, false else.
 	 */
 	static
-	bool uploadMessage(const DocumentServiceSettings &docSrvcSettings,
+	bool uploadMessage(const RecordsManagementSettings &recMgmtSettings,
 	    qint64 dmId, const QString &msgFileName, const QByteArray &msgData,
 	    QWidget *parent = Q_NULLPTR);
 

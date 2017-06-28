@@ -84,7 +84,7 @@
 #include "src/io/wd_sessions.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
-#include "src/settings/document_service.h"
+#include "src/settings/records_management.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
 #include "src/worker/message_emitter.h"
@@ -473,7 +473,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* TODO -- This is only a temporary solution. */
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globDocumentServiceSet.isSet());
+	    globRecordsManagementSet.isSet());
 }
 
 void MainWindow::setWindowsAfterInit(void)
@@ -690,7 +690,7 @@ void showColumnsAccordingToFunctionality(QTableView *view)
 {
 	QList<int> negCols;
 
-	if (!globDocumentServiceSet.isSet()) {
+	if (!globRecordsManagementSet.isSet()) {
 		negCols.append(DbMsgsTblModel::DOC_SRVC_NEG_COL);
 	}
 
@@ -701,12 +701,12 @@ void MainWindow::showRecordsManagementDialogue(void)
 {
 	debugSlotCall();
 
-	if (DlgDocumentService::updateSettings(globDocumentServiceSet, this)) {
+	if (DlgDocumentService::updateSettings(globRecordsManagementSet, this)) {
 		saveSettings();
 	}
 
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globDocumentServiceSet.isSet());
+	    globRecordsManagementSet.isSet());
 
 	showColumnsAccordingToFunctionality(ui->messageList);
 }
@@ -4436,7 +4436,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globDocumentServiceSet.isSet());
+	    globRecordsManagementSet.isSet());
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
@@ -4478,7 +4478,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
 	    /* Separator. */
 	ui->actionSend_to_records_management->setEnabled(
-	    (numSelected == 1) && globDocumentServiceSet.isSet());
+	    (numSelected == 1) && globRecordsManagementSet.isSet());
 	    /* Separator. */
 	ui->actionExport_as_ZFO->setEnabled(numSelected > 0);
 	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
@@ -4599,8 +4599,8 @@ void MainWindow::loadSettings(void)
 	/* Proxy settings. */
 	globProxSet.loadFromSettings(settings);
 
-	/* Document service settings. */
-	globDocumentServiceSet.loadFromSettings(settings);
+	/* Records management settings. */
+	globRecordsManagementSet.loadFromSettings(settings);
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
@@ -4887,8 +4887,8 @@ void MainWindow::saveSettings(void) const
 	/* Proxy settings. */
 	globProxSet.saveToSettings(settings);
 
-	/* Document service settings. */
-	globDocumentServiceSet.saveToSettings(settings);
+	/* Records management settings. */
+	globRecordsManagementSet.saveToSettings(settings);
 
 	/* Global preferences. */
 	globPref.saveToSettings(settings);
@@ -5526,8 +5526,8 @@ void MainWindow::setReceivedColumnWidths(void)
 	}
 	/* Last three columns display icons. */
 	int max = DbMsgsTblModel::rcvdItemIds().size();
-	if (globDocumentServiceSet.isSet()) {
-		/* Add one column if document service is activated. */
+	if (globRecordsManagementSet.isSet()) {
+		/* Add one column if records management service is activated. */
 		++max;
 	}
 	for (; i < max; ++i) {
@@ -5561,8 +5561,8 @@ void MainWindow::setSentColumnWidths(void)
 	}
 	/* Last column displays an icon. */
 	int max = DbMsgsTblModel::rcvdItemIds().size();
-	if (globDocumentServiceSet.isSet()) {
-		/* Add one column if document service is activated. */
+	if (globRecordsManagementSet.isSet()) {
+		/* Add one column if records management service is activated. */
 		++max;
 	}
 	for (; i < max; ++i) {
@@ -7076,7 +7076,7 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 	}
 
 	DlgDocumentServiceStored::updateStoredInformation(
-	    globDocumentServiceSet, accounts, this);
+	    globRecordsManagementSet, accounts, this);
 
 	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
 	    m_messageListProxyModel.sourceModel());
@@ -7160,7 +7160,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	}
 
 	/* Show send to records management dialogue. */
-	DlgDocumentServiceUpload::uploadMessage(globDocumentServiceSet,
+	DlgDocumentServiceUpload::uploadMessage(globRecordsManagementSet,
 	    msgId.dmId, QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
 
 	QList<qint64> msgIdList;
