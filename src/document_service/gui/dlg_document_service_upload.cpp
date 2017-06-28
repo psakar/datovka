@@ -242,7 +242,7 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 		return false;
 	}
 
-	QMessageBox::information(parent, QObject::tr("Successful Upload"),
+	QMessageBox::information(parent, QObject::tr("Successful File Upload"),
 	    QObject::tr("Message '%1' was successfully uploaded into the document service.").arg(dmId) +
 	    QStringLiteral("\n") +
 	    QObject::tr("It can be now found in the document service in these locations:") +

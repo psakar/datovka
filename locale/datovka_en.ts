@@ -1127,29 +1127,29 @@ process of all accounts on the background</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="54"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="53"/>
         <source>Select the location where you want
 to upload the message &apos;%1&apos; into.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="133"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="141"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="197"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="286"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="295"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="132"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="140"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="196"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="292"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="301"/>
         <source>Communication Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="134"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="287"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="133"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="293"/>
         <source>Received invalid response.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="142"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="296"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="141"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="302"/>
         <source>Received empty response.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6956,18 +6956,33 @@ to origin path
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="233"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="232"/>
         <source>Message &apos;%1&apos; could not be uploaded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="236"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="235"/>
         <source>Received error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="241"/>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="240"/>
         <source>File Upload Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="245"/>
+        <source>Successful File Upload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="246"/>
+        <source>Message &apos;%1&apos; was successfully uploaded into the document service.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="248"/>
+        <source>It can be now found in the document service in these locations:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7373,7 +7388,7 @@ the message is considered to be accepted after
     <name>UploadHierarchyModel</name>
     <message>
         <location filename="../src/document_service/models/upload_hierarchy_model.cpp" line="160"/>
-        <source>Upload hierarchy</source>
+        <source>Document Service Hierarchy</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
