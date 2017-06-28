@@ -472,7 +472,7 @@ MainWindow::MainWindow(QWidget *parent)
 	    + acntStrg + "   ");
 
 	/* TODO -- This is only a temporary solution. */
-	ui->actionUpdate_document_service_information->setEnabled(
+	ui->actionUpdate_records_management_information->setEnabled(
 	    globDocumentServiceSet.isSet());
 }
 
@@ -697,7 +697,7 @@ void showColumnsAccordingToFunctionality(QTableView *view)
 	showAllColumnsExcept(view, negCols);
 }
 
-void MainWindow::showDocumentServiceDialogue(void)
+void MainWindow::showRecordsManagementDialogue(void)
 {
 	debugSlotCall();
 
@@ -705,7 +705,7 @@ void MainWindow::showDocumentServiceDialogue(void)
 		saveSettings();
 	}
 
-	ui->actionUpdate_document_service_information->setEnabled(
+	ui->actionUpdate_records_management_information->setEnabled(
 	    globDocumentServiceSet.isSet());
 
 	showColumnsAccordingToFunctionality(ui->messageList);
@@ -1378,7 +1378,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(ui->actionOpen_message_externally);
 		menu->addAction(ui->actionOpen_delivery_info_externally);
 		menu->addSeparator();
-		menu->addAction(ui->actionUpload_to_document_service);
+		menu->addAction(ui->actionSend_to_records_management);
 		menu->addSeparator();
 	}
 	menu->addAction(ui->actionExport_as_ZFO);
@@ -4264,10 +4264,10 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionProxy_settings, SIGNAL(triggered()),
 	    this, SLOT(showProxySettingsDialog()));
 	    /* Separator */
-	connect(ui->actionDocument_service_settings, SIGNAL(triggered()),
-	    this, SLOT(showDocumentServiceDialogue()));
-	connect(ui->actionUpdate_document_service_information, SIGNAL(triggered()),
-	    this, SLOT(getStoredMsgInfoFromDocumentService()));
+	connect(ui->actionRecords_management_settings, SIGNAL(triggered()),
+	    this, SLOT(showRecordsManagementDialogue()));
+	connect(ui->actionUpdate_records_management_information, SIGNAL(triggered()),
+	    this, SLOT(getStoredMsgInfoFromRecordsManagement()));
 	    /* Separator. */
 	connect(ui->actionPreferences, SIGNAL(triggered()),
 	    this, SLOT(showPreferencesDialog()));
@@ -4329,8 +4329,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()),
 	    this, SLOT(openDeliveryInfoExternally()));
 	    /* Separator. */
-	connect(ui->actionUpload_to_document_service, SIGNAL(triggered()),
-	    this, SLOT(uploadSelectedMessageToDocumentService()));
+	connect(ui->actionSend_to_records_management, SIGNAL(triggered()),
+	    this, SLOT(sendSelectedMessageToRecordsManagement()));
 	    /* Separator. */
 	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()),
 	    this, SLOT(exportSelectedMessagesAsZFO()));
@@ -4435,7 +4435,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	// Menu: File
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionUpdate_document_service_information->setEnabled(
+	ui->actionUpdate_records_management_information->setEnabled(
 	    globDocumentServiceSet.isSet());
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
@@ -4477,7 +4477,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionOpen_message_externally->setEnabled(numSelected == 1);
 	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
 	    /* Separator. */
-	ui->actionUpload_to_document_service->setEnabled(
+	ui->actionSend_to_records_management->setEnabled(
 	    (numSelected == 1) && globDocumentServiceSet.isSet());
 	    /* Separator. */
 	ui->actionExport_as_ZFO->setEnabled(numSelected > 0);
@@ -7053,7 +7053,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 }
 
-void MainWindow::getStoredMsgInfoFromDocumentService(void)
+void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 {
 	debugSlotCall();
 
@@ -7088,7 +7088,7 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 	    DbMsgsTblModel::DOC_SRVC_NEG_COL);
 }
 
-void MainWindow::uploadSelectedMessageToDocumentService(void)
+void MainWindow::sendSelectedMessageToRecordsManagement(void)
 {
 	debugSlotCall();
 
@@ -7159,7 +7159,7 @@ void MainWindow::uploadSelectedMessageToDocumentService(void)
 		return;
 	}
 
-	/* Generate upload into data service dialogue. */
+	/* Show send to records management dialogue. */
 	DlgDocumentServiceUpload::uploadMessage(globDocumentServiceSet,
 	    msgId.dmId, QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
 
@@ -8607,13 +8607,13 @@ void MainWindow::setMenuActionIcons(void)
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionDocument_service_settings->setIcon(ico);
+		ui->actionRecords_management_settings->setIcon(ico);
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionUpdate_document_service_information->setIcon(ico);
+		ui->actionUpdate_records_management_information->setIcon(ico);
 	}
 	    /* Separator. */
 	{
@@ -8707,7 +8707,7 @@ void MainWindow::setMenuActionIcons(void)
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionUpload_to_document_service->setIcon(ico);
+		ui->actionSend_to_records_management->setIcon(ico);
 	}
 	    /* Separator. */
 	ui->actionExport_as_ZFO->isEnabled();
