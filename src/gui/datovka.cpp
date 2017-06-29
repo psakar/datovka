@@ -46,9 +46,9 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
-#include "src/document_service/gui/dlg_document_service_stored.h"
 #include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/document_service/gui/dlg_records_management.h"
+#include "src/document_service/gui/dlg_records_management_stored.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -690,7 +690,7 @@ void showColumnsAccordingToFunctionality(QTableView *view)
 	QList<int> negCols;
 
 	if (!globRecordsManagementSet.isSet()) {
-		negCols.append(DbMsgsTblModel::DOC_SRVC_NEG_COL);
+		negCols.append(DbMsgsTblModel::REC_MGMT_NEG_COL);
 	}
 
 	showAllColumnsExcept(view, negCols);
@@ -895,9 +895,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	if (0 != msgTblMdl) {
 		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
 		Q_ASSERT(0 != mdl);
-		mdl->setDocumentServiceIcon();
-		mdl->fillDocumentServiceColumn(
-		    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+		mdl->setRecordsManagementIcon();
+		mdl->fillRecordsManagementColumn(
+		    DbMsgsTblModel::REC_MGMT_NEG_COL);
 		mdl->fillTagsColumn(userName, DbMsgsTblModel::TAGS_NEG_COL);
 		/* TODO -- Add some labels. */
 	}
@@ -7063,19 +7063,19 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 		    m_accountModel.userName(m_accountModel.index(row, 0)));
 	}
 
-	QList<DlgDocumentServiceStored::AcntData> accounts;
+	QList<DlgRecordsManagementStored::AcntData> accounts;
 	foreach (const QString &userName, userNames) {
 		MessageDbSet *dbSet = accountDbSet(userName, this);
 		if (Q_NULLPTR == dbSet) {
 			Q_ASSERT(0);
 			return;
 		}
-		accounts.append(DlgDocumentServiceStored::AcntData(
+		accounts.append(DlgRecordsManagementStored::AcntData(
 		    AccountModel::globAccounts[userName].accountName(),
 		    userName, dbSet));
 	}
 
-	DlgDocumentServiceStored::updateStoredInformation(
+	DlgRecordsManagementStored::updateStoredInformation(
 	    globRecordsManagementSet, accounts, this);
 
 	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
@@ -7084,8 +7084,8 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 		Q_ASSERT(0);
 		return;
 	}
-	messageModel->fillDocumentServiceColumn(
-	    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+	messageModel->fillRecordsManagementColumn(
+	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 }
 
 void MainWindow::sendSelectedMessageToRecordsManagement(void)
@@ -7166,8 +7166,8 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	QList<qint64> msgIdList;
 	msgIdList.append(msgId.dmId);
 
-	messageModel->refillDocumentServiceColumn(msgIdList,
-	    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+	messageModel->refillRecordsManagementColumn(msgIdList,
+	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 }
 
 void MainWindow::showSignatureDetailsDialog(void)

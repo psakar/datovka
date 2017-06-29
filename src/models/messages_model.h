@@ -56,7 +56,7 @@ public:
 		READLOC_COL = 5, /* Read locally. */
 		ATTDOWN_COL = 6, /* Attachments downloaded. */
 		PROCSNG_COL = 7, /* Processing state. */
-		DOC_SRVC_NEG_COL = -2, /* Document service. */
+		REC_MGMT_NEG_COL = -2, /* Records management service. */
 		TAGS_NEG_COL = -1 /* Tags. */
 	};
 
@@ -249,27 +249,27 @@ public:
 	    const QList<qint64> &dmIds, int col);
 
 	/*!
-	 * @brief Sets document service notification icon.
+	 * @brief Sets records management service notification icon.
 	 * @return True on success.
 	 */
-	bool setDocumentServiceIcon(void);
+	bool setRecordsManagementIcon(void);
 
 	/*!
-	 * @brief Fills the model with document service information.
+	 * @brief Fills the model with records management service information.
 	 *
 	 * @param[in] col Negative number specifying the column to write into.
 	 * @return True on success.
 	 */
-	bool fillDocumentServiceColumn(int col);
+	bool fillRecordsManagementColumn(int col);
 
 	/*!
-	 * @brief Reload document service information in given rows.
+	 * @brief Reload records management service information in given rows.
 	 *
 	 * @param[in] dmIds List of message ids for which to load tags.
 	 * @param[in] col Negative number specifying the column to write into.
 	 * @return True on success.
 	 */
-	bool refillDocumentServiceColumn(const QList<qint64> &dmIds, int col);
+	bool refillRecordsManagementColumn(const QList<qint64> &dmIds, int col);
 
 private:
 	/* Make these methods private so nobody is likely to mess with them. */
@@ -293,7 +293,7 @@ private:
 	                          * messages (without added columns).
 	                          */
 
-	QIcon m_dsIco; /*!< Document service icon. */
+	QIcon m_dsIco; /*!< Records management icon. */
 };
 
 #endif /* _MESSAGES_MODEL_H_ */

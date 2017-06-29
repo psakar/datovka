@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _DLG_DOCUMENT_SERVICE_H_
-#define _DLG_DOCUMENT_SERVICE_H_
+#ifndef _DLG_RECORDS_MANAGEMENT_H_
+#define _DLG_RECORDS_MANAGEMENT_H_
 
 #include <QByteArray>
 #include <QDialog>
@@ -113,4 +113,4 @@ private:
 	QByteArray m_logoSvg; /*!< Raw SVG data. */
 };
 
-#endif /* _DLG_DOCUMENT_SERVICE_H_ */
+#endif /* _DLG_RECORDS_MANAGEMENT_H_ */

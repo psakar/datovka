@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _DLG_DOCUMENT_SERVICE_STORED_H_
-#define _DLG_DOCUMENT_SERVICE_STORED_H_
+#ifndef _DLG_RECORDS_MANAGEMENT_STORED_H_
+#define _DLG_RECORDS_MANAGEMENT_STORED_H_
 
 #include <QDialog>
 #include <QList>
@@ -31,15 +31,15 @@
 #include "src/settings/records_management.h"
 
 namespace Ui {
-	class DlgDocumentServiceStored;
+	class DlgRecordsManagementStored;
 }
 
 class MessageDbSet; /* Forward declaration. */
 
 /*!
- * @brief Encapsulated document service stored messages dialogue.
+ * @brief Encapsulated records management service stored messages dialogue.
  */
-class DlgDocumentServiceStored : public QDialog {
+class DlgRecordsManagementStored : public QDialog {
 	Q_OBJECT
 
 public:
@@ -68,7 +68,7 @@ private:
 	 * @param[in] accounts List of accounts to take message identifiers from.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgDocumentServiceStored(const QString &urlStr,
+	explicit DlgRecordsManagementStored(const QString &urlStr,
 	    const QString &tokenStr, const QList<AcntData> &accounts,
 	    QWidget *parent = Q_NULLPTR);
 
@@ -76,7 +76,7 @@ public:
 	/*!
 	 * @brief Destructor.
 	 */
-	~DlgDocumentServiceStored(void);
+	~DlgRecordsManagementStored(void);
 
 	/*!
 	 * @brief Updates stored information about messages uploaded into
@@ -109,16 +109,16 @@ private slots:
 
 private:
 	/*!
-	 * @brief Loads document service logo and sets the logo label.
+	 * @brief Loads records management service logo and sets the logo label.
 	 *
 	 * @param[in] width Sets the image width (and height).
 	 */
-	void loadDocumentServicePixmap(int width);
+	void loadRecordsManagementPixmap(int width);
 
-	Ui::DlgDocumentServiceStored *m_ui; /*!< UI generated from UI file. */
+	Ui::DlgRecordsManagementStored *m_ui; /*!< UI generated from UI file. */
 
-	const QString m_url; /*!< Document service URL. */
-	const QString m_token; /*!< Document service access token. */
+	const QString m_url; /*!< Records management service URL. */
+	const QString m_token; /*!< Records management service access token. */
 	const QList<AcntData> &m_accounts; /*!< Account to use. */
 	int m_accIdx; /*!< Index of next account to be processed. */
 
@@ -127,4 +127,4 @@ private:
 	bool m_cancel; /*!< Set by slot to cancel loop. */
 };
 
-#endif /* _DLG_DOCUMENT_SERVICE_STORED_H_ */
+#endif /* _DLG_RECORDS_MANAGEMENT_STORED_H_ */

@@ -23,14 +23,14 @@
 
 #include <QTimer>
 
-#include "src/document_service/gui/dlg_document_service_stored.h"
+#include "src/document_service/gui/dlg_records_management_stored.h"
 #include "src/graphics/graphics.h"
 #include "src/io/records_management_db.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_records_management_stored_messages.h"
-#include "ui_dlg_document_service_stored.h"
+#include "ui_dlg_records_management_stored.h"
 
 #define LOGO_EDGE 64
 
@@ -39,10 +39,10 @@
 
 #define RUN_DELAY_MS 500
 
-DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
+DlgRecordsManagementStored::DlgRecordsManagementStored(const QString &urlStr,
     const QString &tokenStr, const QList<AcntData> &accounts, QWidget *parent)
     : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgDocumentServiceStored),
+    m_ui(new (std::nothrow) Ui::DlgRecordsManagementStored),
     m_url(urlStr),
     m_token(tokenStr),
     m_accounts(accounts),
@@ -58,7 +58,7 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
 	/* Just to make the progress bar stationary. */
 	m_ui->taskLabel->setText(QStringLiteral("\n"));
 
-	loadDocumentServicePixmap(LOGO_EDGE);
+	loadRecordsManagementPixmap(LOGO_EDGE);
 
 	m_ui->taskProgress->setRange(PROGRESS_MIN, PROGRESS_MAX);
 	m_ui->taskProgress->setValue(PROGRESS_MIN);
@@ -73,12 +73,12 @@ DlgDocumentServiceStored::DlgDocumentServiceStored(const QString &urlStr,
 	QTimer::singleShot(RUN_DELAY_MS, this, SLOT(downloadAndStoreStart()));
 }
 
-DlgDocumentServiceStored::~DlgDocumentServiceStored(void)
+DlgRecordsManagementStored::~DlgRecordsManagementStored(void)
 {
 	delete m_ui;
 }
 
-bool DlgDocumentServiceStored::updateStoredInformation(
+bool DlgRecordsManagementStored::updateStoredInformation(
     const RecordsManagementSettings &recMgmtSettings,
     const QList<AcntData> &accounts, QWidget *parent)
 {
@@ -90,14 +90,14 @@ bool DlgDocumentServiceStored::updateStoredInformation(
 		return false;
 	}
 
-	DlgDocumentServiceStored dlg(recMgmtSettings.url, recMgmtSettings.token,
-	    accounts, parent);
+	DlgRecordsManagementStored dlg(recMgmtSettings.url,
+	    recMgmtSettings.token, accounts, parent);
 	dlg.exec();
 
 	return true;
 }
 
-void DlgDocumentServiceStored::downloadAndStoreStart(void)
+void DlgRecordsManagementStored::downloadAndStoreStart(void)
 {
 	QProgressBar *pBar = m_ui->taskProgress;
 
@@ -134,7 +134,7 @@ cancel:
 	this->close();
 }
 
-void DlgDocumentServiceStored::downloadAndStoreContinue(void)
+void DlgRecordsManagementStored::downloadAndStoreContinue(void)
 {
 	QProgressBar *pBar = m_ui->taskProgress;
 
@@ -184,12 +184,12 @@ cancel:
 	this->close();
 }
 
-void DlgDocumentServiceStored::cancelLoop(void)
+void DlgRecordsManagementStored::cancelLoop(void)
 {
 	m_cancel = true;
 }
 
-void DlgDocumentServiceStored::loadDocumentServicePixmap(int width)
+void DlgRecordsManagementStored::loadRecordsManagementPixmap(int width)
 {
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return;

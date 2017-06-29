@@ -681,7 +681,7 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 	return true;
 }
 
-bool DbMsgsTblModel::setDocumentServiceIcon(void)
+bool DbMsgsTblModel::setRecordsManagementIcon(void)
 {
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
@@ -704,7 +704,7 @@ bool DbMsgsTblModel::setDocumentServiceIcon(void)
 	return true;
 }
 
-bool DbMsgsTblModel::fillDocumentServiceColumn(int col)
+bool DbMsgsTblModel::fillRecordsManagementColumn(int col)
 {
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return false;
@@ -734,7 +734,7 @@ bool DbMsgsTblModel::fillDocumentServiceColumn(int col)
 	return true;
 }
 
-bool DbMsgsTblModel::refillDocumentServiceColumn(const QList<qint64> &dmIds,
+bool DbMsgsTblModel::refillRecordsManagementColumn(const QList<qint64> &dmIds,
     int col)
 {
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
