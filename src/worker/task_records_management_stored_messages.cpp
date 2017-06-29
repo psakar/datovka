@@ -27,7 +27,7 @@
 #include <QSet>
 #include <QThread>
 
-#include "src/document_service/io/document_service_connection.h"
+#include "src/document_service/io/records_management_connection.h"
 #include "src/document_service/json/entry_error.h"
 #include "src/document_service/json/stored_files.h"
 #include "src/io/records_management_db.h"
@@ -264,13 +264,13 @@ int processStoredFilesResponse(bool clear, const StoredFilesResp &sfRes,
  *
  * @param[in]  clear If true then all messages not held within the service will
  *                   be explicitly removed.
- * @param[in]  dsc Records management service connection.
+ * @param[in]  rmc Records management service connection.
  * @param[in]  dmIds Message identifiers.
  * @param[out] limit Obtained limit.
  * @return Number of processed responses, negative value on error.
  */
 static
-int callStoredFiles(bool clear, DocumentServiceConnection &dsc,
+int callStoredFiles(bool clear, RecordsManagementConnection &rmc,
     const QList<qint64> &dmIds, int &limit)
 {
 	if (dmIds.isEmpty()) {
@@ -286,7 +286,7 @@ int callStoredFiles(bool clear, DocumentServiceConnection &dsc,
 
 	QByteArray response;
 
-	if (dsc.communicate(DocumentServiceConnection::SRVC_STORED_FILES,
+	if (rmc.communicate(RecordsManagementConnection::SRVC_STORED_FILES,
 	        sfReq.toJson(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
@@ -331,9 +331,9 @@ enum TaskRecordsManagementStoredMessages::Result updateMessages(
 		return TaskRecordsManagementStoredMessages::DS_DSM_SUCCESS;
 	}
 
-	DocumentServiceConnection dsc(
-	    DocumentServiceConnection::ignoreSslErrorsDflt);
-	dsc.setConnection(urlStr, tokenStr);
+	RecordsManagementConnection rmc(
+	    RecordsManagementConnection::ignoreSslErrorsDflt);
+	rmc.setConnection(urlStr, tokenStr);
 
 	int pos = 0; /* Position. */
 	int currentLimit = 1; /* Start with smallest query to obtain maximal size. */
@@ -343,7 +343,7 @@ enum TaskRecordsManagementStoredMessages::Result updateMessages(
 	while ((pos >= 0) && (pos < dmIds.size())) {
 		QList<qint64> queryList(dmIds.mid(pos, currentLimit));
 
-		int ret = callStoredFiles(clear, dsc, queryList, nextLimit);
+		int ret = callStoredFiles(clear, rmc, queryList, nextLimit);
 		if (ret < 0) {
 			return TaskRecordsManagementStoredMessages::DS_DSM_ERR;
 		}

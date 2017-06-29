@@ -268,7 +268,7 @@ SOURCES += \
     src/document_service/gui/dlg_document_service.cpp \
     src/document_service/gui/dlg_document_service_stored.cpp \
     src/document_service/gui/dlg_document_service_upload.cpp \
-    src/document_service/io/document_service_connection.cpp \
+    src/document_service/io/records_management_connection.cpp \
     src/document_service/json/entry_error.cpp \
     src/document_service/json/helper.cpp \
     src/document_service/json/service_info.cpp \
@@ -393,7 +393,7 @@ HEADERS += \
     src/document_service/gui/dlg_document_service.h \
     src/document_service/gui/dlg_document_service_stored.h \
     src/document_service/gui/dlg_document_service_upload.h \
-    src/document_service/io/document_service_connection.h \
+    src/document_service/io/records_management_connection.h \
     src/document_service/json/entry_error.h \
     src/document_service/json/helper.h \
     src/document_service/json/service_info.h \

@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _DOCUMENT_SERVICE_CONNECTION_H_
-#define _DOCUMENT_SERVICE_CONNECTION_H_
+#ifndef _RECORDS_MANAGEMENT_CONNECTION_H_
+#define _RECORDS_MANAGEMENT_CONNECTION_H_
 
 #include <QByteArray>
 #include <QNetworkAccessManager>
@@ -32,14 +32,14 @@
 #include <QString>
 
 /*!
- * @brief Encapsulates connection to document service.
+ * @brief Encapsulates connection to records management service.
  */
-class DocumentServiceConnection : public QObject {
+class RecordsManagementConnection : public QObject {
 	Q_OBJECT
 
 public:
 	/*!
-	 * @brief Document service service identifiers.
+	 * @brief Records management service identifiers.
 	 */
 	enum ServiceId {
 		SRVC_SERVICE_INFO,
@@ -57,7 +57,7 @@ public:
 	/*!
 	 * @brief Constructor.
 	 */
-	explicit DocumentServiceConnection(bool ignoreSslErrors = false,
+	explicit RecordsManagementConnection(bool ignoreSslErrors = false,
 	    QObject *parent = Q_NULLPTR);
 
 	/*!
@@ -128,4 +128,4 @@ private:
 	QNetworkAccessManager m_nam; /*!< Network access manager. */
 };
 
-#endif /* _DOCUMENT_SERVICE_CONNECTION_H_ */
+#endif /* _RECORDS_MANAGEMENT_CONNECTION_H_ */

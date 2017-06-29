@@ -41,7 +41,7 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
     m_ui(new (std::nothrow) Ui::DlgDocumentServiceUpload),
     m_url(urlStr),
     m_token(tokenStr),
-    m_dsc(DocumentServiceConnection::ignoreSslErrorsDflt, this),
+    m_rmc(RecordsManagementConnection::ignoreSslErrorsDflt, this),
     m_uploadModel(),
     m_uploadProxyModel(),
     m_selectedUploadIds()
@@ -70,7 +70,7 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-	connect(&m_dsc, SIGNAL(connectionError(QString)),
+	connect(&m_rmc, SIGNAL(connectionError(QString)),
 	    this, SLOT(notifyCommunicationError(QString)));
 
 	/* Dialogue window is not shown now so using parent instead. */
@@ -108,7 +108,7 @@ bool DlgDocumentServiceUpload::uploadMessage(
 	}
 
 	/* The connection should be still working. */
-	return uploadFile(dlg.m_dsc, dmId, dlg.m_selectedUploadIds, msgFileName,
+	return uploadFile(dlg.m_rmc, dmId, dlg.m_selectedUploadIds, msgFileName,
 	    msgData, parent);
 }
 
@@ -119,9 +119,9 @@ void DlgDocumentServiceUpload::callUploadHierarchy(void)
 	/* Clear model. */
 	m_uploadModel.setHierarchy(UploadHierarchyResp());
 
-	m_dsc.setConnection(m_url, m_token);
+	m_rmc.setConnection(m_url, m_token);
 
-	if (m_dsc.communicate(DocumentServiceConnection::SRVC_UPLOAD_HIERARCHY,
+	if (m_rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_HIERARCHY,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
@@ -269,7 +269,7 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 	return false;
 }
 
-bool DlgDocumentServiceUpload::uploadFile(DocumentServiceConnection &dsc,
+bool DlgDocumentServiceUpload::uploadFile(RecordsManagementConnection &rmc,
     qint64 dmId, const QStringList &uploadIds, const QString &msgFileName,
     const QByteArray &msgData, QWidget *parent)
 {
@@ -281,7 +281,7 @@ bool DlgDocumentServiceUpload::uploadFile(DocumentServiceConnection &dsc,
 
 	QByteArray response;
 
-	if (dsc.communicate(DocumentServiceConnection::SRVC_UPLOAD_FILE,
+	if (rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_FILE,
 	        ufReq.toJson(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;

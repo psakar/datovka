@@ -29,7 +29,7 @@
 #include <QString>
 #include <QStringList>
 
-#include "src/document_service/io/document_service_connection.h"
+#include "src/document_service/io/records_management_connection.h"
 #include "src/document_service/models/upload_hierarchy_model.h"
 #include "src/document_service/models/upload_hierarchy_proxy_model.h"
 #include "src/settings/records_management.h"
@@ -111,9 +111,9 @@ private:
 	void loadDocumentServicePixmap(int width);
 
 	/*!
-	 * @brief Upload file into document service.
+	 * @brief Upload file into records management service.
 	 *
-	 * @param[in,out] dsc Connection object.
+	 * @param[in,out] rmc Connection object.
 	 * @param[in]     uploadIds Upload location identifiers.
 	 * @param[in]     dmId Message identifier.
 	 * @param[in]     msgFileName Message file name.
@@ -122,7 +122,7 @@ private:
 	 * @return True on success.
 	 */
 	static
-	bool uploadFile(DocumentServiceConnection &dsc, qint64 dmId,
+	bool uploadFile(RecordsManagementConnection &rmc, qint64 dmId,
 	    const QStringList &uploadIds, const QString &msgFileName,
 	    const QByteArray &msgData, QWidget *parent = Q_NULLPTR);
 
@@ -131,7 +131,7 @@ private:
 	const QString m_url; /*!< Service URL. */
 	const QString m_token; /*!< Service token. */
 
-	DocumentServiceConnection m_dsc; /*!< Connection to document service. */
+	RecordsManagementConnection m_rmc; /*!< Connection to records management service. */
 
 	UploadHierarchyModel m_uploadModel; /*!< Upload hierarchy model. */
 	UploadHierarchyProxyModel m_uploadProxyModel; /*!< Used for filtering. */

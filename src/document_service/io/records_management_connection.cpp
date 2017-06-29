@@ -26,10 +26,10 @@
 #include <QTimer>
 #include <QUrl>
 
-#include "src/document_service/io/document_service_connection.h"
+#include "src/document_service/io/records_management_connection.h"
 
 /* Must be set to false for production releases. */
-const bool DocumentServiceConnection::ignoreSslErrorsDflt = true;
+const bool RecordsManagementConnection::ignoreSslErrorsDflt = true;
 
 #define logFuncCall() \
 	qDebug("%s()", __func__)
@@ -38,7 +38,7 @@ const bool DocumentServiceConnection::ignoreSslErrorsDflt = true;
  * @brief Converts service identifier onto service name.
  */
 static
-const QString &serviceName(enum DocumentServiceConnection::ServiceId srvcId)
+const QString &serviceName(enum RecordsManagementConnection::ServiceId srvcId)
 {
 	static const QString SrvServiceInfo(QStringLiteral("service_info"));
 	static const QString SrvUploadHierarchy(QStringLiteral("upload_hierarchy"));
@@ -47,16 +47,16 @@ const QString &serviceName(enum DocumentServiceConnection::ServiceId srvcId)
 	static const QString InvalidService;
 
 	switch (srvcId) {
-	case DocumentServiceConnection::SRVC_SERVICE_INFO:
+	case RecordsManagementConnection::SRVC_SERVICE_INFO:
 		return SrvServiceInfo;
 		break;
-	case DocumentServiceConnection::SRVC_UPLOAD_HIERARCHY:
+	case RecordsManagementConnection::SRVC_UPLOAD_HIERARCHY:
 		return SrvUploadHierarchy;
 		break;
-	case DocumentServiceConnection::SRVC_UPLOAD_FILE:
+	case RecordsManagementConnection::SRVC_UPLOAD_FILE:
 		return SrvUploadFile;
 		break;
-	case DocumentServiceConnection::SRVC_STORED_FILES:
+	case RecordsManagementConnection::SRVC_STORED_FILES:
 		return SrvStoredFiles;
 		break;
 	default:
@@ -71,7 +71,7 @@ const QString &serviceName(enum DocumentServiceConnection::ServiceId srvcId)
  */
 static
 QUrl constructUrl(QString baseUrl,
-    enum DocumentServiceConnection::ServiceId srvcId)
+    enum RecordsManagementConnection::ServiceId srvcId)
 {
 	const QString &srvcName(serviceName(srvcId));
 
@@ -85,7 +85,7 @@ QUrl constructUrl(QString baseUrl,
 	return QUrl(baseUrl + srvcName);
 }
 
-DocumentServiceConnection::DocumentServiceConnection(bool ignoreSslErrors,
+RecordsManagementConnection::RecordsManagementConnection(bool ignoreSslErrors,
     QObject *parent)
     : QObject(parent),
     m_baseUrlStr(),
@@ -99,14 +99,14 @@ DocumentServiceConnection::DocumentServiceConnection(bool ignoreSslErrors,
 	    this, SLOT(handleSslErrors(QNetworkReply *, const QList<QSslError>)));
 }
 
-void DocumentServiceConnection::setConnection(const QString &baseUrl,
+void RecordsManagementConnection::setConnection(const QString &baseUrl,
     const QString &token)
 {
 	m_baseUrlStr = baseUrl;
 	m_tokenStr = token;
 }
 
-bool DocumentServiceConnection::communicate(enum ServiceId srvcId,
+bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
     const QByteArray &requestData, QByteArray &replyData)
 {
 	logFuncCall();
@@ -177,7 +177,7 @@ bool readAndAddCert(const QByteArray &certData, QSsl::EncodingFormat fmt)
 	return true;
 }
 
-bool DocumentServiceConnection::addTrustedCertificate(const QString &filePath)
+bool RecordsManagementConnection::addTrustedCertificate(const QString &filePath)
 {
 	QByteArray certData;
 
@@ -215,7 +215,7 @@ bool DocumentServiceConnection::addTrustedCertificate(const QString &filePath)
 	return false;
 }
 
-void DocumentServiceConnection::handleSslErrors(QNetworkReply *reply,
+void RecordsManagementConnection::handleSslErrors(QNetworkReply *reply,
     const QList<QSslError> &errors)
 {
 	Q_UNUSED(reply);
@@ -243,7 +243,7 @@ void DocumentServiceConnection::handleSslErrors(QNetworkReply *reply,
 	}
 }
 
-QNetworkRequest DocumentServiceConnection::createRequest(
+QNetworkRequest RecordsManagementConnection::createRequest(
     enum ServiceId srvcId) const
 {
 	logFuncCall();
@@ -262,7 +262,7 @@ QNetworkRequest DocumentServiceConnection::createRequest(
 	return request;
 }
 
-QNetworkReply *DocumentServiceConnection::sendRequest(
+QNetworkReply *RecordsManagementConnection::sendRequest(
     const QNetworkRequest &request, const QByteArray &data)
 {
 	logFuncCall();
@@ -294,7 +294,7 @@ QNetworkReply *DocumentServiceConnection::sendRequest(
 	return reply;
 }
 
-bool DocumentServiceConnection::processReply(QNetworkReply *reply,
+bool RecordsManagementConnection::processReply(QNetworkReply *reply,
     QByteArray &replyData)
 {
 	logFuncCall();

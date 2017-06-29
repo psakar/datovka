@@ -27,7 +27,7 @@
 #include <QByteArray>
 #include <QDialog>
 
-#include "src/document_service/io/document_service_connection.h"
+#include "src/document_service/io/records_management_connection.h"
 #include "src/settings/records_management.h"
 
 namespace Ui {
@@ -109,7 +109,7 @@ private:
 
 	Ui::DlgDocumentService *m_ui; /*!< UI generated from UI file. */
 
-	DocumentServiceConnection m_dsc; /*!< Connection to document service. */
+	RecordsManagementConnection m_rmc; /*!< Connection to records management service. */
 	QByteArray m_logoSvg; /*!< Raw SVG data. */
 };
 

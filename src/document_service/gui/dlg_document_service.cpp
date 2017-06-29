@@ -49,7 +49,7 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
     const QString &tokenStr, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgDocumentService),
-    m_dsc(DocumentServiceConnection::ignoreSslErrorsDflt, this),
+    m_rmc(RecordsManagementConnection::ignoreSslErrorsDflt, this),
     m_logoSvg()
 {
 	m_ui->setupUi(this);
@@ -80,7 +80,7 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
 	connect(m_ui->eraseButton, SIGNAL(clicked(bool)),
 	    this, SLOT(eraseContent()));
 
-	connect(&m_dsc, SIGNAL(connectionError(QString)),
+	connect(&m_rmc, SIGNAL(connectionError(QString)),
 	    this, SLOT(notifyCommunicationError(QString)));
 
 	loadStoredServiceInfo();
@@ -144,10 +144,10 @@ void DlgDocumentService::callServiceInfo(void)
 {
 	QByteArray response;
 
-	m_dsc.setConnection(m_ui->urlLine->text().trimmed(),
+	m_rmc.setConnection(m_ui->urlLine->text().trimmed(),
 	    m_ui->tokenLine->text().trimmed());
 
-	if (m_dsc.communicate(DocumentServiceConnection::SRVC_SERVICE_INFO,
+	if (m_rmc.communicate(RecordsManagementConnection::SRVC_SERVICE_INFO,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
