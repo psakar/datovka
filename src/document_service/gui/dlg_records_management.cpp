@@ -23,11 +23,11 @@
 
 #include <QMessageBox>
 
-#include "src/document_service/gui/dlg_document_service.h"
+#include "src/document_service/gui/dlg_records_management.h"
 #include "src/document_service/json/service_info.h"
 #include "src/document_service/widgets/svg_view.h"
 #include "src/io/records_management_db.h"
-#include "ui_dlg_document_service.h"
+#include "ui_dlg_records_management.h"
 
 /*!
  * @brief Return disabled palette.
@@ -45,10 +45,10 @@ const QPalette &disableEditPalette(void)
         return palette;
 }
 
-DlgDocumentService::DlgDocumentService(const QString &urlStr,
+DlgRecordsManagement::DlgRecordsManagement(const QString &urlStr,
     const QString &tokenStr, QWidget *parent)
     : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgDocumentService),
+    m_ui(new (std::nothrow) Ui::DlgRecordsManagement),
     m_rmc(RecordsManagementConnection::ignoreSslErrorsDflt, this),
     m_logoSvg()
 {
@@ -86,19 +86,19 @@ DlgDocumentService::DlgDocumentService(const QString &urlStr,
 	loadStoredServiceInfo();
 }
 
-DlgDocumentService::~DlgDocumentService(void)
+DlgRecordsManagement::~DlgRecordsManagement(void)
 {
 	delete m_ui;
 }
 
-bool DlgDocumentService::updateSettings(
+bool DlgRecordsManagement::updateSettings(
     RecordsManagementSettings &recMgmtSettings, QWidget *parent)
 {
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return false;
 	}
 
-	DlgDocumentService dlg(recMgmtSettings.url, recMgmtSettings.token,
+	DlgRecordsManagement dlg(recMgmtSettings.url, recMgmtSettings.token,
 	    parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return false;
@@ -130,7 +130,7 @@ bool DlgDocumentService::updateSettings(
 	return true;
 }
 
-void DlgDocumentService::activateServiceButtons(void)
+void DlgRecordsManagement::activateServiceButtons(void)
 {
 	m_ui->infoButton->setEnabled(!m_ui->urlLine->text().isEmpty() &&
 	    !m_ui->tokenLine->text().isEmpty());
@@ -140,7 +140,7 @@ void DlgDocumentService::activateServiceButtons(void)
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 }
 
-void DlgDocumentService::callServiceInfo(void)
+void DlgRecordsManagement::callServiceInfo(void)
 {
 	QByteArray response;
 
@@ -175,7 +175,7 @@ void DlgDocumentService::callServiceInfo(void)
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 }
 
-void DlgDocumentService::eraseContent(void)
+void DlgRecordsManagement::eraseContent(void)
 {
 	m_ui->urlLine->setText(QString());
 	m_ui->tokenLine->setText(QString());
@@ -188,12 +188,12 @@ void DlgDocumentService::eraseContent(void)
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 }
 
-void DlgDocumentService::notifyCommunicationError(const QString &errMsg)
+void DlgRecordsManagement::notifyCommunicationError(const QString &errMsg)
 {
 	QMessageBox::critical(this, tr("Communication Error"), errMsg);
 }
 
-void DlgDocumentService::loadStoredServiceInfo(void)
+void DlgRecordsManagement::loadStoredServiceInfo(void)
 {
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return;
@@ -208,7 +208,7 @@ void DlgDocumentService::loadStoredServiceInfo(void)
 	setResponseContent(entry.logoSvg, entry.name, entry.tokenName);
 }
 
-void DlgDocumentService::setResponseContent(const QByteArray &logoSvg,
+void DlgRecordsManagement::setResponseContent(const QByteArray &logoSvg,
     const QString &name, const QString &tokenName)
 {
 	m_ui->graphicsView->setSvgData(logoSvg);

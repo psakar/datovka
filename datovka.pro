@@ -265,9 +265,9 @@ SOURCES += \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
     src/document_service/conversion.cpp \
-    src/document_service/gui/dlg_document_service.cpp \
     src/document_service/gui/dlg_document_service_stored.cpp \
     src/document_service/gui/dlg_document_service_upload.cpp \
+    src/document_service/gui/dlg_records_management.cpp \
     src/document_service/io/records_management_connection.cpp \
     src/document_service/json/entry_error.cpp \
     src/document_service/json/helper.cpp \
@@ -390,9 +390,9 @@ HEADERS += \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
     src/document_service/conversion.h \
-    src/document_service/gui/dlg_document_service.h \
     src/document_service/gui/dlg_document_service_stored.h \
     src/document_service/gui/dlg_document_service_upload.h \
+    src/document_service/gui/dlg_records_management.h \
     src/document_service/io/records_management_connection.h \
     src/document_service/json/entry_error.h \
     src/document_service/json/helper.h \
@@ -505,9 +505,9 @@ HEADERS += \
     src/worker/task_verify_message.h
 
 FORMS += \
-    src/document_service/ui/dlg_document_service.ui \
     src/document_service/ui/dlg_document_service_stored.ui \
     src/document_service/ui/dlg_document_service_upload.ui \
+    src/document_service/ui/dlg_records_management.ui \
     src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
     src/gui/ui/dlg_account_from_db.ui \

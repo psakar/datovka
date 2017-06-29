@@ -46,9 +46,9 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
-#include "src/document_service/gui/dlg_document_service.h"
 #include "src/document_service/gui/dlg_document_service_stored.h"
 #include "src/document_service/gui/dlg_document_service_upload.h"
+#include "src/document_service/gui/dlg_records_management.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -700,7 +700,8 @@ void MainWindow::showRecordsManagementDialogue(void)
 {
 	debugSlotCall();
 
-	if (DlgDocumentService::updateSettings(globRecordsManagementSet, this)) {
+	if (DlgRecordsManagement::updateSettings(globRecordsManagementSet,
+	        this)) {
 		saveSettings();
 	}
 

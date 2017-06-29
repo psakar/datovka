@@ -31,13 +31,13 @@
 #include "src/settings/records_management.h"
 
 namespace Ui {
-	class DlgDocumentService;
+	class DlgRecordsManagement;
 }
 
 /*!
- * @brief Encapsulated document service settings dialogue.
+ * @brief Encapsulated records management service settings dialogue.
  */
-class DlgDocumentService : public QDialog {
+class DlgRecordsManagement : public QDialog {
 	Q_OBJECT
 
 private:
@@ -48,14 +48,14 @@ private:
 	 * @param[in] tokenStr String containing service token.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgDocumentService(const QString &urlStr,
+	explicit DlgRecordsManagement(const QString &urlStr,
 	    const QString &tokenStr, QWidget *parent = Q_NULLPTR);
 
 public:
 	/*!
 	 * @brief Destructor.
 	 */
-	~DlgDocumentService(void);
+	~DlgRecordsManagement(void);
 
 	/*!
 	 * @brief Update record management settings.
@@ -107,7 +107,7 @@ private:
 	void setResponseContent(const QByteArray &logoSvg, const QString &name,
 	    const QString &tokenName);
 
-	Ui::DlgDocumentService *m_ui; /*!< UI generated from UI file. */
+	Ui::DlgRecordsManagement *m_ui; /*!< UI generated from UI file. */
 
 	RecordsManagementConnection m_rmc; /*!< Connection to records management service. */
 	QByteArray m_logoSvg; /*!< Raw SVG data. */
