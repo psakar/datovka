@@ -23,10 +23,10 @@
 
 #include <QMessageBox>
 
-#include "src/document_service/gui/dlg_records_management.h"
-#include "src/document_service/json/service_info.h"
-#include "src/document_service/widgets/svg_view.h"
 #include "src/io/records_management_db.h"
+#include "src/records_management/gui/dlg_records_management.h"
+#include "src/records_management/json/service_info.h"
+#include "src/records_management/widgets/svg_view.h"
 #include "ui_dlg_records_management.h"
 
 /*!

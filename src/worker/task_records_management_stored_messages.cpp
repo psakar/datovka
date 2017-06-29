@@ -27,11 +27,11 @@
 #include <QSet>
 #include <QThread>
 
-#include "src/document_service/io/records_management_connection.h"
-#include "src/document_service/json/entry_error.h"
-#include "src/document_service/json/stored_files.h"
 #include "src/io/records_management_db.h"
 #include "src/log/log.h"
+#include "src/records_management/io/records_management_connection.h"
+#include "src/records_management/json/entry_error.h"
+#include "src/records_management/json/stored_files.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_records_management_stored_messages.h"
 

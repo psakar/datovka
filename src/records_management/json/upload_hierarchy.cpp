@@ -26,8 +26,8 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-#include "src/document_service/json/helper.h"
-#include "src/document_service/json/upload_hierarchy.h"
+#include "src/records_management/json/helper.h"
+#include "src/records_management/json/upload_hierarchy.h"
 
 static
 const QString keyName("name");

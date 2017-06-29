@@ -28,7 +28,7 @@
 #include <QList>
 #include <QStringList>
 
-#include "src/document_service/json/entry_error.h"
+#include "src/records_management/json/entry_error.h"
 
 class QJsonValue; /* Forward declaration. */
 

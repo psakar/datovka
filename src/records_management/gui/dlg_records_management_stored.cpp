@@ -23,10 +23,10 @@
 
 #include <QTimer>
 
-#include "src/document_service/gui/dlg_records_management_stored.h"
 #include "src/graphics/graphics.h"
 #include "src/io/records_management_db.h"
 #include "src/log/log.h"
+#include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_records_management_stored_messages.h"

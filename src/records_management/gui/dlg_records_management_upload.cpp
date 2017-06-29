@@ -24,13 +24,13 @@
 #include <cinttypes>
 #include <QMessageBox>
 
-#include "src/document_service/gui/dlg_records_management_upload.h"
-#include "src/document_service/json/upload_file.h"
-#include "src/document_service/json/upload_hierarchy.h"
 #include "src/graphics/graphics.h"
 #include "src/io/records_management_db.h"
-#include "src/models/sort_filter_proxy_model.h"
 #include "src/log/log.h"
+#include "src/models/sort_filter_proxy_model.h"
+#include "src/records_management/gui/dlg_records_management_upload.h"
+#include "src/records_management/json/upload_file.h"
+#include "src/records_management/json/upload_hierarchy.h"
 #include "ui_dlg_records_management_upload.h"
 
 #define LOGO_EDGE 64

@@ -24,7 +24,7 @@
 #include <QGraphicsSvgItem>
 #include <QSvgRenderer>
 
-#include "src/document_service/widgets/svg_view.h"
+#include "src/records_management/widgets/svg_view.h"
 
 /*
  * See following for inspiration:

@@ -29,7 +29,7 @@
 #include <QString>
 #include <QStringList>
 
-#include "src/document_service/json/entry_error.h"
+#include "src/records_management/json/entry_error.h"
 
 /*!
  * @brief Encapsulates the upload_file request.

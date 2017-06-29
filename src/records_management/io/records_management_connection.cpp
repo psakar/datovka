@@ -26,7 +26,7 @@
 #include <QTimer>
 #include <QUrl>
 
-#include "src/document_service/io/records_management_connection.h"
+#include "src/records_management/io/records_management_connection.h"
 
 /* Must be set to false for production releases. */
 const bool RecordsManagementConnection::ignoreSslErrorsDflt = true;

@@ -26,9 +26,9 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-#include "src/document_service/json/entry_error.h"
-#include "src/document_service/json/helper.h"
-#include "src/document_service/json/upload_file.h"
+#include "src/records_management/json/entry_error.h"
+#include "src/records_management/json/helper.h"
+#include "src/records_management/json/upload_file.h"
 
 static
 const QString keyIds("ids");

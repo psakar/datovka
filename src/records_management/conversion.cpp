@@ -23,7 +23,7 @@
 
 #include <QString>
 
-#include "src/document_service/conversion.h"
+#include "src/records_management/conversion.h"
 
 QList<qint64> createIdList(const QStringList &strList, bool *ok)
 {

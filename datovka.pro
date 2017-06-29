@@ -264,20 +264,6 @@ SOURCES += \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
-    src/document_service/conversion.cpp \
-    src/document_service/gui/dlg_records_management.cpp \
-    src/document_service/gui/dlg_records_management_stored.cpp \
-    src/document_service/gui/dlg_records_management_upload.cpp \
-    src/document_service/io/records_management_connection.cpp \
-    src/document_service/json/entry_error.cpp \
-    src/document_service/json/helper.cpp \
-    src/document_service/json/service_info.cpp \
-    src/document_service/json/stored_files.cpp \
-    src/document_service/json/upload_file.cpp \
-    src/document_service/json/upload_hierarchy.cpp \
-    src/document_service/models/upload_hierarchy_model.cpp \
-    src/document_service/models/upload_hierarchy_proxy_model.cpp \
-    src/document_service/widgets/svg_view.cpp \
     src/graphics/graphics.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
@@ -336,6 +322,20 @@ SOURCES += \
     src/models/sort_filter_proxy_model.cpp \
     src/models/table_model.cpp \
     src/models/tags_model.cpp \
+    src/records_management/conversion.cpp \
+    src/records_management/gui/dlg_records_management.cpp \
+    src/records_management/gui/dlg_records_management_stored.cpp \
+    src/records_management/gui/dlg_records_management_upload.cpp \
+    src/records_management/io/records_management_connection.cpp \
+    src/records_management/json/entry_error.cpp \
+    src/records_management/json/helper.cpp \
+    src/records_management/json/service_info.cpp \
+    src/records_management/json/stored_files.cpp \
+    src/records_management/json/upload_file.cpp \
+    src/records_management/json/upload_hierarchy.cpp \
+    src/records_management/models/upload_hierarchy_model.cpp \
+    src/records_management/models/upload_hierarchy_proxy_model.cpp \
+    src/records_management/widgets/svg_view.cpp \
     src/settings/accounts.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
@@ -389,20 +389,6 @@ HEADERS += \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
-    src/document_service/conversion.h \
-    src/document_service/gui/dlg_records_management.h \
-    src/document_service/gui/dlg_records_management_stored.h \
-    src/document_service/gui/dlg_records_management_upload.h \
-    src/document_service/io/records_management_connection.h \
-    src/document_service/json/entry_error.h \
-    src/document_service/json/helper.h \
-    src/document_service/json/service_info.h \
-    src/document_service/json/stored_files.h \
-    src/document_service/json/upload_file.h \
-    src/document_service/json/upload_hierarchy.h \
-    src/document_service/models/upload_hierarchy_model.h \
-    src/document_service/models/upload_hierarchy_proxy_model.h \
-    src/document_service/widgets/svg_view.h \
     src/graphics/graphics.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
@@ -460,6 +446,20 @@ HEADERS += \
     src/models/sort_filter_proxy_model.h \
     src/models/table_model.h \
     src/models/tags_model.h \
+    src/records_management/conversion.h \
+    src/records_management/gui/dlg_records_management.h \
+    src/records_management/gui/dlg_records_management_stored.h \
+    src/records_management/gui/dlg_records_management_upload.h \
+    src/records_management/io/records_management_connection.h \
+    src/records_management/json/entry_error.h \
+    src/records_management/json/helper.h \
+    src/records_management/json/service_info.h \
+    src/records_management/json/stored_files.h \
+    src/records_management/json/upload_file.h \
+    src/records_management/json/upload_hierarchy.h \
+    src/records_management/models/upload_hierarchy_model.h \
+    src/records_management/models/upload_hierarchy_proxy_model.h \
+    src/records_management/widgets/svg_view.h \
     src/settings/accounts.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
@@ -505,9 +505,6 @@ HEADERS += \
     src/worker/task_verify_message.h
 
 FORMS += \
-    src/document_service/ui/dlg_records_management.ui \
-    src/document_service/ui/dlg_records_management_stored.ui \
-    src/document_service/ui/dlg_records_management_upload.ui \
     src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
     src/gui/ui/dlg_account_from_db.ui \
@@ -529,7 +526,10 @@ FORMS += \
     src/gui/ui/dlg_tag.ui \
     src/gui/ui/dlg_tags.ui \
     src/gui/ui/dlg_timestamp_expir.ui \
-    src/gui/ui/dlg_view_zfo.ui
+    src/gui/ui/dlg_view_zfo.ui \
+    src/records_management/ui/dlg_records_management.ui \
+    src/records_management/ui/dlg_records_management_stored.ui \
+    src/records_management/ui/dlg_records_management_upload.ui
 
 RESOURCES += \
     res/resources.qrc

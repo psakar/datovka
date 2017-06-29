@@ -25,8 +25,8 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-#include "src/document_service/json/helper.h"
-#include "src/document_service/json/service_info.h"
+#include "src/records_management/json/helper.h"
+#include "src/records_management/json/service_info.h"
 
 static
 const QString keyLogoSvg("logo_svg");

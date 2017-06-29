@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include "src/document_service/models/upload_hierarchy_model.h"
+#include "src/records_management/models/upload_hierarchy_model.h"
 
 UploadHierarchyModel::UploadHierarchyModel(QObject *parent)
     : QAbstractItemModel(parent),

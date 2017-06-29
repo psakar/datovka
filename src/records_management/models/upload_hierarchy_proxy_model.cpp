@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include "src/document_service/models/upload_hierarchy_proxy_model.h"
+#include "src/records_management/models/upload_hierarchy_proxy_model.h"
 
 UploadHierarchyProxyModel::UploadHierarchyProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)

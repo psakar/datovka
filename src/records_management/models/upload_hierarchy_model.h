@@ -26,7 +26,7 @@
 
 #include <QAbstractItemModel>
 
-#include "src/document_service/json/upload_hierarchy.h"
+#include "src/records_management/json/upload_hierarchy.h"
 
 /*!
  * @brief Upload hierarchy model.

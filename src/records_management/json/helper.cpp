@@ -26,7 +26,7 @@
 #include <QJsonParseError>
 #include <QJsonValue>
 
-#include "src/document_service/json/helper.h"
+#include "src/records_management/json/helper.h"
 
 bool JsonHelper::readRootObject(const QByteArray &json, QJsonObject &jsonObj)
 {

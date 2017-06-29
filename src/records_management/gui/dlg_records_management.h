@@ -27,7 +27,7 @@
 #include <QByteArray>
 #include <QDialog>
 
-#include "src/document_service/io/records_management_connection.h"
+#include "src/records_management/io/records_management_connection.h"
 #include "src/settings/records_management.h"
 
 namespace Ui {

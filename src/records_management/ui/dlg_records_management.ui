@@ -134,7 +134,7 @@
   <customwidget>
    <class>SvgView</class>
    <extends>QGraphicsView</extends>
-   <header>src/document_service/widgets/svg_view.h</header>
+   <header>src/records_management/widgets/svg_view.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

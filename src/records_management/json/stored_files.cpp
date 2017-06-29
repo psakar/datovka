@@ -27,9 +27,9 @@
 #include <QJsonValue>
 #include <QString>
 
-#include "src/document_service/conversion.h"
-#include "src/document_service/json/helper.h"
-#include "src/document_service/json/stored_files.h"
+#include "src/records_management/conversion.h"
+#include "src/records_management/json/helper.h"
+#include "src/records_management/json/stored_files.h"
 
 static
 const QString keyDmIds("dm_ids");
