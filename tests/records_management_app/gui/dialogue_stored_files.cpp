@@ -27,8 +27,8 @@
 #include <QtGlobal> // qrand
 #include <QTime>
 
-#include "src/document_service/conversion.h"
-#include "tests/document_service_app/gui/dialogue_stored_files.h"
+#include "src/records_management/conversion.h"
+#include "tests/records_management_app/gui/dialogue_stored_files.h"
 #include "ui_dialogue_stored_files.h"
 
 DialogueStoredFiles::DialogueStoredFiles(QWidget *parent)

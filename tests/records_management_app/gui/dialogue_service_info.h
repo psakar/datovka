@@ -25,7 +25,7 @@
 
 #include <QDialog>
 
-#include "src/document_service/json/service_info.h"
+#include "src/records_management/json/service_info.h"
 
 namespace Ui {
 	class DialogueServiceInfo;

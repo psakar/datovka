@@ -25,7 +25,7 @@
 //#include <QScopedPointer>
 #include <QSvgRenderer>
 
-#include "tests/document_service_app/gui/dialogue_service_info.h"
+#include "tests/records_management_app/gui/dialogue_service_info.h"
 #include "ui_dialogue_service_info.h"
 
 DialogueServiceInfo::DialogueServiceInfo(const ServiceInfoResp &sir,

@@ -24,7 +24,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 
-#include "tests/document_service_app/gui/app.h"
+#include "tests/records_management_app/gui/app.h"
 
 #define BASE_URL_OPT "base-url"
 #define TOKEN_OPT "token"

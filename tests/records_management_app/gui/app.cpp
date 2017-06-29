@@ -29,13 +29,13 @@
 #include <QRegExp>
 #include <QtGlobal> // qVersion
 
-#include "src/document_service/json/helper.h"
-#include "src/document_service/json/service_info.h"
-#include "src/document_service/json/stored_files.h"
-#include "src/document_service/json/upload_file.h"
-#include "tests/document_service_app/gui/app.h"
-#include "tests/document_service_app/gui/dialogue_service_info.h"
-#include "tests/document_service_app/gui/dialogue_stored_files.h"
+#include "src/records_management/json/helper.h"
+#include "src/records_management/json/service_info.h"
+#include "src/records_management/json/stored_files.h"
+#include "src/records_management/json/upload_file.h"
+#include "tests/records_management_app/gui/app.h"
+#include "tests/records_management_app/gui/dialogue_service_info.h"
+#include "tests/records_management_app/gui/dialogue_stored_files.h"
 
 #define SVG_PATH "datovka.svg"
 
@@ -64,7 +64,7 @@ MainWindow::MainWindow(const QString &baseUrl, const QString &token,
     : QMainWindow(),
     m_uploadModel(this),
     m_uploadProxyModel(this),
-    m_dsc(ignoreSslErrors, this)
+    m_rmc(ignoreSslErrors, this)
 {
 	setupUi(this);
 
@@ -92,14 +92,14 @@ MainWindow::MainWindow(const QString &baseUrl, const QString &token,
 	connectTopMenuBarActions();
 	initialiseActions();
 
-	m_dsc.setConnection(ui_baseUrlLine->text(), ui_tokenLine->text());
+	m_rmc.setConnection(ui_baseUrlLine->text(), ui_tokenLine->text());
 
-	connect(&m_dsc, SIGNAL(connectionError(QString)),
+	connect(&m_rmc, SIGNAL(connectionError(QString)),
 	    this, SLOT(writeMessage(QString)));
 
 	/* Add CA certificate. */
 	if (!caCertPath.isEmpty()) {
-		DocumentServiceConnection::addTrustedCertificate(caCertPath);
+		RecordsManagementConnection::addTrustedCertificate(caCertPath);
 	}
 }
 
@@ -128,7 +128,7 @@ void MainWindow::callSrvcServiceInfo(void)
 	ui_textEdit->clear();
 
 	QByteArray response;
-	if (m_dsc.communicate(DocumentServiceConnection::SRVC_SERVICE_INFO,
+	if (m_rmc.communicate(RecordsManagementConnection::SRVC_SERVICE_INFO,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
@@ -165,7 +165,7 @@ void MainWindow::callSrvcUploadHierarchy(void)
 	m_uploadModel.setHierarchy(UploadHierarchyResp());
 
 	QByteArray response;
-	if (m_dsc.communicate(DocumentServiceConnection::SRVC_UPLOAD_HIERARCHY,
+	if (m_rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_HIERARCHY,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
@@ -268,7 +268,7 @@ void MainWindow::callSrvcUploadFile(void)
 	ui_textEdit->append(ufreq.toJson());
 
 	QByteArray response;
-	if (m_dsc.communicate(DocumentServiceConnection::SRVC_UPLOAD_FILE,
+	if (m_rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_FILE,
 	        ufreq.toJson(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
@@ -316,7 +316,7 @@ void MainWindow::callSrvcStoredFiles(void)
 	ui_textEdit->append(sfreq.toJson());
 
 	QByteArray response;
-	if (m_dsc.communicate(DocumentServiceConnection::SRVC_STORED_FILES,
+	if (m_rmc.communicate(RecordsManagementConnection::SRVC_STORED_FILES,
 	        sfreq.toJson(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
