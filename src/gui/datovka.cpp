@@ -46,9 +46,9 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
-#include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/document_service/gui/dlg_records_management.h"
 #include "src/document_service/gui/dlg_records_management_stored.h"
+#include "src/document_service/gui/dlg_records_management_upload.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -296,7 +296,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
 	    QString(), QIcon(ICON_3PARTY_PATH "briefcase_grey_16.png"),
-	    tr("Uploaded to document service")));
+	    tr("Uploaded to records management service")));
 
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
 	    tr("Tags"), QIcon(), tr("User-assigned tags")));
@@ -7160,7 +7160,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	}
 
 	/* Show send to records management dialogue. */
-	DlgDocumentServiceUpload::uploadMessage(globRecordsManagementSet,
+	DlgRecordsManagementUpload::uploadMessage(globRecordsManagementSet,
 	    msgId.dmId, QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
 
 	QList<qint64> msgIdList;

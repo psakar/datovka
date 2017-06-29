@@ -21,8 +21,8 @@
  * the two.
  */
 
-#ifndef _DLG_DOCUMENT_SERVICE_UPLOAD_H_
-#define _DLG_DOCUMENT_SERVICE_UPLOAD_H_
+#ifndef _DLG_RECORDS_MANAGEMENT_UPLOAD_H_
+#define _DLG_RECORDS_MANAGEMENT_UPLOAD_H_
 
 #include <QByteArray>
 #include <QDialog>
@@ -35,13 +35,13 @@
 #include "src/settings/records_management.h"
 
 namespace Ui {
-	class DlgDocumentServiceUpload;
+	class DlgRecordsManagementUpload;
 }
 
 /*!
- * @brief Encapsulated document service upload dialogue.
+ * @brief Encapsulated records management service upload dialogue.
  */
-class DlgDocumentServiceUpload : public QDialog {
+class DlgRecordsManagementUpload : public QDialog {
 	Q_OBJECT
 
 private:
@@ -53,17 +53,17 @@ private:
 	 * @param[in] dmId Message identifier.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgDocumentServiceUpload(const QString &urlStr,
+	explicit DlgRecordsManagementUpload(const QString &urlStr,
 	    const QString &tokenStr, qint64 dmId, QWidget *parent = Q_NULLPTR);
 
 public:
 	/*!
 	 * @brief Destructor.
 	 */
-	~DlgDocumentServiceUpload(void);
+	~DlgRecordsManagementUpload(void);
 
 	/*!
-	 * @brief Update document service settings.
+	 * @brief Upload message into records management service.
 	 *
 	 * @param[in] recMgmtSettings Settings containing URL and token.
 	 * @param[in] dmId Message identifier.
@@ -104,11 +104,11 @@ private slots:
 
 private:
 	/*!
-	 * @brief Loads document service logo and sets the logo label.
+	 * @brief Loads records management service logo and sets the logo label.
 	 *
 	 * @param[in] width Sets the image width (and height).
 	 */
-	void loadDocumentServicePixmap(int width);
+	void loadRecordsManagementPixmap(int width);
 
 	/*!
 	 * @brief Upload file into records management service.
@@ -126,7 +126,7 @@ private:
 	    const QStringList &uploadIds, const QString &msgFileName,
 	    const QByteArray &msgData, QWidget *parent = Q_NULLPTR);
 
-	Ui::DlgDocumentServiceUpload *m_ui; /*!< UI generated from UI file. */
+	Ui::DlgRecordsManagementUpload *m_ui; /*!< UI generated from UI file. */
 
 	const QString m_url; /*!< Service URL. */
 	const QString m_token; /*!< Service token. */
@@ -139,4 +139,4 @@ private:
 	QStringList m_selectedUploadIds; /*!< Upload location identifiers. */
 };
 
-#endif /* _DLG_DOCUMENT_SERVICE_UPLOAD_H_ */
+#endif /* _DLG_RECORDS_MANAGEMENT_UPLOAD_H_ */

@@ -24,21 +24,21 @@
 #include <cinttypes>
 #include <QMessageBox>
 
-#include "src/document_service/gui/dlg_document_service_upload.h"
+#include "src/document_service/gui/dlg_records_management_upload.h"
 #include "src/document_service/json/upload_file.h"
 #include "src/document_service/json/upload_hierarchy.h"
 #include "src/graphics/graphics.h"
 #include "src/io/records_management_db.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/log/log.h"
-#include "ui_dlg_document_service_upload.h"
+#include "ui_dlg_records_management_upload.h"
 
 #define LOGO_EDGE 64
 
-DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
+DlgRecordsManagementUpload::DlgRecordsManagementUpload(const QString &urlStr,
     const QString &tokenStr, qint64 dmId, QWidget *parent)
     : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgDocumentServiceUpload),
+    m_ui(new (std::nothrow) Ui::DlgRecordsManagementUpload),
     m_url(urlStr),
     m_token(tokenStr),
     m_rmc(RecordsManagementConnection::ignoreSslErrorsDflt, this),
@@ -48,7 +48,7 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 {
 	m_ui->setupUi(this);
 
-	loadDocumentServicePixmap(LOGO_EDGE);
+	loadRecordsManagementPixmap(LOGO_EDGE);
 	m_ui->appealLabel->setText(
 	    tr("Select the location where you want\nto upload the message '%1' into.")
 	        .arg(dmId));
@@ -77,12 +77,12 @@ DlgDocumentServiceUpload::DlgDocumentServiceUpload(const QString &urlStr,
 	callUploadHierarchy();
 }
 
-DlgDocumentServiceUpload::~DlgDocumentServiceUpload(void)
+DlgRecordsManagementUpload::~DlgRecordsManagementUpload(void)
 {
 	delete m_ui;
 }
 
-bool DlgDocumentServiceUpload::uploadMessage(
+bool DlgRecordsManagementUpload::uploadMessage(
     const RecordsManagementSettings &recMgmtSettings, qint64 dmId,
     const QString &msgFileName, const QByteArray &msgData, QWidget *parent)
 {
@@ -96,8 +96,8 @@ bool DlgDocumentServiceUpload::uploadMessage(
 		return false;
 	}
 
-	DlgDocumentServiceUpload dlg(recMgmtSettings.url, recMgmtSettings.token,
-	    dmId, parent);
+	DlgRecordsManagementUpload dlg(recMgmtSettings.url,
+	    recMgmtSettings.token, dmId, parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return false;
 	}
@@ -112,7 +112,7 @@ bool DlgDocumentServiceUpload::uploadMessage(
 	    msgData, parent);
 }
 
-void DlgDocumentServiceUpload::callUploadHierarchy(void)
+void DlgRecordsManagementUpload::callUploadHierarchy(void)
 {
 	QByteArray response;
 
@@ -146,7 +146,7 @@ void DlgDocumentServiceUpload::callUploadHierarchy(void)
 	}
 }
 
-void DlgDocumentServiceUpload::filterHierarchy(const QString &text)
+void DlgRecordsManagementUpload::filterHierarchy(const QString &text)
 {
 	m_uploadProxyModel.setFilterRole(UploadHierarchyModel::ROLE_FILTER);
 
@@ -169,7 +169,7 @@ void DlgDocumentServiceUpload::filterHierarchy(const QString &text)
 	}
 }
 
-void DlgDocumentServiceUpload::uploadHierarchySelectionChanged(void)
+void DlgRecordsManagementUpload::uploadHierarchySelectionChanged(void)
 {
 	m_selectedUploadIds.clear();
 
@@ -191,12 +191,12 @@ void DlgDocumentServiceUpload::uploadHierarchySelectionChanged(void)
 	    !indexes.isEmpty());
 }
 
-void DlgDocumentServiceUpload::notifyCommunicationError(const QString &errMsg)
+void DlgRecordsManagementUpload::notifyCommunicationError(const QString &errMsg)
 {
 	QMessageBox::critical(this, tr("Communication Error"), errMsg);
 }
 
-void DlgDocumentServiceUpload::loadDocumentServicePixmap(int width)
+void DlgRecordsManagementUpload::loadRecordsManagementPixmap(int width)
 {
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return;
@@ -243,15 +243,15 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 	}
 
 	QMessageBox::information(parent, QObject::tr("Successful File Upload"),
-	    QObject::tr("Message '%1' was successfully uploaded into the document service.").arg(dmId) +
+	    QObject::tr("Message '%1' was successfully uploaded into the records management service.").arg(dmId) +
 	    QStringLiteral("\n") +
-	    QObject::tr("It can be now found in the document service in these locations:") +
+	    QObject::tr("It can be now found in the records management service in these locations:") +
 	    QStringLiteral("\n") +
 	    ufRes.locations().join(QStringLiteral("\n")));
 
 	if (!ufRes.locations().isEmpty()) {
 		logInfoNL(
-		    "Message '%" PRId64 "'has been stored into document service.",
+		    "Message '%" PRId64 "'has been stored into records management service.",
 		    dmId);
 		if (Q_NULLPTR != globRecordsManagementDbPtr) {
 			return globRecordsManagementDbPtr->updateStoredMsg(dmId,
@@ -269,7 +269,7 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 	return false;
 }
 
-bool DlgDocumentServiceUpload::uploadFile(RecordsManagementConnection &rmc,
+bool DlgRecordsManagementUpload::uploadFile(RecordsManagementConnection &rmc,
     qint64 dmId, const QStringList &uploadIds, const QString &msgFileName,
     const QByteArray &msgData, QWidget *parent)
 {
