@@ -1030,142 +1030,6 @@ všech účtů na pozadí aplikace</translation>
     </message>
 </context>
 <context>
-    <name>DlgDocumentService</name>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="28"/>
-        <source>Service location URL.</source>
-        <translation>URL určující umístění služby.</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="31"/>
-        <source>URL:</source>
-        <translation>URL:</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="41"/>
-        <source>Access token into the document service.</source>
-        <translation>Přístupový token do spisové služby.</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="44"/>
-        <source>Token:</source>
-        <translation>Token:</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="71"/>
-        <source>Service Info</source>
-        <translation>Info o službě</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="78"/>
-        <source>Erase</source>
-        <translation>Vymazat</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="100"/>
-        <source>Service name:</source>
-        <translation>Jméno služby:</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="110"/>
-        <source>Token name:</source>
-        <translation>Jméno tokenu:</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="14"/>
-        <source>Document Service Settings</source>
-        <translation>Nastavení spisové služby</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="158"/>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="166"/>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="193"/>
-        <source>Communication Error</source>
-        <translation>Chyba komunikace</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="159"/>
-        <source>Received invalid response.</source>
-        <translation>Obdržena neplatná odezva.</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="167"/>
-        <source>Received empty response.</source>
-        <translation>Obdržena prázdná odezva.</translation>
-    </message>
-</context>
-<context>
-    <name>DlgDocumentServiceStored</name>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_stored.ui" line="14"/>
-        <source>Document Service Stored Messages</source>
-        <translation>Zprávy uložené ve spisové službě</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_stored.cpp" line="111"/>
-        <source>Updating stored information about messages.</source>
-        <translation>Aktualizuji uložené informace o zprávách.</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_stored.cpp" line="151"/>
-        <source>Downloading information about messages from account:
-%1 (%2).</source>
-        <translation>Stahuji informace o zprávách z účtu:
-%1 (%2).</translation>
-    </message>
-</context>
-<context>
-    <name>DlgDocumentServiceUpload</name>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_upload.ui" line="33"/>
-        <source>Appeal</source>
-        <translation>Výzva</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_upload.ui" line="64"/>
-        <source>Reload</source>
-        <translation>Obnovit</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_upload.ui" line="71"/>
-        <source>Filter:</source>
-        <translation>Filtr:</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_upload.ui" line="14"/>
-        <source>Upload Message into Document Service</source>
-        <translation>Nahrát zprávu do spisové služby</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="53"/>
-        <source>Select the location where you want
-to upload the message &apos;%1&apos; into.</source>
-        <translation>Vyberte umístění, kam chcete nahrát
-zprávu &apos;%1&apos;.</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="132"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="140"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="196"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="292"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="301"/>
-        <source>Communication Error</source>
-        <translation>Chyba komunikace</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="133"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="293"/>
-        <source>Received invalid response.</source>
-        <translation>Obdržena neplatná odezva.</translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="141"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="302"/>
-        <source>Received empty response.</source>
-        <translation>Obdržena prázdná odezva.</translation>
-    </message>
-</context>
-<context>
     <name>DlgDsSearch</name>
     <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="68"/>
@@ -1498,6 +1362,142 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <location filename="../src/gui/dlg_proxysets.cpp" line="69"/>
         <source>No proxy detected, direct connection will be used.</source>
         <translation>Nebyla detekována žádná proxy, použije se přímé spojení.</translation>
+    </message>
+</context>
+<context>
+    <name>DlgRecordsManagement</name>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="14"/>
+        <source>Records Management Settings</source>
+        <translation>Nastavení spisové služby</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="28"/>
+        <source>Service location URL.</source>
+        <translation>URL určující umístění služby.</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="31"/>
+        <source>URL:</source>
+        <translation>URL:</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="41"/>
+        <source>Access token into the records management service.</source>
+        <translation>Přístupový token do spisové služby.</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="44"/>
+        <source>Token:</source>
+        <translation>Token:</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="71"/>
+        <source>Service Info</source>
+        <translation>Info o službě</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="78"/>
+        <source>Erase</source>
+        <translation>Vymazat</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="100"/>
+        <source>Service name:</source>
+        <translation>Jméno služby:</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="110"/>
+        <source>Token name:</source>
+        <translation>Jméno tokenu:</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="158"/>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="166"/>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="193"/>
+        <source>Communication Error</source>
+        <translation>Chyba komunikace</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="159"/>
+        <source>Received invalid response.</source>
+        <translation>Obdržena neplatná odezva.</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="167"/>
+        <source>Received empty response.</source>
+        <translation>Obdržena prázdná odezva.</translation>
+    </message>
+</context>
+<context>
+    <name>DlgRecordsManagementStored</name>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_stored.ui" line="14"/>
+        <source>Records Management Stored Messages</source>
+        <translation>Zprávy uložené ve spisové službě</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_stored.cpp" line="111"/>
+        <source>Updating stored information about messages.</source>
+        <translation>Aktualizuji uložené informace o zprávách.</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_stored.cpp" line="151"/>
+        <source>Downloading information about messages from account:
+%1 (%2).</source>
+        <translation>Stahuji informace o zprávách z účtu:
+%1 (%2).</translation>
+    </message>
+</context>
+<context>
+    <name>DlgRecordsManagementUpload</name>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_upload.ui" line="14"/>
+        <source>Upload Message into Records Management Service</source>
+        <translation>Nahrát zprávu do spisové služby</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_upload.ui" line="33"/>
+        <source>Appeal</source>
+        <translation>Výzva</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_upload.ui" line="64"/>
+        <source>Reload</source>
+        <translation>Obnovit</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_upload.ui" line="71"/>
+        <source>Filter:</source>
+        <translation>Filtr:</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="53"/>
+        <source>Select the location where you want
+to upload the message &apos;%1&apos; into.</source>
+        <translation>Vyberte umístění, kam chcete nahrát
+zprávu &apos;%1&apos;.</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="132"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="140"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="196"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="292"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="301"/>
+        <source>Communication Error</source>
+        <translation>Chyba komunikace</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="133"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="293"/>
+        <source>Received invalid response.</source>
+        <translation>Obdržena neplatná odezva.</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="141"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="302"/>
+        <source>Received empty response.</source>
+        <translation>Obdržena prázdná odezva.</translation>
     </message>
 </context>
 <context>
@@ -2109,47 +2109,47 @@ datové zprávy.</translation>
 <context>
     <name>ErrorEntry</name>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="136"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="136"/>
         <source>No error occurred</source>
         <translation>Nevyskytla se žádná chyba</translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="139"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="139"/>
         <source>Request was malformed</source>
         <translation>Požadavek byl vadný</translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="142"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="142"/>
         <source>Identifier is missing</source>
         <translation>Chybí identifikátor</translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="145"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="145"/>
         <source>Supplied identifier is wrong</source>
         <translation>Dodaný identifikátor je špatný</translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="148"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="148"/>
         <source>File format is not supported</source>
         <translation>Formát souboru není podporován</translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="151"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="151"/>
         <source>Data are already present</source>
         <translation>Data jsou již k dispozici</translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="154"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="154"/>
         <source>Service limit was exceeded</source>
         <translation>Limit služby byl dosažen</translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="157"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="157"/>
         <source>Unspecified error</source>
         <translation>Nespecifikovaná chyba</translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="161"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="161"/>
         <source>Unknown error</source>
         <translation>Neznámá chyba</translation>
     </message>
@@ -2874,66 +2874,71 @@ všech účtů na pozadí aplikace</translation>
         <translation>Zpráva není autentická</translation>
     </message>
     <message>
+        <location filename="../src/gui/datovka.cpp" line="459"/>
         <location filename="../src/gui/datovka.cpp" line="460"/>
-        <location filename="../src/gui/datovka.cpp" line="461"/>
         <source>disk</source>
         <translation>disk</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="464"/>
-        <location filename="../src/gui/datovka.cpp" line="468"/>
+        <location filename="../src/gui/datovka.cpp" line="299"/>
+        <source>Uploaded to records management service</source>
+        <translation>Nahráno do spisové služby</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="463"/>
+        <location filename="../src/gui/datovka.cpp" line="467"/>
         <source>memory</source>
         <translation>paměť</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="471"/>
+        <location filename="../src/gui/datovka.cpp" line="470"/>
         <source>Storage:</source>
         <translation>Úložiště:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="537"/>
+        <location filename="../src/gui/datovka.cpp" line="536"/>
         <source>New version of Datovka is available:</source>
         <translation>Nová verze Datovky je k dispozici:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="541"/>
-        <location filename="../src/gui/datovka.cpp" line="557"/>
+        <location filename="../src/gui/datovka.cpp" line="540"/>
+        <location filename="../src/gui/datovka.cpp" line="556"/>
         <source>New version of Datovka</source>
         <translation>Nová verze Datovky</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="542"/>
-        <location filename="../src/gui/datovka.cpp" line="558"/>
+        <location filename="../src/gui/datovka.cpp" line="541"/>
+        <location filename="../src/gui/datovka.cpp" line="557"/>
         <source>New version of Datovka is available.</source>
         <translation>Nová verze Datovky je k dispozici.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="543"/>
+        <location filename="../src/gui/datovka.cpp" line="542"/>
         <source>Current version is %1</source>
         <translation>Vaše současná verze je %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="546"/>
+        <location filename="../src/gui/datovka.cpp" line="545"/>
         <source>New version is %1</source>
         <translation>Nová verze je %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="548"/>
+        <location filename="../src/gui/datovka.cpp" line="547"/>
         <source>Do you want to download new version?</source>
         <translation>Chcete nyní stáhnout novou verzi?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="559"/>
+        <location filename="../src/gui/datovka.cpp" line="558"/>
         <source>Current version is &quot;%1&quot;</source>
         <translation>Vaše verze je &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="562"/>
+        <location filename="../src/gui/datovka.cpp" line="561"/>
         <source>New version is &quot;%1&quot;</source>
         <translation>Nová verze je &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="564"/>
+        <location filename="../src/gui/datovka.cpp" line="563"/>
         <source>Update your application...</source>
         <translation>Aktualizujte aplikaci...</translation>
     </message>
@@ -3816,17 +3821,12 @@ Změnit heslo nyní?</translation>
         <translation>Nový účet: %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="300"/>
-        <source>Uploaded to document service</source>
-        <translation>Nahráno do spisové služby</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="303"/>
+        <location filename="../src/gui/datovka.cpp" line="302"/>
         <source>Tags</source>
         <translation>Tagy</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="303"/>
+        <location filename="../src/gui/datovka.cpp" line="302"/>
         <source>User-assigned tags</source>
         <translation>Uživatelem přiřazené tagy</translation>
     </message>
@@ -4746,17 +4746,17 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1238"/>
-        <source>Document service settings</source>
+        <source>Records management settings</source>
         <translation>Nastavení spisové služby</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1247"/>
-        <source>Upload to document service</source>
-        <translation>Nahrát do spisové služby</translation>
+        <source>Send to records management</source>
+        <translation>Odeslat do spisové služby</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1256"/>
-        <source>Update document service information</source>
+        <source>Update records management information</source>
         <translation>Aktualizovat informace ze spisové služby</translation>
     </message>
     <message>
@@ -7054,33 +7054,33 @@ do původního umístění
         <translation>Ke zprávě &apos;%1&apos; chybí data doručenky, která jsou potřeba pro export do PDF.</translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="232"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="232"/>
         <source>Message &apos;%1&apos; could not be uploaded.</source>
         <translation>Zpráva &apos;%1&apos; nemohla být nahrána.</translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="235"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="235"/>
         <source>Received error</source>
         <translation>Obdržená chyba</translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="240"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="240"/>
         <source>File Upload Error</source>
         <translation>Chyba při nahrávání souboru</translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="245"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="245"/>
         <source>Successful File Upload</source>
         <translation>Úspěšné nahrání souboru</translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="246"/>
-        <source>Message &apos;%1&apos; was successfully uploaded into the document service.</source>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="246"/>
+        <source>Message &apos;%1&apos; was successfully uploaded into the records management service.</source>
         <translation>Zpráva &apos;%1&apos; byla úspěšně nahrána do spisové služby.</translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="248"/>
-        <source>It can be now found in the document service in these locations:</source>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="248"/>
+        <source>It can be now found in the records management service in these locations:</source>
         <translation>Ve spisové službě ji můžete nyní nalézt v těchto místech:</translation>
     </message>
 </context>
@@ -7489,8 +7489,8 @@ neumožňuje zasílání poštovních datových zpráv.</translation>
 <context>
     <name>UploadHierarchyModel</name>
     <message>
-        <location filename="../src/document_service/models/upload_hierarchy_model.cpp" line="160"/>
-        <source>Document Service Hierarchy</source>
+        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="160"/>
+        <source>Records Management Hierarchy</source>
         <translation>Hierarchie spisové služby</translation>
     </message>
 </context>
