@@ -46,9 +46,6 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
-#include "src/document_service/gui/dlg_document_service.h"
-#include "src/document_service/gui/dlg_document_service_stored.h"
-#include "src/document_service/gui/dlg_document_service_upload.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -84,13 +81,15 @@
 #include "src/io/wd_sessions.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
-#include "src/settings/document_service.h"
+#include "src/records_management/gui/dlg_records_management.h"
+#include "src/records_management/gui/dlg_records_management_stored.h"
+#include "src/records_management/gui/dlg_records_management_upload.h"
+#include "src/settings/records_management.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_authenticate_message.h"
-#include "src/worker/task_document_service_stored_messages.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_download_message_list_mojeid.h"
@@ -297,7 +296,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
 	    QString(), QIcon(ICON_3PARTY_PATH "briefcase_grey_16.png"),
-	    tr("Uploaded to document service")));
+	    tr("Uploaded to records management service")));
 
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
 	    tr("Tags"), QIcon(), tr("User-assigned tags")));
@@ -472,8 +471,8 @@ MainWindow::MainWindow(QWidget *parent)
 	    + acntStrg + "   ");
 
 	/* TODO -- This is only a temporary solution. */
-	ui->actionUpdate_document_service_information->setEnabled(
-	    globDocumentServiceSet.isSet());
+	ui->actionUpdate_records_management_information->setEnabled(
+	    globRecordsManagementSet.isSet());
 }
 
 void MainWindow::setWindowsAfterInit(void)
@@ -690,23 +689,24 @@ void showColumnsAccordingToFunctionality(QTableView *view)
 {
 	QList<int> negCols;
 
-	if (!globDocumentServiceSet.isSet()) {
-		negCols.append(DbMsgsTblModel::DOC_SRVC_NEG_COL);
+	if (!globRecordsManagementSet.isSet()) {
+		negCols.append(DbMsgsTblModel::REC_MGMT_NEG_COL);
 	}
 
 	showAllColumnsExcept(view, negCols);
 }
 
-void MainWindow::showDocumentServiceDialogue(void)
+void MainWindow::showRecordsManagementDialogue(void)
 {
 	debugSlotCall();
 
-	if (DlgDocumentService::updateSettings(globDocumentServiceSet, this)) {
+	if (DlgRecordsManagement::updateSettings(globRecordsManagementSet,
+	        this)) {
 		saveSettings();
 	}
 
-	ui->actionUpdate_document_service_information->setEnabled(
-	    globDocumentServiceSet.isSet());
+	ui->actionUpdate_records_management_information->setEnabled(
+	    globRecordsManagementSet.isSet());
 
 	showColumnsAccordingToFunctionality(ui->messageList);
 }
@@ -895,9 +895,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	if (0 != msgTblMdl) {
 		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
 		Q_ASSERT(0 != mdl);
-		mdl->setDocumentServiceIcon();
-		mdl->fillDocumentServiceColumn(
-		    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+		mdl->setRecordsManagementIcon();
+		mdl->fillRecordsManagementColumn(
+		    DbMsgsTblModel::REC_MGMT_NEG_COL);
 		mdl->fillTagsColumn(userName, DbMsgsTblModel::TAGS_NEG_COL);
 		/* TODO -- Add some labels. */
 	}
@@ -1378,7 +1378,7 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		menu->addAction(ui->actionOpen_message_externally);
 		menu->addAction(ui->actionOpen_delivery_info_externally);
 		menu->addSeparator();
-		menu->addAction(ui->actionUpload_to_document_service);
+		menu->addAction(ui->actionSend_to_records_management);
 		menu->addSeparator();
 	}
 	menu->addAction(ui->actionExport_as_ZFO);
@@ -4264,10 +4264,10 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionProxy_settings, SIGNAL(triggered()),
 	    this, SLOT(showProxySettingsDialog()));
 	    /* Separator */
-	connect(ui->actionDocument_service_settings, SIGNAL(triggered()),
-	    this, SLOT(showDocumentServiceDialogue()));
-	connect(ui->actionUpdate_document_service_information, SIGNAL(triggered()),
-	    this, SLOT(getStoredMsgInfoFromDocumentService()));
+	connect(ui->actionRecords_management_settings, SIGNAL(triggered()),
+	    this, SLOT(showRecordsManagementDialogue()));
+	connect(ui->actionUpdate_records_management_information, SIGNAL(triggered()),
+	    this, SLOT(getStoredMsgInfoFromRecordsManagement()));
 	    /* Separator. */
 	connect(ui->actionPreferences, SIGNAL(triggered()),
 	    this, SLOT(showPreferencesDialog()));
@@ -4329,8 +4329,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionOpen_delivery_info_externally, SIGNAL(triggered()),
 	    this, SLOT(openDeliveryInfoExternally()));
 	    /* Separator. */
-	connect(ui->actionUpload_to_document_service, SIGNAL(triggered()),
-	    this, SLOT(uploadSelectedMessageToDocumentService()));
+	connect(ui->actionSend_to_records_management, SIGNAL(triggered()),
+	    this, SLOT(sendSelectedMessageToRecordsManagement()));
 	    /* Separator. */
 	connect(ui->actionExport_as_ZFO, SIGNAL(triggered()),
 	    this, SLOT(exportSelectedMessagesAsZFO()));
@@ -4435,8 +4435,8 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	// Menu: File
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
-	ui->actionUpdate_document_service_information->setEnabled(
-	    globDocumentServiceSet.isSet());
+	ui->actionUpdate_records_management_information->setEnabled(
+	    globRecordsManagementSet.isSet());
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
@@ -4477,8 +4477,8 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionOpen_message_externally->setEnabled(numSelected == 1);
 	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
 	    /* Separator. */
-	ui->actionUpload_to_document_service->setEnabled(
-	    (numSelected == 1) && globDocumentServiceSet.isSet());
+	ui->actionSend_to_records_management->setEnabled(
+	    (numSelected == 1) && globRecordsManagementSet.isSet());
 	    /* Separator. */
 	ui->actionExport_as_ZFO->setEnabled(numSelected > 0);
 	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
@@ -4599,8 +4599,8 @@ void MainWindow::loadSettings(void)
 	/* Proxy settings. */
 	globProxSet.loadFromSettings(settings);
 
-	/* Document service settings. */
-	globDocumentServiceSet.loadFromSettings(settings);
+	/* Records management settings. */
+	globRecordsManagementSet.loadFromSettings(settings);
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
@@ -4887,8 +4887,8 @@ void MainWindow::saveSettings(void) const
 	/* Proxy settings. */
 	globProxSet.saveToSettings(settings);
 
-	/* Document service settings. */
-	globDocumentServiceSet.saveToSettings(settings);
+	/* Records management settings. */
+	globRecordsManagementSet.saveToSettings(settings);
 
 	/* Global preferences. */
 	globPref.saveToSettings(settings);
@@ -5526,8 +5526,8 @@ void MainWindow::setReceivedColumnWidths(void)
 	}
 	/* Last three columns display icons. */
 	int max = DbMsgsTblModel::rcvdItemIds().size();
-	if (globDocumentServiceSet.isSet()) {
-		/* Add one column if document service is activated. */
+	if (globRecordsManagementSet.isSet()) {
+		/* Add one column if records management service is activated. */
 		++max;
 	}
 	for (; i < max; ++i) {
@@ -5561,8 +5561,8 @@ void MainWindow::setSentColumnWidths(void)
 	}
 	/* Last column displays an icon. */
 	int max = DbMsgsTblModel::rcvdItemIds().size();
-	if (globDocumentServiceSet.isSet()) {
-		/* Add one column if document service is activated. */
+	if (globRecordsManagementSet.isSet()) {
+		/* Add one column if records management service is activated. */
 		++max;
 	}
 	for (; i < max; ++i) {
@@ -7053,7 +7053,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 }
 
-void MainWindow::getStoredMsgInfoFromDocumentService(void)
+void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 {
 	debugSlotCall();
 
@@ -7063,20 +7063,20 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 		    m_accountModel.userName(m_accountModel.index(row, 0)));
 	}
 
-	QList<DlgDocumentServiceStored::AcntData> accounts;
+	QList<DlgRecordsManagementStored::AcntData> accounts;
 	foreach (const QString &userName, userNames) {
 		MessageDbSet *dbSet = accountDbSet(userName, this);
 		if (Q_NULLPTR == dbSet) {
 			Q_ASSERT(0);
 			return;
 		}
-		accounts.append(DlgDocumentServiceStored::AcntData(
+		accounts.append(DlgRecordsManagementStored::AcntData(
 		    AccountModel::globAccounts[userName].accountName(),
 		    userName, dbSet));
 	}
 
-	DlgDocumentServiceStored::updateStoredInformation(
-	    globDocumentServiceSet, accounts, this);
+	DlgRecordsManagementStored::updateStoredInformation(
+	    globRecordsManagementSet, accounts, this);
 
 	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
 	    m_messageListProxyModel.sourceModel());
@@ -7084,11 +7084,11 @@ void MainWindow::getStoredMsgInfoFromDocumentService(void)
 		Q_ASSERT(0);
 		return;
 	}
-	messageModel->fillDocumentServiceColumn(
-	    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+	messageModel->fillRecordsManagementColumn(
+	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 }
 
-void MainWindow::uploadSelectedMessageToDocumentService(void)
+void MainWindow::sendSelectedMessageToRecordsManagement(void)
 {
 	debugSlotCall();
 
@@ -7159,15 +7159,15 @@ void MainWindow::uploadSelectedMessageToDocumentService(void)
 		return;
 	}
 
-	/* Generate upload into data service dialogue. */
-	DlgDocumentServiceUpload::uploadMessage(globDocumentServiceSet,
+	/* Show send to records management dialogue. */
+	DlgRecordsManagementUpload::uploadMessage(globRecordsManagementSet,
 	    msgId.dmId, QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
 
 	QList<qint64> msgIdList;
 	msgIdList.append(msgId.dmId);
 
-	messageModel->refillDocumentServiceColumn(msgIdList,
-	    DbMsgsTblModel::DOC_SRVC_NEG_COL);
+	messageModel->refillRecordsManagementColumn(msgIdList,
+	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 }
 
 void MainWindow::showSignatureDetailsDialog(void)
@@ -8607,13 +8607,13 @@ void MainWindow::setMenuActionIcons(void)
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionDocument_service_settings->setIcon(ico);
+		ui->actionRecords_management_settings->setIcon(ico);
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionUpdate_document_service_information->setIcon(ico);
+		ui->actionUpdate_records_management_information->setIcon(ico);
 	}
 	    /* Separator. */
 	{
@@ -8707,7 +8707,7 @@ void MainWindow::setMenuActionIcons(void)
 		QIcon ico;
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionUpload_to_document_service->setIcon(ico);
+		ui->actionSend_to_records_management->setIcon(ico);
 	}
 	    /* Separator. */
 	ui->actionExport_as_ZFO->isEnabled();

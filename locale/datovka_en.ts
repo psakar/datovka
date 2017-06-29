@@ -1021,140 +1021,6 @@ process of all accounts on the background</source>
     </message>
 </context>
 <context>
-    <name>DlgDocumentService</name>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="28"/>
-        <source>Service location URL.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="31"/>
-        <source>URL:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="41"/>
-        <source>Access token into the document service.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="44"/>
-        <source>Token:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="71"/>
-        <source>Service Info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="78"/>
-        <source>Erase</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="100"/>
-        <source>Service name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="110"/>
-        <source>Token name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service.ui" line="14"/>
-        <source>Document Service Settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="158"/>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="166"/>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="193"/>
-        <source>Communication Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="159"/>
-        <source>Received invalid response.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service.cpp" line="167"/>
-        <source>Received empty response.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DlgDocumentServiceStored</name>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_stored.ui" line="14"/>
-        <source>Document Service Stored Messages</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_stored.cpp" line="111"/>
-        <source>Updating stored information about messages.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_stored.cpp" line="151"/>
-        <source>Downloading information about messages from account:
-%1 (%2).</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>DlgDocumentServiceUpload</name>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_upload.ui" line="33"/>
-        <source>Appeal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_upload.ui" line="64"/>
-        <source>Reload</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_upload.ui" line="71"/>
-        <source>Filter:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/ui/dlg_document_service_upload.ui" line="14"/>
-        <source>Upload Message into Document Service</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="53"/>
-        <source>Select the location where you want
-to upload the message &apos;%1&apos; into.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="132"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="140"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="196"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="292"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="301"/>
-        <source>Communication Error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="133"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="293"/>
-        <source>Received invalid response.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="141"/>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="302"/>
-        <source>Received empty response.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>DlgDsSearch</name>
     <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="68"/>
@@ -1481,6 +1347,140 @@ The current search settings will thus probably yield no result.</source>
         <location filename="../src/gui/dlg_proxysets.cpp" line="48"/>
         <location filename="../src/gui/dlg_proxysets.cpp" line="69"/>
         <source>No proxy detected, direct connection will be used.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DlgRecordsManagement</name>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="14"/>
+        <source>Records Management Settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="28"/>
+        <source>Service location URL.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="31"/>
+        <source>URL:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="41"/>
+        <source>Access token into the records management service.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="44"/>
+        <source>Token:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="71"/>
+        <source>Service Info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="78"/>
+        <source>Erase</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="100"/>
+        <source>Service name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management.ui" line="110"/>
+        <source>Token name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="158"/>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="166"/>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="193"/>
+        <source>Communication Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="159"/>
+        <source>Received invalid response.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management.cpp" line="167"/>
+        <source>Received empty response.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DlgRecordsManagementStored</name>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_stored.ui" line="14"/>
+        <source>Records Management Stored Messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_stored.cpp" line="111"/>
+        <source>Updating stored information about messages.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_stored.cpp" line="151"/>
+        <source>Downloading information about messages from account:
+%1 (%2).</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>DlgRecordsManagementUpload</name>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_upload.ui" line="14"/>
+        <source>Upload Message into Records Management Service</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_upload.ui" line="33"/>
+        <source>Appeal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_upload.ui" line="64"/>
+        <source>Reload</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/ui/dlg_records_management_upload.ui" line="71"/>
+        <source>Filter:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="53"/>
+        <source>Select the location where you want
+to upload the message &apos;%1&apos; into.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="132"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="140"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="196"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="292"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="301"/>
+        <source>Communication Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="133"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="293"/>
+        <source>Received invalid response.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="141"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="302"/>
+        <source>Received empty response.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2089,47 +2089,47 @@ contain all otherwise matching databoxes.</source>
 <context>
     <name>ErrorEntry</name>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="136"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="136"/>
         <source>No error occurred</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="139"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="139"/>
         <source>Request was malformed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="142"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="142"/>
         <source>Identifier is missing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="145"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="145"/>
         <source>Supplied identifier is wrong</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="148"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="148"/>
         <source>File format is not supported</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="151"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="151"/>
         <source>Data are already present</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="154"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="154"/>
         <source>Service limit was exceeded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="157"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="157"/>
         <source>Unspecified error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/json/entry_error.cpp" line="161"/>
+        <location filename="../src/records_management/json/entry_error.cpp" line="161"/>
         <source>Unknown error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2603,66 +2603,66 @@ process of all accounts on the background</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/gui/datovka.cpp" line="459"/>
         <location filename="../src/gui/datovka.cpp" line="460"/>
-        <location filename="../src/gui/datovka.cpp" line="461"/>
         <source>disk</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="464"/>
-        <location filename="../src/gui/datovka.cpp" line="468"/>
+        <location filename="../src/gui/datovka.cpp" line="463"/>
+        <location filename="../src/gui/datovka.cpp" line="467"/>
         <source>memory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="471"/>
+        <location filename="../src/gui/datovka.cpp" line="470"/>
         <source>Storage:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="537"/>
+        <location filename="../src/gui/datovka.cpp" line="536"/>
         <source>New version of Datovka is available:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="540"/>
+        <location filename="../src/gui/datovka.cpp" line="556"/>
+        <source>New version of Datovka</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="541"/>
         <location filename="../src/gui/datovka.cpp" line="557"/>
-        <source>New version of Datovka</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="542"/>
-        <location filename="../src/gui/datovka.cpp" line="558"/>
         <source>New version of Datovka is available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="543"/>
+        <location filename="../src/gui/datovka.cpp" line="542"/>
         <source>Current version is %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="546"/>
+        <location filename="../src/gui/datovka.cpp" line="545"/>
         <source>New version is %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="548"/>
+        <location filename="../src/gui/datovka.cpp" line="547"/>
         <source>Do you want to download new version?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="559"/>
+        <location filename="../src/gui/datovka.cpp" line="558"/>
         <source>Current version is &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="562"/>
+        <location filename="../src/gui/datovka.cpp" line="561"/>
         <source>New version is &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="564"/>
+        <location filename="../src/gui/datovka.cpp" line="563"/>
         <source>Update your application...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2695,6 +2695,11 @@ process of all accounts on the background</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="790"/>
         <source>Database files for account &apos;%1&apos; cannot be accessed in location &apos;%2&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="299"/>
+        <source>Uploaded to records management service</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -3123,7 +3128,7 @@ Check your internet connection.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="303"/>
+        <location filename="../src/gui/datovka.cpp" line="302"/>
         <source>Tags</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3259,12 +3264,7 @@ Enter password to unlock certificate file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="300"/>
-        <source>Uploaded to document service</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="303"/>
+        <location filename="../src/gui/datovka.cpp" line="302"/>
         <source>User-assigned tags</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4687,17 +4687,17 @@ sent reply on this message</source>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1238"/>
-        <source>Document service settings</source>
+        <source>Records management settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1247"/>
-        <source>Upload to document service</source>
+        <source>Send to records management</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1256"/>
-        <source>Update document service information</source>
+        <source>Update records management information</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6956,33 +6956,33 @@ to origin path
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="232"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="232"/>
         <source>Message &apos;%1&apos; could not be uploaded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="235"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="235"/>
         <source>Received error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="240"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="240"/>
         <source>File Upload Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="245"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="245"/>
         <source>Successful File Upload</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="246"/>
-        <source>Message &apos;%1&apos; was successfully uploaded into the document service.</source>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="246"/>
+        <source>Message &apos;%1&apos; was successfully uploaded into the records management service.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/document_service/gui/dlg_document_service_upload.cpp" line="248"/>
-        <source>It can be now found in the document service in these locations:</source>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="248"/>
+        <source>It can be now found in the records management service in these locations:</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7387,8 +7387,8 @@ the message is considered to be accepted after
 <context>
     <name>UploadHierarchyModel</name>
     <message>
-        <location filename="../src/document_service/models/upload_hierarchy_model.cpp" line="160"/>
-        <source>Document Service Hierarchy</source>
+        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="160"/>
+        <source>Records Management Hierarchy</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

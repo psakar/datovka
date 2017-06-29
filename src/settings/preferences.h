@@ -63,7 +63,7 @@ public:
 	QString saveToConf; /*!< Configuration file to save to. */
 	const QString accountDbFile; /*!< Account db file. */
 	const QString tagDbFile; /*!< Tag db file. */
-	const QString documentServiceDbFile; /*!< Document service db file. */
+	const QString recordsManagementDbFile; /*!< Records management db file. */
 	const QString tagWebDatovkaDbFile;  /*!< Tag webdatovka db file. */
 	bool auto_download_whole_messages;
 	bool default_download_signed; /*!< Default downloading method. */
@@ -147,11 +147,11 @@ public:
 	QString tagDbPath(void) const;
 
 	/*!
-	 * @brief Returns whole document service db path.
+	 * @brief Returns whole records management db path.
 	 *
-	 * @return Whole path to document service database file.
+	 * @return Whole path to records management database file.
 	 */
-	QString documentServiceDbPath(void) const;
+	QString recordsManagementDbPath(void) const;
 
 	/*!
 	 * @brief Returns whole webdatovka tag db path.

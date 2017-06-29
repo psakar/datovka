@@ -504,9 +504,9 @@ private slots:
 	void showProxySettingsDialog(void);
 
 	/*!
-	 * @brief Document service dialogue.
+	 * @brief Records management dialogue.
 	 */
-	void showDocumentServiceDialogue(void);
+	void showRecordsManagementDialogue(void);
 
 	/*!
 	 * @brief Move selected account up.
@@ -580,14 +580,15 @@ private slots:
 	void openDeliveryInfoExternally(void);
 
 	/*!
-	 * @brief Obtain information about stored messages from document service.
+	 * @brief Obtain information about stored messages from records
+	 *     management.
 	 */
-	void getStoredMsgInfoFromDocumentService(void);
+	void getStoredMsgInfoFromRecordsManagement(void);
 
 	/*!
-	 * @brief Upload message into document service.
+	 * @brief Send message to records management.
 	 */
-	void uploadSelectedMessageToDocumentService(void);
+	void sendSelectedMessageToRecordsManagement(void);
 
 	/*!
 	 * @brief Search data box dialog.

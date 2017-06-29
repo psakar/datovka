@@ -28,8 +28,8 @@
 #include "src/graphics/graphics.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
-#include "src/io/document_service_db.h"
 #include "src/io/message_db.h"
+#include "src/io/records_management_db.h"
 #include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/io/tag_db_container.h"
 #include "src/models/messages_model.h"
@@ -681,15 +681,15 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 	return true;
 }
 
-bool DbMsgsTblModel::setDocumentServiceIcon(void)
+bool DbMsgsTblModel::setRecordsManagementIcon(void)
 {
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
 		return false;
 	}
 
-	DocumentServiceDb::ServiceInfoEntry entry(
-	    globDocumentServiceDbPtr->serviceInfo());
+	RecordsManagementDb::ServiceInfoEntry entry(
+	    globRecordsManagementDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
 		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
 		return false;
@@ -704,9 +704,9 @@ bool DbMsgsTblModel::setDocumentServiceIcon(void)
 	return true;
 }
 
-bool DbMsgsTblModel::fillDocumentServiceColumn(int col)
+bool DbMsgsTblModel::fillRecordsManagementColumn(int col)
 {
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return false;
 	}
 
@@ -725,7 +725,7 @@ bool DbMsgsTblModel::fillDocumentServiceColumn(int col)
 	for (int row = 0; row < rowCount(); ++row) {
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
 		m_data[row][col] =
-		    globDocumentServiceDbPtr->storedMsgLocations(dmId);
+		    globRecordsManagementDbPtr->storedMsgLocations(dmId);
 	}
 
 	emit dataChanged(TblModel::index(0, col),
@@ -734,10 +734,10 @@ bool DbMsgsTblModel::fillDocumentServiceColumn(int col)
 	return true;
 }
 
-bool DbMsgsTblModel::refillDocumentServiceColumn(const QList<qint64> &dmIds,
+bool DbMsgsTblModel::refillRecordsManagementColumn(const QList<qint64> &dmIds,
     int col)
 {
-	if (Q_NULLPTR == globDocumentServiceDbPtr) {
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		return false;
 	}
 
@@ -757,7 +757,7 @@ bool DbMsgsTblModel::refillDocumentServiceColumn(const QList<qint64> &dmIds,
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
 		if (dmIds.contains(dmId)) {
 			m_data[row][col] =
-			    globDocumentServiceDbPtr->storedMsgLocations(dmId);
+			    globRecordsManagementDbPtr->storedMsgLocations(dmId);
 			emit dataChanged(TblModel::index(row, col),
 			    TblModel::index(row, col));
 		}
