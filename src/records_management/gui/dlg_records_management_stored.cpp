@@ -70,6 +70,7 @@ DlgRecordsManagementStored::DlgRecordsManagementStored(const QString &urlStr,
 	    SIGNAL(recordsManagementStoredMessagesFinished(QString)),
 	    this, SLOT(downloadAndStoreContinue()));
 
+	/* Currently there is no means how to detect whether dialogue is shown. */
 	QTimer::singleShot(RUN_DELAY_MS, this, SLOT(downloadAndStoreStart()));
 }
 

@@ -23,6 +23,7 @@
 
 #include <cinttypes>
 #include <QMessageBox>
+#include <QTimer>
 
 #include "src/graphics/graphics.h"
 #include "src/io/records_management_db.h"
@@ -34,6 +35,8 @@
 #include "ui_dlg_records_management_upload.h"
 
 #define LOGO_EDGE 64
+
+#define RUN_DELAY_MS 500
 
 DlgRecordsManagementUpload::DlgRecordsManagementUpload(const QString &urlStr,
     const QString &tokenStr, qint64 dmId, QWidget *parent)
@@ -73,8 +76,8 @@ DlgRecordsManagementUpload::DlgRecordsManagementUpload(const QString &urlStr,
 	connect(&m_rmc, SIGNAL(connectionError(QString)),
 	    this, SLOT(notifyCommunicationError(QString)));
 
-	/* Dialogue window is not shown now so using parent instead. */
-	callUploadHierarchy();
+	/* Currently there is no means how to detect whether dialogue is shown. */
+	QTimer::singleShot(RUN_DELAY_MS, this, SLOT(callUploadHierarchy()));
 }
 
 DlgRecordsManagementUpload::~DlgRecordsManagementUpload(void)
