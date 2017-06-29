@@ -1,3 +1,7 @@
+4.9.0 /
+ * Added API and support for sending messages into records management services.
+ * Removed explicit clear buttons from filter fields.
+
 4.8.3 / 2017-06-13
  * Fixed problems with remembering location of saved attachment files.
  * Directory structure can be created when exporting correspondence overview.
