@@ -157,7 +157,7 @@ QVariant UploadHierarchyModel::headerData(int section,
 {
 	if ((Qt::Horizontal == orientation) && (Qt::DisplayRole == role) &&
 	    (0 == section)) {
-		return tr("Document Service Hierarchy");
+		return tr("Records Management Hierarchy");
 	}
 
 	return QVariant();
