@@ -1237,6 +1237,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Records management settings</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionSend_to_records_management">
    <property name="icon">
@@ -1246,6 +1249,9 @@ sent reply on this message</string>
    <property name="text">
     <string>Send to records management</string>
    </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
   </action>
   <action name="actionUpdate_records_management_information">
    <property name="icon">
@@ -1254,6 +1260,9 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Update records management information</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
    </property>
   </action>
  </widget>
