@@ -1,4 +1,4 @@
-4.9.0 /
+4.9.0 / 2017-06-30
  * Added API and support for sending messages into records management services.
  * Removed explicit clear buttons from filter fields.
 
