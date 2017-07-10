@@ -28,6 +28,7 @@ INCLUDEPATH += \
 	$${top_srcdir}
 
 SOURCES += \
+	$${top_srcdir}/src/localisation/localisation.cpp \
 	$${top_srcdir}/src/records_management/conversion.cpp \
 	$${top_srcdir}/src/records_management/io/records_management_connection.cpp \
 	$${top_srcdir}/src/records_management/json/entry_error.cpp \
@@ -41,9 +42,11 @@ SOURCES += \
 	$${top_srcdir}/tests/records_management_app/gui/app.cpp \
 	$${top_srcdir}/tests/records_management_app/gui/dialogue_service_info.cpp \
 	$${top_srcdir}/tests/records_management_app/gui/dialogue_stored_files.cpp \
+	$${top_srcdir}/tests/records_management_app/json/documents.cpp \
 	main.cpp
 
 HEADERS += \
+	$${top_srcdir}/src/localisation/localisation.h \
 	$${top_srcdir}/src/records_management/conversion.h \
 	$${top_srcdir}/src/records_management/io/records_management_connection.h \
 	$${top_srcdir}/src/records_management/json/entry_error.h \
@@ -56,7 +59,8 @@ HEADERS += \
 	$${top_srcdir}/src/records_management/models/upload_hierarchy_proxy_model.h \
 	$${top_srcdir}/tests/records_management_app/gui/app.h \
 	$${top_srcdir}/tests/records_management_app/gui/dialogue_service_info.h \
-	$${top_srcdir}/tests/records_management_app/gui/dialogue_stored_files.h
+	$${top_srcdir}/tests/records_management_app/gui/dialogue_stored_files.h \
+	$${top_srcdir}/tests/records_management_app/json/documents.h
 
 FORMS += \
 	$${top_srcdir}/tests/records_management_app/ui/app.ui \

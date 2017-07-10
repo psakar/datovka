@@ -84,6 +84,9 @@ MainWindow::MainWindow(const QString &baseUrl, const QString &token,
 	connect(ui_treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 	    this, SLOT(uploadHierarchySelectionChanged(QItemSelection, QItemSelection)));
 
+	ui_treeView->sortByColumn(0, Qt::AscendingOrder);
+	ui_treeView->setSortingEnabled(true);
+
 	ui_vSplitter->setCollapsible(0, false);
 	ui_vSplitter->setCollapsible(1, false);
 
