@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include "src/localisation/localisation.h"
 #include "src/records_management/models/upload_hierarchy_proxy_model.h"
 
 UploadHierarchyProxyModel::UploadHierarchyProxyModel(QObject *parent)
@@ -43,6 +44,21 @@ bool UploadHierarchyProxyModel::filterAcceptsRow(int sourceRow,
 	QModelIndex sourceIndex(sourceModel()->index(sourceRow,
 	    filterKeyColumn(), sourceParent));
 	return filterAcceptsItem(sourceIndex);
+}
+
+bool UploadHierarchyProxyModel::lessThan(const QModelIndex &sourceLeft,
+    const QModelIndex &sourceRight) const
+{
+	QVariant leftData(sourceModel()->data(sourceLeft, filterRole()));
+	QVariant rightData(sourceModel()->data(sourceRight, filterRole()));
+
+	if (Q_LIKELY(leftData.canConvert<QString>())) {
+		Q_ASSERT(rightData.canConvert<QString>());
+		return Localisation::stringCollator.compare(leftData.toString(),
+		    rightData.toString()) < 0;
+	} else {
+		return QSortFilterProxyModel::lessThan(sourceLeft, sourceRight);
+	}
 }
 
 bool UploadHierarchyProxyModel::filterAcceptsItem(

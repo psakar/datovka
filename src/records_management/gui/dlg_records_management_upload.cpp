@@ -71,6 +71,9 @@ DlgRecordsManagementUpload::DlgRecordsManagementUpload(const QString &urlStr,
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 	    this, SLOT(uploadHierarchySelectionChanged()));
 
+	m_ui->uploadView->sortByColumn(0, Qt::AscendingOrder);
+	m_ui->uploadView->setSortingEnabled(true);
+
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
 	connect(&m_rmc, SIGNAL(connectionError(QString)),
