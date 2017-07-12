@@ -137,7 +137,8 @@ private:
 	bool showRootName(void) const;
 
 	/*!
-	 * @brief Return all data according to which can be used for filtering.
+	 * @brief Return all data related to node which can be used for
+	 *     filtering.
 	 *
 	 * @param[in] entry Node identifier.
 	 * @return List of strings.
@@ -149,11 +150,13 @@ private:
 	 * @brief Returns list of all (meta)data (including children).
 	 *
 	 * @param[in] entry Node identifying the root.
+	 * @param[in] takeSuper Set true when data of superordinate node should
+	 *                      be taken into account.
 	 * @return List of all gathered data according to which can be filtered.
 	 */
 	static
 	QStringList filterDataRecursive(
-	    const UploadHierarchyResp::NodeEntry *entry);
+	    const UploadHierarchyResp::NodeEntry *entry, bool takeSuper);
 
 	UploadHierarchyResp m_hierarchy; /*!< Upload hierarchy structure. */
 };

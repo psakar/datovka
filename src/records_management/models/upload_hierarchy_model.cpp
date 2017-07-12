@@ -141,7 +141,7 @@ QVariant UploadHierarchyModel::data(const QModelIndex &index, int role) const
 		return filterData(entry).join(QStringLiteral("\n"));
 		break;
 	case ROLE_FILTER:
-		return filterDataRecursive(entry);
+		return filterDataRecursive(entry, true);
 		break;
 	case ROLE_ID:
 		return entry->id();
@@ -196,7 +196,7 @@ bool UploadHierarchyModel::showRootName(void) const
 QStringList UploadHierarchyModel::filterData(
     const UploadHierarchyResp::NodeEntry *entry)
 {
-	if (entry == Q_NULLPTR) {
+	if (Q_UNLIKELY(entry == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		return QStringList();
 	}
@@ -205,16 +205,29 @@ QStringList UploadHierarchyModel::filterData(
 }
 
 QStringList UploadHierarchyModel::filterDataRecursive(
-    const UploadHierarchyResp::NodeEntry *entry)
+    const UploadHierarchyResp::NodeEntry *entry, bool takeSuper)
 {
-	if (entry == Q_NULLPTR) {
+	if (Q_UNLIKELY(entry == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		return QStringList();
 	}
 
 	QStringList res(filterData(entry));
 	foreach (const UploadHierarchyResp::NodeEntry *sub, entry->sub()) {
-		res += filterDataRecursive(sub);
+		res += filterDataRecursive(sub, false);
+	}
+	if (takeSuper) {
+		/*
+		 * Add also filter data from superordinate node. This has the
+		 * effect that all sub-nodes (including those not matching the
+		 * filter) of a node which matches the entered filter are
+		 * going to be also displayed.
+		 */
+		const UploadHierarchyResp::NodeEntry *sup = entry->super();
+		if (Q_UNLIKELY(sup == Q_NULLPTR)) {
+			return res;
+		}
+		res += filterData(sup);
 	}
 
 	return res;
