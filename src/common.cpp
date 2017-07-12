@@ -110,6 +110,9 @@ QString convertDbTypeToString(int value)
 	else if (value == DBTYPE_OVM_NOTAR) return "OVM_NOTAR";
 	else if (value == DBTYPE_OVM_EXEKUT) return "OVM_EXEKUT";
 	else if (value == DBTYPE_OVM_REQ) return "OVM_REQ";
+	else if (value == DBTYPE_OVM_FO) return "OVM_FO";
+	else if (value == DBTYPE_OVM_PFO) return "OVM_PFO";
+	else if (value == DBTYPE_OVM_PO) return "OVM_PO";
 	else if (value == DBTYPE_PO) return "PO";
 	else if (value == DBTYPE_PO_ZAK) return "PO_ZAK";
 	else if (value == DBTYPE_PO_REQ) return "PO_REQ";
@@ -117,6 +120,7 @@ QString convertDbTypeToString(int value)
 	else if (value == DBTYPE_PFO_ADVOK) return "PFO_ADVOK";
 	else if (value == DBTYPE_PFO_DANPOR) return "PFO_DANPOR";
 	else if (value == DBTYPE_PFO_INSSPR) return "PFO_INSSPR";
+	else if (value == DBTYPE_PFO_AUDITOR) return "PFO_AUDITOR";
 	else if (value == DBTYPE_FO) return "FO";
 	else return "";
 }
@@ -127,6 +131,9 @@ int convertDbTypeToInt(QString value)
 	else if (value == "OVM_NOTAR") return DBTYPE_OVM_NOTAR;
 	else if (value == "OVM_EXEKUT") return DBTYPE_OVM_EXEKUT;
 	else if (value == "OVM_REQ") return DBTYPE_OVM_REQ;
+	else if (value == "OVM_FO") return DBTYPE_OVM_FO;
+	else if (value == "OVM_PFO") return DBTYPE_OVM_PFO;
+	else if (value == "OVM_PO") return DBTYPE_OVM_PO;
 	else if (value == "PO") return DBTYPE_PO;
 	else if (value == "PO_ZAK") return DBTYPE_PO_ZAK;
 	else if (value == "PO_REQ") return DBTYPE_PO_REQ;
@@ -134,6 +141,7 @@ int convertDbTypeToInt(QString value)
 	else if (value == "PFO_ADVOK") return DBTYPE_PFO_ADVOK;
 	else if (value == "PFO_DANPOR") return DBTYPE_PFO_DANPOR;
 	else if (value == "PFO_INSSPR") return DBTYPE_PFO_INSSPR;
+	else if (value == "PFO_AUDITOR") return DBTYPE_PFO_AUDITOR;
 	else if (value == "FO") return DBTYPE_FO;
 	else return DBTYPE_SYSTEM;
 }
@@ -215,6 +223,8 @@ QString convertSenderTypeToString(int value)
 	else if (value == SENDERTYPE_VIRTUAL) return "VIRTUAL";
 	else if (value == SENDERTYPE_OFFICIAL_CERT) return "OFFICIAL_CERT";
 	else if (value == SENDERTYPE_LIQUIDATOR) return "LIQUIDATOR";
+	else if (value == SENDERTYPE_RECEIVER) return "RECEIVER";
+	else if (value == SENDERTYPE_GUARDIAN) return "GUARDIAN";
 	else return "";
 }
 
@@ -276,11 +286,11 @@ QString convertUserPrivilsToString(int userPrivils)
 	return privStr;
 }
 
-const QString & convertUserTypeToString(int value)
+const QString &convertUserTypeToString(int value)
 {
 	static const QString pu("PRIMARY_USER"), eu("ENTRUSTED_USER"),
 	    a("ADMINISTRATOR"), l("LIQUIDATOR"), ou("OFFICIAL_USER"),
-	    ocu("OFFICIAL_CERT_USER");
+	    ocu("OFFICIAL_CERT_USER"), r("RECEIVER"), g("GUARDIAN");
 	static const QString empty;
 
 	switch (value) {
@@ -290,6 +300,8 @@ const QString & convertUserTypeToString(int value)
 	case USERTYPE_LIQUIDATOR: return l;
 	case USERTYPE_OFFICIAL: return ou;
 	case USERTYPE_OFFICIAL_CERT: return ocu;
+	case USERTYPE_RECEIVER: return r;
+	case USERTYPE_GUARDIAN: return g;
 	default: return empty;
 	}
 }
@@ -386,6 +398,11 @@ QString getdbStateText(int value)
 		/* Datová schránka je smazána (přesto existuje v ISDS). */
 		return QObject::tr(
 		    "The data box has been deleted (none the less it exists in ISDS).");
+		break;
+	case DBSTATE_TEMP_UNACCESSIBLE_LAW:
+		/* Datová schránka je dočasně znepřístupněna (z důvodů vyjmenovaných v zákoně), může být později opět zpřístupněna. */
+		return QObject::tr(
+		    "The data box is temporarily inaccessible (because of reasons listed in law). It may be made accessible again at some point in the future.");
 		break;
 	default:
 		return QObject::tr("An error occurred while checking the status.");
