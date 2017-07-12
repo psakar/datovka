@@ -33,6 +33,7 @@
 #include "src/records_management/json/service_info.h"
 #include "src/records_management/json/stored_files.h"
 #include "src/records_management/json/upload_file.h"
+#include "tests/records_management_app/json/documents.h"
 #include "tests/records_management_app/gui/app.h"
 #include "tests/records_management_app/gui/dialogue_service_info.h"
 #include "tests/records_management_app/gui/dialogue_stored_files.h"
@@ -166,6 +167,25 @@ void MainWindow::callSrvcUploadHierarchy(void)
 {
 	ui_textEdit->clear();
 	m_uploadModel.setHierarchy(UploadHierarchyResp());
+
+	if (ui_baseUrlLine->text().isEmpty()) {
+		/* No service URL available. */
+		QMessageBox::warning(this, tr("No URL Available"),
+		    tr("Using dummy response."));
+		bool ok = false;
+		UploadHierarchyResp uhRes(
+		    UploadHierarchyResp::fromJson(uhResDoc, &ok));
+		ui_textEdit->append(JsonHelper::toIndentedString(uhResDoc));
+		if (!ok || !uhRes.isValid()) {
+			QMessageBox::critical(this, tr("Communication Error"),
+			    tr("Invalid dummy response."));
+			return;
+		}
+
+		m_uploadModel.setHierarchy(uhRes);
+		ui_treeView->expandAll();
+		return;
+	}
 
 	QByteArray response;
 	if (m_rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_HIERARCHY,
