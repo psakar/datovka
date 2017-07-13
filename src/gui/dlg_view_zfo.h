@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #ifndef _DLG_VIEW_ZFO_H_
 #define _DLG_VIEW_ZFO_H_
 
-
 #include <QDialog>
 
 #include "src/models/files_model.h"
@@ -43,7 +42,8 @@ public:
 	 * @param[in] zfoFileName Path to the ZFO file.
 	 * @param[in] parent      Pointer to parent object.
 	 */
-	explicit DlgViewZfo(const QString &zfoFileName, QWidget *parent = 0);
+	explicit DlgViewZfo(const QString &zfoFileName,
+	    QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Constructor.
@@ -51,7 +51,8 @@ public:
 	 * @param[in] zfoData Raw ZFO data.
 	 * @param[in] parent      Pointer to parent object.
 	 */
-	explicit DlgViewZfo(const QByteArray &zfoData, QWidget *parent = 0);
+	explicit DlgViewZfo(const QByteArray &zfoData,
+	    QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
