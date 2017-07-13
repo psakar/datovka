@@ -389,9 +389,9 @@ bool DlgViewZfo::envelopeHeaderDescriptionHtml(QString &html,
 	QString statusString;
 	if (NULL != envelope->dmMessageStatus) {
 		statusString =
-		    QString::number(convertHexToDecIndex(*(envelope->dmMessageStatus))) +
+		    QString::number(convertIsdsMsgStatusToDbRepr(*(envelope->dmMessageStatus))) +
 		    " -- " +
-		    msgStatusToText(convertHexToDecIndex(*(envelope->dmMessageStatus)));
+		    dbMsgStatusToText(convertIsdsMsgStatusToDbRepr(*(envelope->dmMessageStatus)));
 	}
 	html += strongAccountInfoLine(tr("Status"), statusString);
 

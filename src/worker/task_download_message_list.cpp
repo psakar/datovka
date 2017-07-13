@@ -272,7 +272,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		} else {
 
 			/* Update message and envelope only if status has changed. */
-			const int dmNewMsgStatus = convertHexToDecIndex(
+			const int dmNewMsgStatus = convertIsdsMsgStatusToDbRepr(
 			     *item->envelope->dmMessageStatus);
 
 			if (dmNewMsgStatus != dmDbMsgStatus) {
@@ -435,7 +435,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 	} else if (messageDb->msgsUpdateMessageState(dmID,
 	    dmDeliveryTime, dmAcceptanceTime,
 	    envel->dmMessageStatus ?
-	        convertHexToDecIndex(*envel->dmMessageStatus) : 0)) {
+	        convertIsdsMsgStatusToDbRepr(*envel->dmMessageStatus) : 0)) {
 		/* Updated message envelope delivery info in db. */
 		logDebugLv0NL(
 		    "Delivery information of message '%" PRId64 "' were updated.",
@@ -453,7 +453,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 		isds_event *item = (isds_event *) event->data;
 		messageDb->msgsInsertUpdateMessageEvent(dmID,
 		    timevalToDbFormat(item->time),
-		    convertEventTypeToString(*item->type),
+		    convertEventTypeToString(*item->type) + QLatin1String(": "),
 		    item->description);
 		event = event->next;
 	}

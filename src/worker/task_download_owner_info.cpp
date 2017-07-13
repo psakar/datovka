@@ -101,7 +101,7 @@ bool TaskDownloadOwnerInfo::downloadOwnerInfo(const QString &userName,
 	bool ret = globAccountDbPtr->insertAccountIntoDb(
 	    AccountDb::keyFromLogin(userName),
 	    ownerInfo->dbID,
-	    convertDbTypeToString(*ownerInfo->dbType),
+	    convertBoxTypeToString(*ownerInfo->dbType),
 	    ic,
 	    ownerInfo->personName ?
 	        ownerInfo->personName->pnFirstName : NULL,

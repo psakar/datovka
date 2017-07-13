@@ -3563,7 +3563,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 				if (key == "dbState") {
 					html.append(strongAccountInfoLine(
 					    accntinfTbl.attrProps[key].desc,
-					    getdbStateText(
+					    getBoxStateText(
 					    accountEntry.value(key).toInt())));
 				} else if (key == "ic") {
 					if (accountEntry.value(key).toInt() > 0) {

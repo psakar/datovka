@@ -183,7 +183,7 @@ int base64RealSize(const QByteArray &b64);
  * @param[in] value Attachment type value.
  * @return Attachment type description.
  */
-QString convertAttachmentType(int value);
+const QString &convertAttachmentType(int value);
 
 /*!
  * @brief Convert type of databox to int.
@@ -191,7 +191,7 @@ QString convertAttachmentType(int value);
  * @param[in] value databox type string.
  * @return databox int.
  */
-int convertDbTypeToInt(QString value);
+int convertBoxTypeToInt(const QString &value);
 
 /*!
  * @brief Convert type of databox to string.
@@ -199,7 +199,7 @@ int convertDbTypeToInt(QString value);
  * @param[in] value databox type value.
  * @return Databox type description.
  */
-QString convertDbTypeToString(int value);
+const QString &convertBoxTypeToString(int value);
 
 /*!
  * @brief Convert event type to string.
@@ -207,7 +207,7 @@ QString convertDbTypeToString(int value);
  * @param[in] value event type value.
  * @return Event description.
  */
-QString convertEventTypeToString(int value);
+const QString &convertEventTypeToString(int value);
 
 /*!
  * @brief Return hash algorithm as string.
@@ -215,7 +215,7 @@ QString convertEventTypeToString(int value);
  * @param[in] value Hash algorithm value.
  * @return Hash algorithm type string.
  */
-QString convertHashAlg(int value);
+const QString &convertHashAlgToString(int value);
 
  /*!
  * @brief Return hash algorithm as int.
@@ -223,23 +223,31 @@ QString convertHashAlg(int value);
  * @param[in] value Hash algorithm string.
  * @return Hash algorithm type value.
  */
-int convertHashAlg2(QString value);
+int convertHashAlgToInt(const QString &value);
 
 /*!
- * @brief Return dec index from hex.
+ * @brief Converts libisds message state to database value as used by Datovka.
  *
- * @param[in] value Decadical value.
- * @return Hexadecimal value.
+ * @param[in] value Libisds massage status value.
+ * @return Datovka value.
  */
-int convertHexToDecIndex(int value);
+int convertIsdsMsgStatusToDbRepr(int value);
 
 /*!
- * @brief Return sender databox type as string from number representation.
+ * @brief Returns message status description.
  *
- * @param[in] value Sender databox type value.
- * @return Sender databox type description.
+ * @param[in] status Message status value as used in database.
+ * @return message status description.
  */
-QString convertSenderDbTypesToString(int value);
+QString dbMsgStatusToText(int status);
+
+/*!
+ * @brief Return sender data box type as string from number representation.
+ *
+ * @param[in] value Sender data box type value as used by libisds.
+ * @return Sender data box type description.
+ */
+QString convertSenderBoxTypeToString(int value);
 
 /*!
  * @brief Convert type of author to string.
@@ -247,23 +255,23 @@ QString convertSenderDbTypesToString(int value);
  * @param[in] value Author type value.
  * @return Author type description.
  */
-QString convertSenderTypeToString(int value);
+const QString &convertSenderTypeToString(int value);
 
 /*!
- * @brief Return privilegs as html string from number representation.
+ * @brief Return privileges as html string from number representation.
  *
- * @param[in] userPrivils Privilegy value.
- * @return Privilegy description.
+ * @param[in] userPrivils Privilege value flags.
+ * @return Privilege description.
  */
 QString convertUserPrivilsToString(int userPrivils);
 
 /*!
- * Convert type of user to string.
+ * @brief Convert type of user to string.
  *
  * @param[in] value user type value.
  * @return User description.
  */
-const QString & convertUserTypeToString(int value);
+const QString &convertUserTypeToString(int value);
 
 /*!
  * @brief Creates email header and message body.
@@ -281,7 +289,7 @@ void createEmailMessage(QString &message, const QString &subj,
  * @param[in] dmType Message type value.
  * @return Message type description.
  */
-const QString dmTypeToText(const QString &dmType);
+QString dmTypeToText(const QString &dmType);
 
 /*!
  * @brief Adds last line into email.
@@ -300,12 +308,12 @@ void finishEmailMessage(QString &message, const QString &boundary);
 QString fromBase64(const QString &base64);
 
 /*!
- * @brief Convert state box to text
+ * @brief Convert data box state to text
  *
- * @param[in] value databox status value.
+ * @param[in] value Data box status value as used by libisds.
  * @return Databox status string.
  */
-QString getdbStateText(int value);
+QString getBoxStateText(int value);
 
 /*!
  * @brief Get/create WebDatovka (MojeId) username.
@@ -360,14 +368,6 @@ bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
  * @return true if account is webdatovka account.
  */
 bool isWebDatovkaAccount(const QString &userName);
-
-/*!
- * @brief Returns message status description.
- *
- * @param[in] status Message status value.
- * @return message status description.
- */
-const QString msgStatusToText(int status);
 
 /*!
  * @brief Converts string to base64.

@@ -74,7 +74,7 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 		isds_event *item = (isds_event *) event->data;
 		messageDb->msgsInsertUpdateMessageEvent(dmID,
 		    timevalToDbFormat(item->time),
-		    convertEventTypeToString(*item->type),
+		    convertEventTypeToString(*item->type) + QLatin1String(": "),
 		    item->description);
 		event = event->next;
 	}
@@ -155,7 +155,7 @@ qdatovka_error Task::storeEnvelope(enum MessageDirection msgDirect,
 	    envel->dmAcceptanceTime ?
 	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
 	    envel->dmMessageStatus ?
-	        convertHexToDecIndex(*envel->dmMessageStatus) : 0,
+	        convertIsdsMsgStatusToDbRepr(*envel->dmMessageStatus) : 0,
 	    envel->dmAttachmentSize ?
 	        (int) *envel->dmAttachmentSize : 0,
 	    envel->dmType,
@@ -267,7 +267,8 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		QByteArray hashValueBase64 = QByteArray((char *) hash->value,
 		    hash->length).toBase64();
 		if (messageDb->msgsInsertUpdateMessageHash(dmID,
-		        hashValueBase64, convertHashAlg(hash->algorithm))) {
+		        hashValueBase64,
+		        convertHashAlgToString(hash->algorithm))) {
 			logDebugLv0NL("Hash of message '%" PRId64 "' stored.",
 			    dmID);
 		} else {
@@ -382,7 +383,7 @@ qdatovka_error Task::updateEnvelope(enum MessageDirection msgDirect,
 	    envel->dmAcceptanceTime ?
 	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
 	    envel->dmMessageStatus ?
-	        convertHexToDecIndex(*envel->dmMessageStatus) : 0,
+	        convertIsdsMsgStatusToDbRepr(*envel->dmMessageStatus) : 0,
 	    envel->dmAttachmentSize ?
 	        (int) *envel->dmAttachmentSize : 0,
 	    envel->dmType,

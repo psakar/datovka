@@ -59,7 +59,7 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 			QVariant entry(_data(index, role));
 
 			if (!entry.isNull()) {
-				return convertDbTypeToString(entry.toInt());
+				return convertBoxTypeToString(entry.toInt());
 			} else {
 				return entry;
 			}

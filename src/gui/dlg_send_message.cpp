@@ -760,7 +760,7 @@ void DlgSendMessage::initContent(enum Action action,
 	this->attachmentSizeInfo->setText(
 	    tr("Total size of attachments is %1 B").arg(0));
 
-	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
+	if (convertBoxTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
 		this->dmAllowSubstDelivery->setEnabled(false);
 		this->dmAllowSubstDelivery->hide();
 	}
@@ -1288,7 +1288,7 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
 
 	/* Only OVM can change. */
-	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
+	if (convertBoxTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
 		envelope.dmAllowSubstDelivery = true;
 	} else {
 		envelope.dmAllowSubstDelivery =
@@ -1475,7 +1475,7 @@ void DlgSendMessage::buildEnvelopeWebDatovka(
 	envelope.dmOVM = m_dbEffectiveOVM;
 
 	/* Only OVM can change. */
-	if (convertDbTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
+	if (convertBoxTypeToInt(m_dbType) > DBTYPE_OVM_REQ) {
 		envelope.dmAllowSubstDelivery = true;
 	} else {
 		envelope.dmAllowSubstDelivery =

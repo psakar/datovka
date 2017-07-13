@@ -114,7 +114,7 @@ struct isds_hash *localMessageHash(MessageDb *messageDb, qint64 dmId)
 
 	QByteArray rawHash = QByteArray::fromBase64(hashLocaldata.valueBase64);
 	hashLocal->length = (size_t) rawHash.size();
-	hashLocal->algorithm = (isds_hash_algorithm) convertHashAlg2(
+	hashLocal->algorithm = (isds_hash_algorithm) convertHashAlgToInt(
 	    hashLocaldata.alg);
 	hashLocal->value = malloc(hashLocal->length);
 	if (NULL == hashLocal->value) {

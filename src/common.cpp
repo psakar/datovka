@@ -60,22 +60,32 @@ void addAttachmentToEmailMessage(QString &message, const QString &attachName,
 
 const QString authorTypeToText(const QString &authorType)
 {
-	if ("PRIMARY_USER" == authorType) {
+	if (QLatin1String("PRIMARY_USER") == authorType) {
 		/* Opravnena osoba nebo likvidator. */
 		return QObject::tr("Primary user");
-	} else if ("ENTRUSTED_USER" == authorType) {
+	} else if (QLatin1String("ENTRUSTED_USER") == authorType) {
 		/* Poverena osoba. */
 		return QObject::tr("Entrusted user");
-	} else if ("ADMINISTRATOR" == authorType) {
+	} else if (QLatin1String("ADMINISTRATOR") == authorType) {
 		/* Systemove DZ. */
 		return QObject::tr("Administrator");
-	} else if ( "OFFICIAL" == authorType) {
+	} else if (QLatin1String("OFFICIAL") == authorType) {
 		/* Systemove DZ. */
 		return QObject::tr("Official");
-	} else if ("VIRTUAL" == authorType) {
+	} else if (QLatin1String("VIRTUAL") == authorType) {
 		/* Spisovka. */
 		return QObject::tr("Virtual");
+	} else if (QLatin1String("OFFICIAL_CERT") == authorType) {
+		return QObject::tr("???");
+	} else if (QLatin1String("LIQUIDATOR") == authorType) {
+		return QObject::tr("Liquidator");
+	} else if (QLatin1String("RECEIVER") == authorType) {
+		return QObject::tr("Receiver");
+	} else if (QLatin1String("GUARDIAN") == authorType) {
+		return QObject::tr("Guardian");
 	} else {
+		logWarningNL("Unknown author type '%s'.",
+		    authorType.toUtf8().constData());
 		return QString();
 	}
 }
@@ -94,138 +104,305 @@ int base64RealSize(const QByteArray &b64)
 	return b64size * 3 / 4 - cnt;
 }
 
-QString convertAttachmentType(int value)
+const QString &convertAttachmentType(int value)
 {
-	if (value == FILEMETATYPE_MAIN) return "main";
-	else if (value == FILEMETATYPE_ENCLOSURE) return "encl";
-	else if (value == FILEMETATYPE_SIGNATURE) return "sign";
-	else if (value == FILEMETATYPE_META) return "meta";
-	else return "";
+	static const QString main("main"), encl("encl"), sign("sign"),
+	    meta("meta");
+	static const QString invalid;
+
+	switch (value) {
+	case FILEMETATYPE_MAIN: return main; break;
+	case FILEMETATYPE_ENCLOSURE: return encl; break;
+	case FILEMETATYPE_SIGNATURE: return sign; break;
+	case FILEMETATYPE_META: return sign; break;
+	default:
+		logWarningNL("Unknown attachment type value '%d'.", value);
+		return invalid;
+		break;
+	}
 }
 
-QString convertDbTypeToString(int value)
+#define STR_OVM_MAIN "OVM_MAIN"
+#define STR_SYSTEM "SYSTEM"
+#define STR_OVM "OVM"
+#define STR_OVM_NOTAR "OVM_NOTAR"
+#define STR_OVM_EXEKUT "OVM_EXEKUT"
+#define STR_OVM_REQ "OVM_REQ"
+#define STR_OVM_FO "OVM_FO"
+#define STR_OVM_PFO "OVM_PFO"
+#define STR_OVM_PO "OVM_PO"
+#define STR_PO "PO"
+#define STR_PO_ZAK "PO_ZAK"
+#define STR_PO_REQ "PO_REQ"
+#define STR_PFO "PFO"
+#define STR_PFO_ADVOK "PFO_ADVOK"
+#define STR_PFO_DANPOR "PFO_DANPOR"
+#define STR_PFO_INSSPR "PFO_INSSPR"
+#define STR_PFO_AUDITOR "PFO_AUDITOR"
+#define STR_FO "FO"
+
+int convertBoxTypeToInt(const QString &value)
 {
-	if (value == DBTYPE_SYSTEM) return "SYSTEM";
-	else if (value == DBTYPE_OVM) return "OVM";
-	else if (value == DBTYPE_OVM_NOTAR) return "OVM_NOTAR";
-	else if (value == DBTYPE_OVM_EXEKUT) return "OVM_EXEKUT";
-	else if (value == DBTYPE_OVM_REQ) return "OVM_REQ";
-	else if (value == DBTYPE_OVM_FO) return "OVM_FO";
-	else if (value == DBTYPE_OVM_PFO) return "OVM_PFO";
-	else if (value == DBTYPE_OVM_PO) return "OVM_PO";
-	else if (value == DBTYPE_PO) return "PO";
-	else if (value == DBTYPE_PO_ZAK) return "PO_ZAK";
-	else if (value == DBTYPE_PO_REQ) return "PO_REQ";
-	else if (value == DBTYPE_PFO) return "PFO";
-	else if (value == DBTYPE_PFO_ADVOK) return "PFO_ADVOK";
-	else if (value == DBTYPE_PFO_DANPOR) return "PFO_DANPOR";
-	else if (value == DBTYPE_PFO_INSSPR) return "PFO_INSSPR";
-	else if (value == DBTYPE_PFO_AUDITOR) return "PFO_AUDITOR";
-	else if (value == DBTYPE_FO) return "FO";
-	else return "";
+	if (value == QLatin1String(STR_OVM_MAIN)) return DBTYPE_OVM_MAIN;
+	else if (value == QLatin1String(STR_SYSTEM)) return DBTYPE_SYSTEM;
+	else if (value == QLatin1String(STR_OVM)) return DBTYPE_OVM;
+	else if (value == QLatin1String(STR_OVM_NOTAR)) return DBTYPE_OVM_NOTAR;
+	else if (value == QLatin1String(STR_OVM_EXEKUT)) return DBTYPE_OVM_EXEKUT;
+	else if (value == QLatin1String(STR_OVM_REQ)) return DBTYPE_OVM_REQ;
+	else if (value == QLatin1String(STR_OVM_FO)) return DBTYPE_OVM_FO;
+	else if (value == QLatin1String(STR_OVM_PFO)) return DBTYPE_OVM_PFO;
+	else if (value == QLatin1String(STR_OVM_PO)) return DBTYPE_OVM_PO;
+	else if (value == QLatin1String(STR_PO)) return DBTYPE_PO;
+	else if (value == QLatin1String(STR_PO_ZAK)) return DBTYPE_PO_ZAK;
+	else if (value == QLatin1String(STR_PO_REQ)) return DBTYPE_PO_REQ;
+	else if (value == QLatin1String(STR_PFO)) return DBTYPE_PFO;
+	else if (value == QLatin1String(STR_PFO_ADVOK)) return DBTYPE_PFO_ADVOK;
+	else if (value == QLatin1String(STR_PFO_DANPOR)) return DBTYPE_PFO_DANPOR;
+	else if (value == QLatin1String(STR_PFO_INSSPR)) return DBTYPE_PFO_INSSPR;
+	else if (value == QLatin1String(STR_PFO_AUDITOR)) return DBTYPE_PFO_AUDITOR;
+	else if (value == QLatin1String(STR_FO)) return DBTYPE_FO;
+	else {
+		logWarningNL("Unknown data box type '%s'.",
+		    value.toUtf8().constData());
+		return DBTYPE_SYSTEM;
+	}
 }
 
-int convertDbTypeToInt(QString value)
+const QString &convertBoxTypeToString(int value)
 {
-	if (value == "OVM") return DBTYPE_OVM;
-	else if (value == "OVM_NOTAR") return DBTYPE_OVM_NOTAR;
-	else if (value == "OVM_EXEKUT") return DBTYPE_OVM_EXEKUT;
-	else if (value == "OVM_REQ") return DBTYPE_OVM_REQ;
-	else if (value == "OVM_FO") return DBTYPE_OVM_FO;
-	else if (value == "OVM_PFO") return DBTYPE_OVM_PFO;
-	else if (value == "OVM_PO") return DBTYPE_OVM_PO;
-	else if (value == "PO") return DBTYPE_PO;
-	else if (value == "PO_ZAK") return DBTYPE_PO_ZAK;
-	else if (value == "PO_REQ") return DBTYPE_PO_REQ;
-	else if (value == "PFO") return DBTYPE_PFO;
-	else if (value == "PFO_ADVOK") return DBTYPE_PFO_ADVOK;
-	else if (value == "PFO_DANPOR") return DBTYPE_PFO_DANPOR;
-	else if (value == "PFO_INSSPR") return DBTYPE_PFO_INSSPR;
-	else if (value == "PFO_AUDITOR") return DBTYPE_PFO_AUDITOR;
-	else if (value == "FO") return DBTYPE_FO;
-	else return DBTYPE_SYSTEM;
+	static const QString ovmMain(STR_OVM_MAIN), system(STR_SYSTEM),
+	    ovm(STR_OVM), ovmNotar(STR_OVM_NOTAR), ovmExekut(STR_OVM_EXEKUT),
+	    ovmReq(STR_OVM_REQ), ovmFo(STR_OVM_FO), ovmPfo(STR_OVM_PFO),
+	    ovmPo(STR_OVM_PO), po(STR_PO), poZak(STR_PO_ZAK), poReq(STR_PO_REQ),
+	    pfo(STR_PFO), pfoAdvok(STR_PFO_ADVOK), pfoDanpor(STR_PFO_DANPOR),
+	    pfoInsspr(STR_PFO_INSSPR), pfoAuditor(STR_PFO_AUDITOR), fo(STR_FO);
+	static const QString invalid;
+
+	switch (value) {
+	case DBTYPE_OVM_MAIN: return ovmMain; break;
+	case DBTYPE_SYSTEM: return system; break;
+	case DBTYPE_OVM: return ovm; break;
+	case DBTYPE_OVM_NOTAR: return ovmNotar; break;
+	case DBTYPE_OVM_EXEKUT: return ovmExekut; break;
+	case DBTYPE_OVM_REQ: return ovmReq; break;
+	case DBTYPE_OVM_FO: return ovmFo; break;
+	case DBTYPE_OVM_PFO: return ovmPfo; break;
+	case DBTYPE_OVM_PO: return ovmPo; break;
+	case DBTYPE_PO: return po; break;
+	case DBTYPE_PO_ZAK: return poZak; break;
+	case DBTYPE_PO_REQ: return poReq; break;
+	case DBTYPE_PFO: return pfo; break;
+	case DBTYPE_PFO_ADVOK: return pfoAdvok; break;
+	case DBTYPE_PFO_DANPOR: return pfoDanpor; break;
+	case DBTYPE_PFO_INSSPR: return pfoInsspr; break;
+	case DBTYPE_PFO_AUDITOR: return pfoAuditor; break;
+	case DBTYPE_FO: return fo; break;
+	default:
+		logWarningNL("Unknown data box type value '%d'.", value);
+		return invalid;
+		break;
+	}
 }
 
-QString convertEventTypeToString(int value)
+const QString &convertEventTypeToString(int value)
 {
-	if (value == EVENT_ACCEPTED_BY_RECIPIENT) return "EV4: ";
-	else if (value == EVENT_ACCEPTED_BY_FICTION) return "EV2: ";
-	else if (value == EVENT_UNDELIVERABLE) return "EV3: ";
-	else if (value == EVENT_COMMERCIAL_ACCEPTED) return "EV1: ";
-	else if (value == EVENT_ENTERED_SYSTEM) return "EV0: ";
-	else if (value == EVENT_DELIVERED) return "EV5: ";
-	else if (value == EVENT_PRIMARY_LOGIN) return "EV11: ";
-	else if (value == EVENT_ENTRUSTED_LOGIN) return "EV12: ";
-	else if (value == EVENT_SYSCERT_LOGIN) return "EV13: ";
-	else if (value == EVENT_UKNOWN) return "";
-	else return "";
+	static const QString ev0("EV0"), ev1("EV1"), ev2("EV2"), ev3("EV3"),
+	    ev4("EV4"), ev5("EV5"), ev11("EV11"), ev12("EV12"), ev13("EV13");
+	static const QString invalid;
+
+	switch (value) {
+	case EVENT_ACCEPTED_BY_RECIPIENT: return ev4; break;
+	case EVENT_ACCEPTED_BY_FICTION: return ev2; break;
+	case EVENT_UNDELIVERABLE: return ev3; break;
+	case EVENT_COMMERCIAL_ACCEPTED: return ev1; break;
+	case EVENT_ENTERED_SYSTEM: return ev0; break;
+	case EVENT_DELIVERED: return ev5; break;
+	case EVENT_PRIMARY_LOGIN: return ev11; break;
+	case EVENT_ENTRUSTED_LOGIN: return ev12; break;
+	case EVENT_SYSCERT_LOGIN: return ev13; break;
+	case EVENT_UKNOWN:
+	default:
+		logWarningNL("Unknown event type value '%d'.", value);
+		return invalid;
+		break;
+	}
 }
 
-QString convertHashAlg(int value)
+#define STR_MD5 "MD5"
+#define STR_SHA_1 "SHA-1"
+#define STR_SHA_224 "SHA-224"
+#define STR_SHA_256 "SHA-256"
+#define STR_SHA_384 "SHA-384"
+#define STR_SHA_512 "SHA-512"
+
+const QString &convertHashAlgToString(int value)
 {
-	if (value == HASH_ALGORITHM_MD5) return "MD5";
-	else if (value == HASH_ALGORITHM_SHA_1) return "SHA-1";
-	else if (value == HASH_ALGORITHM_SHA_224) return "SHA-224";
-	else if (value == HASH_ALGORITHM_SHA_256) return "SHA-256";
-	else if (value == HASH_ALGORITHM_SHA_384) return "SHA-384";
-	else if (value == HASH_ALGORITHM_SHA_512) return "SHA-512";
-	else return "";
+	static const QString md5(STR_MD5), sha1(STR_SHA_1), sha224(STR_SHA_224),
+	    sha256(STR_SHA_256), sha384(STR_SHA_384), sha512(STR_SHA_512);
+	static const QString invalid;
+
+	switch (value) {
+	case HASH_ALGORITHM_MD5: return md5; break;
+	case HASH_ALGORITHM_SHA_1: return sha1; break;
+	case HASH_ALGORITHM_SHA_224: return sha224; break;
+	case HASH_ALGORITHM_SHA_256: return sha256; break;
+	case HASH_ALGORITHM_SHA_384: return sha384; break;
+	case HASH_ALGORITHM_SHA_512: return sha512; break;
+	default:
+		logWarningNL("Unknown hash algorithm value '%d'.", value);
+		return invalid;
+		break;
+	}
 }
 
-int convertHashAlg2(QString value)
+int convertHashAlgToInt(const QString &value)
 {
-	if (value == "MD5") return HASH_ALGORITHM_MD5;
-	else if (value == "SHA-1") return HASH_ALGORITHM_SHA_1;
-	else if (value == "SHA-224") return HASH_ALGORITHM_SHA_224;
-	else if (value == "SHA-256") return HASH_ALGORITHM_SHA_256;
-	else if (value == "SHA-384") return HASH_ALGORITHM_SHA_384;
-	else if (value == "SHA-512") return HASH_ALGORITHM_SHA_512;
-	else return 0;
+	if (value == QLatin1String(STR_MD5)) return HASH_ALGORITHM_MD5;
+	else if (value == QLatin1String(STR_SHA_1)) return HASH_ALGORITHM_SHA_1;
+	else if (value == QLatin1String(STR_SHA_224)) return HASH_ALGORITHM_SHA_224;
+	else if (value == QLatin1String(STR_SHA_256)) return HASH_ALGORITHM_SHA_256;
+	else if (value == QLatin1String(STR_SHA_384)) return HASH_ALGORITHM_SHA_384;
+	else if (value == QLatin1String(STR_SHA_512)) return HASH_ALGORITHM_SHA_512;
+	else {
+		logWarningNL("Unknown hash algorithm '%s'.",
+		    value.toUtf8().constData());
+		return HASH_ALGORITHM_MD5;
+	}
 }
 
-int convertHexToDecIndex(int value)
+int convertIsdsMsgStatusToDbRepr(int value)
 {
-	if (value == MESSAGESTATE_SENT) return 1;
-	else if (value == MESSAGESTATE_STAMPED) return 2;
-	else if (value == MESSAGESTATE_INFECTED) return 3;
-	else if (value == MESSAGESTATE_DELIVERED) return 4;
-	else if (value == MESSAGESTATE_SUBSTITUTED) return 5;
-	else if (value == MESSAGESTATE_RECEIVED) return 6;
-	else if (value == MESSAGESTATE_READ) return 7;
-	else if (value == MESSAGESTATE_UNDELIVERABLE) return 8;
-	else if (value == MESSAGESTATE_REMOVED) return 9;
-	else if (value == MESSAGESTATE_IN_SAFE) return 10;
-	else return 0;
+	switch (value) {
+	case MESSAGESTATE_SENT: return 1; break;
+	case MESSAGESTATE_STAMPED: return 2; break;
+	case MESSAGESTATE_INFECTED: return 3; break;
+	case MESSAGESTATE_DELIVERED: return 4; break;
+	case MESSAGESTATE_SUBSTITUTED: return 5; break;
+	case MESSAGESTATE_RECEIVED: return 6; break;
+	case MESSAGESTATE_READ: return 7; break;
+	case MESSAGESTATE_UNDELIVERABLE: return 8; break;
+	case MESSAGESTATE_REMOVED: return 9; break;
+	case MESSAGESTATE_IN_SAFE: return 10; break;
+	default:
+		logWarningNL("Unknown message state value '%d'.", value);
+		return 0;
+		break;
+	}
 }
 
-QString convertSenderDbTypesToString(int value)
+QString dbMsgStatusToText(int status)
 {
-	/* System ISDS */
-	if (value == DBTYPE_SYSTEM) return QObject::tr("System ISDS");
-	/* OVM */
-	else if (value == DBTYPE_OVM) return QObject::tr("Public authority");
-	/* PO */
-	else if (value == DBTYPE_PO) return QObject::tr("Legal person");
-	/* PFO (OSVC) */
-	else if (value == DBTYPE_PFO) return QObject::tr("Self-employed person");
-	/* FO */
-	else if (value == DBTYPE_FO) return QObject::tr("Natural person");
-	/* unknown */
-	else return "";
+	switch (status) {
+	case 1:
+		/* Zprava byla podana (vznikla v ISDS). */
+		return QObject::tr("Message has been submitted (has been created in ISDS)");
+		break;
+	case 2:
+		/*
+		 * Datová zprava vcetne pisemnosti podepsana casovym razitkem.
+		 */
+		return QObject::tr("Data message including its attachments signed with time-stamp.");
+		break;
+	case 3:
+		/*
+		 * Zprava neprosla AV kontrolou; nakazena pisemnost je smazana;
+		 * konecny stav zpravy pred smazanim.
+		 */
+		return QObject::tr("Message did not pass through AV check; "
+		    "infected paper deleted; final status before deletion.");
+		break;
+	case 4:
+		/* Zprava dodana do ISDS (zapsan cas dodani). */
+		return QObject::tr("Message handed into ISDS "
+		    "(delivery time recorded).");
+		break;
+	case 5:
+		/*
+		 * Uplynulo 10 dnu od dodani verejne zpravy, ktera dosud nebyla
+		 * dorucena prihlasenim (predpoklad dorucení fikci u neOVM DS);
+		 * u komercni zpravy nemuze tento stav nastat.
+		 */
+		return QObject::tr("10 days have passed since the delivery of "
+		    "the public message which has not been accepted by "
+		    "logging-in (assumption of acceptance through fiction in non-OVM "
+		    "DS); this state cannot occur for commercial messages.");
+		break;
+	case 6:
+		/*
+		 * Osoba opravnena cist tuto zpravu se prihlasila - dodana
+		 * zprava byla dorucena.",
+		 */
+		return QObject::tr("A person authorised to read this message "
+		    "has logged in -- delivered message has been accepted.");
+		break;
+	case 7:
+		/* Zprava byla prectena (na portale nebo akci ESS). */
+		return QObject::tr("Message has been read (on the portal or "
+		    "by ESS action).");
+		break;
+	case 8:
+		/*
+		 * Zprava byla oznacena jako nedorucitelna, protoze DS adresata
+		 * byla zpetne znepristupnena.
+		 */
+		return QObject::tr("Message marked as undeliverable because "
+		    "the target DS has been made inaccessible.");
+		break;
+	case 9:
+		/*
+		 * Obsah zpravy byl smazan, obalka zpravy vcetne hashu
+		 * presunuta do archivu.
+		 */
+		return QObject::tr("Message content deleted, envelope "
+		    "including hashes has been moved into archive.");
+		break;
+	case 10:
+		/* Zprava je v Datovem trezoru. */
+		return QObject::tr("Message resides in data vault.");
+		break;
+	default:
+		return QString();
+		break;
+	}
 }
 
-QString convertSenderTypeToString(int value)
+QString convertSenderBoxTypeToString(int value)
 {
-	if (value == SENDERTYPE_PRIMARY) return "PRIMARY_USER";
-	else if (value == SENDERTYPE_ENTRUSTED) return "ENTRUSTED_USER";
-	else if (value == SENDERTYPE_ADMINISTRATOR) return "ADMINISTRATOR";
-	else if (value == SENDERTYPE_OFFICIAL) return "OFFICIAL";
-	else if (value == SENDERTYPE_VIRTUAL) return "VIRTUAL";
-	else if (value == SENDERTYPE_OFFICIAL_CERT) return "OFFICIAL_CERT";
-	else if (value == SENDERTYPE_LIQUIDATOR) return "LIQUIDATOR";
-	else if (value == SENDERTYPE_RECEIVER) return "RECEIVER";
-	else if (value == SENDERTYPE_GUARDIAN) return "GUARDIAN";
-	else return "";
+	switch (value) {
+	case DBTYPE_SYSTEM: return QObject::tr("System ISDS"); break;
+	case DBTYPE_OVM: return QObject::tr("Public authority"); break;
+	case DBTYPE_PO: return QObject::tr("Legal person"); break;
+	case DBTYPE_PFO: return QObject::tr("Self-employed person"); break; /* (OSVC) */
+	case DBTYPE_FO: return QObject::tr("Natural person"); break;
+	default:
+		logWarningNL("Unknown sender data box type value '%d'.", value);
+		return QString();
+		break;
+	}
+}
+
+const QString &convertSenderTypeToString(int value)
+{
+	static const QString pu("PRIMARY_USER"), eu("ENTRUSTED_USER"),
+	    a("ADMINISTRATOR"), o("OFFICIAL"), v("VIRTUAL"),
+	    oc("OFFICIAL_CERT"), l("LIQUIDATOR"), r("RECEIVER"), g("GUARDIAN");
+	static const QString invalid;
+
+	switch (value) {
+	case SENDERTYPE_PRIMARY: return pu; break;
+	case SENDERTYPE_ENTRUSTED: return eu; break;
+	case SENDERTYPE_ADMINISTRATOR: return a; break;
+	case SENDERTYPE_OFFICIAL: return o; break;
+	case SENDERTYPE_VIRTUAL: return v; break;
+	case SENDERTYPE_OFFICIAL_CERT: return oc; break;
+	case SENDERTYPE_LIQUIDATOR: return l; break;
+	case SENDERTYPE_RECEIVER: return r; break;
+	case SENDERTYPE_GUARDIAN: return g; break;
+	default:
+		logWarningNL("Unknown sender type value '%d'.", value);
+		return invalid;
+		break;
+	}
 }
 
 QString convertUserPrivilsToString(int userPrivils)
@@ -291,18 +468,21 @@ const QString &convertUserTypeToString(int value)
 	static const QString pu("PRIMARY_USER"), eu("ENTRUSTED_USER"),
 	    a("ADMINISTRATOR"), l("LIQUIDATOR"), ou("OFFICIAL_USER"),
 	    ocu("OFFICIAL_CERT_USER"), r("RECEIVER"), g("GUARDIAN");
-	static const QString empty;
+	static const QString invalid;
 
 	switch (value) {
-	case USERTYPE_PRIMARY: return pu;
-	case USERTYPE_ENTRUSTED: return eu;
-	case USERTYPE_ADMINISTRATOR: return a;
-	case USERTYPE_LIQUIDATOR: return l;
-	case USERTYPE_OFFICIAL: return ou;
-	case USERTYPE_OFFICIAL_CERT: return ocu;
-	case USERTYPE_RECEIVER: return r;
-	case USERTYPE_GUARDIAN: return g;
-	default: return empty;
+	case USERTYPE_PRIMARY: return pu; break;
+	case USERTYPE_ENTRUSTED: return eu; break;
+	case USERTYPE_ADMINISTRATOR: return a; break;
+	case USERTYPE_LIQUIDATOR: return l; break;
+	case USERTYPE_OFFICIAL: return ou; break;
+	case USERTYPE_OFFICIAL_CERT: return ocu; break;
+	case USERTYPE_RECEIVER: return r; break;
+	case USERTYPE_GUARDIAN: return g; break;
+	default:
+		logWarningNL("Unknown user type value '%d'.", value);
+		return invalid;
+		break;
 	}
 }
 
@@ -331,9 +511,11 @@ void createEmailMessage(QString &message, const QString &subj,
 	message += " <URL: " DATOVKA_HOMEPAGE_URL ">" + newLine;
 }
 
-const QString dmTypeToText(const QString &dmType)
+QString dmTypeToText(const QString &dmType)
 {
 	if (dmType.size() != 1) {
+		logWarningNL("Unknown multi-character message type value '%s'.",
+		    dmType.toUtf8().constData());
 		return QString();
 	}
 
@@ -342,19 +524,21 @@ const QString dmTypeToText(const QString &dmType)
 		return QObject::tr("Postal data message");
 		break;
 	case 'I':
-		return QObject::tr("Initializing postal data message");
+		return QObject::tr("Initialising postal data message");
 		break;
 	case 'O':
 		return QObject::tr("Reply postal data message");
 		break;
 	case 'X':
 		return QObject::tr(
-		    "Initializing postal data message - expired");
+		    "Initialising postal data message - expired");
 		break;
 	case 'Y':
-		return QObject::tr("Initializing postal data message - used");
+		return QObject::tr("Initialising postal data message - used");
 		break;
 	default:
+		logWarningNL("Unknown message type value '%c'.",
+		    dmType[0].toLatin1());
 		return QString();
 		break;
 	}
@@ -371,7 +555,7 @@ QString fromBase64(const QString &base64)
 	return QString::fromUtf8(QByteArray::fromBase64(base64.toUtf8()));
 }
 
-QString getdbStateText(int value)
+QString getBoxStateText(int value)
 {
 	switch (value) {
 	case DBSTATE_ACCESSIBLE:
@@ -405,6 +589,7 @@ QString getdbStateText(int value)
 		    "The data box is temporarily inaccessible (because of reasons listed in law). It may be made accessible again at some point in the future.");
 		break;
 	default:
+		logWarningNL("Unknown data box status value '%d'.", value);
 		return QObject::tr("An error occurred while checking the status.");
 		break;
 	}
@@ -518,82 +703,6 @@ bool isValidDatabaseFileName(QString inDbFileName,
 	}
 
 	return true;
-}
-
-const QString msgStatusToText(int status)
-{
-	switch (status) {
-	case 1:
-		/* Zprava byla podana (vznikla v ISDS). */
-		return QObject::tr("Message has been submitted (has been created in ISDS)");
-		break;
-	case 2:
-		/*
-		 * Datová zprava vcetne pisemnosti podepsana casovym razitkem.
-		 */
-		return QObject::tr("Data message including its attachments signed with time-stamp.");
-		break;
-	case 3:
-		/*
-		 * Zprava neprosla AV kontrolou; nakazena pisemnost je smazana;
-		 * konecny stav zpravy pred smazanim.
-		 */
-		return QObject::tr("Message did not pass through AV check; "
-		    "infected paper deleted; final status before deletion.");
-		break;
-	case 4:
-		/* Zprava dodana do ISDS (zapsan cas dodani). */
-		return QObject::tr("Message handed into ISDS "
-		    "(delivery time recorded).");
-		break;
-	case 5:
-		/*
-		 * Uplynulo 10 dnu od dodani verejne zpravy, ktera dosud nebyla
-		 * dorucena prihlasenim (predpoklad dorucení fikci u neOVM DS);
-		 * u komercni zpravy nemuze tento stav nastat.
-		 */
-		return QObject::tr("10 days have passed since the delivery of "
-		    "the public message which has not been accepted by "
-		    "logging-in (assumption of acceptance through fiction in non-OVM "
-		    "DS); this state cannot occur for commercial messages.");
-		break;
-	case 6:
-		/*
-		 * Osoba opravnena cist tuto zpravu se prihlasila - dodana
-		 * zprava byla dorucena.",
-		 */
-		return QObject::tr("A person authorised to read this message "
-		    "has logged in -- delivered message has been accepted.");
-		break;
-	case 7:
-		/* Zprava byla prectena (na portale nebo akci ESS). */
-		return QObject::tr("Message has been read (on the portal or "
-		    "by ESS action).");
-		break;
-	case 8:
-		/*
-		 * Zprava byla oznacena jako nedorucitelna, protoze DS adresata
-		 * byla zpetne znepristupnena.
-		 */
-		return QObject::tr("Message marked as undeliverable because "
-		    "the target DS has been made inaccessible.");
-		break;
-	case 9:
-		/*
-		 * Obsah zpravy byl smazan, obalka zpravy vcetne hashu
-		 * presunuta do archivu.
-		 */
-		return QObject::tr("Message content deleted, envelope "
-		    "including hashes has been moved into archive.");
-		break;
-	case 10:
-		/* Zprava je v Datovem trezoru. */
-		return QObject::tr("Message resides in data vault.");
-		break;
-	default:
-		return QString();
-		break;
-	}
 }
 
 QString toBase64(const QString &plain)

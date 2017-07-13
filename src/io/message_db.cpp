@@ -1026,7 +1026,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		    query.value(6).toString());
 
 		QString dmSenderType =
-		     convertSenderDbTypesToString(query.value(8).toInt());
+		     convertSenderBoxTypeToString(query.value(8).toInt());
 		if (dmSenderType != "") {
 			html += strongAccountInfoLine(
 			    QObject::tr("Databox type"), dmSenderType);
@@ -1155,7 +1155,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		html += strongAccountInfoLine(
 		    msgsTbl.attrProps[msgStatus[2]].desc,
 		    QString::number(query.value(2).toInt()) + " -- " +
-		    msgStatusToText(query.value(2).toInt()));
+		    dbMsgStatusToText(query.value(2).toInt()));
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: %s.",
