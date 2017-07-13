@@ -309,6 +309,7 @@ SOURCES += \
     src/io/tag_db.cpp \
     src/io/tag_db_container.cpp \
     src/io/wd_sessions.cpp \
+    src/isds/isds_conversion.cpp \
     src/localisation/localisation.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
@@ -433,6 +434,7 @@ HEADERS += \
     src/io/tag_db.h \
     src/io/tag_db_container.h \
     src/io/wd_sessions.h \
+    src/isds/isds_conversion.h \
     src/localisation/localisation.h \
     src/log/log_c.h \
     src/log/log_common.h \

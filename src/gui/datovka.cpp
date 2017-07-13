@@ -79,6 +79,7 @@
 #include "src/io/tag_db.h"
 #include "src/io/tag_db_container.h"
 #include "src/io/wd_sessions.h"
+#include "src/isds/isds_conversion.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
 #include "src/records_management/gui/dlg_records_management.h"
@@ -3515,8 +3516,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 				} else if (key == "userPrivils") {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
-					    convertUserPrivilsToString(userEntry.
-					    value(key).toInt())));
+					    IsdsConversion::userPrivilsToText(
+					        userEntry.value(key).toInt())));
 				} else {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
@@ -3528,8 +3529,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 				if (key == "userType") {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
-					    authorTypeToText(
-					    userEntry.value(key).toString())));
+					    IsdsConversion::senderTypeStrToText(
+					        userEntry.value(key).toString())));
 				} else {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
@@ -3563,8 +3564,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 				if (key == "dbState") {
 					html.append(strongAccountInfoLine(
 					    accntinfTbl.attrProps[key].desc,
-					    getBoxStateText(
-					    accountEntry.value(key).toInt())));
+					    IsdsConversion::boxStateToText(
+					        accountEntry.value(key).toInt())));
 				} else if (key == "ic") {
 					if (accountEntry.value(key).toInt() > 0) {
 						html.append(strongAccountInfoLine(

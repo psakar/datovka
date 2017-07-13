@@ -36,6 +36,7 @@
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/settings/preferences.h"
@@ -389,9 +390,10 @@ bool DlgViewZfo::envelopeHeaderDescriptionHtml(QString &html,
 	QString statusString;
 	if (NULL != envelope->dmMessageStatus) {
 		statusString =
-		    QString::number(convertIsdsMsgStatusToDbRepr(*(envelope->dmMessageStatus))) +
+		    QString::number(IsdsConversion::msgStatusIsdsToDbRepr(*(envelope->dmMessageStatus))) +
 		    " -- " +
-		    dbMsgStatusToText(convertIsdsMsgStatusToDbRepr(*(envelope->dmMessageStatus)));
+		    IsdsConversion::msgStatusDbToText(
+		        IsdsConversion::msgStatusIsdsToDbRepr(*(envelope->dmMessageStatus)));
 	}
 	html += strongAccountInfoLine(tr("Status"), statusString);
 

@@ -26,6 +26,7 @@
 
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/worker/message_emitter.h"
@@ -339,7 +340,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
 	}
 
 	if (messageDb.updateMessageAuthorInfo(dmId,
-	        convertSenderTypeToString((int) *sender_type), sender_name)) {
+	        IsdsConversion::senderTypeToStr((int) *sender_type), sender_name)) {
 		logDebugLv0NL(
 		    "Author information of message '%" PRId64 "' were updated.",
 		    dmId);

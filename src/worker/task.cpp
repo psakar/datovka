@@ -27,6 +27,7 @@
 #include "src/io/account_db.h" /* globAccountDbPtr */
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
@@ -74,7 +75,7 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 		isds_event *item = (isds_event *) event->data;
 		messageDb->msgsInsertUpdateMessageEvent(dmID,
 		    timevalToDbFormat(item->time),
-		    convertEventTypeToString(*item->type) + QLatin1String(": "),
+		    IsdsConversion::eventTypeToStr(*item->type) + QLatin1String(": "),
 		    item->description);
 		event = event->next;
 	}
@@ -155,7 +156,7 @@ qdatovka_error Task::storeEnvelope(enum MessageDirection msgDirect,
 	    envel->dmAcceptanceTime ?
 	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
 	    envel->dmMessageStatus ?
-	        convertIsdsMsgStatusToDbRepr(*envel->dmMessageStatus) : 0,
+	        IsdsConversion::msgStatusIsdsToDbRepr(*envel->dmMessageStatus) : 0,
 	    envel->dmAttachmentSize ?
 	        (int) *envel->dmAttachmentSize : 0,
 	    envel->dmType,
@@ -268,7 +269,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		    hash->length).toBase64();
 		if (messageDb->msgsInsertUpdateMessageHash(dmID,
 		        hashValueBase64,
-		        convertHashAlgToString(hash->algorithm))) {
+		        IsdsConversion::hashAlgToStr(hash->algorithm))) {
 			logDebugLv0NL("Hash of message '%" PRId64 "' stored.",
 			    dmID);
 		} else {
@@ -301,7 +302,7 @@ qdatovka_error Task::storeAttachments(MessageDb &messageDb, qint64 dmId,
 		if (messageDb.msgsInsertUpdateMessageFile(dmId,
 		        item->dmFileDescr, item->dmUpFileGuid,
 		        item->dmFileGuid, item->dmMimeType, item->dmFormat,
-		        convertAttachmentType(item->dmFileMetaType),
+		        IsdsConversion::attachmentTypeToStr(item->dmFileMetaType),
 		        dmEncodedContentBase64)) {
 			logDebugLv0NL(
 			    "Attachment file '%s' was stored into database.",
@@ -383,7 +384,7 @@ qdatovka_error Task::updateEnvelope(enum MessageDirection msgDirect,
 	    envel->dmAcceptanceTime ?
 	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
 	    envel->dmMessageStatus ?
-	        convertIsdsMsgStatusToDbRepr(*envel->dmMessageStatus) : 0,
+	        IsdsConversion::msgStatusIsdsToDbRepr(*envel->dmMessageStatus) : 0,
 	    envel->dmAttachmentSize ?
 	        (int) *envel->dmAttachmentSize : 0,
 	    envel->dmType,
