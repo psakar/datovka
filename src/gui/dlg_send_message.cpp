@@ -53,7 +53,6 @@
 #include "src/worker/task_send_message.h"
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
-#include "src/worker/task_send_message_mojeid.h"
 #include "src/worker/task_search_owner.h"
 #include "ui_dlg_send_message.h"
 
@@ -102,7 +101,6 @@ DlgSendMessage::DlgSendMessage(
     m_dbEffectiveOVM(false),
     m_dbOpenAddressing(false),
     m_isLogged(false),
-    m_isWebDatovkaAccount(false),
     m_lastAttAddPath(),
     m_pdzCredit("0"),
     m_dmType(),
@@ -361,43 +359,30 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		m_userName = userName;
 	}
 
-	if (isWebDatovkaAccount(m_userName)) {
-		m_isWebDatovkaAccount = true;
+
+	m_isLogged = true;
+	m_keepAliveTimer.stop();
+	{
+		TaskKeepAlive *task =
+		    new (std::nothrow) TaskKeepAlive(m_userName);
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+
+		m_isLogged = task->m_isAlive;
+
+		delete task;
 	}
-
-	if (!m_isWebDatovkaAccount) {
-
-		m_isLogged = true;
-		m_keepAliveTimer.stop();
-		{
-			TaskKeepAlive *task =
-			    new (std::nothrow) TaskKeepAlive(m_userName);
-			task->setAutoDelete(false);
-			globWorkPool.runSingle(task);
-
-			m_isLogged = task->m_isAlive;
-
-			delete task;
+	if (!m_isLogged) {
+		if (Q_NULLPTR != m_mw) {
+			m_isLogged = m_mw->connectToIsds(m_userName);
 		}
-		if (!m_isLogged) {
-			if (Q_NULLPTR != m_mw) {
-				m_isLogged = m_mw->connectToIsds(m_userName);
-			}
-		}
-		m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
+	}
+	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
-		/* Check for presence of struct isds_ctx . */
-		if (NULL == globIsdsSessions.session(m_userName)) {
-			logErrorNL("%s", "Missing ISDS session.");
-			m_isLogged = false;
-		}
-	} else {
-		if (!wdSessions.isConnectedToWebdatovka(m_userName)) {
-			if (Q_NULLPTR != m_mw) {
-				m_mw->loginToMojeId(m_userName);
-			}
-		}
-		m_isLogged = true;
+	/* Check for presence of struct isds_ctx . */
+	if (NULL == globIsdsSessions.session(m_userName)) {
+		logErrorNL("%s", "Missing ISDS session.");
+		m_isLogged = false;
 	}
 
 	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
@@ -425,10 +410,8 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		m_lastAttAddPath = accountInfo.lastAttachAddPath();
 	}
 
-	if (!m_isWebDatovkaAccount) {
-		if (m_dbOpenAddressing) {
-			m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
-		}
+	if (m_dbOpenAddressing) {
+		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
 	}
 
 	QString dbOpenAddressingText;
@@ -456,11 +439,8 @@ void DlgSendMessage::sendMessage(void)
 	const QList<BoxContactsModel::PartialEntry> recipEntries(
 	    m_recipientTableModel.partialBoxEntries(BoxContactsModel::ANY));
 
-	if (!m_isWebDatovkaAccount) {
-		sendMessageISDS(recipEntries);
-	} else {
-		sendMessageWebDatovka(recipEntries);
-	}
+
+	sendMessageISDS(recipEntries);
 }
 
 void DlgSendMessage::collectSendMessageStatus(const QString &userName,
@@ -563,56 +543,9 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 	emit usedAttachmentPath(m_userName, m_lastAttAddPath);
 }
 
-void DlgSendMessage::collectSendMessageStatusWebDatovka(const QString &userName,
-    const QStringList &results, const QString &error)
-{
-	debugSlotCall();
-
-	Q_UNUSED(error);
-
-	QString detailText;
-
-	if (results.isEmpty()) {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Information);
-		msgBox.setWindowTitle(tr("Message sent"));
-		msgBox.setText("<b>" +
-		    tr("Message was successfully sent to all recipients.") +
-		    "</b>");
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
-		this->accept(); /* Set return code to accepted. */
-		emit usedAttachmentPath(userName, m_lastAttAddPath);
-	} else {
-		for (int i = 0; i < results.count(); ++i) {
-			QString msg = results.at(i);
-			detailText += msg.replace("§", ": ");
-		}
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Message sending error"));
-		msgBox.setText("<b>" +
-		    tr("Message was NOT sent to all recipients.") + "</b>");
-		detailText += "<br/><br/><b>" +
-		    tr("Do you want to close the Send message form?") + "</b>";
-		msgBox.setInformativeText(detailText);
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		msgBox.setDefaultButton(QMessageBox::No);
-		if (msgBox.exec() == QMessageBox::Yes) {
-			this->close(); /* Set return code to closed. */
-			emit usedAttachmentPath(userName, m_lastAttAddPath);
-		}
-	}
-}
-
 void DlgSendMessage::initContent(enum Action action,
     const QList<MessageDb::MsgId> &msgIds)
 {
-	if (isWebDatovkaAccount(m_userName)) {
-		m_isWebDatovkaAccount = true;
-	}
-
 	m_recipientTableModel.setHeader();
 	this->recipientTableView->setModel(&m_recipientTableModel);
 
@@ -733,18 +666,10 @@ void DlgSendMessage::initContent(enum Action action,
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
-	connect(&globMsgProcEmitter,
-	    SIGNAL(sendMessageMojeIdFinished(QString, QStringList, QString)),
-	    this,
-	    SLOT(collectSendMessageStatusWebDatovka(QString, QStringList,
-	        QString)));
 
 	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
-	if (!m_isWebDatovkaAccount) {
-		connect(&m_keepAliveTimer, SIGNAL(timeout()), this,
-		    SLOT(pingIsdsServer()));
-	}
+	connect(&m_keepAliveTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
 
 	this->attachmentSizeInfo->setText(
 	    tr("Total size of attachments is %1 B").arg(0));
@@ -1441,89 +1366,4 @@ finish:
 	msgBox.setStandardButtons(QMessageBox::Ok);
 	msgBox.exec();
 	this->close();
-}
-
-void DlgSendMessage::buildEnvelopeWebDatovka(
-    JsonLayer::Envelope &envelope) const
-{
-	/* Set mandatory fields of envelope. */
-	envelope.dmAnnotation = this->subjectText->text();
-
-	/* Set optional fields. */
-	envelope.dmSenderIdent = this->dmSenderIdent->text();
-	envelope.dmRecipientIdent = this->dmRecipientIdent->text();
-	envelope.dmSenderRefNumber = this->dmSenderRefNumber->text();
-	envelope.dmRecipientRefNumber = this->dmRecipientRefNumber->text();
-	envelope.dmLegalTitleLaw = this->dmLegalTitleLaw->text();
-	envelope.dmLegalTitleYear = this->dmLegalTitleYear->text();
-	envelope.dmLegalTitleSect = this->dmLegalTitleSect->text();
-	envelope.dmLegalTitlePar = this->dmLegalTitlePar->text();
-	envelope.dmLegalTitlePoint = this->dmLegalTitlePoint->text();
-	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
-	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
-	envelope.dmOVM = m_dbEffectiveOVM;
-
-	/* Only OVM can change. */
-	if (IsdsConversion::boxTypeStrToInt(m_dbType) > DBTYPE_OVM_REQ) {
-		envelope.dmAllowSubstDelivery = true;
-	} else {
-		envelope.dmAllowSubstDelivery =
-		    this->dmAllowSubstDelivery->isChecked();
-	}
-}
-
-void DlgSendMessage::buildFileListWebDatovka(
-    QList<JsonLayer::File> &fileList) const
-{
-	QModelIndex index;
-
-	for (int row = 0; row < m_attachmentModel.rowCount(); ++row) {
-
-		index = m_attachmentModel.index(row, DbFlsTblModel::FNAME_COL);
-		if (!index.isValid()) {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		JsonLayer::File file;
-		file.fName = index.data(Qt::DisplayRole).toString();
-
-		index =
-		    m_attachmentModel.index(row, DbFlsTblModel::CONTENT_COL);
-		if (!index.isValid()) {
-			Q_ASSERT(0);
-			continue;
-		}
-
-		file.fContent = index.data(Qt::DisplayRole).toByteArray();
-		fileList.append(file);
-	}
-}
-
-void DlgSendMessage::sendMessageWebDatovka(
-    const QList<BoxContactsModel::PartialEntry> &recipEntries)
-{
-	/* Get account ID */
-	int accountID = getWebDatovkaAccountId(m_userName);
-
-	/* Create recipient list. */
-	JsonLayer::Recipient recipient;
-	QList<JsonLayer::Recipient> recipientList;
-	foreach (const BoxContactsModel::PartialEntry &e, recipEntries) {
-		recipient.recipientDbId = e.id;
-		recipient.toHands = this->dmToHands->text();
-		recipient.recipientName = e.name;
-		recipient.recipientAddress = e.address;
-		recipientList.append(recipient);
-	}
-
-	JsonLayer::Envelope envelope;
-	buildEnvelopeWebDatovka(envelope);
-	QList<JsonLayer::File> fileList;
-	buildFileListWebDatovka(fileList);
-
-	TaskSendMessageMojeId *task = new (std::nothrow) TaskSendMessageMojeId(
-	    m_userName, accountID, recipientList, envelope, fileList);
-	task->setAutoDelete(true);
-	globWorkPool.assignHi(task);
 }

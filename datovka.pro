@@ -356,14 +356,11 @@ SOURCES += \
     src/worker/task_change_pwd.cpp \
     src/worker/task_download_credit_info.cpp \
     src/worker/task_download_message.cpp \
-    src/worker/task_download_message_mojeid.cpp \
     src/worker/task_download_message_list.cpp \
-    src/worker/task_download_message_list_mojeid.cpp \
     src/worker/task_download_owner_info.cpp \
     src/worker/task_download_password_info.cpp \
     src/worker/task_download_user_info.cpp \
     src/worker/task_erase_message.cpp \
-    src/worker/task_get_account_list_mojeid.cpp \
     src/worker/task_import_message.cpp \
     src/worker/task_import_zfo.cpp \
     src/worker/task_keep_alive.cpp \
@@ -371,9 +368,7 @@ SOURCES += \
     src/worker/task_search_owner.cpp \
     src/worker/task_search_owner_fulltext.cpp \
     src/worker/task_send_message.cpp \
-    src/worker/task_send_message_mojeid.cpp \
     src/worker/task_split_db.cpp \
-    src/worker/task_sync_mojeid.cpp \
     src/worker/task_vacuum_db_set.cpp \
     src/worker/task_verify_message.cpp
 
@@ -479,14 +474,11 @@ HEADERS += \
     src/worker/task_change_pwd.h \
     src/worker/task_download_credit_info.h \
     src/worker/task_download_message.h \
-    src/worker/task_download_message_mojeid.h \
     src/worker/task_download_message_list.h \
-    src/worker/task_download_message_list_mojeid.h \
     src/worker/task_download_owner_info.h \
     src/worker/task_download_password_info.h \
     src/worker/task_download_user_info.h \
     src/worker/task_erase_message.h \
-    src/worker/task_get_account_list_mojeid.h \
     src/worker/task_import_message.h \
     src/worker/task_import_zfo.h \
     src/worker/task_keep_alive.h \
@@ -494,9 +486,7 @@ HEADERS += \
     src/worker/task_search_owner.h \
     src/worker/task_search_owner_fulltext.h \
     src/worker/task_send_message.h \
-    src/worker/task_send_message_mojeid.h \
     src/worker/task_split_db.h \
-    src/worker/task_sync_mojeid.h \
     src/worker/task_vacuum_db_set.h \
     src/worker/task_verify_message.h
 

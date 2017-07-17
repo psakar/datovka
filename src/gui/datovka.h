@@ -123,13 +123,6 @@ protected:
 	virtual
 	void showEvent(QShowEvent *event) Q_DECL_OVERRIDE;
 
-public slots:
-
-	/*!
-	 * @brief Login to mojeID.
-	 */
-	void loginToMojeId(const QString &userName);
-
 private slots:
 	/*!
 	 * @brief Refresh AccountList.
@@ -155,14 +148,6 @@ private slots:
 	    bool listScheduled);
 
 	/*!
-	 * @brief Performs action depending on message download outcome
-	 *        for webdatovka.
-	 */
-	void collectDownloadMessageMojeId(const QString &usrName,
-	    qint64 msgId, int result, const QString &errDesc,
-	    bool listScheduled);
-
-	/*!
 	 * @brief Performs action depending on message list download outcome.
 	 */
 	void collectDownloadMessageListStatus(const QString &usrName,
@@ -182,12 +167,6 @@ private slots:
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
 	    bool isPDZ, qint64 dmId);
-
-	/*!
-	 * @brief Performs action depending on webdatovka message send outcome.
-	 */
-	void sendMessageMojeIdAction(const QString &userName,
-	    const QStringList &result, const QString &error);
 
 	/*!
 	 * @brief Version response slot.
@@ -395,13 +374,8 @@ private slots:
 	/*!
 	 * @brief Delete selected message(s) from local database and ISDS.
 	 */
+
 	void deleteMessage(void);
-
-	/*!
-	 * @brief Delete selected message(s) from local database and Webdatovka.
-	 */
-	void deleteMessageWebdatovka(const QString &userName);
-
 	/*!
 	 * @brief Downloads new messages from server for all accounts.
 	 */
@@ -467,11 +441,6 @@ private slots:
 	 * @brief Show add new account dialog.
 	 */
 	void showAddNewAccountDialog(void);
-
-	/*!
-	 * @brief Add mojeID account action and dialog.
-	 */
-	void addNewMojeIDAccount(void);
 
 	/*!
 	 * @brief Deletion confirmation dialog.
@@ -727,10 +696,6 @@ private slots:
 	 * @brief Vacuum message database.
 	 */
 	void vacuumMsgDbSlot(void);
-
-	void callMojeId(const QString &user, const QString &lastUrl,
-	    const QString &token, QString userName, QString pwd, QString otp,
-	    bool syncALL, const QString &certPath);
 
 	/*!
 	 * @brief Show information about import message results.
@@ -1120,23 +1085,6 @@ private:
 	 */
 	void exportExpirMessagesToZFO(const QString &userName,
 	    const QList<MessageDb::MsgId> &expirMsgIds);
-
-	/*!
-	 * @brief Show dialog for webdatovka account
-	 *        that action is not implemented.
-	 * @param[in] userName - account username.
-	 * @param[in] txt        additional info text.
-	 */
-	void showWebDatovkaInfoDialog(const QString &userName, QString txt);
-
-	/*!
-	 * @brief Test if exists another mojeID account with same userId
-	 *        when we delete any mojeID acccount.
-	 *
-	 * @param[in] userName - account username.
-	 * @return true if any account exists
-	 */
-	bool existsAnotherMojeIdAccountWithSameUserId(const QString &userName);
 
 	/*!
 	 * @brief Export selected messages to disk.
