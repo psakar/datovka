@@ -50,12 +50,10 @@
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
 #include "src/gui/dlg_create_account.h"
-#include "src/gui/dlg_login_mojeid.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/gui/dlg_ds_search.h"
-#include "src/gui/dlg_search_mojeid.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
@@ -122,11 +120,6 @@ QNetworkAccessManager* nam;
  * on all sent or received messages.
  */
 #define DISABLE_ALL_TABLE 1
-
-/*
- * If defined then adding of mojeID account will be inaccessible.
- */
-#define DISABLE_MOJEID_ACCOUNT_ADDING 1
 
 /*!
  * @brief Returns QModelIndex of the currently selected account model node.
@@ -1106,10 +1099,6 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 		menu->addAction(ui->actionImport_ZFO_file_into_database);
 	} else {
 		menu->addAction(ui->actionAdd_account);
-		menu->addAction(ui->actionAdd_mojeID_account);
-#ifdef DISABLE_MOJEID_ACCOUNT_ADDING
-		ui->actionAdd_mojeID_account->setVisible(false);
-#endif /* DISABLE_MOJEID_ACCOUNT_ADDING */
 	}
 
 	menu->exec(QCursor::pos());
@@ -4254,8 +4243,6 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionAdd_account, SIGNAL(triggered()),
 	    this, SLOT(showAddNewAccountDialog()));
-	connect(ui->actionAdd_mojeID_account, SIGNAL(triggered()),
-	    this, SLOT(addNewMojeIDAccount()));
 	connect(ui->actionDelete_account, SIGNAL(triggered()),
 	    this, SLOT(deleteSelectedAccount()));
 	    /* Separator. */
@@ -5455,18 +5442,10 @@ void MainWindow::findDatabox(void)
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
 	    .arg(AccountModel::globAccounts[userName].accountName()));
 
-	if (isWebDatovkaAccount(userName)) {
-		QDialog *dsSearch =
-		    new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_BLANK, 0,
-		    dbType, dbEffectiveOVM, this, userName);
-		dsSearch->exec();
-		dsSearch->deleteLater();
-	} else {
-		QDialog *dsSearch = new DlgDsSearch(userName, dbType,
-		    dbEffectiveOVM, dbOpenAddressing, Q_NULLPTR, this);
-		dsSearch->exec();
-		dsSearch->deleteLater();
-	}
+	QDialog *dsSearch = new DlgDsSearch(userName, dbType,
+	    dbEffectiveOVM, dbOpenAddressing, Q_NULLPTR, this);
+	dsSearch->exec();
+	dsSearch->deleteLater();
 }
 
 /* ========================================================================= */
@@ -8594,10 +8573,6 @@ void MainWindow::setMenuActionIcons(void)
 	}
 	    /* Separator. */
 	ui->actionAdd_account->isEnabled();
-	ui->actionAdd_mojeID_account->isEnabled();
-#ifdef DISABLE_MOJEID_ACCOUNT_ADDING
-	ui->actionAdd_mojeID_account->setVisible(false);
-#endif /* DISABLE_MOJEID_ACCOUNT_ADDING */
 	ui->actionDelete_account->isEnabled();
 	    /* Separator. */
 	ui->actionImport_database_directory->isEnabled();
@@ -9227,20 +9202,8 @@ void MainWindow::sendMessageMojeIdAction(const QString &userName,
 void MainWindow::loginToMojeId(const QString &userName)
 /* ========================================================================= */
 {
+	Q_UNUSED(userName);
 	debugSlotCall();
-
-	QUrl lastUrl;
-	jsonlayer.startLoginToWebDatovka(lastUrl);
-
-	QDialog *mojeIDLoginDialog = new DlgLoginToMojeId(userName,
-	    lastUrl.toString(), this);
-
-	connect(mojeIDLoginDialog, SIGNAL(callMojeId(QString, QString, QString,
-	    QString, QString, QString, bool, QString)),
-	    this, SLOT(callMojeId(QString,
-	    QString, QString, QString, QString, QString, bool, QString)));
-
-	mojeIDLoginDialog->exec();
 }
 
 

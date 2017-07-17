@@ -35,7 +35,6 @@
 #include "src/web/json.h"
 #include "src/web/net.h"
 #include "src/io/wd_sessions.h"
-#include "src/gui/dlg_login_mojeid.h"
 
 JsonLayer jsonlayer;
 

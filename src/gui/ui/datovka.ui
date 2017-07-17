@@ -349,7 +349,7 @@ sent reply on this message</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>27</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -359,7 +359,6 @@ sent reply on this message</string>
     <addaction name="actionSync_all_accounts"/>
     <addaction name="separator"/>
     <addaction name="actionAdd_account"/>
-    <addaction name="actionAdd_mojeID_account"/>
     <addaction name="actionDelete_account"/>
     <addaction name="separator"/>
     <addaction name="actionImport_database_directory"/>
@@ -1209,21 +1208,6 @@ sent reply on this message</string>
    </property>
    <property name="toolTip">
     <string>Forward message</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::NoRole</enum>
-   </property>
-  </action>
-  <action name="actionAdd_mojeID_account">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/mojeid.png</normaloff>:/mojeid.png</iconset>
-   </property>
-   <property name="text">
-    <string>Add mojeID account</string>
-   </property>
-   <property name="toolTip">
-    <string>Add new mojeID account</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

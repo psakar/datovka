@@ -31,7 +31,6 @@
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
-#include "src/gui/dlg_search_mojeid.h"
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
 #include "src/model_interaction/attachment_interaction.h"
@@ -165,19 +164,8 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 void DlgSendMessage::addRecipientFromISDSSearch(void)
 {
 	QStringList dbIDs;
-	QDialog *dsSearch = Q_NULLPTR;
-	if (!m_isWebDatovkaAccount) {
-		dsSearch = new DlgDsSearch(m_userName, m_dbType,
+	QDialog *dsSearch = new DlgDsSearch(m_userName, m_dbType,
 		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
-	} else {
-#if 0 /* TODO -- MojeID functionality disabled, deal with it later. */
-		dsSearch = new DlgDsSearchMojeId(DlgDsSearchMojeId::ACT_ADDNEW,
-		    this->recipientTableWidget, m_dbType, m_dbEffectiveOVM,
-		    this, m_userName);
-#else
-		return;
-#endif
-	}
 	dsSearch->exec();
 	dsSearch->deleteLater();
 	addRecipientBoxes(dbIDs);

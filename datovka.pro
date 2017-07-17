@@ -276,11 +276,9 @@ SOURCES += \
     src/gui/dlg_ds_search.cpp \
     src/gui/dlg_import_zfo.cpp \
     src/gui/dlg_import_zfo_result.cpp \
-    src/gui/dlg_login_mojeid.cpp \
     src/gui/dlg_msg_search.cpp \
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
-    src/gui/dlg_search_mojeid.cpp \
     src/gui/dlg_send_message.cpp \
     src/gui/dlg_signature_detail.cpp \
     src/gui/dlg_tag.cpp \
@@ -402,11 +400,9 @@ HEADERS += \
     src/gui/dlg_ds_search.h \
     src/gui/dlg_import_zfo.h \
     src/gui/dlg_import_zfo_result.h \
-    src/gui/dlg_login_mojeid.h \
     src/gui/dlg_msg_search.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
-    src/gui/dlg_search_mojeid.h \
     src/gui/dlg_send_message.h \
     src/gui/dlg_signature_detail.h \
     src/gui/dlg_tag.h \
@@ -518,11 +514,9 @@ FORMS += \
     src/gui/ui/dlg_ds_search.ui \
     src/gui/ui/dlg_import_zfo_result.ui \
     src/gui/ui/dlg_import_zfo.ui \
-    src/gui/ui/dlg_login_mojeid.ui \
     src/gui/ui/dlg_msg_search.ui \
     src/gui/ui/dlg_preferences.ui \
     src/gui/ui/dlg_proxysets.ui \
-    src/gui/ui/dlg_search_mojeid.ui \
     src/gui/ui/dlg_send_message.ui \
     src/gui/ui/dlg_signature_detail.ui \
     src/gui/ui/dlg_tag.ui \
