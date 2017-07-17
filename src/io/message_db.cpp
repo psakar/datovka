@@ -1179,7 +1179,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		query.first();
 		if (query.isValid()) {
 			html += strongAccountInfoLine(QObject::tr("Events"),
-			    "");
+			    QString());
 		}
 		while (query.isValid()) {
 			html += indentDivStart +

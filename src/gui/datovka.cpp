@@ -789,7 +789,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    "<h3>" + tr("Database access error") + "</h3>" "<br/>";
 		htmlMessage += "<div>";
 		htmlMessage += tr("Database files for account '%1' cannot be accessed in location '%2'."
-		    ).arg(userName).arg(dbDir);
+		    ).arg(userName.toHtmlEscaped()).arg(dbDir.toHtmlEscaped());
 		htmlMessage += "<br/>";
 		htmlMessage += tr("The file cannot be accessed or is "
 		    "corrupted. Please fix the access privileges or "
@@ -3661,9 +3661,9 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName,
 /* ========================================================================= */
 {
 	QString html = indentDivStart;
-	html.append ("<h3>" + accountName + "</h3>");
+	html.append ("<h3>" + accountName.toHtmlEscaped() + "</h3>");
 
-	html.append(strongAccountInfoLine(tr("Received messages"), ""));
+	html.append(strongAccountInfoLine(tr("Received messages"), QString()));
 	html.append(indentDivStart);
 	if (0 == receivedCounts.size()) {
 		html.append(tr("none"));
@@ -3677,7 +3677,7 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName,
 
 	html.append("<br/>");
 
-	html.append(strongAccountInfoLine(tr("Sent messages"), ""));
+	html.append(strongAccountInfoLine(tr("Sent messages"), QString()));
 	html.append(indentDivStart);
 	if (0 == sentCounts.size()) {
 		html.append(tr("none"));
@@ -3703,12 +3703,12 @@ QString MainWindow::createAccountInfoMessagesCount(const QString &accountName,
 /* ========================================================================= */
 {
 	QString html = indentDivStart;
-	html.append ("<h3>" + accountName + "</h3>");
+	html.append ("<h3>" + accountName.toHtmlEscaped() + "</h3>");
 
 	if (type == MessageDb::TYPE_RECEIVED) {
-		html.append(strongAccountInfoLine(tr("Received messages"), ""));
+		html.append(strongAccountInfoLine(tr("Received messages"), QString()));
 	} else {
-		html.append(strongAccountInfoLine(tr("Sent messages"), ""));
+		html.append(strongAccountInfoLine(tr("Sent messages"), QString()));
 	}
 	html.append(indentDivStart);
 	if (0 == counts.size()) {

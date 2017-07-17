@@ -118,29 +118,34 @@ enum MessageDirection {
                                                    * are displayed as icons.
                                                    */
 
+/* Expecting arguments of type QString. */
 #define strongAccountInfoLine(title, value) \
-	(QString("<div><strong>") + (title) + ": </strong>" + (value) + \
-	"</div>")
+	(QLatin1String("<div><strong>") + (title).toHtmlEscaped() + \
+	QLatin1String(": </strong>") + (value).toHtmlEscaped() + \
+	QLatin1String("</div>"))
 #define accountInfoLine(title, value) \
-	(QString("<div>") + (title) + ": " + (value) + "</div>")
-#define indentDivStart "<div style=\"margin-left: 12px;\">"
-#define divEnd "</div>"
+	(QLatin1String("<div>") + (title).toHtmlEscaped() + \
+	QLatin1String(": ") + (value).toHtmlEscaped() + QLatin1String("</div>"))
+#define indentDivStart QLatin1String("<div style=\"margin-left: 12px;\">")
+#define divEnd QLatin1String("</div>")
 
 #define strongMessagePdf(title) \
-	(QString("<strong>") + (title) + QString("</strong>"))
+	(QLatin1String("<strong>") + (title).toHtmlEscaped() + \
+	QLatin1String("</strong>"))
 
 #define messageTableSectionPdf(title) \
-	(QString("<table width=\"100%\" style=\"background-color: #FFFF00; padding: 40px 20px 40px 20px; font-size: 18px;\"><tr><td>") + \
-	title + QString("</td></tr></table>"))
+	(QLatin1String("<table width=\"100%\" style=\"background-color: #FFFF00; padding: 40px 20px 40px 20px; font-size: 18px;\"><tr><td>") + \
+	(title).toHtmlEscaped() + QLatin1String("</td></tr></table>"))
 
 #define messageTableInfoStartPdf() \
-	(QString("<table style=\"margin-left: 10px; margin-top: 10px; margin-bottom: 30px; font-size: 16px;\">"))
+	(QLatin1String("<table style=\"margin-left: 10px; margin-top: 10px; margin-bottom: 30px; font-size: 16px;\">"))
 
 #define messageTableInfoPdf(title, value) \
-	(QString("<tr><td>") + title + QString(": ") + \
-	QString("</td><td>") + value + QString("</td></tr>"))
+	(QLatin1String("<tr><td>") + (title).toHtmlEscaped() + \
+	QLatin1String(": ") + QLatin1String("</td><td>") + \
+	(value).toHtmlEscaped() + QLatin1String("</td></tr>"))
 
-#define messageTableInfoEndPdf() (QString("</table>"))
+#define messageTableInfoEndPdf() (QLatin1String("</table>"))
 
 /*!
  * @brief Date/time format used in the application.

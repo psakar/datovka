@@ -324,16 +324,16 @@ QString DlgViewZfo::deliveryDescriptionHtml(const void *msgDER,
 
 	envelopeHeaderDescriptionHtml(html, envelope);
 
-	html += strongAccountInfoLine(tr("Events"),"");
+	html += strongAccountInfoLine(tr("Events"), QString());
 
 	html += indentDivStart;
 	const struct isds_list *event = envelope->events;
 	while (NULL != event) {
 		isds_event *item = (isds_event *) event->data;
 		html += strongAccountInfoLine(
-		        dateTimeStrFromDbFormat(timevalToDbFormat(item->time),
+		    dateTimeStrFromDbFormat(timevalToDbFormat(item->time),
 		        dateTimeDisplayFormat),
-		        item->description);
+		    QString(item->description));
 		event = event->next;
 	}
 	html += divEnd;
@@ -355,24 +355,24 @@ bool DlgViewZfo::envelopeHeaderDescriptionHtml(QString &html,
 
 	html += "<h3>" + tr("Identification") + "</h3>";
 
-	html += strongAccountInfoLine(tr("ID"), envelope->dmID);
-	html += strongAccountInfoLine(tr("Subject"), envelope->dmAnnotation);
-	html += strongAccountInfoLine(tr("Message type"), envelope->dmType);
+	html += strongAccountInfoLine(tr("ID"), QString(envelope->dmID));
+	html += strongAccountInfoLine(tr("Subject"), QString(envelope->dmAnnotation));
+	html += strongAccountInfoLine(tr("Message type"), QString(envelope->dmType));
 
 	html += "<br/>";
 
 	/* Information about message author. */
-	html += strongAccountInfoLine(tr("Sender"), envelope->dmSender);
-	html += strongAccountInfoLine(tr("Sender Databox ID"), envelope->dbIDSender);
+	html += strongAccountInfoLine(tr("Sender"), QString(envelope->dmSender));
+	html += strongAccountInfoLine(tr("Sender Databox ID"), QString(envelope->dbIDSender));
 	html += strongAccountInfoLine(tr("Sender Address"),
-	    envelope->dmSenderAddress);
+	    QString(envelope->dmSenderAddress));
 
 	html += "<br/>";
 
-	html += strongAccountInfoLine(tr("Recipient"), envelope->dmRecipient);
-	html += strongAccountInfoLine(tr("Recipient Databox ID"), envelope->dbIDRecipient);
+	html += strongAccountInfoLine(tr("Recipient"), QString(envelope->dmRecipient));
+	html += strongAccountInfoLine(tr("Recipient Databox ID"), QString(envelope->dbIDRecipient));
 	html += strongAccountInfoLine(tr("Recipient Address"),
-	    envelope->dmRecipientAddress);
+	    QString(envelope->dmRecipientAddress));
 
 	html += "<h3>" + tr("Status") + "</h3>";
 
