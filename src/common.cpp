@@ -107,44 +107,6 @@ QString fromBase64(const QString &base64)
 	return QString::fromUtf8(QByteArray::fromBase64(base64.toUtf8()));
 }
 
-QString getWebDatovkaUsername(const QString &userId, const QString &accountId)
-{
-	return DB_MOJEID_NAME_PREFIX + userId + "-" + accountId;
-}
-
-int getWebDatovkaAccountId(const QString &userName)
-{
-	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
-		return -1;
-	}
-
-	const QString aID = userName.split("-").at(2);
-	return aID.toInt();
-}
-
-int getWebDatovkaUserId(const QString &userName)
-{
-	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
-		return -1;
-	}
-	const QString uID = userName.split("-").at(1);
-	return uID.toInt();
-}
-
-QString getWebDatovkaTagDbPrefix(const QString &userName)
-{
-	if (!userName.contains(DB_MOJEID_NAME_PREFIX)) {
-		return QString();
-	}
-
-	return DB_MOJEID_NAME_PREFIX + userName.split("-").at(1);
-}
-
-bool isWebDatovkaAccount(const QString &userName)
-{
-	return userName.contains(DB_MOJEID_NAME_PREFIX);
-}
-
 bool isValidDatabaseFileName(QString inDbFileName,
     QString &dbUserName, QString &dbYear, bool &dbTestingFlag, QString &errMsg)
 {

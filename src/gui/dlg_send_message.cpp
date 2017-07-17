@@ -38,7 +38,6 @@
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
-#include "src/io/wd_sessions.h"
 #include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
 #include "src/localisation/localisation.h"

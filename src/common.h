@@ -57,16 +57,13 @@
 #define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/cs/datovka.html"
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
-#define DB_MOJEID_NAME_PREFIX "mojeid-"
-
 /* return values of Datovka login methods */
 typedef enum {
 	USER_NAME = 0,
 	CERTIFICATE = 1,
 	USER_CERTIFICATE = 2,
 	HOTP = 3,
-	TOTP = 4,
-	MOJEID = 5
+	TOTP = 4
 } LoginMethodsIndex;
 
 
@@ -205,39 +202,6 @@ void finishEmailMessage(QString &message, const QString &boundary);
 QString fromBase64(const QString &base64);
 
 /*!
- * @brief Get/create WebDatovka (MojeId) username.
- *
- * @param[in] userId    Wedatovka user ID.
- * @param[in] accountId Wedatovka account ID.
- * @return Username of account.
- */
-QString getWebDatovkaUsername(const QString &userId, const QString &accountId);
-
-/*!
- * Get account id from username of WebDatovka account.
- *
- * @param[in] userName Account user name.
- * @return Account id of webdatovka account.
- */
-int getWebDatovkaAccountId(const QString &userName);
-
-/*!
- * Get user id from username of WebDatovka account.
- *
- * @param[in] userName Account user name.
- * @return user id of webdatovka account.
- */
-int getWebDatovkaUserId(const QString &userName);
-
-/*!
- * Get name prefix of tag database from username (WebDatovka).
- *
- * @param[in] userName  Account user name.
- * @return tag database prefix of webdatovka account.
- */
-QString getWebDatovkaTagDbPrefix(const QString &userName);
-
-/*!
  * @brief Check valid database filename.
  *
  * @param[in] inDbFileName   Input database file name.
@@ -249,14 +213,6 @@ QString getWebDatovkaTagDbPrefix(const QString &userName);
  */
 bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
     QString &dbYear, bool &dbTestingFlag, QString &errMsg);
-
-/*!
- * @brief Test if selected account is WebDatovka (MojeId) account.
- *
- * @param[in] userName  Account user name.
- * @return true if account is webdatovka account.
- */
-bool isWebDatovkaAccount(const QString &userName);
 
 /*!
  * @brief Converts string to base64.

@@ -306,7 +306,6 @@ SOURCES += \
     src/io/sqlite/table.cpp \
     src/io/tag_db.cpp \
     src/io/tag_db_container.cpp \
-    src/io/wd_sessions.cpp \
     src/isds/isds_conversion.cpp \
     src/localisation/localisation.cpp \
     src/log/log.cpp \
@@ -347,8 +346,6 @@ SOURCES += \
     src/views/table_home_end_filter.cpp \
     src/views/table_key_press_filter.cpp \
     src/views/table_space_selection_filter.cpp \
-    src/web/net.cpp \
-    src/web/json.cpp \
     src/worker/message_emitter.cpp \
     src/worker/pool.cpp \
     src/worker/task.cpp \
@@ -423,7 +420,6 @@ HEADERS += \
     src/io/sqlite/table.h \
     src/io/tag_db.h \
     src/io/tag_db_container.h \
-    src/io/wd_sessions.h \
     src/isds/isds_conversion.h \
     src/localisation/localisation.h \
     src/log/log_c.h \
@@ -464,9 +460,6 @@ HEADERS += \
     src/views/table_home_end_filter.h \
     src/views/table_key_press_filter.h \
     src/views/table_space_selection_filter.h \
-    src/web/net.h \
-    src/web/net_consts.h \
-    src/web/json.h \
     src/worker/message_emitter.h \
     src/worker/pool.h \
     src/worker/task.h \

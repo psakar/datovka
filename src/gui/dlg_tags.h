@@ -29,7 +29,6 @@
 
 #include "ui_dlg_tags.h"
 #include "src/io/tag_db.h"
-#include "src/web/json.h"
 
 /*!
  * @brief Tags management dialogue.

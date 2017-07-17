@@ -46,7 +46,6 @@
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
 #include "src/single/single_instance.h"
-#include "src/web/json.h"
 #include "src/worker/task.h" /* TODO -- remove this header file. */
 
 /* Forward declaration as we don;t wan to pull-in all header file content. */
@@ -89,12 +88,6 @@ public:
 	 */
 	static
 	MessageDbSet *accountDbSet(const QString &userName, MainWindow *mw);
-
-	/*!
-	 * @brief Get account list from Webdatovka.
-	 */
-	bool wdGetAccountList(const QString &userName,
-	    const QNetworkCookie &sessionid, bool syncWithAll);
 
 protected:
 	/*!
@@ -719,16 +712,6 @@ private:
 	 * @param[in] msgIdList Messages whose tags should be edited.
 	 */
 	void modifyTags(const QString &userName, QList<qint64> msgIdList);
-
-	/*!
-	 * @brief Get message list from webdatovka server.
-	 */
-	bool wdGetMessageList(const QString &userName);
-
-	/*!
-	 * @brief Do sync of account in the webdatovka server.
-	 */
-	bool wdSyncAccount(const QString &userName);
 
 	/*!
 	 * @brief Show status bar text with timeout.
