@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/worker/message_emitter.h"
@@ -272,7 +273,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		} else {
 
 			/* Update message and envelope only if status has changed. */
-			const int dmNewMsgStatus = convertHexToDecIndex(
+			const int dmNewMsgStatus = IsdsConversion::msgStatusIsdsToDbRepr(
 			     *item->envelope->dmMessageStatus);
 
 			if (dmNewMsgStatus != dmDbMsgStatus) {
@@ -435,7 +436,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 	} else if (messageDb->msgsUpdateMessageState(dmID,
 	    dmDeliveryTime, dmAcceptanceTime,
 	    envel->dmMessageStatus ?
-	        convertHexToDecIndex(*envel->dmMessageStatus) : 0)) {
+	        IsdsConversion::msgStatusIsdsToDbRepr(*envel->dmMessageStatus) : 0)) {
 		/* Updated message envelope delivery info in db. */
 		logDebugLv0NL(
 		    "Delivery information of message '%" PRId64 "' were updated.",
@@ -453,7 +454,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 		isds_event *item = (isds_event *) event->data;
 		messageDb->msgsInsertUpdateMessageEvent(dmID,
 		    timevalToDbFormat(item->time),
-		    convertEventTypeToString(*item->type),
+		    IsdsConversion::eventTypeToStr(*item->type) + QLatin1String(": "),
 		    item->description);
 		event = event->next;
 	}

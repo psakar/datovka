@@ -118,29 +118,34 @@ enum MessageDirection {
                                                    * are displayed as icons.
                                                    */
 
+/* Expecting arguments of type QString. */
 #define strongAccountInfoLine(title, value) \
-	(QString("<div><strong>") + (title) + ": </strong>" + (value) + \
-	"</div>")
+	(QLatin1String("<div><strong>") + (title).toHtmlEscaped() + \
+	QLatin1String(": </strong>") + (value).toHtmlEscaped() + \
+	QLatin1String("</div>"))
 #define accountInfoLine(title, value) \
-	(QString("<div>") + (title) + ": " + (value) + "</div>")
-#define indentDivStart "<div style=\"margin-left: 12px;\">"
-#define divEnd "</div>"
+	(QLatin1String("<div>") + (title).toHtmlEscaped() + \
+	QLatin1String(": ") + (value).toHtmlEscaped() + QLatin1String("</div>"))
+#define indentDivStart QLatin1String("<div style=\"margin-left: 12px;\">")
+#define divEnd QLatin1String("</div>")
 
 #define strongMessagePdf(title) \
-	(QString("<strong>") + (title) + QString("</strong>"))
+	(QLatin1String("<strong>") + (title).toHtmlEscaped() + \
+	QLatin1String("</strong>"))
 
 #define messageTableSectionPdf(title) \
-	(QString("<table width=\"100%\" style=\"background-color: #FFFF00; padding: 40px 20px 40px 20px; font-size: 18px;\"><tr><td>") + \
-	title + QString("</td></tr></table>"))
+	(QLatin1String("<table width=\"100%\" style=\"background-color: #FFFF00; padding: 40px 20px 40px 20px; font-size: 18px;\"><tr><td>") + \
+	(title).toHtmlEscaped() + QLatin1String("</td></tr></table>"))
 
 #define messageTableInfoStartPdf() \
-	(QString("<table style=\"margin-left: 10px; margin-top: 10px; margin-bottom: 30px; font-size: 16px;\">"))
+	(QLatin1String("<table style=\"margin-left: 10px; margin-top: 10px; margin-bottom: 30px; font-size: 16px;\">"))
 
 #define messageTableInfoPdf(title, value) \
-	(QString("<tr><td>") + title + QString(": ") + \
-	QString("</td><td>") + value + QString("</td></tr>"))
+	(QLatin1String("<tr><td>") + (title).toHtmlEscaped() + \
+	QLatin1String(": ") + QLatin1String("</td><td>") + \
+	(value).toHtmlEscaped() + QLatin1String("</td></tr>"))
 
-#define messageTableInfoEndPdf() (QString("</table>"))
+#define messageTableInfoEndPdf() (QLatin1String("</table>"))
 
 /*!
  * @brief Date/time format used in the application.
@@ -162,108 +167,12 @@ void addAttachmentToEmailMessage(QString &message, const QString &attachName,
     const QByteArray &base64, const QString &boundary);
 
 /*!
- * @brief Translates author type to text.
- *
- * @param[in] authorType Author type string.
- * @return Author type description.
- */
-const QString authorTypeToText(const QString &authorType);
-
-/*!
  * @brief Computes the size of real (decoded from base64) data.
  *
  * @param[in] b64 Data in Base64.
  * @return Size of real data.
  */
 int base64RealSize(const QByteArray &b64);
-
-/*!
- * @brief Return attachment type as string.
- *
- * @param[in] value Attachment type value.
- * @return Attachment type description.
- */
-QString convertAttachmentType(int value);
-
-/*!
- * @brief Convert type of databox to int.
- *
- * @param[in] value databox type string.
- * @return databox int.
- */
-int convertDbTypeToInt(QString value);
-
-/*!
- * @brief Convert type of databox to string.
- *
- * @param[in] value databox type value.
- * @return Databox type description.
- */
-QString convertDbTypeToString(int value);
-
-/*!
- * @brief Convert event type to string.
- *
- * @param[in] value event type value.
- * @return Event description.
- */
-QString convertEventTypeToString(int value);
-
-/*!
- * @brief Return hash algorithm as string.
- *
- * @param[in] value Hash algorithm value.
- * @return Hash algorithm type string.
- */
-QString convertHashAlg(int value);
-
- /*!
- * @brief Return hash algorithm as int.
- *
- * @param[in] value Hash algorithm string.
- * @return Hash algorithm type value.
- */
-int convertHashAlg2(QString value);
-
-/*!
- * @brief Return dec index from hex.
- *
- * @param[in] value Decadical value.
- * @return Hexadecimal value.
- */
-int convertHexToDecIndex(int value);
-
-/*!
- * @brief Return sender databox type as string from number representation.
- *
- * @param[in] value Sender databox type value.
- * @return Sender databox type description.
- */
-QString convertSenderDbTypesToString(int value);
-
-/*!
- * @brief Convert type of author to string.
- *
- * @param[in] value Author type value.
- * @return Author type description.
- */
-QString convertSenderTypeToString(int value);
-
-/*!
- * @brief Return privilegs as html string from number representation.
- *
- * @param[in] userPrivils Privilegy value.
- * @return Privilegy description.
- */
-QString convertUserPrivilsToString(int userPrivils);
-
-/*!
- * Convert type of user to string.
- *
- * @param[in] value user type value.
- * @return User description.
- */
-const QString & convertUserTypeToString(int value);
 
 /*!
  * @brief Creates email header and message body.
@@ -274,14 +183,6 @@ const QString & convertUserTypeToString(int value);
  */
 void createEmailMessage(QString &message, const QString &subj,
     const QString &boundary);
-
-/*!
- * @brief Translates message type to text.
- *
- * @param[in] dmType Message type value.
- * @return Message type description.
- */
-const QString dmTypeToText(const QString &dmType);
 
 /*!
  * @brief Adds last line into email.
@@ -298,14 +199,6 @@ void finishEmailMessage(QString &message, const QString &boundary);
  * @return Decoded string.
  */
 QString fromBase64(const QString &base64);
-
-/*!
- * @brief Convert state box to text
- *
- * @param[in] value databox status value.
- * @return Databox status string.
- */
-QString getdbStateText(int value);
 
 /*!
  * @brief Get/create WebDatovka (MojeId) username.
@@ -360,14 +253,6 @@ bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
  * @return true if account is webdatovka account.
  */
 bool isWebDatovkaAccount(const QString &userName);
-
-/*!
- * @brief Returns message status description.
- *
- * @param[in] status Message status value.
- * @return message status description.
- */
-const QString msgStatusToText(int status);
 
 /*!
  * @brief Converts string to base64.

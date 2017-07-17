@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
+#include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_verify_message.h"
@@ -114,7 +115,7 @@ struct isds_hash *localMessageHash(MessageDb *messageDb, qint64 dmId)
 
 	QByteArray rawHash = QByteArray::fromBase64(hashLocaldata.valueBase64);
 	hashLocal->length = (size_t) rawHash.size();
-	hashLocal->algorithm = (isds_hash_algorithm) convertHashAlg2(
+	hashLocal->algorithm = (isds_hash_algorithm) IsdsConversion::hashAlgStrToInt(
 	    hashLocaldata.alg);
 	hashLocal->value = malloc(hashLocal->length);
 	if (NULL == hashLocal->value) {

@@ -51,6 +51,7 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
+#include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 
@@ -1011,9 +1012,9 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		html += strongAccountInfoLine(QObject::tr("Subject"),
 		    query.value(0).toString());
 		if (!query.value(1).toString().isEmpty() &&
-		    (!dmTypeToText(query.value(1).toString()).isEmpty())) {
+		    (!IsdsConversion::dmTypeToText(query.value(1).toString()).isEmpty())) {
 			html += strongAccountInfoLine(QObject::tr("Message type"),
-			    dmTypeToText(query.value(1).toString()));
+			    IsdsConversion::dmTypeToText(query.value(1).toString()));
 		}
 
 		html += "<br/>";
@@ -1026,7 +1027,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		    query.value(6).toString());
 
 		QString dmSenderType =
-		     convertSenderDbTypesToString(query.value(8).toInt());
+		     IsdsConversion::senderBoxTypeToText(query.value(8).toInt());
 		if (dmSenderType != "") {
 			html += strongAccountInfoLine(
 			    QObject::tr("Databox type"), dmSenderType);
@@ -1048,8 +1049,8 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 				html += strongAccountInfoLine(
 				    QObject::tr("Message author"),
 				    authorInfo +
-				    authorTypeToText(value.toObject().value(
-				        "userType").toString()));
+				    IsdsConversion::senderTypeStrToText(
+				        value.toObject().value("userType").toString()));
 			}
 		}
 
@@ -1155,7 +1156,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		html += strongAccountInfoLine(
 		    msgsTbl.attrProps[msgStatus[2]].desc,
 		    QString::number(query.value(2).toInt()) + " -- " +
-		    msgStatusToText(query.value(2).toInt()));
+		    IsdsConversion::msgStatusDbToText(query.value(2).toInt()));
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: %s.",
@@ -1178,7 +1179,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		query.first();
 		if (query.isValid()) {
 			html += strongAccountInfoLine(QObject::tr("Events"),
-			    "");
+			    QString());
 		}
 		while (query.isValid()) {
 			html += indentDivStart +

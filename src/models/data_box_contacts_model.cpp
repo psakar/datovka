@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include "src/common.h"
+#include "src/isds/isds_conversion.h"
 #include "src/models/data_box_contacts_model.h"
 
 BoxContactsModel::BoxContactsModel(QObject *parent)
@@ -59,7 +59,7 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 			QVariant entry(_data(index, role));
 
 			if (!entry.isNull()) {
-				return convertDbTypeToString(entry.toInt());
+				return IsdsConversion::boxTypeToStr(entry.toInt());
 			} else {
 				return entry;
 			}

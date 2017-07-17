@@ -79,6 +79,7 @@
 #include "src/io/tag_db.h"
 #include "src/io/tag_db_container.h"
 #include "src/io/wd_sessions.h"
+#include "src/isds/isds_conversion.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"
 #include "src/records_management/gui/dlg_records_management.h"
@@ -788,7 +789,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    "<h3>" + tr("Database access error") + "</h3>" "<br/>";
 		htmlMessage += "<div>";
 		htmlMessage += tr("Database files for account '%1' cannot be accessed in location '%2'."
-		    ).arg(userName).arg(dbDir);
+		    ).arg(userName.toHtmlEscaped()).arg(dbDir.toHtmlEscaped());
 		htmlMessage += "<br/>";
 		htmlMessage += tr("The file cannot be accessed or is "
 		    "corrupted. Please fix the access privileges or "
@@ -3515,8 +3516,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 				} else if (key == "userPrivils") {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
-					    convertUserPrivilsToString(userEntry.
-					    value(key).toInt())));
+					    IsdsConversion::userPrivilsToText(
+					        userEntry.value(key).toInt())));
 				} else {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
@@ -3528,8 +3529,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 				if (key == "userType") {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
-					    authorTypeToText(
-					    userEntry.value(key).toString())));
+					    IsdsConversion::senderTypeStrToText(
+					        userEntry.value(key).toString())));
 				} else {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
@@ -3563,8 +3564,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 				if (key == "dbState") {
 					html.append(strongAccountInfoLine(
 					    accntinfTbl.attrProps[key].desc,
-					    getdbStateText(
-					    accountEntry.value(key).toInt())));
+					    IsdsConversion::boxStateToText(
+					        accountEntry.value(key).toInt())));
 				} else if (key == "ic") {
 					if (accountEntry.value(key).toInt() > 0) {
 						html.append(strongAccountInfoLine(
@@ -3660,9 +3661,9 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName,
 /* ========================================================================= */
 {
 	QString html = indentDivStart;
-	html.append ("<h3>" + accountName + "</h3>");
+	html.append ("<h3>" + accountName.toHtmlEscaped() + "</h3>");
 
-	html.append(strongAccountInfoLine(tr("Received messages"), ""));
+	html.append(strongAccountInfoLine(tr("Received messages"), QString()));
 	html.append(indentDivStart);
 	if (0 == receivedCounts.size()) {
 		html.append(tr("none"));
@@ -3676,7 +3677,7 @@ QString MainWindow::createAccountInfoAllField(const QString &accountName,
 
 	html.append("<br/>");
 
-	html.append(strongAccountInfoLine(tr("Sent messages"), ""));
+	html.append(strongAccountInfoLine(tr("Sent messages"), QString()));
 	html.append(indentDivStart);
 	if (0 == sentCounts.size()) {
 		html.append(tr("none"));
@@ -3702,12 +3703,12 @@ QString MainWindow::createAccountInfoMessagesCount(const QString &accountName,
 /* ========================================================================= */
 {
 	QString html = indentDivStart;
-	html.append ("<h3>" + accountName + "</h3>");
+	html.append ("<h3>" + accountName.toHtmlEscaped() + "</h3>");
 
 	if (type == MessageDb::TYPE_RECEIVED) {
-		html.append(strongAccountInfoLine(tr("Received messages"), ""));
+		html.append(strongAccountInfoLine(tr("Received messages"), QString()));
 	} else {
-		html.append(strongAccountInfoLine(tr("Sent messages"), ""));
+		html.append(strongAccountInfoLine(tr("Sent messages"), QString()));
 	}
 	html.append(indentDivStart);
 	if (0 == counts.size()) {

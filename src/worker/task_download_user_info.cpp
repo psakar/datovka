@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_user_info.h"
@@ -89,7 +90,7 @@ bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
 
 	bool ret = globAccountDbPtr->insertUserIntoDb(
 	    AccountDb::keyFromLogin(userName),
-	    convertUserTypeToString(*userInfo->userType),
+	    IsdsConversion::userTypeToStr(*userInfo->userType),
 	    (int) *userInfo->userPrivils,
 	    userInfo->personName ? userInfo->personName->pnFirstName : NULL,
 	    userInfo->personName ? userInfo->personName->pnMiddleName : NULL,
