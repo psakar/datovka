@@ -61,12 +61,10 @@ public:
 	 *
 	 * @param[in] userName            Account user name.
 	 * @param[in] msgIdList           List of message ids.
-	 * @param[in] msgIdWebDatovkaList List of message ids.
 	 * @param[in] parent              Parent widget.
 	 */
 	explicit DlgTags(const QString &userName, TagDb *tagDb,
-	    const QList<qint64> &msgIdList,
-	    const QList<qint64> &msgIdWebDatovkaList, QWidget *parent = Q_NULLPTR);
+	    const QList<qint64> &msgIdList, QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
@@ -147,16 +145,13 @@ private:
 	const QString m_userName; /*!< Account username. */
 	TagDb *m_tagDbPtr; /*!< Tag db pointer. */
 	const QList<qint64> m_msgIdList; /*!< List of message identifiers. */
-	QList<qint64> m_msgIdWebDatovkaList; /*!< List of message identifiers of WebDatovka. */
 
 	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
 	class TagsModel *m_tagsModel; /*!< Tags model. */
 
 	enum ReturnCode m_retCode; /*!< Dialogue return code. */
-	bool m_isWebDatovkaAccount; /*!< is WebDatovka account. */
 
 	QString m_errStr;
-	JsonLayer m_jsonsLayer;
 };
 
 #endif /* _DLG_TAGS_H_ */

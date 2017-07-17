@@ -592,16 +592,7 @@ DbMsgsTblModel &DbMsgsTblModel::dummyModel(enum DbMsgsTblModel::Type type)
 
 bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 {
-	TagDb *tagDb = 0;
-
-	if (isWebDatovkaAccount(userName)) {
-		tagDb = globWebDatovkaTagDbPtr->
-		     accessTagDb(getWebDatovkaTagDbPrefix(userName));
-	} else {
-		tagDb = globTagDbPtr;
-	}
-
-	if (0 == tagDb) {
+	if (Q_NULLPTR == globTagDbPtr) {
 		return false;
 	}
 
@@ -623,7 +614,7 @@ bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 
 	for (int row = 0; row < rowCount(); ++row) {
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
-		TagItemList tagList(tagDb->getMessageTags(userName, dmId));
+		TagItemList tagList(globTagDbPtr->getMessageTags(userName, dmId));
 		tagList.sortNames();
 		m_data[row][col] = QVariant::fromValue(tagList);
 	}
@@ -637,16 +628,7 @@ bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
     const QList<qint64> &dmIds, int col)
 {
-	TagDb *tagDb = 0;
-
-	if (isWebDatovkaAccount(userName)) {
-		tagDb = globWebDatovkaTagDbPtr->
-		    accessTagDb(getWebDatovkaTagDbPrefix(userName));
-	} else {
-		tagDb = globTagDbPtr;
-	}
-
-	if (0 == tagDb) {
+	if (Q_NULLPTR == globTagDbPtr) {
 		return false;
 	}
 
@@ -670,7 +652,7 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
 		if (dmIds.contains(dmId)) {
 			TagItemList tagList(
-			    tagDb->getMessageTags(userName, dmId));
+			    globTagDbPtr->getMessageTags(userName, dmId));
 			tagList.sortNames();
 			m_data[row][col] = QVariant::fromValue(tagList);
 			emit dataChanged(TblModel::index(row, col),

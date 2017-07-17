@@ -38,28 +38,23 @@ DlgTags::DlgTags(const QString &userName, TagDb *tagDb, QWidget *parent)
     m_userName(userName),
     m_tagDbPtr(tagDb),
     m_msgIdList(),
-    m_msgIdWebDatovkaList(),
     m_tagsDelegate(Q_NULLPTR),
     m_tagsModel(Q_NULLPTR),
-    m_retCode(NO_ACTION),
-    m_isWebDatovkaAccount(false)
+    m_retCode(NO_ACTION)
 {
 	setupUi(this);
 	initDlg();
 }
 
 DlgTags::DlgTags(const QString &userName, TagDb *tagDb,
-    const QList<qint64> &msgIdList,
-    const QList<qint64> &msgIdWebDatovkaList, QWidget *parent)
+    const QList<qint64> &msgIdList, QWidget *parent)
     : QDialog(parent),
     m_userName(userName),
     m_tagDbPtr(tagDb),
     m_msgIdList(msgIdList),
-    m_msgIdWebDatovkaList(msgIdWebDatovkaList),
     m_tagsDelegate(Q_NULLPTR),
     m_tagsModel(Q_NULLPTR),
-    m_retCode(NO_ACTION),
-    m_isWebDatovkaAccount(false)
+    m_retCode(NO_ACTION)
 {
 	setupUi(this);
 	initDlg();
@@ -85,8 +80,7 @@ int DlgTags::exec(void)
 
 void DlgTags::addTag(void)
 {
-	QDialog *tagDlg = new DlgTag(m_userName, m_tagDbPtr,
-	    m_isWebDatovkaAccount, this);
+	QDialog *tagDlg = new DlgTag(m_userName, m_tagDbPtr, this);
 	tagDlg->exec();
 	tagDlg->deleteLater();
 
@@ -98,8 +92,7 @@ void DlgTags::updateTag(void)
 	TagItem tagItem(m_tagDbPtr->getTagData(
 	    getTagIdFromIndex(tagListView->selectionModel()->currentIndex())));
 
-	QDialog *tagDlg = new DlgTag(m_userName, m_tagDbPtr,
-	    m_isWebDatovkaAccount, tagItem, this);
+	QDialog *tagDlg = new DlgTag(m_userName, m_tagDbPtr, tagItem, this);
 	int retVal = tagDlg->exec();
 	tagDlg->deleteLater();
 
@@ -121,13 +114,6 @@ void DlgTags::deleteTag(void)
 	}
 
 	foreach (const QModelIndex &idx, slctIdxs) {
-
-		if (m_isWebDatovkaAccount) {
-			if (!m_jsonsLayer.deleteTag(m_userName,
-			    getTagIdFromIndex(idx), m_errStr)) {
-				continue;
-			}
-		}
 		m_tagDbPtr->deleteTag(getTagIdFromIndex(idx));
 	}
 
@@ -148,29 +134,10 @@ void DlgTags::assignSelectedTagsToMsgs(void)
 
 	Q_ASSERT(!m_userName.isEmpty());
 
-	if (m_isWebDatovkaAccount) {
-		if (m_msgIdList.count() != m_msgIdWebDatovkaList.count()) {
-			return;
-		}
-		for (int i = 0; i < m_msgIdList.count(); ++i) {
-			foreach (const QModelIndex &idx, slctIdxs) {
-				if (!m_jsonsLayer.assignTag(m_userName,
-				    getTagIdFromIndex(idx),
-				    m_msgIdWebDatovkaList.at(i), m_errStr)) {
-					continue;
-				}
-				m_tagDbPtr->assignTagToMsg(m_userName,
-				    getTagIdFromIndex(idx),
-				    m_msgIdList.at(i));
-			}
-
-		}
-	} else {
-		foreach (const qint64 &msgId, m_msgIdList) {
-			foreach (const QModelIndex &idx, slctIdxs) {
-				m_tagDbPtr->assignTagToMsg(m_userName,
-				    getTagIdFromIndex(idx), msgId);
-			}
+	foreach (const qint64 &msgId, m_msgIdList) {
+		foreach (const QModelIndex &idx, slctIdxs) {
+			m_tagDbPtr->assignTagToMsg(m_userName,
+			    getTagIdFromIndex(idx), msgId);
 		}
 	}
 
@@ -191,28 +158,10 @@ void DlgTags::removeSelectedTagsFromMsgs(void)
 
 	Q_ASSERT(!m_userName.isEmpty());
 
-	if (m_isWebDatovkaAccount) {
-		if (m_msgIdList.count() != m_msgIdWebDatovkaList.count()) {
-			return;
-		}
-		for (int i = 0; i < m_msgIdList.count(); ++i) {
-			foreach (const QModelIndex &idx, slctIdxs) {
-				if (!m_jsonsLayer.removeTag(m_userName,
-				    getTagIdFromIndex(idx),
-				    m_msgIdWebDatovkaList.at(i), m_errStr)) {
-					continue;
-				}
-				m_tagDbPtr->removeTagFromMsg(m_userName,
-				    getTagIdFromIndex(idx), m_msgIdList.at(i));
-			}
-
-		}
-	} else {
-		foreach (const qint64 &msgId, m_msgIdList) {
-			foreach (const QModelIndex &idx, slctIdxs) {
-				m_tagDbPtr->removeTagFromMsg(m_userName,
-				    getTagIdFromIndex(idx), msgId);
-			}
+	foreach (const qint64 &msgId, m_msgIdList) {
+		foreach (const QModelIndex &idx, slctIdxs) {
+			m_tagDbPtr->removeTagFromMsg(m_userName,
+			    getTagIdFromIndex(idx), msgId);
 		}
 	}
 
@@ -226,22 +175,8 @@ void DlgTags::removeAllTagsFromMsgs(void)
 {
 	Q_ASSERT(!m_userName.isEmpty());
 
-	if (m_isWebDatovkaAccount) {
-		if (m_msgIdList.count() != m_msgIdWebDatovkaList.count()) {
-			return;
-		}
-		for (int i = 0; i < m_msgIdList.count(); ++i) {
-			if (!m_jsonsLayer.removeAllTags(m_userName,
-			   m_msgIdWebDatovkaList.at(i), m_errStr)) {
-				continue;
-			}
-			m_tagDbPtr->removeAllTagsFromMsg(m_userName,
-			    m_msgIdList.at(i));
-		}
-	} else {
-		foreach (const qint64 &msgId, m_msgIdList) {
-			m_tagDbPtr->removeAllTagsFromMsg(m_userName, msgId);
-		}
+	foreach (const qint64 &msgId, m_msgIdList) {
+		m_tagDbPtr->removeAllTagsFromMsg(m_userName, msgId);
 	}
 
 	/* Tag assignment was changed. */
@@ -281,8 +216,6 @@ void DlgTags::fillTagsToListView(void)
 
 void DlgTags::initDlg(void)
 {
-	m_isWebDatovkaAccount = isWebDatovkaAccount(m_userName);
-
 	m_tagsDelegate = new TagsDelegate(this);
 	m_tagsModel = new TagsModel(this);
 

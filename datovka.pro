@@ -374,7 +374,6 @@ SOURCES += \
     src/worker/task_send_message_mojeid.cpp \
     src/worker/task_split_db.cpp \
     src/worker/task_sync_mojeid.cpp \
-    src/worker/task_tag_sync_mojeid.cpp \
     src/worker/task_vacuum_db_set.cpp \
     src/worker/task_verify_message.cpp
 
@@ -498,7 +497,6 @@ HEADERS += \
     src/worker/task_send_message_mojeid.h \
     src/worker/task_split_db.h \
     src/worker/task_sync_mojeid.h \
-    src/worker/task_tag_sync_mojeid.h \
     src/worker/task_vacuum_db_set.h \
     src/worker/task_verify_message.h
 

@@ -267,17 +267,7 @@ TaskDownloadMessageListMojeID::downloadMessageList(
 			}
 		}
 
-		TagDb *tagDb = globWebDatovkaTagDbPtr->
-		    accessTagDb(getWebDatovkaTagDbPrefix(userName));
-		Q_ASSERT(0 != tagDb);
-
 		messageDb->smsgdtSetLocallyRead(dmID, messageList.at(i)._read);
-		tagDb->removeAllTagsFromMsg(userName, dmID);
-
-		for (int t = 0; t < messageList.at(i)._tagList.count(); ++t) {
-			tagDb->assignTagToMsg(userName,
-			    messageList.at(i)._tagList.at(t), dmID);
-		}
 	}
 
 #ifdef USE_TRANSACTIONS

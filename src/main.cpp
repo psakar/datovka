@@ -629,13 +629,6 @@ int main(int argc, char *argv[])
 			return EXIT_FAILURE;
 		}
 
-		/* Create tag DB container. */
-		globWebDatovkaTagDbPtr = new (std::nothrow) TagDbContainer("tagDbWebDatovka");
-		if (0 == globWebDatovkaTagDbPtr) {
-			logErrorNL("%s", "Cannot allocate webdatovka tag db container.");
-			return EXIT_FAILURE;
-		}
-
 		globRecordsManagementDbPtr =
 		    new (std::nothrow) RecordsManagementDb("recordsManagementDb");
 		if (Q_NULLPTR == globRecordsManagementDbPtr) {
@@ -717,11 +710,6 @@ int main(int argc, char *argv[])
 	if (0 != globTagDbPtr) {
 		delete globTagDbPtr;
 		globTagDbPtr = 0;
-	}
-
-	if (0 != globWebDatovkaTagDbPtr) {
-		delete globWebDatovkaTagDbPtr;
-		globWebDatovkaTagDbPtr = 0;
 	}
 
 	if (0 != globMessageDbsPtr) {

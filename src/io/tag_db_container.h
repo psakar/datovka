@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,10 +68,5 @@ public:
 
 	const QString m_connectionName;
 };
-
-/*!
- * @brief Global database container.
- */
-extern TagDbContainer * globWebDatovkaTagDbPtr;
 
 #endif /* _TAG_DB_CONTAINER_H_ */

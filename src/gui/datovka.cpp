@@ -95,7 +95,6 @@
 #include "src/worker/task_download_message_mojeid.h"
 #include "src/worker/task_erase_message.h"
 #include "src/worker/task_sync_mojeid.h"
-#include "src/worker/task_tag_sync_mojeid.h"
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
@@ -3068,13 +3067,6 @@ void MainWindow::deleteMessageWebdatovka(const QString &userName)
 			 * TODO -- Remove the year on account list if last
 			 * message was removed.
 			 */
-
-			/* Delete all tags from message_tags table.
-			 * Tag in the tag table are kept.
-			 */
-			TagDb *tagDb =
-			    globWebDatovkaTagDbPtr->accessTagDb(userName);
-			tagDb->removeAllTagsFromMsg(userName, id.dmId);
 		}
 	}
 
@@ -5126,17 +5118,7 @@ void MainWindow::deleteAccount(const QString &userName)
 		    .arg(accountName));
 	}
 
-	if (isWebDatovkaAccount(userName)) {	
-		TagDb *tagDbWd = globWebDatovkaTagDbPtr->accessTagDb(
-		    getWebDatovkaTagDbPrefix(userName));
-		if (!existsAnotherMojeIdAccountWithSameUserId(userName)) {
-			globWebDatovkaTagDbPtr->deleteDb(tagDbWd);
-		} else {
-			tagDbWd->removeAllMsgTagsFromAccount(userName);
-		}
-	} else {
-		globTagDbPtr->removeAllMsgTagsFromAccount(userName);
-	}
+	globTagDbPtr->removeAllMsgTagsFromAccount(userName);
 
 	if ((DlgYesNoCheckbox::YesChecked == retVal) ||
 	    (DlgYesNoCheckbox::YesUnchecked == retVal)) {
@@ -8745,7 +8727,7 @@ void MainWindow::showTagDialog(void)
 {
 	debugSlotCall();
 	modifyTags(m_accountModel.userName(currentAccountModelIndex()),
-	    QList<qint64>(), QList<qint64>());
+	    QList<qint64>());
 }
 
 /* ========================================================================= */
@@ -8758,37 +8740,15 @@ void MainWindow::addOrDeleteMsgTags(void)
 	debugSlotCall();
 
 	QList<qint64> msgIdList;
-	QList<qint64> msgIdWebDatovkaList;
 
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
-	const bool webdatovkaAccount = isWebDatovkaAccount(userName);
-	MessageDbSet *dbSet = Q_NULLPTR;
-	if (webdatovkaAccount) {
-		dbSet = accountDbSet(userName, this);
-		if (Q_NULLPTR == dbSet) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
 
 	foreach (const QModelIndex &idx, currentFrstColMessageIndexes()) {
 		msgIdList.append(idx.data().toLongLong());
-		if (webdatovkaAccount) {
-			Q_ASSERT(Q_NULLPTR != dbSet);
-			QDateTime deliveryTime(msgDeliveryTime(idx));
-			MessageDb *messageDb =
-			    dbSet->accessMessageDb(deliveryTime, false);
-			if (messageDb == Q_NULLPTR) {
-				Q_ASSERT(0);
-				return;
-			}
-			qint64 mId = messageDb->getWebDatokaId(idx.data().toLongLong());
-			msgIdWebDatovkaList.append(mId);
-		}
 	}
 
-	modifyTags(userName, msgIdList, msgIdWebDatovkaList);
+	modifyTags(userName, msgIdList);
 }
 
 void MainWindow::vacuumMsgDbSlot(void)
@@ -8875,47 +8835,23 @@ void MainWindow::vacuumMsgDbSlot(void)
 	delete task;
 }
 
-void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList,
-    QList<qint64> msgIdWebDatovkaList)
+void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 {
-	TagDb *tagDb = Q_NULLPTR;
-
-	if (isWebDatovkaAccount(userName)) {
-		if (!wdSessions.isConnectedToWebdatovka(userName)) {
-			loginToMojeId(userName);
-		}
-
-		if (!wdSessions.isConnectedToWebdatovka(userName)) {
-			showWebDatovkaInfoDialog(userName,
-			    tr("You have to be logged into the WebDatovka if you want to modify tags."));
-			return;
-		}
-
-		tagDb = globWebDatovkaTagDbPtr->accessTagDb(
-		    getWebDatovkaTagDbPrefix(userName));
-	} else {
-		tagDb = globTagDbPtr;
-	}
-	if (tagDb == Q_NULLPTR) {
+	if (globTagDbPtr == Q_NULLPTR) {
 		Q_ASSERT(0);
 		return;
 	}
 
 	QDialog *tagsDlg = Q_NULLPTR;
 
-	if (msgIdList.isEmpty() && msgIdWebDatovkaList.isEmpty()) {
-		tagsDlg = new DlgTags(userName, tagDb, this);
-	} else if (!msgIdList.isEmpty() && !msgIdWebDatovkaList.isEmpty()) {
-		Q_ASSERT(0);
-		return;
-	} else if ((!userName.isEmpty() && !msgIdList.isEmpty()) ||
-	           (!userName.isEmpty() && !msgIdWebDatovkaList.isEmpty())) {
+	if (msgIdList.isEmpty()) {
+		tagsDlg = new DlgTags(userName, globTagDbPtr, this);
+	} else if ((!userName.isEmpty() && !msgIdList.isEmpty()) || (!userName.isEmpty())) {
 		/*
 		 * FIXME -- The tags dialogue as it now exists is not suitable
 		 * for adding tags to messages.
 		 */
-		tagsDlg = new DlgTags(userName, tagDb, msgIdList,
-		    msgIdWebDatovkaList, this);
+		tagsDlg = new DlgTags(userName, globTagDbPtr, msgIdList, this);
 	} else {
 		Q_ASSERT(0);
 		return;
@@ -9074,12 +9010,6 @@ bool MainWindow::wdGetMessageList(const QString &userName)
 	if (!isWebDatovkaAccount(userName)) {
 		return false;
 	}
-
-	/* list of tags task */
-	TaskTagSyncAccount *tagtask;
-	tagtask = new (std::nothrow) TaskTagSyncAccount(userName);
-	tagtask->setAutoDelete(true);
-	globWorkPool.assignHi(tagtask);
 
 	int accountID = getWebDatovkaAccountId(userName);
 
