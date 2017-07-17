@@ -83,6 +83,11 @@ QString IsdsConversion::boxStateToText(int val)
 	}
 }
 
+/*
+ * DBTYPE_OVM_MAIN is a special value introduced in git version of libisds.
+ * It appears not to be included in officially released source packages.
+ * TODO -- Check the function of DBTYPE_OVM_MAIN.
+ */
 #define STR_OVM_MAIN "OVM_MAIN"
 #define STR_SYSTEM "SYSTEM"
 #define STR_OVM "OVM"
@@ -104,7 +109,7 @@ QString IsdsConversion::boxStateToText(int val)
 
 const QString &IsdsConversion::boxTypeToStr(int val)
 {
-	static const QString ovmMain(STR_OVM_MAIN), system(STR_SYSTEM),
+	static const QString system(STR_SYSTEM),
 	    ovm(STR_OVM), ovmNotar(STR_OVM_NOTAR), ovmExekut(STR_OVM_EXEKUT),
 	    ovmReq(STR_OVM_REQ), ovmFo(STR_OVM_FO), ovmPfo(STR_OVM_PFO),
 	    ovmPo(STR_OVM_PO), po(STR_PO), poZak(STR_PO_ZAK), poReq(STR_PO_REQ),
@@ -113,7 +118,6 @@ const QString &IsdsConversion::boxTypeToStr(int val)
 	static const QString invalid;
 
 	switch (val) {
-	case DBTYPE_OVM_MAIN: return ovmMain; break;
 	case DBTYPE_SYSTEM: return system; break;
 	case DBTYPE_OVM: return ovm; break;
 	case DBTYPE_OVM_NOTAR: return ovmNotar; break;
@@ -140,8 +144,7 @@ const QString &IsdsConversion::boxTypeToStr(int val)
 
 int IsdsConversion::boxTypeStrToInt(const QString &val)
 {
-	if (val == QLatin1String(STR_OVM_MAIN)) return DBTYPE_OVM_MAIN;
-	else if (val == QLatin1String(STR_SYSTEM)) return DBTYPE_SYSTEM;
+	if (val == QLatin1String(STR_SYSTEM)) return DBTYPE_SYSTEM;
 	else if (val == QLatin1String(STR_OVM)) return DBTYPE_OVM;
 	else if (val == QLatin1String(STR_OVM_NOTAR)) return DBTYPE_OVM_NOTAR;
 	else if (val == QLatin1String(STR_OVM_EXEKUT)) return DBTYPE_OVM_EXEKUT;
