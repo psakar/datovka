@@ -55,17 +55,6 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 	m_loginmethod = loginMethodIdx;
 
 	switch (m_loginmethod) {
-	case MOJEID:
-		this->certificateLabel->setEnabled(false);
-		this->addCertificateButton->setEnabled(false);
-		this->passwordLabel->setEnabled(false);
-		this->passwordLineEdit->setEnabled(false);
-		this->rememberPswcheckBox->setEnabled(false);
-		this->usernameLineEdit->setEnabled(false);
-		this->accountLineEdit->setEnabled(false);
-		this->testAccountCheckBox->setEnabled(false);
-		this->loginmethodComboBox->setEnabled(false);
-		break;
 	case CERTIFICATE:
 		this->certificateLabel->setEnabled(true);
 		this->addCertificateButton->setEnabled(true);
@@ -99,12 +88,6 @@ void DlgCreateAccount::checkInputFields(void)
 	bool buttonEnabled;
 
 	switch (m_loginmethod) {
-	case MOJEID:
-		buttonEnabled = true;
-		if (m_action == ACT_EDIT) {
-			this->accountLineEdit->setEnabled(true);
-		}
-		break;
 	case CERTIFICATE:
 		buttonEnabled = !this->accountLineEdit->text().isEmpty()
 		    && !this->usernameLineEdit->text().isEmpty()
@@ -238,10 +221,6 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 		break;
 	case AcntSettings::LIM_UNAME_PWD_TOTP:
 		itemIdx = TOTP;
-		break;
-	case AcntSettings::LIM_MOJE_ID:
-		this->loginmethodComboBox->addItem(tr("mojeID"));
-		itemIdx = MOJEID;
 		break;
 	default:
 		Q_ASSERT(0);

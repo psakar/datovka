@@ -38,7 +38,6 @@
 #include "src/models/files_model.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
-#include "src/web/json.h"
 #include "ui_dlg_send_message.h"
 
 /*!
@@ -199,16 +198,6 @@ private slots:
 	    const QString &dbIDRecipient, const QString &recipientName,
 	    bool isPDZ, qint64 dmId);
 
-	/*!
-	 * @brief Gathers status after sending messages via WebDatovka.
-	 *
-	 * @param[in] userName User name identifying the sender account.
-	 * @param[in] results List of result state descriptions.
-	 * @param[in] error Error description.
-	 */
-	void collectSendMessageStatusWebDatovka(const QString &userName,
-	    const QStringList &results, const QString &error);
-
 private:
 	/*!
 	 * @brief Initialises the dialogue content.
@@ -315,28 +304,6 @@ private:
 	void sendMessageISDS(
 	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
 
-	/*!
-	 * @brief Construct JSON envelope description.
-	 *
-	 * @param[out] envelope Envelope to be set.
-	 */
-	void buildEnvelopeWebDatovka(JsonLayer::Envelope &envelope) const;
-
-	/*!
-	 * @brief Construct list of JSON attachment descriptions.
-	 *
-	 * @param[out] fileList File list to append entries to.
-	 */
-	void buildFileListWebDatovka(QList<JsonLayer::File> &fileList) const;
-
-	/*!
-	 * @brief Send messages via WebDatovka interface.
-	 *
-	 * @param[in] recipEntries List of recipients.
-	 */
-	void sendMessageWebDatovka(
-	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
-
 	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
 	const QList<Task::AccountDescr> m_messageDbSetList; /*!< Available accounts.*/
 
@@ -347,7 +314,6 @@ private:
 	bool m_dbEffectiveOVM; /*! True if selected data box has effective OVM. */
 	bool m_dbOpenAddressing; /*! True if selected box has open addressing.  */
 	bool m_isLogged; /*!< True if account has already logged in. */
-	bool m_isWebDatovkaAccount; /*!< True if this is a WebDatovka account. */
 
 	QString m_lastAttAddPath; /*! Last attachment location. */
 	QString m_pdzCredit; /*! String containing credit value. */

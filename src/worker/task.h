@@ -30,7 +30,6 @@
 #include "src/common.h" // qdatovka_error, enum MessageDirection
 #include "src/io/message_db.h" // MessageDb::MsgId
 #include "src/io/message_db_set.h"
-#include "src/web/json.h"
 
 /*!
  * @brief Maximum length of message list to be downloaded.
@@ -114,13 +113,11 @@ protected:
 	 * @param[in]     msgDirect Received or sent message.
 	 * @param[in,out] dbSet     Database container.
 	 * @param[in]     envel     Message envelope.
-	 * @param[in]     msgId     Message webdatovka id or NULL.
 	 * @return Error state.
 	 */
 	static
 	qdatovka_error storeEnvelope(enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const struct isds_envelope *envel,
-	    QString msgId);
+	    MessageDbSet &dbSet, const struct isds_envelope *envel);
 
 	/*!
 	 * @brief Store message into database.
@@ -137,7 +134,7 @@ protected:
 	qdatovka_error storeMessage(bool signedMsg,
 	    enum MessageDirection msgDirect,
 	    MessageDbSet &dbSet, const struct isds_message *msg,
-	    const QString &progressLabel, QString msgId);
+	    const QString &progressLabel);
 
 	/*!
 	 * @brief Store attachments into database.
@@ -157,26 +154,11 @@ protected:
 	 * @param[in]     msgDirect Received or sent message.
 	 * @param[in,out] messageDb Database.
 	 * @param[in]     envel     Message envelope.
-	 * @param[in]     msgId     Message webdatovka id or NULL.
 	 * @return True on success.
 	 */
 	static
 	qdatovka_error updateEnvelope(enum MessageDirection msgDirect,
-	    MessageDb &messageDb, const struct isds_envelope *envel,
-	    QString msgId);
-
-	/*!
-	 * @brief Store envelope into database.
-	 *
-	 * @param[in]     msgDirect Received or sent message.
-	 * @param[in,out] dbSet     Database container.
-	 * @param[in]     envel     Message envelope.
-	 * @param[in]     isNew     true = insert into db, false = update in db.
-	 * @return Error state.
-	 */
-	static
-	qdatovka_error storeEnvelopeWebDatovka(enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const JsonLayer::Envelope &envel, bool isNew);
+	    MessageDb &messageDb, const struct isds_envelope *envel);
 
 private:
 //	/*!

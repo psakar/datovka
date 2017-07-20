@@ -46,8 +46,7 @@ public:
 		CERTIFICATE = 1,
 		USER_CERTIFICATE = 2,
 		HOTP = 3,
-		TOTP = 4,
-		MOJEID = 5
+		TOTP = 4
 	};
 
 	/*!

@@ -49,19 +49,6 @@ signals:
 	   bool listScheduled);
 
 	/*!
-	 * @brief Emitted when download message finishes - webdatovka.
-	 *
-	 * @param[in] usrName       Account identifier (user login name).
-	 * @param[in] msgId         Message identifier.
-	 * @param[in] result        Operation outcome
-	 *                          (enum TaskDownloadMessage::Result).
-	 * @param[in] errDesc       Error description string.
-	 * @param[in] listScheduled True if ran from download message list.
-	 */
-	void downloadMessageFinishedMojeId(const QString &usrName, qint64 msgId,
-	   int result, const QString &errDesc, bool listScheduled);
-
-	/*!
 	 * @brief Emitted when download message finishes.
 	 *
 	 * @param[in] usrName   Account identifier (user login name).
@@ -134,16 +121,6 @@ signals:
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
 	    bool isPDZ, qint64 dmId);
-
-	/*!
-	 * @brief Emitted when mojeid send message finishes.
-	 *
-	 * @param[in] userName      Account username.
-	 * @param[in] resultList    ResultList from webdatovka.
-	 * @param[in] error         Error message from netmanager.
-	 */
-	void sendMessageMojeIdFinished(const QString &userName,
-	    const QStringList &resultList, const QString &errStr);
 
 	/*!
 	 * @brief This signal is emitted when status bar text is changed

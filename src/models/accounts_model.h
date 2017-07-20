@@ -41,7 +41,6 @@
 #define LIM_USER_CERT "user_certificate"
 #define LIM_HOTP "hotp"
 #define LIM_TOTP "totp"
-#define LIM_MOJEID "mojeid"
 
 /*!
  * @brief Account hierarchy.

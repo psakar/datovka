@@ -61,17 +61,6 @@ public:
 	bool insertTag(const QString &tagName, const QString &tagColor);
 
 	/*!
-	 * @brief Insert new or update webdatovka tag into database file.
-	 *
-	 * @param[in] id            id of tag form webdatovka.
-	 * @param[in] tagName       text label of tag.
-	 * @param[in] tagColor      color of tag in HEX format.
-	 * @return True on success, false on any error.
-	 */
-	bool insertUpdateWebDatovkaTag(int id, const QString &tagName,
-	    const QString &tagColor);
-
-	/*!
 	 * @brief Update tag in database file.
 	 *
 	 * @param[in] id            id of tag.

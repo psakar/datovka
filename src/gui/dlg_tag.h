@@ -42,23 +42,20 @@ public:
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName     Account user name.
-	 * @param[in] isWebDatovka is Webdatovka account.
 	 * @param[in] parent       Parent widget.
 	 */
 	explicit DlgTag(const QString &userName, TagDb *tagDb,
-	    bool isWebDatovkaAccount, QWidget *parent = Q_NULLPTR);
+	    QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName     Account user name.
-	 * @param[in] isWebDatovka is Webdatovka account.
 	 * @param[in] tag          Tag.
 	 * @param[in] parent       Parent widget.
 	 */
 	explicit DlgTag(const QString &userName, TagDb *tagDb,
-	    bool isWebDatovkaAccount, const TagItem &tag,
-	    QWidget *parent = Q_NULLPTR);
+	    const TagItem &tag, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -84,7 +81,6 @@ private:
 
 	const QString m_userName; /*!< Account username. */
 	TagDb *m_tagDbPtr; /*!< Tag db pointer. */
-	const bool m_isWebDatovkaAccount; /*!< is WebDatovka account. */
 	TagItem m_tagItem; /*!< Created tag. */
 };
 

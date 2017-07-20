@@ -46,7 +46,6 @@
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
 #include "src/single/single_instance.h"
-#include "src/web/json.h"
 #include "src/worker/task.h" /* TODO -- remove this header file. */
 
 /* Forward declaration as we don;t wan to pull-in all header file content. */
@@ -90,12 +89,6 @@ public:
 	static
 	MessageDbSet *accountDbSet(const QString &userName, MainWindow *mw);
 
-	/*!
-	 * @brief Get account list from Webdatovka.
-	 */
-	bool wdGetAccountList(const QString &userName,
-	    const QNetworkCookie &sessionid, bool syncWithAll);
-
 protected:
 	/*!
 	 * @brief Check if some worker is working on the background and show
@@ -123,13 +116,6 @@ protected:
 	virtual
 	void showEvent(QShowEvent *event) Q_DECL_OVERRIDE;
 
-public slots:
-
-	/*!
-	 * @brief Login to mojeID.
-	 */
-	void loginToMojeId(const QString &userName);
-
 private slots:
 	/*!
 	 * @brief Refresh AccountList.
@@ -155,14 +141,6 @@ private slots:
 	    bool listScheduled);
 
 	/*!
-	 * @brief Performs action depending on message download outcome
-	 *        for webdatovka.
-	 */
-	void collectDownloadMessageMojeId(const QString &usrName,
-	    qint64 msgId, int result, const QString &errDesc,
-	    bool listScheduled);
-
-	/*!
 	 * @brief Performs action depending on message list download outcome.
 	 */
 	void collectDownloadMessageListStatus(const QString &usrName,
@@ -182,12 +160,6 @@ private slots:
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
 	    bool isPDZ, qint64 dmId);
-
-	/*!
-	 * @brief Performs action depending on webdatovka message send outcome.
-	 */
-	void sendMessageMojeIdAction(const QString &userName,
-	    const QStringList &result, const QString &error);
 
 	/*!
 	 * @brief Version response slot.
@@ -398,11 +370,6 @@ private slots:
 	void deleteMessage(void);
 
 	/*!
-	 * @brief Delete selected message(s) from local database and Webdatovka.
-	 */
-	void deleteMessageWebdatovka(const QString &userName);
-
-	/*!
 	 * @brief Downloads new messages from server for all accounts.
 	 */
 	void synchroniseAllAccounts(void);
@@ -467,11 +434,6 @@ private slots:
 	 * @brief Show add new account dialog.
 	 */
 	void showAddNewAccountDialog(void);
-
-	/*!
-	 * @brief Add mojeID account action and dialog.
-	 */
-	void addNewMojeIDAccount(void);
 
 	/*!
 	 * @brief Deletion confirmation dialog.
@@ -728,10 +690,6 @@ private slots:
 	 */
 	void vacuumMsgDbSlot(void);
 
-	void callMojeId(const QString &user, const QString &lastUrl,
-	    const QString &token, QString userName, QString pwd, QString otp,
-	    bool syncALL, const QString &certPath);
-
 	/*!
 	 * @brief Show information about import message results.
 	 */
@@ -752,21 +710,8 @@ private:
 	 * @param[in] userName Account login string. Must be supplied when
 	 *                     message identifiers are passed.
 	 * @param[in] msgIdList Messages whose tags should be edited.
-	 * @param[in] msgIdWebDatovkaList Webdatovka messages whose tags should
-	 *                                be edited.
 	 */
-	void modifyTags(const QString &userName, QList<qint64> msgIdList,
-	    QList<qint64> msgIdWebDatovkaList);
-
-	/*!
-	 * @brief Get message list from webdatovka server.
-	 */
-	bool wdGetMessageList(const QString &userName);
-
-	/*!
-	 * @brief Do sync of account in the webdatovka server.
-	 */
-	bool wdSyncAccount(const QString &userName);
+	void modifyTags(const QString &userName, QList<qint64> msgIdList);
 
 	/*!
 	 * @brief Show status bar text with timeout.
@@ -1123,23 +1068,6 @@ private:
 	 */
 	void exportExpirMessagesToZFO(const QString &userName,
 	    const QList<MessageDb::MsgId> &expirMsgIds);
-
-	/*!
-	 * @brief Show dialog for webdatovka account
-	 *        that action is not implemented.
-	 * @param[in] userName - account username.
-	 * @param[in] txt        additional info text.
-	 */
-	void showWebDatovkaInfoDialog(const QString &userName, QString txt);
-
-	/*!
-	 * @brief Test if exists another mojeID account with same userId
-	 *        when we delete any mojeID acccount.
-	 *
-	 * @param[in] userName - account username.
-	 * @return true if any account exists
-	 */
-	bool existsAnotherMojeIdAccountWithSameUserId(const QString &userName);
 
 	/*!
 	 * @brief Export selected messages to disk.

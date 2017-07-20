@@ -254,7 +254,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 
 			/* Store envelope in new location. */
 			Task::storeEnvelope(msgDirect, dbSet,
-			    message->envelope, NULL);
+			    message->envelope);
 		}
 		/* Update message delivery time. */
 		mId.deliveryTime = newDeliveryTime;
@@ -262,7 +262,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 
 	/* Store the message. */
 	Task::storeMessage(signedMsg, msgDirect, dbSet, message,
-	    progressLabel, NULL);
+	    progressLabel);
 
 	emit globMsgProcEmitter.progressChange(progressLabel, 90);
 

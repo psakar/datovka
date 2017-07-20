@@ -66,8 +66,7 @@ public:
 		LIM_UNAME_CRT, /*!< User name and certificate. */
 		LIM_UNAME_PWD_CRT, /*!< User name, password and certificate. */
 		LIM_UNAME_PWD_HOTP, /*!< User name, password and HOTP. */
-		LIM_UNAME_PWD_TOTP, /*!< User name, password and TOTP (SMS). */
-		LIM_MOJE_ID /*!< MOJEID. */
+		LIM_UNAME_PWD_TOTP /*!< User name, password and TOTP (SMS). */
 	};
 
 	/*!
