@@ -310,7 +310,8 @@ void DlgChangePwd::changePassword(void)
 		Q_ASSERT(!m_userName.isEmpty());
 		QString error = tr("Error: ") + errorStr;
 		if (!longErrorStr.isEmpty()) {
-			error = tr("ISDS returns: ") + longErrorStr;
+			error = tr("ISDS returns") + QLatin1String(": ") +
+			    longErrorStr;
 		}
 
 		QMessageBox::warning(this, tr("Password error"),

@@ -42,7 +42,7 @@
       <number>1</number>
      </property>
      <property name="text">
-      <string>The HTTPS protocol is used when accessing the Databox server while HTTP is used to download the certificate revocation list and information about new Datovka versions. </string>
+      <string>The HTTPS protocol is used when accessing the Databox server while HTTP is used to download the certificate revocation list and information about new Datovka versions.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

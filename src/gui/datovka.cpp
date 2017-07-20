@@ -2148,7 +2148,8 @@ void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
 		msgBox.setWindowTitle(tr("Download message list error"));
 		msgBox.setText(errorMessage);
 		if (!errDesc.isEmpty()) {
-			msgBox.setInformativeText(tr("Server: ") + errDesc);
+			msgBox.setInformativeText(
+			    tr("Server") + QLatin1String(": ") + errDesc);
 		} else {
 			msgBox.setInformativeText(
 			    tr("A connection error occurred."));

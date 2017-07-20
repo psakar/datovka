@@ -582,13 +582,13 @@ všech účtů na pozadí aplikace</translation>
 <context>
     <name>DbMsgsTblModel</name>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="468"/>
-        <location filename="../src/models/messages_model.cpp" line="507"/>
+        <location filename="../src/models/messages_model.cpp" line="467"/>
+        <location filename="../src/models/messages_model.cpp" line="506"/>
         <source>Attachments downloaded</source>
         <translation>Přílohy staženy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="476"/>
+        <location filename="../src/models/messages_model.cpp" line="475"/>
         <source>Processing state</source>
         <translation>Stav vyřizování</translation>
     </message>
@@ -739,21 +739,21 @@ všech účtů na pozadí aplikace</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_change_pwd.cpp" line="313"/>
-        <source>ISDS returns: </source>
-        <translation>ISDS vrací:</translation>
+        <source>ISDS returns</source>
+        <translation>ISDS vrací</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_change_pwd.cpp" line="317"/>
+        <location filename="../src/gui/dlg_change_pwd.cpp" line="318"/>
         <source>An error occurred while password was changed.</source>
         <translation>Nastala chyba v průběhu změny hesla.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_change_pwd.cpp" line="319"/>
+        <location filename="../src/gui/dlg_change_pwd.cpp" line="320"/>
         <source>You have to fix the problem and try to again.</source>
         <translation>Napravte chybu a zkuste to znovu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_change_pwd.cpp" line="316"/>
+        <location filename="../src/gui/dlg_change_pwd.cpp" line="317"/>
         <source>Password error</source>
         <translation>Chybné heslo</translation>
     </message>
@@ -1014,10 +1014,6 @@ všech účtů na pozadí aplikace</translation>
         <translation>Zadejte heslo/certifikát pro účet %1</translation>
     </message>
     <message>
-        <source>mojeID</source>
-        <translation type="vanished">mojeID</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_create_account.cpp" line="116"/>
         <source>Open Certificate</source>
         <translation>Otevřít certifikát</translation>
@@ -1238,44 +1234,6 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <location filename="../src/gui/dlg_ds_search.cpp" line="623"/>
         <source>Search error</source>
         <translation>Chyba při vyhledávání</translation>
-    </message>
-</context>
-<context>
-    <name>DlgDsSearchMojeId</name>
-    <message>
-        <source>Search</source>
-        <translation type="vanished">Vyhledat</translation>
-    </message>
-    <message>
-        <source>Search next</source>
-        <translation type="vanished">Vyhledat další</translation>
-    </message>
-</context>
-<context>
-    <name>DlgLoginToMojeId</name>
-    <message>
-        <source>Password</source>
-        <translation type="vanished">Heslo</translation>
-    </message>
-    <message>
-        <source>Certificate</source>
-        <translation type="vanished">Certifikát</translation>
-    </message>
-    <message>
-        <source>Password + Secure code</source>
-        <translation type="vanished">Heslo + Bezpečnostní kód</translation>
-    </message>
-    <message>
-        <source>Login to account: %1</source>
-        <translation type="vanished">Přihlásit se do účtu: %1</translation>
-    </message>
-    <message>
-        <source>Open Certificate</source>
-        <translation type="vanished">Otevřít certifikát</translation>
-    </message>
-    <message>
-        <source>Certificate Files (*.p12 *.pem)</source>
-        <translation type="vanished">Soubory certifikátů (*.p12 *.pem)</translation>
     </message>
 </context>
 <context>
@@ -1760,22 +1718,6 @@ zprávu &apos;%1&apos;.</translation>
         <translation>Tag nebyl vytvořen.</translation>
     </message>
     <message>
-        <source>Tag update error</source>
-        <translation type="vanished">Chyba aktualizace tagu</translation>
-    </message>
-    <message>
-        <source>Tag with name &apos;%1&apos;&apos; wasn&apos;t updated in the WebDatovka database.</source>
-        <translation type="vanished">Tag pojmenovaný &apos;%1&apos; nebyl aktualizován v databázi WebDatovky.</translation>
-    </message>
-    <message>
-        <source>Tag insert error</source>
-        <translation type="vanished">Chyba vložení tagu</translation>
-    </message>
-    <message>
-        <source>Tag with name &apos;%1&apos;&apos; wasn&apos;t&apos; created in WebDatovka database.</source>
-        <translation type="vanished">Tag pojmenovaný &apos;%1&apos; nebyl vytvořen v databázi WebDatovky.</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_tag.cpp" line="103"/>
         <source>Tag with name &apos;%1&apos;&apos; already exists in database.</source>
         <translation>Tag se jménem &apos;%1&apos; již v databázi existuje.</translation>
@@ -2043,41 +1985,6 @@ datové zprávy.</translation>
     </message>
 </context>
 <context>
-    <name>DsSearchMojeId</name>
-    <message>
-        <source>Search recipient</source>
-        <translation type="vanished">Vyhledat příjemce</translation>
-    </message>
-    <message>
-        <source>Current account:</source>
-        <translation type="vanished">Aktuální účet:</translation>
-    </message>
-    <message>
-        <source>n/a</source>
-        <translation type="vanished">n/a</translation>
-    </message>
-    <message>
-        <source>Keyword:</source>
-        <translation type="vanished">Klíčové slovo:</translation>
-    </message>
-    <message>
-        <source>Search</source>
-        <translation type="vanished">Vyhledat</translation>
-    </message>
-    <message>
-        <source>ID</source>
-        <translation type="vanished">ID</translation>
-    </message>
-    <message>
-        <source>Name</source>
-        <translation type="vanished">Jméno</translation>
-    </message>
-    <message>
-        <source>Address</source>
-        <translation type="vanished">Adresa</translation>
-    </message>
-</context>
-<context>
     <name>ErrorEntry</name>
     <message>
         <location filename="../src/records_management/json/entry_error.cpp" line="136"/>
@@ -2247,232 +2154,232 @@ zanést neplatná data.</translation>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="51"/>
         <source>The data box is accessible. It is possible to send messages into it. It can be looked up on the Portal.</source>
-        <translation type="unfinished">Datová schránka je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat.</translation>
+        <translation>Datová schránka je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="56"/>
         <source>The data box is temporarily inaccessible (at own request). It may be made accessible again at some point in the future.</source>
-        <translation type="unfinished">Datová schránka je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna.</translation>
+        <translation>Datová schránka je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="61"/>
         <source>The data box is so far inactive. The owner of the box has to log into the web interface at first in order to activate the box.</source>
-        <translation type="unfinished">Datová schránka je dosud neaktivní. Vlastník schránky se musí poprvé přihlásit do webového rozhraní, aby došlo k aktivaci schránky.</translation>
+        <translation>Datová schránka je dosud neaktivní. Vlastník schránky se musí poprvé přihlásit do webového rozhraní, aby došlo k aktivaci schránky.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="66"/>
         <source>The data box is permanently inaccessible. It is waiting to be deleted (but it may be made accessible again).</source>
-        <translation type="unfinished">Datová schránka je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna).</translation>
+        <translation>Datová schránka je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna).</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="71"/>
         <source>The data box has been deleted (none the less it exists in ISDS).</source>
-        <translation type="unfinished">Datová schránka byla smazána (přesto existuje v ISDS).</translation>
+        <translation>Datová schránka byla smazána (přesto existuje v ISDS).</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="76"/>
         <source>The data box is temporarily inaccessible (because of reasons listed in law). It may be made accessible again at some point in the future.</source>
-        <translation type="unfinished"></translation>
+        <translation>Datová schránka je dočasně znepřístupněna (z důvodů vyjmenovaných v zákoně), může být později opět zpřístupněna.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="81"/>
         <source>An error occurred while checking the status.</source>
-        <translation type="unfinished">Došlo k chybě při zjišťování stavu.</translation>
+        <translation>Došlo k chybě při zjišťování stavu.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="174"/>
         <source>System ISDS</source>
-        <translation type="unfinished">Systém ISDS</translation>
+        <translation>Systém ISDS</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="175"/>
         <source>Public authority</source>
-        <translation type="unfinished">Orgán veřejné moci (OVM)</translation>
+        <translation>Orgán veřejné moci (OVM)</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="176"/>
         <source>Legal person</source>
-        <translation type="unfinished">Právnická osoba (PO)</translation>
+        <translation>Právnická osoba (PO)</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="177"/>
         <source>Self-employed person</source>
-        <translation type="unfinished">Podnikající fyzická osoba (OSVČ)</translation>
+        <translation>Podnikající fyzická osoba (OSVČ)</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="178"/>
         <source>Natural person</source>
-        <translation type="unfinished">Fyzická osoba (FO)</translation>
+        <translation>Fyzická osoba (FO)</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="196"/>
         <source>Postal data message</source>
-        <translation type="unfinished">Poštovní datová zpráva</translation>
+        <translation>Poštovní datová zpráva</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="199"/>
         <source>Initialising postal data message</source>
-        <translation type="unfinished"></translation>
+        <translation>Inicializační poštovní datová zpráva</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="202"/>
         <source>Reply postal data message</source>
-        <translation type="unfinished">Odpovědní poštovní datová zpráva</translation>
+        <translation>Odpovědní poštovní datová zpráva</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="205"/>
         <source>Initialising postal data message - expired</source>
-        <translation type="unfinished"></translation>
+        <translation>Inicializační poštovní datová zpráva - propadlá</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="208"/>
         <source>Initialising postal data message - used</source>
-        <translation type="unfinished"></translation>
+        <translation>Inicializační poštovní datová zpráva - použitá</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="309"/>
         <source>Message has been submitted (has been created in ISDS)</source>
-        <translation type="unfinished">Zpráva byla podána (vznikla v ISDS)</translation>
+        <translation>Zpráva byla podána (vznikla v ISDS)</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="315"/>
         <source>Data message including its attachments signed with time-stamp.</source>
-        <translation type="unfinished">Datová zpráva včetně písemností podepsána časovým razítkem.</translation>
+        <translation>Datová zpráva včetně písemností podepsána časovým razítkem.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="322"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
-        <translation type="unfinished">Zpráva neprošla AV kontrolou; nakažená písemnost je smazána; konečný stav zprávy před smazáním.</translation>
+        <translation>Zpráva neprošla AV kontrolou; nakažená písemnost je smazána; konečný stav zprávy před smazáním.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="327"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
-        <translation type="unfinished">Zpráva dodána do ISDS (zapsán čas dodání).</translation>
+        <translation>Zpráva dodána do ISDS (zapsán čas dodání).</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="335"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of acceptance through fiction in non-OVM DS); this state cannot occur for commercial messages.</source>
-        <translation type="unfinished">Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u ne-OVM DS); tento stav nemůže nastat v případě poštovních datových zpráv.</translation>
+        <translation>Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u ne-OVM DS); tento stav nemůže nastat v případě poštovních datových zpráv.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="345"/>
         <source>A person authorised to read this message has logged in -- delivered message has been accepted.</source>
-        <translation type="unfinished">Osoba oprávněná číst tuto zprávu se přihlásila -- dodaná zpráva byla doručena.</translation>
+        <translation>Osoba oprávněná číst tuto zprávu se přihlásila -- dodaná zpráva byla doručena.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="350"/>
         <source>Message has been read (on the portal or by ESS action).</source>
-        <translation type="unfinished">Zpráva byla přečtena (na portále nebo akcí ESS).</translation>
+        <translation>Zpráva byla přečtena (na portále nebo akcí ESS).</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="357"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
-        <translation type="unfinished">Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
+        <translation>Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="365"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
-        <translation type="unfinished">Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
+        <translation>Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="370"/>
         <source>Message resides in data vault.</source>
-        <translation type="unfinished">Zpráva je v Datovém trezoru.</translation>
+        <translation>Zpráva je v Datovém trezoru.</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="418"/>
         <source>Primary user</source>
-        <translation type="unfinished">Oprávněná osoba</translation>
+        <translation>Oprávněná osoba</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="421"/>
         <source>Entrusted user</source>
-        <translation type="unfinished">Pověřená osoba</translation>
+        <translation>Pověřená osoba</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="424"/>
         <source>Administrator</source>
-        <translation type="unfinished">Administrátor</translation>
+        <translation>Administrátor</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="427"/>
         <source>Official</source>
-        <translation type="unfinished">Oficiální</translation>
+        <translation>Oficiální</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="430"/>
         <source>Virtual</source>
-        <translation type="unfinished">Virtuální</translation>
+        <translation>Virtuální</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="432"/>
         <source>???</source>
-        <translation type="unfinished"></translation>
+        <translation>???</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="434"/>
         <source>Liquidator</source>
-        <translation type="unfinished"></translation>
+        <translation>Likvidátor</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="436"/>
         <source>Receiver</source>
-        <translation type="unfinished"></translation>
+        <translation>Nucený správce</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="438"/>
         <source>Guardian</source>
-        <translation type="unfinished"></translation>
+        <translation>Opatrovník</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="475"/>
         <source>Full control</source>
-        <translation type="unfinished">Plný přístup</translation>
+        <translation>Plný přístup</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="477"/>
         <source>Restricted control</source>
-        <translation type="unfinished">Omezený přístup</translation>
+        <translation>Omezený přístup</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="482"/>
         <source>download and read incoming DM</source>
-        <translation type="unfinished">stahovat a číst došlé DZ</translation>
+        <translation>stahovat a číst došlé DZ</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="488"/>
         <source>download and read DM sent into own hands</source>
-        <translation type="unfinished">stahovat a číst DZ určené do vlastních rukou</translation>
+        <translation>stahovat a číst DZ určené do vlastních rukou</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="493"/>
         <source>create and send DM, download sent DM</source>
-        <translation type="unfinished">vytvářet a odesílat DZ, stahovat odeslané DZ</translation>
+        <translation>vytvářet a odesílat DZ, stahovat odeslané DZ</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="498"/>
         <source>retrieve DM lists, delivery and acceptance reports</source>
-        <translation type="unfinished">načítat seznamy DZ, dodejky a doručenky</translation>
+        <translation>načítat seznamy DZ, dodejky a doručenky</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="503"/>
         <source>search for data boxes</source>
-        <translation type="unfinished">vyhledávat DS</translation>
+        <translation>vyhledávat DS</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="507"/>
         <source>manage the data box</source>
-        <translation type="unfinished">spravovat DS</translation>
+        <translation>spravovat DS</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="511"/>
         <source>read message in data vault</source>
-        <translation type="unfinished">číst zprávy v datovém trezoru</translation>
+        <translation>číst zprávy v datovém trezoru</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="515"/>
         <source>erase messages from data vault</source>
-        <translation type="unfinished">mazat zprávy v datovém trezoru</translation>
+        <translation>mazat zprávy v datovém trezoru</translation>
     </message>
 </context>
 <context>
@@ -2674,98 +2581,6 @@ zanést neplatná data.</translation>
     </message>
 </context>
 <context>
-    <name>JsonLayer</name>
-    <message>
-        <source>Login to mojeID failed. You must choose correct login method and enter correct login data. Try again.</source>
-        <translation type="vanished">Přihlášení do mojeID selhalo. Musíte vybrat správný způsob přihlašování a zadat správné přihlašovací údaje. Zkuste to znovu.</translation>
-    </message>
-    <message>
-        <source>Cannot open client certificate from path &apos;%1&apos;</source>
-        <translation type="vanished">Nelze otevřít certifikát z cesty &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>Certificate password</source>
-        <translation type="vanished">Heslo certifikátu</translation>
-    </message>
-    <message>
-        <source>Enter certificate password:</source>
-        <translation type="vanished">Zadejte heslo k certifikátu:</translation>
-    </message>
-    <message>
-        <source>Cannot parse client certificate from path &apos;%1&apos;</source>
-        <translation type="vanished">Nemohu načíst certifikát z cesty &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>User is not logged to mojeID</source>
-        <translation type="vanished">Uživatel není přihlášen do mojeID</translation>
-    </message>
-    <message>
-        <source>Reply content missing</source>
-        <translation type="vanished">Chybí obsah odpovědi</translation>
-    </message>
-</context>
-<context>
-    <name>LoginToMojeId</name>
-    <message>
-        <source>Add a new mojeID account(s)</source>
-        <translation type="vanished">Přidejte účet mojeID</translation>
-    </message>
-    <message>
-        <source>Please select login method and enter credentials for mojeID.</source>
-        <translation type="vanished">Vyberte způsob přihlašování a zadejte přihlašovací údaje do mojeID.</translation>
-    </message>
-    <message>
-        <source>Login method:</source>
-        <translation type="vanished">Způsob přihlášení:</translation>
-    </message>
-    <message>
-        <source>Select authorization method for login into your databox</source>
-        <translation type="vanished">Vyberte metodu přihlašování do datové schránky</translation>
-    </message>
-    <message>
-        <source>Username:</source>
-        <translation type="vanished">Uživatelské jméno:</translation>
-    </message>
-    <message>
-        <source>Enter your username</source>
-        <translation type="vanished">Zadejte své přihlašovací jméno</translation>
-    </message>
-    <message>
-        <source>Password:</source>
-        <translation type="vanished">Heslo:</translation>
-    </message>
-    <message>
-        <source>Enter your password</source>
-        <translation type="vanished">Zadejte své heslo</translation>
-    </message>
-    <message>
-        <source>Certificate file:</source>
-        <translation type="vanished">Soubor certifikátu:</translation>
-    </message>
-    <message>
-        <source>Select a certificate</source>
-        <translation type="vanished">Vyberte certifikát</translation>
-    </message>
-    <message>
-        <source>Add</source>
-        <translation type="vanished">Přidat</translation>
-    </message>
-    <message>
-        <source>Security code (OTP):</source>
-        <translation type="vanished">Bezpečnostní kód (OTP):</translation>
-    </message>
-    <message>
-        <source>Account will be included into synchronisation
-process of all accounts on the background</source>
-        <translation type="vanished">Účet bude zahrnut do hromadné synchronizace
-všech účtů na pozadí aplikace</translation>
-    </message>
-    <message>
-        <source>Synchronise account(s) when &quot;Synchronise all&quot; is activated</source>
-        <translation type="vanished">Synchronizovat účet při aktivaci hromadné synchronizace</translation>
-    </message>
-</context>
-<context>
     <name>MainWindow</name>
     <message>
         <location filename="../src/gui/datovka.cpp" line="8238"/>
@@ -2778,7 +2593,7 @@ všech účtů na pozadí aplikace</translation>
         <translation>Režim: nepřipojeno (offline)</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="818"/>
+        <location filename="../src/gui/datovka.cpp" line="817"/>
         <source>All messages</source>
         <translation>Všechny zprávy</translation>
     </message>
@@ -3025,128 +2840,133 @@ všech účtů na pozadí aplikace</translation>
         <translation>Zpráva není autentická</translation>
     </message>
     <message>
+        <location filename="../src/gui/datovka.cpp" line="437"/>
         <location filename="../src/gui/datovka.cpp" line="438"/>
-        <location filename="../src/gui/datovka.cpp" line="439"/>
         <source>disk</source>
         <translation>disk</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="287"/>
+        <location filename="../src/gui/datovka.cpp" line="286"/>
         <source>Uploaded to records management service</source>
         <translation>Nahráno do spisové služby</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="442"/>
-        <location filename="../src/gui/datovka.cpp" line="446"/>
+        <location filename="../src/gui/datovka.cpp" line="441"/>
+        <location filename="../src/gui/datovka.cpp" line="445"/>
         <source>memory</source>
         <translation>paměť</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="449"/>
+        <location filename="../src/gui/datovka.cpp" line="448"/>
         <source>Storage:</source>
         <translation>Úložiště:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="515"/>
+        <location filename="../src/gui/datovka.cpp" line="514"/>
         <source>New version of Datovka is available:</source>
         <translation>Nová verze Datovky je k dispozici:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="519"/>
-        <location filename="../src/gui/datovka.cpp" line="535"/>
+        <location filename="../src/gui/datovka.cpp" line="518"/>
+        <location filename="../src/gui/datovka.cpp" line="534"/>
         <source>New version of Datovka</source>
         <translation>Nová verze Datovky</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="520"/>
-        <location filename="../src/gui/datovka.cpp" line="536"/>
+        <location filename="../src/gui/datovka.cpp" line="519"/>
+        <location filename="../src/gui/datovka.cpp" line="535"/>
         <source>New version of Datovka is available.</source>
         <translation>Nová verze Datovky je k dispozici.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="521"/>
+        <location filename="../src/gui/datovka.cpp" line="520"/>
         <source>Current version is %1</source>
         <translation>Vaše současná verze je %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="524"/>
+        <location filename="../src/gui/datovka.cpp" line="523"/>
         <source>New version is %1</source>
         <translation>Nová verze je %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="526"/>
+        <location filename="../src/gui/datovka.cpp" line="525"/>
         <source>Do you want to download new version?</source>
         <translation>Chcete nyní stáhnout novou verzi?</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="537"/>
+        <location filename="../src/gui/datovka.cpp" line="536"/>
         <source>Current version is &quot;%1&quot;</source>
         <translation>Vaše verze je &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="540"/>
+        <location filename="../src/gui/datovka.cpp" line="539"/>
         <source>New version is &quot;%1&quot;</source>
         <translation>Nová verze je &quot;%1&quot;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="542"/>
+        <location filename="../src/gui/datovka.cpp" line="541"/>
         <source>Update your application...</source>
         <translation>Aktualizujte aplikaci...</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="769"/>
+        <location filename="../src/gui/datovka.cpp" line="768"/>
         <source>Database files for account &apos;%1&apos; cannot be accessed in location &apos;%2&apos;.</source>
         <translation>Databázové soubory pro účet &apos;%1&apos; nelze zpřístupnit ve složce &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="828"/>
+        <location filename="../src/gui/datovka.cpp" line="827"/>
         <source>All received messages</source>
         <translation>Všechny přijaté zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="844"/>
+        <location filename="../src/gui/datovka.cpp" line="843"/>
         <source>All sent messages</source>
         <translation>Všechny odeslané zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1029"/>
-        <location filename="../src/gui/datovka.cpp" line="1043"/>
-        <location filename="../src/gui/datovka.cpp" line="1057"/>
-        <location filename="../src/gui/datovka.cpp" line="1379"/>
+        <location filename="../src/gui/datovka.cpp" line="1028"/>
+        <location filename="../src/gui/datovka.cpp" line="1042"/>
+        <location filename="../src/gui/datovka.cpp" line="1056"/>
+        <location filename="../src/gui/datovka.cpp" line="1378"/>
         <source>As Unsettled</source>
         <translation>Nevyřízeno</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1031"/>
-        <location filename="../src/gui/datovka.cpp" line="1045"/>
-        <location filename="../src/gui/datovka.cpp" line="1059"/>
-        <location filename="../src/gui/datovka.cpp" line="1381"/>
+        <location filename="../src/gui/datovka.cpp" line="1030"/>
+        <location filename="../src/gui/datovka.cpp" line="1044"/>
+        <location filename="../src/gui/datovka.cpp" line="1058"/>
+        <location filename="../src/gui/datovka.cpp" line="1380"/>
         <source>As in Progress</source>
         <translation>Vyřizuje se</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1033"/>
-        <location filename="../src/gui/datovka.cpp" line="1047"/>
-        <location filename="../src/gui/datovka.cpp" line="1061"/>
-        <location filename="../src/gui/datovka.cpp" line="1383"/>
+        <location filename="../src/gui/datovka.cpp" line="1032"/>
+        <location filename="../src/gui/datovka.cpp" line="1046"/>
+        <location filename="../src/gui/datovka.cpp" line="1060"/>
+        <location filename="../src/gui/datovka.cpp" line="1382"/>
         <source>As Settled</source>
         <translation>Vyřízeno</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1999"/>
+        <location filename="../src/gui/datovka.cpp" line="1998"/>
         <location filename="../src/gui/datovka.cpp" line="6302"/>
         <source>Select target folder to save</source>
         <translation>Vyberte cílovou složku pro uložení</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2019"/>
+        <location filename="../src/gui/datovka.cpp" line="2018"/>
         <source>Error saving of attachments</source>
         <translation>Chyba při ukládání příloh</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2020"/>
+        <location filename="../src/gui/datovka.cpp" line="2019"/>
         <source>Some attachments of message &apos;%1&apos; were not saved to target folder!</source>
         <translation>Některé přílohy zprávy &apos;%1&apos; nebyly uloženy do cílové složky!</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/datovka.cpp" line="2152"/>
+        <source>Server</source>
+        <translation>Server</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="6236"/>
@@ -3234,44 +3054,44 @@ všech účtů na pozadí aplikace</translation>
         <translation>Vyřizuje se</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="767"/>
+        <location filename="../src/gui/datovka.cpp" line="766"/>
         <source>Database access error</source>
         <translation>Chyba přístupu k databázi</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="772"/>
+        <location filename="../src/gui/datovka.cpp" line="771"/>
         <source>The file cannot be accessed or is corrupted. Please fix the access privileges or remove or rename the file so that the application can create a new empty file.</source>
         <translation>Nelze přistoupik k souboru nebo je soubor poškozen. Opravte prosím přístupová oprávnění nebo odstraňte nebo přejmenujte soubor, aby aplikace mohla vytvořit nový prázdný soubor.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="777"/>
+        <location filename="../src/gui/datovka.cpp" line="776"/>
         <source>Create a backup copy of the affected file. This will help when trying to perform data recovery.</source>
         <translation>Vytvořte si kopii postiženého souboru. Může to pomoct při případném obnovování dat.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="780"/>
+        <location filename="../src/gui/datovka.cpp" line="779"/>
         <source>In general, it is recommended to create backup copies of the database files to prevent data loss.</source>
         <translation>Všeobecně je doporučováno vyrábět záložní kopie databázových souborů aby se zamezilo ztrátě dat.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1018"/>
-        <location filename="../src/gui/datovka.cpp" line="1370"/>
+        <location filename="../src/gui/datovka.cpp" line="1017"/>
+        <location filename="../src/gui/datovka.cpp" line="1369"/>
         <source>Mark</source>
         <translation>Označit</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1023"/>
-        <location filename="../src/gui/datovka.cpp" line="1037"/>
-        <location filename="../src/gui/datovka.cpp" line="1051"/>
-        <location filename="../src/gui/datovka.cpp" line="1373"/>
+        <location filename="../src/gui/datovka.cpp" line="1022"/>
+        <location filename="../src/gui/datovka.cpp" line="1036"/>
+        <location filename="../src/gui/datovka.cpp" line="1050"/>
+        <location filename="../src/gui/datovka.cpp" line="1372"/>
         <source>As Read</source>
         <translation>Přečtené</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1025"/>
-        <location filename="../src/gui/datovka.cpp" line="1039"/>
-        <location filename="../src/gui/datovka.cpp" line="1053"/>
-        <location filename="../src/gui/datovka.cpp" line="1375"/>
+        <location filename="../src/gui/datovka.cpp" line="1024"/>
+        <location filename="../src/gui/datovka.cpp" line="1038"/>
+        <location filename="../src/gui/datovka.cpp" line="1052"/>
+        <location filename="../src/gui/datovka.cpp" line="1374"/>
         <source>As Unread</source>
         <translation>Nepřečtené</translation>
     </message>
@@ -3282,17 +3102,17 @@ všech účtů na pozadí aplikace</translation>
         <translation>Nemohu uložit soubor &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2149"/>
+        <location filename="../src/gui/datovka.cpp" line="2148"/>
         <source>Download message list error</source>
         <translation>Chyba stahování seznamu zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2109"/>
+        <location filename="../src/gui/datovka.cpp" line="2108"/>
         <source>ISDS: </source>
         <translation>ISDS: </translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2106"/>
+        <location filename="../src/gui/datovka.cpp" line="2105"/>
         <source>It was not possible to download a complete message &quot;%1&quot; from server Datové schránky.</source>
         <translation>Nebylo možné stáhnout kompletní zprávu &quot;%1&quot; ze serveru Datové schránky.</translation>
     </message>
@@ -3550,50 +3370,6 @@ všech účtů na pozadí aplikace</translation>
         <translation>Pročišťování databáze selhalo s chybovým hlášením: %1</translation>
     </message>
     <message>
-        <source>You have to be logged into the WebDatovka if you want to modify tags.</source>
-        <translation type="vanished">Musíte být přihlášeni do WebDatovky, aby bylo možné upravovat tagy.</translation>
-    </message>
-    <message>
-        <source>Add account(s) error</source>
-        <translation type="vanished">Chyba přidávání účtu</translation>
-    </message>
-    <message>
-        <source>There aren&apos;t any Webdatovka accounts for this mojeID identity.</source>
-        <translation type="vanished">Pro tuto mojeID identitu nejsou žádné účty ve WebDatovce.</translation>
-    </message>
-    <message>
-        <source>You are login into wrong mojeID identity.</source>
-        <translation type="vanished">Jste přihlášeni do špatné mojeID identity.</translation>
-    </message>
-    <message>
-        <source>Please enter correct mojeID login for account &apos;%1&apos;.</source>
-        <translation type="vanished">Zadejte prosím správné mojeID přihlašovací jméno &apos;%1&apos;.</translation>
-    </message>
-    <message>
-        <source>New mojeID identity has some account(s).</source>
-        <translation type="vanished">Nová modeID identita má nějaké účty.</translation>
-    </message>
-    <message>
-        <source>Do you want to add account(s) for this mojeID identity to Datovka?</source>
-        <translation type="vanished">Chcete přidat účet pro tuto mojeID identitu do Datovky?</translation>
-    </message>
-    <message>
-        <source>Some account(s) were removed from Webdatovka for this mojeID identity.</source>
-        <translation type="vanished">Některé účty byly odebrány z WebDatovky pro tuto mojeID identitu.</translation>
-    </message>
-    <message>
-        <source>Do you want to also remove these accounts from Datovka?</source>
-        <translation type="vanished">Chcete také odebrat tyto účty z Datovky?</translation>
-    </message>
-    <message>
-        <source>This action is not supported for MojeID account &apos;%1&apos;</source>
-        <translation type="vanished">Tato akce není podporována pro mojeID účet &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <source>Login problem</source>
-        <translation type="vanished">Problém přihlášení</translation>
-    </message>
-    <message>
         <location filename="../src/gui/datovka.cpp" line="8082"/>
         <source>Select directory for new databases</source>
         <translation>Vyberte složku pro nové databáze</translation>
@@ -3624,12 +3400,12 @@ všech účtů na pozadí aplikace</translation>
         <translation>Původní databáze byla přesunuta do:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2102"/>
+        <location filename="../src/gui/datovka.cpp" line="2101"/>
         <source>It was not possible download complete message &quot;%1&quot; from ISDS server.</source>
         <translation>Nebylo možné stáhnout celou zprávu &quot;%1&quot; ze serveru ISDS.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2105"/>
+        <location filename="../src/gui/datovka.cpp" line="2104"/>
         <source>Download message error</source>
         <translation>Chyba stahování zprávy</translation>
     </message>
@@ -3955,76 +3731,59 @@ Změnit heslo nyní?</translation>
         <translation>Nový účet: %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="290"/>
+        <location filename="../src/gui/datovka.cpp" line="289"/>
         <source>Tags</source>
         <translation>Tagy</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="290"/>
+        <location filename="../src/gui/datovka.cpp" line="289"/>
         <source>User-assigned tags</source>
         <translation>Uživatelem přiřazené tagy</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1910"/>
+        <location filename="../src/gui/datovka.cpp" line="1909"/>
         <source>Saving attachment of message &apos;%1&apos; to files was not successful!</source>
         <translation>Nepodařilo se uložit přílohu zprávy &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1940"/>
+        <location filename="../src/gui/datovka.cpp" line="1939"/>
         <source>Saving attachment of message &apos;%1&apos; to file was successful.</source>
         <translation>Nepodařilo se uložit přílohu zprávy &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1950"/>
+        <location filename="../src/gui/datovka.cpp" line="1949"/>
         <source>Saving attachment of message &apos;%1&apos; to file was not successful!</source>
         <translation>Nepodařilo se uložit přílohu zprávy &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2035"/>
+        <location filename="../src/gui/datovka.cpp" line="2034"/>
         <source>Attachment &apos;%1&apos; stored into temporary file &apos;%2&apos;.</source>
         <translation>Příloha &apos;%1&apos; uložena do dočasného souboru &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2039"/>
+        <location filename="../src/gui/datovka.cpp" line="2038"/>
         <source>Attachment &apos;%1&apos; couldn&apos;t be stored into temporary file.</source>
         <translation>Příloha &apos;%1&apos; nemohla být uložena do dočasného souboru.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2111"/>
+        <location filename="../src/gui/datovka.cpp" line="2110"/>
         <source>A connection error occurred or the message has already been deleted from the server.</source>
         <translation>Nastala chyba spojení, nebo zpráva již byla smazána ze serveru.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2121"/>
+        <location filename="../src/gui/datovka.cpp" line="2120"/>
         <source>Couldn&apos;t download message &apos;%1&apos;.</source>
         <translation>Nešlo stáhnout zprávu &apos;%1&apos;.</translation>
     </message>
     <message>
-        <source>It was not possible download complete message &quot;%1&quot; from webdatovka server.</source>
-        <translation type="vanished">Nebylo možné stáhnout celou zprávu &apos;%1&apos; ze serveru WebDatovky.</translation>
-    </message>
-    <message>
-        <source>It was not possible to download a complete message &quot;%1&quot; from webdatovka server.</source>
-        <translation type="vanished">Nebylo možné stáhnout celou zprávu &apos;%1&apos; ze serveru WebDatovky.</translation>
-    </message>
-    <message>
-        <source>Webdatovka: </source>
-        <translation type="vanished">WebDatovka:</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="2142"/>
+        <location filename="../src/gui/datovka.cpp" line="2141"/>
         <source>It was not possible download received message list from server.</source>
         <translation>Nebylo možné stáhnout seznam přijatých zpráv ze serveru.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="2144"/>
+        <location filename="../src/gui/datovka.cpp" line="2143"/>
         <source>It was not possible download sent message list from server.</source>
         <translation>Nebylo možné stáhnout seznam odeslaných zpráv ze serveru.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/datovka.cpp" line="2152"/>
-        <source>Server: </source>
-        <translation>Server:</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="2155"/>
@@ -4050,26 +3809,6 @@ Změnit heslo nyní?</translation>
         <location filename="../src/gui/datovka.cpp" line="2866"/>
         <source>Warning: If you delete selected messages from ISDS then these messages will be lost forever.</source>
         <translation>Upozornění: Jestli-že smažete vybrané zprávy ze serveru ISDS, budou tyto zprávy navždy ztraceny.</translation>
-    </message>
-    <message>
-        <source>You have to be logged into the Webdatovka if you want to delete message(s).</source>
-        <translation type="vanished">Musíte být přihlášeni do WebDatovky, aby bylo možné mazat zprávy.</translation>
-    </message>
-    <message>
-        <source>Warning: If you delete the message from Webdatovka then this message will be lost forever.</source>
-        <translation type="vanished">Upozornění: Jestliže smažete vybrané zprávy z WebDatovky, budou tyto zprávy navždy ztraceny.</translation>
-    </message>
-    <message>
-        <source>Warning: If you delete selected messages from Webdatovka then these messages will be lost forever.</source>
-        <translation type="vanished">Upozornění: Jestli-že smažete vybrané zprávy z WebDatovky, budou tyto zprávy navždy ztraceny.</translation>
-    </message>
-    <message>
-        <source>You have to be logged into the WebDatovka if you want to download complete message.</source>
-        <translation type="vanished">Musíte být přihlášeni do WebDatovky, aby bylo možné stahovat kompletní zprávy.</translation>
-    </message>
-    <message>
-        <source>MojeID account</source>
-        <translation type="vanished">MojeID účet</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3734"/>
@@ -4149,10 +3888,6 @@ Změnit heslo nyní?</translation>
         <translation>Databázové soubory pro &apos;%1&apos; nemohli být vytvořeny v
 
 &apos;%2&apos;.</translation>
-    </message>
-    <message>
-        <source>You have to be logged into the WebDatovka if you want to find databox.</source>
-        <translation type="vanished">Musíte být přihlášeni do WebDatovky, aby bylo možné vyhledávat datové schránky.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="7040"/>
@@ -4235,7 +3970,7 @@ Try again.</source>
 Zkuste to znova.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="1441"/>
+        <location filename="../src/gui/datovka.cpp" line="1440"/>
         <location filename="../src/gui/datovka.cpp" line="6387"/>
         <location filename="../src/gui/datovka.cpp" line="6483"/>
         <location filename="../src/gui/datovka.cpp" line="6809"/>
@@ -4854,14 +4589,6 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
         <location filename="../src/gui/ui/datovka.ui" line="1210"/>
         <source>Forward message</source>
         <translation>Přeposlat zprávu</translation>
-    </message>
-    <message>
-        <source>Add mojeID account</source>
-        <translation type="vanished">Přidat účet mojeID</translation>
-    </message>
-    <message>
-        <source>Add new mojeID account</source>
-        <translation type="vanished">Přidat nový mojeID účet</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1222"/>
@@ -5621,7 +5348,7 @@ soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_proxysets.ui" line="45"/>
-        <source>The HTTPS protocol is used when accessing the Databox server while HTTP is used to download the certificate revocation list and information about new Datovka versions. </source>
+        <source>The HTTPS protocol is used when accessing the Databox server while HTTP is used to download the certificate revocation list and information about new Datovka versions.</source>
         <translation>Protokol HTTPS je využíván k přístupu na server Datových schránek. Protokol HTTP je použit ke stažení seznamu zneplatněných certifikátů a informací o nových verzích Datovky.</translation>
     </message>
     <message>
@@ -5726,46 +5453,6 @@ soubor do cesty, kam se ukládají přílohy.</translation>
 <context>
     <name>QObject</name>
     <message>
-        <source>Postal data message</source>
-        <translation type="vanished">Poštovní datová zpráva</translation>
-    </message>
-    <message>
-        <source>Initializing postal data message</source>
-        <translation type="vanished">Inicializační poštovní datová zpráva</translation>
-    </message>
-    <message>
-        <source>Reply postal data message</source>
-        <translation type="vanished">Odpovědní poštovní datová zpráva</translation>
-    </message>
-    <message>
-        <source>Initializing postal data message - expired</source>
-        <translation type="vanished">Inicializační poštovní datová zpráva - propadlá</translation>
-    </message>
-    <message>
-        <source>Initializing postal data message - used</source>
-        <translation type="vanished">Inicializační poštovní datová zpráva - použitá</translation>
-    </message>
-    <message>
-        <source>Primary user</source>
-        <translation type="vanished">Oprávněná osoba</translation>
-    </message>
-    <message>
-        <source>Entrusted user</source>
-        <translation type="vanished">Pověřená osoba</translation>
-    </message>
-    <message>
-        <source>Administrator</source>
-        <translation type="vanished">Administrátor</translation>
-    </message>
-    <message>
-        <source>Official</source>
-        <translation type="vanished">Oficiální</translation>
-    </message>
-    <message>
-        <source>Virtual</source>
-        <translation type="vanished">Virtuální</translation>
-    </message>
-    <message>
         <location filename="../src/common.cpp" line="123"/>
         <source>File &apos;%1&apos; does not contain a valid database filename.</source>
         <translation>Databázový soubor &apos;%1&apos; neobsahuje správny název.</translation>
@@ -5795,130 +5482,6 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <location filename="../src/common.cpp" line="174"/>
         <source>File &apos;%1&apos; does not contain a valid message database or filename has wrong format.</source>
         <translation>Soubor &apos;%1&apos; neobsahuje validní databázi zpráv nebo název souboru má špatný formát.</translation>
-    </message>
-    <message>
-        <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
-        <translation type="vanished">Zpráva neprošla AV kontrolou; nakažená písemnost je smazána; konečný stav zprávy před smazáním.</translation>
-    </message>
-    <message>
-        <source>Message handed into ISDS (delivery time recorded).</source>
-        <translation type="vanished">Zpráva dodána do ISDS (zapsán čas dodání).</translation>
-    </message>
-    <message>
-        <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of acceptance through fiction in non-OVM DS); this state cannot occur for commercial messages.</source>
-        <translation type="vanished">Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u ne-OVM DS); tento stav nemůže nastat v případě poštovních datových zpráv.</translation>
-    </message>
-    <message>
-        <source>Message has been read (on the portal or by ESS action).</source>
-        <translation type="vanished">Zpráva byla přečtena (na portále nebo akcí ESS).</translation>
-    </message>
-    <message>
-        <source>Message has been submitted (has been created in ISDS)</source>
-        <translation type="vanished">Zpráva byla podána (vznikla v ISDS)</translation>
-    </message>
-    <message>
-        <source>Data message including its attachments signed with time-stamp.</source>
-        <translation type="vanished">Datová zpráva včetně písemností podepsána časovým razítkem.</translation>
-    </message>
-    <message>
-        <source>A person authorised to read this message has logged in -- delivered message has been accepted.</source>
-        <translation type="vanished">Osoba oprávněná číst tuto zprávu se přihlásila -- dodaná zpráva byla doručena.</translation>
-    </message>
-    <message>
-        <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
-        <translation type="vanished">Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
-    </message>
-    <message>
-        <source>Message content deleted, envelope including hashes has been moved into archive.</source>
-        <translation type="vanished">Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
-    </message>
-    <message>
-        <source>Message resides in data vault.</source>
-        <translation type="vanished">Zpráva je v Datovém trezoru.</translation>
-    </message>
-    <message>
-        <source>Full control</source>
-        <translation type="vanished">Plný přístup</translation>
-    </message>
-    <message>
-        <source>Restricted control</source>
-        <translation type="vanished">Omezený přístup</translation>
-    </message>
-    <message>
-        <source>download and read incoming DM</source>
-        <translation type="vanished">stahovat a číst došlé DZ</translation>
-    </message>
-    <message>
-        <source>download and read DM sent into own hands</source>
-        <translation type="vanished">stahovat a číst DZ určené do vlastních rukou</translation>
-    </message>
-    <message>
-        <source>create and send DM, download sent DM</source>
-        <translation type="vanished">vytvářet a odesílat DZ, stahovat odeslané DZ</translation>
-    </message>
-    <message>
-        <source>retrieve DM lists, delivery and acceptance reports</source>
-        <translation type="vanished">načítat seznamy DZ, dodejky a doručenky</translation>
-    </message>
-    <message>
-        <source>search for data boxes</source>
-        <translation type="vanished">vyhledávat DS</translation>
-    </message>
-    <message>
-        <source>manage the data box</source>
-        <translation type="vanished">spravovat DS</translation>
-    </message>
-    <message>
-        <source>read message in data vault</source>
-        <translation type="vanished">číst zprávy v datovém trezoru</translation>
-    </message>
-    <message>
-        <source>erase messages from data vault</source>
-        <translation type="vanished">mazat zprávy v datovém trezoru</translation>
-    </message>
-    <message>
-        <source>System ISDS</source>
-        <translation type="vanished">Systém ISDS</translation>
-    </message>
-    <message>
-        <source>Public authority</source>
-        <translation type="vanished">Orgán veřejné moci (OVM)</translation>
-    </message>
-    <message>
-        <source>Legal person</source>
-        <translation type="vanished">Právnická osoba (PO)</translation>
-    </message>
-    <message>
-        <source>Self-employed person</source>
-        <translation type="vanished">Podnikající fyzická osoba (OSVČ)</translation>
-    </message>
-    <message>
-        <source>Natural person</source>
-        <translation type="vanished">Fyzická osoba (FO)</translation>
-    </message>
-    <message>
-        <source>The data box is accessible. It is possible to send messages into it. It can be looked up on the Portal.</source>
-        <translation type="vanished">Datová schránka je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat.</translation>
-    </message>
-    <message>
-        <source>The data box is temporarily inaccessible (at own request). It may be made accessible again at some point in the future.</source>
-        <translation type="vanished">Datová schránka je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna.</translation>
-    </message>
-    <message>
-        <source>The data box is so far inactive. The owner of the box has to log into the web interface at first in order to activate the box.</source>
-        <translation type="vanished">Datová schránka je dosud neaktivní. Vlastník schránky se musí poprvé přihlásit do webového rozhraní, aby došlo k aktivaci schránky.</translation>
-    </message>
-    <message>
-        <source>The data box is permanently inaccessible. It is waiting to be deleted (but it may be made accessible again).</source>
-        <translation type="vanished">Datová schránka je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna).</translation>
-    </message>
-    <message>
-        <source>The data box has been deleted (none the less it exists in ISDS).</source>
-        <translation type="vanished">Datová schránka byla smazána (přesto existuje v ISDS).</translation>
-    </message>
-    <message>
-        <source>An error occurred while checking the status.</source>
-        <translation type="vanished">Došlo k chybě při zjišťování stavu.</translation>
     </message>
     <message>
         <location filename="../src/io/db_tables.cpp" line="330"/>
@@ -6199,124 +5762,124 @@ soubor do cesty, kam se ukládají přílohy.</translation>
         <translation>Přečteno lokálně</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="147"/>
+        <location filename="../src/main.cpp" line="146"/>
         <source>Data box application</source>
         <translation>Aplikace pro datové schránky</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="152"/>
+        <location filename="../src/main.cpp" line="151"/>
         <source>Use &lt;conf-subdir&gt; subdirectory for configuration.</source>
         <translation>Použít &lt;conf-subdir&gt; podadresář pro konfiguraci.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="154"/>
+        <location filename="../src/main.cpp" line="153"/>
         <source>conf-subdir</source>
         <translation>conf-subdir</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="158"/>
+        <location filename="../src/main.cpp" line="157"/>
         <source>On start load &lt;conf&gt; file.</source>
         <translation>Po spuštění načíst &lt;conf&gt; soubor.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="159"/>
-        <location filename="../src/main.cpp" line="164"/>
+        <location filename="../src/main.cpp" line="158"/>
+        <location filename="../src/main.cpp" line="163"/>
         <source>conf</source>
         <translation>conf</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="163"/>
+        <location filename="../src/main.cpp" line="162"/>
         <source>On stop save &lt;conf&gt; file.</source>
         <translation>Po ukončení uložit &lt;conf&gt; soubor.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="168"/>
+        <location filename="../src/main.cpp" line="167"/>
         <source>Log messages to &lt;file&gt;.</source>
         <translation>Zaznamenávat výpisy do &lt;souboru&gt;.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="169"/>
+        <location filename="../src/main.cpp" line="168"/>
         <source>file</source>
         <translation>soubor</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="173"/>
+        <location filename="../src/main.cpp" line="172"/>
         <source>Set verbosity of logged messages to &lt;level&gt;. Default is </source>
         <translation>Nastavit podrobnost ladicích zpráv na &lt;level&gt;. Výchozí je </translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="175"/>
-        <location filename="../src/main.cpp" line="189"/>
+        <location filename="../src/main.cpp" line="174"/>
+        <location filename="../src/main.cpp" line="188"/>
         <source>level</source>
         <translation>úroveň</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="187"/>
+        <location filename="../src/main.cpp" line="186"/>
         <source>Set debugging verbosity to &lt;level&gt;. Default is </source>
         <translation>Nastavit podrobnost ladicích informací na &lt;level&gt;. Výchozí je </translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="197"/>
+        <location filename="../src/main.cpp" line="196"/>
         <source>Service: connect to isds and login into databox.</source>
         <translation>Služba: připojit se k datové schránce.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="219"/>
+        <location filename="../src/main.cpp" line="218"/>
         <source>Service: download acceptance info of message with signature and time stamp of MV.</source>
         <translation>Služba: stáhnout informace o doručení zprávy s podpisem a časovým razítkem MV.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="572"/>
+        <location filename="../src/main.cpp" line="571"/>
         <source>Application is loading...</source>
         <translation>Aplikace se načítá...</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="198"/>
-        <location filename="../src/main.cpp" line="204"/>
-        <location filename="../src/main.cpp" line="209"/>
-        <location filename="../src/main.cpp" line="215"/>
-        <location filename="../src/main.cpp" line="221"/>
-        <location filename="../src/main.cpp" line="244"/>
+        <location filename="../src/main.cpp" line="197"/>
+        <location filename="../src/main.cpp" line="203"/>
+        <location filename="../src/main.cpp" line="208"/>
+        <location filename="../src/main.cpp" line="214"/>
+        <location filename="../src/main.cpp" line="220"/>
+        <location filename="../src/main.cpp" line="243"/>
         <source>string-of-parameters</source>
         <translation>řetězec-parametrů</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="202"/>
+        <location filename="../src/main.cpp" line="201"/>
         <source>Service: download list of received/sent messages from ISDS.</source>
         <translation>Služba: stáhnout seznam přijatých a odeslaných zpráv z ISDS.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="208"/>
+        <location filename="../src/main.cpp" line="207"/>
         <source>Service: create and send a new message to ISDS.</source>
         <translation>Služba: vytvořit a odeslat novou zprávu do ISDS.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="213"/>
+        <location filename="../src/main.cpp" line="212"/>
         <source>Service: download complete message with signature and time stamp of MV.</source>
         <translation>Služba: stáhnout kompletní zprávu s podpisem a časovým razítkem MV.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="225"/>
+        <location filename="../src/main.cpp" line="224"/>
         <source>Service: get information about user (role, privileges, ...).</source>
         <translation>Služba: stáhnout informace o uživateli (role, oprávnění, ...).</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="231"/>
+        <location filename="../src/main.cpp" line="230"/>
         <source>Service: get information about owner and its databox.</source>
         <translation>Služba: stáhnout informace o vlastníkovi a jeho datové schránce.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="237"/>
+        <location filename="../src/main.cpp" line="236"/>
         <source>Service: get list of messages where attachment missing (local database only).</source>
         <translation>Služba: získat seznam zpráv bez přílohy (pouze lokální databaze).</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="243"/>
+        <location filename="../src/main.cpp" line="242"/>
         <source>Service: find a databox via several parameters.</source>
         <translation>Služba: vyhledat datovou schránku na ISDS.</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="249"/>
+        <location filename="../src/main.cpp" line="248"/>
         <source>ZFO file to be viewed.</source>
         <translation>Zobrazovaný ZFO soubor.</translation>
     </message>
@@ -7175,6 +6738,11 @@ do původního umístění
         <translation>Prosím, vyplňte ve formuláři &lt;b&gt;předmět&lt;/b&gt;, &lt;b&gt;alespoň jednoho příjemce&lt;/b&gt; a &lt;b&gt;alespoň jednu přílohu&lt;/b&gt;:</translation>
     </message>
     <message>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="93"/>
+        <source>Sender:</source>
+        <translation>Odesílatel:</translation>
+    </message>
+    <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="116"/>
         <source>Subject:</source>
         <translation>Předmět:</translation>
@@ -7350,11 +6918,6 @@ bude zpráva považována za doručenou
         <location filename="../src/gui/ui/dlg_send_message.ui" line="67"/>
         <source>Account:</source>
         <translation>Účet:</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="93"/>
-        <source>Sender: </source>
-        <translation>Odesílatel:</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="447"/>
