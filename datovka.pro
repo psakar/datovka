@@ -305,7 +305,6 @@ SOURCES += \
     src/io/sqlite/db.cpp \
     src/io/sqlite/table.cpp \
     src/io/tag_db.cpp \
-    src/io/tag_db_container.cpp \
     src/isds/isds_conversion.cpp \
     src/localisation/localisation.cpp \
     src/log/log.cpp \
@@ -419,7 +418,6 @@ HEADERS += \
     src/io/sqlite/db.h \
     src/io/sqlite/table.h \
     src/io/tag_db.h \
-    src/io/tag_db_container.h \
     src/isds/isds_conversion.h \
     src/localisation/localisation.h \
     src/log/log_c.h \

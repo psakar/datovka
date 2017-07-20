@@ -31,7 +31,6 @@
 #include "src/io/message_db.h"
 #include "src/io/records_management_db.h"
 #include "src/io/tag_db.h" /* Direct access to tag database, */
-#include "src/io/tag_db_container.h"
 #include "src/models/messages_model.h"
 
 const int DbMsgsTblModel::rcvdMsgsColCnt(8);

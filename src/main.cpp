@@ -43,7 +43,6 @@
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
-#include "src/io/tag_db_container.h"
 #include "src/io/records_management_db.h"
 #include "src/io/sqlite/db.h"
 #include "src/localisation/localisation.h"

@@ -75,7 +75,6 @@
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
-#include "src/io/tag_db_container.h"
 #include "src/isds/isds_conversion.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/models/files_model.h"

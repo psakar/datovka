@@ -28,7 +28,6 @@
 #include "src/delegates/tags_delegate.h"
 #include "src/gui/dlg_tag.h"
 #include "src/gui/dlg_tags.h"
-#include "src/io/tag_db_container.h"
 #include "src/models/tags_model.h"
 
 #define WRONG_TAG_ID -1 /** TODO -- Remove. */
