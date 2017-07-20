@@ -119,6 +119,10 @@ enum MessageDirection {
                                                    */
 
 /* Expecting arguments of type QString. */
+#define strongAccountInfoLineNoEscape(title, value) \
+	(QLatin1String("<div><strong>") + (title) + \
+	QLatin1String(": </strong>") + (value) + \
+	QLatin1String("</div>"))
 #define strongAccountInfoLine(title, value) \
 	(QLatin1String("<div><strong>") + (title).toHtmlEscaped() + \
 	QLatin1String(": </strong>") + (value).toHtmlEscaped() + \

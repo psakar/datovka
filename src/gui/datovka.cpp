@@ -3514,7 +3514,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 						    value(key).toInt())));
 					}
 				} else if (key == "userPrivils") {
-					html.append(strongAccountInfoLine(
+					html.append(strongAccountInfoLineNoEscape(
 					    userinfTbl.attrProps[key].desc,
 					    IsdsConversion::userPrivilsToText(
 					        userEntry.value(key).toInt())));
