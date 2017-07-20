@@ -367,8 +367,8 @@ private slots:
 	/*!
 	 * @brief Delete selected message(s) from local database and ISDS.
 	 */
-
 	void deleteMessage(void);
+
 	/*!
 	 * @brief Downloads new messages from server for all accounts.
 	 */
