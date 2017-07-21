@@ -686,7 +686,15 @@ void MainWindow::showRecordsManagementDialogue(void)
 	ui->actionUpdate_records_management_information->setEnabled(
 	    globRecordsManagementSet.isSet());
 
+	DbMsgsTblModel *mdl = qobject_cast<DbMsgsTblModel *>(
+	    m_messageListProxyModel.sourceModel());
+	if (Q_NULLPTR != mdl) {
+		mdl->setRecordsManagementIcon();
+	}
+
 	showColumnsAccordingToFunctionality(ui->messageList);
+	AccountModel::nodeTypeIsReceived(currentAccountModelIndex()) ?
+	    setReceivedColumnWidths() : setSentColumnWidths();
 }
 
 /* ========================================================================= */
