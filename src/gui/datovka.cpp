@@ -690,6 +690,8 @@ void MainWindow::showRecordsManagementDialogue(void)
 	    m_messageListProxyModel.sourceModel());
 	if (Q_NULLPTR != mdl) {
 		mdl->setRecordsManagementIcon();
+		mdl->fillRecordsManagementColumn(
+		    DbMsgsTblModel::REC_MGMT_NEG_COL);
 	}
 
 	showColumnsAccordingToFunctionality(ui->messageList);
