@@ -9,6 +9,10 @@ SET MINGW_PATH="C:\Qt\Tools\mingw530_32"
 SET MAKE="mingw32-make.exe"
 SET DEPLOYQT="windeployqt.exe"
 
+rmdir /S /Q debug
+rmdir /S /Q release
+rmdir /S /Q %APP_DIR%
+
 SET CONF="release"
 
 %QMAKE% CONFIG+=%CONF% rm_test_app.pro
