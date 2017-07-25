@@ -11,12 +11,12 @@ SET DEPLOYQT="windeployqt.exe"
 
 SET CONF="release"
 
-"%QMAKE%" CONFIG+=%CONF% rm_test_app.pro
-"%MAKE%" -j 4
+%QMAKE% CONFIG+=%CONF% rm_test_app.pro
+%MAKE% -j 4
 
 mkdir "%APP_DIR%"
 copy "%CONF%\rm_test_app.exe" "%APP_DIR%"
 copy "%MINGW_PATH%\opt\bin\libeay32.dll" "%APP_DIR%"
 copy "%MINGW_PATH%\opt\bin\ssleay32.dll" "%APP_DIR%"
 copy rm_test_app.bat "%APP_DIR%"
-"%DEPLOYQT%" --dir "%APP_DIR%" --%CONF% "%APP_DIR%\rm_test_app.exe"
+%DEPLOYQT% --dir "%APP_DIR%" --%CONF% "%APP_DIR%\rm_test_app.exe"
