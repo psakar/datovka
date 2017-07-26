@@ -4,7 +4,7 @@ QT += gui svg widgets
 
 TEMPLATE = app
 APP_NAME = ds_test_app
-VERSION = 0.0.1
+VERSION = 4.9.0
 
 REQUIRED_MAJOR = 5
 REQUIRED_MINOR = 2

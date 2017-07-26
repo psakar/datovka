@@ -6,11 +6,13 @@ QT += testlib
 
 TEMPLATE = app
 TARGET = tests
+VERSION = 4.9.0
 
 top_srcdir = ../
 
 DEFINES += \
-	DEBUG=1
+	DEBUG=1 \
+	VERSION=\\\"$${VERSION}\\\"
 
 QMAKE_CXXFLAGS = \
 	-g -O0 -std=c++11 \
