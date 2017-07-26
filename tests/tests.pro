@@ -6,7 +6,7 @@ QT += testlib
 
 TEMPLATE = app
 TARGET = tests
-VERSION = 4.9.0
+VERSION = 4.9.1
 
 top_srcdir = ../
 
