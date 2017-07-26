@@ -712,7 +712,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	Q_UNUSED(previous);
 
 	QString html;
-	QAbstractTableModel *msgTblMdl = 0;
+	QAbstractTableModel *msgTblMdl = Q_NULLPTR;
 
 	if (!current.isValid()) {
 		/* May occur on deleting last account. */
@@ -741,9 +741,13 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 
 	const QString userName(m_accountModel.userName(current));
 
-	Q_ASSERT(!userName.isEmpty());
+	if (userName.isEmpty()) {
+		logErrorNL("%s", "Have empty user name.");
+//		Q_ASSERT(0);
+		return;
+	}
 	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	if (Q_NULLPTR == dbSet) {
 		/* May occur on deleting last account. */
 		setMessageActionVisibility(0);
 
@@ -876,13 +880,19 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(true);
 		break;
 	default:
-		Q_ASSERT(0);
+		logErrorNL("%s", "Cannot determine account node type.");
+//		Q_ASSERT(0);
+		return;
 		break;
 	}
 
-	if (0 != msgTblMdl) {
-		DbMsgsTblModel *mdl = dynamic_cast<DbMsgsTblModel *>(msgTblMdl);
-		Q_ASSERT(0 != mdl);
+	if (Q_NULLPTR != msgTblMdl) {
+		DbMsgsTblModel *mdl = qobject_cast<DbMsgsTblModel *>(msgTblMdl);
+		if (Q_NULLPTR == mdl) {
+			logErrorNL("%s", "Received model is not of desired type.");
+//			Q_ASSERT(0);
+			return;
+		}
 		mdl->setRecordsManagementIcon();
 		mdl->fillRecordsManagementColumn(
 		    DbMsgsTblModel::REC_MGMT_NEG_COL);
@@ -937,7 +947,11 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeReceivedYear:
 		/* Set model. */
-		Q_ASSERT(0 != msgTblMdl);
+		if (Q_NULLPTR == msgTblMdl) {
+			logErrorNL("%s", "No received message table model available.");
+//			Q_ASSERT(0);
+			return;
+		}
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
 		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
@@ -952,7 +966,11 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeSentYear:
 		/* Set model. */
-		Q_ASSERT(0 != msgTblMdl);
+		if (Q_NULLPTR == msgTblMdl) {
+			logErrorNL("%s", "No sent message table model available.");
+//			Q_ASSERT(0);
+			return;
+		}
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
 		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
@@ -984,7 +1002,7 @@ setmodel:
 		/* Select last message in list if there are some messages. */
 		itemModel = ui->messageList->model();
 		/* enable/disable buttons */
-		if ((0 != itemModel) && (0 < itemModel->rowCount())) {
+		if ((Q_NULLPTR != itemModel) && (0 < itemModel->rowCount())) {
 			messageItemRestoreSelectionOnModelChange();
 			ui->actionAuthenticate_message_file->setEnabled(true);
 			ui->actionExport_correspondence_overview->
@@ -996,7 +1014,9 @@ setmodel:
 		}
 		break;
 	default:
-		Q_ASSERT(0);
+		logErrorNL("%s", "Cannot determine account node type.");
+//		Q_ASSERT(0);
+		return;
 		break;
 	}
 
