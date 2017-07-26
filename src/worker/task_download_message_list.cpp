@@ -248,7 +248,12 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 #ifdef USE_TRANSACTIONS
 		if (!usedDbs.contains(messageDb)) {
 			usedDbs.insert(messageDb);
-			messageDb->beginTransaction();
+			if (!messageDb->beginTransaction()) {
+				logWarningNL(
+				    "Cannot begin transaction for '%s'.",
+				    userName.toUtf8().constData());
+//				return DL_DB_INS_ERR;
+			}
 		}
 #endif /* USE_TRANSACTIONS */
 
