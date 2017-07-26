@@ -1,3 +1,19 @@
+4.9.1 /
+ * Added experimental support for new data-box and user types that are going
+   to be introduced into the ISDS production environment and which are already
+   present in the ISDS testing environment.
+   Version 0.10.7 of libisds is required to build the application.
+ * Updated building scripts for the Windows application to automatically pull
+   Qt dependencies into the package.
+ * Fixed issue when records management data have not been erased from message
+   model after the service has been deactivated.
+ * Fixed issues with records management logo not being displayed in message
+   list immediately after the service has been set up.
+ * Alphabetically sorting nodes of records management hierarchy.
+ * Sub-nodes of matching element are also displayed when filtering hierarchy of
+   records management service.
+ * Removed inactive mojeid-datovka code from the sources.
+
 4.9.0 / 2017-06-30
  * Added API and support for sending messages into records management services.
  * Removed explicit clear buttons from filter fields.
