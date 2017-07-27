@@ -154,10 +154,10 @@ copy "AUTHORS" %DATOVKAPORTPATH%
 copy "copyING" %DATOVKAPORTPATH%
 copy "Changelog" %DATOVKAPORTPATH%
 copy "scripts\datovka-portable-log.bat" %DATOVKAPORTPATH%
-copy "locale\datovka_cs.qm" "%DATOVKAPATH%\locale"
+copy "locale\datovka_cs.qm" "%DATOVKAPORTPATH%\locale"
 for /R "mingw32built\bin\" %%x in (*.dll) do copy "%%x" %DATOVKAPORTPATH% /Y
 windeployqt --release "%DATOVKAPORTPATH%\datovka-portable.exe"
-copy "%DATOVKAPORTPATH%\translations\qt_cs.qm" "%DATOVKAPATH%\locale\qtbase_cs.qm"
+copy "%DATOVKAPORTPATH%\translations\qt_cs.qm" "%DATOVKAPORTPATH%\locale\qtbase_cs.qm"
 rmdir /S /Q "%DATOVKAPORTPATH%\translations"
 @echo Bundle done.
 @echo.
