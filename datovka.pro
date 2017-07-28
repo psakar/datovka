@@ -9,8 +9,8 @@ QT += printsupport
 
 TEMPLATE = app
 APP_NAME = datovka
-# VERSION must contain only three dot-separated numbers because of OS X deployment.
-VERSION = 4.9.1
+
+include(pri/version.pri)
 
 # Generate localisation. Must be run manually.
 #system(lrelease datovka.pro)
