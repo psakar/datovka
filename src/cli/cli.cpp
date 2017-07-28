@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <cstdlib>
 #include <QTextStream>
 
 #include "src/cli/cli.h"
@@ -36,6 +37,11 @@
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_search_owner.h"
+
+const QSet<QString> serviceSet = QSet<QString>() << SER_LOGIN <<
+SER_GET_MSG_LIST << SER_SEND_MSG << SER_GET_MSG << SER_GET_DEL_INFO <<
+SER_GET_USER_INFO << SER_GET_OWNER_INFO << SER_CHECK_ATTACHMENT <<
+SER_FIND_DATABOX;
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList()
@@ -1540,7 +1546,7 @@ int runService(const QString &lParam,
 	cli_error cret = CLI_ERROR;
 	bool needsISDS = true;
 	QString errmsg = "Unknown error";
-	int ret = CLI_EXIT_ERROR;
+	int ret = EXIT_FAILURE;
 
 	/* parse service parameter list */
 	if (!(service.isNull()) && !(sParam.isNull())) {
@@ -1685,7 +1691,7 @@ int runService(const QString &lParam,
 	}
 
 	if (CLI_SUCCESS == cret) {
-		ret = CLI_EXIT_OK;
+		ret = EXIT_SUCCESS;
 	} else {
 		printErrToStdErr(cret, errmsg);
 	}

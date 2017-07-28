@@ -228,6 +228,7 @@ win32 {
 SOURCES += \
     src/cli/cli.cpp \
     src/cli/cli_login.cpp \
+    src/cli/cli_parser.cpp \
     src/common.cpp \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
@@ -341,6 +342,7 @@ SOURCES += \
 HEADERS += \
     src/cli/cli.h \
     src/cli/cli_login.h \
+    src/cli/cli_parser.h \
     src/common.h \
     src/crypto/crypto.h \
     src/crypto/crypto_funcs.h \

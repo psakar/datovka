@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,16 +21,12 @@
  * the two.
  */
 
-
-#ifndef CLI_H
-#define CLI_H
+#ifndef _CLI_H_
+#define _CLI_H_
 
 #include <QApplication>
 #include <QDebug>
 
-
-#define CLI_EXIT_ERROR 1
-#define CLI_EXIT_OK 0
 #define CLI_PREFIX "D-CLI: "
 #define PARSER_PREFIX "Parser error: "
 
@@ -78,19 +74,16 @@ enum cli_error {
 
 // IMORTANT: if any another service is/ will be defined,
 // it must be added into this service list
-const QStringList serviceList = QStringList() << SER_LOGIN <<
-SER_GET_MSG_LIST << SER_SEND_MSG << SER_GET_MSG << SER_GET_DEL_INFO <<
-SER_GET_USER_INFO << SER_GET_OWNER_INFO << SER_CHECK_ATTACHMENT <<
-SER_FIND_DATABOX;
+extern const QSet<QString> serviceSet;
 
 /*
  * Run login + service
  * [in] lParam = login parameter string
  * [in] service = name of service
  * [in] sParam = service parameter string
- * @retrun status code of operation
+ * @return status code of operation (EXIT_SUCCESS or EXIT_FAILURE)
 */
 int runService(const QString &lParam,
     const QString &service, const QString &sParam);
 
-#endif // CLI_H
+#endif /* _CLI_H_ */

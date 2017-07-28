@@ -31,7 +31,7 @@
 #include <QDir>
 #include <QtWidgets>
 
-#include "src/cli/cli.h"
+#include "src/cli/cli_parser.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_funcs.h"
@@ -52,74 +52,14 @@
 #include "src/single/single_instance.h"
 #include "src/worker/pool.h"
 
-#define CONF_SUBDIR_OPT "conf-subdir"
-#define LOAD_CONF_OPT "load-conf"
-#define SAVE_CONF_OPT "save-conf"
-#define LOG_FILE "log-file"
-
-#define LOG_VERBOSITY_OPT "log-verbosity"
-#define DEBUG_OPT "debug"
-#define DEBUG_VERBOSITY_OPT "debug-verbosity"
-
-#define RUN_MODE_GUI 0
-#define RUN_MODE_CLI 1
-#define RUN_MODE_ZFO 2
-
-/* ========================================================================= */
-static
-int doCLI(const QStringList &serList, const QCommandLineParser &parser)
-/* ========================================================================= */
-{
-	int ret = CLI_EXIT_ERROR;
-	QString errmsg;
-	QString serName;
-	int index = 0;
-	QTextStream cout(stderr);
-
-	// every valid CLI action must have only one login parameter
-	// or one login parameter and one name service
-	switch (serList.count()) {
-	case 0:
-		errmsg = "No service has been defined for CLI action!";
-		break;
-	case 1:
-		if (serList.contains(SER_LOGIN)) {
-			ret = runService(parser.value(SER_LOGIN),
-			    NULL, NULL);
-			return ret;
-		} else {
-			errmsg = "Only service name was set. "
-			    "Login parameter is missing!";
-		}
-		break;
-	case 2:
-		if (serList.contains(SER_LOGIN)) {
-			index = serList.indexOf(SER_LOGIN);
-			if (index == 0) {
-				serName = serList.at(1);
-			} else {
-				serName = serList.at(0);
-			}
-			ret = runService(parser.value(SER_LOGIN),
-			    serName, parser.value(serName));
-			return ret;
-		} else {
-			errmsg = "Login parameter is missing! "
-			    "Maybe two service names were set.";
-		}
-		break;
-	default:
-		errmsg = "More than two service names or logins were set! "
-		    "This situation is not allowed.";
-		break;
-	}
-
-	// print error to stderr
-	cout << CLI_PREFIX << " error(" << CLI_ERROR << ") : "
-	    << errmsg << endl;
-
-	return ret;
-}
+/*!
+ * @brief Specified the mode the executable is being executed with.
+ */
+enum RunMode {
+	RM_GUI, /*!< Start with active GUI. */
+	RM_CLI, /*!< Execute command line service. */
+	RM_ZFO /*!< View ZFO content. */
+};
 
 /* ========================================================================= */
 static
@@ -134,118 +74,6 @@ int showZfo(const QString &fileName)
 	viewDialog->exec();
 
 	delete viewDialog;
-
-	return 0;
-}
-
-/* ========================================================================= */
-static
-int setupCmdLineParser(QCommandLineParser &parser)
-/* ========================================================================= */
-{
-	parser.setApplicationDescription(QObject::tr("Data box application"));
-	parser.addHelpOption();
-	parser.addVersionOption();
-	/* Options with values. */
-	if (!parser.addOption(QCommandLineOption(CONF_SUBDIR_OPT,
-	        QObject::tr(
-	            "Use <conf-subdir> subdirectory for configuration."),
-	        QObject::tr("conf-subdir")))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(LOAD_CONF_OPT,
-	        QObject::tr("On start load <conf> file."),
-	        QObject::tr("conf")))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(SAVE_CONF_OPT,
-	        QObject::tr("On stop save <conf> file."),
-	        QObject::tr("conf")))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(LOG_FILE,
-	        QObject::tr("Log messages to <file>."),
-	        QObject::tr("file")))) {
-		return -1;
-	}
-	QCommandLineOption logVerb(QStringList() << "L" << LOG_VERBOSITY_OPT,
-	    QObject::tr("Set verbosity of logged messages to <level>. "
-	        "Default is ") + QString::number(globLog.logVerbosity()) + ".",
-	    QObject::tr("level"));
-	if (!parser.addOption(logVerb)) {
-		return -1;
-	}
-	/* Boolean options. */
-#ifdef DEBUG
-	QCommandLineOption debugOpt(QStringList() << "D" << DEBUG_OPT,
-	    "Enable debugging information.");
-	if (!parser.addOption(debugOpt)) {
-		return -1;
-	}
-	QCommandLineOption debugVerb(QStringList() << "V" << DEBUG_VERBOSITY_OPT,
-	    QObject::tr("Set debugging verbosity to <level>. Default is ") +
-	    QString::number(globLog.debugVerbosity()) + ".",
-	    QObject::tr("level"));
-	if (!parser.addOption(debugVerb)) {
-		return -1;
-	}
-#endif /* DEBUG */
-
-	/* Options with values. */
-	if (!parser.addOption(QCommandLineOption(SER_LOGIN,
-	        QObject::tr("Service: connect to isds and login into databox."),
-	        QObject::tr("string-of-parameters")))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_LIST,
-	        QObject::tr("Service: download list of received/sent "
-	        "messages from ISDS."),
-	        QObject::tr("string-of-parameters")))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(SER_SEND_MSG,
-	        QObject::tr("Service: create and send a new message to ISDS."),
-	        QObject::tr("string-of-parameters")))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_MSG,
-	        QObject::tr("Service: download complete message with "
-	        "signature and time stamp of MV."),
-	        QObject::tr("string-of-parameters")))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_DEL_INFO,
-	        QObject::tr("Service: download acceptance info of message "
-	        "with signature and time stamp of MV."),
-	        QObject::tr("string-of-parameters")))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_USER_INFO,
-	        QObject::tr("Service: get information about user "
-	        "(role, privileges, ...)."),
-	        NULL))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(SER_GET_OWNER_INFO,
-	        QObject::tr("Service: get information about owner and "
-	        "its databox."),
-	        NULL))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(SER_CHECK_ATTACHMENT,
-	        QObject::tr("Service: get list of messages where "
-	        "attachment missing (local database only)."),
-	        NULL))) {
-		return -1;
-	}
-	if (!parser.addOption(QCommandLineOption(SER_FIND_DATABOX,
-	        QObject::tr("Service: find a databox via several parameters."),
-	        QObject::tr("string-of-parameters")))) {
-		return -1;
-	}
-
-	parser.addPositionalArgument("[zfo-file]",
-	    QObject::tr("ZFO file to be viewed."));
 
 	return 0;
 }
@@ -434,27 +262,16 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	QStringList cmdLineFileNames = parser.positionalArguments();
-	QStringList inOptions = parser.optionNames();
-	QStringList serList;
+	const QStringList cmdLineFileNames(parser.positionalArguments());
+	const QStringList srvcArgs(CLIServiceArgs(parser.optionNames()));
 
-	// check if any CLI service was set from command line
-	for (int i = 0; i < inOptions.count(); ++i) {
-		for (int j = 0; j < serviceList.count(); ++j) {
-			if (inOptions.at(i) == serviceList.at(j)) {
-				serList.append(inOptions.at(i));
-				break;
-			}
-		}
-	}
+	enum RunMode runMode = RM_GUI;
+	QSplashScreen *splash = new QSplashScreen;
 
-	short runMode = RUN_MODE_GUI;
-	QSplashScreen * splash = new QSplashScreen;
-
-	if (!serList.isEmpty()) {
-		runMode = RUN_MODE_CLI;
+	if (!srvcArgs.isEmpty()) {
+		runMode = RM_CLI;
 	} else if (!cmdLineFileNames.isEmpty()) {
-		runMode = RUN_MODE_ZFO;
+		runMode = RM_ZFO;
 	} else {
 		splash->setPixmap(QPixmap(":/splash/datovka-splash.png"));
 		splash->show();
@@ -566,7 +383,7 @@ int main(int argc, char *argv[])
 	loadLocalisation(app);
 
 	/* set splash action text */
-	if (runMode == RUN_MODE_GUI) {
+	if (runMode == RM_GUI) {
 		Qt::Alignment align = Qt::AlignCenter;
 		splash->showMessage(QObject::tr("Application is loading..."),
 		align, Qt::white);
@@ -642,7 +459,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-
 	int ret = EXIT_SUCCESS;
 
 	/* Parse account information. */
@@ -663,10 +479,10 @@ int main(int argc, char *argv[])
 	//QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif /* >= Qt-5.6 */
 
-	if (runMode == RUN_MODE_CLI) {
+	if (runMode == RM_CLI) {
 		delete splash;
-		ret = doCLI(serList, parser);
-	} else if (runMode == RUN_MODE_ZFO) {
+		ret = runCLIService(srvcArgs, parser);
+	} else if (runMode == RM_ZFO) {
 		delete splash;
 		foreach (const QString &fileName, cmdLineFileNames) {
 			ret = showZfo(fileName);
