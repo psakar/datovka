@@ -4,13 +4,14 @@
 #
 #-------------------------------------------------
 
-QT += core gui network svg sql
+QT += core gui network svg sql widgets
 QT += printsupport
 
 TEMPLATE = app
 APP_NAME = datovka
 
 include(pri/version.pri)
+include(pri/check_qt_version.pri)
 
 # Generate localisation. Must be run manually.
 #system(lrelease datovka.pro)
@@ -25,40 +26,9 @@ win32 {
 	system(copy $$[QT_INSTALL_DATA]/translations/qtbase_cs.qm locale/qtbase_cs.qm)
 }
 
-
-# Required Qt versions
-REQUIRED_MAJOR = 5
-REQUIRED_MINOR = 3
 # Qt 5.2.1 contains a bug causing the application to crash on some drop events.
 # Version 5.3.2 should be fine.
-ADVISED_MINOR = 3
-ADVISED_PATCH = 2
-
-lessThan(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
-	error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
-} else {
-	QT += widgets
-}
-
-isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
-	lessThan(QT_MINOR_VERSION, $${REQUIRED_MINOR}) {
-		error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
-	}
-
-	lessThan(QT_MINOR_VERSION, $${ADVISED_MINOR}) {
-		warning(Qt version at least $${REQUIRED_MAJOR}.$${ADVISED_MINOR}.$${ADVISED_PATCH} is suggested.)
-	} else {
-		isEqual(QT_MINOR_VERSION, $${ADVISED_MINOR}) {
-			lessThan(QT_PATCH_VERSION, $${ADVISED_PATCH}) {
-				warning(Qt version at least $${REQUIRED_MAJOR}.$${ADVISED_MINOR}.$${ADVISED_PATCH} is suggested.)
-			}
-		}
-	}
-} else {
-	warning(The current Qt version $${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION} may not work.)
-}
-
-#LIBISDS_PREFIX = "$$HOME/third_party/built"
+sufficientQtVersion(5, 3, 3, 2)
 
 DEFINES += \
 	DEBUG=1 \

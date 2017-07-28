@@ -8,13 +8,9 @@ TEMPLATE = app
 APP_NAME = ds_test_app
 
 include($${top_srcdir}/pri/version.pri)
+include($${top_srcdir}/pri/check_qt_version.pri)
 
-REQUIRED_MAJOR = 5
-REQUIRED_MINOR = 2
-
-lessThan(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
-	error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
-}
+sufficientQtVersion(5, 2, 3, 2)
 
 DEFINES += \
 	DEBUG=1 \
