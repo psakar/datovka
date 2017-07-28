@@ -81,7 +81,7 @@ int showZfo(const QString &fileName)
 /* ========================================================================= */
 static
 int setupPreferences(const QCommandLineParser &parser,
-    GlobPreferences &prefs, GlobLog &log)
+    GlobPreferences &prefs, LogDevice &log)
 /* ========================================================================= */
 {
 	int logFileId = -1;
@@ -98,7 +98,7 @@ int setupPreferences(const QCommandLineParser &parser,
 	if (parser.isSet(LOG_FILE)) {
 		QString logFileName = parser.value(LOG_FILE);
 		logFileId = log.openFile(logFileName.toUtf8().constData(),
-		    GlobLog::LM_APPEND);
+		    LogDevice::LM_APPEND);
 		if (-1 == logFileId) {
 			logError("Cannot open log file '%s'.\n",
 			    logFileName.toUtf8().constData());
@@ -110,7 +110,7 @@ int setupPreferences(const QCommandLineParser &parser,
 	}
 #ifdef DEBUG
 	if (parser.isSet(DEBUG_OPT) || parser.isSet(DEBUG_VERBOSITY_OPT)) {
-		log.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
+		log.setLogLevels(LogDevice::LF_STDERR, LOGSRC_ANY,
 		    LOG_UPTO(LOG_DEBUG));
 		if (-1 != logFileId) {
 			log.setLogLevels(logFileId, LOGSRC_ANY,
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 	qsrand(QDateTime::currentDateTime().toTime_t());
 
 	/* Log warnings. */
-	globLog.setLogLevels(GlobLog::LF_STDERR, LOGSRC_ANY,
+	globLog.setLogLevels(LogDevice::LF_STDERR, LOGSRC_ANY,
 	    LOG_UPTO(LOG_WARNING));
 
 #ifndef WIN32
