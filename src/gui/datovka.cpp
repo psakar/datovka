@@ -252,6 +252,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_accountModel(this),
     m_messageListProxyModel(this),
+    m_attachmentModel(this),
     m_messageMarker(this),
     m_lastSelectedMessageId(-1),
     m_lastStoredMessageId(-1),
@@ -1236,9 +1237,10 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	}
 
 	/* Show files related to message message. */
-	QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId.dmId);
-	Q_ASSERT(0 != fileTblMdl);
-	ui->messageAttachmentList->setModel(fileTblMdl);
+	m_attachmentModel.removeRows(0, m_attachmentModel.rowCount());
+	m_attachmentModel.setHeader();
+	m_attachmentModel.appendData(messageDb->attachEntries(msgId.dmId));
+	ui->messageAttachmentList->setModel(&m_attachmentModel);
 	/* First three columns contain hidden data. */
 	ui->messageAttachmentList->setColumnHidden(
 	    DbFlsTblModel::ATTACHID_COL, true);
@@ -2355,9 +2357,10 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId, 0));
 	ui->messageInfo->setReadOnly(true);
 
-	QAbstractTableModel *fileTblMdl = messageDb->flsModel(dmId);
-	Q_ASSERT(0 != fileTblMdl);
-	ui->messageAttachmentList->setModel(fileTblMdl);
+	m_attachmentModel.removeRows(0, m_attachmentModel.rowCount());
+	m_attachmentModel.setHeader();
+	m_attachmentModel.appendData(messageDb->attachEntries(dmId));
+	ui->messageAttachmentList->setModel(&m_attachmentModel);
 	/* First three columns contain hidden data. */
 	ui->messageAttachmentList->setColumnHidden(
 	    DbFlsTblModel::ATTACHID_COL, true);

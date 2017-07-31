@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,8 @@
  * the two.
  */
 
-
 #ifndef _MESSAGE_DB_H_
 #define _MESSAGE_DB_H_
-
 
 #include <QAbstractButton>
 #include <QAbstractTableModel>
@@ -38,7 +36,6 @@
 #include <QVector>
 
 #include "src/io/sqlite/db.h"
-#include "src/models/files_model.h"
 #include "src/models/messages_model.h"
 
 #define INVALID_YEAR "inv"
@@ -49,7 +46,6 @@ enum Sorting {
 	ASCENDING,
 	DESCENDING
 };
-
 
 /*!
  * @brief Encapsulates message database.
@@ -196,6 +192,35 @@ public:
 		    :  dmFileDescr(fileDescr), dmEncodedContent(encodedContent)
 		{ }
 		~FileData(void)
+		{ }
+
+		bool isValid(void) const
+		{
+			return (!dmFileDescr.isEmpty()) &&
+			    (!dmEncodedContent.isEmpty());
+		}
+	};
+
+	/*!
+	 * @brief Attachment data used to fill attachment model.
+	 */
+	class AttachmentEntry {
+	public:
+		qint64 id; /*!< Entry identifier. */
+		qint64 messageId; /*!< Identifier of the message which the attachment belong to. */
+		QByteArray dmEncodedContent; /*!< Base64-encoded file content. */
+		QString dmFileDescr; /*!< Attachment file name. */
+		QString dmMimeType; /*!< String holding the mime type. */
+		int size; /*!< Attachment file size (base64-decoded). */
+
+		AttachmentEntry(void)
+		    : id(0), messageId(0), dmEncodedContent(), dmFileDescr(),
+		    dmMimeType(), size(0)
+		{ }
+		AttachmentEntry(qint64 i, qint64 mi, const QByteArray &dec,
+		    const QString &dfd, const QString &dmt, int s)
+		    : id(i), messageId(mi), dmEncodedContent(dec),
+		    dmFileDescr(dfd), dmMimeType(dmt), size(s)
 		{ }
 
 		bool isValid(void) const
@@ -382,14 +407,12 @@ public:
 	QList<FileData> getFilesFromMessage(qint64 msgId) const;
 
 	/*!
-	 * @brief Return files related to given message.
+	 * @brief Return list of attachment entries related to given message.
 	 *
 	 * @param[in] msgId  Message identifier.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of attachment entries.
 	 */
-	QAbstractTableModel * flsModel(qint64 msgId);
+	QList<AttachmentEntry> attachEntries(qint64 msgId) const;
 
 	/*!
 	 * @brief Check if any message with given id exists in database.
@@ -1035,8 +1058,6 @@ private:
 	static
 	const QVector<QString> msgStatus;
 
-	DbFlsTblModel m_sqlFilesModel; /*!< Model of displayed files. */
-
 	/*!
 	 * @brief Adds _dmType column.
 	 *
@@ -1109,6 +1130,5 @@ private:
 	friend class MessageDbSet;
 	friend class MessageDbSingle;
 };
-
 
 #endif /* _MESSAGE_DB_H_ */

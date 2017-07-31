@@ -28,6 +28,7 @@
 #include <QObject>
 #include <QVariant>
 
+#include "src/io/message_db.h"
 #include "src/models/table_model.h"
 
 /*!
@@ -140,6 +141,13 @@ public:
 	 * @brief Sets default header.
 	 */
 	void setHeader(void);
+
+	/*!
+	 * @brief Appends data into the model.
+	 *
+	 * @brief entryList List of entries to append into the model.
+	 */
+	void appendData(const QList<MessageDb::AttachmentEntry> &entryList);
 
 	/*!
 	 * @brief Sets the content of the model according to the supplied

@@ -47,10 +47,10 @@
 #include <QVariant>
 #include <QVector>
 
-#include "message_db.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
+#include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
@@ -77,8 +77,7 @@ const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
 
 MessageDb::MessageDb(const QString &connectionName)
     : SQLiteDb(connectionName),
-    m_sqlMsgsModel(),
-    m_sqlFilesModel()
+    m_sqlMsgsModel()
 {
 }
 
@@ -1811,14 +1810,9 @@ fail:
 	return QList<FileData>();
 }
 
-
-/* ========================================================================= */
-/*
- * Return files related to given message.
- */
-QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
-/* ========================================================================= */
+QList<MessageDb::AttachmentEntry> MessageDb::attachEntries(qint64 msgId) const
 {
+	QList<AttachmentEntry> entryList;
 	int i;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
@@ -1842,15 +1836,22 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 
 	/* First three columns ought to be hidden. */
 
-	m_sqlFilesModel.setQuery(query);
-	m_sqlFilesModel.setHeader();
+	query.first();
+	while (query.isActive() && query.isValid()) {
 
-	return &m_sqlFilesModel;
+		entryList.append(AttachmentEntry(query.value(0).toLongLong(),
+		    query.value(1).toLongLong(), query.value(2).toByteArray(),
+		    query.value(3).toString(), query.value(4).toString(),
+		    query.value(5).toInt()));
+
+		query.next();
+	}
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<AttachmentEntry>();
 }
-
 
 /* ========================================================================= */
 /*

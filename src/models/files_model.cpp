@@ -358,6 +358,43 @@ void DbFlsTblModel::setHeader(void)
 	    Qt::DisplayRole);
 }
 
+void DbFlsTblModel::appendData(
+    const QList<MessageDb::AttachmentEntry> &entryList)
+{
+	if (Q_UNLIKELY(MessageDb::fileItemIds.size() != 6)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	m_columnCount = 6;
+
+	if (entryList.isEmpty()) {
+		/* Don't do anything. */
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), rowCount(),
+	    rowCount() + entryList.size() - 1);
+
+	foreach (const MessageDb::AttachmentEntry &entry, entryList) {
+
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		row[0] = entry.id;
+		row[1] = entry.messageId;
+		row[2] = entry.dmEncodedContent;
+		row[3] = entry.dmFileDescr;
+		row[4] = entry.dmMimeType;
+		row[5] = entry.size;
+
+		m_data[m_rowCount++] = row;
+	}
+
+	endInsertRows();
+}
+
 bool DbFlsTblModel::setMessage(const struct isds_message *message)
 {
 	if (NULL == message) {
