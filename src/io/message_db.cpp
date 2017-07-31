@@ -142,7 +142,7 @@ QAbstractTableModel *MessageDb::msgsRcvdWithin90DaysModel(
 {
 	QSqlQuery query(m_db);
 
-	if (!msgsRcvdWithin90DaysQuery(query, appendedCols)) {
+	if (!msgsRcvdWithin90DaysQuery(query, appendedCols.size())) {
 		goto fail;
 	}
 
@@ -457,7 +457,7 @@ QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
 {
 	QSqlQuery query(m_db);
 
-	if (!msgsSntWithin90DaysQuery(query, appendedCols)) {
+	if (!msgsSntWithin90DaysQuery(query, appendedCols.size())) {
 		goto fail;
 	}
 
@@ -4516,16 +4516,20 @@ bool MessageDb::reopenDb(const QString &newFileName)
 	return reopen_ret;
 }
 
-bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query, int appendedColsNum)
 {
+	if (Q_UNLIKELY(appendedColsNum < 0)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
 		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
-	for (int i = 0; i < appendedCols.size(); ++i) {
+	for (int i = 0; i < appendedColsNum; ++i) {
 		queryStr += ", null";
 	}
 	queryStr += " FROM messages AS m "
@@ -4557,15 +4561,19 @@ fail:
 	return false;
 }
 
-bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query, int appendedColsNum)
 {
+	if (Q_UNLIKELY(appendedColsNum < 0)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
 		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	for (int i = 0; i < appendedCols.size(); ++i) {
+	for (int i = 0; i < appendedColsNum; ++i) {
 		queryStr += ", null";
 	}
 	queryStr += " FROM messages AS m "

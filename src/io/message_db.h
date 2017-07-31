@@ -1027,22 +1027,22 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
-	 * @param[in,out] query        Query already assigned to a database.
-	 * @param[in]     appendedCols List of names for added empty columns.
+	 * @param[in,out] query Query already assigned to a database.
+	 * @param[in]     appendedColsNum Number of added empty columns.
 	 * @return True on success.
 	 */
-	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	static
+	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query, int appendedColsNum);
 
 	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
-	 * @param[in,out] query        Query already assigned to a database.
-	 * @param[in]     appendedCols List of names for added empty columns.
+	 * @param[in,out] query Query already assigned to a database.
+	 * @param[in]     appendedColsNum Number of added empty columns.
 	 * @return True on success.
 	 */
-	bool msgsSntWithin90DaysQuery(QSqlQuery &query,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	static
+	bool msgsSntWithin90DaysQuery(QSqlQuery &query, int appendedColsNum);
 
 	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
 

@@ -220,7 +220,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	{
 		QSqlQuery query(db0.m_db);
 
-		if (!db0.msgsRcvdWithin90DaysQuery(query, appendedCols)) {
+		if (!db0.msgsRcvdWithin90DaysQuery(query, appendedCols.size())) {
 			goto fail;
 		}
 
@@ -235,7 +235,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 	{
 		QSqlQuery query(db1.m_db);
 
-		if (!db1.msgsRcvdWithin90DaysQuery(query, appendedCols)) {
+		if (!db1.msgsRcvdWithin90DaysQuery(query, appendedCols.size())) {
 			goto fail;
 		}
 
@@ -749,7 +749,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	{
 		QSqlQuery query(db0.m_db);
 
-		if (!db0.msgsSntWithin90DaysQuery(query, appendedCols)) {
+		if (!db0.msgsSntWithin90DaysQuery(query, appendedCols.size())) {
 			goto fail;
 		}
 
@@ -763,7 +763,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
 	{
 		QSqlQuery query(db1.m_db);
 
-		if (!db1.msgsSntWithin90DaysQuery(query, appendedCols)) {
+		if (!db1.msgsSntWithin90DaysQuery(query, appendedCols.size())) {
 			goto fail;
 		}
 
