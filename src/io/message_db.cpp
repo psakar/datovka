@@ -81,14 +81,10 @@ MessageDb::MessageDb(const QString &connectionName)
 {
 }
 
-/* ========================================================================= */
-/*
- * Return all received messages model.
- */
-QAbstractTableModel *MessageDb::msgsRcvdModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
+	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
@@ -120,15 +116,21 @@ QAbstractTableModel *MessageDb::msgsRcvdModel(
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_RCVD);
-	if (!m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
+	query.first();
+	while (query.isActive() && query.isValid()) {
+		entryList.append(RcvdEntry(query.value(0).toLongLong(),
+		    query.value(1).toString(), query.value(2).toString(),
+		    query.value(3).toString(), query.value(4).toString(),
+		    query.value(5).toBool(), query.value(6).toBool(),
+		    query.value(7).toInt()));
+
+		query.next();
 	}
-	return &m_sqlMsgsModel;
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<RcvdEntry>();
 }
 
 
@@ -398,15 +400,10 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Return all sent messages model.
- */
-QAbstractTableModel * MessageDb::msgsSntModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
+	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
@@ -435,17 +432,21 @@ QAbstractTableModel * MessageDb::msgsSntModel(
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_SNT);
-	if (!m_sqlMsgsModel.setSntHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
+	query.first();
+	while (query.isActive() && query.isValid()) {
+		entryList.append(SntEntry(query.value(0).toLongLong(),
+		    query.value(1).toString(), query.value(2).toString(),
+		    query.value(3).toString(), query.value(4).toString(),
+		    query.value(5).toInt(), query.value(6).toBool()));
+
+		query.next();
 	}
-	return &m_sqlMsgsModel;
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<SntEntry>();
 }
-
 
 /* ========================================================================= */
 /*
@@ -1838,7 +1839,6 @@ QList<MessageDb::AttachmentEntry> MessageDb::attachEntries(qint64 msgId) const
 
 	query.first();
 	while (query.isActive() && query.isValid()) {
-
 		entryList.append(AttachmentEntry(query.value(0).toLongLong(),
 		    query.value(1).toLongLong(), query.value(2).toByteArray(),
 		    query.value(3).toString(), query.value(4).toString(),

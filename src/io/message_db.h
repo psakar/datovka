@@ -177,6 +177,49 @@ public:
 	};
 
 	/*!
+	 * @brief Received entries.
+	 */
+	class RcvdEntry {
+	public:
+		qint64 dmId; /*!< Message identifier. */
+		QString dmAnnotation; /*!< Message annotation. */
+		QString dmSender; /*!< Message sender. */
+		QString dmDeliveryTime; /*!< Delivery time as stored in the database. */
+		QString dmAcceptanceTime; /*!< Acceptance time as stored in the database. */
+		bool readLocally; /*!< True if locally read. */
+		bool isDownloaded; /*!< True if complete message has been downloaded. */
+		int processStatus; /*!< Brief processing status. */
+
+		RcvdEntry(qint64 i, const QString &a, const QString &s,
+		    const QString &dt, const QString &at, bool rl, bool id,
+		    int ps)
+		    : dmId(i), dmAnnotation(a), dmSender(s), dmDeliveryTime(dt),
+		    dmAcceptanceTime(at), readLocally(rl), isDownloaded(id),
+		    processStatus(ps)
+		{ }
+	};
+
+	/*!
+	 * @brief Sent entries.
+	 */
+	class SntEntry {
+	public:
+		qint64 dmId; /*!< Message identifier. */
+		QString dmAnnotation; /*!< Message annotation. */
+		QString dmSender; /*!< Message sender. */
+		QString dmDeliveryTime; /*!< Delivery time as stored in the database. */
+		QString dmAcceptanceTime; /*!< Acceptance time as stored in the database. */
+		int dmMessageStatus; /*!< Brief message status. */
+		bool isDownloaded; /*!< True if complete message has been downloaded. */
+
+		SntEntry(qint64 i, const QString &a, const QString &s,
+		    const QString &dt, const QString &at, int ms, bool id)
+		    : dmId(i), dmAnnotation(a), dmSender(s), dmDeliveryTime(dt),
+		    dmAcceptanceTime(at), dmMessageStatus(ms), isDownloaded(id)
+		{ }
+	};
+
+	/*!
 	 * @brief File entry data.
 	 */
 	class FileData {
@@ -739,15 +782,13 @@ public:
 
 protected: /* These function are used from within a database container. */
 	/*!
-	 * @brief Return all received messages model.
+	 * @brief Return entries for all received messages.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsRcvdModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<RcvdEntry> msgsRcvdEntries(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Return received messages within past 90 days.
@@ -812,15 +853,13 @@ protected: /* These function are used from within a database container. */
 	    const QString &year) const;
 
 	/*!
-	 * @brief Return all sent messages model.
+	 * @brief Return entries for all sent messages.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsSntModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<SntEntry> msgsSntEntries(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Return sent messages within past 90 days.

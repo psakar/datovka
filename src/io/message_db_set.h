@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -358,15 +358,13 @@ public: /* Database function that have been delegate to the container. */
 	bool vacuum(void);
 
 	/*!
-	 * @brief Return all received messages model.
+	 * @brief Return entries for all received messages.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsRcvdModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<MessageDb::RcvdEntry> msgsRcvdEntries(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Return received messages within past 90 days.
@@ -431,15 +429,13 @@ public: /* Database function that have been delegate to the container. */
 	    const QString &year) const;
 
 	/*!
-	 * @brief Return all sent messages model.
+	 * @brief Return entries for all sent messages.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsSntModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<MessageDb::SntEntry> msgsSntEntries(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Return sent messages within past 90 days.
@@ -596,8 +592,8 @@ private:
 	 */
 	QStringList _yrly_secKeysIn90Days(void) const;
 
-	inline QAbstractTableModel *_sf_msgsRcvdModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsRcvdModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::RcvdEntry> _sf_msgsRcvdEntries(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	inline QList<MessageDb::RcvdEntry> _yrly_msgsRcvdEntries(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	inline QAbstractTableModel *_sf_msgsRcvdWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	static
@@ -621,8 +617,8 @@ private:
 	inline int _sf_msgsUnreadInYear(enum MessageDb::MessageType type, const QString &year) const;
 	inline int _yrly_msgsUnreadInYear(enum MessageDb::MessageType type, const QString &year) const;
 
-	inline QAbstractTableModel *_sf_msgsSntModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsSntModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::SntEntry> _sf_msgsSntEntries(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	inline QList<MessageDb::SntEntry> _yrly_msgsSntEntries(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	inline QAbstractTableModel *_sf_msgsSntWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	static

@@ -251,6 +251,7 @@ MainWindow::~MainWindow(void)
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_accountModel(this),
+    m_messageTableModel(DbMsgsTblModel::DUMMY_RCVD, this),
     m_messageListProxyModel(this),
     m_attachmentModel(this),
     m_messageMarker(this),
@@ -845,6 +846,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_RECEIVED);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
+		//m_sqlMsgsModel.setRcvdHeader(m_msgTblAppendedCols);
 		msgTblMdl = dbSet->msgsRcvdModel(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
@@ -860,6 +862,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_SENT);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
+		//m_sqlMsgsModel.setSntHeader(m_msgTblAppendedCols);
 		msgTblMdl = dbSet->msgsSntModel(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 #endif /* DISABLE_ALL_TABLE */

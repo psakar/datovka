@@ -1092,6 +1092,7 @@ private:
 	                              * Account tree view model. Generated from
 	                              * configuration file.
 	                              */
+	DbMsgsTblModel m_messageTableModel; /*!< Message table model. */
 	SortFilterProxyModel m_messageListProxyModel; /*!<
 	                                               * Used for message
 	                                               * sorting and filtering.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,42 +79,41 @@ QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 	return keys;
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsRcvdModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_sf_msgsRcvdEntries(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(
-		    DbMsgsTblModel::DUMMY_RCVD);
+		return QList<MessageDb::RcvdEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdModel(appendedCols);
+	return this->first()->msgsRcvdEntries(appendedCols);
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_msgsRcvdEntries(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	/* TODO -- Implementation missing and will probably be missing. */
 	Q_UNUSED(appendedCols);
 	Q_ASSERT(0);
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::msgsRcvdModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::msgsRcvdEntries(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdModel(appendedCols);
+		return _sf_msgsRcvdEntries(appendedCols);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdModel(appendedCols);
+		return _yrly_msgsRcvdEntries(appendedCols);
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
 QAbstractTableModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(
@@ -613,41 +612,41 @@ int MessageDbSet::msgsUnreadInYear(enum MessageDb::MessageType type,
 	return -1;
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsSntModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_sf_msgsSntEntries(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SNT);
+		return QList<MessageDb::SntEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsSntModel(appendedCols);
+	return this->first()->msgsSntEntries(appendedCols);
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsSntModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_yrly_msgsSntEntries(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	/* TODO -- Implementation missing and will probably be missing. */
 	Q_UNUSED(appendedCols);
 	Q_ASSERT(0);
-	return NULL;
+	return QList<MessageDb::SntEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::msgsSntModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::msgsSntEntries(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsSntModel(appendedCols);
+		return _sf_msgsSntEntries(appendedCols);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsSntModel(appendedCols);
+		return _yrly_msgsSntEntries(appendedCols);
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::SntEntry>();
 }
 
 QAbstractTableModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(
