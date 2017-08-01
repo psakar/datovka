@@ -782,6 +782,15 @@ public:
 
 protected: /* These function are used from within a database container. */
 	/*!
+	 * @brief Appends to received entry list data received from SQL query.
+	 *
+	 * @param[in,out] entryList List to add entries to.
+	 * @param[in] query Query to read data from.
+	 */
+	static
+	void appendRcvdEntryList(QList<RcvdEntry> &entryList, QSqlQuery &query);
+
+	/*!
 	 * @brief Return entries for all received messages.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
@@ -791,15 +800,13 @@ protected: /* These function are used from within a database container. */
 	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
-	 * @brief Return received messages within past 90 days.
+	 * @brief Return entries for received messages within past 90 days.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsRcvdWithin90DaysModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<RcvdEntry> msgsRcvdEntriesWithin90Days(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Return received messages within given year.

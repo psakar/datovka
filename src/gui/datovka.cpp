@@ -816,8 +816,11 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
-		msgTblMdl = dbSet->msgsRcvdWithin90DaysModel(
-		    m_msgTblAppendedCols);
+		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
+		msgTblMdl = &m_messageTableModel;
+		/* TODO */
+//		msgTblMdl = dbSet->msgsRcvdWithin90DaysModel(
+//		    m_msgTblAppendedCols);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),

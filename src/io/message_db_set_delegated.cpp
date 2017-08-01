@@ -116,23 +116,22 @@ QList<MessageDb::RcvdEntry> MessageDbSet::msgsRcvdEntries(
 	return QList<MessageDb::RcvdEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_sf_msgsRcvdEntriesWithin90Days(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(
-		    DbMsgsTblModel::DUMMY_RCVD);
+		return QList<MessageDb::RcvdEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdWithin90DaysModel(appendedCols);
+	return this->first()->msgsRcvdEntriesWithin90Days(appendedCols);
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_attach_msgsRcvdEntriesWithin90Days(
     MessageDb &db, const QString &attachFileName,
     const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
+	QList<MessageDb::RcvdEntry> entryList;
 	QSqlQuery query(db.m_db);
-	QAbstractTableModel *ret = 0;
 	bool attached = false;
 	QString queryStr;
 
@@ -194,13 +193,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(
 		goto fail;
 	}
 
-	db.m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_RCVD);
-	if (!db.m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-
-	ret = &db.m_sqlMsgsModel;
+	MessageDb::appendRcvdEntryList(entryList, query);
 
 fail:
 	/* Query must be finished before detaching. */
@@ -208,13 +201,13 @@ fail:
 	if (attached) {
 		MessageDb::detachDb2(query);
 	}
-	return ret;
+	return entryList;
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_msgsRcvdEntriesWithin90Days(
     MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
 {
-	QAbstractTableModel *ret = 0;
+	QList<MessageDb::RcvdEntry> entryList;
 
 	{
 		QSqlQuery query(db0.m_db);
@@ -223,12 +216,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 			goto fail;
 		}
 
-		db0.m_sqlMsgsModel.setQuery(query,
-		    DbMsgsTblModel::WORKING_RCVD);
-		if (!db0.m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-			Q_ASSERT(0);
-			goto fail;
-		}
+		MessageDb::appendRcvdEntryList(entryList, query);
 	}
 
 	{
@@ -238,72 +226,69 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
 			goto fail;
 		}
 
-		db0.m_sqlMsgsModel.appendQueryData(query,
-		    DbMsgsTblModel::WORKING_RCVD);
+		MessageDb::appendRcvdEntryList(entryList, query);
 	}
 
-	ret = &db0.m_sqlMsgsModel;
-
 fail:
-	return ret;
+	return entryList;
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_msgsRcvdEntriesWithin90Days(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
+	QList<MessageDb::RcvdEntry> entryList;
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
 	if (secKeys.size() == 0) {
-		return &DbMsgsTblModel::dummyModel(
-		    DbMsgsTblModel::DUMMY_RCVD);
+		return QList<MessageDb::RcvdEntry>();
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
-		MessageDb *db = this->value(secKeys[0], NULL);
-		if (NULL == db) {
+		MessageDb *db = this->value(secKeys[0], Q_NULLPTR);
+		if (Q_NULLPTR == db) {
 			Q_ASSERT(0);
-			return NULL;
+			return QList<MessageDb::RcvdEntry>();
 		}
-		return db->msgsRcvdWithin90DaysModel(appendedCols);
+		return db->msgsRcvdEntriesWithin90Days(appendedCols);
 	} else {
 		Q_ASSERT(secKeys.size() == 2);
 		/* The models need to be attached. */
 
-		MessageDb *db0 = this->value(secKeys[0], NULL);
-		MessageDb *db1 = this->value(secKeys[1], NULL);
-		if ((NULL == db0) || (NULL == db1)) {
+		MessageDb *db0 = this->value(secKeys[0], Q_NULLPTR);
+		MessageDb *db1 = this->value(secKeys[1], Q_NULLPTR);
+		if ((Q_NULLPTR == db0) || (Q_NULLPTR == db1)) {
 			Q_ASSERT(0);
-			return NULL;
+			return QList<MessageDb::RcvdEntry>();
 		}
 
 #if 0
-		return _yrly_2dbs_attach_msgsRcvdWithin90DaysModel(*db0,
+		return _yrly_2dbs_attach_msgsRcvdEntriesWithin90Days(*db0,
 		    db1->fileName(), appendedCols);
 #else
-		return _yrly_2dbs_msgsRcvdWithin90DaysModel(*db0, *db1,
+		return _yrly_2dbs_msgsRcvdEntriesWithin90Days(*db0, *db1,
 		    appendedCols);
 #endif
 	}
 
 	Q_ASSERT(0);
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::msgsRcvdWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::msgsRcvdEntriesWithin90Days(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdWithin90DaysModel(appendedCols);
+		return _sf_msgsRcvdEntriesWithin90Days(appendedCols);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdWithin90DaysModel(appendedCols);
+		return _yrly_msgsRcvdEntriesWithin90Days(appendedCols);
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
 QAbstractTableModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year,

@@ -81,6 +81,21 @@ MessageDb::MessageDb(const QString &connectionName)
 {
 }
 
+void MessageDb::appendRcvdEntryList(QList<MessageDb::RcvdEntry> &entryList,
+    QSqlQuery &query)
+{
+	query.first();
+	while (query.isActive() && query.isValid()) {
+		entryList.append(MessageDb::RcvdEntry(
+		    query.value(0).toLongLong(), query.value(1).toString(),
+		    query.value(2).toString(), query.value(3).toString(),
+		    query.value(4).toString(), query.value(5).toBool(),
+		    query.value(6).toBool(), query.value(7).toInt()));
+
+		query.next();
+	}
+}
+
 QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(
     const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
@@ -116,16 +131,7 @@ QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(
 		goto fail;
 	}
 
-	query.first();
-	while (query.isActive() && query.isValid()) {
-		entryList.append(RcvdEntry(query.value(0).toLongLong(),
-		    query.value(1).toString(), query.value(2).toString(),
-		    query.value(3).toString(), query.value(4).toString(),
-		    query.value(5).toBool(), query.value(6).toBool(),
-		    query.value(7).toInt()));
-
-		query.next();
-	}
+	appendRcvdEntryList(entryList, query);
 
 	return entryList;
 
@@ -133,32 +139,23 @@ fail:
 	return QList<RcvdEntry>();
 }
 
-
-/* ========================================================================= */
-/*
- * Return received messages within past 90 days.
- */
-QAbstractTableModel *MessageDb::msgsRcvdWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesWithin90Days(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
+	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
 
 	if (!msgsRcvdWithin90DaysQuery(query, appendedCols.size())) {
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_RCVD);
-	if (!m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendRcvdEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<RcvdEntry>();
 }
-
 
 /* ========================================================================= */
 /*

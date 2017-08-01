@@ -367,15 +367,13 @@ public: /* Database function that have been delegate to the container. */
 	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
-	 * @brief Return received messages within past 90 days.
+	 * @brief Return entries for received messages within past 90 days.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsRcvdWithin90DaysModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<MessageDb::RcvdEntry> msgsRcvdEntriesWithin90Days(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Return received messages within given year.
@@ -595,12 +593,12 @@ private:
 	inline QList<MessageDb::RcvdEntry> _sf_msgsRcvdEntries(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 	inline QList<MessageDb::RcvdEntry> _yrly_msgsRcvdEntries(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
-	inline QAbstractTableModel *_sf_msgsRcvdWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::RcvdEntry> _sf_msgsRcvdEntriesWithin90Days(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 	static
-	inline QAbstractTableModel *_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(MessageDb &db, const QString &attachFileName, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::RcvdEntry> _yrly_2dbs_attach_msgsRcvdEntriesWithin90Days(MessageDb &db, const QString &attachFileName, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_msgsRcvdWithin90DaysModel(MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsRcvdWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::RcvdEntry> _yrly_2dbs_msgsRcvdEntriesWithin90Days(MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::RcvdEntry> _yrly_msgsRcvdEntriesWithin90Days(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	inline QAbstractTableModel *_sf_msgsRcvdInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	inline QAbstractTableModel *_yrly_msgsRcvdInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
