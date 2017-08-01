@@ -817,7 +817,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		break;
 	case AccountModel::nodeRecentReceived:
 		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
-		msgTblMdl = &m_messageTableModel;
+//		msgTblMdl = &m_messageTableModel;
 		/* TODO */
 //		msgTblMdl = dbSet->msgsRcvdWithin90DaysModel(
 //		    m_msgTblAppendedCols);
@@ -827,8 +827,11 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeRecentSent:
-		msgTblMdl = dbSet->msgsSntWithin90DaysModel(
-		    m_msgTblAppendedCols);
+		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
+//		msgTblMdl = &m_messageTableModel;
+		/* TODO */
+//		msgTblMdl = dbSet->msgsSntWithin90DaysModel(
+//		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:

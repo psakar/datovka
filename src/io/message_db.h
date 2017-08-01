@@ -860,6 +860,15 @@ protected: /* These function are used from within a database container. */
 	    const QString &year) const;
 
 	/*!
+	 * @brief Appends to sent entry list data received from SQL query.
+	 *
+	 * @param[in,out] entryList List to add entries to.
+	 * @param[in] query Query to read data from.
+	 */
+	static
+	void appendSntEntryList(QList<SntEntry> &entryList, QSqlQuery &query);
+
+	/*!
 	 * @brief Return entries for all sent messages.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
@@ -869,15 +878,13 @@ protected: /* These function are used from within a database container. */
 	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
-	 * @brief Return sent messages within past 90 days.
+	 * @brief Return entries for all sent messages within past 90 days.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsSntWithin90DaysModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<SntEntry> msgsSntEntriesWithin90Days(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Return sent messages within given year.

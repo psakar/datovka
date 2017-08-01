@@ -436,15 +436,13 @@ public: /* Database function that have been delegate to the container. */
 	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
-	 * @brief Return sent messages within past 90 days.
+	 * @brief Return entries for all sent messages within past 90 days.
 	 *
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsSntWithin90DaysModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<MessageDb::SntEntry> msgsSntEntriesWithin90Days(
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Return sent messages within given year.
@@ -618,12 +616,12 @@ private:
 	inline QList<MessageDb::SntEntry> _sf_msgsSntEntries(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 	inline QList<MessageDb::SntEntry> _yrly_msgsSntEntries(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
-	inline QAbstractTableModel *_sf_msgsSntWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::SntEntry> _sf_msgsSntEntriesWithin90Days(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 	static
-	inline QAbstractTableModel *_yrly_2dbs_attach_msgsSntWithin90DaysModel(MessageDb &db, const QString &attachFileName, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::SntEntry> _yrly_2dbs_attach_msgsSntEntriesWithin90Days(MessageDb &db, const QString &attachFileName, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	static
-	inline QAbstractTableModel *_yrly_2dbs_msgsSntWithin90DaysModel(MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsSntWithin90DaysModel(const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::SntEntry> _yrly_2dbs_msgsSntEntriesWithin90Days(MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::SntEntry> _yrly_msgsSntEntriesWithin90Days(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	inline QAbstractTableModel *_sf_msgsSntInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	inline QAbstractTableModel *_yrly_msgsSntInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);

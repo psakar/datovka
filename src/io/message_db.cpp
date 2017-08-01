@@ -81,7 +81,7 @@ MessageDb::MessageDb(const QString &connectionName)
 {
 }
 
-void MessageDb::appendRcvdEntryList(QList<MessageDb::RcvdEntry> &entryList,
+void MessageDb::appendRcvdEntryList(QList<RcvdEntry> &entryList,
     QSqlQuery &query)
 {
 	query.first();
@@ -397,6 +397,19 @@ fail:
 	return -1;
 }
 
+void MessageDb::appendSntEntryList(QList<SntEntry> &entryList, QSqlQuery &query)
+{
+	query.first();
+	while (query.isActive() && query.isValid()) {
+		entryList.append(SntEntry(query.value(0).toLongLong(),
+		    query.value(1).toString(), query.value(2).toString(),
+		    query.value(3).toString(), query.value(4).toString(),
+		    query.value(5).toInt(), query.value(6).toBool()));
+
+		query.next();
+	}
+}
+
 QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(
     const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
@@ -429,15 +442,7 @@ QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(
 		goto fail;
 	}
 
-	query.first();
-	while (query.isActive() && query.isValid()) {
-		entryList.append(SntEntry(query.value(0).toLongLong(),
-		    query.value(1).toString(), query.value(2).toString(),
-		    query.value(3).toString(), query.value(4).toString(),
-		    query.value(5).toInt(), query.value(6).toBool()));
-
-		query.next();
-	}
+	appendSntEntryList(entryList, query);
 
 	return entryList;
 
@@ -445,31 +450,23 @@ fail:
 	return QList<SntEntry>();
 }
 
-/* ========================================================================= */
-/*
- * Return sent messages within past 90 days.
- */
-QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesWithin90Days(
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
+	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
 
 	if (!msgsSntWithin90DaysQuery(query, appendedCols.size())) {
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_SNT);
-	if (!m_sqlMsgsModel.setSntHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendSntEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<SntEntry>();
 }
-
 
 /* ========================================================================= */
 /*
