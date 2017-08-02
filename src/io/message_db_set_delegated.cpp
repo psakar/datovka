@@ -717,7 +717,7 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_msgsSntEntriesWithin90Days(
 	}
 
 fail:
-	return QList<MessageDb::SntEntry>();
+	return entryList;
 }
 
 QList<MessageDb::SntEntry> MessageDbSet::_yrly_msgsSntEntriesWithin90Days(void) const
