@@ -376,8 +376,10 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 
 	/* Set column count if the model is empty. */
 	if (rowCount() == 0) {
+		beginResetModel();
 		m_type = WORKING_RCVD;
 		m_columnCount = rcvdItemIds().size() + appendedColsNum;
+		endResetModel();
 	} else {
 		if (Q_UNLIKELY(m_type != WORKING_RCVD)) {
 			Q_ASSERT(0);
@@ -429,8 +431,10 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 
 	/* Set column count if the model is empty. */
 	if (rowCount() == 0) {
+		beginResetModel();
 		m_type = WORKING_SNT;
 		m_columnCount = sntItemIds().size() + appendedColsNum;
+		endResetModel();
 	} else {
 		if (Q_UNLIKELY(m_type != WORKING_SNT)) {
 			Q_ASSERT(0);

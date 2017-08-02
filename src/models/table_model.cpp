@@ -79,10 +79,11 @@ void TblModel::setQuery(QSqlQuery &query)
 	m_data.clear();
 	m_rowsAllocated = 0;
 	m_rowCount = 0;
-	endResetModel();
 
 	/* Looks like empty results have column count set. */
 	m_columnCount = query.record().count();
+
+	endResetModel();
 
 	appendQueryData(query);
 }
