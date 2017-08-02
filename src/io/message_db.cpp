@@ -22,7 +22,6 @@
  */
 
 #include <cinttypes>
-#include <QAbstractTableModel>
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
@@ -461,14 +460,10 @@ fail:
 	return QList<SntEntry>();
 }
 
-/* ========================================================================= */
-/*
- * Return sent messages within given year.
- */
-QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesInYear(const QString &year,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
+	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
@@ -500,17 +495,13 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &year,
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_SNT);
-	if (!m_sqlMsgsModel.setSntHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendSntEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<SntEntry>();
 }
-
 
 /* ========================================================================= */
 /*

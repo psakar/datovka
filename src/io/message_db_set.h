@@ -24,7 +24,6 @@
 #ifndef _MESSAGE_DB_SET_H_
 #define _MESSAGE_DB_SET_H_
 
-#include <QAbstractTableModel>
 #include <QDateTime>
 #include <QMap>
 #include <QString>
@@ -443,16 +442,14 @@ public: /* Database function that have been delegate to the container. */
 	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
-	 * @brief Return sent messages within given year.
+	 * @brief Return entries for sent messages within given year.
 	 *
 	 * @param[in] year         Year number.
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsSntInYearModel(const QString &year,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<MessageDb::SntEntry> msgsSntEntriesInYear(const QString &year,
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -621,8 +618,8 @@ private:
 	inline QList<MessageDb::SntEntry> _yrly_2dbs_msgsSntEntriesWithin90Days(MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	inline QList<MessageDb::SntEntry> _yrly_msgsSntEntriesWithin90Days(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
-	inline QAbstractTableModel *_sf_msgsSntInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsSntInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::SntEntry> _sf_msgsSntEntriesInYear(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	inline QList<MessageDb::SntEntry> _yrly_msgsSntEntriesInYear(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	inline bool _sf_smsgdtSetAllReceivedLocallyRead(bool read);
 	inline bool _yrly_smsgdtSetAllReceivedLocallyRead(bool read);

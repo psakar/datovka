@@ -807,45 +807,48 @@ QList<MessageDb::SntEntry> MessageDbSet::msgsSntEntriesWithin90Days(
 	return QList<MessageDb::SntEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_sf_msgsSntEntriesInYear(
+    const QString &year,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SNT);
+		return QList<MessageDb::SntEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsSntInYearModel(year, appendedCols);
+	return this->first()->msgsSntEntriesInYear(year, appendedCols);
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsSntInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_yrly_msgsSntEntriesInYear(
+    const QString &year,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
-	MessageDb *db = this->value(secondaryKey, NULL);
-	if (NULL == db) {
-		return 0;
+	MessageDb *db = this->value(secondaryKey, Q_NULLPTR);
+	if (Q_NULLPTR == db) {
+		return QList<MessageDb::SntEntry>();
 	}
 
-	return db->msgsSntInYearModel(year, appendedCols);
+	return db->msgsSntEntriesInYear(year, appendedCols);
 }
 
-QAbstractTableModel *MessageDbSet::msgsSntInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::msgsSntEntriesInYear(
+    const QString &year,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsSntInYearModel(year, appendedCols);
+		return _sf_msgsSntEntriesInYear(year, appendedCols);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsSntInYearModel(year, appendedCols);
+		return _yrly_msgsSntEntriesInYear(year, appendedCols);
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::SntEntry>();
 }
 
 bool MessageDbSet::_sf_smsgdtSetAllReceivedLocallyRead(bool read)

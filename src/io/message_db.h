@@ -25,7 +25,6 @@
 #define _MESSAGE_DB_H_
 
 #include <QAbstractButton>
-#include <QAbstractTableModel>
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
@@ -885,16 +884,14 @@ protected: /* These function are used from within a database container. */
 	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
-	 * @brief Return sent messages within given year.
+	 * @brief Return entries for sent messages within given year.
 	 *
 	 * @param[in] year         Year number.
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsSntInYearModel(const QString &year,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<SntEntry> msgsSntEntriesInYear(const QString &year,
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Set message read locally for all received messages.

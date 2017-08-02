@@ -853,7 +853,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
 		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
-		msgTblMdl = dbSet->msgsRcvdModel(m_msgTblAppendedCols);
+//		msgTblMdl = dbSet->msgsRcvdModel(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
@@ -869,7 +869,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
 		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
-		msgTblMdl = dbSet->msgsSntModel(m_msgTblAppendedCols);
+//		msgTblMdl = dbSet->msgsSntModel(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 #endif /* DISABLE_ALL_TABLE */
 		break;
@@ -886,10 +886,13 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSentYear:
+		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
+//		msgTblMdl = &m_messageTableModel;
+		/* TODO */
 		/* TODO -- Parameter check. */
-		msgTblMdl = dbSet->msgsSntInYearModel(
-		    current.data(ROLE_PLAIN_DISPLAY).toString(),
-		    m_msgTblAppendedCols);
+//		msgTblMdl = dbSet->msgsSntInYearModel(
+//		    current.data(ROLE_PLAIN_DISPLAY).toString(),
+//		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		break;
 	default:
