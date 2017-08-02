@@ -97,7 +97,7 @@ public:
 	 * @param[in] parent Parent object.
 	 */
 	explicit DbMsgsTblModel(enum Type type = WORKING_RCVD,
-	    QObject *parent = 0);
+	    QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Returns the data stored under the given role.

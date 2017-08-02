@@ -101,7 +101,7 @@ public:
 	 * @brief Returns object containing serialised attachment data.
 	 *
 	 * @param[in] indexes List of indexes.
-	 * @return Pointer to newly allocated mime data object, 0 on error.
+	 * @return Pointer to newly allocated mime data object, Q_NULLPTR on error.
 	 */
 	virtual
 	QMimeData *mimeData(
