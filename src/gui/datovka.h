@@ -44,6 +44,7 @@
 #include "src/gui/dlg_timestamp_expir.h"
 #include "src/models/accounts_model.h"
 #include "src/models/files_model.h"
+#include "src/models/messages_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/settings/preferences.h"
 #include "src/single/single_instance.h"

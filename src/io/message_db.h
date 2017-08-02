@@ -34,8 +34,8 @@
 #include <QString>
 #include <QVector>
 
+#include "src/common.h"
 #include "src/io/sqlite/db.h"
-#include "src/models/messages_model.h"
 
 #define INVALID_YEAR "inv"
 #define DB2 "db2"
@@ -792,30 +792,24 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return entries for all received messages.
 	 *
-	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<RcvdEntry> msgsRcvdEntries(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	QList<RcvdEntry> msgsRcvdEntries(void) const;
 
 	/*!
 	 * @brief Return entries for received messages within past 90 days.
 	 *
-	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<RcvdEntry> msgsRcvdEntriesWithin90Days(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	QList<RcvdEntry> msgsRcvdEntriesWithin90Days(void) const;
 
 	/*!
 	 * @brief Return entries for received messages within given year.
 	 *
 	 * @param[in] year         Year number.
-	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<RcvdEntry> msgsRcvdEntriesInYear(const QString &year,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	QList<RcvdEntry> msgsRcvdEntriesInYear(const QString &year) const;
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -868,30 +862,24 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Return entries for all sent messages.
 	 *
-	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<SntEntry> msgsSntEntries(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	QList<SntEntry> msgsSntEntries(void) const;
 
 	/*!
 	 * @brief Return entries for all sent messages within past 90 days.
 	 *
-	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<SntEntry> msgsSntEntriesWithin90Days(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	QList<SntEntry> msgsSntEntriesWithin90Days(void) const;
 
 	/*!
 	 * @brief Return entries for sent messages within given year.
 	 *
 	 * @param[in] year         Year number.
-	 * @param[in] appendedCols List of names for added empty columns.
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<SntEntry> msgsSntEntriesInYear(const QString &year,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	QList<SntEntry> msgsSntEntriesInYear(const QString &year) const;
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -1076,23 +1064,19 @@ protected: /* These function are used from within a database container. */
 	 * @brief Query received messages within past 90 days.
 	 *
 	 * @param[in,out] query Query already assigned to a database.
-	 * @param[in]     appendedColsNum Number of added empty columns.
 	 * @return True on success.
 	 */
 	static
-	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query, int appendedColsNum);
+	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query);
 
 	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
 	 * @param[in,out] query Query already assigned to a database.
-	 * @param[in]     appendedColsNum Number of added empty columns.
 	 * @return True on success.
 	 */
 	static
-	bool msgsSntWithin90DaysQuery(QSqlQuery &query, int appendedColsNum);
-
-	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
+	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
 
 public:
 	static

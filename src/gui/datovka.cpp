@@ -77,7 +77,6 @@
 #include "src/io/tag_db.h"
 #include "src/isds/isds_conversion.h"
 #include "src/model_interaction/attachment_interaction.h"
-#include "src/models/files_model.h"
 #include "src/records_management/gui/dlg_records_management.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"

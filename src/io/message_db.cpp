@@ -52,6 +52,7 @@
 #include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
+#include "src/models/messages_model.h"
 #include "src/settings/preferences.h"
 
 /* Attachment size is computed from actual data. */
@@ -75,8 +76,7 @@ const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
     "LENGTH(dmEncodedContent)"};
 
 MessageDb::MessageDb(const QString &connectionName)
-    : SQLiteDb(connectionName),
-    m_sqlMsgsModel()
+    : SQLiteDb(connectionName)
 {
 }
 
@@ -95,8 +95,7 @@ void MessageDb::appendRcvdEntryList(QList<RcvdEntry> &entryList,
 	}
 }
 
-QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(void) const
 {
 	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
@@ -106,9 +105,6 @@ QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -138,13 +134,12 @@ fail:
 	return QList<RcvdEntry>();
 }
 
-QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesWithin90Days(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesWithin90Days(void) const
 {
 	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
 
-	if (!msgsRcvdWithin90DaysQuery(query, appendedCols.size())) {
+	if (!msgsRcvdWithin90DaysQuery(query)) {
 		goto fail;
 	}
 
@@ -157,8 +152,7 @@ fail:
 }
 
 QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesInYear(
-    const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
+    const QString &year) const
 {
 	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
@@ -168,9 +162,6 @@ QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesInYear(
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -402,8 +393,7 @@ void MessageDb::appendSntEntryList(QList<SntEntry> &entryList, QSqlQuery &query)
 	}
 }
 
-QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(void) const
 {
 	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
@@ -412,9 +402,6 @@ QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(
 		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -442,13 +429,12 @@ fail:
 	return QList<SntEntry>();
 }
 
-QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesWithin90Days(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesWithin90Days(void) const
 {
 	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
 
-	if (!msgsSntWithin90DaysQuery(query, appendedCols.size())) {
+	if (!msgsSntWithin90DaysQuery(query)) {
 		goto fail;
 	}
 
@@ -460,8 +446,8 @@ fail:
 	return QList<SntEntry>();
 }
 
-QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesInYear(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesInYear(
+    const QString &year) const
 {
 	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
@@ -470,9 +456,6 @@ QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesInYear(const QString &year,
 		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -4494,22 +4477,14 @@ bool MessageDb::reopenDb(const QString &newFileName)
 	return reopen_ret;
 }
 
-bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query, int appendedColsNum)
+bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
 {
-	if (Q_UNLIKELY(appendedColsNum < 0)) {
-		Q_ASSERT(0);
-		return false;
-	}
-
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
 		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
-	for (int i = 0; i < appendedColsNum; ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -4539,21 +4514,13 @@ fail:
 	return false;
 }
 
-bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query, int appendedColsNum)
+bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query)
 {
-	if (Q_UNLIKELY(appendedColsNum < 0)) {
-		Q_ASSERT(0);
-		return false;
-	}
-
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
 		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	for (int i = 0; i < appendedColsNum; ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "

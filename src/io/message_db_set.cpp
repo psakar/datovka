@@ -30,7 +30,7 @@
 #include <QRegExp>
 #include <QSqlDatabase>
 
-#include "message_db_set.h"
+#include "src/io/message_db_set.h"
 #include "src/log/log.h"
 
 MessageDbSet::MessageDbSet(const QString &locDir, const QString &primaryKey,
