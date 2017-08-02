@@ -713,7 +713,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	Q_UNUSED(previous);
 
 	QString html;
-	QAbstractTableModel *msgTblMdl = Q_NULLPTR;
 
 	if (!current.isValid()) {
 		/* May occur on deleting last account. */
@@ -809,6 +808,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	    this, SLOT(messageItemClicked(QModelIndex)));
 
 	m_messageTableModel.removeRows(0, m_messageTableModel.rowCount());
+	m_messageListProxyModel.setSourceModel(&m_messageTableModel); /* TODO */
 
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
@@ -817,22 +817,20 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
-		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
 		m_messageTableModel.appendData(
 		    dbSet->msgsRcvdEntriesWithin90Days(),
 		    m_msgTblAppendedCols.size());
-		msgTblMdl = &m_messageTableModel; /* TODO */
+		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeRecentSent:
-		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
 		m_messageTableModel.appendData(
 		    dbSet->msgsSntEntriesWithin90Days(),
 		    m_msgTblAppendedCols.size());
-		msgTblMdl = &m_messageTableModel; /* TODO */
+		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
@@ -853,10 +851,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_RECEIVED);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
 		m_messageTableModel.appendData(dbSet->msgsEntriesRcvd(),
 		    m_msgTblAppendedCols.size());
-		msgTblMdl = &m_messageTableModel; /* TODO */
+		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
@@ -871,32 +868,29 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_SENT);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
 		m_messageTableModel.appendData(dbSet->msgsSntEntries(),
 		    m_msgTblAppendedCols.size());
-		msgTblMdl = &m_messageTableModel; /* TODO */
+		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 #endif /* DISABLE_ALL_TABLE */
 		break;
 	case AccountModel::nodeReceivedYear:
-		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
 		m_messageTableModel.appendData(
 		    dbSet->msgsRcvdEntriesInYear(
 		        current.data(ROLE_PLAIN_DISPLAY).toString()),
 		    m_msgTblAppendedCols.size());
-		msgTblMdl = &m_messageTableModel; /* TODO */
+		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
 		/* TODO -- Parameter check. */
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSentYear:
-		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
 		m_messageTableModel.appendData(
 		    dbSet->msgsSntEntriesInYear(
 		        current.data(ROLE_PLAIN_DISPLAY).toString()),
 		    m_msgTblAppendedCols.size());
-		msgTblMdl = &m_messageTableModel; /* TODO */
+		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
 		/* TODO -- Parameter check. */
 		ui->actionDelete_message_from_db->setEnabled(true);
 		break;
@@ -907,17 +901,12 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		break;
 	}
 
-	if (Q_NULLPTR != msgTblMdl) {
-		DbMsgsTblModel *mdl = qobject_cast<DbMsgsTblModel *>(msgTblMdl);
-		if (Q_NULLPTR == mdl) {
-			logErrorNL("%s", "Received model is not of desired type.");
-//			Q_ASSERT(0);
-			return;
-		}
-		mdl->setRecordsManagementIcon();
-		mdl->fillRecordsManagementColumn(
+	{
+		m_messageTableModel.setRecordsManagementIcon();
+		m_messageTableModel.fillRecordsManagementColumn(
 		    DbMsgsTblModel::REC_MGMT_NEG_COL);
-		mdl->fillTagsColumn(userName, DbMsgsTblModel::TAGS_NEG_COL);
+		m_messageTableModel.fillTagsColumn(userName,
+		    DbMsgsTblModel::TAGS_NEG_COL);
 		/* TODO -- Add some labels. */
 	}
 
@@ -968,13 +957,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeReceivedYear:
 		/* Set model. */
-		if (Q_NULLPTR == msgTblMdl) {
-			logErrorNL("%s", "No received message table model available.");
-//			Q_ASSERT(0);
-			return;
-		}
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
-		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
@@ -987,13 +970,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeSentYear:
 		/* Set model. */
-		if (Q_NULLPTR == msgTblMdl) {
-			logErrorNL("%s", "No sent message table model available.");
-//			Q_ASSERT(0);
-			return;
-		}
 		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
-		m_messageListProxyModel.setSourceModel(msgTblMdl);
 		ui->messageList->setModel(&m_messageListProxyModel);
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
