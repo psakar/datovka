@@ -413,47 +413,6 @@ bool DbFlsTblModel::setMessage(const struct isds_message *message)
 	return appendMessageData(message);
 }
 
-void DbFlsTblModel::setQuery(QSqlQuery &query)
-{
-	beginResetModel();
-	m_data.clear();
-	m_rowsAllocated = 0;
-	m_rowCount = 0;
-	endResetModel();
-
-	/* Looks like empty results have column count set. */
-	/* m_columnCount = MAX_COL; */
-	if ((query.record().count() + 1) != m_columnCount) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	appendQueryData(query);
-}
-
-bool DbFlsTblModel::appendQueryData(QSqlQuery &query)
-{
-	if ((query.record().count() + 1) != m_columnCount) {
-		return false;
-	}
-
-	query.first();
-	while (query.isActive() && query.isValid()) {
-
-		QVector<QVariant> row(m_columnCount);
-
-		queryToVector(row, query);
-		row[FPATH_COL] = LOCAL_DATABASE_STR;
-
-		/* Don't check data duplicity! */
-		insertVector(row, rowCount(), false);
-
-		query.next();
-	}
-
-	return true;
-}
-
 /* File content will be held within model. */
 //#define HOLD_FILE_CONTENT
 

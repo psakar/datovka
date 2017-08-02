@@ -159,23 +159,6 @@ public:
 	bool setMessage(const struct isds_message *message);
 
 	/*!
-	 * @brief Sets the content of the model according to the supplied query.
-	 *
-	 * @param[in,out] qyery SQL query result.
-	 */
-	virtual
-	void setQuery(QSqlQuery &query) Q_DECL_OVERRIDE;
-
-	/*!
-	 * @brief Appends data from the supplied query to the model.
-	 *
-	 * @param[in,out] query SQL query result.
-	 * @return True on success.
-	 */
-	virtual
-	bool appendQueryData(QSqlQuery &query) Q_DECL_OVERRIDE;
-
-	/*!
 	 * @brief Adds attachment file.
 	 *
 	 * @param[in] filePath Path to attachment file.

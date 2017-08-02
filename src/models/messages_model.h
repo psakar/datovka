@@ -123,23 +123,6 @@ public:
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
-	 * @brief Sets the content of the model according to the supplied query.
-	 *
-	 * @param[in,out] qyery SQL query result.
-	 * @param[in]     type  Working received or sent.
-	 */
-	void setQuery(QSqlQuery &query, enum Type type);
-
-	/*!
-	 * @brief Appends data from the supplied query to the model.
-	 *
-	 * @param[in,out] query SQL query result.
-	 * @param[in]     type  Working received or sent.
-	 * @return True on success.
-	 */
-	bool appendQueryData(QSqlQuery &query, enum Type type);
-
-	/*!
 	 * @brief Appends received entry data into the model.
 	 *
 	 * @param[in] entryList List of entries to append into the model.
@@ -278,12 +261,6 @@ public:
 	bool refillRecordsManagementColumn(const QList<qint64> &dmIds, int col);
 
 private:
-	/* Make these methods private so nobody is likely to mess with them. */
-	virtual
-	void setQuery(QSqlQuery &query) Q_DECL_OVERRIDE;
-	virtual
-	bool appendQueryData(QSqlQuery &query) Q_DECL_OVERRIDE;
-
 	enum Type m_type; /*!<
 	                   * Whether this is a model dummy or contains data.
 	                   */

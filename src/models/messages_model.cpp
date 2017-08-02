@@ -344,22 +344,6 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 	}
 }
 
-void DbMsgsTblModel::setQuery(QSqlQuery &query, enum DbMsgsTblModel::Type type)
-{
-	setType(type);
-	TblModel::setQuery(query);
-	/* TODO -- Check whether type matches query. */
-}
-
-bool DbMsgsTblModel::appendQueryData(QSqlQuery &query,
-    enum DbMsgsTblModel::Type type)
-{
-	if (type != m_type) {
-		return false;
-	}
-	return TblModel::appendQueryData(query);
-}
-
 void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
     int appendedColsNum)
 {
@@ -831,14 +815,4 @@ bool DbMsgsTblModel::refillRecordsManagementColumn(const QList<qint64> &dmIds,
 	}
 
 	return true;
-}
-
-void DbMsgsTblModel::setQuery(QSqlQuery &query)
-{
-	TblModel::setQuery(query);
-}
-
-bool DbMsgsTblModel::appendQueryData(QSqlQuery &query)
-{
-	return TblModel::appendQueryData(query);
 }
