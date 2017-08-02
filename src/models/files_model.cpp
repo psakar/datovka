@@ -382,12 +382,12 @@ void DbFlsTblModel::appendData(
 
 		QVector<QVariant> row(m_columnCount);
 
-		row[0] = entry.id;
-		row[1] = entry.messageId;
-		row[2] = entry.dmEncodedContent;
-		row[3] = entry.dmFileDescr;
-		row[4] = entry.dmMimeType;
-		row[5] = entry.size;
+		row[ATTACHID_COL] = entry.id;
+		row[MSGID_COL] = entry.messageId;
+		row[CONTENT_COL] = entry.dmEncodedContent;
+		row[FNAME_COL] = entry.dmFileDescr;
+		row[MIME_COL] = entry.dmMimeType;
+		row[FSIZE_COL] = entry.size;
 
 		m_data[m_rowCount++] = row;
 	}

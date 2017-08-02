@@ -366,6 +366,111 @@ bool DbMsgsTblModel::appendQueryData(QSqlQuery &query,
 	return TblModel::appendQueryData(query);
 }
 
+void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
+    int appendedColsNum)
+{
+	if (Q_UNLIKELY(appendedColsNum < 0)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Set column count if the model is empty. */
+	if (rowCount() == 0) {
+		m_type = WORKING_RCVD;
+		m_columnCount = rcvdItemIds().size() + appendedColsNum;
+	} else {
+		if (Q_UNLIKELY(m_type != WORKING_RCVD)) {
+			Q_ASSERT(0);
+			return;
+		}
+		if (Q_UNLIKELY(m_columnCount !=
+		        (rcvdItemIds().size() + appendedColsNum))) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	if (entryList.isEmpty()) {
+		/* Don't do anything. */
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), rowCount(),
+	    rowCount() + entryList.size() - 1);
+
+	foreach (const MessageDb::RcvdEntry &entry, entryList) {
+
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		row[DMID_COL] = entry.dmId;
+		row[ANNOT_COL] = entry.dmAnnotation;
+		row[2] = entry.dmSender;
+		row[DELIVERY_COL] = entry.dmDeliveryTime;
+		row[ACCEPT_COL] = entry.dmAcceptanceTime;
+		row[READLOC_COL] = entry.readLocally;
+		row[ATTDOWN_COL] = entry.isDownloaded;
+		row[PROCSNG_COL] = entry.processStatus;
+
+		m_data[m_rowCount++] = row;
+	}
+
+	endInsertRows();
+}
+
+void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
+    int appendedColsNum)
+{
+	if (Q_UNLIKELY(appendedColsNum < 0)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Set column count if the model is empty. */
+	if (rowCount() == 0) {
+		m_type = WORKING_SNT;
+		m_columnCount = sntItemIds().size() + appendedColsNum;
+	} else {
+		if (Q_UNLIKELY(m_type != WORKING_SNT)) {
+			Q_ASSERT(0);
+			return;
+		}
+		if (Q_UNLIKELY(m_columnCount !=
+		        (sntItemIds().size() + appendedColsNum))) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	if (entryList.isEmpty()) {
+		/* Don't do anything. */
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), rowCount(),
+	    rowCount() + entryList.size() - 1);
+
+	foreach (const MessageDb::SntEntry &entry, entryList) {
+
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		row[DMID_COL] = entry.dmId;
+		row[ANNOT_COL] = entry.dmAnnotation;
+		row[2] = entry.dmRecipient;
+		row[DELIVERY_COL] = entry.dmDeliveryTime;
+		row[ACCEPT_COL] = entry.dmAcceptanceTime;
+		row[5] = entry.dmMessageStatus;
+		row[ATTDOWN_COL] = entry.isDownloaded;
+
+		m_data[m_rowCount++] = row;
+	}
+
+	endInsertRows();
+}
+
 bool DbMsgsTblModel::setType(enum DbMsgsTblModel::Type type)
 {
 	m_type = type;

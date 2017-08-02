@@ -205,16 +205,17 @@ public:
 	public:
 		qint64 dmId; /*!< Message identifier. */
 		QString dmAnnotation; /*!< Message annotation. */
-		QString dmSender; /*!< Message sender. */
+		QString dmRecipient; /*!< Message recipient. */
 		QString dmDeliveryTime; /*!< Delivery time as stored in the database. */
 		QString dmAcceptanceTime; /*!< Acceptance time as stored in the database. */
 		int dmMessageStatus; /*!< Brief message status. */
 		bool isDownloaded; /*!< True if complete message has been downloaded. */
 
-		SntEntry(qint64 i, const QString &a, const QString &s,
+		SntEntry(qint64 i, const QString &a, const QString &r,
 		    const QString &dt, const QString &at, int ms, bool id)
-		    : dmId(i), dmAnnotation(a), dmSender(s), dmDeliveryTime(dt),
-		    dmAcceptanceTime(at), dmMessageStatus(ms), isDownloaded(id)
+		    : dmId(i), dmAnnotation(a), dmRecipient(r),
+		    dmDeliveryTime(dt), dmAcceptanceTime(at),
+		    dmMessageStatus(ms), isDownloaded(id)
 		{ }
 	};
 

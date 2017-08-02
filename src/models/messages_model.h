@@ -31,6 +31,7 @@
 #include <QVector>
 
 #include "src/common.h" /* enum MessageProcessState */
+#include "src/io/message_db.h"
 #include "src/models/table_model.h"
 
 /*!
@@ -66,8 +67,8 @@ public:
 	 * @note Dummies are used to fake empty models.
 	 */
 	enum Type {
-		WORKING_RCVD = 0, /*!< Ordinary model created from SQL query. */
-		WORKING_SNT, /*!< Ordinary model created from SQL query. */
+		WORKING_RCVD = 0, /*!< Ordinary model created from SQL query result. */
+		WORKING_SNT, /*!< Ordinary model created from SQL query result. */
 		DUMMY_RCVD, /*!< Empty received dummy. */
 		DUMMY_SNT /*!< Empty sent dummy. */
 	};
@@ -139,6 +140,24 @@ public:
 	 * @return True on success.
 	 */
 	bool appendQueryData(QSqlQuery &query, enum Type type);
+
+	/*!
+	 * @brief Appends received entry data into the model.
+	 *
+	 * @param[in] entryList List of entries to append into the model.
+	 * @param[in] appendedColsNum Number of added empty columns.
+	 */
+	void appendData(const QList<MessageDb::RcvdEntry> &entryList,
+	    int appendedColsNum);
+
+	/*!
+	 * @brief Appends sent entry data into the model.
+	 *
+	 * @param[in] entryList List of entries to append into the model.
+	 * @param[in] appendedColsNum Number of added empty columns.
+	 */
+	void appendData(const QList<MessageDb::SntEntry> &entryList,
+	    int appendedColsNum);
 
 	/*!
 	 * @brief Sets the type of the model.
