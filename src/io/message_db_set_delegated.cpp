@@ -30,6 +30,11 @@
 #include "src/log/log.h"
 #include "src/models/messages_model.h"
 
+/*
+ * If defined then no attaching of databases will be performed.
+ */
+#define DISABLE_DB_ATTACHING 1
+
 bool MessageDbSet::vacuum(void)
 {
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
@@ -248,12 +253,12 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_msgsRcvdEntriesWithin90Days(void
 			return QList<MessageDb::RcvdEntry>();
 		}
 
-#if 0
+#if defined DISABLE_DB_ATTACHING
+		return _yrly_2dbs_msgsRcvdEntriesWithin90Days(*db0, *db1);
+#else /* !DISABLE_DB_ATTACHING */
 		return _yrly_2dbs_attach_msgsRcvdEntriesWithin90Days(*db0,
 		    db1->fileName());
-#else
-		return _yrly_2dbs_msgsRcvdEntriesWithin90Days(*db0, *db1);
-#endif
+#endif /* DISABLE_DB_ATTACHING */
 	}
 
 	Q_ASSERT(0);
@@ -745,12 +750,12 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_msgsSntEntriesWithin90Days(void) 
 			return QList<MessageDb::SntEntry>();
 		}
 
-#if 0
+#if defined DISABLE_DB_ATTACHING
+		return _yrly_2dbs_msgsSntEntriesWithin90Days(*db0, *db1);
+#else /* !DISABLE_DB_ATTACHING */
 		return _yrly_2dbs_attach_msgsSntEntriesWithin90Days(*db0,
 		    db1->fileName());
-#else
-		return _yrly_2dbs_msgsSntEntriesWithin90Days(*db0, *db1);
-#endif
+#endif /* DISABLE_DB_ATTACHING */
 	}
 
 	Q_ASSERT(0);
