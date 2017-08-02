@@ -358,6 +358,43 @@ void DbFlsTblModel::setHeader(void)
 	    Qt::DisplayRole);
 }
 
+void DbFlsTblModel::appendData(
+    const QList<MessageDb::AttachmentEntry> &entryList)
+{
+	if (Q_UNLIKELY(MessageDb::fileItemIds.size() != 6)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	m_columnCount = 6;
+
+	if (entryList.isEmpty()) {
+		/* Don't do anything. */
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), rowCount(),
+	    rowCount() + entryList.size() - 1);
+
+	foreach (const MessageDb::AttachmentEntry &entry, entryList) {
+
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		row[ATTACHID_COL] = entry.id;
+		row[MSGID_COL] = entry.messageId;
+		row[CONTENT_COL] = entry.dmEncodedContent;
+		row[FNAME_COL] = entry.dmFileDescr;
+		row[MIME_COL] = entry.dmMimeType;
+		row[FSIZE_COL] = entry.size;
+
+		m_data[m_rowCount++] = row;
+	}
+
+	endInsertRows();
+}
+
 bool DbFlsTblModel::setMessage(const struct isds_message *message)
 {
 	if (NULL == message) {
@@ -374,47 +411,6 @@ bool DbFlsTblModel::setMessage(const struct isds_message *message)
 	/* m_columnCount = MAX_COL; */
 
 	return appendMessageData(message);
-}
-
-void DbFlsTblModel::setQuery(QSqlQuery &query)
-{
-	beginResetModel();
-	m_data.clear();
-	m_rowsAllocated = 0;
-	m_rowCount = 0;
-	endResetModel();
-
-	/* Looks like empty results have column count set. */
-	/* m_columnCount = MAX_COL; */
-	if ((query.record().count() + 1) != m_columnCount) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	appendQueryData(query);
-}
-
-bool DbFlsTblModel::appendQueryData(QSqlQuery &query)
-{
-	if ((query.record().count() + 1) != m_columnCount) {
-		return false;
-	}
-
-	query.first();
-	while (query.isActive() && query.isValid()) {
-
-		QVector<QVariant> row(m_columnCount);
-
-		queryToVector(row, query);
-		row[FPATH_COL] = LOCAL_DATABASE_STR;
-
-		/* Don't check data duplicity! */
-		insertVector(row, rowCount(), false);
-
-		query.next();
-	}
-
-	return true;
 }
 
 /* File content will be held within model. */

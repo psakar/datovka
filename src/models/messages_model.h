@@ -31,6 +31,7 @@
 #include <QVector>
 
 #include "src/common.h" /* enum MessageProcessState */
+#include "src/io/message_db.h"
 #include "src/models/table_model.h"
 
 /*!
@@ -66,10 +67,8 @@ public:
 	 * @note Dummies are used to fake empty models.
 	 */
 	enum Type {
-		WORKING_RCVD = 0, /*!< Ordinary model created from SQL query. */
-		WORKING_SNT, /*!< Ordinary model created from SQL query. */
-		DUMMY_RCVD, /*!< Empty received dummy. */
-		DUMMY_SNT /*!< Empty sent dummy. */
+		WORKING_RCVD = 0, /*!< Ordinary model created from SQL query result. */
+		WORKING_SNT /*!< Ordinary model created from SQL query result. */
 	};
 
 	/*!
@@ -98,7 +97,7 @@ public:
 	 * @param[in] parent Parent object.
 	 */
 	explicit DbMsgsTblModel(enum Type type = WORKING_RCVD,
-	    QObject *parent = 0);
+	    QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Returns the data stored under the given role.
@@ -124,21 +123,22 @@ public:
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
-	 * @brief Sets the content of the model according to the supplied query.
+	 * @brief Appends received entry data into the model.
 	 *
-	 * @param[in,out] qyery SQL query result.
-	 * @param[in]     type  Working received or sent.
+	 * @param[in] entryList List of entries to append into the model.
+	 * @param[in] appendedColsNum Number of added empty columns.
 	 */
-	void setQuery(QSqlQuery &query, enum Type type);
+	void appendData(const QList<MessageDb::RcvdEntry> &entryList,
+	    int appendedColsNum);
 
 	/*!
-	 * @brief Appends data from the supplied query to the model.
+	 * @brief Appends sent entry data into the model.
 	 *
-	 * @param[in,out] query SQL query result.
-	 * @param[in]     type  Working received or sent.
-	 * @return True on success.
+	 * @param[in] entryList List of entries to append into the model.
+	 * @param[in] appendedColsNum Number of added empty columns.
 	 */
-	bool appendQueryData(QSqlQuery &query, enum Type type);
+	void appendData(const QList<MessageDb::SntEntry> &entryList,
+	    int appendedColsNum);
 
 	/*!
 	 * @brief Sets the type of the model.
@@ -216,17 +216,6 @@ public:
 	    enum MessageProcessState forceState);
 
 	/*!
-	 * @brief Returns reference to a dummy model.
-	 *
-	 * @note Beware of the static initialization order fiasco.
-	 *
-	 * @param[in] type Type of the table model.
-	 * @returns Reference to a static dummy model.
-	 */
-	static
-	DbMsgsTblModel &dummyModel(enum Type type);
-
-	/*!
 	 * @brief Fills the model with tag information.
 	 *
 	 * @param[in] userName Account user name.
@@ -272,12 +261,6 @@ public:
 	bool refillRecordsManagementColumn(const QList<qint64> &dmIds, int col);
 
 private:
-	/* Make these methods private so nobody is likely to mess with them. */
-	virtual
-	void setQuery(QSqlQuery &query) Q_DECL_OVERRIDE;
-	virtual
-	bool appendQueryData(QSqlQuery &query) Q_DECL_OVERRIDE;
-
 	enum Type m_type; /*!<
 	                   * Whether this is a model dummy or contains data.
 	                   */

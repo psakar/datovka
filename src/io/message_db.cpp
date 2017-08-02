@@ -22,7 +22,6 @@
  */
 
 #include <cinttypes>
-#include <QAbstractTableModel>
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
@@ -47,12 +46,13 @@
 #include <QVariant>
 #include <QVector>
 
-#include "message_db.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
+#include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
+#include "src/models/messages_model.h"
 #include "src/settings/preferences.h"
 
 /* Attachment size is computed from actual data. */
@@ -76,20 +76,28 @@ const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
     "LENGTH(dmEncodedContent)"};
 
 MessageDb::MessageDb(const QString &connectionName)
-    : SQLiteDb(connectionName),
-    m_sqlMsgsModel(),
-    m_sqlFilesModel()
+    : SQLiteDb(connectionName)
 {
 }
 
-/* ========================================================================= */
-/*
- * Return all received messages model.
- */
-QAbstractTableModel *MessageDb::msgsRcvdModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+void MessageDb::appendRcvdEntryList(QList<RcvdEntry> &entryList,
+    QSqlQuery &query)
 {
+	query.first();
+	while (query.isActive() && query.isValid()) {
+		entryList.append(MessageDb::RcvdEntry(
+		    query.value(0).toLongLong(), query.value(1).toString(),
+		    query.value(2).toString(), query.value(3).toString(),
+		    query.value(4).toString(), query.value(5).toBool(),
+		    query.value(6).toBool(), query.value(7).toInt()));
+
+		query.next();
+	}
+}
+
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(void) const
+{
+	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
@@ -97,9 +105,6 @@ QAbstractTableModel *MessageDb::msgsRcvdModel(
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -121,52 +126,35 @@ QAbstractTableModel *MessageDb::msgsRcvdModel(
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_RCVD);
-	if (!m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendRcvdEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<RcvdEntry>();
 }
 
-
-/* ========================================================================= */
-/*
- * Return received messages within past 90 days.
- */
-QAbstractTableModel *MessageDb::msgsRcvdWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesWithin90Days(void) const
 {
+	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
 
-	if (!msgsRcvdWithin90DaysQuery(query, appendedCols)) {
+	if (!msgsRcvdWithin90DaysQuery(query)) {
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_RCVD);
-	if (!m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendRcvdEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<RcvdEntry>();
 }
 
-
-/* ========================================================================= */
-/*
- * Return received messages within given year.
- */
-QAbstractTableModel *MessageDb::msgsRcvdInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesInYear(
+    const QString &year) const
 {
+	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
@@ -174,9 +162,6 @@ QAbstractTableModel *MessageDb::msgsRcvdInYearModel(const QString &year,
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -201,17 +186,13 @@ QAbstractTableModel *MessageDb::msgsRcvdInYearModel(const QString &year,
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_RCVD);
-	if (!m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendRcvdEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<RcvdEntry>();
 }
-
 
 /* ========================================================================= */
 /*
@@ -399,24 +380,28 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Return all sent messages model.
- */
-QAbstractTableModel * MessageDb::msgsSntModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+void MessageDb::appendSntEntryList(QList<SntEntry> &entryList, QSqlQuery &query)
 {
+	query.first();
+	while (query.isActive() && query.isValid()) {
+		entryList.append(SntEntry(query.value(0).toLongLong(),
+		    query.value(1).toString(), query.value(2).toString(),
+		    query.value(3).toString(), query.value(4).toString(),
+		    query.value(5).toInt(), query.value(6).toBool()));
+
+		query.next();
+	}
+}
+
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(void) const
+{
+	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
 		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -436,61 +421,41 @@ QAbstractTableModel * MessageDb::msgsSntModel(
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_SNT);
-	if (!m_sqlMsgsModel.setSntHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendSntEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<SntEntry>();
 }
 
-
-/* ========================================================================= */
-/*
- * Return sent messages within past 90 days.
- */
-QAbstractTableModel * MessageDb::msgsSntWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesWithin90Days(void) const
 {
+	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
 
-	if (!msgsSntWithin90DaysQuery(query, appendedCols)) {
+	if (!msgsSntWithin90DaysQuery(query)) {
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_SNT);
-	if (!m_sqlMsgsModel.setSntHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendSntEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<SntEntry>();
 }
 
-
-/* ========================================================================= */
-/*
- * Return sent messages within given year.
- */
-QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesInYear(
+    const QString &year) const
 {
+	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
 		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -513,17 +478,13 @@ QAbstractTableModel * MessageDb::msgsSntInYearModel(const QString &year,
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_SNT);
-	if (!m_sqlMsgsModel.setSntHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendSntEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<SntEntry>();
 }
-
 
 /* ========================================================================= */
 /*
@@ -1811,14 +1772,9 @@ fail:
 	return QList<FileData>();
 }
 
-
-/* ========================================================================= */
-/*
- * Return files related to given message.
- */
-QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
-/* ========================================================================= */
+QList<MessageDb::AttachmentEntry> MessageDb::attachEntries(qint64 msgId) const
 {
+	QList<AttachmentEntry> entryList;
 	int i;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
@@ -1842,15 +1798,21 @@ QAbstractTableModel * MessageDb::flsModel(qint64 msgId)
 
 	/* First three columns ought to be hidden. */
 
-	m_sqlFilesModel.setQuery(query);
-	m_sqlFilesModel.setHeader();
+	query.first();
+	while (query.isActive() && query.isValid()) {
+		entryList.append(AttachmentEntry(query.value(0).toLongLong(),
+		    query.value(1).toLongLong(), query.value(2).toByteArray(),
+		    query.value(3).toString(), query.value(4).toString(),
+		    query.value(5).toInt()));
 
-	return &m_sqlFilesModel;
+		query.next();
+	}
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<AttachmentEntry>();
 }
-
 
 /* ========================================================================= */
 /*
@@ -4515,8 +4477,7 @@ bool MessageDb::reopenDb(const QString &newFileName)
 	return reopen_ret;
 }
 
-bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
 {
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
@@ -4524,9 +4485,6 @@ bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query,
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -4556,17 +4514,13 @@ fail:
 	return false;
 }
 
-bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query)
 {
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
 		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "

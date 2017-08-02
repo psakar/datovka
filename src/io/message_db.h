@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,10 @@
  * the two.
  */
 
-
 #ifndef _MESSAGE_DB_H_
 #define _MESSAGE_DB_H_
 
-
 #include <QAbstractButton>
-#include <QAbstractTableModel>
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
@@ -37,9 +34,8 @@
 #include <QString>
 #include <QVector>
 
+#include "src/common.h"
 #include "src/io/sqlite/db.h"
-#include "src/models/files_model.h"
-#include "src/models/messages_model.h"
 
 #define INVALID_YEAR "inv"
 #define DB2 "db2"
@@ -49,7 +45,6 @@ enum Sorting {
 	ASCENDING,
 	DESCENDING
 };
-
 
 /*!
  * @brief Encapsulates message database.
@@ -181,6 +176,50 @@ public:
 	};
 
 	/*!
+	 * @brief Received entries.
+	 */
+	class RcvdEntry {
+	public:
+		qint64 dmId; /*!< Message identifier. */
+		QString dmAnnotation; /*!< Message annotation. */
+		QString dmSender; /*!< Message sender. */
+		QString dmDeliveryTime; /*!< Delivery time as stored in the database. */
+		QString dmAcceptanceTime; /*!< Acceptance time as stored in the database. */
+		bool readLocally; /*!< True if locally read. */
+		bool isDownloaded; /*!< True if complete message has been downloaded. */
+		int processStatus; /*!< Brief processing status. */
+
+		RcvdEntry(qint64 i, const QString &a, const QString &s,
+		    const QString &dt, const QString &at, bool rl, bool id,
+		    int ps)
+		    : dmId(i), dmAnnotation(a), dmSender(s), dmDeliveryTime(dt),
+		    dmAcceptanceTime(at), readLocally(rl), isDownloaded(id),
+		    processStatus(ps)
+		{ }
+	};
+
+	/*!
+	 * @brief Sent entries.
+	 */
+	class SntEntry {
+	public:
+		qint64 dmId; /*!< Message identifier. */
+		QString dmAnnotation; /*!< Message annotation. */
+		QString dmRecipient; /*!< Message recipient. */
+		QString dmDeliveryTime; /*!< Delivery time as stored in the database. */
+		QString dmAcceptanceTime; /*!< Acceptance time as stored in the database. */
+		int dmMessageStatus; /*!< Brief message status. */
+		bool isDownloaded; /*!< True if complete message has been downloaded. */
+
+		SntEntry(qint64 i, const QString &a, const QString &r,
+		    const QString &dt, const QString &at, int ms, bool id)
+		    : dmId(i), dmAnnotation(a), dmRecipient(r),
+		    dmDeliveryTime(dt), dmAcceptanceTime(at),
+		    dmMessageStatus(ms), isDownloaded(id)
+		{ }
+	};
+
+	/*!
 	 * @brief File entry data.
 	 */
 	class FileData {
@@ -196,6 +235,35 @@ public:
 		    :  dmFileDescr(fileDescr), dmEncodedContent(encodedContent)
 		{ }
 		~FileData(void)
+		{ }
+
+		bool isValid(void) const
+		{
+			return (!dmFileDescr.isEmpty()) &&
+			    (!dmEncodedContent.isEmpty());
+		}
+	};
+
+	/*!
+	 * @brief Attachment data used to fill attachment model.
+	 */
+	class AttachmentEntry {
+	public:
+		qint64 id; /*!< Entry identifier. */
+		qint64 messageId; /*!< Identifier of the message which the attachment belong to. */
+		QByteArray dmEncodedContent; /*!< Base64-encoded file content. */
+		QString dmFileDescr; /*!< Attachment file name. */
+		QString dmMimeType; /*!< String holding the mime type. */
+		int size; /*!< Attachment file size (base64-decoded). */
+
+		AttachmentEntry(void)
+		    : id(0), messageId(0), dmEncodedContent(), dmFileDescr(),
+		    dmMimeType(), size(0)
+		{ }
+		AttachmentEntry(qint64 i, qint64 mi, const QByteArray &dec,
+		    const QString &dfd, const QString &dmt, int s)
+		    : id(i), messageId(mi), dmEncodedContent(dec),
+		    dmFileDescr(dfd), dmMimeType(dmt), size(s)
 		{ }
 
 		bool isValid(void) const
@@ -382,14 +450,12 @@ public:
 	QList<FileData> getFilesFromMessage(qint64 msgId) const;
 
 	/*!
-	 * @brief Return files related to given message.
+	 * @brief Return list of attachment entries related to given message.
 	 *
 	 * @param[in] msgId  Message identifier.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of attachment entries.
 	 */
-	QAbstractTableModel * flsModel(qint64 msgId);
+	QList<AttachmentEntry> attachEntries(qint64 msgId) const;
 
 	/*!
 	 * @brief Check if any message with given id exists in database.
@@ -716,38 +782,35 @@ public:
 
 protected: /* These function are used from within a database container. */
 	/*!
-	 * @brief Return all received messages model.
+	 * @brief Appends to received entry list data received from SQL query.
 	 *
-	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @param[in,out] entryList List to add entries to.
+	 * @param[in] query Query to read data from.
 	 */
-	QAbstractTableModel *msgsRcvdModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	static
+	void appendRcvdEntryList(QList<RcvdEntry> &entryList, QSqlQuery &query);
 
 	/*!
-	 * @brief Return received messages within past 90 days.
+	 * @brief Return entries for all received messages.
 	 *
-	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsRcvdWithin90DaysModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<RcvdEntry> msgsRcvdEntries(void) const;
 
 	/*!
-	 * @brief Return received messages within given year.
+	 * @brief Return entries for received messages within past 90 days.
+	 *
+	 * @return List of entries, empty list on failure.
+	 */
+	QList<RcvdEntry> msgsRcvdEntriesWithin90Days(void) const;
+
+	/*!
+	 * @brief Return entries for received messages within given year.
 	 *
 	 * @param[in] year         Year number.
-	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsRcvdInYearModel(const QString &year,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<RcvdEntry> msgsRcvdEntriesInYear(const QString &year) const;
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -789,38 +852,35 @@ protected: /* These function are used from within a database container. */
 	    const QString &year) const;
 
 	/*!
-	 * @brief Return all sent messages model.
+	 * @brief Appends to sent entry list data received from SQL query.
 	 *
-	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @param[in,out] entryList List to add entries to.
+	 * @param[in] query Query to read data from.
 	 */
-	QAbstractTableModel *msgsSntModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	static
+	void appendSntEntryList(QList<SntEntry> &entryList, QSqlQuery &query);
 
 	/*!
-	 * @brief Return sent messages within past 90 days.
+	 * @brief Return entries for all sent messages.
 	 *
-	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsSntWithin90DaysModel(
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<SntEntry> msgsSntEntries(void) const;
 
 	/*!
-	 * @brief Return sent messages within given year.
+	 * @brief Return entries for all sent messages within past 90 days.
+	 *
+	 * @return List of entries, empty list on failure.
+	 */
+	QList<SntEntry> msgsSntEntriesWithin90Days(void) const;
+
+	/*!
+	 * @brief Return entries for sent messages within given year.
 	 *
 	 * @param[in] year         Year number.
-	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsSntInYearModel(const QString &year,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<SntEntry> msgsSntEntriesInYear(const QString &year) const;
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -1004,24 +1064,20 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
-	 * @param[in,out] query        Query already assigned to a database.
-	 * @param[in]     appendedCols List of names for added empty columns.
+	 * @param[in,out] query Query already assigned to a database.
 	 * @return True on success.
 	 */
-	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	static
+	bool msgsRcvdWithin90DaysQuery(QSqlQuery &query);
 
 	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
-	 * @param[in,out] query        Query already assigned to a database.
-	 * @param[in]     appendedCols List of names for added empty columns.
+	 * @param[in,out] query Query already assigned to a database.
 	 * @return True on success.
 	 */
-	bool msgsSntWithin90DaysQuery(QSqlQuery &query,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
-
-	DbMsgsTblModel m_sqlMsgsModel; /*!< Model of displayed messages. */
+	static
+	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
 
 public:
 	static
@@ -1034,8 +1090,6 @@ private:
 	const QVector<QString> msgDeliveryBoolAttribs;
 	static
 	const QVector<QString> msgStatus;
-
-	DbFlsTblModel m_sqlFilesModel; /*!< Model of displayed files. */
 
 	/*!
 	 * @brief Adds _dmType column.
@@ -1109,6 +1163,5 @@ private:
 	friend class MessageDbSet;
 	friend class MessageDbSingle;
 };
-
 
 #endif /* _MESSAGE_DB_H_ */

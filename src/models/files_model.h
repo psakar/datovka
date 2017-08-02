@@ -28,6 +28,7 @@
 #include <QObject>
 #include <QVariant>
 
+#include "src/io/message_db.h"
 #include "src/models/table_model.h"
 
 /*!
@@ -100,7 +101,7 @@ public:
 	 * @brief Returns object containing serialised attachment data.
 	 *
 	 * @param[in] indexes List of indexes.
-	 * @return Pointer to newly allocated mime data object, 0 on error.
+	 * @return Pointer to newly allocated mime data object, Q_NULLPTR on error.
 	 */
 	virtual
 	QMimeData *mimeData(
@@ -142,6 +143,13 @@ public:
 	void setHeader(void);
 
 	/*!
+	 * @brief Appends data into the model.
+	 *
+	 * @brief entryList List of entries to append into the model.
+	 */
+	void appendData(const QList<MessageDb::AttachmentEntry> &entryList);
+
+	/*!
 	 * @brief Sets the content of the model according to the supplied
 	 *     message.
 	 *
@@ -149,23 +157,6 @@ public:
 	 * @return True on success.
 	 */
 	bool setMessage(const struct isds_message *message);
-
-	/*!
-	 * @brief Sets the content of the model according to the supplied query.
-	 *
-	 * @param[in,out] qyery SQL query result.
-	 */
-	virtual
-	void setQuery(QSqlQuery &query) Q_DECL_OVERRIDE;
-
-	/*!
-	 * @brief Appends data from the supplied query to the model.
-	 *
-	 * @param[in,out] query SQL query result.
-	 * @return True on success.
-	 */
-	virtual
-	bool appendQueryData(QSqlQuery &query) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Adds attachment file.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,47 +71,6 @@ QVariant TblModel::headerData(int section, Qt::Orientation orientation,
     int role) const
 {
 	return _headerData(section, orientation, role);
-}
-
-void TblModel::setQuery(QSqlQuery &query)
-{
-	beginResetModel();
-	m_data.clear();
-	m_rowsAllocated = 0;
-	m_rowCount = 0;
-	endResetModel();
-
-	/* Looks like empty results have column count set. */
-	m_columnCount = query.record().count();
-
-	appendQueryData(query);
-}
-
-bool TblModel::appendQueryData(QSqlQuery &query)
-{
-	if (query.record().count() != m_columnCount) {
-		return false;
-	}
-
-	beginResetModel();
-
-	query.first();
-	while (query.isActive() && query.isValid()) {
-
-		reserveSpace();
-
-		QVector<QVariant> row(m_columnCount);
-
-		queryToVector(row, query);
-
-		m_data[m_rowCount++] = row;
-
-		query.next();
-	}
-
-	endResetModel();
-
-	return true;
 }
 
 bool TblModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
@@ -200,6 +159,48 @@ bool TblModel::removeRows(int row, int count, const QModelIndex &parent)
 	}
 
 	endRemoveRows();
+
+	return true;
+}
+
+void TblModel::setQuery(QSqlQuery &query)
+{
+	beginResetModel();
+	m_data.clear();
+	m_rowsAllocated = 0;
+	m_rowCount = 0;
+
+	/* Looks like empty results have column count set. */
+	m_columnCount = query.record().count();
+
+	endResetModel();
+
+	appendQueryData(query);
+}
+
+bool TblModel::appendQueryData(QSqlQuery &query)
+{
+	if (query.record().count() != m_columnCount) {
+		return false;
+	}
+
+	beginResetModel();
+
+	query.first();
+	while (query.isActive() && query.isValid()) {
+
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		queryToVector(row, query);
+
+		m_data[m_rowCount++] = row;
+
+		query.next();
+	}
+
+	endResetModel();
 
 	return true;
 }

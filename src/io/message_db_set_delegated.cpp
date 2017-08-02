@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,14 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-#include "message_db_set.h"
+#include "src/io/message_db_set.h"
 #include "src/log/log.h"
+#include "src/models/messages_model.h"
+
+/*
+ * If defined then no attaching of databases will be performed.
+ */
+#define DISABLE_DB_ATTACHING 1
 
 bool MessageDbSet::vacuum(void)
 {
@@ -79,61 +85,53 @@ QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 	return keys;
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsRcvdModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_sf_msgsRcvdEntries(void) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(
-		    DbMsgsTblModel::DUMMY_RCVD);
+		return QList<MessageDb::RcvdEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdModel(appendedCols);
+	return this->first()->msgsRcvdEntries();
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_msgsRcvdEntries(void) const
 {
 	/* TODO -- Implementation missing and will probably be missing. */
-	Q_UNUSED(appendedCols);
 	Q_ASSERT(0);
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::msgsRcvdModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::msgsRcvdEntries(void) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdModel(appendedCols);
+		return _sf_msgsRcvdEntries();
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdModel(appendedCols);
+		return _yrly_msgsRcvdEntries();
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsRcvdWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_sf_msgsRcvdEntriesWithin90Days(void) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(
-		    DbMsgsTblModel::DUMMY_RCVD);
+		return QList<MessageDb::RcvdEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdWithin90DaysModel(appendedCols);
+	return this->first()->msgsRcvdEntriesWithin90Days();
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(
-    MessageDb &db, const QString &attachFileName,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_attach_msgsRcvdEntriesWithin90Days(
+    MessageDb &db, const QString &attachFileName)
 {
+	QList<MessageDb::RcvdEntry> entryList;
 	QSqlQuery query(db.m_db);
-	QAbstractTableModel *ret = 0;
 	bool attached = false;
 	QString queryStr;
 
@@ -148,9 +146,6 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
 	queryStr += "ifnull(p.state, 0) AS process_status";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -169,9 +164,6 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
 	queryStr += "ifnull(p.state, 0) AS process_status";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM " DB2 ".messages AS m "
 	    "LEFT JOIN " DB2 ".supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -195,13 +187,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsRcvdWithin90DaysModel(
 		goto fail;
 	}
 
-	db.m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_RCVD);
-	if (!db.m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-
-	ret = &db.m_sqlMsgsModel;
+	MessageDb::appendRcvdEntryList(entryList, query);
 
 fail:
 	/* Query must be finished before detaching. */
@@ -209,144 +195,132 @@ fail:
 	if (attached) {
 		MessageDb::detachDb2(query);
 	}
-	return ret;
+	return entryList;
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsRcvdWithin90DaysModel(
-    MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_msgsRcvdEntriesWithin90Days(
+    MessageDb &db0, MessageDb &db1)
 {
-	QAbstractTableModel *ret = 0;
+	QList<MessageDb::RcvdEntry> entryList;
 
 	{
 		QSqlQuery query(db0.m_db);
 
-		if (!db0.msgsRcvdWithin90DaysQuery(query, appendedCols)) {
+		if (!db0.msgsRcvdWithin90DaysQuery(query)) {
 			goto fail;
 		}
 
-		db0.m_sqlMsgsModel.setQuery(query,
-		    DbMsgsTblModel::WORKING_RCVD);
-		if (!db0.m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-			Q_ASSERT(0);
-			goto fail;
-		}
+		MessageDb::appendRcvdEntryList(entryList, query);
 	}
 
 	{
 		QSqlQuery query(db1.m_db);
 
-		if (!db1.msgsRcvdWithin90DaysQuery(query, appendedCols)) {
+		if (!db1.msgsRcvdWithin90DaysQuery(query)) {
 			goto fail;
 		}
 
-		db0.m_sqlMsgsModel.appendQueryData(query,
-		    DbMsgsTblModel::WORKING_RCVD);
+		MessageDb::appendRcvdEntryList(entryList, query);
 	}
 
-	ret = &db0.m_sqlMsgsModel;
-
 fail:
-	return ret;
+	return entryList;
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_msgsRcvdEntriesWithin90Days(void) const
 {
+	QList<MessageDb::RcvdEntry> entryList;
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
 	if (secKeys.size() == 0) {
-		return &DbMsgsTblModel::dummyModel(
-		    DbMsgsTblModel::DUMMY_RCVD);
+		return QList<MessageDb::RcvdEntry>();
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
-		MessageDb *db = this->value(secKeys[0], NULL);
-		if (NULL == db) {
+		MessageDb *db = this->value(secKeys[0], Q_NULLPTR);
+		if (Q_NULLPTR == db) {
 			Q_ASSERT(0);
-			return NULL;
+			return QList<MessageDb::RcvdEntry>();
 		}
-		return db->msgsRcvdWithin90DaysModel(appendedCols);
+		return db->msgsRcvdEntriesWithin90Days();
 	} else {
 		Q_ASSERT(secKeys.size() == 2);
 		/* The models need to be attached. */
 
-		MessageDb *db0 = this->value(secKeys[0], NULL);
-		MessageDb *db1 = this->value(secKeys[1], NULL);
-		if ((NULL == db0) || (NULL == db1)) {
+		MessageDb *db0 = this->value(secKeys[0], Q_NULLPTR);
+		MessageDb *db1 = this->value(secKeys[1], Q_NULLPTR);
+		if ((Q_NULLPTR == db0) || (Q_NULLPTR == db1)) {
 			Q_ASSERT(0);
-			return NULL;
+			return QList<MessageDb::RcvdEntry>();
 		}
 
-#if 0
-		return _yrly_2dbs_attach_msgsRcvdWithin90DaysModel(*db0,
-		    db1->fileName(), appendedCols);
-#else
-		return _yrly_2dbs_msgsRcvdWithin90DaysModel(*db0, *db1,
-		    appendedCols);
-#endif
+#if defined DISABLE_DB_ATTACHING
+		return _yrly_2dbs_msgsRcvdEntriesWithin90Days(*db0, *db1);
+#else /* !DISABLE_DB_ATTACHING */
+		return _yrly_2dbs_attach_msgsRcvdEntriesWithin90Days(*db0,
+		    db1->fileName());
+#endif /* DISABLE_DB_ATTACHING */
 	}
 
 	Q_ASSERT(0);
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::msgsRcvdWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::msgsRcvdEntriesWithin90Days(void) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdWithin90DaysModel(appendedCols);
+		return _sf_msgsRcvdEntriesWithin90Days();
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdWithin90DaysModel(appendedCols);
+		return _yrly_msgsRcvdEntriesWithin90Days();
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_sf_msgsRcvdEntriesInYear(
+    const QString &year) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(
-		    DbMsgsTblModel::DUMMY_RCVD);
+		return QList<MessageDb::RcvdEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdInYearModel(year, appendedCols);
+	return this->first()->msgsRcvdEntriesInYear(year);
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdInYearModel(
-    const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_msgsRcvdEntriesInYear(
+    const QString &year) const
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
-	MessageDb *db = this->value(secondaryKey, NULL);
-	if (NULL == db) {
-		return 0;
+	MessageDb *db = this->value(secondaryKey, Q_NULLPTR);
+	if (Q_NULLPTR == db) {
+		return QList<MessageDb::RcvdEntry>();
 	}
 
-	return db->msgsRcvdInYearModel(year, appendedCols);
+	return db->msgsRcvdEntriesInYear(year);
 }
 
-QAbstractTableModel *MessageDbSet::msgsRcvdInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::msgsRcvdEntriesInYear(
+    const QString &year) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdInYearModel(year, appendedCols);
+		return _sf_msgsRcvdEntriesInYear(year);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdInYearModel(year, appendedCols);
+		return _yrly_msgsRcvdEntriesInYear(year);
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
 QStringList MessageDbSet::_sf_msgsYears(enum MessageDb::MessageType type,
@@ -613,59 +587,53 @@ int MessageDbSet::msgsUnreadInYear(enum MessageDb::MessageType type,
 	return -1;
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsSntModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_sf_msgsSntEntries(void) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SNT);
+		return QList<MessageDb::SntEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsSntModel(appendedCols);
+	return this->first()->msgsSntEntries();
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsSntModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_yrly_msgsSntEntries(void) const
 {
 	/* TODO -- Implementation missing and will probably be missing. */
-	Q_UNUSED(appendedCols);
 	Q_ASSERT(0);
-	return NULL;
+	return QList<MessageDb::SntEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::msgsSntModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::msgsSntEntries(void) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsSntModel(appendedCols);
+		return _sf_msgsSntEntries();
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsSntModel(appendedCols);
+		return _yrly_msgsSntEntries();
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::SntEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsSntWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_sf_msgsSntEntriesWithin90Days(void) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SNT);
+		return QList<MessageDb::SntEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsSntWithin90DaysModel(appendedCols);
+	return this->first()->msgsSntEntriesWithin90Days();
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsSntWithin90DaysModel(
-    MessageDb &db, const QString &attachFileName,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_attach_msgsSntEntriesWithin90Days(
+    MessageDb &db, const QString &attachFileName)
 {
+	QList<MessageDb::SntEntry> entryList;
 	QSqlQuery query(db.m_db);
-	QAbstractTableModel *ret = 0;
 	bool attached = false;
 	QString queryStr;
 
@@ -679,9 +647,6 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsSntWithin90DaysModel(
 		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -698,9 +663,6 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsSntWithin90DaysModel(
 		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	for (int i = 0; i < appendedCols.size(); ++i) {
-		queryStr += ", null";
-	}
 	queryStr += " FROM " DB2 ".messages AS m "
 	    "LEFT JOIN " DB2 ".supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
@@ -723,13 +685,7 @@ QAbstractTableModel *MessageDbSet::_yrly_2dbs_attach_msgsSntWithin90DaysModel(
 		goto fail;
 	}
 
-	db.m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_SNT);
-	if (!db.m_sqlMsgsModel.setSntHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-
-	ret = &db.m_sqlMsgsModel;
+	MessageDb::appendSntEntryList(entryList, query);
 
 fail:
 	/* Query must be finished before detaching. */
@@ -737,142 +693,131 @@ fail:
 	if (attached) {
 		MessageDb::detachDb2(query);
 	}
-	return ret;
+	return entryList;
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_2dbs_msgsSntWithin90DaysModel(
-    MessageDb &db0, MessageDb &db1,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_msgsSntEntriesWithin90Days(
+    MessageDb &db0, MessageDb &db1)
 {
-	QAbstractTableModel *ret = 0;
+	QList<MessageDb::SntEntry> entryList;
 
 	{
 		QSqlQuery query(db0.m_db);
 
-		if (!db0.msgsSntWithin90DaysQuery(query, appendedCols)) {
+		if (!db0.msgsSntWithin90DaysQuery(query)) {
 			goto fail;
 		}
 
-		db0.m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_SNT);
-		if (!db0.m_sqlMsgsModel.setSntHeader(appendedCols)) {
-			Q_ASSERT(0);
-			goto fail;
-		}
+		MessageDb::appendSntEntryList(entryList, query);
 	}
 
 	{
 		QSqlQuery query(db1.m_db);
 
-		if (!db1.msgsSntWithin90DaysQuery(query, appendedCols)) {
+		if (!db1.msgsSntWithin90DaysQuery(query)) {
 			goto fail;
 		}
 
-		db0.m_sqlMsgsModel.appendQueryData(query,
-		    DbMsgsTblModel::WORKING_SNT);
+		MessageDb::appendSntEntryList(entryList, query);
 	}
 
-	ret = &db0.m_sqlMsgsModel;
-
 fail:
-	return ret;
+	return entryList;
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsSntWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_yrly_msgsSntEntriesWithin90Days(void) const
 {
 	QStringList secKeys = _yrly_secKeysIn90Days();
 
 	if (secKeys.size() == 0) {
-		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SNT);
+		return QList<MessageDb::SntEntry>();
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
-		MessageDb *db = this->value(secKeys[0], NULL);
-		if (NULL == db) {
+		MessageDb *db = this->value(secKeys[0], Q_NULLPTR);
+		if (Q_NULLPTR == db) {
 			Q_ASSERT(0);
-			return NULL;
+			return QList<MessageDb::SntEntry>();
 		}
-		return db->msgsSntWithin90DaysModel(appendedCols);
+		return db->msgsSntEntriesWithin90Days();
 	} else {
 		Q_ASSERT(secKeys.size() == 2);
 		/* The models need to be attached. */
 
-		MessageDb *db0 = this->value(secKeys[0], NULL);
-		MessageDb *db1 = this->value(secKeys[1], NULL);
-		if ((NULL == db0) || (NULL == db1)) {
+		MessageDb *db0 = this->value(secKeys[0], Q_NULLPTR);
+		MessageDb *db1 = this->value(secKeys[1], Q_NULLPTR);
+		if ((Q_NULLPTR == db0) || (Q_NULLPTR == db1)) {
 			Q_ASSERT(0);
-			return NULL;
+			return QList<MessageDb::SntEntry>();
 		}
 
-#if 0
-		return _yrly_2dbs_attach_msgsSntWithin90DaysModel(*db0,
-		    db1->fileName(), appendedCols);
-#else
-		return _yrly_2dbs_msgsSntWithin90DaysModel(*db0, *db1,
-		    appendedCols);
-#endif
+#if defined DISABLE_DB_ATTACHING
+		return _yrly_2dbs_msgsSntEntriesWithin90Days(*db0, *db1);
+#else /* !DISABLE_DB_ATTACHING */
+		return _yrly_2dbs_attach_msgsSntEntriesWithin90Days(*db0,
+		    db1->fileName());
+#endif /* DISABLE_DB_ATTACHING */
 	}
 
 	Q_ASSERT(0);
-	return NULL;
+	return QList<MessageDb::SntEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::msgsSntWithin90DaysModel(
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::msgsSntEntriesWithin90Days(void) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsSntWithin90DaysModel(appendedCols);
+		return _sf_msgsSntEntriesWithin90Days();
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsSntWithin90DaysModel(appendedCols);
+		return _yrly_msgsSntEntriesWithin90Days();
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::SntEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsSntInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_sf_msgsSntEntriesInYear(
+    const QString &year) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(DbMsgsTblModel::DUMMY_SNT);
+		return QList<MessageDb::SntEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsSntInYearModel(year, appendedCols);
+	return this->first()->msgsSntEntriesInYear(year);
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsSntInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::_yrly_msgsSntEntriesInYear(
+    const QString &year) const
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
-	MessageDb *db = this->value(secondaryKey, NULL);
-	if (NULL == db) {
-		return 0;
+	MessageDb *db = this->value(secondaryKey, Q_NULLPTR);
+	if (Q_NULLPTR == db) {
+		return QList<MessageDb::SntEntry>();
 	}
 
-	return db->msgsSntInYearModel(year, appendedCols);
+	return db->msgsSntEntriesInYear(year);
 }
 
-QAbstractTableModel *MessageDbSet::msgsSntInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::SntEntry> MessageDbSet::msgsSntEntriesInYear(
+    const QString &year) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsSntInYearModel(year, appendedCols);
+		return _sf_msgsSntEntriesInYear(year);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsSntInYearModel(year, appendedCols);
+		return _yrly_msgsSntEntriesInYear(year);
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::SntEntry>();
 }
 
 bool MessageDbSet::_sf_smsgdtSetAllReceivedLocallyRead(bool read)

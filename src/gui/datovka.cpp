@@ -77,7 +77,6 @@
 #include "src/io/tag_db.h"
 #include "src/isds/isds_conversion.h"
 #include "src/model_interaction/attachment_interaction.h"
-#include "src/models/files_model.h"
 #include "src/records_management/gui/dlg_records_management.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
@@ -251,7 +250,9 @@ MainWindow::~MainWindow(void)
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_accountModel(this),
+    m_messageTableModel(DbMsgsTblModel::WORKING_RCVD, this),
     m_messageListProxyModel(this),
+    m_attachmentModel(this),
     m_messageMarker(this),
     m_lastSelectedMessageId(-1),
     m_lastStoredMessageId(-1),
@@ -686,13 +687,9 @@ void MainWindow::showRecordsManagementDialogue(void)
 	ui->actionUpdate_records_management_information->setEnabled(
 	    globRecordsManagementSet.isSet());
 
-	DbMsgsTblModel *mdl = qobject_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	if (Q_NULLPTR != mdl) {
-		mdl->setRecordsManagementIcon();
-		mdl->fillRecordsManagementColumn(
-		    DbMsgsTblModel::REC_MGMT_NEG_COL);
-	}
+	m_messageTableModel.setRecordsManagementIcon();
+	m_messageTableModel.fillRecordsManagementColumn(
+	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 
 	showColumnsAccordingToFunctionality(ui->messageList);
 	AccountModel::nodeTypeIsReceived(currentAccountModelIndex()) ?
@@ -712,7 +709,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	Q_UNUSED(previous);
 
 	QString html;
-	QAbstractTableModel *msgTblMdl = Q_NULLPTR;
 
 	if (!current.isValid()) {
 		/* May occur on deleting last account. */
@@ -807,6 +803,11 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	ui->messageList->disconnect(SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(messageItemClicked(QModelIndex)));
 
+	m_messageTableModel.removeRows(0, m_messageTableModel.rowCount());
+	m_messageListProxyModel.setSourceModel(&m_messageTableModel); /* TODO */
+	m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT); /* TODO */
+	ui->messageList->setModel(&m_messageListProxyModel); /* TODO */
+
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 		setMessageActionVisibility(0);
@@ -814,16 +815,20 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
-		msgTblMdl = dbSet->msgsRcvdWithin90DaysModel(
-		    m_msgTblAppendedCols);
+		m_messageTableModel.appendData(
+		    dbSet->msgsRcvdEntriesWithin90Days(),
+		    m_msgTblAppendedCols.size());
+		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeRecentSent:
-		msgTblMdl = dbSet->msgsSntWithin90DaysModel(
-		    m_msgTblAppendedCols);
+		m_messageTableModel.appendData(
+		    dbSet->msgsSntEntriesWithin90Days(),
+		    m_msgTblAppendedCols.size());
+		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
@@ -844,7 +849,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_RECEIVED);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		msgTblMdl = dbSet->msgsRcvdModel(m_msgTblAppendedCols);
+		m_messageTableModel.appendData(dbSet->msgsEntriesRcvd(),
+		    m_msgTblAppendedCols.size());
+		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
@@ -859,24 +866,30 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_SENT);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		msgTblMdl = dbSet->msgsSntModel(m_msgTblAppendedCols);
+		m_messageTableModel.appendData(dbSet->msgsSntEntries(),
+		    m_msgTblAppendedCols.size());
+		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 #endif /* DISABLE_ALL_TABLE */
 		break;
 	case AccountModel::nodeReceivedYear:
+		m_messageTableModel.appendData(
+		    dbSet->msgsRcvdEntriesInYear(
+		        current.data(ROLE_PLAIN_DISPLAY).toString()),
+		    m_msgTblAppendedCols.size());
+		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
 		/* TODO -- Parameter check. */
-		msgTblMdl = dbSet->msgsRcvdInYearModel(
-		    current.data(ROLE_PLAIN_DISPLAY).toString(),
-		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSentYear:
+		m_messageTableModel.appendData(
+		    dbSet->msgsSntEntriesInYear(
+		        current.data(ROLE_PLAIN_DISPLAY).toString()),
+		    m_msgTblAppendedCols.size());
+		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
 		/* TODO -- Parameter check. */
-		msgTblMdl = dbSet->msgsSntInYearModel(
-		    current.data(ROLE_PLAIN_DISPLAY).toString(),
-		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		break;
 	default:
@@ -886,17 +899,12 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		break;
 	}
 
-	if (Q_NULLPTR != msgTblMdl) {
-		DbMsgsTblModel *mdl = qobject_cast<DbMsgsTblModel *>(msgTblMdl);
-		if (Q_NULLPTR == mdl) {
-			logErrorNL("%s", "Received model is not of desired type.");
-//			Q_ASSERT(0);
-			return;
-		}
-		mdl->setRecordsManagementIcon();
-		mdl->fillRecordsManagementColumn(
+	{
+		m_messageTableModel.setRecordsManagementIcon();
+		m_messageTableModel.fillRecordsManagementColumn(
 		    DbMsgsTblModel::REC_MGMT_NEG_COL);
-		mdl->fillTagsColumn(userName, DbMsgsTblModel::TAGS_NEG_COL);
+		m_messageTableModel.fillTagsColumn(userName,
+		    DbMsgsTblModel::TAGS_NEG_COL);
 		/* TODO -- Add some labels. */
 	}
 
@@ -947,14 +955,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeReceivedYear:
 		/* Set model. */
-		if (Q_NULLPTR == msgTblMdl) {
-			logErrorNL("%s", "No received message table model available.");
-//			Q_ASSERT(0);
-			return;
-		}
-		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
-		m_messageListProxyModel.setSourceModel(msgTblMdl);
-		ui->messageList->setModel(&m_messageListProxyModel);
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setReceivedColumnWidths();
@@ -966,14 +966,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeSentYear:
 		/* Set model. */
-		if (Q_NULLPTR == msgTblMdl) {
-			logErrorNL("%s", "No sent message table model available.");
-//			Q_ASSERT(0);
-			return;
-		}
-		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
-		m_messageListProxyModel.setSourceModel(msgTblMdl);
-		ui->messageList->setModel(&m_messageListProxyModel);
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setSentColumnWidths();
@@ -1236,9 +1228,10 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	}
 
 	/* Show files related to message message. */
-	QAbstractTableModel *fileTblMdl = messageDb->flsModel(msgId.dmId);
-	Q_ASSERT(0 != fileTblMdl);
-	ui->messageAttachmentList->setModel(fileTblMdl);
+	m_attachmentModel.removeRows(0, m_attachmentModel.rowCount());
+	m_attachmentModel.setHeader();
+	m_attachmentModel.appendData(messageDb->attachEntries(msgId.dmId));
+	ui->messageAttachmentList->setModel(&m_attachmentModel);
 	/* First three columns contain hidden data. */
 	ui->messageAttachmentList->setColumnHidden(
 	    DbFlsTblModel::ATTACHID_COL, true);
@@ -1308,11 +1301,7 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	 * Mark message as read without reloading
 	 * the whole model.
 	 */
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
-
-	messageModel->overrideRead(msgId.dmId, !isRead);
+	m_messageTableModel.overrideRead(msgId.dmId, !isRead);
 
 	/*
 	 * Reload/update account model only for
@@ -2291,13 +2280,10 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		return;
 	}
 
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
 	QModelIndex msgIdIdx;
 	/* Find corresponding message in model. */
-	for (int row = 0; row < messageModel->rowCount(); ++row) {
-		QModelIndex index = messageModel->index(row, 0);
+	for (int row = 0; row < m_messageTableModel.rowCount(); ++row) {
+		QModelIndex index = m_messageTableModel.index(row, 0);
 		if (index.data().toLongLong() == dmId) {
 			msgIdIdx = index;
 			break;
@@ -2312,7 +2298,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	 * Mark message as having attachment downloaded without reloading
 	 * the whole model.
 	 */
-	messageModel->overrideDownloaded(dmId, true);
+	m_messageTableModel.overrideDownloaded(dmId, true);
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -2355,9 +2341,10 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId, 0));
 	ui->messageInfo->setReadOnly(true);
 
-	QAbstractTableModel *fileTblMdl = messageDb->flsModel(dmId);
-	Q_ASSERT(0 != fileTblMdl);
-	ui->messageAttachmentList->setModel(fileTblMdl);
+	m_attachmentModel.removeRows(0, m_attachmentModel.rowCount());
+	m_attachmentModel.setHeader();
+	m_attachmentModel.appendData(messageDb->attachEntries(dmId));
+	ui->messageAttachmentList->setModel(&m_attachmentModel);
 	/* First three columns contain hidden data. */
 	ui->messageAttachmentList->setColumnHidden(
 	    DbFlsTblModel::ATTACHID_COL, true);
@@ -6782,13 +6769,7 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 	DlgRecordsManagementStored::updateStoredInformation(
 	    globRecordsManagementSet, accounts, this);
 
-	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	if (messageModel == Q_NULLPTR) {
-		Q_ASSERT(0);
-		return;
-	}
-	messageModel->fillRecordsManagementColumn(
+	m_messageTableModel.fillRecordsManagementColumn(
 	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 }
 
@@ -6856,13 +6837,6 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 		}
 	}
 
-	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	if (messageModel == Q_NULLPTR) {
-		Q_ASSERT(0);
-		return;
-	}
-
 	/* Show send to records management dialogue. */
 	DlgRecordsManagementUpload::uploadMessage(globRecordsManagementSet,
 	    msgId.dmId, QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
@@ -6870,7 +6844,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	QList<qint64> msgIdList;
 	msgIdList.append(msgId.dmId);
 
-	messageModel->refillRecordsManagementColumn(msgIdList,
+	m_messageTableModel.refillRecordsManagementColumn(msgIdList,
 	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 }
 
@@ -7449,10 +7423,6 @@ void MainWindow::messageItemsSetReadStatus(
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
-
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
 	     it != firstMsgColumnIdxs.end(); ++it) {
 		const MessageDb::MsgId msgId(msgMsgId(*it));
@@ -7471,7 +7441,7 @@ void MainWindow::messageItemsSetReadStatus(
 		 * Mark message as read without reloading
 		 * the whole model.
 		 */
-		messageModel->overrideRead(msgId.dmId, read);
+		m_messageTableModel.overrideRead(msgId.dmId, read);
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -7510,10 +7480,6 @@ void MainWindow::messageItemsSetProcessStatus(
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
-
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
 	     it != firstMsgColumnIdxs.end(); ++it) {
 		const MessageDb::MsgId msgId(msgMsgId(*it));
@@ -7532,7 +7498,7 @@ void MainWindow::messageItemsSetProcessStatus(
 		 * Mark message as read without reloading
 		 * the whole model.
 		 */
-		messageModel->overrideProcessing(msgId.dmId, state);
+		m_messageTableModel.overrideProcessing(msgId.dmId, state);
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -8606,18 +8572,11 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 		return;
 	}
 
-	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	if (messageModel == Q_NULLPTR) {
-		Q_ASSERT(0);
-		return;
-	}
-
 	if (dlgRet == DlgTags::TAGS_CHANGED) {
 		/* May affect all rows. */
 		msgIdList.clear();
-		for (int row = 0; row < messageModel->rowCount(); ++row) {
-			msgIdList.append(messageModel->index(row,
+		for (int row = 0; row < m_messageTableModel.rowCount(); ++row) {
+			msgIdList.append(m_messageTableModel.index(row,
 			    DbMsgsTblModel::DMID_COL).data().toLongLong());
 		}
 	}
@@ -8626,7 +8585,7 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 		return;
 	}
 
-	messageModel->refillTagsColumn(userName, msgIdList,
+	m_messageTableModel.refillTagsColumn(userName, msgIdList,
 	    DbMsgsTblModel::TAGS_NEG_COL);
 }
 

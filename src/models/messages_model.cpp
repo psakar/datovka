@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 	/* TODO -- This is only a temporal solution. */
 	switch (m_type) {
 	case WORKING_RCVD:
-	case DUMMY_RCVD:
 		if (index.column() == (PROCSNG_COL + TAGS_OFFS)) {
 			QStringList locations(
 			    _data(index, Qt::DisplayRole).toStringList());
@@ -77,7 +76,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		}
 		break;
 	case WORKING_SNT:
-	case DUMMY_SNT:
 		if (index.column() == (ATTDOWN_COL + TAGS_OFFS)) {
 			QStringList locations(
 			    _data(index, Qt::DisplayRole).toStringList());
@@ -103,13 +101,11 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 	/* Leave additional tags to delegates. */
 	switch (m_type) {
 	case WORKING_RCVD:
-	case DUMMY_RCVD:
 		if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
 			return _data(index, role);
 		}
 		break;
 	case WORKING_SNT:
-	case DUMMY_SNT:
 		if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
 			return _data(index, role);
 		}
@@ -261,13 +257,11 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 	/* Draw additional. */
 	switch (m_type) {
 	case WORKING_RCVD:
-	case DUMMY_RCVD:
 		if (section > PROCSNG_COL) {
 			return _headerData(section, orientation, role);
 		}
 		break;
 	case WORKING_SNT:
-	case DUMMY_SNT:
 		if (section > ATTDOWN_COL) {
 			return _headerData(section, orientation, role);
 		}
@@ -350,37 +344,120 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 	}
 }
 
-void DbMsgsTblModel::setQuery(QSqlQuery &query, enum DbMsgsTblModel::Type type)
+void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
+    int appendedColsNum)
 {
-	setType(type);
-	TblModel::setQuery(query);
-	/* TODO -- Check whether type matches query. */
+	if (Q_UNLIKELY(appendedColsNum < 0)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Set column count if the model is empty. */
+	if (rowCount() == 0) {
+		beginResetModel();
+		m_type = WORKING_RCVD;
+		m_columnCount = rcvdItemIds().size() + appendedColsNum;
+		endResetModel();
+	} else {
+		if (Q_UNLIKELY(m_type != WORKING_RCVD)) {
+			Q_ASSERT(0);
+			return;
+		}
+		if (Q_UNLIKELY(m_columnCount !=
+		        (rcvdItemIds().size() + appendedColsNum))) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	if (entryList.isEmpty()) {
+		/* Don't do anything. */
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), rowCount(),
+	    rowCount() + entryList.size() - 1);
+
+	foreach (const MessageDb::RcvdEntry &entry, entryList) {
+
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		row[DMID_COL] = entry.dmId;
+		row[ANNOT_COL] = entry.dmAnnotation;
+		row[2] = entry.dmSender;
+		row[DELIVERY_COL] = entry.dmDeliveryTime;
+		row[ACCEPT_COL] = entry.dmAcceptanceTime;
+		row[READLOC_COL] = entry.readLocally;
+		row[ATTDOWN_COL] = entry.isDownloaded;
+		row[PROCSNG_COL] = entry.processStatus;
+
+		m_data[m_rowCount++] = row;
+	}
+
+	endInsertRows();
 }
 
-bool DbMsgsTblModel::appendQueryData(QSqlQuery &query,
-    enum DbMsgsTblModel::Type type)
+void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
+    int appendedColsNum)
 {
-	if (type != m_type) {
-		return false;
+	if (Q_UNLIKELY(appendedColsNum < 0)) {
+		Q_ASSERT(0);
+		return;
 	}
-	return TblModel::appendQueryData(query);
+
+	/* Set column count if the model is empty. */
+	if (rowCount() == 0) {
+		beginResetModel();
+		m_type = WORKING_SNT;
+		m_columnCount = sntItemIds().size() + appendedColsNum;
+		endResetModel();
+	} else {
+		if (Q_UNLIKELY(m_type != WORKING_SNT)) {
+			Q_ASSERT(0);
+			return;
+		}
+		if (Q_UNLIKELY(m_columnCount !=
+		        (sntItemIds().size() + appendedColsNum))) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	if (entryList.isEmpty()) {
+		/* Don't do anything. */
+		return;
+	}
+
+	beginInsertRows(QModelIndex(), rowCount(),
+	    rowCount() + entryList.size() - 1);
+
+	foreach (const MessageDb::SntEntry &entry, entryList) {
+
+		reserveSpace();
+
+		QVector<QVariant> row(m_columnCount);
+
+		row[DMID_COL] = entry.dmId;
+		row[ANNOT_COL] = entry.dmAnnotation;
+		row[2] = entry.dmRecipient;
+		row[DELIVERY_COL] = entry.dmDeliveryTime;
+		row[ACCEPT_COL] = entry.dmAcceptanceTime;
+		row[5] = entry.dmMessageStatus;
+		row[ATTDOWN_COL] = entry.isDownloaded;
+
+		m_data[m_rowCount++] = row;
+	}
+
+	endInsertRows();
 }
 
 bool DbMsgsTblModel::setType(enum DbMsgsTblModel::Type type)
 {
 	m_type = type;
 
-	switch (m_type) {
-	case DUMMY_RCVD:
-		return setRcvdHeader(QList<DbMsgsTblModel::AppendedCol>()); /* FIXME */
-		break;
-	case DUMMY_SNT:
-		return setSntHeader(QList<DbMsgsTblModel::AppendedCol>()); /* FIXME */
-		break;
-	default:
-		return true;
-		break;
-	}
+	return true;
 }
 
 const QVector<QString> &DbMsgsTblModel::rcvdItemIds(void)
@@ -582,13 +659,6 @@ bool DbMsgsTblModel::overrideProcessing(qint64 dmId,
 	return false;
 }
 
-DbMsgsTblModel &DbMsgsTblModel::dummyModel(enum DbMsgsTblModel::Type type)
-{
-	static DbMsgsTblModel dummy(DUMMY_RCVD);
-	dummy.setType(type);
-	return dummy;
-}
-
 bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 {
 	if (Q_NULLPTR == globTagDbPtr) {
@@ -745,14 +815,4 @@ bool DbMsgsTblModel::refillRecordsManagementColumn(const QList<qint64> &dmIds,
 	}
 
 	return true;
-}
-
-void DbMsgsTblModel::setQuery(QSqlQuery &query)
-{
-	TblModel::setQuery(query);
-}
-
-bool DbMsgsTblModel::appendQueryData(QSqlQuery &query)
-{
-	return TblModel::appendQueryData(query);
 }

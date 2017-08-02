@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	explicit TblModel(QObject *parent = 0);
+	explicit TblModel(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Returns number of rows under given parent.
@@ -98,23 +98,6 @@ public:
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
-	 * @brief Sets the content of the model according to the supplied query.
-	 *
-	 * @param[in,out] qyery SQL query result.
-	 */
-	virtual
-	void setQuery(QSqlQuery &query);
-
-	/*!
-	 * @brief Appends data from the supplied query to the model.
-	 *
-	 * @param[in,out] query SQL query result.
-	 * @return True on success.
-	 */
-	virtual
-	bool appendQueryData(QSqlQuery &query);
-
-	/*!
 	 * @brief Move rows.
 	 *
 	 * @param[in] sourceParent Source parent.
@@ -142,6 +125,23 @@ public:
 	    const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
 
 protected:
+	/*!
+	 * @brief Sets the content of the model according to the supplied query.
+	 *
+	 * @param[in,out] qyery SQL query result.
+	 */
+	virtual
+	void setQuery(QSqlQuery &query);
+
+	/*!
+	 * @brief Appends data from the supplied query to the model.
+	 *
+	 * @param[in,out] query SQL query result.
+	 * @return True on success.
+	 */
+	virtual
+	bool appendQueryData(QSqlQuery &query);
+
 	/*!
 	 * @brief Returns raw data stored under the given role.
 	 *
