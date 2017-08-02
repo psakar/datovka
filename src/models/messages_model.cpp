@@ -59,7 +59,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 	/* TODO -- This is only a temporal solution. */
 	switch (m_type) {
 	case WORKING_RCVD:
-	case DUMMY_RCVD:
 		if (index.column() == (PROCSNG_COL + TAGS_OFFS)) {
 			QStringList locations(
 			    _data(index, Qt::DisplayRole).toStringList());
@@ -77,7 +76,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		}
 		break;
 	case WORKING_SNT:
-	case DUMMY_SNT:
 		if (index.column() == (ATTDOWN_COL + TAGS_OFFS)) {
 			QStringList locations(
 			    _data(index, Qt::DisplayRole).toStringList());
@@ -103,13 +101,11 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 	/* Leave additional tags to delegates. */
 	switch (m_type) {
 	case WORKING_RCVD:
-	case DUMMY_RCVD:
 		if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
 			return _data(index, role);
 		}
 		break;
 	case WORKING_SNT:
-	case DUMMY_SNT:
 		if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
 			return _data(index, role);
 		}
@@ -261,13 +257,11 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 	/* Draw additional. */
 	switch (m_type) {
 	case WORKING_RCVD:
-	case DUMMY_RCVD:
 		if (section > PROCSNG_COL) {
 			return _headerData(section, orientation, role);
 		}
 		break;
 	case WORKING_SNT:
-	case DUMMY_SNT:
 		if (section > ATTDOWN_COL) {
 			return _headerData(section, orientation, role);
 		}
@@ -479,17 +473,7 @@ bool DbMsgsTblModel::setType(enum DbMsgsTblModel::Type type)
 {
 	m_type = type;
 
-	switch (m_type) {
-	case DUMMY_RCVD:
-		return setRcvdHeader(QList<DbMsgsTblModel::AppendedCol>()); /* FIXME */
-		break;
-	case DUMMY_SNT:
-		return setSntHeader(QList<DbMsgsTblModel::AppendedCol>()); /* FIXME */
-		break;
-	default:
-		return true;
-		break;
-	}
+	return true;
 }
 
 const QVector<QString> &DbMsgsTblModel::rcvdItemIds(void)
@@ -689,13 +673,6 @@ bool DbMsgsTblModel::overrideProcessing(qint64 dmId,
 	}
 
 	return false;
-}
-
-DbMsgsTblModel &DbMsgsTblModel::dummyModel(enum DbMsgsTblModel::Type type)
-{
-	static DbMsgsTblModel dummy(DUMMY_RCVD);
-	dummy.setType(type);
-	return dummy;
 }
 
 bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)

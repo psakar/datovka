@@ -250,7 +250,7 @@ MainWindow::~MainWindow(void)
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_accountModel(this),
-    m_messageTableModel(DbMsgsTblModel::DUMMY_RCVD, this),
+    m_messageTableModel(DbMsgsTblModel::WORKING_RCVD, this),
     m_messageListProxyModel(this),
     m_attachmentModel(this),
     m_messageMarker(this),

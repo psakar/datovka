@@ -68,9 +68,7 @@ public:
 	 */
 	enum Type {
 		WORKING_RCVD = 0, /*!< Ordinary model created from SQL query result. */
-		WORKING_SNT, /*!< Ordinary model created from SQL query result. */
-		DUMMY_RCVD, /*!< Empty received dummy. */
-		DUMMY_SNT /*!< Empty sent dummy. */
+		WORKING_SNT /*!< Ordinary model created from SQL query result. */
 	};
 
 	/*!
@@ -233,17 +231,6 @@ public:
 	 */
 	bool overrideProcessing(qint64 dmId,
 	    enum MessageProcessState forceState);
-
-	/*!
-	 * @brief Returns reference to a dummy model.
-	 *
-	 * @note Beware of the static initialization order fiasco.
-	 *
-	 * @param[in] type Type of the table model.
-	 * @returns Reference to a static dummy model.
-	 */
-	static
-	DbMsgsTblModel &dummyModel(enum Type type);
 
 	/*!
 	 * @brief Fills the model with tag information.
