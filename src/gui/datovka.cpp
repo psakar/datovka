@@ -687,13 +687,9 @@ void MainWindow::showRecordsManagementDialogue(void)
 	ui->actionUpdate_records_management_information->setEnabled(
 	    globRecordsManagementSet.isSet());
 
-	DbMsgsTblModel *mdl = qobject_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	if (Q_NULLPTR != mdl) {
-		mdl->setRecordsManagementIcon();
-		mdl->fillRecordsManagementColumn(
-		    DbMsgsTblModel::REC_MGMT_NEG_COL);
-	}
+	m_messageTableModel.setRecordsManagementIcon();
+	m_messageTableModel.fillRecordsManagementColumn(
+	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 
 	showColumnsAccordingToFunctionality(ui->messageList);
 	AccountModel::nodeTypeIsReceived(currentAccountModelIndex()) ?
@@ -809,6 +805,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 
 	m_messageTableModel.removeRows(0, m_messageTableModel.rowCount());
 	m_messageListProxyModel.setSourceModel(&m_messageTableModel); /* TODO */
+	m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT); /* TODO */
+	ui->messageList->setModel(&m_messageListProxyModel); /* TODO */
 
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
@@ -957,8 +955,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeReceivedYear:
 		/* Set model. */
-		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
-		ui->messageList->setModel(&m_messageListProxyModel);
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setReceivedColumnWidths();
@@ -970,8 +966,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeSentYear:
 		/* Set model. */
-		m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
-		ui->messageList->setModel(&m_messageListProxyModel);
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setSentColumnWidths();
@@ -1307,11 +1301,7 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	 * Mark message as read without reloading
 	 * the whole model.
 	 */
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
-
-	messageModel->overrideRead(msgId.dmId, !isRead);
+	m_messageTableModel.overrideRead(msgId.dmId, !isRead);
 
 	/*
 	 * Reload/update account model only for
@@ -2290,13 +2280,10 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		return;
 	}
 
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
 	QModelIndex msgIdIdx;
 	/* Find corresponding message in model. */
-	for (int row = 0; row < messageModel->rowCount(); ++row) {
-		QModelIndex index = messageModel->index(row, 0);
+	for (int row = 0; row < m_messageTableModel.rowCount(); ++row) {
+		QModelIndex index = m_messageTableModel.index(row, 0);
 		if (index.data().toLongLong() == dmId) {
 			msgIdIdx = index;
 			break;
@@ -2311,7 +2298,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	 * Mark message as having attachment downloaded without reloading
 	 * the whole model.
 	 */
-	messageModel->overrideDownloaded(dmId, true);
+	m_messageTableModel.overrideDownloaded(dmId, true);
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -6782,13 +6769,7 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 	DlgRecordsManagementStored::updateStoredInformation(
 	    globRecordsManagementSet, accounts, this);
 
-	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	if (messageModel == Q_NULLPTR) {
-		Q_ASSERT(0);
-		return;
-	}
-	messageModel->fillRecordsManagementColumn(
+	m_messageTableModel.fillRecordsManagementColumn(
 	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 }
 
@@ -6856,13 +6837,6 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 		}
 	}
 
-	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	if (messageModel == Q_NULLPTR) {
-		Q_ASSERT(0);
-		return;
-	}
-
 	/* Show send to records management dialogue. */
 	DlgRecordsManagementUpload::uploadMessage(globRecordsManagementSet,
 	    msgId.dmId, QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
@@ -6870,7 +6844,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	QList<qint64> msgIdList;
 	msgIdList.append(msgId.dmId);
 
-	messageModel->refillRecordsManagementColumn(msgIdList,
+	m_messageTableModel.refillRecordsManagementColumn(msgIdList,
 	    DbMsgsTblModel::REC_MGMT_NEG_COL);
 }
 
@@ -7449,10 +7423,6 @@ void MainWindow::messageItemsSetReadStatus(
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
-
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
 	     it != firstMsgColumnIdxs.end(); ++it) {
 		const MessageDb::MsgId msgId(msgMsgId(*it));
@@ -7471,7 +7441,7 @@ void MainWindow::messageItemsSetReadStatus(
 		 * Mark message as read without reloading
 		 * the whole model.
 		 */
-		messageModel->overrideRead(msgId.dmId, read);
+		m_messageTableModel.overrideRead(msgId.dmId, read);
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -7510,10 +7480,6 @@ void MainWindow::messageItemsSetProcessStatus(
 	QItemSelection storedMsgSelection =
 	    ui->messageList->selectionModel()->selection();
 
-	DbMsgsTblModel *messageModel = dynamic_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	Q_ASSERT(0 != messageModel);
-
 	for (QModelIndexList::const_iterator it = firstMsgColumnIdxs.begin();
 	     it != firstMsgColumnIdxs.end(); ++it) {
 		const MessageDb::MsgId msgId(msgMsgId(*it));
@@ -7532,7 +7498,7 @@ void MainWindow::messageItemsSetProcessStatus(
 		 * Mark message as read without reloading
 		 * the whole model.
 		 */
-		messageModel->overrideProcessing(msgId.dmId, state);
+		m_messageTableModel.overrideProcessing(msgId.dmId, state);
 	}
 
 	ui->messageList->selectionModel()->select(storedMsgSelection,
@@ -8606,18 +8572,11 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 		return;
 	}
 
-	DbMsgsTblModel *messageModel = qobject_cast<DbMsgsTblModel *>(
-	    m_messageListProxyModel.sourceModel());
-	if (messageModel == Q_NULLPTR) {
-		Q_ASSERT(0);
-		return;
-	}
-
 	if (dlgRet == DlgTags::TAGS_CHANGED) {
 		/* May affect all rows. */
 		msgIdList.clear();
-		for (int row = 0; row < messageModel->rowCount(); ++row) {
-			msgIdList.append(messageModel->index(row,
+		for (int row = 0; row < m_messageTableModel.rowCount(); ++row) {
+			msgIdList.append(m_messageTableModel.index(row,
 			    DbMsgsTblModel::DMID_COL).data().toLongLong());
 		}
 	}
@@ -8626,7 +8585,7 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 		return;
 	}
 
-	messageModel->refillTagsColumn(userName, msgIdList,
+	m_messageTableModel.refillTagsColumn(userName, msgIdList,
 	    DbMsgsTblModel::TAGS_NEG_COL);
 }
 
