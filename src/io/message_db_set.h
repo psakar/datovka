@@ -376,16 +376,14 @@ public: /* Database function that have been delegate to the container. */
 	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
-	 * @brief Return received messages within given year.
+	 * @brief Return entries for received messages within given year.
 	 *
 	 * @param[in] year         Year number.
 	 * @param[in] appendedCols List of names for added empty columns.
-	 * @return Pointer to model, 0 on failure.
-	 *
-	 * @note The model must not be freed.
+	 * @return List of entries, empty list on failure.
 	 */
-	QAbstractTableModel *msgsRcvdInYearModel(const QString &year,
-	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	QList<MessageDb::RcvdEntry> msgsRcvdEntriesInYear(const QString &year,
+	    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -598,8 +596,8 @@ private:
 	inline QList<MessageDb::RcvdEntry> _yrly_2dbs_msgsRcvdEntriesWithin90Days(MessageDb &db0, MessageDb &db1, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
 	inline QList<MessageDb::RcvdEntry> _yrly_msgsRcvdEntriesWithin90Days(const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
-	inline QAbstractTableModel *_sf_msgsRcvdInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
-	inline QAbstractTableModel *_yrly_msgsRcvdInYearModel(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols);
+	inline QList<MessageDb::RcvdEntry> _sf_msgsRcvdEntriesInYear(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
+	inline QList<MessageDb::RcvdEntry> _yrly_msgsRcvdEntriesInYear(const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const;
 
 	inline QStringList _sf_msgsYears(enum MessageDb::MessageType type, enum Sorting sorting) const;
 	inline QStringList _yrly_msgsYears(enum MessageDb::MessageType type, enum Sorting sorting) const;

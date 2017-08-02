@@ -291,46 +291,48 @@ QList<MessageDb::RcvdEntry> MessageDbSet::msgsRcvdEntriesWithin90Days(
 	return QList<MessageDb::RcvdEntry>();
 }
 
-QAbstractTableModel *MessageDbSet::_sf_msgsRcvdInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_sf_msgsRcvdEntriesInYear(
+    const QString &year,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	if (this->size() == 0) {
-		return &DbMsgsTblModel::dummyModel(
-		    DbMsgsTblModel::DUMMY_RCVD);
+		return QList<MessageDb::RcvdEntry>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsRcvdInYearModel(year, appendedCols);
+	return this->first()->msgsRcvdEntriesInYear(year, appendedCols);
 }
 
-QAbstractTableModel *MessageDbSet::_yrly_msgsRcvdInYearModel(
-    const QString &year, const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_msgsRcvdEntriesInYear(
+    const QString &year,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
-	MessageDb *db = this->value(secondaryKey, NULL);
-	if (NULL == db) {
-		return 0;
+	MessageDb *db = this->value(secondaryKey, Q_NULLPTR);
+	if (Q_NULLPTR == db) {
+		return QList<MessageDb::RcvdEntry>();
 	}
 
-	return db->msgsRcvdInYearModel(year, appendedCols);
+	return db->msgsRcvdEntriesInYear(year, appendedCols);
 }
 
-QAbstractTableModel *MessageDbSet::msgsRcvdInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
+QList<MessageDb::RcvdEntry> MessageDbSet::msgsRcvdEntriesInYear(
+    const QString &year,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsRcvdInYearModel(year, appendedCols);
+		return _sf_msgsRcvdEntriesInYear(year, appendedCols);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsRcvdInYearModel(year, appendedCols);
+		return _yrly_msgsRcvdEntriesInYear(year, appendedCols);
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	return NULL;
+	return QList<MessageDb::RcvdEntry>();
 }
 
 QStringList MessageDbSet::_sf_msgsYears(enum MessageDb::MessageType type,

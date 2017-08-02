@@ -157,14 +157,11 @@ fail:
 	return QList<RcvdEntry>();
 }
 
-/* ========================================================================= */
-/*
- * Return received messages within given year.
- */
-QAbstractTableModel *MessageDb::msgsRcvdInYearModel(const QString &year,
-    const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
-/* ========================================================================= */
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesInYear(
+    const QString &year,
+    const QList<DbMsgsTblModel::AppendedCol> &appendedCols) const
 {
+	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
@@ -199,17 +196,13 @@ QAbstractTableModel *MessageDb::msgsRcvdInYearModel(const QString &year,
 		goto fail;
 	}
 
-	m_sqlMsgsModel.setQuery(query, DbMsgsTblModel::WORKING_RCVD);
-	if (!m_sqlMsgsModel.setRcvdHeader(appendedCols)) {
-		Q_ASSERT(0);
-		goto fail;
-	}
-	return &m_sqlMsgsModel;
+	appendRcvdEntryList(entryList, query);
+
+	return entryList;
 
 fail:
-	return 0;
+	return QList<RcvdEntry>();
 }
-
 
 /* ========================================================================= */
 /*
