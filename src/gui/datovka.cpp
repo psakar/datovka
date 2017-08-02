@@ -808,6 +808,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	ui->messageList->disconnect(SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(messageItemClicked(QModelIndex)));
 
+	m_messageTableModel.removeRows(0, m_messageTableModel.rowCount());
+
 	switch (AccountModel::nodeType(current)) {
 	case AccountModel::nodeAccountTop:
 		setMessageActionVisibility(0);
@@ -816,10 +818,10 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		break;
 	case AccountModel::nodeRecentReceived:
 		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
-//		msgTblMdl = &m_messageTableModel;
-		/* TODO */
-//		msgTblMdl = dbSet->msgsRcvdWithin90DaysModel(
-//		    m_msgTblAppendedCols);
+		m_messageTableModel.appendData(
+		    dbSet->msgsRcvdEntriesWithin90Days(),
+		    m_msgTblAppendedCols.size());
+		msgTblMdl = &m_messageTableModel; /* TODO */
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
@@ -827,10 +829,10 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		break;
 	case AccountModel::nodeRecentSent:
 		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
-//		msgTblMdl = &m_messageTableModel;
-		/* TODO */
-//		msgTblMdl = dbSet->msgsSntWithin90DaysModel(
-//		    m_msgTblAppendedCols);
+		m_messageTableModel.appendData(
+		    dbSet->msgsSntEntriesWithin90Days(),
+		    m_msgTblAppendedCols.size());
+		msgTblMdl = &m_messageTableModel; /* TODO */
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
@@ -852,7 +854,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
 		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
-//		msgTblMdl = dbSet->msgsRcvdModel(m_msgTblAppendedCols);
+		m_messageTableModel.appendData(dbSet->msgsEntriesRcvd(),
+		    m_msgTblAppendedCols.size());
+		msgTblMdl = &m_messageTableModel; /* TODO */
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
@@ -868,30 +872,32 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
 		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
-//		msgTblMdl = dbSet->msgsSntModel(m_msgTblAppendedCols);
+		m_messageTableModel.appendData(dbSet->msgsSntEntries(),
+		    m_msgTblAppendedCols.size());
+		msgTblMdl = &m_messageTableModel; /* TODO */
 		ui->actionDelete_message_from_db->setEnabled(true);
 #endif /* DISABLE_ALL_TABLE */
 		break;
 	case AccountModel::nodeReceivedYear:
 		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
-//		msgTblMdl = &m_messageTableModel;
-		/* TODO */
+		m_messageTableModel.appendData(
+		    dbSet->msgsRcvdEntriesInYear(
+		        current.data(ROLE_PLAIN_DISPLAY).toString()),
+		    m_msgTblAppendedCols.size());
+		msgTblMdl = &m_messageTableModel; /* TODO */
 		/* TODO -- Parameter check. */
-//		msgTblMdl = dbSet->msgsRcvdInYearModel(
-//		    current.data(ROLE_PLAIN_DISPLAY).toString(),
-//		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSentYear:
 		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
-//		msgTblMdl = &m_messageTableModel;
-		/* TODO */
+		m_messageTableModel.appendData(
+		    dbSet->msgsSntEntriesInYear(
+		        current.data(ROLE_PLAIN_DISPLAY).toString()),
+		    m_msgTblAppendedCols.size());
+		msgTblMdl = &m_messageTableModel; /* TODO */
 		/* TODO -- Parameter check. */
-//		msgTblMdl = dbSet->msgsSntInYearModel(
-//		    current.data(ROLE_PLAIN_DISPLAY).toString(),
-//		    m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		break;
 	default:
