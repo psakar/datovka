@@ -24,8 +24,8 @@
 #ifndef _CLI_H_
 #define _CLI_H_
 
-#include <QApplication>
-#include <QDebug>
+#include <QSet>
+#include <QString>
 
 #define CLI_PREFIX "D-CLI: "
 #define PARSER_PREFIX "Parser error: "

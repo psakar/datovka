@@ -22,6 +22,7 @@
  */
 
 #include <cstdlib>
+#include <QTextStream>
 
 #include "src/cli/cli.h"
 #include "src/cli/cli_parser.h"

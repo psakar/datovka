@@ -257,6 +257,7 @@ SOURCES += \
     src/gui/dlg_timestamp_expir.cpp \
     src/gui/dlg_view_zfo.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
+    src/initialisation.cpp \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
     src/io/dbs.cpp \
@@ -372,6 +373,7 @@ HEADERS += \
     src/gui/dlg_timestamp_expir.h \
     src/gui/dlg_view_zfo.h \
     src/gui/dlg_yes_no_checkbox.h \
+    src/initialisation.h \
     src/io/account_db.h \
     src/io/db_tables.h \
     src/io/dbs.h \
