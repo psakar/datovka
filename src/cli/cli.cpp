@@ -22,11 +22,12 @@
  */
 
 #include <cstdlib>
+#include <QDebug>
 #include <QTextStream>
 
 #include "src/cli/cli.h"
 #include "src/cli/cli_login.h"
-#include "src/gui/datovka.h"
+#include "src/gui/datovka.h" /* TODO -- Remove. */
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
@@ -1671,7 +1672,7 @@ int runService(const QString &lParam,
 
 		if (!globIsdsSessions.isConnectedToIsds(username) &&
 		    !connectToIsdsCLI(globIsdsSessions,
-			    AccountModel::globAccounts[username], pwd, otp)) {
+		        globAccounts[username], pwd, otp)) {
 			errmsg = "Missing session for " + username +
 			   " or connection fails";
 			qDebug() << errmsg;

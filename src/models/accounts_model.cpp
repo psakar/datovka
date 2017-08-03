@@ -76,8 +76,6 @@
 #define internalIdUserNameIndex(intId) \
 	(((unsigned) (intId)) >> TYPE_BITS)
 
-AccountsMap AccountModel::globAccounts;
-
 AccountModel::AccountModel(QObject *parent)
     : QAbstractItemModel(parent),
     m_userNames(),

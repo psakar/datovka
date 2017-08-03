@@ -306,6 +306,7 @@ SOURCES += \
     src/records_management/models/upload_hierarchy_model.cpp \
     src/records_management/models/upload_hierarchy_proxy_model.cpp \
     src/records_management/widgets/svg_view.cpp \
+    src/settings/account.cpp \
     src/settings/accounts.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
@@ -422,6 +423,7 @@ HEADERS += \
     src/records_management/models/upload_hierarchy_model.h \
     src/records_management/models/upload_hierarchy_proxy_model.h \
     src/records_management/widgets/svg_view.h \
+    src/settings/account.h \
     src/settings/accounts.h \
     src/settings/preferences.h \
     src/settings/proxy.h \

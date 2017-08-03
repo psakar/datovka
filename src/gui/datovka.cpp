@@ -760,8 +760,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 
 		/* Get user name and db location. */
-		const AcntSettings &itemSettings(
-		    AccountModel::globAccounts[userName]);
+		const AcntSettings &itemSettings(globAccounts[userName]);
 
 		QString dbDir = itemSettings.dbDir();
 		if (dbDir.isEmpty()) {
@@ -1511,7 +1510,7 @@ void MainWindow::messageItemStoreSelection(qint64 msgId)
 
 		const QString userName(m_accountModel.userName(acntIdx));
 		Q_ASSERT(!userName.isEmpty());
-		AccountModel::globAccounts[userName].setLastMsg(msgId);
+		globAccounts[userName].setLastMsg(msgId);
 	}
 }
 
@@ -1521,7 +1520,7 @@ void MainWindow::storeExportPath(const QString &userName)
 
 	Q_ASSERT(!userName.isEmpty());
 
-	AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
+	AcntSettings &accountInfo(globAccounts[userName]);
 	accountInfo.setLastAttachSavePath(m_save_attach_dir);
 	accountInfo.setLastAttachAddPath(m_add_attach_dir);
 	accountInfo.setLastCorrespPath(m_export_correspond_dir);
@@ -1632,8 +1631,7 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 				    m_accountModel.userName(acntIdx));
 				Q_ASSERT(!userName.isEmpty());
 
-				msgLastId = AccountModel::globAccounts[userName]
-				    .lastMsg();
+				msgLastId = globAccounts[userName].lastMsg();
 			} else {
 				msgLastId = m_lastStoredMessageId;
 			}
@@ -2240,7 +2238,7 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 	if (TaskSendMessage::SM_SUCCESS == result) {
 		showStatusTextWithTimeout(tr(
 		    "Message from '%1' (%2) has been successfully sent to '%3' (%4).").
-		    arg(AccountModel::globAccounts[userName].accountName()).
+		    arg(globAccounts[userName].accountName()).
 		    arg(userName).arg(recipientName).arg(dbIDRecipient));
 
 		/* Refresh account list. */
@@ -2248,7 +2246,7 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 	} else {
 		showStatusTextWithTimeout(tr(
 		    "Error while sending message from '%1' (%2) to '%3' (%4).").
-		    arg(AccountModel::globAccounts[userName].accountName()).
+		    arg(globAccounts[userName].accountName()).
 		    arg(userName).arg(recipientName).arg(dbIDRecipient));
 	}
 
@@ -3084,7 +3082,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		Q_ASSERT(!userName.isEmpty());
 
 		/* Skip those that should omitted. */
-		if (!AccountModel::globAccounts[userName].syncWithAll()) {
+		if (!globAccounts[userName].syncWithAll()) {
 			continue;
 		}
 
@@ -3256,7 +3254,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	html.append("<h3>");
 
 
-	if (AccountModel::globAccounts[userName].isTestAccount()) {
+	if (globAccounts[userName].isTestAccount()) {
 		html.append(tr("Test account"));
 	} else {
 		html.append(tr("Standard account"));
@@ -3265,7 +3263,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	html.append("</h3>");
 
 	html.append(strongAccountInfoLine(tr("Account name"),
-	    AccountModel::globAccounts[userName].accountName()));
+	    globAccounts[userName].accountName()));
 
 	const QString acntDbKey(AccountDb::keyFromLogin(userName));
 	if (globAccountDbPtr->dbId(acntDbKey).isEmpty()) {
@@ -3555,7 +3553,7 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 	}
 
 	/* Get user name and db location. */
-	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
+	AcntSettings &itemSettings(globAccounts[userName]);
 
 	if (!itemSettings.isValid()) {
 		logWarning(
@@ -3851,7 +3849,7 @@ void MainWindow::setAccountStoragePaths(const QString &userName)
 
 	Q_ASSERT(!userName.isEmpty());
 
-	const AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
+	const AcntSettings &itemSettings(globAccounts[userName]);
 
 	if (!itemSettings.lastAttachSavePath().isEmpty()) {
 		m_save_attach_dir = itemSettings.lastAttachSavePath();
@@ -4873,8 +4871,7 @@ void MainWindow::deleteAccount(const QString &userName)
 		return;
 	}
 
-	const QString accountName(
-	    AccountModel::globAccounts[userName].accountName());
+	const QString accountName(globAccounts[userName].accountName());
 
 	QString dlgTitleText = tr("Remove account ") + accountName;
 	QString questionText = tr("Do you want to remove account") + " '" +
@@ -4950,7 +4947,7 @@ void MainWindow::changeAccountPassword(void)
 	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	Q_ASSERT(!dbId.isEmpty());
 
-	const AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
+	const AcntSettings &accountInfo(globAccounts[userName]);
 
 	showStatusTextWithTimeout(tr("Change password of account "
 	    "\"%1\".").arg(accountInfo.accountName()));
@@ -4975,18 +4972,17 @@ void MainWindow::manageAccountProperties(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
-	    .arg(AccountModel::globAccounts[userName].accountName()));
+	    .arg(globAccounts[userName].accountName()));
 
 	DlgCreateAccount *accountDlg = new DlgCreateAccount(
-	    AccountModel::globAccounts[userName], DlgCreateAccount::ACT_EDIT,
-	    this);
+	    globAccounts[userName], DlgCreateAccount::ACT_EDIT, this);
 
 	int dlgRet = accountDlg->exec();
 
 	if (QDialog::Accepted == dlgRet) {
 		/* Save changes. */
-		AccountModel::globAccounts[userName] = accountDlg->getSubmittedData();
-		emit AccountModel::globAccounts.accountDataChanged(userName);
+		globAccounts[userName] = accountDlg->getSubmittedData();
+		emit globAccounts.accountDataChanged(userName);
 
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
 		    .arg(userName));
@@ -5046,7 +5042,7 @@ void MainWindow::changeDataDirectory(void)
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
-	const AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
+	const AcntSettings &itemSettings(globAccounts[userName]);
 
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
@@ -5083,7 +5079,7 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	Q_ASSERT(!userName.isEmpty());
 
 	/* Get current settings. */
-	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
+	AcntSettings &itemSettings(globAccounts[userName]);
 
 	MessageDbSet *dbSet = accountDbSet(userName, this);
 	if (0 == dbSet) {
@@ -5204,7 +5200,7 @@ void MainWindow::findDatabox(void)
 	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
 
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
-	    .arg(AccountModel::globAccounts[userName].accountName()));
+	    .arg(globAccounts[userName].accountName()));
 
 	QDialog *dsSearch = new DlgDsSearch(userName, dbType,
 	    dbEffectiveOVM, dbOpenAddressing, Q_NULLPTR, this);
@@ -6762,7 +6758,7 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 			return;
 		}
 		accounts.append(DlgRecordsManagementStored::AcntData(
-		    AccountModel::globAccounts[userName].accountName(),
+		    globAccounts[userName].accountName(),
 		    userName, dbSet));
 	}
 
@@ -7124,21 +7120,21 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 
 bool MainWindow::connectToIsds(const QString &userName)
 {
-	AcntSettings settingsCopy(AccountModel::globAccounts[userName]);
+	AcntSettings settingsCopy(globAccounts[userName]);
 
 	if (!logInGUI(globIsdsSessions, settingsCopy)) {
 		return false;
 	}
 
 	/* Logged in. */
-	AccountModel::globAccounts[userName] = settingsCopy;
+	globAccounts[userName] = settingsCopy;
 	/*
 	 * Catching the following signal is required only when account has
 	 * changed.
 	 *
 	 * The account model catches the signal.
 	 */
-	emit AccountModel::globAccounts.accountDataChanged(userName);
+	emit globAccounts.accountDataChanged(userName);
 	saveSettings();
 
 	/* Get account information if possible. */
@@ -7672,7 +7668,7 @@ void MainWindow::prepareMsgTmstmpExpir(
 		Q_ASSERT(!userName.isEmpty());
 		showStatusTextPermanently(tr("Checking time stamps in "
 		    "account '%1'...").arg(
-		        AccountModel::globAccounts[userName].accountName()));
+		        globAccounts[userName].accountName()));
 		checkMsgsTmstmpExpiration(userName, QStringList());
 		break;
 
@@ -7683,7 +7679,7 @@ void MainWindow::prepareMsgTmstmpExpir(
 			Q_ASSERT(!userName.isEmpty());
 			showStatusTextPermanently(
 			    tr("Checking time stamps in account '%1'...").arg(
-			        AccountModel::globAccounts[userName].accountName()));
+			        globAccounts[userName].accountName()));
 			checkMsgsTmstmpExpiration(userName, QStringList());
 		}
 		break;
@@ -7852,7 +7848,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 
 		infoText = tr("Time stamp expiration check "
 		    "in account '%1' finished with result:").arg(
-		        AccountModel::globAccounts[userName].accountName())
+		        globAccounts[userName].accountName())
 		    + "<br/><br/>" +
 		    tr("Total of messages in database: %1").arg(msgCnt)
 		    + "<br/><b>" +
@@ -8060,7 +8056,7 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 	QString newDbDir;
 	QString userName = m_accountModel.userName(currentAccountModelIndex());
 	/* get current db file location */
-	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
+	AcntSettings &itemSettings(globAccounts[userName]);
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		dbDir = globPref.confDir();

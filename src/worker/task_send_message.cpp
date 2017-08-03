@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
-#include "src/models/accounts_model.h"
+#include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_send_message.h"
 
@@ -403,7 +403,7 @@ void TaskSendMessage::run(void)
 	struct isds_message *message = libisdsMessage(m_message);
 	if (NULL == message) {
 		logErrorNL("Could not create isds_message for account '%s'.",
-		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
+		    globAccounts[m_userName].accountName().toUtf8().constData());
 		return;
 	}
 

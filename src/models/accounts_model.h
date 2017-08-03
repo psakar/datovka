@@ -32,7 +32,6 @@
 #include <QString>
 #include <QVariant>
 
-
 #include "src/settings/accounts.h"
 
 /* Login method descriptors. */
@@ -49,14 +48,6 @@ class AccountModel: public QAbstractItemModel {
     Q_OBJECT
 
 public:
-	/*!
-	 * @brief Holds account data related to account.
-	 *
-	 * @note Key is userName. The user name is held by the user name list.
-	 */
-	static
-	AccountsMap globAccounts;
-
 	/*
 	 * nodeRoot (Invisible.)
 	 * |
