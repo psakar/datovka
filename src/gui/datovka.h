@@ -82,14 +82,9 @@ public:
 	/*!
 	 * @brief Get message db set related to given account.
 	 *
-	 * @note If pointer to main window is not specified, then all dialogues
-	 *     will be suppressed.
-	 *
 	 * @param userName Account login.
-	 * @param mw       Pointer to main window.
 	 */
-	static
-	MessageDbSet *accountDbSet(const QString &userName, MainWindow *mw);
+	MessageDbSet *accountDbSet(const QString &userName);
 
 protected:
 	/*!

@@ -27,13 +27,13 @@
 
 #include "src/cli/cli.h"
 #include "src/cli/cli_login.h"
-#include "src/gui/datovka.h" /* TODO -- Remove. */
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/io/isds_helper.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
+#include "src/model_interaction/account_interaction.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
@@ -1577,7 +1577,13 @@ int runService(const QString &lParam,
 	const QString username = loginMap["username"].toString();
 
 	/* get message database set */
-	MessageDbSet *msgDbSet = MainWindow::accountDbSet(username, 0);
+	MessageDbSet *msgDbSet = Q_NULLPTR;
+	{
+		enum AccountInteraction::AccessStatus status;
+		QString dbDir, namesStr;
+		msgDbSet = AccountInteraction::accessDbSet(username, status,
+		    dbDir, namesStr);
+	}
 	if (msgDbSet == NULL) {
 		errmsg = "Database doesn't exists for user " + username;
 		qDebug() << CLI_PREFIX << errmsg;

@@ -283,6 +283,7 @@ SOURCES += \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
+    src/model_interaction/account_interaction.cpp \
     src/model_interaction/attachment_interaction.cpp \
     src/models/accounts_model.cpp \
     src/models/combo_box_model.cpp \
@@ -400,6 +401,7 @@ HEADERS += \
     src/log/log_c.h \
     src/log/log_common.h \
     src/log/log.h \
+    src/model_interaction/account_interaction.h \
     src/model_interaction/attachment_interaction.h \
     src/models/accounts_model.h \
     src/models/combo_box_model.h \
