@@ -22,6 +22,7 @@
  */
 
 #include <cinttypes>
+#include <QAbstractButton>
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>

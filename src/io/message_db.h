@@ -24,7 +24,6 @@
 #ifndef _MESSAGE_DB_H_
 #define _MESSAGE_DB_H_
 
-#include <QAbstractButton>
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
@@ -36,6 +35,8 @@
 
 #include "src/common.h"
 #include "src/io/sqlite/db.h"
+
+class QAbstractButton; /* Forward declaration. */
 
 #define INVALID_YEAR "inv"
 #define DB2 "db2"
