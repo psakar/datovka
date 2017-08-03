@@ -226,6 +226,7 @@ win32 {
 }
 
 SOURCES += \
+    src/about.cpp \
     src/cli/cli.cpp \
     src/cli/cli_login.cpp \
     src/cli/cli_parser.cpp \
@@ -341,6 +342,7 @@ SOURCES += \
     src/worker/task_verify_message.cpp
 
 HEADERS += \
+    src/about.h \
     src/cli/cli.h \
     src/cli/cli_login.h \
     src/cli/cli_parser.h \

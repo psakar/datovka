@@ -21,39 +21,30 @@
  * the two.
  */
 
-#ifndef _DLG_ABOUT_H_
-#define _DLG_ABOUT_H_
+#if defined(__APPLE__) || defined(__clang__)
+#  define __USE_C99_MATH
+#  define _Bool bool
+#else /* !__APPLE__ */
+#  include <cstdbool>
+#endif /* __APPLE__ */
 
-#include <QDialog>
-#include <QStringList>
+#include <cstdlib>
+#include <isds.h>
+#include <openssl/crypto.h> /* SSLeay_version(3) */
 
-#include "src/common.h"
-#include "ui_dlg_about.h"
+#include "src/about.h"
 
-/*!
- * @brief About dialogue.
- */
-class DlgAbout : public QDialog, public Ui::AboutDialog {
-	Q_OBJECT
+QStringList libraryDependencies(void)
+{
+	QStringList libs;
 
-public:
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] parent Parent object.
-	 */
-	explicit DlgAbout(QWidget *parent = Q_NULLPTR);
+	libs.append(QStringLiteral("Qt ") + qVersion());
 
-private slots:
-	/*!
-	 * @brief Loads the license file into the text field.
-	 */
-	void showLicence(void);
+	char *isdsVer = isds_version();
+	libs.append(QStringLiteral("libisds ") + isdsVer);
+	free(isdsVer); isdsVer = NULL;
 
-	/*!
-	 * @brief Displays credits information in the text field.
-	 */
-	void showCredits(void);
-};
+	libs.append(SSLeay_version(SSLEAY_VERSION));
 
-#endif /* _DLG_ABOUT_H_ */
+	return libs;
+}

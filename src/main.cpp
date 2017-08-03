@@ -27,6 +27,7 @@
 #include <QDir>
 #include <QtWidgets>
 
+#include "src/about.h"
 #include "src/cli/cli_parser.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_threads.h"
@@ -159,7 +160,7 @@ int main(int argc, char *argv[])
 	/* TODO -- Make the following assignments configurable. */
 	QCoreApplication::setApplicationName("Datovka");
 	QCoreApplication::setApplicationVersion(VERSION " -- [" +
-	    DlgAbout::libraryDependencies().join("; ") + "]");
+	    libraryDependencies().join("; ") + "]");
 
 	qInstallMessageHandler(globalLogOutput);
 
