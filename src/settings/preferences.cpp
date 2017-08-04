@@ -91,6 +91,24 @@ GlobPreferences::~GlobPreferences(void)
 {
 }
 
+bool GlobPreferences::ensureConfPresence(void)
+{
+	if (!QDir(globPref.confDir()).exists()) {
+		if (!QDir(globPref.confDir()).mkpath(".")) {
+			return false;
+		}
+	}
+	if (!QFile(globPref.loadConfPath()).exists()) {
+		QFile file(globPref.loadConfPath());
+		if (!file.open(QIODevice::ReadWrite)) {
+			return false;
+		}
+		file.close();
+	}
+
+	return true;
+}
+
 void GlobPreferences::loadFromSettings(const QSettings &settings)
 {
 	int value;

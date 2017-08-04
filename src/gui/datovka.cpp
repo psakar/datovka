@@ -3659,30 +3659,6 @@ void MainWindow::setAccountStoragePaths(const QString &userName)
 
 /* ========================================================================= */
 /*
- * Create configuration file if not present.
- */
-bool MainWindow::ensureConfPresence(void)
-/* ========================================================================= */
-{
-	if (!QDir(globPref.confDir()).exists()) {
-		if (!QDir(globPref.confDir()).mkpath(".")) {
-			return false;
-		}
-	}
-	if (!QFile(globPref.loadConfPath()).exists()) {
-		QFile file(globPref.loadConfPath());
-		if (!file.open(QIODevice::ReadWrite)) {
-			return false;
-		}
-		file.close();
-	}
-
-	return true;
-}
-
-
-/* ========================================================================= */
-/*
  * Sets geometry from settings.
  */
 void MainWindow::loadWindowGeometry(const QSettings &settings)

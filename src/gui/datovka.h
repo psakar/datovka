@@ -66,12 +66,6 @@ public:
 	~MainWindow(void);
 
 	/*!
-	 * @brief Create configuration file if not present.
-	 */
-	static
-	bool ensureConfPresence(void);
-
-	/*!
 	 * @brief Connects to ISDS and downloads basic information about the
 	 *     user.
 	 *
