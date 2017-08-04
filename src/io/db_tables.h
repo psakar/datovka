@@ -26,6 +26,11 @@
 
 #include "src/io/sqlite/table.h"
 
+/*!
+ * @brief Localised table descriptions.
+ */
+void localiseTableDescriptions(void);
+
 /*
  * Account database.
  */

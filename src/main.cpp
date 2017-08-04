@@ -207,19 +207,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Localise description in tables. */
-	accntinfTbl.reloadLocalisedDescription();
-	userinfTbl.reloadLocalisedDescription();
-	pwdexpdtTbl.reloadLocalisedDescription();
-	msgsTbl.reloadLocalisedDescription();
-	flsTbl.reloadLocalisedDescription();
-	hshsTbl.reloadLocalisedDescription();
-	evntsTbl.reloadLocalisedDescription();
-	prcstTbl.reloadLocalisedDescription();
-	rwmsgdtTbl.reloadLocalisedDescription();
-	rwdlvrinfdtTbl.reloadLocalisedDescription();
-	smsgdtTbl.reloadLocalisedDescription();
-	crtdtTbl.reloadLocalisedDescription();
-	msgcrtdtTbl.reloadLocalisedDescription();
+	localiseTableDescriptions();
 
 	/*
 	 * These objects cannot be globally accessible static objects.
