@@ -41,7 +41,6 @@
 #include "src/io/tag_db.h"
 #include "src/io/records_management_db.h"
 #include "src/io/sqlite/db.h"
-#include "src/localisation/localisation.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/settings/proxy.h"
@@ -77,74 +76,7 @@ int showZfo(const QString &fileName)
 	return 0;
 }
 
-/* ========================================================================= */
-static
-void loadLocalisation(QApplication &app)
-/* ========================================================================= */
-{
-	static QTranslator qtTranslator, appTranslator;
-
-	QSettings settings(globPref.loadConfPath(),
-	    QSettings::IniFormat);
-	settings.setIniCodec("UTF-8");
-
-	QString language =
-	    settings.value("preferences/language").toString();
-
-	/* Check for application localisation location. */
-	QString localisationDir;
-	QString localisationFile;
-
-	localisationDir = appLocalisationDir();
-
-	logInfo("Loading application localisation from path '%s'.\n",
-	    localisationDir.toUtf8().constData());
-
-	localisationFile = "datovka_" + Localisation::shortLangName(language);
-
-	Localisation::setProgramLocale(language);
-
-	if (!appTranslator.load(localisationFile, localisationDir)) {
-		logWarning("Could not load localisation file '%s' "
-		    "from directory '%s'.\n",
-		    localisationFile.toUtf8().constData(),
-		    localisationDir.toUtf8().constData());
-	}
-
-	app.installTranslator(&appTranslator);
-
-
-	localisationDir = qtLocalisationDir();
-
-	logInfo("Loading Qt localisation from path '%s'.\n",
-	    localisationDir.toUtf8().constData());
-
-	{
-		const QString langName(Localisation::shortLangName(language));
-		if (langName != Localisation::langEn) {
-			localisationFile =
-			    "qtbase_" + Localisation::shortLangName(language);
-		} else {
-			localisationFile = QString();
-		}
-	}
-
-	if (!localisationFile.isEmpty() &&
-	    !qtTranslator.load(localisationFile, localisationDir)) {
-		logWarning("Could not load localisation file '%s' "
-		    "from directory '%s'.\n",
-		    localisationFile.toUtf8().constData(),
-		    localisationDir.toUtf8().constData());
-	}
-
-	app.installTranslator(&qtTranslator);
-}
-
-/* ========================================================================= */
-/* ========================================================================= */
 int main(int argc, char *argv[])
-/* ========================================================================= */
-/* ========================================================================= */
 {
 	/* Set random generator. */
 	qsrand(QDateTime::currentDateTime().toTime_t());
@@ -264,7 +196,7 @@ int main(int argc, char *argv[])
 	logDebugLv0NL("App path: '%s'.",
 	    app.applicationDirPath().toUtf8().constData());
 
-	loadLocalisation(app);
+	loadLocalisation(globPref);
 
 	/* set splash action text */
 	if (runMode == RM_GUI) {

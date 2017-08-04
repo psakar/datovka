@@ -50,4 +50,11 @@ int preferencesSetUp(const QCommandLineParser &parser,
  */
 void downloadCRL(void);
 
+/*!
+ * @brief Loads application localisation.
+ *
+ * @param[in] prefs Preferences structure.
+ */
+void loadLocalisation(const GlobPreferences &prefs);
+
 #endif /* _INITIALISATION_H_ */

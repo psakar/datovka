@@ -24,13 +24,17 @@
 #ifndef WIN32
 #include <clocale>
 #endif /* !WIN32 */
+#include <QCoreApplication>
 #include <QProcessEnvironment>
+#include <QTranslator>
 
 #include "src/cli/cli_parser.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/initialisation.h"
 #include "src/io/file_downloader.h"
+#include "src/io/filesystem.h"
+#include "src/localisation/localisation.h"
 
 void setDefaultLocale(void)
 {
@@ -143,4 +147,62 @@ void downloadCRL(void)
 
 		++crl;
 	}
+}
+
+void loadLocalisation(const GlobPreferences &prefs)
+{
+	static QTranslator qtTranslator, appTranslator;
+
+	QSettings settings(prefs.loadConfPath(), QSettings::IniFormat);
+	settings.setIniCodec("UTF-8");
+
+	const QString language(
+	    settings.value("preferences/language").toString());
+
+	/* Check for application localisation location. */
+	QString localisationDir;
+	QString localisationFile;
+
+	localisationDir = appLocalisationDir();
+
+	logInfo("Loading application localisation from path '%s'.\n",
+	    localisationDir.toUtf8().constData());
+
+	localisationFile = "datovka_" + Localisation::shortLangName(language);
+
+	Localisation::setProgramLocale(language);
+
+	if (!appTranslator.load(localisationFile, localisationDir)) {
+		logWarning("Could not load localisation file '%s' "
+		    "from directory '%s'.\n",
+		    localisationFile.toUtf8().constData(),
+		    localisationDir.toUtf8().constData());
+	}
+
+	QCoreApplication::installTranslator(&appTranslator);
+
+	localisationDir = qtLocalisationDir();
+
+	logInfo("Loading Qt localisation from path '%s'.\n",
+	    localisationDir.toUtf8().constData());
+
+	{
+		const QString langName(Localisation::shortLangName(language));
+		if (langName != Localisation::langEn) {
+			localisationFile =
+			    "qtbase_" + Localisation::shortLangName(language);
+		} else {
+			localisationFile = QString();
+		}
+	}
+
+	if (!localisationFile.isEmpty() &&
+	    !qtTranslator.load(localisationFile, localisationDir)) {
+		logWarning("Could not load localisation file '%s' "
+		    "from directory '%s'.\n",
+		    localisationFile.toUtf8().constData(),
+		    localisationDir.toUtf8().constData());
+	}
+
+	QCoreApplication::installTranslator(&qtTranslator);
 }
