@@ -27,7 +27,10 @@
 #include <QProcessEnvironment>
 
 #include "src/cli/cli_parser.h"
+#include "src/crypto/crypto.h"
+#include "src/crypto/crypto_funcs.h"
 #include "src/initialisation.h"
+#include "src/io/file_downloader.h"
 
 void setDefaultLocale(void)
 {
@@ -104,4 +107,40 @@ int preferencesSetUp(const QCommandLineParser &parser,
 	}
 
 	return 0;
+}
+
+void downloadCRL(void)
+{
+	/* Start downloading the CRL files. */
+	QList<QUrl> urlList;
+	FileDownloader fDown(true);
+	const struct crl_location *crl = crl_locations;
+	const char **url;
+	while ((NULL != crl) && (NULL != crl->file_name)) {
+		urlList.clear();
+
+		url = crl->urls;
+		while ((NULL != url) && (NULL != *url)) {
+			urlList.append(QUrl(*url));
+			++url;
+		}
+
+		QByteArray data = fDown.download(urlList, 2000);
+		if (!data.isEmpty()) {
+			if (0 != crypto_add_crl(data.data(),
+			        data.size())) {
+				logWarning(
+				    "Couldn't load downloaded CRL file '%s'.\n",
+				    crl->file_name);
+			} else {
+				logInfo("Loaded CRL file '%s'.\n",
+				    crl->file_name);
+			}
+		} else {
+			logWarning("Couldn't download CRL file '%s'.\n",
+			    crl->file_name);
+		}
+
+		++crl;
+	}
 }

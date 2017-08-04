@@ -45,4 +45,9 @@ void setDefaultLocale(void);
 int preferencesSetUp(const QCommandLineParser &parser,
     GlobPreferences &prefs, LogDevice &log);
 
+/*!
+ * @brief Downloads CRL files and installs them into OpenSSL context.
+ */
+void downloadCRL(void);
+
 #endif /* _INITIALISATION_H_ */

@@ -29,15 +29,13 @@
 
 #include "src/about.h"
 #include "src/cli/cli_parser.h"
-#include "src/crypto/crypto.h"
-#include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/crypto/crypto_threads.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/initialisation.h"
 #include "src/io/db_tables.h"
-#include "src/io/file_downloader.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
@@ -251,41 +249,8 @@ int main(int argc, char *argv[])
 		globProxSet.setProxyEnvVars();
 	}
 
-	{
-		/* Start downloading the CRL files. */
-		QList<QUrl> urlList;
-		FileDownloader fDown(true);
-		const struct crl_location *crl = crl_locations;
-		const char **url;
-		while ((NULL != crl) && (NULL != crl->file_name)) {
-			urlList.clear();
-
-			url = crl->urls;
-			while ((NULL != url) && (NULL != *url)) {
-				urlList.append(QUrl(*url));
-				++url;
-			}
-
-			QByteArray data = fDown.download(urlList, 2000);
-			if (!data.isEmpty()) {
-				if (0 != crypto_add_crl(data.data(),
-				        data.size())) {
-					logWarning("Couldn't load downloaded "
-					    "CRL file '%s'.\n",
-					    crl->file_name);
-				} else {
-					logInfo("Loaded CRL file '%s'.\n",
-					    crl->file_name);
-				}
-			} else {
-				logWarning(
-				    "Couldn't download CRL file '%s'.\n",
-				    crl->file_name);
-			}
-
-			++crl;
-		}
-	}
+	/* Start downloading the CRL files. */
+	downloadCRL();
 
 	if (!SQLiteDb::dbDriverSupport()) {
 		logError("Cannot load database driver '%s'.\n",
