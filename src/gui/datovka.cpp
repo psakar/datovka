@@ -1208,7 +1208,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	}
 
 	/* Generate and show message information. */
-	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId.dmId, 0));
+	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId.dmId));
 	ui->messageInfo->setReadOnly(true);
 
 	if (received) {
@@ -2337,7 +2337,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	}
 
 	/* Generate and show message information. */
-	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId, 0));
+	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId));
 	ui->messageInfo->setReadOnly(true);
 
 	m_attachmentModel.removeRows(0, m_attachmentModel.rowCount());

@@ -22,7 +22,6 @@
  */
 
 #include <cinttypes>
-#include <QAbstractButton>
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
@@ -938,14 +937,8 @@ fail:
 	return contactList;
 }
 
-
-/* ========================================================================= */
-/*
- * Return HTML formatted message description.
- */
-QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
-    bool showId, bool verSignature, bool warnOld) const
-/* ========================================================================= */
+QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
+    bool warnOld) const
 {
 	QString html;
 	QSqlQuery query(m_db);
@@ -1208,11 +1201,6 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		/* TODO */
 	}
 
-	/* Disable verify signature button. It is re-enabled when needed. */
-	if (0 != verSigButton) {
-		verSigButton->setEnabled(false);
-	}
-
 	if (verSignature) {
 
 		html += "<h3>" + QObject::tr("Signature") + "</h3>";
@@ -1222,10 +1210,6 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 			html += strongAccountInfoLine(
 			    QObject::tr("Message signature"),
 			    QObject::tr("Not present"));
-			/* Enable verification button. */
-			if (0 != verSigButton) {
-				verSigButton->setEnabled(true);
-			}
 			html += "<div>" +
 			    QObject::tr("Download the complete message in order to verify its signature.") +
 			    "</div>";

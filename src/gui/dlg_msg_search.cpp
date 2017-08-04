@@ -523,7 +523,7 @@ void DlgMsgSearch::appendMsgsToTable(
 			Q_ASSERT(0 != messageDb);
 
 			item->setToolTip(messageDb->descriptionHtml(
-			    msgData.mId.dmId, 0, true, false, true));
+			    msgData.mId.dmId, true, false, true));
 		}
 		this->resultsTableWidget->setItem(row, COL_MESSAGE_ID, item);
 		this->resultsTableWidget->setItem(row, COL_DELIVERY_YEAR,

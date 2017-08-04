@@ -36,8 +36,6 @@
 #include "src/common.h"
 #include "src/io/sqlite/db.h"
 
-class QAbstractButton; /* Forward declaration. */
-
 #define INVALID_YEAR "inv"
 #define DB2 "db2"
 
@@ -399,18 +397,15 @@ public:
 	/*!
 	 * @brief Return HTML formatted message description.
 	 *
-	 * @param[in]     dmId          Message identifier.
-	 * @param[in,out] verSigButton  Button to activate/deactivate
-	 *                              according to message content.
-	 * @param[in]     showId        Whether to also show the message id.
-	 * @param[in]     verSignature  Whether to show verification details.
+	 * @param[in]     dmId Message identifier.
+	 * @param[in]     showId Whether to also show the message id.
+	 * @param[in]     verSignature Whether to show verification details.
 	 * @param[in]     warnOld
 	 * @return HTML formatted string containing message information.
 	 *     Empty string is returned on error.
 	 */
-	QString descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
-	    bool showId = true, bool verSignature = true,
-	    bool warnOld = true) const;
+	QString descriptionHtml(qint64 dmId, bool showId = true,
+	    bool verSignature = true, bool warnOld = true) const;
 
 	/*!
 	 * @brief Return message envelope HTML to be used to generate a PDF.

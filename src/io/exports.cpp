@@ -304,7 +304,7 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 
 	// save file to disk
 	if (printPDF(fileName,
-	    messageDb->descriptionHtml(msgId.dmId, 0) +
+	    messageDb->descriptionHtml(msgId.dmId) +
 	    messageDb->fileListHtmlToPdf(msgId.dmId)) && attachWriteSuccess) {
 		errStr = QObject::tr("Export of message envelope \"%1\" to "
 		    "PDF and attachments were successful.").arg(msgID);
