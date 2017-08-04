@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,23 +21,20 @@
  * the two.
  */
 
-
 #include <cstdlib> /* malloc(3) */
 #include <cstring> /* memset(3) */
 #include <QDebug>
 #include <QFile>
 #include <QObject>
 
-#include "isds_sessions.h"
 #include "src/common.h"
-#include "src/gui/dlg_import_zfo.h"
+#include "src/io/imports.h"
+#include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
 
-
 IsdsSessions globIsdsSessions;
-
 
 /* ========================================================================= */
 /*!
@@ -954,7 +951,7 @@ struct isds_message *loadZfoData(struct isds_ctx *isdsSession,
 		goto fail;
 	}
 
-	if (zfoType == ImportZFODialog::IMPORT_MESSAGE_ZFO) {
+	if (zfoType == Imports::IMPORT_MESSAGE) {
 		status = isds_load_message(isdsSession, raw_type,
 		    rawMsgData.data(), rawMsgData.size(), &message,
 		    BUFFER_COPY);

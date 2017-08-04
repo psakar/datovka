@@ -176,11 +176,11 @@ void DlgViewZfo::parseZfoData(const QByteArray &zfoData)
 		goto fail;
 	}
 
-	m_zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
+	m_zfoType = Imports::IMPORT_MESSAGE;
 	Q_ASSERT(NULL == m_message);
 	m_message = loadZfoData(dummy_session, zfoData, m_zfoType);
 	if (NULL == m_message) {
-		m_zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
+		m_zfoType = Imports::IMPORT_DELIVERY;
 		m_message = loadZfoData(dummy_session, zfoData, m_zfoType);
 		if (NULL == m_message) {
 			logError("%s\n", "Cannot parse message data.");
@@ -203,11 +203,11 @@ void DlgViewZfo::parseZfoFile(const QString &zfoFileName)
 		goto fail;
 	}
 
-	m_zfoType = ImportZFODialog::IMPORT_MESSAGE_ZFO;
+	m_zfoType = Imports::IMPORT_MESSAGE;
 	Q_ASSERT(NULL == m_message);
 	m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
 	if (NULL == m_message) {
-		m_zfoType = ImportZFODialog::IMPORT_DELIVERY_ZFO;
+		m_zfoType = Imports::IMPORT_DELIVERY;
 		m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
 		if (NULL == m_message) {
 			logError("Cannot parse file '%s'.\n",
@@ -226,7 +226,7 @@ void DlgViewZfo::setUpDialogue(void)
 {
 	/* TODO -- Adjust splitter sizes. */
 
-	if (ImportZFODialog::IMPORT_DELIVERY_ZFO == m_zfoType) {
+	if (Imports::IMPORT_DELIVERY == m_zfoType) {
 		this->attachmentTable->hide();
 		envelopeTextEdit->setHtml(
 		    deliveryDescriptionHtml(

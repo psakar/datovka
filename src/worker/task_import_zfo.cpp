@@ -115,12 +115,12 @@ enum TaskImportZfo::ZfoType TaskImportZfo::determineFileType(
 	}
 
 	struct isds_message *message = loadZfoFile(dummySession, fileName,
-	    ImportZFODialog::IMPORT_MESSAGE_ZFO);
+	    Imports::IMPORT_MESSAGE);
 	if (NULL != message) {
 		zfoType = ZT_MESSAGE;
 	} else {
 		message = loadZfoFile(dummySession, fileName,
-		    ImportZFODialog::IMPORT_DELIVERY_ZFO);
+		    Imports::IMPORT_DELIVERY);
 		if(NULL != message) {
 			zfoType = ZT_DELIVERY_INFO;
 		} else {
@@ -144,11 +144,11 @@ enum TaskImportZfo::ZfoType TaskImportZfo::determineFileType(
  */
 static
 enum TaskImportZfo::Result loadZfo(const QString &fileName,
-    enum ImportZFODialog::ZFOtype zfoType, struct isds_message **msgPtr)
+    enum Imports::Type zfoType, struct isds_message **msgPtr)
 {
 	Q_ASSERT((NULL != msgPtr) && (NULL == *msgPtr));
-	Q_ASSERT((ImportZFODialog::IMPORT_MESSAGE_ZFO == zfoType) ||
-	    (ImportZFODialog::IMPORT_DELIVERY_ZFO == zfoType));
+	Q_ASSERT((Imports::IMPORT_MESSAGE == zfoType) ||
+	    (Imports::IMPORT_DELIVERY == zfoType));
 
 	struct isds_message *message = NULL;
 
@@ -278,7 +278,7 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 
 	{
 		enum TaskImportZfo::Result res = loadZfo(fileName,
-		    ImportZFODialog::IMPORT_MESSAGE_ZFO, &message);
+		    Imports::IMPORT_MESSAGE, &message);
 		if (IMP_SUCCESS != res) {
 			Q_ASSERT(NULL == message);
 			resultDesc = QObject::tr("Wrong ZFO format. This file "
@@ -434,7 +434,7 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfo(
 
 	{
 		enum TaskImportZfo::Result res = loadZfo(fileName,
-		    ImportZFODialog::IMPORT_DELIVERY_ZFO, &message);
+		    Imports::IMPORT_DELIVERY, &message);
 		if (IMP_SUCCESS != res) {
 			Q_ASSERT(NULL == message);
 			resultDesc = QObject::tr("Wrong ZFO format. This file "

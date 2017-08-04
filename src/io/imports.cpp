@@ -43,9 +43,8 @@ void Imports::importDbMsgsIntoDatabase(MessageDbSet &dbSet,
 }
 
 void Imports::importZfoIntoDatabase(const QStringList &fileList,
-    const QList<Task::AccountDescr> &databaseList,
-    enum ImportZFODialog::ZFOtype zfoType, bool authenticate,
-    QSet<QString> &zfoFilesToImport,
+    const QList<Task::AccountDescr> &databaseList, enum Type zfoType,
+    bool authenticate, QSet<QString> &zfoFilesToImport,
     QList< QPair<QString, QString> > &zfoFilesInvalid,
     int &numFilesToImport, QString &errTxt)
 {
@@ -60,20 +59,18 @@ void Imports::importZfoIntoDatabase(const QStringList &fileList,
 		switch (TaskImportZfo::determineFileType(file)) {
 		case TaskImportZfo::ZT_UKNOWN:
 			impZFOInfo.first = file;
-			impZFOInfo.second = QObject::tr("Wrong ZFO format. This "
-			    "file does not contain correct data for import.");
+			impZFOInfo.second = QObject::tr("Wrong ZFO format. "
+			    "This file does not contain correct data for import.");
 			zfoFilesInvalid.append(impZFOInfo);
 			break;
 		case TaskImportZfo::ZT_MESSAGE:
-			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
-			    (ImportZFODialog::IMPORT_MESSAGE_ZFO == zfoType)) {
+			if ((IMPORT_ANY == zfoType) || (IMPORT_MESSAGE == zfoType)) {
 				messageZfoFiles.insert(file);
 				zfoFilesToImport.insert(file);
 			}
 			break;
 		case TaskImportZfo::ZT_DELIVERY_INFO:
-			if ((ImportZFODialog::IMPORT_ALL_ZFO == zfoType) ||
-			    (ImportZFODialog::IMPORT_DELIVERY_ZFO == zfoType)) {
+			if ((IMPORT_ANY == zfoType) || (IMPORT_DELIVERY == zfoType)) {
 				deliveryZfoFiles.insert(file);
 				zfoFilesToImport.insert(file);
 			}
@@ -84,8 +81,8 @@ void Imports::importZfoIntoDatabase(const QStringList &fileList,
 	}
 
 	if (messageZfoFiles.isEmpty() && deliveryZfoFiles.isEmpty()) {
-		errTxt = QObject::tr("The selection does not contain any "
-		    "valid ZFO file.");
+		errTxt = QObject::tr(
+		    "The selection does not contain any valid ZFO file.");
 		return;
 	}
 

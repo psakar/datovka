@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
  * individual source file, and distribute linked combinations including
  * the two.
  */
-
 
 #ifndef _ISDS_SESSIONS_H_
 #define _ISDS_SESSIONS_H_
@@ -43,7 +42,6 @@
 /* Global ISDS context container instance. */
 class IsdsSessions;
 extern IsdsSessions globIsdsSessions;
-
 
 /*!
  * @brief Holds the ISDS context structures.
@@ -90,20 +88,17 @@ private:
 	QMap<QString, struct isds_ctx *> m_sessions;
 };
 
-
 /*!
  * @brief Log in using user name and password.
  */
 isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, bool testingSession);
 
-
 /*!
  * @brief Log in using system certificate.
  */
 isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
     const QString &certPath, const QString &passphrase, bool testingSession);
-
 
 /*!
  * @brief Log in using user certificate without password.
@@ -113,14 +108,12 @@ isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
     const QString &idBox, const QString &certPath, const QString &passphrase,
     bool testingSession);
 
-
 /*!
  * @brief Log in using user certificate with password.
  */
 isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
     const QString &userName, const QString &pwd, const QString &certPath,
     const QString &passphrase, bool testingSession);
-
 
 /*!
  * @brief Log in using username, pwd and OTP.
@@ -160,7 +153,6 @@ struct isds_Address * isds_Address_create(const QString &adCity,
 struct isds_BirthInfo * isds_BirthInfo_createConsume(struct tm *biDate,
     const QString &biCity, const QString &biCountry, const QString &biState);
 
-
 /*!
  * @brief Create new isds_DbOwnerInfo structure according to the supplied
  *     values.
@@ -177,7 +169,6 @@ struct isds_DbOwnerInfo * isds_DbOwnerInfo_createConsume(const QString &dbID,
     const QString &nationality, const QString &email, const QString telNumber,
     const QString &identifier, const QString &registryCode, long int dbState,
     bool dbEffectiveOVM, bool dbOpenAddressing);
-
 
 /*!
  * @brief Create DbUserInfo structure.
@@ -198,8 +189,7 @@ struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
  *
  * @param[in,out] isdsSession Pointer to session context.
  * @param[in]     rawMsgData  Raw message data.
- * @param[in]     zfoType     Message or delivery info
- *                            (enum ImportZFODialog::ZFOtype).
+ * @param[in]     zfoType     Message or delivery info (enum Imports::Type).
  * @return Pointer to newly allocated message, NULL on error. Use
  *     isds_message_free() to delete.
  */

@@ -24,7 +24,6 @@
 #ifndef _IMPORTS_H_
 #define _IMPORTS_H_
 
-#include "src/gui/dlg_import_zfo.h"
 #include "src/worker/task.h"
 
 /*!
@@ -33,6 +32,15 @@
 class Imports {
 
 public:
+	/*!
+	 * @brief ZFO type.
+	 */
+	enum Type {
+		IMPORT_ANY, /*!< All types. */
+		IMPORT_MESSAGE, /*!< Data message. */
+		IMPORT_DELIVERY /*!< Delivery info. */
+	};
+
 	/*!
 	 * @brief Import messages from external databases to local database.
 	 *
@@ -61,7 +69,7 @@ public:
 	static
 	void importZfoIntoDatabase(const QStringList &fileList,
 	    const QList<Task::AccountDescr> &databaseList,
-	    enum ImportZFODialog::ZFOtype zfoType, bool authenticate,
+	    enum Type zfoType, bool authenticate,
 	    QSet<QString> &zfoFilesToImport,
 	    QList< QPair<QString, QString> > &zfoFilesInvalid,
 	    int &numFilesToImport, QString &errTxt);

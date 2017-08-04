@@ -5809,8 +5809,7 @@ void MainWindow::showImportZFOActionDialog(void)
 {
 	debugSlotCall();
 
-	enum ImportZFODialog::ZFOtype zfoType =
-	    ImportZFODialog::IMPORT_MESSAGE_ZFO;
+	enum Imports::Type zfoType = Imports::IMPORT_MESSAGE;
 	enum ImportZFODialog::ZFOlocation locationType =
 	    ImportZFODialog::IMPORT_FROM_DIR;
 	bool checkZfoOnServer = false;
@@ -7567,7 +7566,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 		for (int i = 0; i < msgCnt; ++i) {
 
 			message = loadZfoFile(dummy_session, filePathList.at(i),
-			    ImportZFODialog::IMPORT_MESSAGE_ZFO);
+			    Imports::IMPORT_MESSAGE);
 			if (NULL == message || message->envelope == NULL) {
 				errorMsgFileNames.append(filePathList.at(i));
 				continue;

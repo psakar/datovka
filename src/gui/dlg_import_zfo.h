@@ -25,6 +25,8 @@
 #define _DLG_IMPORT_ZFO_H_
 
 #include <QDialog>
+
+#include "src/io/imports.h"
 #include "ui_dlg_import_zfo.h"
 
 /*!
@@ -43,15 +45,6 @@ public:
 	};
 
 	/*!
-	 * ZFO type.
-	 */
-	enum ZFOtype {
-		IMPORT_ALL_ZFO,
-		IMPORT_MESSAGE_ZFO,
-		IMPORT_DELIVERY_ZFO
-	};
-
-	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[out] zfoType  - Specifies ZFO type.
@@ -60,9 +53,9 @@ public:
 	 *                                will check on the ISDS server.
 	 * @param[in] parent - Parent object.
 	 */
-	ImportZFODialog(enum ImportZFODialog::ZFOtype &zfoType,
-	    enum ImportZFODialog::ZFOlocation &locationType,
-	    bool &checkZfoOnServer, QWidget *parent = Q_NULLPTR);
+	ImportZFODialog(enum Imports::Type &zfoType,
+	    enum ZFOlocation &locationType, bool &checkZfoOnServer,
+	    QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -76,8 +69,8 @@ private slots:
 	void setChosenValues(void);
 
 private:
-	enum ImportZFODialog::ZFOtype &m_zfoType; /*!< Specifies ZFO type. */
-	enum ImportZFODialog::ZFOlocation &m_locationType; /*!< Specifies how/where ZFOs will load. */
+	enum Imports::Type &m_zfoType; /*!< Specifies ZFO type. */
+	enum ZFOlocation &m_locationType; /*!< Specifies how/where ZFOs will load. */
 	bool &m_checkZfoOnServer; /*!< ZFO will check on the ISDS server. */
 };
 
