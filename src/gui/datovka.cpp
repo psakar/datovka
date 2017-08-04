@@ -5053,11 +5053,11 @@ void MainWindow::setReceivedColumnWidths(void)
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_received_1);
 	ui->messageList->setColumnWidth(2, m_received_2);
-	for (i = 3; i < (DbMsgsTblModel::rcvdItemIds().size() - 3); ++i) {
+	for (i = 3; i < (MessageDb::rcvdItemIds.size() - 3); ++i) {
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last three columns display icons. */
-	int max = DbMsgsTblModel::rcvdItemIds().size();
+	int max = MessageDb::rcvdItemIds.size();
 	if (globRecordsManagementSet.isSet()) {
 		/* Add one column if records management service is activated. */
 		++max;
@@ -5088,11 +5088,11 @@ void MainWindow::setSentColumnWidths(void)
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_sent_1);
 	ui->messageList->setColumnWidth(2, m_sent_2);
-	for (i = 3; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
+	for (i = 3; i < (MessageDb::sntItemIds.size() - 1); ++i) {
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last column displays an icon. */
-	int max = DbMsgsTblModel::rcvdItemIds().size();
+	int max = MessageDb::rcvdItemIds.size();
 	if (globRecordsManagementSet.isSet()) {
 		/* Add one column if records management service is activated. */
 		++max;

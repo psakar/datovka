@@ -28,7 +28,6 @@
 
 #include "src/io/message_db_set.h"
 #include "src/log/log.h"
-#include "src/models/messages_model.h"
 
 /*
  * If defined then no attaching of databases will be performed.
@@ -141,8 +140,8 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_attach_msgsRcvdEntriesWithi
 	}
 
 	queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
+	for (int i = 0; i < (MessageDb::rcvdItemIds.size() - 2); ++i) {
+		queryStr += MessageDb::rcvdItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
 	queryStr += "ifnull(p.state, 0) AS process_status";
@@ -159,8 +158,8 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_attach_msgsRcvdEntriesWithi
 	    "(m.dmDeliveryTime >= date('now','-90 day'))"
 	    " UNION "
 	    "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
+	for (int i = 0; i < (MessageDb::rcvdItemIds.size() - 2); ++i) {
+		queryStr += MessageDb::rcvdItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
 	queryStr += "ifnull(p.state, 0) AS process_status";
@@ -643,8 +642,8 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_attach_msgsSntEntriesWithin9
 	}
 
 	queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
+	for (int i = 0; i < (MessageDb::sntItemIds.size() - 1); ++i) {
+		queryStr += MessageDb::sntItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM messages AS m "
@@ -659,8 +658,8 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_attach_msgsSntEntriesWithin9
 	    " (m.dmDeliveryTime IS NULL))"
 	    " UNION "
 	    "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
+	for (int i = 0; i < (MessageDb::sntItemIds.size() - 1); ++i) {
+		queryStr += MessageDb::sntItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM " DB2 ".messages AS m "

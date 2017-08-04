@@ -970,12 +970,6 @@ protected: /* These function are used from within a database container. */
 	 */
 	QStringList getAllMsgsIDEqualWithYear(const QString &year) const;
 
-	static
-	const QVector<QString> receivedItemIds;
-	static
-	const QVector<QString> sentItemIds;
-
-
 	/*!
 	 * @brief Return list of message ids corresponding to given date
 	 *     interval.
@@ -1076,6 +1070,14 @@ protected: /* These function are used from within a database container. */
 	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
 
 public:
+	/*
+	 * TODO -- Use static methods returning reference to static constant
+	 * vector.
+	 */
+	static
+	const QVector<QString> rcvdItemIds;
+	static
+	const QVector<QString> sntItemIds;
 	static
 	const QVector<QString> fileItemIds;
 

@@ -151,22 +151,6 @@ public:
 	bool setType(enum Type type);
 
 	/*!
-	 * @brief Singleton method returning received column identifiers.
-	 *
-	 * @return List of received column identifiers.
-	 */
-	static
-	const QVector<QString> &rcvdItemIds(void);
-
-	/*!
-	 * @brief Singleton method returning sent column identifiers.
-	 *
-	 * @return List of sent column identifiers.
-	 */
-	static
-	const QVector<QString> &sntItemIds(void);
-
-	/*!
 	 * @brief Set header data for received model.
 	 *
 	 * @return False on error.
