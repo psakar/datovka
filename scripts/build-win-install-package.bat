@@ -34,39 +34,41 @@ del version.txt
 ::  Define package name, User can change it if needed 
 set DATOVKAZIP="datovka-%VERSION%-windows.zip"
 
-@echo --------------------------------------------------------------------
-@echo This batch creates Datovka installation packages for Windows in several steps:
+@echo -------------------------------------------------------------------------
+@echo This batch creates Datovka installation package for Windows in several steps:
 @echo 1) Build Datovka binary (datovka.exe) with QT tool (requires Qt)
-@echo 2) Create application packages to "packages" folder
+@echo 2) Create application bundle with dependencies to "packages" folder
 @echo 3) Create installation package (*.exe) to "packages" folder (requires NSIS tool)
-@echo 4) Create ZIP packages to "packages" folder (requires 7-ZIP tool)
-@echo ---------------------------------------------------------------------
+@echo 4) Create ZIP package to "packages" folder (requires 7-ZIP tool)
+@echo -------------------------------------------------------------------------
 @echo WARNING:
 @echo You must set path to Qt, Qt compiler executables to Windows Environment
 @echo Variables (section PATH) otherwise the script will not run correctly.
 @echo Add to Windows PATH following paths (replace 5.9.1 for your Qt version): 
 @echo   "C:\Qt\5.9.1\mingw53_32\bin\"
 @echo   "C:\Qt\Tools\mingw530_32\bin\"
-@echo ---------------------------------------------------------------------
+@echo -------------------------------------------------------------------------
 @echo Current path to NSIS:  %NSISPATH%
 @echo Current path to 7-ZIP: %ZIPPATH% 
-@echo NOTE: If paths are wrong, change these in the script.
-@echo ---------------------------------------------------------------------
+@echo NOTE: If paths to NSIS and 7-ZIP are wrong, you must set correct paths
+@echo       in the script before running.
+@echo -------------------------------------------------------------------------
 @echo Datovka version to build: %VERSION%
-@echo ---------------------------------------------------------------------
+@echo -------------------------------------------------------------------------
 @echo.
-pause
 
-if exist packages (
-  rmdir /S /Q packages
+if NOT "%1" == "nopause" (
+  pause
+  if exist packages (
+    rmdir /S /Q packages
+  )
 )
 
 :: Datovka installation version
-@echo. 
-@echo ========================================
-@echo Datovka application package (v%VERSION%)  
-@echo ========================================
-@echo Build Datovka binary ...
+@echo.
+@echo -------------------------------------
+@echo Build Datovka binary (v%VERSION%) ...
+@echo -------------------------------------
 mingw32-make.exe clean
 lupdate datovka.pro
 lrelease datovka.pro
@@ -75,8 +77,9 @@ mingw32-make.exe -j 2
 mingw32-make.exe clean
 @echo Build done.
 @echo.
-@echo -------------------------------------------------------------
-@echo Create application bundle and copy all files and libraries...
+@echo --------------------------------------------------------------
+@echo Create application bundle and copy all files and libraries ...
+@echo --------------------------------------------------------------
 :: Create app packege folder
 set DATOVKAPATH=packages\datovka-%VERSION%
 mkdir %DATOVKAPATH%
@@ -94,8 +97,9 @@ copy "%DATOVKAPATH%\translations\qt_cs.qm" "%DATOVKAPATH%\locale\qtbase_cs.qm"
 rmdir /S /Q "%DATOVKAPATH%\translations"
 @echo Bundle done.
 @echo.
-@echo -----------------------------------------------------
-@echo Create executable install package (*.exe)...
+@echo --------------------------------------------------
+@echo Create executable installation package (*.exe) ...
+@echo --------------------------------------------------
 :: Replace version string in the NSIS script  
 set SEARCHTEXT="VERSIONXXX"
 set file="nsis\datovka-install\datovka-install.nsi"
@@ -118,12 +122,15 @@ start /wait /Min "Build Datovka installer" %NSISPATH% %file%
 del %file%
 @echo Install package done.
 @echo.
-@echo -----------------------------------------------------
+@echo -----------------------------------------------
 @echo Run 7-ZIP and create ZIP archive of Datovka ...
+@echo -----------------------------------------------
 cd packages
 start /wait /Min "Create Datovka ZIP archive" %ZIPPATH% a -tzip %DATOVKAZIP% datovka-%VERSION%
 cd ..
 @echo ZIP archive done.
 rmdir /S /Q release
 rmdir /S /Q debug
-cd scripts
+if NOT "%1" == "nopause" (
+  cd packages
+)

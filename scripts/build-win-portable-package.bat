@@ -32,38 +32,39 @@ del version.txt
 ::  Define package name, User can change it if needed 
 set DATOVKAPZIP="datovka-portable-%VERSION%-windows.zip"
 
-@echo --------------------------------------------------------------------
-@echo This batch creates Datovka packages for Windows in several steps:
-@echo 1) Build Datovka binary (datovka.exe) with QT tool (requires Qt)
-@echo 2) Create application packages to "packages" folder
-@echo 3) Create installation package (*.exe) to "packages" folder (requires NSIS tool)
-@echo 4) Create ZIP packages to "packages" folder (requires 7-ZIP tool)
-@echo ---------------------------------------------------------------------
+@echo -------------------------------------------------------------------------
+@echo This batch creates portable Datovka package for Windows in several steps:
+@echo 1) Build Portable Datovka binary (datovka.exe) with QT tool (requires Qt)
+@echo 2) Create application bundle with dependencies to "packages" folder
+@echo 3) Create ZIP package to "packages" folder (requires 7-ZIP tool)
+@echo -------------------------------------------------------------------------
 @echo WARNING:
 @echo You must set path to Qt, Qt compiler executables to Windows Environment
 @echo Variables (section PATH) otherwise the script will not run correctly.
 @echo Add to Windows PATH following paths (replace 5.9.1 for your Qt version): 
 @echo   "C:\Qt\5.9.1\mingw53_32\bin\"
 @echo   "C:\Qt\Tools\mingw530_32\bin\"
-@echo ---------------------------------------------------------------------
-@echo Current path to NSIS:  %NSISPATH%
+@echo -------------------------------------------------------------------------
 @echo Current path to 7-ZIP: %ZIPPATH% 
-@echo NOTE: If paths are wrong, change these in the script.
-@echo ---------------------------------------------------------------------
-@echo Datovka version to build: %VERSION%
-@echo ---------------------------------------------------------------------
+@echo NOTE: If path to 7-ZIP is wrong, you must set correct path in the script
+@echo       before running.
+@echo -------------------------------------------------------------------------
+@echo Portable Datovka version to build: %VERSION%
+@echo -------------------------------------------------------------------------
 @echo.
-pause
 
-if exist packages (
-  rmdir /S /Q packages
+if NOT "%1" == "nopause" (
+  pause
+  if exist packages (
+    rmdir /S /Q packages
+  )
 )
 
 :: Datovka portable version
-@echo =====================================
-@echo Datovka portable package (v%VERSION%)  
-@echo =====================================
-@echo Build Datovka binary ... 
+@echo.
+@echo ----------------------------------------------
+@echo Build Portable Datovka binary (v%VERSION%) ...
+@echo ---------------------------------------------- 
 mingw32-make.exe clean
 lupdate datovka.pro
 lrelease datovka.pro
@@ -72,8 +73,9 @@ mingw32-make.exe -j 2
 mingw32-make.exe clean
 @echo Build done.
 @echo.
-@echo -------------------------------------------------------------
-@echo Create application bundle and copy all files and libraries...
+@echo --------------------------------------------------------------
+@echo Create application bundle and copy all files and libraries ...
+@echo --------------------------------------------------------------
 :: Create app packege folder
 set DATOVKAPORTPATH=packages\datovka-%VERSION%-portable
 mkdir %DATOVKAPORTPATH%
@@ -91,8 +93,9 @@ copy "%DATOVKAPORTPATH%\translations\qt_cs.qm" "%DATOVKAPORTPATH%\locale\qtbase_
 rmdir /S /Q "%DATOVKAPORTPATH%\translations"
 @echo Bundle done.
 @echo.
-@echo -----------------------------------------------------
-@echo Run 7-ZIP and create ZIP archive of portable Datovka ...
+@echo --------------------------------------------------------
+@echo Run 7-ZIP and create ZIP archive of Portable Datovka ...
+@echo --------------------------------------------------------
 cd packages
 start /wait /Min "Create portable Datovka ZIP archive" %ZIPPATH% a -tzip %DATOVKAPZIP% datovka-%VERSION%-portable
 cd ..
@@ -100,4 +103,6 @@ cd ..
 @echo.
 rmdir /S /Q release
 rmdir /S /Q debug
-cd scripts
+if NOT "%1" == "nopause" (
+  cd packages
+)
