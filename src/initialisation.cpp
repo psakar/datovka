@@ -32,8 +32,12 @@
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/initialisation.h"
+#include "src/io/account_db.h"
 #include "src/io/file_downloader.h"
 #include "src/io/filesystem.h"
+#include "src/io/message_db_set_container.h"
+#include "src/io/records_management_db.h"
+#include "src/io/tag_db.h"
 #include "src/localisation/localisation.h"
 
 void setDefaultLocale(void)
@@ -205,4 +209,87 @@ void loadLocalisation(const GlobPreferences &prefs)
 	}
 
 	QCoreApplication::installTranslator(&qtTranslator);
+}
+
+int allocateGlobalObjects(const GlobPreferences &prefs)
+{
+	/*
+	 * These objects cannot be globally accessible static objects.
+	 * The unpredictable order of constructing and destructing these
+	 * objects causes segmentation faults upon their destruction.
+	 *
+	 * TODO -- Solve the problem of this globally accessible structures.
+	 */
+
+	globAccountDbPtr = new (std::nothrow) AccountDb("accountDb");
+	if (Q_NULLPTR == globAccountDbPtr) {
+		logErrorNL("%s", "Cannot allocate account db.");
+		goto fail;
+	}
+	/* Open accounts database. */
+	if (!globAccountDbPtr->openDb(prefs.accountDbPath())) {
+		logErrorNL("Error opening account db '%s'.",
+		    prefs.accountDbPath().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Create message DB container. */
+	globMessageDbsPtr = new (std::nothrow) DbContainer("GLOBALDBS");
+	if (Q_NULLPTR == globMessageDbsPtr) {
+		logErrorNL("%s", "Cannot allocate message db container.");
+		goto fail;
+	}
+
+	globTagDbPtr = new (std::nothrow) TagDb("tagDb");
+	if (Q_NULLPTR == globTagDbPtr) {
+		logErrorNL("%s", "Cannot allocate tag db.");
+		goto fail;
+	}
+	/* Open tags database. */
+	if (!globTagDbPtr->openDb(prefs.tagDbPath())) {
+		logErrorNL("Error opening tag db '%s'.",
+		    prefs.tagDbPath().toUtf8().constData());
+		goto fail;
+	}
+
+	globRecordsManagementDbPtr =
+	    new (std::nothrow) RecordsManagementDb("recordsManagementDb");
+	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+		logErrorNL("%s", "Cannot allocate records management db.");
+		goto fail;
+	}
+	/* Open records management database. */
+	if (!globRecordsManagementDbPtr->openDb(prefs.recordsManagementDbPath())) {
+		logErrorNL("Error opening records management db '%s'.",
+		    prefs.recordsManagementDbPath().toUtf8().constData());
+		goto fail;
+	}
+
+	return 0;
+
+fail:
+	deallocateGlobalObjects();
+	return -1;
+}
+
+void deallocateGlobalObjects(void)
+{
+	if (Q_NULLPTR != globRecordsManagementDbPtr) {
+		delete globRecordsManagementDbPtr;
+		globRecordsManagementDbPtr = Q_NULLPTR;
+	}
+
+	if (Q_NULLPTR != globTagDbPtr) {
+		delete globTagDbPtr;
+		globTagDbPtr = Q_NULLPTR;
+	}
+
+	if (Q_NULLPTR != globMessageDbsPtr) {
+		delete globMessageDbsPtr;
+		globMessageDbsPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != globAccountDbPtr) {
+		delete globAccountDbPtr;
+		globAccountDbPtr = Q_NULLPTR;
+	}
 }

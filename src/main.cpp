@@ -37,9 +37,6 @@
 #include "src/initialisation.h"
 #include "src/io/db_tables.h"
 #include "src/io/filesystem.h"
-#include "src/io/message_db_set_container.h"
-#include "src/io/tag_db.h"
-#include "src/io/records_management_db.h"
 #include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
@@ -209,58 +206,8 @@ int main(int argc, char *argv[])
 	/* Localise description in tables. */
 	localiseTableDescriptions();
 
-	/*
-	 * These objects cannot be globally accessible static objects.
-	 * The unpredictable order of constructing and destructing these
-	 * objects causes segmentation faults upon their destruction.
-	 *
-	 * TODO -- Solve the problem of this globally accessible structures.
-	 */
-	{
-		globAccountDbPtr = new (std::nothrow) AccountDb("accountDb");
-		if (0 == globAccountDbPtr) {
-			logErrorNL("%s", "Cannot allocate account db.");
-			return EXIT_FAILURE;
-		}
-		/* Open accounts database. */
-		if (!globAccountDbPtr->openDb(globPref.accountDbPath())) {
-			logErrorNL("Error opening account db '%s'.",
-			    globPref.accountDbPath().toUtf8().constData());
-			return EXIT_FAILURE;
-		}
-
-		/* Create message DB container. */
-		globMessageDbsPtr = new (std::nothrow) DbContainer("GLOBALDBS");
-		if (0 == globMessageDbsPtr) {
-			logErrorNL("%s",
-			    "Cannot allocate message db container.");
-			return EXIT_FAILURE;
-		}
-
-		globTagDbPtr = new (std::nothrow) TagDb("tagDb");
-		if (0 == globTagDbPtr) {
-			logErrorNL("%s", "Cannot allocate tag db.");
-			return EXIT_FAILURE;
-		}
-		/* Open tags database. */
-		if (!globTagDbPtr->openDb(globPref.tagDbPath())) {
-			logErrorNL("Error opening tag db '%s'.",
-			    globPref.tagDbPath().toUtf8().constData());
-			return EXIT_FAILURE;
-		}
-
-		globRecordsManagementDbPtr =
-		    new (std::nothrow) RecordsManagementDb("recordsManagementDb");
-		if (Q_NULLPTR == globRecordsManagementDbPtr) {
-			logErrorNL("%s", "Cannot allocate records management db.");
-			return EXIT_FAILURE;
-		}
-		/* Open records management database. */
-		if (!globRecordsManagementDbPtr->openDb(globPref.recordsManagementDbPath())) {
-			logErrorNL("Error opening records management db '%s'.",
-			    globPref.recordsManagementDbPath().toUtf8().constData());
-			return EXIT_FAILURE;
-		}
+	if (0 != allocateGlobalObjects(globPref)) {
+		return EXIT_FAILURE;
 	}
 
 	int ret = EXIT_SUCCESS;
@@ -321,24 +268,7 @@ int main(int argc, char *argv[])
 	 */
 	//crypto_cleanup_threads();
 
-	if (Q_NULLPTR != globRecordsManagementDbPtr) {
-		delete globRecordsManagementDbPtr;
-		globRecordsManagementDbPtr = Q_NULLPTR;
-	}
-
-	if (0 != globTagDbPtr) {
-		delete globTagDbPtr;
-		globTagDbPtr = 0;
-	}
-
-	if (0 != globMessageDbsPtr) {
-		delete globMessageDbsPtr;
-		globMessageDbsPtr = 0;
-	}
-	if (0 != globAccountDbPtr) {
-		delete globAccountDbPtr;
-		globAccountDbPtr = 0;
-	}
+	deallocateGlobalObjects();
 
 	return ret;
 }
