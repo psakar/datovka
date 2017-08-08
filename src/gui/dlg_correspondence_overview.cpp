@@ -27,6 +27,7 @@
 #include <QPushButton>
 #include <QTextStream>
 
+#include "src/delegates/tag_item.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/io/exports.h"
 #include "src/io/filesystem.h"

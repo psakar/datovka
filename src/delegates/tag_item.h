@@ -30,36 +30,25 @@
 #include <QString>
 #include <QStyleOptionViewItem>
 
+#include "src/io/tag_db.h"
+
 /*!
  * @brief Describes tag information.
  */
-class TagItem {
+class TagItem : public TagDb::TagEntry {
 
 public:
 	/*!
 	 * @brief Constructor of invalid tag item.
-	 *
-	 * @note Identifier is -1, has empty name, colour is 'ffffff';
 	 */
 	TagItem(void);
 
 	/*!
-	 * @brief Constructs a tag item from supplied parameters.
+	 * @brief Constructor.
 	 *
-	 * @param[in] i Tag identifier.
-	 * @param[in] n Tag name.
-	 * @param[in] c Tag colour in hex format without the leading hashtag.
+	 * @param[in] entry Tag entry to construct item from.
 	 */
-	TagItem(int i, const QString &n, const QString &c);
-
-	/*!
-	 * @brief Check for validity.
-	 *
-	 * @note Invalid tag has id equal to -1, empty name and bogus colour.
-	 *
-	 * @return True if tag contains valid data.
-	 */
-	bool isValid(void) const;
+	explicit TagItem(const TagDb::TagEntry &entry);
 
 	/*!
 	 * @brief Paint tag rectangle.
@@ -80,15 +69,6 @@ public:
 	QSize sizeHint(const QStyleOptionViewItem &option) const;
 
 	/*!
-	 * @brief Returns true if colour string is valid.
-	 *
-	 * @param[in] colourStr Colour string.
-	 * @return True if colour string is valid.
-	 */
-	static
-	bool isValidColourStr(const QString &colourStr);
-
-	/*!
 	 * @brief Adjust foreground colour according to the supplied label
 	 *     colour.
 	 *
@@ -99,13 +79,6 @@ public:
 	static
 	QColor adjustForegroundColour(const QColor &fgColour,
 	    const QColor &tagColour);
-
-	int id; /*!< Tag identifier. */
-	QString name; /*!< Name of the rag. */
-	QString colour; /*!<
-	                 * Colour of the tag in hex format without the leading
-	                 * hashtag.
-	                 */
 };
 
 class TagItemList : public QList<TagItem> {
@@ -119,9 +92,9 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] tagList List of tag items.
+	 * @param[in] tagList List of tag entries.
 	 */
-	TagItemList(const QList<TagItem> &tagList);
+	TagItemList(const QList<TagDb::TagEntry> &tagList);
 
 	/*!
 	 * @brief Paint all list elements.
