@@ -1,0 +1,167 @@
+
+QT += core network sql
+CONFIG += console
+
+TEMPLATE = app
+APP_NAME = datovka-cli
+
+include(pri/version.pri)
+include(pri/check_qt_version.pri)
+
+sufficientQtVersion(5, 2, 3, 2)
+
+DEFINES += \
+	DEBUG=1 \
+	VERSION=\\\"$${VERSION}\\\"
+
+QMAKE_CXXFLAGS = \
+	-g -O0 -std=c++11 \
+	-Wall -Wextra -pedantic \
+	-Wdate-time -Wformat -Werror=format-security
+
+INCLUDEPATH += \
+	.
+
+LIBS = \
+	-lisds
+
+isEqual(STATIC, 1) {
+	warning(Linking statically.)
+} else {
+	INCLUDEPATH += \
+		/usr/include/libxml2
+}
+
+!isEmpty(PORTABLE_APPLICATION) {
+	warning(Building portable version.)
+	DEFINES += PORTABLE_APPLICATION=1
+	TARGET = $${APP_NAME}-portable
+}
+
+!isEmpty(DISABLE_VERSION_CHECK_BY_DEFAULT) {
+	warning(Disabling version check by default.)
+	DEFINES += DISABLE_VERSION_CHECK_BY_DEFAULT=1
+}
+
+win32 {
+        RC_FILE += res/icon.rc
+
+	DEFINES += WIN32=1
+
+	INCLUDEPATH = \
+		src \
+		mingw32built/include/libxml2 \
+		mingw32built/include/
+
+	LIBS = \
+		$${_PRO_FILE_PWD_}/mingw32built/bin/libisds-5.dll \
+		$${_PRO_FILE_PWD_}/mingw32built/bin/libeay32.dll
+
+	SOURCES += src/compat/compat_win.c
+
+	HEADERS += src/compat/compat_win.h
+} else {
+	LIBS += \
+		-lcrypto
+}
+
+SOURCES += \
+	src/about.cpp \
+	src/cli/cli.cpp \
+	src/cli/cli_login.cpp \
+	src/cli/cli_parser.cpp \
+	src/common.cpp \
+	src/crypto/crypto.c \
+	src/crypto/crypto_threads.cpp \
+	src/initialisation.cpp \
+	src/io/account_db.cpp \
+	src/io/db_tables.cpp \
+	src/io/dbs.cpp \
+	src/io/file_downloader.cpp \
+	src/io/filesystem.cpp \
+	src/io/isds_helper.cpp \
+	src/io/isds_login.cpp \
+	src/io/isds_sessions.cpp \
+	src/io/message_db.cpp \
+	src/io/message_db_set.cpp \
+	src/io/message_db_set_container.cpp \
+	src/io/message_db_set_delegated.cpp \
+	src/io/records_management_db.cpp \
+	src/io/sqlite/db.cpp \
+	src/io/sqlite/table.cpp \
+	src/io/tag_db.cpp \
+	src/isds/isds_conversion.cpp \
+	src/model_interaction/account_interaction.cpp \
+	src/localisation/localisation.cpp \
+	src/log/log.cpp \
+	src/log/log_c.cpp \
+	src/main_cli.cpp \
+	src/settings/account.cpp \
+	src/settings/accounts.cpp \
+	src/settings/preferences.cpp \
+	src/settings/proxy.cpp \
+	src/single/single_instance.cpp \
+	src/worker/message_emitter.cpp \
+	src/worker/pool.cpp \
+	src/worker/task.cpp \
+	src/worker/task_download_message.cpp \
+	src/worker/task_download_message_list.cpp \
+	src/worker/task_download_owner_info.cpp \
+	src/worker/task_download_password_info.cpp \
+	src/worker/task_download_user_info.cpp \
+	src/worker/task_search_owner.cpp
+
+HEADERS += \
+	src/about.h \
+	src/cli/cli.h \
+	src/cli/cli_login.h \
+	src/cli/cli_parser.h \
+	src/common.h \
+	src/crypto/crypto.h \
+	src/crypto/crypto_funcs.h \
+	src/crypto/crypto_threads.h \
+	src/initialisation.h \
+	src/io/account_db.h \
+	src/io/db_tables.h \
+	src/io/dbs.h \
+	src/io/file_downloader.h \
+	src/io/filesystem.h \
+	src/io/isds_helper.h \
+	src/io/isds_login.h \
+	src/io/isds_sessions.h \
+	src/io/message_db.h \
+	src/io/message_db_set.h \
+	src/io/message_db_set_container.h \
+	src/io/records_management_db.h \
+	src/io/sqlite/db.h \
+	src/io/sqlite/table.h \
+	src/io/tag_db.h \
+	src/isds/isds_conversion.h \
+	src/model_interaction/account_interaction.h \
+	src/localisation/localisation.h \
+	src/log/log_c.h \
+	src/log/log_common.h \
+	src/log/log.h \
+	src/settings/account.h \
+	src/settings/accounts.h \
+	src/settings/preferences.h \
+	src/settings/proxy.h \
+	src/single/single_instance.h \
+	src/worker/message_emitter.h \
+	src/worker/pool.h \
+	src/worker/task.h \
+	src/worker/task_download_message.h \
+	src/worker/task_download_message_list.h \
+	src/worker/task_download_owner_info.h \
+	src/worker/task_download_password_info.h \
+	src/worker/task_download_user_info.h \
+	src/worker/task_search_owner.h
+
+FORMS +=
+
+RESOURCES += \
+
+TRANSLATIONS += locale/datovka_en.ts \
+    locale/datovka_cs.ts
+
+OTHER_FILES +=
