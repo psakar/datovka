@@ -4,13 +4,14 @@
 #
 #-------------------------------------------------
 
-QT += core gui network svg sql
+QT += core gui network svg sql widgets
 QT += printsupport
 
 TEMPLATE = app
 APP_NAME = datovka
-# VERSION must contain only three dot-separated numbers because of OS X deployment.
-VERSION = 4.9.1
+
+include(pri/version.pri)
+include(pri/check_qt_version.pri)
 
 # Generate localisation. Must be run manually.
 #system(lrelease datovka.pro)
@@ -25,40 +26,9 @@ win32 {
 	system(copy $$[QT_INSTALL_DATA]/translations/qtbase_cs.qm locale/qtbase_cs.qm)
 }
 
-
-# Required Qt versions
-REQUIRED_MAJOR = 5
-REQUIRED_MINOR = 3
 # Qt 5.2.1 contains a bug causing the application to crash on some drop events.
 # Version 5.3.2 should be fine.
-ADVISED_MINOR = 3
-ADVISED_PATCH = 2
-
-lessThan(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
-	error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
-} else {
-	QT += widgets
-}
-
-isEqual(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
-	lessThan(QT_MINOR_VERSION, $${REQUIRED_MINOR}) {
-		error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
-	}
-
-	lessThan(QT_MINOR_VERSION, $${ADVISED_MINOR}) {
-		warning(Qt version at least $${REQUIRED_MAJOR}.$${ADVISED_MINOR}.$${ADVISED_PATCH} is suggested.)
-	} else {
-		isEqual(QT_MINOR_VERSION, $${ADVISED_MINOR}) {
-			lessThan(QT_PATCH_VERSION, $${ADVISED_PATCH}) {
-				warning(Qt version at least $${REQUIRED_MAJOR}.$${ADVISED_MINOR}.$${ADVISED_PATCH} is suggested.)
-			}
-		}
-	}
-} else {
-	warning(The current Qt version $${QT_MAJOR_VERSION}.$${QT_MINOR_VERSION} may not work.)
-}
-
-#LIBISDS_PREFIX = "$$HOME/third_party/built"
+sufficientQtVersion(5, 3, 3, 2)
 
 DEFINES += \
 	DEBUG=1 \
@@ -256,8 +226,10 @@ win32 {
 }
 
 SOURCES += \
+    src/about.cpp \
     src/cli/cli.cpp \
     src/cli/cli_login.cpp \
+    src/cli/cli_parser.cpp \
     src/common.cpp \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
@@ -286,6 +258,7 @@ SOURCES += \
     src/gui/dlg_timestamp_expir.cpp \
     src/gui/dlg_view_zfo.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
+    src/initialisation.cpp \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
     src/io/dbs.cpp \
@@ -310,6 +283,7 @@ SOURCES += \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
+    src/model_interaction/account_interaction.cpp \
     src/model_interaction/attachment_interaction.cpp \
     src/models/accounts_model.cpp \
     src/models/combo_box_model.cpp \
@@ -333,6 +307,7 @@ SOURCES += \
     src/records_management/models/upload_hierarchy_model.cpp \
     src/records_management/models/upload_hierarchy_proxy_model.cpp \
     src/records_management/widgets/svg_view.cpp \
+    src/settings/account.cpp \
     src/settings/accounts.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
@@ -369,8 +344,10 @@ SOURCES += \
     src/worker/task_verify_message.cpp
 
 HEADERS += \
+    src/about.h \
     src/cli/cli.h \
     src/cli/cli_login.h \
+    src/cli/cli_parser.h \
     src/common.h \
     src/crypto/crypto.h \
     src/crypto/crypto_funcs.h \
@@ -400,6 +377,7 @@ HEADERS += \
     src/gui/dlg_timestamp_expir.h \
     src/gui/dlg_view_zfo.h \
     src/gui/dlg_yes_no_checkbox.h \
+    src/initialisation.h \
     src/io/account_db.h \
     src/io/db_tables.h \
     src/io/dbs.h \
@@ -423,6 +401,7 @@ HEADERS += \
     src/log/log_c.h \
     src/log/log_common.h \
     src/log/log.h \
+    src/model_interaction/account_interaction.h \
     src/model_interaction/attachment_interaction.h \
     src/models/accounts_model.h \
     src/models/combo_box_model.h \
@@ -446,6 +425,7 @@ HEADERS += \
     src/records_management/models/upload_hierarchy_model.h \
     src/records_management/models/upload_hierarchy_proxy_model.h \
     src/records_management/widgets/svg_view.h \
+    src/settings/account.h \
     src/settings/accounts.h \
     src/settings/preferences.h \
     src/settings/proxy.h \

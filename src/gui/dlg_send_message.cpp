@@ -34,7 +34,6 @@
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
 #include "src/model_interaction/attachment_interaction.h"
-#include "src/models/accounts_model.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
@@ -42,6 +41,7 @@
 #include "src/isds/isds_conversion.h"
 #include "src/localisation/localisation.h"
 #include "src/log/log.h"
+#include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
 #include "src/views/attachment_table_view.h"
 #include "src/views/table_home_end_filter.h"
@@ -391,7 +391,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		}
 	}
 
-	const AcntSettings &accountInfo(AccountModel::globAccounts[m_userName]);
+	const AcntSettings &accountInfo(globAccounts[m_userName]);
 	const QString acntDbKey(AccountDb::keyFromLogin(m_userName));
 	m_dbId = globAccountDbPtr->dbId(acntDbKey);
 	Q_ASSERT(!m_dbId.isEmpty());
@@ -426,9 +426,8 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	}
 
 	this->fromUser->setText("<strong>" +
-	    AccountModel::globAccounts[m_userName].accountName() +
-	    "</strong>" + " (" + m_userName + ") - " + m_dbType +
-	    dbOpenAddressingText);
+	    globAccounts[m_userName].accountName() + "</strong>" +
+	    " (" + m_userName + ") - " + m_dbType + dbOpenAddressingText);
 }
 
 void DlgSendMessage::sendMessage(void)
@@ -581,7 +580,7 @@ void DlgSendMessage::initContent(enum Action action,
 
 	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
 		const QString accountName =
-		    AccountModel::globAccounts[acnt.userName].accountName() +
+		    globAccounts[acnt.userName].accountName() +
 		    " (" + acnt.userName + ")";
 		this->fromComboBox->addItem(accountName, QVariant(acnt.userName));
 		if (m_userName == acnt.userName) {

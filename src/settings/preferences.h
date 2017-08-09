@@ -58,6 +58,12 @@ public:
 	 */
 	~GlobPreferences(void);
 
+	/*!
+	 * @brief Create configuration file if not present.
+	 */
+	static
+	bool ensureConfPresence(void);
+
 	QString confSubdir; /*!< Configuration directory. */
 	QString loadFromConf; /*!< Configuration file to load from. */
 	QString saveToConf; /*!< Configuration file to save to. */

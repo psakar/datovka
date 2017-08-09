@@ -356,7 +356,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 	if (rowCount() == 0) {
 		beginResetModel();
 		m_type = WORKING_RCVD;
-		m_columnCount = rcvdItemIds().size() + appendedColsNum;
+		m_columnCount = MessageDb::rcvdItemIds.size() + appendedColsNum;
 		endResetModel();
 	} else {
 		if (Q_UNLIKELY(m_type != WORKING_RCVD)) {
@@ -364,7 +364,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 			return;
 		}
 		if (Q_UNLIKELY(m_columnCount !=
-		        (rcvdItemIds().size() + appendedColsNum))) {
+		        (MessageDb::rcvdItemIds.size() + appendedColsNum))) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -411,7 +411,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 	if (rowCount() == 0) {
 		beginResetModel();
 		m_type = WORKING_SNT;
-		m_columnCount = sntItemIds().size() + appendedColsNum;
+		m_columnCount = MessageDb::sntItemIds.size() + appendedColsNum;
 		endResetModel();
 	} else {
 		if (Q_UNLIKELY(m_type != WORKING_SNT)) {
@@ -419,7 +419,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 			return;
 		}
 		if (Q_UNLIKELY(m_columnCount !=
-		        (sntItemIds().size() + appendedColsNum))) {
+		        (MessageDb::sntItemIds.size() + appendedColsNum))) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -460,37 +460,6 @@ bool DbMsgsTblModel::setType(enum DbMsgsTblModel::Type type)
 	return true;
 }
 
-const QVector<QString> &DbMsgsTblModel::rcvdItemIds(void)
-{
-	static QVector<QString> ids;
-	if (ids.size() == 0) {
-		ids.append("dmID");
-		ids.append("dmAnnotation");
-		ids.append("dmSender");
-		ids.append("dmDeliveryTime");
-		ids.append("dmAcceptanceTime");
-		ids.append("read_locally");
-		ids.append("is_downloaded");
-		ids.append("process_status");
-	}
-	return ids;
-}
-
-const QVector<QString> &DbMsgsTblModel::sntItemIds(void)
-{
-	static QVector<QString> ids;
-	if (ids.size() == 0) {
-	    ids.append("dmID");
-	    ids.append("dmAnnotation");
-	    ids.append("dmRecipient");
-	    ids.append("dmDeliveryTime");
-	    ids.append("dmAcceptanceTime");
-	    ids.append("dmMessageStatus");
-	    ids.append("is_downloaded");
-	}
-	return ids;
-}
-
 static
 void appendHeaderColumns(DbMsgsTblModel *model, int dfltHdrSize,
     const QList<DbMsgsTblModel::AppendedCol> &appendedCols)
@@ -516,29 +485,29 @@ void appendHeaderColumns(DbMsgsTblModel *model, int dfltHdrSize,
 
 bool DbMsgsTblModel::setRcvdHeader(const QList<AppendedCol> &appendedCols)
 {
-	for (int i = 0; i < rcvdItemIds().size(); ++i) {
+	for (int i = 0; i < MessageDb::rcvdItemIds.size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(rcvdItemIds()[i]) !=
+		if (msgsTbl.attrProps.find(MessageDb::rcvdItemIds[i]) !=
 		    msgsTbl.attrProps.end()) {
 			/* Description. */
 			setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(rcvdItemIds()[i]).desc,
+			    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[i]).desc,
 			    Qt::DisplayRole);
 			/* Data type. */
 			setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(rcvdItemIds()[i]).type,
+			    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[i]).type,
 			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if (smsgdtTbl.attrProps.find(rcvdItemIds()[i]) !=
+		} else if (smsgdtTbl.attrProps.find(MessageDb::rcvdItemIds[i]) !=
 		    smsgdtTbl.attrProps.end()) {
 			/* Description. */
 			setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(rcvdItemIds()[i]).desc,
+			    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[i]).desc,
 			    Qt::DisplayRole);
 			/* Data type. */
 			setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(rcvdItemIds()[i]).type,
+			    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[i]).type,
 			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == rcvdItemIds()[i]) {
+		} else if ("is_downloaded" == MessageDb::rcvdItemIds[i]) {
 			/* Description. */
 			setHeaderData(i, Qt::Horizontal,
 			    tr("Attachments downloaded"), Qt::DisplayRole);
@@ -546,7 +515,7 @@ bool DbMsgsTblModel::setRcvdHeader(const QList<AppendedCol> &appendedCols)
 			setHeaderData(i, Qt::Horizontal,
 			    DB_BOOL_ATTACHMENT_DOWNLOADED,
 			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("process_status" == rcvdItemIds()[i]) {
+		} else if ("process_status" == MessageDb::rcvdItemIds[i]) {
 			/* Description. */
 			setHeaderData(i, Qt::Horizontal,
 			    tr("Processing state"), Qt::DisplayRole);
@@ -558,26 +527,26 @@ bool DbMsgsTblModel::setRcvdHeader(const QList<AppendedCol> &appendedCols)
 		}
 	}
 
-	appendHeaderColumns(this, rcvdItemIds().size(), appendedCols);
+	appendHeaderColumns(this, MessageDb::rcvdItemIds.size(), appendedCols);
 
 	return true;
 }
 
 bool DbMsgsTblModel::setSntHeader(const QList<AppendedCol> &appendedCols)
 {
-	for (int i = 0; i < sntItemIds().size(); ++i) {
+	for (int i = 0; i < MessageDb::sntItemIds.size(); ++i) {
 		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(sntItemIds()[i]) !=
+		if (msgsTbl.attrProps.find(MessageDb::sntItemIds[i]) !=
 		    msgsTbl.attrProps.end()) {
 			/* Description. */
 			setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(sntItemIds()[i]).desc,
+			    msgsTbl.attrProps.value(MessageDb::sntItemIds[i]).desc,
 			    Qt::DisplayRole);
 			/* Data type. */
 			setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(sntItemIds()[i]).type,
+			    msgsTbl.attrProps.value(MessageDb::sntItemIds[i]).type,
 			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == sntItemIds()[i]) {
+		} else if ("is_downloaded" == MessageDb::sntItemIds[i]) {
 			/* Description. */
 			setHeaderData(i, Qt::Horizontal,
 			    tr("Attachments downloaded"), Qt::DisplayRole);
@@ -590,7 +559,7 @@ bool DbMsgsTblModel::setSntHeader(const QList<AppendedCol> &appendedCols)
 		}
 	}
 
-	appendHeaderColumns(this, sntItemIds().size(), appendedCols);
+	appendHeaderColumns(this, MessageDb::sntItemIds.size(), appendedCols);
 
 	return true;
 }

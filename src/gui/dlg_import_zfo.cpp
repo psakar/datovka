@@ -23,8 +23,8 @@
 
 #include "src/gui/dlg_import_zfo.h"
 
-ImportZFODialog::ImportZFODialog(enum ImportZFODialog::ZFOtype &zfoType,
-    enum ImportZFODialog::ZFOlocation &locationType, bool &checkZfoOnServer,
+ImportZFODialog::ImportZFODialog(enum Imports::Type &zfoType,
+    enum ZFOlocation &locationType, bool &checkZfoOnServer,
     QWidget *parent)
     : QDialog(parent),
     m_zfoType(zfoType),
@@ -63,11 +63,11 @@ void ImportZFODialog::setControlsActivity(void)
 void ImportZFODialog::setChosenValues(void)
 {
 	if (this->messageZFO->isChecked()) {
-		m_zfoType = IMPORT_MESSAGE_ZFO;
+		m_zfoType = Imports::IMPORT_MESSAGE;
 	} else if (this->deliveryZFO->isChecked()) {
-		m_zfoType = IMPORT_DELIVERY_ZFO;
+		m_zfoType = Imports::IMPORT_DELIVERY;
 	} else {
-		m_zfoType = IMPORT_ALL_ZFO;
+		m_zfoType = Imports::IMPORT_ANY;
 	}
 
 	if (this->radioImportAll->isChecked()) {

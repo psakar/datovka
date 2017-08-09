@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,6 @@
 #include <QString>
 #include <QVariant>
 
-
 #include "src/settings/accounts.h"
 
 /* Login method descriptors. */
@@ -49,14 +48,6 @@ class AccountModel: public QAbstractItemModel {
     Q_OBJECT
 
 public:
-	/*!
-	 * @brief Holds account data related to account.
-	 *
-	 * @note Key is userName. The user name is held by the user name list.
-	 */
-	static
-	AccountsMap globAccounts;
-
 	/*
 	 * nodeRoot (Invisible.)
 	 * |

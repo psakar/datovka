@@ -21,46 +21,17 @@
  * the two.
  */
 
-#ifndef _ACCOUNTS_H_
-#define _ACCOUNTS_H_
+#ifndef _ABOUT_H_
+#define _ABOUT_H_
 
-#include <QMap>
-#include <QObject>
-#include <QSettings>
-#include <QString>
-
-#include "src/settings/account.h"
-
-/* Meta object features are not supported for nested classes. */
+#include <QStringList>
 
 /*!
- * @brief Associative array mapping user name to settings.
- */
-class AccountsMap : public QObject, public QMap<QString, AcntSettings> {
-	Q_OBJECT
-
-public:
-	/*!
-	 * @brief Load data from supplied settings.
-	 */
-	void loadFromSettings(const QSettings &settings);
-
-signals:
-	/*!
-	 * @brief Notifies that account data have changed.
-	 *
-	 * @note Currently the signal must be triggered manually.
-	 *
-	 * @param[in] userName User name.
-	 */
-	void accountDataChanged(const QString &userName);
-};
-
-/*!
- * @brief Holds account data related to account.
+ * @brief Obtain list of strings containing libraries which the application
+ *     depends on.
  *
- * @note Key is userName. The user name is held by the user name list.
+ * @return List of strings containing library descriptions.
  */
-extern AccountsMap globAccounts;
+QStringList libraryDependencies(void);
 
-#endif /* _ACCOUNTS_H_ */
+#endif /* _ABOUT_H_ */

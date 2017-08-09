@@ -28,7 +28,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
-#include "src/models/accounts_model.h"
+#include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h" /* List with whole messages. */
 #include "src/worker/task_download_message.h" /* List with whole messages. */
@@ -93,7 +93,7 @@ void TaskDownloadMessageList::run(void)
 	logDebugLv1NL("%s", "-----------------------------------------------");
 	logDebugLv1NL("Downloading %s message list for account '%s'.",
 	    (MSG_RECEIVED == m_msgDirect) ? "received" : "sent",
-	    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
+	    globAccounts[m_userName].accountName().toUtf8().constData());
 	logDebugLv1NL("%s", "-----------------------------------------------");
 
 	if (MSG_RECEIVED == m_msgDirect) {
@@ -110,10 +110,10 @@ void TaskDownloadMessageList::run(void)
 
 	if (DL_SUCCESS == m_result) {
 		logDebugLv1NL("Done downloading message list for account '%s'.",
-		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
+		    globAccounts[m_userName].accountName().toUtf8().constData());
 	} else {
 		logErrorNL("Downloading message list for account '%s' failed.",
-		    AccountModel::globAccounts[m_userName].accountName().toUtf8().constData());
+		    globAccounts[m_userName].accountName().toUtf8().constData());
 	}
 
 	emit globMsgProcEmitter.downloadMessageListFinished(m_userName,

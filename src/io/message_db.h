@@ -24,7 +24,6 @@
 #ifndef _MESSAGE_DB_H_
 #define _MESSAGE_DB_H_
 
-#include <QAbstractButton>
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
@@ -398,18 +397,15 @@ public:
 	/*!
 	 * @brief Return HTML formatted message description.
 	 *
-	 * @param[in]     dmId          Message identifier.
-	 * @param[in,out] verSigButton  Button to activate/deactivate
-	 *                              according to message content.
-	 * @param[in]     showId        Whether to also show the message id.
-	 * @param[in]     verSignature  Whether to show verification details.
+	 * @param[in]     dmId Message identifier.
+	 * @param[in]     showId Whether to also show the message id.
+	 * @param[in]     verSignature Whether to show verification details.
 	 * @param[in]     warnOld
 	 * @return HTML formatted string containing message information.
 	 *     Empty string is returned on error.
 	 */
-	QString descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
-	    bool showId = true, bool verSignature = true,
-	    bool warnOld = true) const;
+	QString descriptionHtml(qint64 dmId, bool showId = true,
+	    bool verSignature = true, bool warnOld = true) const;
 
 	/*!
 	 * @brief Return message envelope HTML to be used to generate a PDF.
@@ -974,12 +970,6 @@ protected: /* These function are used from within a database container. */
 	 */
 	QStringList getAllMsgsIDEqualWithYear(const QString &year) const;
 
-	static
-	const QVector<QString> receivedItemIds;
-	static
-	const QVector<QString> sentItemIds;
-
-
 	/*!
 	 * @brief Return list of message ids corresponding to given date
 	 *     interval.
@@ -1080,6 +1070,14 @@ protected: /* These function are used from within a database container. */
 	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
 
 public:
+	/*
+	 * TODO -- Use static methods returning reference to static constant
+	 * vector.
+	 */
+	static
+	const QVector<QString> rcvdItemIds;
+	static
+	const QVector<QString> sntItemIds;
 	static
 	const QVector<QString> fileItemIds;
 

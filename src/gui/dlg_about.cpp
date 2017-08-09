@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,18 +21,9 @@
  * the two.
  */
 
-#if defined(__APPLE__) || defined(__clang__)
-#  define __USE_C99_MATH
-#  define _Bool bool
-#else /* !__APPLE__ */
-#  include <cstdbool>
-#endif /* __APPLE__ */
-
-#include <cstdlib>
-#include <isds.h>
-#include <openssl/crypto.h> /* SSLeay_version(3) */
 #include <QFile>
 
+#include "src/about.h"
 #include "src/gui/dlg_about.h"
 #include "src/io/filesystem.h"
 
@@ -87,21 +78,6 @@ DlgAbout::DlgAbout(QWidget *parent)
 	    SLOT(showCredits()));
 
 	connect(this->buttonBox, SIGNAL(accepted()), this, SLOT(close()));
-}
-
-QStringList DlgAbout::libraryDependencies(void)
-{
-	QStringList libs;
-
-	libs.append(QStringLiteral("Qt ") + qVersion());
-
-	char *isdsVer = isds_version();
-	libs.append(QStringLiteral("libisds ") + isdsVer);
-	free(isdsVer); isdsVer = NULL;
-
-	libs.append(SSLeay_version(SSLEAY_VERSION));
-
-	return libs;
 }
 
 void DlgAbout::showLicence(void)

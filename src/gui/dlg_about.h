@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,16 +42,7 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	explicit DlgAbout(QWidget *parent = 0);
-
-	/*!
-	 * @brief Obtain list of strings containing libraries which the
-	 *     application depends on.
-	 *
-	 * @return List of strings containing library descriptions.
-	 */
-	static
-	QStringList libraryDependencies(void);
+	explicit DlgAbout(QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!

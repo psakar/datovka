@@ -27,10 +27,11 @@
 #include <QPushButton>
 #include <QTextStream>
 
+#include "src/delegates/tag_item.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/io/exports.h"
 #include "src/io/filesystem.h"
-#include "src/models/accounts_model.h"
+#include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
 
 #define CSV_LITERAL QStringLiteral("CSV")
@@ -48,8 +49,7 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 
 	Q_ASSERT(!userName.isEmpty());
 
-	this->accountName->setText(
-	    AccountModel::globAccounts[userName].accountName() +
+	this->accountName->setText(globAccounts[userName].accountName() +
 	    QStringLiteral(" (") + userName + QStringLiteral(")"));
 
 	this->toCalendarWidget->setMinimumDate(this->fromCalendarWidget->selectedDate());

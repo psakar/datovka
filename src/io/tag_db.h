@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,6 @@
 #include <QList>
 #include <QString>
 
-#include "src/delegates/tag_item.h"
 #include "src/io/sqlite/db.h"
 
 /*!
@@ -36,6 +35,53 @@
 class TagDb : public SQLiteDb {
 
 public:
+	/*!
+	 * @brief Encapsulates database tag entry.
+	 */
+	class TagEntry {
+	public:
+		/*!
+		 * @brief Constructor of invalid tag entry.
+		 *
+		 * @note Identifier is -1, has empty name, colour is 'ffffff';
+		 */
+		TagEntry(void);
+
+		/*!
+		 * @brief Constructs a tag entry from supplied parameters.
+		 *
+		 * @param[in] i Tag identifier.
+		 * @param[in] n Tag name.
+		 * @param[in] c Tag colour in hex format without the leading hashtag.
+		 */
+		TagEntry(int i, const QString &n, const QString &c);
+
+		/*!
+		 * @brief Check for validity.
+		 *
+		 * @note Invalid tag has id equal to -1, empty name and bogus colour.
+		 *
+		 * @return True if tag contains valid data.
+		 */
+		bool isValid(void) const;
+
+		/*!
+		 * @brief Returns true if colour string is valid.
+		 *
+		 * @param[in] colourStr Colour string.
+		 * @return True if colour string is valid.
+		 */
+		static
+		bool isValidColourStr(const QString &colourStr);
+
+		int id; /*!< Tag identifier. */
+		QString name; /*!< Name of the tag. */
+		QString colour; /*!<
+		                 * Colour of the tag in hex format without
+		                 * the leading hashtag.
+		                 */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 *
@@ -91,14 +137,14 @@ public:
 	 * @param[in] id    id of tag.
 	 * @return tag struct with data.
 	 */
-	TagItem getTagData(int id);
+	TagEntry getTagData(int id) const;
 
 	/*!
 	 * @brief Get all tags from database file.
 	 *
-	 * @return Llist of TagItem.
+	 * @return List of tag entries.
 	 */
-	QList<TagItem> getAllTags(void);
+	QList<TagEntry> getAllTags(void) const;
 
 	/*!
 	 * @brief Get all tags related to given message.
@@ -107,8 +153,8 @@ public:
 	 * @param[in] dmgId Message identifier.
 	 * @return List of tags related to message.
 	 */
-	TagItemList getMessageTags(const QString &userName,
-	    const quint64 msgId);
+	QList<TagEntry> getMessageTags(const QString &userName,
+	    const quint64 msgId) const;
 
 	/*!
 	 * @brief Delete all tags for message ID
@@ -154,7 +200,7 @@ public:
 	 * @param[in] text    search text of tag name.
 	 * @return List of message IDs related to tag text.
 	 */
-	QList<qint64> getMsgIdsContainSearchTagText(const QString &text);
+	QList<qint64> getMsgIdsContainSearchTagText(const QString &text) const;
 
 private:
 	/*!

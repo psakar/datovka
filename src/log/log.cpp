@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
  * the two.
  */
 
-
 #include <cstdarg>
 #include <cstddef> /* NULL */
 #include <cstdio>
@@ -33,26 +32,18 @@
 #include <QString>
 #include <QtGlobal>
 
-#include "log.h"
-
+#include "src/log/log.h"
 
 #define LOG_TIME_FMT "MMM dd hh:mm:ss"
 
+LogDevice globLog;
 
-GlobLog globLog;
-
-
-/* ========================================================================= */
-/*
- * Message output function.
- */
 void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
     const QString &msg)
-/* ========================================================================= */
 {
 	QByteArray localMsg = msg.toLocal8Bit();
 	QString dateTime = QDateTime::currentDateTime().toString(LOG_TIME_FMT);
-	uint8_t level = GlobLog::levelFromType(type);
+	uint8_t level = LogDevice::levelFromType(type);
 
 	switch (type) {
 	case QtDebugMsg:
@@ -84,13 +75,7 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Debugging using Qt-defined output.
- */
 void qDebugCall(const char *fmt, ...)
-/* ========================================================================= */
 {
 	va_list argp;
 
@@ -104,20 +89,13 @@ void qDebugCall(const char *fmt, ...)
 	va_end(argp);
 }
 
-
-/* ========================================================================= */
-/*
- * Debugging using Qt-defined output.
- */
 void qDebugCallV(const char *fmt, va_list ap)
-/* ========================================================================= */
 {
 	QString outStr;
 	outStr.vsprintf(fmt, ap);
 
 	qDebug("%s", outStr.toUtf8().constData());
 }
-
 
 /*!
  * @brief A convenience macro for getting levels for a given facility
@@ -126,13 +104,7 @@ void qDebugCallV(const char *fmt, va_list ap)
 #define facilityLevels(facility, source) \
 	facDescVect[(facility)].levels[(source)]
 
-
-/* ========================================================================= */
-/*
- * Constructor.
- */
-GlobLog::GlobLog(void)
-/* ========================================================================= */
+LogDevice::LogDevice(void)
     : m_mutex(),
     m_hostName(QHostInfo::localHostName()),
     m_logVerbosity(0),
@@ -150,13 +122,7 @@ GlobLog::GlobLog(void)
 	/* TODO -- Initialise syslog. */
 }
 
-
-/* ========================================================================= */
-/*
- * Destructor.
- */
-GlobLog::~GlobLog(void)
-/* ========================================================================= */
+LogDevice::~LogDevice(void)
 {
 	/* TODO -- De-initialise syslog. */
 
@@ -167,13 +133,7 @@ GlobLog::~GlobLog(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Get log verbosity.
- */
-int GlobLog::logVerbosity(void)
-/* ========================================================================= */
+int LogDevice::logVerbosity(void)
 {
 	int ret;
 
@@ -186,13 +146,7 @@ int GlobLog::logVerbosity(void)
 	return ret;
 }
 
-
-/* ========================================================================= */
-/*
- * Set log verbosity.
- */
-void GlobLog::setLogVerbosity(int verb)
-/* ========================================================================= */
+void LogDevice::setLogVerbosity(int verb)
 {
 	m_mutex.lock();
 
@@ -207,13 +161,7 @@ void GlobLog::setLogVerbosity(int verb)
 	m_mutex.unlock();
 }
 
-
-/* ========================================================================= */
-/*
- * Get debug verbosity.
- */
-int GlobLog::debugVerbosity(void)
-/* ========================================================================= */
+int LogDevice::debugVerbosity(void)
 {
 	int ret;
 
@@ -226,13 +174,7 @@ int GlobLog::debugVerbosity(void)
 	return ret;
 }
 
-
-/* ========================================================================= */
-/*
- * Set debug verbosity.
- */
-void GlobLog::setDebugVerbosity(int verb)
-/* ========================================================================= */
+void LogDevice::setDebugVerbosity(int verb)
 {
 	m_mutex.lock();
 
@@ -241,13 +183,7 @@ void GlobLog::setDebugVerbosity(int verb)
 	m_mutex.unlock();
 }
 
-
-/* ========================================================================= */
-/*
- * Opens a log file as a logging facility.
- */
-int GlobLog::openFile(const QString &fName, LogMode mode)
-/* ========================================================================= */
+int LogDevice::openFile(const QString &fName, LogMode mode)
 {
 	FILE *of;
 	const char *openMode;
@@ -295,13 +231,7 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Returns the log levels for the given facility and source.
- */
-uint8_t GlobLog::logLevels(int facility, int source)
-/* ========================================================================= */
+uint8_t LogDevice::logLevels(int facility, int source)
 {
 	uint8_t ret;
 
@@ -317,13 +247,7 @@ uint8_t GlobLog::logLevels(int facility, int source)
 	return ret;
 }
 
-
-/* ========================================================================= */
-/*
- * Sets the log levels for the selected facility and source.
- */
-void GlobLog::setLogLevels(int facility, int source, uint8_t levels)
-/* ========================================================================= */
+void LogDevice::setLogLevels(int facility, int source, uint8_t levels)
 {
 	Q_ASSERT((facility >= 0) && (facility < MAX_LOG_FILES));
 	Q_ASSERT((source >= -1) && (source < MAX_SOURCES));
@@ -341,13 +265,7 @@ void GlobLog::setLogLevels(int facility, int source, uint8_t levels)
 	m_mutex.unlock();
 }
 
-
-/* ========================================================================= */
-/*
- * Add log levels to the selected facility and source.
- */
-void GlobLog::addLogLevels(int facility, int source, uint8_t levels)
-/* ========================================================================= */
+void LogDevice::addLogLevels(int facility, int source, uint8_t levels)
 {
 	int i;
 
@@ -367,13 +285,7 @@ void GlobLog::addLogLevels(int facility, int source, uint8_t levels)
 	m_mutex.unlock();
 }
 
-
-/* ========================================================================= */
-/*
- * Returns the id of a new unique source that can be used.
- */
-int GlobLog::acquireUniqueLogSource(void)
-/* ========================================================================= */
+int LogDevice::acquireUniqueLogSource(void)
 {
 	int ret;
 
@@ -391,13 +303,7 @@ int GlobLog::acquireUniqueLogSource(void)
 	return ret;
 }
 
-
-/* ========================================================================= */
-/*
- * Log message.
- */
-int GlobLog::log(int source, uint8_t level, const char *fmt, ...)
-/* ========================================================================= */
+int LogDevice::log(int source, uint8_t level, const char *fmt, ...)
 {
 	const char *prefix;
 	va_list argp;
@@ -423,13 +329,7 @@ int GlobLog::log(int source, uint8_t level, const char *fmt, ...)
 	return 0;
 }
 
-
-/* ========================================================================= */
-/*
- * Log message.
- */
-int GlobLog::logVlog(int source, uint8_t level, const char *fmt, va_list ap)
-/* ========================================================================= */
+int LogDevice::logVlog(int source, uint8_t level, const char *fmt, va_list ap)
 {
 	const char *prefix;
 
@@ -450,13 +350,7 @@ int GlobLog::logVlog(int source, uint8_t level, const char *fmt, va_list ap)
 	return 0;
 }
 
-
-/* ========================================================================= */
-/*
- * Log multi-line message.
- */
-int GlobLog::logMl(int source, uint8_t level, const char *fmt, ...)
-/* ========================================================================= */
+int LogDevice::logMl(int source, uint8_t level, const char *fmt, ...)
 {
 	const char *prefix;
 	va_list argp;
@@ -482,13 +376,7 @@ int GlobLog::logMl(int source, uint8_t level, const char *fmt, ...)
 	return 0;
 }
 
-
-/* ========================================================================= */
-/*
- * Log multi-line message.
- */
-int GlobLog::logVlogMl(int source, uint8_t level, const char *fmt, va_list ap)
-/* ========================================================================= */
+int LogDevice::logVlogMl(int source, uint8_t level, const char *fmt, va_list ap)
 {
 	const char *prefix;
 
@@ -509,13 +397,7 @@ int GlobLog::logVlogMl(int source, uint8_t level, const char *fmt, va_list ap)
 	return 0;
 }
 
-
-/* ========================================================================= */
-/*
- * Returns a string containing log urgency prefix.
- */
-const char * GlobLog::urgencyPrefix(uint8_t level)
-/* ========================================================================= */
+const char *LogDevice::urgencyPrefix(uint8_t level)
 {
 	const char *prefix;
 
@@ -528,19 +410,13 @@ const char * GlobLog::urgencyPrefix(uint8_t level)
 	case LOG_NOTICE :  prefix = "notice: ";    break;
 	case LOG_INFO :    prefix = "info: ";      break;
 	case LOG_DEBUG :   prefix = "debug: ";     break;
-	default :          prefix = NULL;
+	default :          prefix = NULL;          break;
 	}
 
 	return prefix;
 }
 
-
-/* ========================================================================= */
-/*
- * converts message type to urgency level.
- */
-uint8_t GlobLog::levelFromType(QtMsgType type)
-/* ========================================================================= */
+uint8_t LogDevice::levelFromType(QtMsgType type)
 {
 	switch (type) {
 	case QtDebugMsg:
@@ -567,14 +443,8 @@ uint8_t GlobLog::levelFromType(QtMsgType type)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Log message.
- */
-void GlobLog::logPrefixVlog(int source, uint8_t level,
+void LogDevice::logPrefixVlog(int source, uint8_t level,
     const char *prefix, const char *format, va_list ap)
-/* ========================================================================= */
 {
 	uint8_t logMask;
 	int i;
@@ -647,14 +517,8 @@ void GlobLog::logPrefixVlog(int source, uint8_t level,
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Log multi-line message.
- */
-void GlobLog::logPrefixVlogMl(int source, uint8_t level,
+void LogDevice::logPrefixVlogMl(int source, uint8_t level,
     const char *prefix, const char *format, va_list ap)
-/* ========================================================================= */
 {
 	uint8_t logMask;
 	int i;

@@ -21,46 +21,30 @@
  * the two.
  */
 
-#ifndef _ACCOUNTS_H_
-#define _ACCOUNTS_H_
+#if defined(__APPLE__) || defined(__clang__)
+#  define __USE_C99_MATH
+#  define _Bool bool
+#else /* !__APPLE__ */
+#  include <cstdbool>
+#endif /* __APPLE__ */
 
-#include <QMap>
-#include <QObject>
-#include <QSettings>
-#include <QString>
+#include <cstdlib>
+#include <isds.h>
+#include <openssl/crypto.h> /* SSLeay_version(3) */
 
-#include "src/settings/account.h"
+#include "src/about.h"
 
-/* Meta object features are not supported for nested classes. */
+QStringList libraryDependencies(void)
+{
+	QStringList libs;
 
-/*!
- * @brief Associative array mapping user name to settings.
- */
-class AccountsMap : public QObject, public QMap<QString, AcntSettings> {
-	Q_OBJECT
+	libs.append(QStringLiteral("Qt ") + qVersion());
 
-public:
-	/*!
-	 * @brief Load data from supplied settings.
-	 */
-	void loadFromSettings(const QSettings &settings);
+	char *isdsVer = isds_version();
+	libs.append(QStringLiteral("libisds ") + isdsVer);
+	free(isdsVer); isdsVer = NULL;
 
-signals:
-	/*!
-	 * @brief Notifies that account data have changed.
-	 *
-	 * @note Currently the signal must be triggered manually.
-	 *
-	 * @param[in] userName User name.
-	 */
-	void accountDataChanged(const QString &userName);
-};
+	libs.append(SSLeay_version(SSLEAY_VERSION));
 
-/*!
- * @brief Holds account data related to account.
- *
- * @note Key is userName. The user name is held by the user name list.
- */
-extern AccountsMap globAccounts;
-
-#endif /* _ACCOUNTS_H_ */
+	return libs;
+}

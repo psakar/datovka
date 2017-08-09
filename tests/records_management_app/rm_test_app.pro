@@ -2,18 +2,15 @@
 QT += core network
 QT += gui svg widgets
 
+top_srcdir = ../..
+
 TEMPLATE = app
 APP_NAME = ds_test_app
-VERSION = 4.9.1
 
-REQUIRED_MAJOR = 5
-REQUIRED_MINOR = 2
+include($${top_srcdir}/pri/version.pri)
+include($${top_srcdir}/pri/check_qt_version.pri)
 
-lessThan(QT_MAJOR_VERSION, $${REQUIRED_MAJOR}) {
-	error(Qt version $${REQUIRED_MAJOR}.$${REQUIRED_MINOR} is required.)
-}
-
-top_srcdir = ../..
+sufficientQtVersion(5, 2, 3, 2)
 
 DEFINES += \
 	DEBUG=1 \

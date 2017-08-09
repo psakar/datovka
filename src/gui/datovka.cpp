@@ -76,6 +76,7 @@
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
 #include "src/isds/isds_conversion.h"
+#include "src/model_interaction/account_interaction.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/records_management/gui/dlg_records_management.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
@@ -742,7 +743,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 //		Q_ASSERT(0);
 		return;
 	}
-	MessageDbSet *dbSet = accountDbSet(userName, this);
+	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		/* May occur on deleting last account. */
 		setMessageActionVisibility(0);
@@ -760,8 +761,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 
 		/* Get user name and db location. */
-		const AcntSettings &itemSettings(
-		    AccountModel::globAccounts[userName]);
+		const AcntSettings &itemSettings(globAccounts[userName]);
 
 		QString dbDir = itemSettings.dbDir();
 		if (dbDir.isEmpty()) {
@@ -1176,8 +1176,8 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	}
 
 	MessageDbSet *dbSet = accountDbSet(
-	    m_accountModel.userName(currentAccountModelIndex()), this);
-	if (0 == dbSet) {
+	    m_accountModel.userName(currentAccountModelIndex()));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -1208,7 +1208,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	}
 
 	/* Generate and show message information. */
-	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId.dmId, 0));
+	ui->messageInfo->setHtml(messageDb->descriptionHtml(msgId.dmId));
 	ui->messageInfo->setReadOnly(true);
 
 	if (received) {
@@ -1278,8 +1278,8 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	m_messageMarker.stop();
 
 	MessageDbSet *dbSet = accountDbSet(
-	    m_accountModel.userName(currentAccountModelIndex()), this);
-	if (0 == dbSet) {
+	    m_accountModel.userName(currentAccountModelIndex()));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -1440,8 +1440,8 @@ void MainWindow::viewSelectedMessage(void)
 	MessageDb::MsgId msgId(msgMsgId(msgIndex));
 	Q_ASSERT(msgId.dmId >= 0);
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -1511,7 +1511,7 @@ void MainWindow::messageItemStoreSelection(qint64 msgId)
 
 		const QString userName(m_accountModel.userName(acntIdx));
 		Q_ASSERT(!userName.isEmpty());
-		AccountModel::globAccounts[userName].setLastMsg(msgId);
+		globAccounts[userName].setLastMsg(msgId);
 	}
 }
 
@@ -1521,7 +1521,7 @@ void MainWindow::storeExportPath(const QString &userName)
 
 	Q_ASSERT(!userName.isEmpty());
 
-	AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
+	AcntSettings &accountInfo(globAccounts[userName]);
 	accountInfo.setLastAttachSavePath(m_save_attach_dir);
 	accountInfo.setLastAttachAddPath(m_add_attach_dir);
 	accountInfo.setLastCorrespPath(m_export_correspond_dir);
@@ -1632,8 +1632,7 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 				    m_accountModel.userName(acntIdx));
 				Q_ASSERT(!userName.isEmpty());
 
-				msgLastId = AccountModel::globAccounts[userName]
-				    .lastMsg();
+				msgLastId = globAccounts[userName].lastMsg();
 			} else {
 				msgLastId = m_lastStoredMessageId;
 			}
@@ -1943,7 +1942,7 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	const QString dbId(
 	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
+	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
@@ -1997,7 +1996,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	const QString dbId(
 	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
+	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
@@ -2240,7 +2239,7 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 	if (TaskSendMessage::SM_SUCCESS == result) {
 		showStatusTextWithTimeout(tr(
 		    "Message from '%1' (%2) has been successfully sent to '%3' (%4).").
-		    arg(AccountModel::globAccounts[userName].accountName()).
+		    arg(globAccounts[userName].accountName()).
 		    arg(userName).arg(recipientName).arg(dbIDRecipient));
 
 		/* Refresh account list. */
@@ -2248,7 +2247,7 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 	} else {
 		showStatusTextWithTimeout(tr(
 		    "Error while sending message from '%1' (%2) to '%3' (%4).").
-		    arg(AccountModel::globAccounts[userName].accountName()).
+		    arg(globAccounts[userName].accountName()).
 		    arg(userName).arg(recipientName).arg(dbIDRecipient));
 	}
 
@@ -2325,8 +2324,8 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	}
 
 	MessageDbSet *dbSet = accountDbSet(
-	    m_accountModel.userName(currentAccountModelIndex()), this);
-	if (0 == dbSet) {
+	    m_accountModel.userName(currentAccountModelIndex()));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -2338,7 +2337,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	}
 
 	/* Generate and show message information. */
-	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId, 0));
+	ui->messageInfo->setHtml(messageDb->descriptionHtml(dmId));
 	ui->messageInfo->setReadOnly(true);
 
 	m_attachmentModel.removeRows(0, m_attachmentModel.rowCount());
@@ -2385,9 +2384,8 @@ void MainWindow::accountMarkReceivedLocallyRead(bool read)
 
 	QModelIndex acntIdx(currentAccountModelIndex());
 
-	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
-	    this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -2444,9 +2442,8 @@ void MainWindow::accountMarkReceivedYearLocallyRead(bool read)
 
 	QModelIndex acntIdx(currentAccountModelIndex());
 
-	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
-	    this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -2509,9 +2506,8 @@ void MainWindow::accountMarkRecentReceivedLocallyRead(bool read)
 
 	QModelIndex acntIdx(currentAccountModelIndex());
 
-	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
-	    this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -2569,9 +2565,8 @@ void MainWindow::accountMarkReceivedProcessState(
 
 	QModelIndex acntIdx(currentAccountModelIndex());
 
-	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
-	    this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -2639,9 +2634,8 @@ void MainWindow::accountMarkReceivedYearProcessState(
 
 	QModelIndex acntIdx(currentAccountModelIndex());
 
-	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
-	    this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -2717,9 +2711,8 @@ void MainWindow::accountMarkRecentReceivedProcessState(
 
 	QModelIndex acntIdx(currentAccountModelIndex());
 
-	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx),
-	    this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(m_accountModel.userName(acntIdx));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -2944,8 +2937,8 @@ bool MainWindow::eraseMessage(const QString &userName,
 
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -3084,7 +3077,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		Q_ASSERT(!userName.isEmpty());
 
 		/* Skip those that should omitted. */
-		if (!AccountModel::globAccounts[userName].syncWithAll()) {
+		if (!globAccounts[userName].syncWithAll()) {
 			continue;
 		}
 
@@ -3127,8 +3120,8 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 		Q_ASSERT(!userName.isEmpty());
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		return false;
 	}
 
@@ -3213,7 +3206,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 	const QString userName(m_accountModel.userName(acntIdx));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
+	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
@@ -3256,7 +3249,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	html.append("<h3>");
 
 
-	if (AccountModel::globAccounts[userName].isTestAccount()) {
+	if (globAccounts[userName].isTestAccount()) {
 		html.append(tr("Test account"));
 	} else {
 		html.append(tr("Standard account"));
@@ -3265,7 +3258,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	html.append("</h3>");
 
 	html.append(strongAccountInfoLine(tr("Account name"),
-	    AccountModel::globAccounts[userName].accountName()));
+	    globAccounts[userName].accountName()));
 
 	const QString acntDbKey(AccountDb::keyFromLogin(userName));
 	if (globAccountDbPtr->dbId(acntDbKey).isEmpty()) {
@@ -3416,8 +3409,8 @@ lastPart:
 	html.append(strongAccountInfoLine(tr("Password expiration date"),
 	    info));
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return QString();
 	}
@@ -3537,270 +3530,75 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 	return html;
 }
 
-
-/* ========================================================================= */
-/*
- * Get message db set related to given account.
- */
-MessageDbSet * MainWindow::accountDbSet(const QString &userName,
-    MainWindow *mw)
-/* ========================================================================= */
+MessageDbSet *MainWindow::accountDbSet(const QString &userName)
 {
-	MessageDbSet *dbSet = NULL;
-	int flags, dbPresenceCode;
+	enum AccountInteraction::AccessStatus status;
+	QString dbDir, namesStr;
 
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return 0;
-	}
+	MessageDbSet *dbSet = AccountInteraction::accessDbSet(userName, status,
+	    dbDir, namesStr);
 
-	/* Get user name and db location. */
-	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
-
-	if (!itemSettings.isValid()) {
-		logWarning(
-		    "Attempting to accessing database for user name '%s'. "
-		    "The account seems not to exist.\n",
-		    userName.toUtf8().constData());
-		return 0;
-	}
-
-	QString dbDir = itemSettings.dbDir();
-	if (dbDir.isEmpty()) {
-		/* Set default directory name. */
-		dbDir = globPref.confDir();
-	}
-
-	flags = 0;
-	if (itemSettings.isTestAccount()) {
-		flags |= MDS_FLG_TESTING;
-	}
-	if (itemSettings._createdFromScratch()) {
-		/* Check database structure on account creation. */
-		flags |= MDS_FLG_CHECK_QUICK;
-	}
-	dbPresenceCode =
-	    MessageDbSet::checkExistingDbFile(dbDir, userName, flags);
-
-	switch (dbPresenceCode) {
-	case MDS_ERR_OK:
-		{
-			if (itemSettings._createdFromScratch()) {
-				/* Notify the user on account creation. */
-				QStringList dbFileNames(
-				    MessageDbSet::existingDbFileNamesInLocation(
-				        dbDir, userName,
-				        itemSettings.isTestAccount(),
-				        MessageDbSet::DO_UNKNOWN, true));
-				Q_ASSERT(!dbFileNames.isEmpty());
-				QString namesStr("'" + dbFileNames[0] + "'");
-				for (int i = 1; i < dbFileNames.size(); ++i) {
-					namesStr += ", '" + dbFileNames[i] + "'";
-				}
-				logInfo("Database files %s for user name "
-				    "'%s' already present in '%s'.\n",
-				    namesStr.toUtf8().constData(),
-				    userName.toUtf8().constData(),
-				    dbDir.toUtf8().constData());
-				if (0 != mw) {
-					QMessageBox::information(mw,
-					    tr("Datovka: Database file present"),
-					    tr("Database file for account '%1' "
-					        "already exists.").arg(userName) +
-					    "\n\n" +
-					    tr("The existing database files %1 in '%2' are "
-					        "going to be used.").arg(namesStr).arg(dbDir) +
-					    "\n\n" +
-					    tr("If you want to use a new blank file "
-					        "then delete, rename or move the "
-					        "existing file so that the "
-					        "application can create a new empty "
-					        "file."),
-					    QMessageBox::Ok);
-				}
-			}
-			dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
-			    itemSettings.isTestAccount(),
-			    MessageDbSet::DO_UNKNOWN,
-			    MessageDbSet::CM_MUST_EXIST);
-		}
+	switch (status) {
+	case AccountInteraction::AS_DB_PRESENT:
+		QMessageBox::information(this,
+		    tr("Datovka: Database file present"),
+		    tr("Database file for account '%1' already exists.").arg(userName) +
+		    "\n\n" +
+		    tr("The existing database files %1 in '%2' are going to be used.").arg(namesStr).arg(dbDir) +
+		    "\n\n" +
+		    tr("If you want to use a new blank file then delete, rename or move the existing file so that the application can create a new empty file."),
+		    QMessageBox::Ok);
 		break;
-	case MDS_ERR_MISSFILE:
-		{
-			if (!itemSettings._createdFromScratch()) {
-				/* Not on account creation. */
-				logWarning("Missing database files for "
-				    "user name '%s' in '%s'.\n",
-				    userName.toUtf8().constData(),
-				    dbDir.toUtf8().constData());
-				if (0 != mw) {
-					QMessageBox::warning(mw,
-					    tr("Datovka: Problem loading database"),
-					    tr("Could not load data from the database "
-					        "for account '%1'").arg(userName) +
-					    "\n\n" +
-					    tr("Database files are missing in '%1'.").arg(
-					        dbDir) +
-					    "\n\n" +
-					    tr("I'll try to create an empty one."),
-					    QMessageBox::Ok);
-				}
-			}
-			dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
-			    itemSettings.isTestAccount(),
-			    MessageDbSet::DO_YEARLY,
-			    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
-		}
+	case AccountInteraction::AS_DB_NOT_PRESENT:
+		QMessageBox::warning(this,
+		    tr("Datovka: Problem loading database"),
+		    tr("Could not load data from the database for account '%1'").arg(userName) +
+		    "\n\n" +
+		    tr("Database files are missing in '%1'.").arg(dbDir) +
+		    "\n\n" +
+		    tr("I'll try to create an empty one."),
+		    QMessageBox::Ok);
 		break;
-	case MDS_ERR_NOTAFILE:
-		{
-			/* Notify the user that the location is not a file. */
-			QStringList dbFileNames(
-			    MessageDbSet::existingDbFileNamesInLocation(
-			        dbDir, userName,
-			        itemSettings.isTestAccount(),
-			        MessageDbSet::DO_UNKNOWN, true));
-			Q_ASSERT(!dbFileNames.isEmpty());
-			QString namesStr("'" + dbFileNames[0] + "'");
-			for (int i = 1; i < dbFileNames.size(); ++i) {
-				namesStr += ", '" + dbFileNames[i] + "'";
-			}
-			logWarning("Some databases of %s in '%s' related to "
-			    "user name '%s' are not a file.\n",
-			    namesStr.toUtf8().constData(),
-			    dbDir.toUtf8().constData(),
-			    userName.toUtf8().constData());
-			if (0 != mw) {
-				QMessageBox::warning(mw,
-				    tr("Datovka: Problem loading database"),
-				    tr("Could not load data from the database "
-				        "for account '%1'").arg(userName) +
-				    "\n\n" +
-				    tr("Some databases of %1 in '%2' are not a file."
-				        ).arg(namesStr).arg(dbDir),
-				    QMessageBox::Ok);
-			}
-		}
+	case AccountInteraction::AS_DB_NOT_FILES:
+		QMessageBox::warning(this,
+		    tr("Datovka: Problem loading database"),
+		    tr("Could not load data from the database for account '%1'").arg(userName) +
+		    "\n\n" +
+		    tr("Some databases of %1 in '%2' are not a file.").arg(namesStr).arg(dbDir),
+		    QMessageBox::Ok);
 		break;
-	case MDS_ERR_ACCESS:
-		{
-			/* Notify that the user does not have enough rights. */
-			QStringList dbFileNames(
-			    MessageDbSet::existingDbFileNamesInLocation(
-			        dbDir, userName,
-			        itemSettings.isTestAccount(),
-			        MessageDbSet::DO_UNKNOWN, true));
-			Q_ASSERT(!dbFileNames.isEmpty());
-			QString namesStr("'" + dbFileNames[0] + "'");
-			for (int i = 1; i < dbFileNames.size(); ++i) {
-				namesStr += ", '" + dbFileNames[i] + "'";
-			}
-			logWarning("Some databases of '%s' in '%s' related to "
-			    "user name '%s' cannot be accessed.\n",
-			    namesStr.toUtf8().constData(),
-			    dbDir.toUtf8().constData(),
-			    userName.toUtf8().constData());
-			if (0 != mw) {
-				QMessageBox::warning(mw,
-				    tr("Datovka: Problem loading database"),
-				    tr("Could not load data from the database "
-				        "for account '%1'").arg(userName) +
-				    "\n\n" +
-				    tr("Some databases of '%1' in '%2' cannot be accessed."
-				        ).arg(namesStr).arg(dbDir) +
-				    "\n\n" +
-				    tr("You don't have enough access rights to use "
-				        "the file."),
-				    QMessageBox::Ok);
-			}
-		}
+	case AccountInteraction::AS_DB_FILES_INACCESSIBLE:
+		QMessageBox::warning(this,
+		    tr("Datovka: Problem loading database"),
+		    tr("Could not load data from the database for account '%1'").arg(userName) +
+		    "\n\n" +
+		    tr("Some databases of '%1' in '%2' cannot be accessed.").arg(namesStr).arg(dbDir) +
+		    "\n\n" +
+		    tr("You don't have enough access rights to use the file."),
+		    QMessageBox::Ok);
 		break;
-	case MDS_ERR_CREATE:
-		{
-			/* This error should not be returned. */
-			Q_ASSERT(0);
-		}
+	case AccountInteraction::AS_DB_FILES_CORRUPT:
+		QMessageBox::warning(this,
+		    tr("Datovka: Problem loading database"),
+		    tr("Could not load data from the database for account '%1'").arg(userName) +
+		    "\n\n" +
+		    tr("Some databases of %1 in '%2' cannot be used.").arg(namesStr).arg(dbDir) +
+		    "\n\n" +
+		    tr("The file either does not contain an sqlite database or the file is corrupted."),
+		    QMessageBox::Ok);
 		break;
-	case MDS_ERR_DATA:
-		{
-			/*
-			 * Database file is not a database file or is
-			 * corrupted.
-			 */
-			QStringList dbFileNames(
-			    MessageDbSet::existingDbFileNamesInLocation(
-			        dbDir, userName,
-			        itemSettings.isTestAccount(),
-			        MessageDbSet::DO_UNKNOWN, true));
-			Q_ASSERT(!dbFileNames.isEmpty());
-			QString namesStr("'" + dbFileNames[0] + "'");
-			for (int i = 1; i < dbFileNames.size(); ++i) {
-				namesStr += ", '" + dbFileNames[i] + "'";
-			}
-			logWarning("Some databases of %s in '%s' related to "
-			    "user name '%s' is probably corrupted.\n",
-			    namesStr.toUtf8().constData(),
-			    dbDir.toUtf8().constData(),
-			    userName.toUtf8().constData());
-			if (0 != mw) {
-				QMessageBox::warning(mw,
-				    tr("Datovka: Problem loading database"),
-				    tr("Could not load data from the database "
-				        "for account '%1'").arg(userName) +
-				    "\n\n" +
-				    tr("Some databases of %1 in '%2' cannot be used."
-				        ).arg(namesStr).arg(dbDir) +
-				    "\n\n" +
-				    tr("The file either does not contain an sqlite "
-				        "database or the file is corrupted."),
-				    QMessageBox::Ok);
-			}
-		}
-		break;
-	case MDS_ERR_MULTIPLE:
-		{
-			/*
-			 * Multiple atabase organisation types resite in the
-			 * same location.
-			 */
-			QStringList dbFileNames(
-			    MessageDbSet::existingDbFileNamesInLocation(
-			        dbDir, userName,
-			        itemSettings.isTestAccount(),
-			        MessageDbSet::DO_UNKNOWN, true));
-			Q_ASSERT(!dbFileNames.isEmpty());
-			QString namesStr("'" + dbFileNames[0] + "'");
-			for (int i = 1; i < dbFileNames.size(); ++i) {
-				namesStr += ", '" + dbFileNames[i] + "'";
-			}
-			logWarning("Multiple databases %s for '%s' have been "
-			    "encountered in the location '%s'.\n",
-			    namesStr.toUtf8().constData(),
-			    userName.toUtf8().constData(),
-			    dbDir.toUtf8().constData());
-			if (0 != mw) {
-				QMessageBox::warning(mw,
-				    tr("Datovka: Problem loading database"),
-				    tr("Could not load data from the database "
-				        "for account '%1'").arg(userName) +
-				    "\n\n" +
-				    tr("Conflicting databases %1 in '%2' cannot be used."
-				        ).arg(namesStr).arg(dbDir) +
-				    "\n\n" +
-				    tr("Please remove the conflicting files."),
-				    QMessageBox::Ok);
-			}
-		}
+	case AccountInteraction::AS_DB_CONFUSING_ORGANISATION:
+		QMessageBox::warning(this,
+		    tr("Datovka: Problem loading database"),
+		    tr("Could not load data from the database for account '%1'").arg(userName) +
+		    "\n\n" +
+		    tr("Conflicting databases %1 in '%2' cannot be used.").arg(namesStr).arg(dbDir) +
+		    "\n\n" +
+		    tr("Please remove the conflicting files."),
+		    QMessageBox::Ok);
 		break;
 	default:
-		/* The code should not end here. */
-		Q_ASSERT(0);
 		break;
-	}
-
-	if (itemSettings._createdFromScratch()) {
-		/* Notify only once. */
-		itemSettings._setCreatedFromScratch(false);
 	}
 
 	/*
@@ -3809,25 +3607,17 @@ MessageDbSet * MainWindow::accountDbSet(const QString &userName,
 	 * account.
 	 */
 
-	if (NULL == dbSet) {
+	if (Q_NULLPTR == dbSet) {
 		/*
 		 * TODO -- generate notification dialogue and give the user
 		 * a choice between aborting program and skipping account?
 		 */
-		logError("Database files for user name '%s' in '%s' cannot be "
-		    "created or is probably corrupted.\n",
-		    userName.toUtf8().constData(),
-		    dbDir.toUtf8().constData());
-		if (0 != mw) {
-			QMessageBox::critical(mw,
-			    tr("Datovka: Database opening error"),
-			    tr("Could not load data from the database "
-			        "for account '%1'").arg(userName) +
-			    "\n\n" +
-			    tr("Database files in '%1' cannot be created or are "
-			        "corrupted.").arg(dbDir),
-			    QMessageBox::Ok);
-		}
+		QMessageBox::critical(this,
+		    tr("Datovka: Database opening error"),
+		    tr("Could not load data from the database for account '%1'").arg(userName) +
+		    "\n\n" +
+		    tr("Database files in '%1' cannot be created or are corrupted.").arg(dbDir),
+		    QMessageBox::Ok);
 		/*
 		 * The program has to be aborted right now. The method
 		 * QCoreApplication::exit(EXIT_FAILURE) uses the event loop
@@ -3851,7 +3641,7 @@ void MainWindow::setAccountStoragePaths(const QString &userName)
 
 	Q_ASSERT(!userName.isEmpty());
 
-	const AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
+	const AcntSettings &itemSettings(globAccounts[userName]);
 
 	if (!itemSettings.lastAttachSavePath().isEmpty()) {
 		m_save_attach_dir = itemSettings.lastAttachSavePath();
@@ -3866,30 +3656,6 @@ void MainWindow::setAccountStoragePaths(const QString &userName)
 		m_on_export_zfo_activate = itemSettings.lastZFOExportPath();
 	}
 }
-
-/* ========================================================================= */
-/*
- * Create configuration file if not present.
- */
-bool MainWindow::ensureConfPresence(void)
-/* ========================================================================= */
-{
-	if (!QDir(globPref.confDir()).exists()) {
-		if (!QDir(globPref.confDir()).mkpath(".")) {
-			return false;
-		}
-	}
-	if (!QFile(globPref.loadConfPath()).exists()) {
-		QFile file(globPref.loadConfPath());
-		if (!file.open(QIODevice::ReadWrite)) {
-			return false;
-		}
-		file.close();
-	}
-
-	return true;
-}
-
 
 /* ========================================================================= */
 /*
@@ -4487,8 +4253,8 @@ bool MainWindow::updateExistingAccountModelUnread(const QModelIndex &index)
 	/* Get database id. */
 	const QString userName(m_accountModel.userName(index));
 	Q_ASSERT(!userName.isEmpty());
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -4540,8 +4306,8 @@ bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 	/* Get database id. */
 	const QString userName(m_accountModel.userName(index));
 	Q_ASSERT(!userName.isEmpty());
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -4599,8 +4365,8 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		Q_ASSERT(topIndex.isValid());
 		const QString userName(m_accountModel.userName(topIndex));
 		Q_ASSERT(!userName.isEmpty());
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		if (0 == dbSet) {
+		MessageDbSet *dbSet = accountDbSet(userName);
+		if (Q_NULLPTR == dbSet) {
 			/*
 			 * Skip creation of leaves when no database is present.
 			 */
@@ -4730,16 +4496,16 @@ void MainWindow::showSendMessageDialog(int action)
 			QModelIndex index = m_accountModel.index(i, 0);
 			const QString uName(m_accountModel.userName(index));
 			Q_ASSERT(!uName.isEmpty());
-			MessageDbSet *dbSet = accountDbSet(uName, this);
-			if (0 == dbSet) {
+			MessageDbSet *dbSet = accountDbSet(uName);
+			if (Q_NULLPTR == dbSet) {
 				Q_ASSERT(0);
 				return;
 			}
 			messageDbList.append(Task::AccountDescr(uName, dbSet));
 		}
 	} else {
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		if (0 == dbSet) {
+		MessageDbSet *dbSet = accountDbSet(userName);
+		if (Q_NULLPTR == dbSet) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -4761,8 +4527,8 @@ void MainWindow::showSendMessageDialog(int action)
 			MessageDb::MsgId msgId(msgMsgId(msgIdx));
 
 			/* Check whether full messages are present. */
-			MessageDbSet *dbSet = accountDbSet(userName, this);
-			Q_ASSERT(0 != dbSet);
+			MessageDbSet *dbSet = accountDbSet(userName);
+			Q_ASSERT(Q_NULLPTR != dbSet);
 
 			MessageDb *messageDb =
 			    dbSet->accessMessageDb(msgId.deliveryTime, false);
@@ -4867,14 +4633,13 @@ void MainWindow::deleteAccount(const QString &userName)
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	const QString accountName(
-	    AccountModel::globAccounts[userName].accountName());
+	const QString accountName(globAccounts[userName].accountName());
 
 	QString dlgTitleText = tr("Remove account ") + accountName;
 	QString questionText = tr("Do you want to remove account") + " '" +
@@ -4950,7 +4715,7 @@ void MainWindow::changeAccountPassword(void)
 	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	Q_ASSERT(!dbId.isEmpty());
 
-	const AcntSettings &accountInfo(AccountModel::globAccounts[userName]);
+	const AcntSettings &accountInfo(globAccounts[userName]);
 
 	showStatusTextWithTimeout(tr("Change password of account "
 	    "\"%1\".").arg(accountInfo.accountName()));
@@ -4975,18 +4740,17 @@ void MainWindow::manageAccountProperties(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
-	    .arg(AccountModel::globAccounts[userName].accountName()));
+	    .arg(globAccounts[userName].accountName()));
 
 	DlgCreateAccount *accountDlg = new DlgCreateAccount(
-	    AccountModel::globAccounts[userName], DlgCreateAccount::ACT_EDIT,
-	    this);
+	    globAccounts[userName], DlgCreateAccount::ACT_EDIT, this);
 
 	int dlgRet = accountDlg->exec();
 
 	if (QDialog::Accepted == dlgRet) {
 		/* Save changes. */
-		AccountModel::globAccounts[userName] = accountDlg->getSubmittedData();
-		emit AccountModel::globAccounts.accountDataChanged(userName);
+		globAccounts[userName] = accountDlg->getSubmittedData();
+		emit globAccounts.accountDataChanged(userName);
 
 		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
 		    .arg(userName));
@@ -5046,7 +4810,7 @@ void MainWindow::changeDataDirectory(void)
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
-	const AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
+	const AcntSettings &itemSettings(globAccounts[userName]);
 
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
@@ -5083,10 +4847,10 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 	Q_ASSERT(!userName.isEmpty());
 
 	/* Get current settings. */
-	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
+	AcntSettings &itemSettings(globAccounts[userName]);
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -5204,7 +4968,7 @@ void MainWindow::findDatabox(void)
 	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
 
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
-	    .arg(AccountModel::globAccounts[userName].accountName()));
+	    .arg(globAccounts[userName].accountName()));
 
 	QDialog *dsSearch = new DlgDsSearch(userName, dbType,
 	    dbEffectiveOVM, dbOpenAddressing, Q_NULLPTR, this);
@@ -5265,11 +5029,11 @@ void MainWindow::setReceivedColumnWidths(void)
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_received_1);
 	ui->messageList->setColumnWidth(2, m_received_2);
-	for (i = 3; i < (DbMsgsTblModel::rcvdItemIds().size() - 3); ++i) {
+	for (i = 3; i < (MessageDb::rcvdItemIds.size() - 3); ++i) {
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last three columns display icons. */
-	int max = DbMsgsTblModel::rcvdItemIds().size();
+	int max = MessageDb::rcvdItemIds.size();
 	if (globRecordsManagementSet.isSet()) {
 		/* Add one column if records management service is activated. */
 		++max;
@@ -5300,11 +5064,11 @@ void MainWindow::setSentColumnWidths(void)
 	ui->messageList->resizeColumnToContents(0);
 	ui->messageList->setColumnWidth(1, m_sent_1);
 	ui->messageList->setColumnWidth(2, m_sent_2);
-	for (i = 3; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
+	for (i = 3; i < (MessageDb::sntItemIds.size() - 1); ++i) {
 		ui->messageList->resizeColumnToContents(i);
 	}
 	/* Last column displays an icon. */
-	int max = DbMsgsTblModel::rcvdItemIds().size();
+	int max = MessageDb::rcvdItemIds.size();
 	if (globRecordsManagementSet.isSet()) {
 		/* Add one column if records management service is activated. */
 		++max;
@@ -5896,8 +5660,8 @@ void MainWindow::verifySelectedMessage(void)
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -6001,7 +5765,7 @@ void MainWindow::showExportCorrespondenceOverviewDialog(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
+	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
@@ -6021,8 +5785,7 @@ void MainWindow::showImportZFOActionDialog(void)
 {
 	debugSlotCall();
 
-	enum ImportZFODialog::ZFOtype zfoType =
-	    ImportZFODialog::IMPORT_MESSAGE_ZFO;
+	enum Imports::Type zfoType = Imports::IMPORT_MESSAGE;
 	enum ImportZFODialog::ZFOlocation locationType =
 	    ImportZFODialog::IMPORT_FROM_DIR;
 	bool checkZfoOnServer = false;
@@ -6044,8 +5807,8 @@ void MainWindow::showImportZFOActionDialog(void)
 		if ((!checkZfoOnServer) ||
 		    globIsdsSessions.isConnectedToIsds(userName) ||
 		    connectToIsds(userName)) {
-			MessageDbSet *dbSet = accountDbSet(userName, this);
-			if (0 == dbSet) {
+			MessageDbSet *dbSet = accountDbSet(userName);
+			if (Q_NULLPTR == dbSet) {
 				Q_ASSERT(0);
 				continue;
 			}
@@ -6209,7 +5972,7 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 	const QString userName(m_accountModel.userName(acntIdx));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
+	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return false;
@@ -6323,8 +6086,8 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -6381,8 +6144,8 @@ void MainWindow::sendMessagesZfoEmail(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -6476,8 +6239,8 @@ void MainWindow::sendAllAttachmentsEmail(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -6612,8 +6375,8 @@ void MainWindow::openSelectedMessageExternally(void)
 	}
 
 	MessageDbSet *dbSet = accountDbSet(
-	    m_accountModel.userName(currentAccountModelIndex()), this);
-	if (0 == dbSet) {
+	    m_accountModel.userName(currentAccountModelIndex()));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -6692,8 +6455,8 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -6756,13 +6519,13 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 
 	QList<DlgRecordsManagementStored::AcntData> accounts;
 	foreach (const QString &userName, userNames) {
-		MessageDbSet *dbSet = accountDbSet(userName, this);
+		MessageDbSet *dbSet = accountDbSet(userName);
 		if (Q_NULLPTR == dbSet) {
 			Q_ASSERT(0);
 			return;
 		}
 		accounts.append(DlgRecordsManagementStored::AcntData(
-		    AccountModel::globAccounts[userName].accountName(),
+		    globAccounts[userName].accountName(),
 		    userName, dbSet));
 	}
 
@@ -6801,7 +6564,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	MessageDb::MsgId msgId(msgMsgId(msgIndex));
 	Q_ASSERT(msgId.dmId >= 0);
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
+	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
@@ -6862,8 +6625,8 @@ void MainWindow::showSignatureDetailsDialog(void)
 	}
 
 	MessageDbSet *dbSet = accountDbSet(
-	    m_accountModel.userName(currentAccountModelIndex()), this);
-	if (0 == dbSet) {
+	    m_accountModel.userName(currentAccountModelIndex()));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -7124,21 +6887,21 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 
 bool MainWindow::connectToIsds(const QString &userName)
 {
-	AcntSettings settingsCopy(AccountModel::globAccounts[userName]);
+	AcntSettings settingsCopy(globAccounts[userName]);
 
 	if (!logInGUI(globIsdsSessions, settingsCopy)) {
 		return false;
 	}
 
 	/* Logged in. */
-	AccountModel::globAccounts[userName] = settingsCopy;
+	globAccounts[userName] = settingsCopy;
 	/*
 	 * Catching the following signal is required only when account has
 	 * changed.
 	 *
 	 * The account model catches the signal.
 	 */
-	emit AccountModel::globAccounts.accountDataChanged(userName);
+	emit globAccounts.accountDataChanged(userName);
 	saveSettings();
 
 	/* Get account information if possible. */
@@ -7414,8 +7177,8 @@ void MainWindow::messageItemsSetReadStatus(
 	}
 
 	MessageDbSet *dbSet = accountDbSet(
-	    m_accountModel.userName(currentAccountModelIndex()), this);
-	if (0 == dbSet) {
+	    m_accountModel.userName(currentAccountModelIndex()));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -7471,8 +7234,8 @@ void MainWindow::messageItemsSetProcessStatus(
 	}
 
 	MessageDbSet *dbSet = accountDbSet(
-	   m_accountModel.userName(currentAccountModelIndex()), this);
-	if (0 == dbSet) {
+	   m_accountModel.userName(currentAccountModelIndex()));
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -7541,8 +7304,8 @@ void MainWindow::showMsgAdvancedSearchDialog(void)
 	const QString currentUserName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!currentUserName.isEmpty());
-	MessageDbSet *dbSet = accountDbSet(currentUserName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(currentUserName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -7556,8 +7319,8 @@ void MainWindow::showMsgAdvancedSearchDialog(void)
 		const QString userName(m_accountModel.userName(index));
 		Q_ASSERT(!userName.isEmpty());
 		if (currentUserName != userName) {
-			MessageDbSet *dbSet = accountDbSet(userName, this);
-			if (0 == dbSet) {
+			MessageDbSet *dbSet = accountDbSet(userName);
+			if (Q_NULLPTR == dbSet) {
 				Q_ASSERT(0);
 				continue;
 			}
@@ -7672,7 +7435,7 @@ void MainWindow::prepareMsgTmstmpExpir(
 		Q_ASSERT(!userName.isEmpty());
 		showStatusTextPermanently(tr("Checking time stamps in "
 		    "account '%1'...").arg(
-		        AccountModel::globAccounts[userName].accountName()));
+		        globAccounts[userName].accountName()));
 		checkMsgsTmstmpExpiration(userName, QStringList());
 		break;
 
@@ -7683,7 +7446,7 @@ void MainWindow::prepareMsgTmstmpExpir(
 			Q_ASSERT(!userName.isEmpty());
 			showStatusTextPermanently(
 			    tr("Checking time stamps in account '%1'...").arg(
-			        AccountModel::globAccounts[userName].accountName()));
+			        globAccounts[userName].accountName()));
 			checkMsgsTmstmpExpiration(userName, QStringList());
 		}
 		break;
@@ -7779,7 +7542,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 		for (int i = 0; i < msgCnt; ++i) {
 
 			message = loadZfoFile(dummy_session, filePathList.at(i),
-			    ImportZFODialog::IMPORT_MESSAGE_ZFO);
+			    Imports::IMPORT_MESSAGE);
 			if (NULL == message || message->envelope == NULL) {
 				errorMsgFileNames.append(filePathList.at(i));
 				continue;
@@ -7823,8 +7586,8 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 		showExportOption = false;
 
 	} else {
-		MessageDbSet *dbSet = accountDbSet(userName, this);
-		if (0 == dbSet) {
+		MessageDbSet *dbSet = accountDbSet(userName);
+		if (Q_NULLPTR == dbSet) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -7852,7 +7615,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 
 		infoText = tr("Time stamp expiration check "
 		    "in account '%1' finished with result:").arg(
-		        AccountModel::globAccounts[userName].accountName())
+		        globAccounts[userName].accountName())
 		    + "<br/><br/>" +
 		    tr("Total of messages in database: %1").arg(msgCnt)
 		    + "<br/><b>" +
@@ -7947,8 +7710,8 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -8016,8 +7779,8 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 	m_on_import_database_dir_activate =
 	    QFileInfo(dbFileList.at(0)).absoluteDir().absolutePath();
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -8060,14 +7823,14 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 	QString newDbDir;
 	QString userName = m_accountModel.userName(currentAccountModelIndex());
 	/* get current db file location */
-	AcntSettings &itemSettings(AccountModel::globAccounts[userName]);
+	AcntSettings &itemSettings(globAccounts[userName]);
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		dbDir = globPref.confDir();
 	}
 
 	/* get origin message db set based on username */
-	MessageDbSet *msgDbSet = accountDbSet(userName, this);
+	MessageDbSet *msgDbSet = accountDbSet(userName);
 	if (Q_NULLPTR == msgDbSet) {
 		return;
 	}
@@ -8476,8 +8239,8 @@ void MainWindow::vacuumMsgDbSlot(void)
 	const QString userName =
 	    m_accountModel.userName(currentAccountModelIndex());
 
-	MessageDbSet *msgDbSet = accountDbSet(userName, this);
-	if (0 == msgDbSet) {
+	MessageDbSet *msgDbSet = accountDbSet(userName);
+	if (Q_NULLPTR == msgDbSet) {
 		return;
 	}
 
@@ -8607,8 +8370,8 @@ void MainWindow::doExportOfSelectedFiles(
 		return;
 	}
 
-	MessageDbSet *dbSet = accountDbSet(userName, this);
-	if (0 == dbSet) {
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}

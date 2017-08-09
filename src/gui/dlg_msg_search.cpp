@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,12 @@
  * the two.
  */
 
-
-#include "dlg_msg_search.h"
 #include "src/common.h"
+#include "src/gui/dlg_msg_search.h"
 #include "src/io/message_db.h"
 #include "src/io/tag_db.h"
 #include "src/log/log.h"
-#include "src/models/accounts_model.h"
+#include "src/settings/accounts.h"
 #include "src/views/table_home_end_filter.h"
 
 #define COL_USER_NAME 0
@@ -72,8 +71,7 @@ void DlgMsgSearch::initSearchWindow(void)
 	Q_ASSERT(!m_userName.isEmpty());
 
 	/* set account name and user name to label */
-	QString accountName =
-	    AccountModel::globAccounts[m_userName].accountName() + " (" +
+	QString accountName = globAccounts[m_userName].accountName() + " (" +
 	    m_userName + ")";
 	this->currentAccountName->setText(accountName);
 
@@ -525,7 +523,7 @@ void DlgMsgSearch::appendMsgsToTable(
 			Q_ASSERT(0 != messageDb);
 
 			item->setToolTip(messageDb->descriptionHtml(
-			    msgData.mId.dmId, 0, true, false, true));
+			    msgData.mId.dmId, true, false, true));
 		}
 		this->resultsTableWidget->setItem(row, COL_MESSAGE_ID, item);
 		this->resultsTableWidget->setItem(row, COL_DELIVERY_YEAR,

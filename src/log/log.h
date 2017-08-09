@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,8 @@
  * the two.
  */
 
-
 #ifndef _LOG_H_
 #define _LOG_H_
-
 
 #include <cstdarg>
 #include <QMutex>
@@ -32,13 +30,15 @@
 
 #include "src/log/log_common.h"
 
-
 /*!
  * @brief Message output function.
+ *
+ * @param[in] type Type of message sent to message handler.
+ * @param[in] context Additional information about a log message.
+ * @param[in] msg Message to be handled.
  */
 void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
     const QString &msg);
-
 
 /*!
  * @brief Debugging using Qt-defined output.
@@ -47,14 +47,13 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
  */
 void qDebugCall(const char *fmt, ...);
 
-
 /*!
  * @brief Debugging using Qt-defined output.
  *
  * @param[in] fmt Format string.
+ * @param[in,out] ap Variable arguments list.
  */
 void qDebugCallV(const char *fmt, va_list ap);
-
 
 /*!
  * @brief Generates location debug information.
@@ -70,7 +69,6 @@ void qDebugCallV(const char *fmt, va_list ap);
 #  define debugSlotCall() do {} while(0)
 #endif
 
-
 /*!
  * @brief Generates location debug information.
  */
@@ -85,23 +83,20 @@ void qDebugCallV(const char *fmt, va_list ap);
 #  define debugFuncCall() do {} while(0)
 #endif
 
-
 /*!
  * @brief Maximal number of simultaneously opened files.
  */
 #define MAX_LOG_FILES 64
-
 
 /*!
  * @brief Maximal number of sources to write to log facility.
  */
 #define MAX_SOURCES 64
 
-
 /*!
- * @brief Global logger class.
+ * @brief Logging device class.
  */
-class GlobLog {
+class LogDevice {
 public:
 	enum LogFac {
 		LF_SYSLOG = 0, /*!< @brief Syslog facility. */
@@ -120,8 +115,8 @@ public:
 		FILE *fout; /*!< Output file. */
 	};
 
-	GlobLog(void);
-	~GlobLog(void);
+	LogDevice(void);
+	~LogDevice(void);
 
 	/*!
 	 * @brief Get log verbosity.
@@ -267,7 +262,7 @@ private:
 	 * @brief Converts log level to urgency prefix.
 	 */
 	static
-	const char * urgencyPrefix(uint8_t level);
+	const char *urgencyPrefix(uint8_t level);
 
 	/*!
 	 * @brief converts message type to urgency level.
@@ -307,8 +302,7 @@ private:
 	    const char *prefix, const char *format, va_list ap);
 };
 
-
-extern GlobLog globLog; /*!< Global log facility. */
+extern LogDevice globLog; /*!< Global log facility. */
 
 /*!
  * @brief Logging macro used for internal purposes.
@@ -353,7 +347,6 @@ extern GlobLog globLog; /*!< Global log facility. */
 	(void) 0
 #endif /* DEBUG */
 
-
 /*!
  * @brief Logs the debugging information even if the threshold was not set.
  *
@@ -362,7 +355,6 @@ extern GlobLog globLog; /*!< Global log facility. */
  */
 #define logDebugLv0NL(format, ...) \
 	logDebugNL(-1, format, __VA_ARGS__)
-
 
 /*!
  * @brief Logs the debugging information only if the verbosity exceeds 0.
@@ -373,7 +365,6 @@ extern GlobLog globLog; /*!< Global log facility. */
 #define logDebugLv1NL(format, ...) \
 	logDebugNL(0, format, __VA_ARGS__)
 
-
 /*!
  * @brief Logs the debugging information only if the verbosity exceeds 1.
  *
@@ -383,7 +374,6 @@ extern GlobLog globLog; /*!< Global log facility. */
 #define logDebugLv2NL(format, ...) \
 	logDebugNL(1, format, __VA_ARGS__)
 
-
 /*!
  * @brief Logs the debugging information only if the verbosity exceeds 2.
  *
@@ -392,7 +382,6 @@ extern GlobLog globLog; /*!< Global log facility. */
  */
 #define logDebugLv3NL(format, ...) \
 	logDebugNL(2, format, __VA_ARGS__)
-
 
 /*!
  * @brief Logs multi-line debugging message.
@@ -408,7 +397,6 @@ extern GlobLog globLog; /*!< Global log facility. */
 		} \
 	} while (0)
 
-
 /*!
  * @brief Logs the debugging information even if the threshold was not set.
  *
@@ -417,7 +405,6 @@ extern GlobLog globLog; /*!< Global log facility. */
  */
 #define logDebugMlLv0(format, ...) \
 	logDebugMl(-1, format, __VA_ARGS__)
-
 
 /*!
  * @brief Logs the debugging information only if the verbosity exceeds 0.
@@ -428,7 +415,6 @@ extern GlobLog globLog; /*!< Global log facility. */
 #define logDebugMlLv1(format, ...) \
 	logDebugMl(0, format, __VA_ARGS__)
 
-
 /*!
  * @brief Logs the debugging information only if the verbosity exceeds 1.
  *
@@ -438,7 +424,6 @@ extern GlobLog globLog; /*!< Global log facility. */
 #define logDebugMlLv2(format, ...) \
 	logDebugMl(1, format, __VA_ARGS__)
 
-
 /*!
  * @brief Logs the debugging information only if the verbosity exceeds 2.
  *
@@ -447,7 +432,6 @@ extern GlobLog globLog; /*!< Global log facility. */
  */
 #define logDebugMlLv3(format, ...) \
 	logDebugMl(2, format, __VA_ARGS__)
-
 
 /*!
  * @brief Logs information message.
@@ -480,7 +464,6 @@ extern GlobLog globLog; /*!< Global log facility. */
 		globLog.logMl(LOGSRC_DEF, LOG_INFO, format, __VA_ARGS__); \
 	} while (0)
 
-
 /*!
  * @brief Logs warning message.
  *
@@ -512,7 +495,6 @@ extern GlobLog globLog; /*!< Global log facility. */
 		globLog.logMl(LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__); \
 	} while (0)
 
-
 /*!
  * @brief Logs error message.
  *
@@ -523,7 +505,6 @@ extern GlobLog globLog; /*!< Global log facility. */
 	do { \
 		globLog.log(LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__); \
 	} while (0)
-
 
 /*!
  * @brief Logs error message. Automatic newline is added.
@@ -544,6 +525,5 @@ extern GlobLog globLog; /*!< Global log facility. */
 	do { \
 		globLog.logMl(LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__); \
 	} while (0)
-
 
 #endif /* _LOG_H_ */

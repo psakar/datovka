@@ -4,11 +4,12 @@ QT += gui
 QT += network
 QT += testlib
 
+top_srcdir = ../
+
 TEMPLATE = app
 TARGET = tests
-VERSION = 4.9.1
 
-top_srcdir = ../
+include($${top_srcdir}pri/version.pri)
 
 DEFINES += \
 	DEBUG=1 \

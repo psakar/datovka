@@ -22,10 +22,9 @@
  */
 
 #include <cstdlib>
-#include <QApplication>
 #include <QCommandLineParser>
+#include <QCoreApplication>
 #include <QDateTime>
-#include <QSplashScreen>
 #include <QtGlobal> /* qsrand() */
 #include <QThread>
 
@@ -33,8 +32,6 @@
 #include "src/cli/cli_parser.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_threads.h"
-#include "src/gui/datovka.h"
-#include "src/gui/dlg_view_zfo.h"
 #include "src/initialisation.h"
 #include "src/io/db_tables.h"
 #include "src/io/filesystem.h"
@@ -44,35 +41,6 @@
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
 #include "src/worker/pool.h"
-
-/*!
- * @brief Specified the mode the executable is being executed with.
- */
-enum RunMode {
-	RM_GUI, /*!< Start with active GUI. */
-	RM_CLI, /*!< Execute command line service. */
-	RM_ZFO /*!< View ZFO content. */
-};
-
-/*!
- * @brief View data message from ZFO file.
- *
- * @param[in] fileName ZFO file name.
- */
-static
-int showZfo(const QString &fileName)
-{
-	if (fileName.isEmpty()) {
-		return -1;
-	}
-
-	QDialog *viewDialog = new DlgViewZfo(fileName, Q_NULLPTR);
-	viewDialog->exec();
-
-	delete viewDialog;
-
-	return 0;
-}
 
 int main(int argc, char *argv[])
 {
@@ -86,13 +54,13 @@ int main(int argc, char *argv[])
 	setDefaultLocale();
 
 	/* TODO -- Make the following assignments configurable. */
-	QCoreApplication::setApplicationName("Datovka");
+	QCoreApplication::setApplicationName("Datovka CLI");
 	QCoreApplication::setApplicationVersion(VERSION " -- [" +
 	    libraryDependencies().join("; ") + "]");
 
 	qInstallMessageHandler(globalLogOutput);
 
-	QApplication app(argc, argv);
+	QCoreApplication app(argc, argv);
 
 	QCommandLineParser parser;
 	if (0 != setupCmdLineParser(parser)) {
@@ -109,32 +77,18 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	const QStringList cmdLineFileNames(parser.positionalArguments());
 	const QStringList srvcArgs(CLIServiceArgs(parser.optionNames()));
-
-	enum RunMode runMode = RM_GUI;
-	QSplashScreen *splash = new QSplashScreen;
-
-	if (!srvcArgs.isEmpty()) {
-		runMode = RM_CLI;
-	} else if (!cmdLineFileNames.isEmpty()) {
-		runMode = RM_ZFO;
-	} else {
-		splash->setPixmap(QPixmap(":/splash/datovka-splash.png"));
-		splash->show();
+	if (srvcArgs.isEmpty()) {
+		logErrorNL("%s",
+		    "No command line arguments supplied. Exiting.");
+		return EXIT_FAILURE;
 	}
 
 	/* Ensure only one instance with given configuration file. */
 	SingleInstance singleInstance(globPref.loadConfPath());
 	if (singleInstance.existsInSystem()) {
 		logErrorNL("%s",
-		    "Another application already uses same configuration.");
-		logInfo("%s\n", "Notifying key owner and exiting");
-		if (!singleInstance.sendMessage(
-		        SingleInstance::msgRaiseMainWindow)) {
-			logErrorNL("%s",
-			    "Could not send message to owner.");
-		}
+		    "Another application already uses same configuration. Exiting.");
 		return EXIT_FAILURE;
 	}
 
@@ -147,7 +101,6 @@ int main(int argc, char *argv[])
 
 	if (0 != crypto_init()) {
 		logError("%s\n", "Cannot load cryptographic back-end.");
-		/* TODO -- throw a dialogue notifying the user. */
 		/*
 		 * TODO -- the function should fail only when all certificates
 		 * failed to load.
@@ -189,20 +142,12 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	logDebugLv0NL("GUI main thread: %p.", QThread::currentThreadId());
+	logDebugLv0NL("CLI main thread: %p.", QThread::currentThreadId());
 
 	logDebugLv0NL("App path: '%s'.",
 	    app.applicationDirPath().toUtf8().constData());
 
 	loadLocalisation(globPref);
-
-	/* set splash action text */
-	if (runMode == RM_GUI) {
-		Qt::Alignment align = Qt::AlignCenter;
-		splash->showMessage(QObject::tr("Application is loading..."),
-		align, Qt::white);
-		app.processEvents();
-	}
 
 	/* Localise description in tables. */
 	localiseTableDescriptions();
@@ -225,30 +170,7 @@ int main(int argc, char *argv[])
 	globWorkPool.start();
 	logInfo("%s\n", "Worker pool started.");
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
-	// https://blog.qt.io/blog/2016/01/26/high-dpi-support-in-qt-5-6/
-	//logInfoNL("%s", "Enabling high DPI scaling.");
-	//QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-#endif /* >= Qt-5.6 */
-
-	if (runMode == RM_CLI) {
-		delete splash;
-		ret = runCLIService(srvcArgs, parser);
-	} else if (runMode == RM_ZFO) {
-		delete splash;
-		foreach (const QString &fileName, cmdLineFileNames) {
-			ret = showZfo(fileName);
-			if (0 != ret) {
-				break;
-			}
-		}
-	} else {
-		MainWindow mainwin;
-		mainwin.show();
-		splash->finish(&mainwin);
-		delete splash;
-		ret = (0 == app.exec()) ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
+	ret = runCLIService(srvcArgs, parser);
 
 	/* Wait until all threads finished. */
 	logInfo("%s\n", "Waiting for pending worker threads.");

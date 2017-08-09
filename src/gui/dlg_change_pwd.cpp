@@ -21,15 +21,13 @@
  * the two.
  */
 
-
 #include <QMessageBox>
 
-#include "dlg_change_pwd.h"
+#include "src/gui/dlg_change_pwd.h"
 #include "src/io/isds_sessions.h"
-#include "src/models/accounts_model.h"
+#include "src/settings/accounts.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_change_pwd.h"
-
 
 DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
     QWidget *parent)
@@ -40,7 +38,6 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
 	setupUi(this);
 	initPwdChangeDialog();
 }
-
 
 /* ========================================================================= */
 /*
@@ -72,14 +69,14 @@ void DlgChangePwd::initPwdChangeDialog(void)
 	this->otpLabel->setEnabled(false);
 	this->smsPushButton->setEnabled(false);
 
-	if (AccountModel::globAccounts[m_userName].loginMethod() ==
+	if (globAccounts[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_HOTP) {
 		this->secCodeLineEdit->setEnabled(true);
 		this->otpLabel->setText(tr("Enter security code:"));
 		this->otpLabel->setEnabled(true);
 	}
 
-	if (AccountModel::globAccounts[m_userName].loginMethod() ==
+	if (globAccounts[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		this->secCodeLineEdit->setEnabled(true);
 		this->smsPushButton->setEnabled(true);
@@ -159,9 +156,9 @@ void DlgChangePwd::checkInputFields(void)
 
 	Q_ASSERT(!m_userName.isEmpty());
 
-	if (AccountModel::globAccounts[m_userName].loginMethod() ==
+	if (globAccounts[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_HOTP ||
-	    AccountModel::globAccounts[m_userName].loginMethod() ==
+	    globAccounts[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		buttonEnabled = buttonEnabled &&
 		    !this->secCodeLineEdit->text().isEmpty();
@@ -203,10 +200,10 @@ void DlgChangePwd::sendSmsCode(void)
 	/* show Premium SMS request dialog */
 	QMessageBox::StandardButton reply = QMessageBox::question(this,
 	    tr("SMS code for account ") +
-	    AccountModel::globAccounts[m_userName].accountName(),
+	    globAccounts[m_userName].accountName(),
 	    tr("Account \"%1\" requires authentication via security code "
 	    "for connection to databox.")
-	        .arg(AccountModel::globAccounts[m_userName].accountName())
+	        .arg(globAccounts[m_userName].accountName())
 	    + "<br/>" +
 	    tr("Security code will be sent you via Premium SMS.") +
 	    "<br/><br/>" +
@@ -235,11 +232,11 @@ void DlgChangePwd::sendSmsCode(void)
 		QMessageBox::information(this, tr("Enter SMS security code"),
 		    tr("SMS security code for account \"%1\"<br/>"
 		    "has been sent on your mobile phone...")
-		    .arg(AccountModel::globAccounts[m_userName].accountName())
+		    .arg(globAccounts[m_userName].accountName())
 		     + "<br/><br/>" +
 		    tr("Enter SMS security code for account")
 		    + "<br/><b>"
-		    + AccountModel::globAccounts[m_userName].accountName()
+		    + globAccounts[m_userName].accountName()
 		    + " </b>(" + m_userName + ").",
 		    QMessageBox::Ok);
 		this->otpLabel->setText(tr("Enter SMS code:"));
@@ -268,14 +265,14 @@ void DlgChangePwd::changePassword(void)
 	QString errorStr, longErrorStr;
 	TaskChangePwd *task;
 
-	if (AccountModel::globAccounts[m_userName].loginMethod() ==
+	if (globAccounts[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_HOTP ||
-	    AccountModel::globAccounts[m_userName].loginMethod() ==
+	    globAccounts[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		task = new (std::nothrow) TaskChangePwd(m_userName,
 		    this->currentPwdLineEdit->text().toUtf8().constData(),
 		    this->newPwdLineEdit->text().toUtf8().constData(),
-		    (AccountModel::globAccounts[m_userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
+		    (globAccounts[m_userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
 		    this->secCodeLineEdit->text());
 	} else {
 		task = new (std::nothrow) TaskChangePwd(m_userName,
@@ -300,7 +297,7 @@ void DlgChangePwd::changePassword(void)
 		        "into your data box via the web interface."),
 		    QMessageBox::Ok);
 
-		AccountModel::globAccounts[m_userName].setPassword(
+		globAccounts[m_userName].setPassword(
 		    this->newPwdLineEdit->text());
 
 		/* TODO - delete and create new

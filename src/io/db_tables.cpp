@@ -29,6 +29,30 @@
 
 #include "src/io/db_tables.h"
 
+void localiseTableDescriptions(void)
+{
+	accntinfTbl.reloadLocalisedDescription();
+	userinfTbl.reloadLocalisedDescription();
+	pwdexpdtTbl.reloadLocalisedDescription();
+
+	msgsTbl.reloadLocalisedDescription();
+	flsTbl.reloadLocalisedDescription();
+	hshsTbl.reloadLocalisedDescription();
+	evntsTbl.reloadLocalisedDescription();
+	prcstTbl.reloadLocalisedDescription();
+	rwmsgdtTbl.reloadLocalisedDescription();
+	rwdlvrinfdtTbl.reloadLocalisedDescription();
+	smsgdtTbl.reloadLocalisedDescription();
+	crtdtTbl.reloadLocalisedDescription();
+	msgcrtdtTbl.reloadLocalisedDescription();
+
+	tagTbl.reloadLocalisedDescription();
+	msgtagsTbl.reloadLocalisedDescription();
+
+	srvcInfTbl.reloadLocalisedDescription();
+	strdFlsMsgsTbl.reloadLocalisedDescription();
+}
+
 
 namespace AccntinfTbl {
 	const QString tabName("account_info");

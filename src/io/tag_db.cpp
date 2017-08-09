@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QRegExp>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -30,6 +31,34 @@
 #include "src/io/db_tables.h"
 #include "src/io/tag_db.h"
 #include "src/log/log.h"
+
+#define DFLT_COLOUR "ffffff"
+
+TagDb::TagEntry::TagEntry(void)
+    : id(-1),
+    name(),
+    colour(DFLT_COLOUR)
+{
+}
+
+TagDb::TagEntry::TagEntry(int i, const QString &n, const QString &c)
+    : id(i),
+    name(n),
+    colour(isValidColourStr(c) ? c : DFLT_COLOUR)
+{
+}
+
+bool TagDb::TagEntry::isValid(void) const
+{
+	return (id >= 0) && !name.isEmpty() && (6 == colour.size());
+}
+
+bool TagDb::TagEntry::isValidColourStr(const QString &colourStr)
+{
+	QRegExp re("^[a-f0-9]{6,6}$");
+
+	return re.exactMatch(colourStr);
+}
 
 TagDb::TagDb(const QString &connectionName)
     : SQLiteDb(connectionName)
@@ -163,7 +192,7 @@ bool TagDb::deleteAllTags(void)
 }
 
 
-TagItem TagDb::getTagData(int id)
+TagDb::TagEntry TagDb::getTagData(int id) const
 {
 	QSqlQuery query(m_db);
 
@@ -176,7 +205,7 @@ TagItem TagDb::getTagData(int id)
 	query.bindValue(":id", id);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		return TagItem(id, query.value(0).toString(),
+		return TagEntry(id, query.value(0).toString(),
 		    query.value(1).toString());
 	} else {
 		logErrorNL(
@@ -186,13 +215,13 @@ TagItem TagDb::getTagData(int id)
 	}
 
 fail:
-	return TagItem();
+	return TagEntry();
 }
 
-QList<TagItem> TagDb::getAllTags(void)
+QList<TagDb::TagEntry> TagDb::getAllTags(void) const
 {
 	QSqlQuery query(m_db);
-	QList<TagItem> tagList;
+	QList<TagEntry> tagList;
 
 	QString queryStr = "SELECT * FROM tag ORDER BY tag_name ASC";
 	if (!query.prepare(queryStr)) {
@@ -204,7 +233,7 @@ QList<TagItem> TagDb::getAllTags(void)
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
-			tagList.append(TagItem(query.value(0).toInt(),
+			tagList.append(TagEntry(query.value(0).toInt(),
 			    query.value(1).toString(),
 			    query.value(2).toString()));
 			query.next();
@@ -217,13 +246,14 @@ QList<TagItem> TagDb::getAllTags(void)
 
 	return tagList;
 fail:
-	return QList<TagItem>();
+	return QList<TagEntry>();
 }
 
-TagItemList TagDb::getMessageTags(const QString &userName, quint64 msgId)
+QList<TagDb::TagEntry> TagDb::getMessageTags(const QString &userName,
+    quint64 msgId) const
 {
 	QSqlQuery query(m_db);
-	TagItemList tagList;
+	QList<TagEntry> tagList;
 
 	QString queryStr = "SELECT t.id, t.tag_name, t.tag_color "
 	    "FROM tag AS t "
@@ -242,7 +272,7 @@ TagItemList TagDb::getMessageTags(const QString &userName, quint64 msgId)
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
-			tagList.append(TagItem(query.value(0).toInt(),
+			tagList.append(TagEntry(query.value(0).toInt(),
 			    query.value(1).toString(),
 			    query.value(2).toString()));
 			query.next();
@@ -255,7 +285,7 @@ TagItemList TagDb::getMessageTags(const QString &userName, quint64 msgId)
 	}
 
 fail:
-	return TagItemList();
+	return QList<TagEntry>();
 }
 
 bool TagDb::removeAllTagsFromMsg(const QString &userName, qint64 msgId)
@@ -373,7 +403,7 @@ bool TagDb::removeAllMsgTagsFromAccount(const QString &userName)
 	return true;
 }
 
-QList<qint64> TagDb::getMsgIdsContainSearchTagText(const QString &text)
+QList<qint64> TagDb::getMsgIdsContainSearchTagText(const QString &text) const
 {
 	QSqlQuery query(m_db);
 	QList<qint64> msgIdList;

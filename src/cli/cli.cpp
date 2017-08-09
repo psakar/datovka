@@ -21,21 +21,28 @@
  * the two.
  */
 
+#include <cstdlib>
+#include <QDebug>
 #include <QTextStream>
 
 #include "src/cli/cli.h"
 #include "src/cli/cli_login.h"
-#include "src/gui/datovka.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/io/isds_helper.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
+#include "src/model_interaction/account_interaction.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_search_owner.h"
+
+const QSet<QString> serviceSet = QSet<QString>() << SER_LOGIN <<
+SER_GET_MSG_LIST << SER_SEND_MSG << SER_GET_MSG << SER_GET_DEL_INFO <<
+SER_GET_USER_INFO << SER_GET_OWNER_INFO << SER_CHECK_ATTACHMENT <<
+SER_FIND_DATABOX;
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList()
@@ -1540,7 +1547,7 @@ int runService(const QString &lParam,
 	cli_error cret = CLI_ERROR;
 	bool needsISDS = true;
 	QString errmsg = "Unknown error";
-	int ret = CLI_EXIT_ERROR;
+	int ret = EXIT_FAILURE;
 
 	/* parse service parameter list */
 	if (!(service.isNull()) && !(sParam.isNull())) {
@@ -1570,7 +1577,13 @@ int runService(const QString &lParam,
 	const QString username = loginMap["username"].toString();
 
 	/* get message database set */
-	MessageDbSet *msgDbSet = MainWindow::accountDbSet(username, 0);
+	MessageDbSet *msgDbSet = Q_NULLPTR;
+	{
+		enum AccountInteraction::AccessStatus status;
+		QString dbDir, namesStr;
+		msgDbSet = AccountInteraction::accessDbSet(username, status,
+		    dbDir, namesStr);
+	}
 	if (msgDbSet == NULL) {
 		errmsg = "Database doesn't exists for user " + username;
 		qDebug() << CLI_PREFIX << errmsg;
@@ -1665,7 +1678,7 @@ int runService(const QString &lParam,
 
 		if (!globIsdsSessions.isConnectedToIsds(username) &&
 		    !connectToIsdsCLI(globIsdsSessions,
-			    AccountModel::globAccounts[username], pwd, otp)) {
+		        globAccounts[username], pwd, otp)) {
 			errmsg = "Missing session for " + username +
 			   " or connection fails";
 			qDebug() << errmsg;
@@ -1685,7 +1698,7 @@ int runService(const QString &lParam,
 	}
 
 	if (CLI_SUCCESS == cret) {
-		ret = CLI_EXIT_OK;
+		ret = EXIT_SUCCESS;
 	} else {
 		printErrToStdErr(cret, errmsg);
 	}

@@ -23,32 +23,20 @@
 
 #include <algorithm> /* std::sort */
 #include <QPainter>
-#include <QRegExp>
 
 #include "src/delegates/tag_item.h"
 #include "src/dimensions/dimensions.h"
 #include "src/localisation/localisation.h"
 #include "src/log/log.h"
 
-#define DFLT_COLOUR "ffffff"
-
 TagItem::TagItem(void)
-    : id(-1),
-    name(),
-    colour(DFLT_COLOUR)
+    : TagDb::TagEntry()
 {
 }
 
-TagItem::TagItem(int i, const QString &n, const QString &c)
-    : id(i),
-    name(n),
-    colour(isValidColourStr(c) ? c : DFLT_COLOUR)
+TagItem::TagItem(const TagDb::TagEntry &entry)
+    : TagDb::TagEntry(entry)
 {
-}
-
-bool TagItem::isValid(void) const
-{
-	return (id >= 0) && !name.isEmpty() && (6 == colour.size());
 }
 
 int TagItem::paint(class QPainter *painter,
@@ -121,13 +109,6 @@ QSize TagItem::sizeHint(const QStyleOptionViewItem &option) const
 	return QSize(width, height);
 }
 
-bool TagItem::isValidColourStr(const QString &colourStr)
-{
-	QRegExp re("^[a-f0-9]{6,6}$");
-
-	return re.exactMatch(colourStr);
-}
-
 QColor TagItem::adjustForegroundColour(const QColor &fgColour,
     const QColor &tagColour)
 {
@@ -151,9 +132,12 @@ TagItemList::TagItemList(void)
 {
 }
 
-TagItemList::TagItemList(const QList<TagItem> &tagList)
-    : QList<TagItem>(tagList)
+TagItemList::TagItemList(const QList<TagDb::TagEntry> &tagList)
+    : QList<TagItem>()
 {
+	foreach (const TagDb::TagEntry entry, tagList) {
+		QList<TagItem>::append(TagItem(entry));
+	}
 }
 
 void TagItemList::paint(class QPainter *painter,

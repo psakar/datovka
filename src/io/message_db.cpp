@@ -52,7 +52,6 @@
 #include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
-#include "src/models/messages_model.h"
 #include "src/settings/preferences.h"
 
 /* Attachment size is computed from actual data. */
@@ -70,6 +69,14 @@ const QVector<QString> MessageDb::msgDeliveryBoolAttribs = {"dmPersonalDelivery"
 
 const QVector<QString> MessageDb::msgStatus = {"dmDeliveryTime",
     "dmAcceptanceTime", "dmMessageStatus"};
+
+const QVector<QString> MessageDb::rcvdItemIds = {"dmID", "dmAnnotation",
+    "dmSender", "dmDeliveryTime", "dmAcceptanceTime", "read_locally",
+    "is_downloaded", "process_status"};
+
+const QVector<QString> MessageDb::sntItemIds = {"dmID", "dmAnnotation",
+    "dmRecipient", "dmDeliveryTime", "dmAcceptanceTime", "dmMessageStatus",
+    "is_downloaded"};
 
 const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
     "dmEncodedContent", "_dmFileDescr", "_dmMimeType",
@@ -100,8 +107,8 @@ QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(void) const
 	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
+	for (int i = 0; i < (rcvdItemIds.size() - 2); ++i) {
+		queryStr += rcvdItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
@@ -157,8 +164,8 @@ QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesInYear(
 	QList<RcvdEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
+	for (int i = 0; i < (rcvdItemIds.size() - 2); ++i) {
+		queryStr += rcvdItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
@@ -398,8 +405,8 @@ QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(void) const
 	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
+	for (int i = 0; i < (sntItemIds.size() - 1); ++i) {
+		queryStr += sntItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM messages AS m "
@@ -452,8 +459,8 @@ QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesInYear(
 	QList<SntEntry> entryList;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
+	for (int i = 0; i < (sntItemIds.size() - 1); ++i) {
+		queryStr += sntItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM messages AS m "
@@ -937,14 +944,8 @@ fail:
 	return contactList;
 }
 
-
-/* ========================================================================= */
-/*
- * Return HTML formatted message description.
- */
-QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
-    bool showId, bool verSignature, bool warnOld) const
-/* ========================================================================= */
+QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
+    bool warnOld) const
 {
 	QString html;
 	QSqlQuery query(m_db);
@@ -1207,11 +1208,6 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 		/* TODO */
 	}
 
-	/* Disable verify signature button. It is re-enabled when needed. */
-	if (0 != verSigButton) {
-		verSigButton->setEnabled(false);
-	}
-
 	if (verSignature) {
 
 		html += "<h3>" + QObject::tr("Signature") + "</h3>";
@@ -1221,10 +1217,6 @@ QString MessageDb::descriptionHtml(qint64 dmId, QAbstractButton *verSigButton,
 			html += strongAccountInfoLine(
 			    QObject::tr("Message signature"),
 			    QObject::tr("Not present"));
-			/* Enable verification button. */
-			if (0 != verSigButton) {
-				verSigButton->setEnabled(true);
-			}
 			html += "<div>" +
 			    QObject::tr("Download the complete message in order to verify its signature.") +
 			    "</div>";
@@ -4480,8 +4472,8 @@ bool MessageDb::reopenDb(const QString &newFileName)
 bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
 {
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::rcvdItemIds().size() - 2); ++i) {
-		queryStr += DbMsgsTblModel::rcvdItemIds()[i] + ", ";
+	for (int i = 0; i < (rcvdItemIds.size() - 2); ++i) {
+		queryStr += rcvdItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", "
 	    "ifnull(p.state, 0) AS process_status";
@@ -4517,8 +4509,8 @@ fail:
 bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query)
 {
 	QString queryStr = "SELECT ";
-	for (int i = 0; i < (DbMsgsTblModel::sntItemIds().size() - 1); ++i) {
-		queryStr += DbMsgsTblModel::sntItemIds()[i] + ", ";
+	for (int i = 0; i < (sntItemIds.size() - 1); ++i) {
+		queryStr += sntItemIds[i] + ", ";
 	}
 	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
 	queryStr += " FROM messages AS m "
