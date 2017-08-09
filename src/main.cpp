@@ -24,15 +24,16 @@
 #include <cstdlib>
 #include <QApplication>
 #include <QCommandLineParser>
-#include <QDir>
-#include <QtWidgets>
+#include <QDateTime>
+#include <QSplashScreen>
+#include <QtGlobal> /* qsrand() */
+#include <QThread>
 
 #include "src/about.h"
 #include "src/cli/cli_parser.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_threads.h"
 #include "src/gui/datovka.h"
-#include "src/gui/dlg_about.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/initialisation.h"
 #include "src/io/db_tables.h"

@@ -25,8 +25,7 @@
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QDateTime>
-#include <QProcessEnvironment>
-#include <QtGlobal>
+#include <QtGlobal> /* qsrand() */
 #include <QThread>
 
 #include "src/about.h"
