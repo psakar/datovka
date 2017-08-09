@@ -118,7 +118,6 @@ enum AcntSettings::LogInMethod methodStrToEnum(const QString &str)
 	}
 }
 
-
 /*!
  * @brief Converts login method identifier to string.
  *
