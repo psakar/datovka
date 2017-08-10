@@ -28,7 +28,7 @@
 #include "src/cli/cli_parser.h"
 #include "src/log/log.h"
 
-int setupCmdLineParser(QCommandLineParser &parser)
+int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
 {
 	parser.setApplicationDescription(QObject::tr("Data box application"));
 	parser.addHelpOption();
@@ -137,7 +137,7 @@ int setupCmdLineParser(QCommandLineParser &parser)
 	return 0;
 }
 
-QStringList CLIServiceArgs(const QStringList &options)
+QStringList CLIParser::CLIServiceArgs(const QStringList &options)
 {
 	QStringList srvcArgs;
 
@@ -150,7 +150,7 @@ QStringList CLIServiceArgs(const QStringList &options)
 	return srvcArgs;
 }
 
-int runCLIService(const QStringList &srvcArgs,
+int CLIParser::runCLIService(const QStringList &srvcArgs,
     const QCommandLineParser &parser)
 {
 	int ret = EXIT_FAILURE;

@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	QApplication app(argc, argv);
 
 	QCommandLineParser parser;
-	if (0 != setupCmdLineParser(parser)) {
+	if (0 != CLIParser::setupCmdLineParser(parser)) {
 		logErrorNL("%s", "Cannot set up command-line parser.");
 		return EXIT_FAILURE;
 	}
@@ -110,7 +110,8 @@ int main(int argc, char *argv[])
 	}
 
 	const QStringList cmdLineFileNames(parser.positionalArguments());
-	const QStringList srvcArgs(CLIServiceArgs(parser.optionNames()));
+	const QStringList srvcArgs(
+	    CLIParser::CLIServiceArgs(parser.optionNames()));
 
 	enum RunMode runMode = RM_GUI;
 	QSplashScreen *splash = new QSplashScreen;
@@ -233,7 +234,7 @@ int main(int argc, char *argv[])
 
 	if (runMode == RM_CLI) {
 		delete splash;
-		ret = runCLIService(srvcArgs, parser);
+		ret = CLIParser::runCLIService(srvcArgs, parser);
 	} else if (runMode == RM_ZFO) {
 		delete splash;
 		foreach (const QString &fileName, cmdLineFileNames) {

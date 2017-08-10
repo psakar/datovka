@@ -37,29 +37,46 @@
 #define DEBUG_VERBOSITY_OPT "debug-verbosity"
 
 /*!
- * @brief Performs command-line parser setup.
- *
- * @param[in,out] parser Parser to add options to.
- * @return 0 on success, -1 else.
+ * @brief Provides namespace for convenience methods dealing with command line
+ *     parser.
  */
-int setupCmdLineParser(QCommandLineParser &parser);
+class CLIParser {
 
-/*!
- * @brief Returns list of options related to CLI services.
- *
- * @param[in] options Command line options.
- * @return List of options related to services.
- */
-QStringList CLIServiceArgs(const QStringList &options);
+private:
+	/*!
+	 * @brief Private constructor.
+	 */
+	CLIParser(void);
 
-/*!
- * @brief Calls command-line service.
- *
- * @param[in] srvcArgs Service arguments.
- * @patam[in] parser Command line parser.
- * @return EXIT_SUCCESS on success, EXIT_FAILURE on failure.
- */
-int runCLIService(const QStringList &srvcArgs,
-    const QCommandLineParser &parser);
+public:
+	/*!
+	 * @brief Performs command-line parser setup.
+	 *
+	 * @param[in,out] parser Parser to add options to.
+	 * @return 0 on success, -1 else.
+	 */
+	static
+	int setupCmdLineParser(QCommandLineParser &parser);
+
+	/*!
+	 * @brief Returns list of options related to CLI services.
+	 *
+	 * @param[in] options Command line options.
+	 * @return List of options related to services.
+	 */
+	static
+	QStringList CLIServiceArgs(const QStringList &options);
+
+	/*!
+	 * @brief Calls command-line service.
+	 *
+	 * @param[in] srvcArgs Service arguments.
+	 * @patam[in] parser Command line parser.
+	 * @return EXIT_SUCCESS on success, EXIT_FAILURE on failure.
+	 */
+	static
+	int runCLIService(const QStringList &srvcArgs,
+	    const QCommandLineParser &parser);
+};
 
 #endif /* _CLI_PARSER_H_ */
