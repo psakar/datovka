@@ -146,11 +146,12 @@ int CLIParser::runCLIService(const QStringList &srvcArgs,
 	int ret = EXIT_FAILURE;
 	QString errmsg;
 	QString serName;
-	int index = 0;
-	QTextStream cout(stderr);
+	QTextStream errStream(stderr);
 
-	// every valid CLI action must have only one login parameter
-	// or one login parameter and one name service
+	/*
+	 * Every valid CLI action must have only one login parameter
+	 * or one login parameter and one service name.
+	 */
 	switch (srvcArgs.count()) {
 	case 0:
 		errmsg = "No service has been defined for CLI action!";
@@ -167,8 +168,7 @@ int CLIParser::runCLIService(const QStringList &srvcArgs,
 		break;
 	case 2:
 		if (srvcArgs.contains(SER_LOGIN)) {
-			index = srvcArgs.indexOf(SER_LOGIN);
-			if (index == 0) {
+			if (0 == srvcArgs.indexOf(SER_LOGIN)) {
 				serName = srvcArgs.at(1);
 			} else {
 				serName = srvcArgs.at(0);
@@ -187,8 +187,8 @@ int CLIParser::runCLIService(const QStringList &srvcArgs,
 		break;
 	}
 
-	// print error to stderr
-	cout << CLI_PREFIX << " error(" << CLI_ERROR << ") : "
+	/* Print error to error output. */
+	errStream << CLI_PREFIX << " error(" << CLI_ERROR << ") : "
 	    << errmsg << endl;
 
 	return ret;
