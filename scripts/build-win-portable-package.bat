@@ -23,7 +23,7 @@ set ZIPPATH="C:\Program Files (x86)\7-Zip\7z.exe"
 
 :: Obtain current version from datovka.pro
 cd ..
-findstr /C:"VERSION =" datovka.pro > version.txt
+findstr /C:"VERSION =" pri\version.pri > version.txt
 set "string=var1;var2;var3;"
 for /f "tokens=1,2,3 delims= " %%i in (version.txt) do set "variable1=%%i" &set "variable2=%%j" &set "VERSION=%%k"
 endlocal
@@ -62,14 +62,19 @@ if NOT "%1" == "nopause" (
 
 :: Datovka portable version
 @echo.
-@echo ----------------------------------------------
-@echo Build Portable Datovka binary (v%VERSION%) ...
-@echo ---------------------------------------------- 
+@echo -------------------------------------------------------------
+@echo Build Portable Datovka binary and CLI binary (v%VERSION%) ...
+@echo ------------------------------------------------------------- 
 mingw32-make.exe clean
 lupdate datovka.pro
 lrelease datovka.pro
 qmake.exe datovka.pro -r -spec win32-g++ PORTABLE_APPLICATION=1 
-mingw32-make.exe -j 2
+mingw32-make.exe -j 4
+mingw32-make.exe clean
+lupdate datovka-cli.pro.noauto
+lrelease datovka-cli.pro.noauto
+qmake.exe datovka-cli.pro.noauto -r -spec win32-g++ PORTABLE_APPLICATION=1 
+mingw32-make.exe -j 4
 mingw32-make.exe clean
 @echo Build done.
 @echo.
@@ -82,6 +87,7 @@ mkdir %DATOVKAPORTPATH%
 mkdir "%DATOVKAPORTPATH%\locale"
 :: copy all required app files and libraries
 copy "release\datovka-portable.exe" %DATOVKAPORTPATH%
+copy "release\datovka-cli-portable.exe" %DATOVKAPORTPATH%
 copy "AUTHORS" %DATOVKAPORTPATH%
 copy "copyING" %DATOVKAPORTPATH%
 copy "Changelog" %DATOVKAPORTPATH%
