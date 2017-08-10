@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 	QCoreApplication app(argc, argv);
 
 	QCommandLineParser parser;
-	if (0 != setupCmdLineParser(parser)) {
+	if (0 != CLIParser::setupCmdLineParser(parser)) {
 		logErrorNL("%s", "Cannot set up command-line parser.");
 		return EXIT_FAILURE;
 	}
@@ -77,7 +77,8 @@ int main(int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	const QStringList srvcArgs(CLIServiceArgs(parser.optionNames()));
+	const QStringList srvcArgs(
+	    CLIParser::CLIServiceArgs(parser.optionNames()));
 	if (srvcArgs.isEmpty()) {
 		logErrorNL("%s",
 		    "No command line arguments supplied. Exiting.");
@@ -170,7 +171,7 @@ int main(int argc, char *argv[])
 	globWorkPool.start();
 	logInfo("%s\n", "Worker pool started.");
 
-	ret = runCLIService(srvcArgs, parser);
+	ret = CLIParser::runCLIService(srvcArgs, parser);
 
 	/* Wait until all threads finished. */
 	logInfo("%s\n", "Waiting for pending worker threads.");

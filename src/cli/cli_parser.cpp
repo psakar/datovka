@@ -28,51 +28,47 @@
 #include "src/cli/cli_parser.h"
 #include "src/log/log.h"
 
-int setupCmdLineParser(QCommandLineParser &parser)
+int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
 {
-	parser.setApplicationDescription(QObject::tr("Data box application"));
+	parser.setApplicationDescription(tr("Data box application"));
 	parser.addHelpOption();
 	parser.addVersionOption();
 	/* Options with values. */
 	if (!parser.addOption(QCommandLineOption(CONF_SUBDIR_OPT,
-	        QObject::tr(
-	            "Use <conf-subdir> subdirectory for configuration."),
-	        QObject::tr("conf-subdir")))) {
+	        tr("Use <%1> subdirectory for configuration.").arg(tr("conf-subdir")),
+	        tr("conf-subdir")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(LOAD_CONF_OPT,
-	        QObject::tr("On start load <conf> file."),
-	        QObject::tr("conf")))) {
+	        tr("On start load <%1> file.").arg(tr("conf")), tr("conf")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SAVE_CONF_OPT,
-	        QObject::tr("On stop save <conf> file."),
-	        QObject::tr("conf")))) {
+	        tr("On stop save <%1> file.").arg(tr("conf")), tr("conf")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(LOG_FILE,
-	        QObject::tr("Log messages to <file>."),
-	        QObject::tr("file")))) {
+	        tr("Log messages to <%1>.").arg(tr("file")), tr("file")))) {
 		return -1;
 	}
 	QCommandLineOption logVerb(QStringList() << "L" << LOG_VERBOSITY_OPT,
-	    QObject::tr("Set verbosity of logged messages to <level>. "
-	        "Default is ") + QString::number(globLog.logVerbosity()) + ".",
-	    QObject::tr("level"));
+	    tr("Set verbosity of logged messages to <%1>. Default is %2.")
+	        .arg(tr("level")).arg(QString::number(globLog.logVerbosity())),
+	    tr("level"));
 	if (!parser.addOption(logVerb)) {
 		return -1;
 	}
 	/* Boolean options. */
 #ifdef DEBUG
 	QCommandLineOption debugOpt(QStringList() << "D" << DEBUG_OPT,
-	    "Enable debugging information.");
+	    tr("Enable debugging information."));
 	if (!parser.addOption(debugOpt)) {
 		return -1;
 	}
 	QCommandLineOption debugVerb(QStringList() << "V" << DEBUG_VERBOSITY_OPT,
-	    QObject::tr("Set debugging verbosity to <level>. Default is ") +
-	    QString::number(globLog.debugVerbosity()) + ".",
-	    QObject::tr("level"));
+	    tr("Set debugging verbosity to <%1>. Default is %2.")
+	        .arg(tr("level")).arg(QString::number(globLog.debugVerbosity())),
+	    tr("level"));
 	if (!parser.addOption(debugVerb)) {
 		return -1;
 	}
@@ -80,64 +76,58 @@ int setupCmdLineParser(QCommandLineParser &parser)
 
 	/* Options with values. */
 	if (!parser.addOption(QCommandLineOption(SER_LOGIN,
-	        QObject::tr("Service: connect to isds and login into databox."),
-	        QObject::tr("string-of-parameters")))) {
+	        tr("Service: connect to ISDS and login into data box."),
+	        tr("string-of-parameters")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_LIST,
-	        QObject::tr("Service: download list of received/sent "
-	        "messages from ISDS."),
-	        QObject::tr("string-of-parameters")))) {
+	        tr("Service: download list of received/sent messages from ISDS."),
+	        tr("string-of-parameters")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_SEND_MSG,
-	        QObject::tr("Service: create and send a new message to ISDS."),
-	        QObject::tr("string-of-parameters")))) {
+	        tr("Service: create and send a new message to ISDS."),
+	        tr("string-of-parameters")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_MSG,
-	        QObject::tr("Service: download complete message with "
-	        "signature and time stamp of MV."),
-	        QObject::tr("string-of-parameters")))) {
+	        tr("Service: download complete message with signature and time stamp of MV."),
+	        tr("string-of-parameters")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_DEL_INFO,
-	        QObject::tr("Service: download acceptance info of message "
-	        "with signature and time stamp of MV."),
-	        QObject::tr("string-of-parameters")))) {
+	        tr("Service: download acceptance info of message with signature and time stamp of MV."),
+	        tr("string-of-parameters")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_USER_INFO,
-	        QObject::tr("Service: get information about user "
-	        "(role, privileges, ...)."),
-	        NULL))) {
+	        tr("Service: get information about user (role, privileges, ...)."),
+	        QString()))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_OWNER_INFO,
-	        QObject::tr("Service: get information about owner and "
-	        "its databox."),
-	        NULL))) {
+	        tr("Service: get information about owner and its data box."),
+	        QString()))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_CHECK_ATTACHMENT,
-	        QObject::tr("Service: get list of messages where "
-	        "attachment missing (local database only)."),
-	        NULL))) {
+	        tr("Service: get list of messages where attachment missing (local database only)."),
+	        QString()))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_FIND_DATABOX,
-	        QObject::tr("Service: find a databox via several parameters."),
-	        QObject::tr("string-of-parameters")))) {
+	        tr("Service: find a data box via several parameters."),
+	        tr("string-of-parameters")))) {
 		return -1;
 	}
 
-	parser.addPositionalArgument("[zfo-file]",
-	    QObject::tr("ZFO file to be viewed."));
+	parser.addPositionalArgument(tr("[zfo-file]"),
+	    tr("ZFO file to be viewed."));
 
 	return 0;
 }
 
-QStringList CLIServiceArgs(const QStringList &options)
+QStringList CLIParser::CLIServiceArgs(const QStringList &options)
 {
 	QStringList srvcArgs;
 
@@ -150,17 +140,18 @@ QStringList CLIServiceArgs(const QStringList &options)
 	return srvcArgs;
 }
 
-int runCLIService(const QStringList &srvcArgs,
+int CLIParser::runCLIService(const QStringList &srvcArgs,
     const QCommandLineParser &parser)
 {
 	int ret = EXIT_FAILURE;
 	QString errmsg;
 	QString serName;
-	int index = 0;
-	QTextStream cout(stderr);
+	QTextStream errStream(stderr);
 
-	// every valid CLI action must have only one login parameter
-	// or one login parameter and one name service
+	/*
+	 * Every valid CLI action must have only one login parameter
+	 * or one login parameter and one service name.
+	 */
 	switch (srvcArgs.count()) {
 	case 0:
 		errmsg = "No service has been defined for CLI action!";
@@ -168,7 +159,7 @@ int runCLIService(const QStringList &srvcArgs,
 	case 1:
 		if (srvcArgs.contains(SER_LOGIN)) {
 			ret = runService(parser.value(SER_LOGIN),
-			    NULL, NULL);
+			    QString(), QString());
 			return ret;
 		} else {
 			errmsg = "Only service name was set. "
@@ -177,8 +168,7 @@ int runCLIService(const QStringList &srvcArgs,
 		break;
 	case 2:
 		if (srvcArgs.contains(SER_LOGIN)) {
-			index = srvcArgs.indexOf(SER_LOGIN);
-			if (index == 0) {
+			if (0 == srvcArgs.indexOf(SER_LOGIN)) {
 				serName = srvcArgs.at(1);
 			} else {
 				serName = srvcArgs.at(0);
@@ -197,8 +187,8 @@ int runCLIService(const QStringList &srvcArgs,
 		break;
 	}
 
-	// print error to stderr
-	cout << CLI_PREFIX << " error(" << CLI_ERROR << ") : "
+	/* Print error to error output. */
+	errStream << CLI_PREFIX << " error(" << CLI_ERROR << ") : "
 	    << errmsg << endl;
 
 	return ret;
