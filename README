@@ -1,15 +1,14 @@
 Important
 ---------
 
-The application is still in its development! We know about some bugs but most
-likely there are even more.
-
-If you have been using the previous Python-based datovka application then
-back-up your critical data before using this application!
-
 The application is provided without any warranty.
 
-For a list of known issues visit the following page:
-https://gitlab.labs.nic.cz/labs/qdatovka/issues
+List of known bugs and issues can be found here:
+https://gitlab.labs.nic.cz/datovka/datovka/issues
+If you encounter a problem then please send an email to
+datove-schranky@labs.nic.cz or use the aforementioned site to let us know.
 
-If you encounter a problem please use the aforementioned site to let us know.
+If you have been using the Python-based Datovka application (i.e. version 3 and
+earlier versions) then back up your critical data before using this application!
+An attempt to execute Datovka 3 after you've run Datovka 4 will most likely
+lead to data corruption and loss of stored data.
