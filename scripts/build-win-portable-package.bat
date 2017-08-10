@@ -71,8 +71,6 @@ lrelease datovka.pro
 qmake.exe datovka.pro -r -spec win32-g++ PORTABLE_APPLICATION=1 
 mingw32-make.exe -j 4
 mingw32-make.exe clean
-lupdate datovka-cli.pro.noauto
-lrelease datovka-cli.pro.noauto
 qmake.exe datovka-cli.pro.noauto -r -spec win32-g++ PORTABLE_APPLICATION=1 
 mingw32-make.exe -j 4
 mingw32-make.exe clean
