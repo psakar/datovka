@@ -3179,6 +3179,34 @@ fail:
 	return QStringList();
 }
 
+QStringList MessageDb::getAllMessageIDs(enum MessageType messageType) const
+{
+	QSqlQuery query(m_db);
+	QStringList msgIsList;
+	QString queryStr = "SELECT dmID FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "WHERE s.message_type = :message_type";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":message_type", messageType);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			msgIsList.append(query.value(0).toString());
+			query.next();
+		}
+	}
+	return msgIsList;
+fail:
+	return QStringList();
+}
 
 /* ========================================================================= */
 /*

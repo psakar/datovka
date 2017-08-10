@@ -614,11 +614,19 @@ public:
 	    int messageType);
 
 	/*!
-	 * @brief Return all message ID from database without attachment.
+	 * @brief Return all message IDs from database without attachment.
 	 *
 	 * @return message id list.
 	 */
 	QStringList getAllMessageIDsWithoutAttach(void) const;
+
+	/*!
+	 * @brief Return all message IDs from database.
+	 *
+	 * @param[in] messageType  Message orienation.
+	 * @return message id list.
+	 */
+	QStringList getAllMessageIDs(enum MessageType messageType) const;
 
 	/*!
 	 * @brief Check whether whole message is stored in database.

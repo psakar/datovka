@@ -386,6 +386,42 @@ for login in $USERNAMES; do
 	fi
 done
 
+echo "***********************************************************************"
+echo "* GET MSG ID LIST FROM DB:: Get all received message IDs (via all accounts)."
+echo "***********************************************************************"
+for login in $USERNAMES; do
+	"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+		--login "username='$login'" \
+		--get-msg-ids "dmType='received'" \
+		2>/dev/null
+	if [ 0 != $? ]; then
+		echo "GetMsgIDs-received: $login - ERROR"
+		echo ""
+		exit
+	else
+		echo "GetMsgIDs-received: $login - OK"
+		echo ""
+	fi
+done
+
+echo "***********************************************************************"
+echo "* GET MSG ID LIST FROM DB:: Get all sent message IDs (via all accounts)."
+echo "***********************************************************************"
+for login in $USERNAMES; do
+	"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+		--login "username='$login'" \
+		--get-msg-ids "dmType='sent'" \
+		2>/dev/null
+	if [ 0 != $? ]; then
+		echo "GetMsgIDs-sent: $login - ERROR"
+		echo ""
+		exit
+	else
+		echo "GetMsgIDs-sent: $login - OK"
+		echo ""
+	fi
+done
+
 echo ""
 echo ""
 echo "------------------------------------------------------------------------"

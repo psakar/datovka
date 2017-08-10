@@ -523,11 +523,19 @@ public: /* Database function that have been delegate to the container. */
 	QList<MessageDb::MsgId> getAllMessageIDsFromDB(void) const;
 
 	/*!
-	 * @brief Return all message ID from database without attachment.
+	 * @brief Return all message IDs from database without attachment.
 	 *
 	 * @return message id list.
 	 */
 	QStringList getAllMessageIDsWithoutAttach(void) const;
+
+	/*!
+	 * @brief Return all message IDs from database.
+	 *
+	 * @param[in] messageType Message orienation.
+	 * @return message id list.
+	 */
+	QStringList getAllMessageIDs(enum MessageDb::MessageType messageType) const;
 
 	/*!
 	 * @brief Return list of message ids corresponding to given date
@@ -640,6 +648,9 @@ private:
 
 	inline QStringList _sf_getAllMessageIDsWithoutAttach(void) const;
 	inline QStringList _yrly_getAllMessageIDsWithoutAttach(void) const;
+
+	inline QStringList _sf_getAllMessageIDs(enum MessageDb::MessageType messageType) const;
+	inline QStringList _yrly_getAllMessageIDs(enum MessageDb::MessageType messageType) const;
 
 	inline QList<MessageDb::MsgId> _sf_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 	inline QList<MessageDb::MsgId> _yrly_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
