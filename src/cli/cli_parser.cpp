@@ -35,25 +35,25 @@ int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
 	parser.addVersionOption();
 	/* Options with values. */
 	if (!parser.addOption(QCommandLineOption(CONF_SUBDIR_OPT,
-	        tr("Use <conf-subdir> subdirectory for configuration."),
+	        tr("Use <%1> subdirectory for configuration.").arg(tr("conf-subdir")),
 	        tr("conf-subdir")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(LOAD_CONF_OPT,
-	        tr("On start load <conf> file."), tr("conf")))) {
+	        tr("On start load <%1> file.").arg(tr("conf")), tr("conf")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SAVE_CONF_OPT,
-	        tr("On stop save <conf> file."), tr("conf")))) {
+	        tr("On stop save <%1> file.").arg(tr("conf")), tr("conf")))) {
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(LOG_FILE,
-	        tr("Log messages to <file>."), tr("file")))) {
+	        tr("Log messages to <%1>.").arg(tr("file")), tr("file")))) {
 		return -1;
 	}
 	QCommandLineOption logVerb(QStringList() << "L" << LOG_VERBOSITY_OPT,
-	    tr("Set verbosity of logged messages to <level>. Default is %1.")
-	        .arg(QString::number(globLog.logVerbosity())),
+	    tr("Set verbosity of logged messages to <%1>. Default is %2.")
+	        .arg(tr("level")).arg(QString::number(globLog.logVerbosity())),
 	    tr("level"));
 	if (!parser.addOption(logVerb)) {
 		return -1;
@@ -66,8 +66,8 @@ int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
 		return -1;
 	}
 	QCommandLineOption debugVerb(QStringList() << "V" << DEBUG_VERBOSITY_OPT,
-	    tr("Set debugging verbosity to <level>. Default is %1.")
-	        .arg(QString::number(globLog.debugVerbosity())),
+	    tr("Set debugging verbosity to <%1>. Default is %2.")
+	        .arg(tr("level")).arg(QString::number(globLog.debugVerbosity())),
 	    tr("level"));
 	if (!parser.addOption(debugVerb)) {
 		return -1;
