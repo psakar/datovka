@@ -41,6 +41,7 @@
  *     parser.
  */
 class CLIParser {
+	Q_DECLARE_TR_FUNCTIONS(CLIParser)
 
 private:
 	/*!
