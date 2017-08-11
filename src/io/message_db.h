@@ -965,13 +965,6 @@ protected: /* These function are used from within a database container. */
 	QList<MsgId> getAllMessageIDsFromDB(void) const;
 
 	/*!
-	 * @brief Get all unique years of messages.
-	 *
-	 * @return Return unique year list.
-	 */
-	QStringList getAllUniqueYearsFormMsgs(void) const;
-
-	/*!
 	 * @brief Get list of all message IDs corresponding with year.
 	 *
 	 * @return Return message ID list.

@@ -3234,39 +3234,6 @@ fail:
 	return QList<MessageDb::MsgId>();
 }
 
-
-/* ========================================================================= */
-/*
- * Get all unique years from messages db.
- */
-QStringList MessageDb::getAllUniqueYearsFormMsgs(void) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
-	    "FROM messages";
-	QStringList yearIsList;
-
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	if (query.exec() && query.isActive()) {
-		query.first();
-		while (query.isValid()) {
-			if (!query.value(0).toString().isEmpty()) {
-				yearIsList.append(query.value(0).toString());
-			}
-			query.next();
-		}
-	}
-	return yearIsList;
-fail:
-	return QStringList();
-}
-
 QList<qint64> MessageDb::getAllMsgsIDEqualWithYear(const QString &year) const
 {
 	QSqlQuery query(m_db);
