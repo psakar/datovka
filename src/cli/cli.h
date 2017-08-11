@@ -56,6 +56,7 @@
 #define SER_GET_USER_INFO "get-user-info"
 #define SER_GET_OWNER_INFO "get-owner-info"
 #define SER_CHECK_ATTACHMENT "check-attachment"
+#define SER_GET_MSG_IDS "get-msg-ids"
 #define SER_FIND_DATABOX "find-databox"
 
 

@@ -3146,20 +3146,14 @@ fail:
 	return QByteArray();
 }
 
-
-/* ========================================================================= */
-/*
- * Return all message ID from database without attachment.
- */
-QStringList MessageDb::getAllMessageIDsWithoutAttach(void) const
-/* ========================================================================= */
+QList<qint64> MessageDb::getAllMessageIDsWithoutAttach(void) const
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT dmID FROM messages AS m "
 	    "LEFT JOIN raw_message_data AS r ON (m.dmID = r.message_id) "
 	    "WHERE r.message_id IS null";
 
-	QStringList msgIsList;
+	QList<qint64> msgIdList;
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -3170,15 +3164,43 @@ QStringList MessageDb::getAllMessageIDsWithoutAttach(void) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
-			msgIsList.append(query.value(0).toString());
+			msgIdList.append(query.value(0).toLongLong());
 			query.next();
 		}
 	}
-	return msgIsList;
+	return msgIdList;
 fail:
-	return QStringList();
+	return QList<qint64>();
 }
 
+QList<qint64> MessageDb::getAllMessageIDs(enum MessageType messageType) const
+{
+	QSqlQuery query(m_db);
+	QList<qint64> msgIdList;
+	QString queryStr = "SELECT dmID FROM messages AS m "
+	    "LEFT JOIN supplementary_message_data AS s "
+	    "ON (m.dmID = s.message_id) "
+	    "WHERE s.message_type = :message_type";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	query.bindValue(":message_type", messageType);
+
+	if (query.exec() && query.isActive()) {
+		query.first();
+		while (query.isValid()) {
+			msgIdList.append(query.value(0).toLongLong());
+			query.next();
+		}
+	}
+	return msgIdList;
+fail:
+	return QList<qint64>();
+}
 
 /* ========================================================================= */
 /*
@@ -3212,50 +3234,11 @@ fail:
 	return QList<MessageDb::MsgId>();
 }
 
-
-/* ========================================================================= */
-/*
- * Get all unique years from messages db.
- */
-QStringList MessageDb::getAllUniqueYearsFormMsgs(void) const
-/* ========================================================================= */
+QList<qint64> MessageDb::getAllMsgsIDEqualWithYear(const QString &year) const
 {
 	QSqlQuery query(m_db);
-	QString queryStr = "SELECT DISTINCT strftime('%Y', dmDeliveryTime) "
-	    "FROM messages";
-	QStringList yearIsList;
-
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	if (query.exec() && query.isActive()) {
-		query.first();
-		while (query.isValid()) {
-			if (!query.value(0).toString().isEmpty()) {
-				yearIsList.append(query.value(0).toString());
-			}
-			query.next();
-		}
-	}
-	return yearIsList;
-fail:
-	return QStringList();
-}
-
-
-/* ========================================================================= */
-/*
- * Get list of all messages ID correspond with year.
- */
-QStringList MessageDb::getAllMsgsIDEqualWithYear(const QString &year) const
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QStringList msgList;
-	QString	queryStr;
+	QList<qint64> msgList;
+	QString queryStr;
 
 	if (year == "inv") {
 		queryStr = "SELECT dmID FROM messages WHERE "
@@ -3275,16 +3258,15 @@ QStringList MessageDb::getAllMsgsIDEqualWithYear(const QString &year) const
 		query.first();
 		while (query.isValid()) {
 			if (!query.value(0).toString().isEmpty()) {
-				msgList.append(query.value(0).toString());
+				msgList.append(query.value(0).toLongLong());
 			}
 			query.next();
 		}
 	}
 	return msgList;
 fail:
-	return QStringList();
+	return QList<qint64>();
 }
-
 
 /* ========================================================================= */
 /*
@@ -3300,7 +3282,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	bool transaction = false;
 	QString queryStr;
 
-	QStringList idList = getAllMsgsIDEqualWithYear(year);
+	QList<qint64> idList(getAllMsgsIDEqualWithYear(year));
 
 	attached = attachDb2(query, newDbFileName);
 	if (!attached) {
@@ -3332,15 +3314,16 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	}
 
 	// copy other message data from other tables into new db.
-	for (int i = 0; i < idList.count(); ++i) {
+	foreach (qint64 dmId, idList) {
 
 		queryStr = "INSERT INTO " DB2 ".files SELECT * FROM files WHERE "
-		   "message_id = '"+ idList.at(i) + "'";
+		    "message_id = :message_id";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
+		query.bindValue(":message_id", dmId);
 		if (!query.exec()) {
 			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3348,12 +3331,13 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		}
 
 		queryStr = "INSERT INTO " DB2 ".hashes SELECT * FROM hashes WHERE "
-		   "message_id = '"+ idList.at(i) + "'";
+		    "message_id = :message_id";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
+		query.bindValue(":message_id", dmId);
 		if (!query.exec()) {
 			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3361,12 +3345,13 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		}
 
 		queryStr = "INSERT INTO " DB2 ".events SELECT * FROM events WHERE "
-		   "message_id = '"+ idList.at(i) + "'";
+		    "message_id = :message_id";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
+		query.bindValue(":message_id", dmId);
 		if (!query.exec()) {
 			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3374,13 +3359,13 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		}
 
 		queryStr = "INSERT INTO " DB2 ".raw_message_data SELECT * "
-		    "FROM raw_message_data WHERE message_id = "
-		    "'"+ idList.at(i) + "'";
+		    "FROM raw_message_data WHERE message_id = :message_id";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
+		query.bindValue(":message_id", dmId);
 		if (!query.exec()) {
 			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3388,13 +3373,13 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		}
 
 		queryStr = "INSERT INTO " DB2 ".raw_delivery_info_data SELECT * "
-		    "FROM raw_delivery_info_data WHERE message_id = "
-		    "'"+ idList.at(i) + "'";
+		    "FROM raw_delivery_info_data WHERE message_id = :message_id";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
+		query.bindValue(":message_id", dmId);
 		if (!query.exec()) {
 			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3403,12 +3388,13 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 
 		queryStr = "INSERT INTO " DB2 ".supplementary_message_data "
 		    "SELECT * FROM supplementary_message_data WHERE "
-		    "message_id = '"+ idList.at(i) + "'";
+		    "message_id = :message_id";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
+		query.bindValue(":message_id", dmId);
 		if (!query.exec()) {
 			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3416,12 +3402,13 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 		}
 
 		queryStr = "INSERT INTO " DB2 ".process_state SELECT * FROM "
-		    "process_state WHERE message_id = '"+ idList.at(i) + "'";
+		    "process_state WHERE message_id = :message_id";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
+		query.bindValue(":message_id", dmId);
 		if (!query.exec()) {
 			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
@@ -3443,12 +3430,13 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 
 		queryStr = "INSERT INTO " DB2 ".message_certificate_data SELECT * "
 		    "FROM message_certificate_data WHERE "
-		    "message_id = '"+ idList.at(i) + "'";
+		    "message_id = :message_id";
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());
 			goto fail;
 		}
+		query.bindValue(":message_id", dmId);
 		if (!query.exec()) {
 			logErrorNL("Cannot execute SQL query: %s.",
 			    query.lastError().text().toUtf8().constData());

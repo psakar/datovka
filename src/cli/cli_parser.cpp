@@ -81,7 +81,7 @@ int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
 		return -1;
 	}
 	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_LIST,
-	        tr("Service: download list of received/sent messages from ISDS."),
+	        tr("Service: download list of received/sent messages from ISDS (synchronization)."),
 	        tr("string-of-parameters")))) {
 		return -1;
 	}
@@ -117,6 +117,11 @@ int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
 	}
 	if (!parser.addOption(QCommandLineOption(SER_FIND_DATABOX,
 	        tr("Service: find a data box via several parameters."),
+	        tr("string-of-parameters")))) {
+		return -1;
+	}
+	if (!parser.addOption(QCommandLineOption(SER_GET_MSG_IDS,
+	        tr("Service: get list of message IDs (received/sent) from local database."),
 	        tr("string-of-parameters")))) {
 		return -1;
 	}

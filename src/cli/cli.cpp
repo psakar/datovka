@@ -42,7 +42,7 @@
 const QSet<QString> serviceSet = QSet<QString>() << SER_LOGIN <<
 SER_GET_MSG_LIST << SER_SEND_MSG << SER_GET_MSG << SER_GET_DEL_INFO <<
 SER_GET_USER_INFO << SER_GET_OWNER_INFO << SER_CHECK_ATTACHMENT <<
-SER_FIND_DATABOX;
+SER_GET_MSG_IDS << SER_FIND_DATABOX;
 
 // Known attributes definition
 const QStringList connectAttrs = QStringList()
@@ -62,9 +62,9 @@ const QStringList getMsgAttrs = QStringList()
     << "attachmentDir";
 const QStringList getDelInfoAttrs = QStringList() << "dmID" << "zfoFile"
     << "download";
+const QStringList getMsgIdsAttrs = QStringList() << "dmType";
 const QStringList findDataboxAttrs = QStringList() << "dbType" << "dbID"
     << "ic" << "firmName" << "pnFirstName" << "pnLastName" << "adZipCode";
-
 
 /* ========================================================================= */
 static
@@ -106,7 +106,6 @@ void printErrToStdErr(const cli_error err, const QString errmsg)
 	cout << CLI_PREFIX << " error(" << err << ") : " << errmsg << endl;
 }
 
-
 /* ========================================================================= */
 const QString createErrorMsg(const QString &msg)
 /* ========================================================================= */
@@ -114,14 +113,12 @@ const QString createErrorMsg(const QString &msg)
 	return QString(CLI_PREFIX) + QString(PARSER_PREFIX) + msg;
 }
 
-
 /* ========================================================================= */
 static void isds_document_free_void(void **document)
 /* ========================================================================= */
 {
 	isds_document_free((struct isds_document **) document);
 }
-
 
 /* ========================================================================= */
 bool checkAttributeIfExists(const QString &service, const QString &attribute)
@@ -137,12 +134,13 @@ bool checkAttributeIfExists(const QString &service, const QString &attribute)
 		return getMsgAttrs.contains(attribute);
 	} else if (service == SER_GET_DEL_INFO) {
 		return getDelInfoAttrs.contains(attribute);
+	} else if (service == SER_GET_MSG_IDS) {
+		return getMsgIdsAttrs.contains(attribute);
 	} else if (service == SER_FIND_DATABOX) {
 		return findDataboxAttrs.contains(attribute);
 	}
 	return false;
 }
-
 
 /* ========================================================================= */
 const QStringList parseAttachment(const QString &files)
@@ -154,7 +152,6 @@ const QStringList parseAttachment(const QString &files)
 	return files.split(";");
 }
 
-
 /* ========================================================================= */
 const QStringList parseDbIDRecipient(const QString &dbIDRecipient)
 /* ========================================================================= */
@@ -164,7 +161,6 @@ const QStringList parseDbIDRecipient(const QString &dbIDRecipient)
 	}
 	return dbIDRecipient.split(";");
 }
-
 
 /* ========================================================================= */
 cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
@@ -316,7 +312,6 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	printDataToStdOut(newMsgIdList);
 	return CLI_SUCCESS;
 }
-
 
 /* ========================================================================= */
 cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
@@ -480,7 +475,6 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	return CLI_SUCCESS;
 }
 
-
 /* ========================================================================= */
 cli_error getDeliveryInfo(const QMap<QString,QVariant> &map,
     MessageDbSet *msgDbSet, bool needsISDS, QString &errmsg)
@@ -559,7 +553,6 @@ cli_error getDeliveryInfo(const QMap<QString,QVariant> &map,
 	return CLI_SUCCESS;
 }
 
-
 /* ========================================================================= */
 cli_error checkAttachment(const QMap<QString,QVariant> &map,
     MessageDbSet *msgDbSet)
@@ -575,6 +568,34 @@ cli_error checkAttachment(const QMap<QString,QVariant> &map,
 	return CLI_SUCCESS;
 }
 
+/* ========================================================================= */
+cli_error getMsgIds(const QMap<QString,QVariant> &map,
+    MessageDbSet *msgDbSet, QString &errmsg)
+/* ========================================================================= */
+{
+	const QString username = map["username"].toString();
+
+	qDebug() << CLI_PREFIX << "Get list of message IDs "
+	    "from local database for username" <<  username;
+
+	if ((map["dmType"].toString() != MT_RECEIVED) &&
+	    (map["dmType"].toString() != MT_SENT) &&
+	    (map["dmType"].toString() != MT_SENT_RECEIVED)) {
+		errmsg = "Wrong dmType value: " + map["dmType"].toString();
+		qDebug() << CLI_PREFIX << errmsg;
+		return CLI_ATR_VAL_ERR;
+	}
+
+	if (map["dmType"].toString() == MT_RECEIVED) {
+		printDataToStdOut(msgDbSet->getAllMessageIDs(MessageDb::TYPE_RECEIVED));
+	} else if (map["dmType"].toString() == MT_SENT) {
+		printDataToStdOut(msgDbSet->getAllMessageIDs(MessageDb::TYPE_SENT));
+	} else {
+		printDataToStdOut(msgDbSet->getAllMessageIDs(MessageDb::TYPE_RECEIVED));
+		printDataToStdOut(msgDbSet->getAllMessageIDs(MessageDb::TYPE_SENT));
+	}
+	return CLI_SUCCESS;
+}
 
 /* ========================================================================= */
 cli_error getUserInfo(const QMap<QString,QVariant> &map, QString &errmsg)
@@ -593,7 +614,6 @@ cli_error getUserInfo(const QMap<QString,QVariant> &map, QString &errmsg)
 	return CLI_ERROR;
 }
 
-
 /* ========================================================================= */
 cli_error getOwnerInfo(const QMap <QString, QVariant> &map, QString &errmsg)
 /* ========================================================================= */
@@ -610,7 +630,6 @@ cli_error getOwnerInfo(const QMap <QString, QVariant> &map, QString &errmsg)
 	errmsg = "Cannot download owner info";
 	return CLI_ERROR;
 }
-
 
 /* ========================================================================= */
 cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
@@ -665,7 +684,6 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 
 	return CLI_SUCCESS;
 }
-
 
 /* ========================================================================= */
 static
@@ -1076,7 +1094,6 @@ finish:
 	return ret;
 }
 
-
 /* ========================================================================= */
 cli_error checkLoginMandatoryAttributes(const QMap<QString,QVariant> &map,
     QString &errmsg)
@@ -1095,7 +1112,6 @@ cli_error checkLoginMandatoryAttributes(const QMap<QString,QVariant> &map,
 
 	return CLI_SUCCESS;
 }
-
 
 /* ========================================================================= */
 cli_error checkSendMsgMandatoryAttributes(const QMap<QString,QVariant> &map,
@@ -1141,7 +1157,6 @@ cli_error checkSendMsgMandatoryAttributes(const QMap<QString,QVariant> &map,
 	return CLI_SUCCESS;
 }
 
-
 /* ========================================================================= */
 cli_error checkGetMsgListMandatoryAttributes(const QMap<QString,QVariant> &map,
     QString &errmsg)
@@ -1169,7 +1184,6 @@ cli_error checkGetMsgListMandatoryAttributes(const QMap<QString,QVariant> &map,
 
 	return CLI_SUCCESS;
 }
-
 
 /* ========================================================================= */
 cli_error checkGetMsgMandatoryAttributes(const QMap<QString,QVariant> &map,
@@ -1216,7 +1230,6 @@ cli_error checkGetMsgMandatoryAttributes(const QMap<QString,QVariant> &map,
 	return CLI_SUCCESS;
 }
 
-
 /* ========================================================================= */
 cli_error checkDownloadDeliveryMandatoryAttributes(
     const QMap<QString,QVariant> &map, QString &errmsg)
@@ -1247,7 +1260,6 @@ cli_error checkDownloadDeliveryMandatoryAttributes(
 
 	return CLI_SUCCESS;
 }
-
 
 /* ========================================================================= */
 cli_error checkFindDataboxMandatoryAttributes(
@@ -1349,7 +1361,6 @@ cli_error checkFindDataboxMandatoryAttributes(
 	return CLI_SUCCESS;
 }
 
-
 /* ========================================================================= */
 cli_error checkMandatoryAttributes(const QString &service,
     QMap<QString,QVariant> &map, QString &errmsg)
@@ -1365,13 +1376,14 @@ cli_error checkMandatoryAttributes(const QString &service,
 		return checkGetMsgMandatoryAttributes(map, errmsg);
 	} else if (service == SER_GET_DEL_INFO) {
 		return checkDownloadDeliveryMandatoryAttributes(map, errmsg);
+	} else if (service == SER_GET_MSG_IDS) {
+		return checkGetMsgListMandatoryAttributes(map, errmsg);
 	} else if (service == SER_FIND_DATABOX) {
 		return checkFindDataboxMandatoryAttributes(map, errmsg);
 	}
 	errmsg = "Unknown service name";
 	return CLI_UNKNOWN_SER;
 }
-
 
 /* ========================================================================= */
 cli_error parsePamamString(const QString &service, const QString &paramString,
@@ -1508,7 +1520,6 @@ cli_error parsePamamString(const QString &service, const QString &paramString,
 	return CLI_SUCCESS;
 }
 
-
 /* ========================================================================= */
 cli_error doService(const QString &service, const QMap<QString,QVariant> &map,
     MessageDbSet *msgDbSet, bool needsISDS, QString &errmsg)
@@ -1529,13 +1540,14 @@ cli_error doService(const QString &service, const QMap<QString,QVariant> &map,
 		return getOwnerInfo(map, errmsg);
 	} else if (service == SER_CHECK_ATTACHMENT) {
 		return checkAttachment(map, msgDbSet);
+	} else if (service == SER_GET_MSG_IDS) {
+		return getMsgIds(map, msgDbSet, errmsg);
 	} else if (service == SER_FIND_DATABOX) {
 		return findDatabox(map, errmsg);
 	}
 	errmsg = "Unknown service name";
 	return CLI_UNKNOWN_SER;
 }
-
 
 /* ========================================================================= */
 int runService(const QString &lParam,
@@ -1659,7 +1671,7 @@ int runService(const QString &lParam,
 		}
 	}
 
-	if (service == SER_CHECK_ATTACHMENT) {
+	if (service == SER_CHECK_ATTACHMENT || service == SER_GET_MSG_IDS) {
 		needsISDS = false;
 	}
 
