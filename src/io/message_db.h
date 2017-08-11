@@ -614,19 +614,19 @@ public:
 	    int messageType);
 
 	/*!
-	 * @brief Return all message IDs from database without attachment.
+	 * @brief Return all IDs of messages without attachment.
 	 *
-	 * @return message id list.
+	 * @return Message identifier list.
 	 */
-	QStringList getAllMessageIDsWithoutAttach(void) const;
+	QList<qint64> getAllMessageIDsWithoutAttach(void) const;
 
 	/*!
 	 * @brief Return all message IDs from database.
 	 *
-	 * @param[in] messageType  Message orienation.
-	 * @return message id list.
+	 * @param[in] messageType Specifies sent or received messages.
+	 * @return Message identifier list.
 	 */
-	QStringList getAllMessageIDs(enum MessageType messageType) const;
+	QList<qint64> getAllMessageIDs(enum MessageType messageType) const;
 
 	/*!
 	 * @brief Check whether whole message is stored in database.
@@ -965,18 +965,18 @@ protected: /* These function are used from within a database container. */
 	QList<MsgId> getAllMessageIDsFromDB(void) const;
 
 	/*!
-	 * @brief Get all unique years from messages db.
+	 * @brief Get all unique years of messages.
 	 *
 	 * @return Return unique year list.
 	 */
 	QStringList getAllUniqueYearsFormMsgs(void) const;
 
 	/*!
-	 * @brief Get list of all messages ID correspond with year.
+	 * @brief Get list of all message IDs corresponding with year.
 	 *
 	 * @return Return message ID list.
 	 */
-	QStringList getAllMsgsIDEqualWithYear(const QString &year) const;
+	QList<qint64> getAllMsgsIDEqualWithYear(const QString &year) const;
 
 	/*!
 	 * @brief Return list of message ids corresponding to given date

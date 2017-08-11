@@ -1284,25 +1284,25 @@ QList<MessageDb::MsgId> MessageDbSet::getAllMessageIDsFromDB(void) const
 	return QList<MessageDb::MsgId>();
 }
 
-QStringList MessageDbSet::_sf_getAllMessageIDsWithoutAttach(void) const
+QList<qint64> MessageDbSet::_sf_getAllMessageIDsWithoutAttach(void) const
 {
 	if (this->size() == 0) {
-		return QStringList();
+		return QList<qint64>();
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->getAllMessageIDsWithoutAttach();
 }
 
-QStringList MessageDbSet::_yrly_getAllMessageIDsWithoutAttach(void) const
+QList<qint64> MessageDbSet::_yrly_getAllMessageIDsWithoutAttach(void) const
 {
-	QStringList msgIds;
+	QList<qint64> msgIds;
 
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_NULLPTR == db) {
 			Q_ASSERT(0);
-			return QStringList();
+			return QList<qint64>();
 		}
 
 		msgIds.append(db->getAllMessageIDsWithoutAttach());
@@ -1311,7 +1311,7 @@ QStringList MessageDbSet::_yrly_getAllMessageIDsWithoutAttach(void) const
 	return msgIds;
 }
 
-QStringList MessageDbSet::getAllMessageIDsWithoutAttach(void) const
+QList<qint64> MessageDbSet::getAllMessageIDsWithoutAttach(void) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -1325,30 +1325,30 @@ QStringList MessageDbSet::getAllMessageIDsWithoutAttach(void) const
 		break;
 	}
 
-	return QStringList();
+	return QList<qint64>();
 }
 
-QStringList MessageDbSet::_sf_getAllMessageIDs(
+QList<qint64> MessageDbSet::_sf_getAllMessageIDs(
     enum MessageDb::MessageType messageType) const
 {
 	if (this->size() == 0) {
-		return QStringList();
+		return QList<qint64>();
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->getAllMessageIDs(messageType);
 }
 
-QStringList MessageDbSet::_yrly_getAllMessageIDs(
+QList<qint64> MessageDbSet::_yrly_getAllMessageIDs(
     enum MessageDb::MessageType messageType) const
 {
-	QStringList msgIds;
+	QList<qint64> msgIds;
 
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_NULLPTR == db) {
 			Q_ASSERT(0);
-			return QStringList();
+			return QList<qint64>();
 		}
 
 		msgIds.append(db->getAllMessageIDs(messageType));
@@ -1357,7 +1357,7 @@ QStringList MessageDbSet::_yrly_getAllMessageIDs(
 	return msgIds;
 }
 
-QStringList MessageDbSet::getAllMessageIDs(
+QList<qint64> MessageDbSet::getAllMessageIDs(
     enum MessageDb::MessageType messageType) const
 {
 	switch (m_organisation) {
@@ -1372,7 +1372,7 @@ QStringList MessageDbSet::getAllMessageIDs(
 		break;
 	}
 
-	return QStringList();
+	return QList<qint64>();
 }
 
 QList<MessageDb::MsgId> MessageDbSet::_sf_msgsDateInterval(

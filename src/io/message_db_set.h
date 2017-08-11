@@ -523,19 +523,19 @@ public: /* Database function that have been delegate to the container. */
 	QList<MessageDb::MsgId> getAllMessageIDsFromDB(void) const;
 
 	/*!
-	 * @brief Return all message IDs from database without attachment.
+	 * @brief Return all IDs of messages without attachment.
 	 *
-	 * @return message id list.
+	 * @return Message identifier list.
 	 */
-	QStringList getAllMessageIDsWithoutAttach(void) const;
+	QList<qint64> getAllMessageIDsWithoutAttach(void) const;
 
 	/*!
 	 * @brief Return all message IDs from database.
 	 *
-	 * @param[in] messageType Message orienation.
-	 * @return message id list.
+	 * @param[in] messageType Specifies sent or received messages.
+	 * @return Message identifier list.
 	 */
-	QStringList getAllMessageIDs(enum MessageDb::MessageType messageType) const;
+	QList<qint64> getAllMessageIDs(enum MessageDb::MessageType messageType) const;
 
 	/*!
 	 * @brief Return list of message ids corresponding to given date
@@ -646,11 +646,11 @@ private:
 	inline QList<MessageDb::MsgId> _sf_getAllMessageIDsFromDB(void) const;
 	inline QList<MessageDb::MsgId> _yrly_getAllMessageIDsFromDB(void) const;
 
-	inline QStringList _sf_getAllMessageIDsWithoutAttach(void) const;
-	inline QStringList _yrly_getAllMessageIDsWithoutAttach(void) const;
+	inline QList<qint64> _sf_getAllMessageIDsWithoutAttach(void) const;
+	inline QList<qint64> _yrly_getAllMessageIDsWithoutAttach(void) const;
 
-	inline QStringList _sf_getAllMessageIDs(enum MessageDb::MessageType messageType) const;
-	inline QStringList _yrly_getAllMessageIDs(enum MessageDb::MessageType messageType) const;
+	inline QList<qint64> _sf_getAllMessageIDs(enum MessageDb::MessageType messageType) const;
+	inline QList<qint64> _yrly_getAllMessageIDs(enum MessageDb::MessageType messageType) const;
 
 	inline QList<MessageDb::MsgId> _sf_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 	inline QList<MessageDb::MsgId> _yrly_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
