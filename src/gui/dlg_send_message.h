@@ -45,12 +45,12 @@
  *
  * @param[in] messageDb Message database.
  * @param[in] dmId Message identifier number.
- * @return Prefix.
+ * @return Prefix strings 'DDZ', 'ODZ' or 'DZ'.
  *
  * @todo Move this function somewhere else
  *     (and clean up the code of the following dialogue.
  */
-const QString &dzPrefix(MessageDb *messageDb, qint64 dmId);
+const QString &dzPrefix(const MessageDb *messageDb, qint64 dmId);
 
 /*!
  * @brief Send message dialogue.
