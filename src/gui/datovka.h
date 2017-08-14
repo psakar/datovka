@@ -57,7 +57,6 @@ namespace Ui {
 	class MainWindow;
 }
 
-
 class MainWindow : public QMainWindow {
 	Q_OBJECT
 
@@ -102,7 +101,7 @@ protected:
 
 	/*!
 	 * @brief Check window geometry, adjust size if window is too large for
-	 *     desktop..
+	 *     desktop.
 	 */
 	virtual
 	void showEvent(QShowEvent *event) Q_DECL_OVERRIDE;
@@ -376,7 +375,7 @@ private slots:
 	bool synchroniseSelectedAccount(QString userName = QString());
 
 	/*!
-	 * @brief Downloads the attachments for the selected message.
+	 * @brief Downloads attachments of selected messages.
 	 */
 	void downloadSelectedMessageAttachments(void);
 
@@ -751,11 +750,6 @@ private:
 	 */
 	QModelIndex accountYearlyIndex(const QString &userName,
 	    const QString &year, int msgType);
-
-	/*!
-	 * @brief Return index for message with given properties.
-	 */
-	QModelIndex messageIndex(qint64 msgId) const;
 
 	/*!
 	 * @brief Check message time stamp expiration for account.

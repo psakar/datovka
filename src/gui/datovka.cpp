@@ -106,7 +106,7 @@
 #define WIN_POSITION_H "h"
 #define WIN_POSITION_MAX "max"
 
-QNetworkAccessManager* nam;
+QNetworkAccessManager *nam;
 
 /*
  * If defined then no message table is going to be generated when clicking
@@ -139,6 +139,41 @@ QNetworkAccessManager* nam;
  */
 #define currentFrstColAttachmentIndexes() \
 	(ui->messageAttachmentList->selectionModel()->selectedRows(0))
+
+/*!
+ * @brief Return index for message with given properties.
+ *
+ * @param[in] view Message table view.
+ * @param[in] dmId Message identifier.
+ * @return Index of given message.
+ */
+static inline
+QModelIndex messageIndex(const QTableView *view, qint64 dmId)
+{
+	if (Q_UNLIKELY((Q_NULLPTR == view) || (dmId < 0))) {
+		Q_ASSERT(0);
+		return QModelIndex();
+	}
+
+	const QAbstractItemModel *model = view->model();
+	if (Q_UNLIKELY(Q_NULLPTR == model)) {
+		Q_ASSERT(0);
+		return QModelIndex();
+	}
+
+	/* Find and select the message with the ID. */
+	for (int row = 0; row < model->rowCount(); ++row) {
+		/*
+		 * TODO -- Search in a more resource-saving way.
+		 * Eliminate index copying, use smarter search.
+		 */
+		if (model->index(row, 0).data().toLongLong() == dmId) {
+			return model->index(row, 0);
+		}
+	}
+
+	return QModelIndex();
+}
 
 /*!
  * @brief Message identifier from index.
@@ -1766,41 +1801,6 @@ QModelIndex MainWindow::accountYearlyIndex(const QString &userName,
 	return yearIdx;
 }
 
-
-/* ========================================================================= */
-/*
- * Return index for message with given properties.
- */
-QModelIndex MainWindow::messageIndex(qint64 msgId) const
-/* ========================================================================= */
-{
-	debugFuncCall();
-
-	const QAbstractItemModel *model = ui->messageList->model();
-	Q_ASSERT(0 != model);
-
-	int rowCount = model->rowCount();
-
-	if (0 == rowCount) {
-		/* Do nothing on empty model. */
-		return QModelIndex();
-	}
-
-	/* Find and select the message with the ID. */
-	for (int row = 0; row < rowCount; ++row) {
-		/*
-		 * TODO -- Search in a more resource-saving way.
-		 * Eliminate index copying, use smarter search.
-		 */
-		if (model->index(row, 0).data().toLongLong() == msgId) {
-			return model->index(row, 0);
-		}
-	}
-
-	return QModelIndex();
-}
-
-
 /* ========================================================================= */
 /*
  * Select account via userName and focus on message ID from search selection.
@@ -1827,8 +1827,7 @@ void MainWindow::messageItemFromSearchSelection(const QString &userName,
 	accountItemCurrentChanged(yearIdx);
 
 	/* second step: find and select message according to msgId */
-	QModelIndex msgIdx(messageIndex(msgId));
-
+	QModelIndex msgIdx(messageIndex(ui->messageList, msgId));
 	if (msgIdx.isValid()) {
 		ui->messageList->setCurrentIndex(msgIdx);
 		ui->messageList->scrollTo(msgIdx);
@@ -3185,13 +3184,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	return true;
 }
 
-
-/* ========================================================================= */
-/*
- * Downloads the attachments for the selected message.
- */
 void MainWindow::downloadSelectedMessageAttachments(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -3222,15 +3215,17 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 
 	foreach (const MessageDb::MsgId &id, msgMsgIds(firstMsgColumnIdxs)) {
 		/* Using prepend() just to outrun other jobs. */
-		TaskDownloadMessage *task;
-
-		task = new (std::nothrow) TaskDownloadMessage(
-		    userName, dbSet, msgDirect, id, false);
+		TaskDownloadMessage *task =
+		    new (std::nothrow) TaskDownloadMessage(
+		        userName, dbSet, msgDirect, id, false);
+		if (Q_UNLIKELY(task == Q_NULLPTR)) {
+			Q_ASSERT(0);
+			continue;
+		}
 		task->setAutoDelete(true);
 		globWorkPool.assignLo(task, WorkerPool::PREPEND);
 	}
 }
-
 
 /* ========================================================================= */
 /*
@@ -5268,18 +5263,12 @@ void MainWindow::saveAppIdConfigFormat(QSettings &settings) const
 	settings.endGroup();
 }
 
-
-/* ========================================================================= */
-/*
-* Slot: Refresh AccountList
-*/
 void MainWindow::refreshAccountList(const QString &userName)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
 	if (userName.isEmpty()) {
-		logWarning("%s\n",
+		logWarningNL("%s",
 		    "Cannot refresh account list on empty user name.");
 		return;
 	}
@@ -5297,6 +5286,9 @@ void MainWindow::refreshAccountList(const QString &userName)
 		/* Currently selected is the one being processed. */
 		nodeType = AccountModel::nodeType(selectedIdx);
 		switch (nodeType) {
+		case AccountModel::nodeRecentReceived:
+		case AccountModel::nodeRecentSent:
+			break;
 		case AccountModel::nodeReceivedYear:
 			year = selectedIdx.data(ROLE_PLAIN_DISPLAY).toString();
 			msgType = MessageDb::TYPE_RECEIVED;
@@ -5334,17 +5326,18 @@ void MainWindow::refreshAccountList(const QString &userName)
 	 * TODO -- A better solution?
 	 */
 	ui->accountList->repaint();
-	if ((nodeType != AccountModel::nodeUnknown) && !year.isEmpty()) {
-		QModelIndex yearIdx(accountYearlyIndex(userName, year,
-		    msgType));
-
-		if (yearIdx.isValid()) {
-			ui->accountList->setCurrentIndex(yearIdx);
-			accountItemCurrentChanged(selectedIdx);
+	if ((nodeType != AccountModel::nodeUnknown) && (dmId != -1)) {
+		if (!year.isEmpty()) {
+			QModelIndex yearIdx(accountYearlyIndex(userName, year,
+			    msgType));
+			if (yearIdx.isValid()) {
+				ui->accountList->setCurrentIndex(yearIdx);
+				accountItemCurrentChanged(selectedIdx);
+			}
 		}
 
 		if (dmId != -1) {
-			QModelIndex msgIdx(messageIndex(dmId));
+			QModelIndex msgIdx(messageIndex(ui->messageList, dmId));
 			if (msgIdx.isValid()) {
 				ui->messageList->setCurrentIndex(msgIdx);
 				ui->messageList->scrollTo(msgIdx);
