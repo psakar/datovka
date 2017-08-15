@@ -96,10 +96,20 @@ void DlgAbout::showLicence(void)
 {
 	m_ui->textEdit->setPlainText(
 	    suppliedTextFileContent(TEXT_FILE_LICENCE));
+	if (m_ui->textEdit->toPlainText().isEmpty()) {
+		m_ui->textEdit->setPlainText(
+		    tr("File '%1' either doesn't exist or is empty.")
+		        .arg(expectedTextFilePath(TEXT_FILE_LICENCE)));
+	}
 }
 
 void DlgAbout::showCredits(void)
 {
 	m_ui->textEdit->setPlainText(
 	    suppliedTextFileContent(TEXT_FILE_CREDITS));
+	if (m_ui->textEdit->toPlainText().isEmpty()) {
+		m_ui->textEdit->setPlainText(
+		    tr("File '%1' either doesn't exist or is empty.")
+		        .arg(expectedTextFilePath(TEXT_FILE_CREDITS)));
+	}
 }
