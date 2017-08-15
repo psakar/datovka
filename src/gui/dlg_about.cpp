@@ -21,18 +21,19 @@
  * the two.
  */
 
-#include <QFile>
-
 #include "src/about.h"
+#include "src/common.h"
 #include "src/gui/dlg_about.h"
 #include "src/io/filesystem.h"
+#include "ui_dlg_about.h"
 
 DlgAbout::DlgAbout(QWidget *parent)
-    : QDialog(parent)
+    : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgAbout)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	this->labelVersion->setText(
+	m_ui->labelVersion->setText(
 	    "<span style=\"font-size:15pt;\"><b>Datovka"
 #ifdef PORTABLE_APPLICATION
 	    " - " + tr("Portable version") +
@@ -42,9 +43,9 @@ DlgAbout::DlgAbout(QWidget *parent)
 	    "<b>" + tr("Version") + ": " VERSION "</b>"
 	    "<br/>"
 	    + tr("Free client for Czech eGov data boxes."));
-	this->labelVersion->setAlignment(Qt::AlignHCenter);
-	this->labelVersion->setTextFormat(Qt::RichText);
-	this->labelVersion->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	m_ui->labelVersion->setAlignment(Qt::AlignHCenter);
+	m_ui->labelVersion->setTextFormat(Qt::RichText);
+	m_ui->labelVersion->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
 	QString copyrightHtml(
 	    "Copyright &copy; 2014–2016 CZ.NIC, z. s. p. o. "
@@ -57,37 +58,48 @@ DlgAbout::DlgAbout(QWidget *parent)
 	    "<a href=\"" DATOVKA_FAQ_URL "\">" + tr("FAQ") + "</a>";
 	copyrightHtml += "<br/>" + tr("Support") + ": "
 	    "&lt;<a href=\"mailto:" SUPPORT_MAIL "?Subject=[Datovka%20" VERSION "]\">" SUPPORT_MAIL "</a>&gt;";
-	this->labelCopy->setText(copyrightHtml);
-	this->labelCopy->setTextFormat(Qt::RichText);
-	this->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	this->labelCopy->setOpenExternalLinks(true);
+	m_ui->labelCopy->setText(copyrightHtml);
+	m_ui->labelCopy->setTextFormat(Qt::RichText);
+	m_ui->labelCopy->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	m_ui->labelCopy->setOpenExternalLinks(true);
 
 	QString librariesStr("<b>");
 	librariesStr += QObject::tr("Depends on libraries:");
 	librariesStr += "</b><br/>";
-	this->labelLibs->setText(librariesStr +
+	m_ui->labelLibs->setText(librariesStr +
 	    libraryDependencies().join("<br/>"));
-	this->labelLibs->setTextFormat(Qt::RichText);
-	this->labelLibs->setTextInteractionFlags(Qt::TextBrowserInteraction);
-	this->labelLibs->setAlignment(Qt::AlignHCenter);
-	this->labelLibs->setWordWrap(true);
+	m_ui->labelLibs->setTextFormat(Qt::RichText);
+	m_ui->labelLibs->setTextInteractionFlags(Qt::TextBrowserInteraction);
+	m_ui->labelLibs->setAlignment(Qt::AlignHCenter);
+	m_ui->labelLibs->setWordWrap(true);
 
-	connect(this->pushButtonLicence, SIGNAL(clicked()), this,
+	connect(m_ui->pushButtonLicence, SIGNAL(clicked()), this,
 	    SLOT(showLicence()));
-	connect(this->pushButtonCredits, SIGNAL(clicked()), this,
+	connect(m_ui->pushButtonCredits, SIGNAL(clicked()), this,
 	    SLOT(showCredits()));
 
-	connect(this->buttonBox, SIGNAL(accepted()), this, SLOT(close()));
+	connect(m_ui->buttonBox, SIGNAL(accepted()), this, SLOT(close()));
+}
+
+DlgAbout::~DlgAbout(void)
+{
+	delete m_ui;
+}
+
+void DlgAbout::about(QWidget *parent)
+{
+	DlgAbout dlg(parent);
+	dlg.exec();
 }
 
 void DlgAbout::showLicence(void)
 {
-	this->textEdit->setPlainText(
+	m_ui->textEdit->setPlainText(
 	    suppliedTextFileContent(TEXT_FILE_LICENCE));
 }
 
 void DlgAbout::showCredits(void)
 {
-	this->textEdit->setPlainText(
+	m_ui->textEdit->setPlainText(
 	    suppliedTextFileContent(TEXT_FILE_CREDITS));
 }
