@@ -166,7 +166,16 @@ enum TextFile {
 };
 
 /*!
+ * @brief Return default installation location of text file.
+ *
+ * @param[in] textFile Text file identifier.
+ */
+QString expectedTextFilePath(enum TextFile textFile);
+
+/*!
  * @brief Returns the content of the supplied text file.
+ *
+ * @param[in] textFile Text file identifier.
  */
 QString suppliedTextFileContent(enum TextFile textFile);
 

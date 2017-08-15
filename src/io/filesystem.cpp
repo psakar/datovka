@@ -421,6 +421,74 @@ QString qtLocalisationDir(void)
 }
 
 /*!
+ * @brief Return text file name.
+ *
+ * @param[in] textFile Text file identifier.
+ * @return Pointer to C string or NULL on error.
+ */
+static inline
+const char *textFileName(enum TextFile textFile)
+{
+#define CREDITS_FILE "AUTHORS"
+#define LICENCE_FILE "COPYING"
+	const char *fileName = NULL;
+
+	switch (textFile) {
+	case TEXT_FILE_CREDITS:
+		fileName = CREDITS_FILE;
+		break;
+	case TEXT_FILE_LICENCE:
+		fileName = LICENCE_FILE;
+		break;
+	default:
+		break;
+	}
+
+	return fileName;
+#undef CREDITS_FILE
+#undef LICENCE_FILE
+}
+
+/*!
+ * @brief Expands to defined text files installation location.
+ */
+#define instLocationUnix() \
+	QString(TEXT_FILES_INST_DIR)
+
+/*!
+ * @brief Adjust text file location for OS X/macOS package.
+ *
+ * @param[in] filePath Location as defined by executable.
+ * @return Adjusted path.
+ */
+static inline
+QString adjustForMacPackage(const QString &filePath)
+{
+	QDir directory(filePath);
+	if (QLatin1String("MacOS") == directory.dirName()) {
+		directory.cdUp();
+	}
+	return directory.absolutePath() + QDir::separator() +
+	    QLatin1String("Resources");
+}
+
+QString expectedTextFilePath(enum TextFile textFile)
+{
+	QString filePath;
+
+#if defined TEXT_FILES_INST_DIR
+	filePath = instLocationUnix();
+#elif defined Q_OS_OSX
+	filePath = QCoreApplication::applicationDirPath();
+	filePath = adjustForMacPackage(filePath);
+#else /* !TEXT_FILES_INST_DIR && !Q_OS_OSX */
+	filePath = QCoreApplication::applicationDirPath();
+#endif /* TEXT_FILES_INST_DIR || Q_OS_OSX */
+
+	return filePath + QDir::separator() + textFileName(textFile);
+}
+
+/*!
  * @brief Searches for the location of the supplied text file.
  *
  * @param[in] fName File name.
@@ -436,7 +504,7 @@ QString suppliedTextFileLocation(const QString &fName)
 	 * Search in installation location if supplied.
 	 */
 
-	filePath = QString(TEXT_FILES_INST_DIR) + QDir::separator() + fName;
+	filePath = instLocationUnix() + QDir::separator() + fName;
 
 	if (QFile::exists(filePath)) {
 		return filePath;
@@ -448,14 +516,7 @@ QString suppliedTextFileLocation(const QString &fName)
 	/* Search in application location. */
 	filePath = QCoreApplication::applicationDirPath();
 #ifdef Q_OS_OSX
-	{
-		QDir directory(filePath);
-		if ("MacOS" == directory.dirName()) {
-			directory.cdUp();
-		}
-		filePath = directory.absolutePath() + QDir::separator() +
-		    "Resources";
-	}
+	filePath = adjustForMacPackage(filePath);
 #endif /* Q_OS_OSX */
 	filePath += QDir::separator() + fName;
 
@@ -470,24 +531,8 @@ QString suppliedTextFileLocation(const QString &fName)
 
 QString suppliedTextFileContent(enum TextFile textFile)
 {
-#define CREDITS_FILE "AUTHORS"
-#define LICENCE_FILE "COPYING"
-
-	const char *fileName = NULL;
-	QString content;
-
-	switch (textFile) {
-	case TEXT_FILE_CREDITS:
-		fileName = CREDITS_FILE;
-		break;
-	case TEXT_FILE_LICENCE:
-		fileName = LICENCE_FILE;
-		break;
-	default:
-		fileName = NULL;
-	}
-
-	if (NULL == fileName) {
+	const char *fileName = textFileName(textFile);
+	if (Q_UNLIKELY(NULL == fileName)) {
 		Q_ASSERT(0);
 		return QString();
 	}
@@ -496,6 +541,8 @@ QString suppliedTextFileContent(enum TextFile textFile)
 	if (fileLocation.isEmpty()) {
 		return QString();
 	}
+
+	QString content;
 
 	QFile file(fileLocation);
 	QTextStream textStream(&file);
@@ -506,8 +553,6 @@ QString suppliedTextFileContent(enum TextFile textFile)
 	file.close();
 
 	return content;
-#undef CREDITS_FILE
-#undef LICENCE_FILE
 }
 
 #undef LOCALE_SRC_PATH

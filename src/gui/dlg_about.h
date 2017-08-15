@@ -25,24 +25,38 @@
 #define _DLG_ABOUT_H_
 
 #include <QDialog>
-#include <QStringList>
 
-#include "src/common.h"
-#include "ui_dlg_about.h"
+namespace Ui {
+	class DlgAbout;
+}
 
 /*!
  * @brief About dialogue.
  */
-class DlgAbout : public QDialog, public Ui::AboutDialog {
+class DlgAbout : public QDialog {
 	Q_OBJECT
 
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] parent Parent object.
 	 */
 	explicit DlgAbout(QWidget *parent = Q_NULLPTR);
+
+public:
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgAbout(void);
+
+	/*!
+	 * @brief View about dialogue.
+	 *
+	 * @param[in] parent Window parent widget.
+	 */
+	static
+	void about(QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -54,6 +68,9 @@ private slots:
 	 * @brief Displays credits information in the text field.
 	 */
 	void showCredits(void);
+
+private:
+	Ui::DlgAbout *m_ui; /*!< UI generated from UI file. */
 };
 
 #endif /* _DLG_ABOUT_H_ */

@@ -5351,9 +5351,7 @@ void MainWindow::refreshAccountList(const QString &userName)
 
 void MainWindow::showAboutApplicationDialog(void)
 {
-	QDialog *da = new DlgAbout(this);
-	da->exec();
-	da->deleteLater();
+	DlgAbout::about(this);
 }
 void MainWindow::showImportDatabaseDialog(void)
 {
