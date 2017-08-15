@@ -56,21 +56,21 @@
 #include "ui_dlg_send_message.h"
 
 /*
- * Message types as defined in ISDS alnd used in libisds.
- * For details see linisds.h .
+ * Message types as defined in ISDS and used in libisds.
+ * For details see libisds.h .
  */
 #define DMTYPE_INIT "I"
 #define DMTYPE_COMM "K"
 #define DMTYPE_RESP "O"
 
-const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
+const QString &dzPrefix(const MessageDb *messageDb, qint64 dmId)
 {
-	const static QString nothing;
-	const static QString received(QLatin1String("D"));
-	const static QString sent(QLatin1String("O"));
+	const static QString unspecified(QLatin1String("DZ"));
+	const static QString received(QLatin1String("DDZ"));
+	const static QString sent(QLatin1String("ODZ"));
 
-	if (Q_NULLPTR == messageDb || dmId < 0) {
-		return nothing;
+	if (Q_UNLIKELY(Q_NULLPTR == messageDb || dmId < 0)) {
+		return unspecified;
 	}
 
 	switch (messageDb->msgMessageType(dmId)) {
@@ -81,7 +81,7 @@ const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
 		return sent;
 		break;
 	default:
-		return nothing;
+		return unspecified;
 		break;
 	}
 }
@@ -733,7 +733,7 @@ void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 		}
 
 		m_attachmentModel.appendAttachmentEntry(msgBase64,
-		    dzPrefix(messageDb, msgId.dmId) + QString("DZ_%1.zfo").arg(msgId.dmId));
+		    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId));
 	}
 }
 

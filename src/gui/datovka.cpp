@@ -6178,8 +6178,8 @@ void MainWindow::sendMessagesZfoEmail(void)
 			}
 		}
 
-		QString attachName(dzPrefix(messageDb, msgId.dmId) +
-		    QString("DZ_%1.zfo").arg(msgId.dmId));
+		QString attachName(
+		    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId));
 		if (attachName.isEmpty()) {
 			Q_ASSERT(0);
 			return;
@@ -6393,8 +6393,7 @@ void MainWindow::openSelectedMessageExternally(void)
 	}
 
 	QString fileName(TMP_ATTACHMENT_PREFIX +
-	    dzPrefix(messageDb, msgId.dmId) +
-	    QString("DZ_%1.zfo").arg(msgId.dmId));
+	    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId));
 	if (fileName.isEmpty()) {
 		Q_ASSERT(0);
 		return;
@@ -6473,8 +6472,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 	}
 
 	QString fileName(TMP_ATTACHMENT_PREFIX +
-	    dzPrefix(messageDb, msgId.dmId) +
-	    QString("DZ_%1_info.zfo").arg(msgId.dmId));
+	    QString("%1_%2_info.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId));
 	if (fileName.isEmpty()) {
 		Q_ASSERT(0);
 		return;
@@ -6595,7 +6593,9 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 
 	/* Show send to records management dialogue. */
 	DlgRecordsManagementUpload::uploadMessage(globRecordsManagementSet,
-	    msgId.dmId, QString("DZ-%1.zfo").arg(msgId.dmId), msgRaw, this);
+	    msgId.dmId,
+	    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId),
+	    msgRaw, this);
 
 	QList<qint64> msgIdList;
 	msgIdList.append(msgId.dmId);
