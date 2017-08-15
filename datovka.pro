@@ -42,7 +42,9 @@ unix:!macx {
 	BINDIR="$${PREFIX}/bin"
 	DATADIR="$${PREFIX}/share"
 
-	TEXT_FILES_INST_DIR = "$${DATADIR}/doc/$${APP_NAME}"
+	isEmpty(TEXT_FILES_INST_DIR) {
+		TEXT_FILES_INST_DIR = "$${DATADIR}/doc/$${APP_NAME}"
+	}
 	LOCALE_INST_DIR = "$${DATADIR}/$${APP_NAME}/localisations"
 
 	application.target = $${APP_NAME}
@@ -83,8 +85,7 @@ unix:!macx {
 	additional.path = "$${TEXT_FILES_INST_DIR}"
 	additional.files = \
 		AUTHORS \
-		COPYING \
-		README
+		COPYING
 
 	DEFINES += DATADIR=\\\"$$DATADIR\\\" \
 		PKGDATADIR=\\\"$$PKGDATADIR\\\" \
