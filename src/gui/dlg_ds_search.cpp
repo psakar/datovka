@@ -67,6 +67,7 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
     m_dbOpenAddressing(dbOpenAddressing),
+    m_contactListProxyModel(this),
     m_contactTableModel(this),
     m_boxTypeCBoxModel(this),
     m_fulltextCBoxModel(this),
@@ -113,7 +114,16 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	m_ui->fulltextTargetCBox->setModel(&m_fulltextCBoxModel);
 
 	m_contactTableModel.setHeader();
-	m_ui->contactTableView->setModel(&m_contactTableModel);
+	m_contactListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT);
+	m_contactListProxyModel.setSourceModel(&m_contactTableModel);
+	{
+		QList<int> columnList;
+		columnList.append(BoxContactsModel::BOX_ID_COL);
+		columnList.append(BoxContactsModel::BOX_NAME_COL);
+		columnList.append(BoxContactsModel::ADDRESS_COL);
+		m_contactListProxyModel.setFilterKeyColumns(columnList);
+	}
+	m_ui->contactTableView->setModel(&m_contactListProxyModel);
 
 	connect(m_ui->contactTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
@@ -154,6 +164,13 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	    new TableHomeEndFilter(this));
 	m_ui->contactTableView->installEventFilter(
 	    new TableSpaceSelectionFilter(this));
+
+	m_ui->filterLine->setFixedWidth(200);
+	m_ui->filterLine->setToolTip(tr("Enter sought expression"));
+	m_ui->filterLine->setClearButtonEnabled(true);
+
+	connect(m_ui->filterLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(filterContact(QString)));
 
 	initContent();
 }
@@ -337,6 +354,23 @@ void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 
 		m_ui->pscLineLabel->show();
 		m_ui->pscLineEdit->show();
+	}
+}
+
+void DlgDsSearch::filterContact(const QString &text)
+{
+	m_contactListProxyModel.setFilterRegExp(QRegExp(text,
+	    Qt::CaseInsensitive, QRegExp::FixedString));
+	/* Set filter field background colour. */
+	if (text.isEmpty()) {
+		m_ui->filterLine->setStyleSheet(
+		    SortFilterProxyModel::blankFilterEditStyle);
+	} else if (m_contactListProxyModel.rowCount() != 0) {
+		m_ui->filterLine->setStyleSheet(
+		    SortFilterProxyModel::foundFilterEditStyle);
+	} else {
+		m_ui->filterLine->setStyleSheet(
+		    SortFilterProxyModel::notFoundFilterEditStyle);
 	}
 }
 

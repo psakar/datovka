@@ -30,6 +30,7 @@
 
 #include "src/models/combo_box_model.h"
 #include "src/models/data_box_contacts_model.h"
+#include "src/models/sort_filter_proxy_model.h"
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
 
@@ -141,6 +142,11 @@ private slots:
 	 */
 	void makeSearchElelementsVisible(int fulltextState);
 
+	/*!
+	 * @brief Apply filter text on the table.
+	 */
+	void filterContact(const QString &text);
+
 private:
 	/*!
 	 * @brief Initialise dialogue content.
@@ -232,6 +238,10 @@ private:
 	const bool m_dbEffectiveOVM;
 	const bool m_dbOpenAddressing;
 
+	SortFilterProxyModel m_contactListProxyModel; /*!<
+	                                               * Used for message
+	                                               * sorting and filtering.
+	                                               */
 	BoxContactsModel m_contactTableModel; /*!< Model of found data boxes. */
 	CBoxModel m_boxTypeCBoxModel; /*!< Data box type combo box model. */
 	CBoxModel m_fulltextCBoxModel; /*!< Full-text combo box model. */

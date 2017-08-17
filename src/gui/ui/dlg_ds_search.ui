@@ -229,6 +229,16 @@ contain all otherwise matching databoxes.</string>
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QLabel" name="filterLabel">
+       <property name="text">
+        <string>Filter:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="filterLine"/>
+     </item>
     </layout>
    </item>
    <item>
