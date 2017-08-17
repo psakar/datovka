@@ -42,11 +42,27 @@
 #define CBOX_TYPE_PFO 3
 #define CBOX_TYPE_FO 4
 
+FulltextSearchThread::FulltextSearchThread(DlgDsSearch *dlg)
+    : m_dlg(dlg)
+{
+	Q_ASSERT(dlg != Q_NULLPTR);
+}
+
+void FulltextSearchThread::run(void)
+{
+	if (Q_UNLIKELY(m_dlg == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+	m_dlg->searchDataBoxFulltext();
+}
+
 DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     bool dbEffectiveOVM, bool dbOpenAddressing, QStringList *dbIdList,
     QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgDsSearch),
+    m_fulltextThread(this),
     m_userName(userName),
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
@@ -127,6 +143,9 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	connect(m_ui->searchPushButton, SIGNAL(clicked()),
 	    this, SLOT(searchDataBox()));
 
+	connect(&m_fulltextThread, SIGNAL(finished()),
+	    this, SLOT(enableSearchControls()));
+
 	connect(m_ui->useFulltextCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(makeSearchElelementsVisible(int)));
 	m_ui->useFulltextCheckBox->setCheckState(Qt::Checked);
@@ -141,6 +160,7 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 
 DlgDsSearch::~DlgDsSearch(void)
 {
+	m_fulltextThread.wait();
 	delete m_ui;
 }
 
@@ -180,18 +200,39 @@ void DlgDsSearch::checkInputFields(void)
 	}
 }
 
+/*!
+ * @brief Enables/disables search controls.
+ *
+ * @param[in,out] ui User interface.
+ * @param[in]     enabled State to be set.
+ */
+static inline
+void setSearchControlsEnabled(Ui::DlgDsSearch *ui, bool enabled)
+{
+	if (Q_UNLIKELY(Q_NULLPTR == ui)) {
+		Q_ASSERT(0);
+		return;
+	}
+	ui->useFulltextCheckBox->setEnabled(enabled);
+	ui->searchPushButton->setEnabled(enabled);
+}
+
+void DlgDsSearch::enableSearchControls(void)
+{
+	setSearchControlsEnabled(m_ui, true);
+}
+
 void DlgDsSearch::searchDataBox(void)
 {
-	m_ui->useFulltextCheckBox->setEnabled(false);
-	m_ui->searchPushButton->setEnabled(false);
+	setSearchControlsEnabled(m_ui, false);
 	QCoreApplication::processEvents();
 	if (Qt::Checked == m_ui->useFulltextCheckBox->checkState()) {
-		searchDataBoxFulltext();
+//		searchDataBoxFulltext();
+		searchDataBoxFulltextThread();
 	} else {
 		searchDataBoxNormal();
+		setSearchControlsEnabled(m_ui, true);
 	}
-	m_ui->useFulltextCheckBox->setEnabled(true);
-	m_ui->searchPushButton->setEnabled(true);
 }
 
 void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
@@ -511,6 +552,11 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 	queryBoxFulltextAll(target, boxType, m_ui->textLineEdit->text());
 }
 
+void DlgDsSearch::searchDataBoxFulltextThread(void)
+{
+	m_fulltextThread.start();
+}
+
 void DlgDsSearch::queryBoxNormal(const QString &boxId,
     enum TaskSearchOwner::BoxType boxType, const QString &ic,
     const QString &name, const QString &zipCode)
@@ -518,8 +564,7 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 	m_ui->contactTableView->setEnabled(false);
 	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
-	QString resultString(tr("Total found") + QStringLiteral(": "));
-	m_ui->searchResultText->setText(resultString + QStringLiteral("0"));
+	m_ui->searchResultText->setText(totalFoundStr(0));
 
 	TaskSearchOwner::SoughtOwnerInfo soughtInfo(boxId, boxType, ic, name,
 	    name, name, zipCode);
@@ -564,15 +609,17 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 		break;
 	}
 
+	bool selectForstRow = m_contactTableModel.rowCount() == 0;
 	m_contactTableModel.appendData(foundBoxes);
 
-	m_ui->searchResultText->setText(
-	    resultString + QString::number(foundBoxes.size()));
+	m_ui->searchResultText->setText(totalFoundStr(foundBoxes.size()));
 
 	if (m_contactTableModel.rowCount() > 0) {
 		m_ui->contactTableView->selectColumn(
 		    BoxContactsModel::CHECKBOX_COL);
-		m_ui->contactTableView->selectRow(0);
+		if (selectForstRow) {
+			m_ui->contactTableView->selectRow(0);
+		}
 	}
 
 	m_ui->contactTableView->setEnabled(true);
@@ -585,9 +632,6 @@ bool DlgDsSearch::queryBoxFulltextPage(
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase, qint64 pageNum)
 {
-	QString resultString(tr("Total found") + QStringLiteral(": "));
-	m_ui->searchResultText->setText(resultString + QStringLiteral("0"));
-
 	TaskSearchOwnerFulltext *task =
 	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, phrase,
 	        target, boxType, pageNum, false);
@@ -631,17 +675,19 @@ bool DlgDsSearch::queryBoxFulltextPage(
 		break;
 	}
 
+	bool selectForstRow = m_contactTableModel.rowCount() == 0;
 	m_contactTableModel.appendData(foundBoxes);
 
-	m_ui->searchResultText->setText(
-	    resultString + QString::number(totalDb) + QStringLiteral("; ") +
-	    tr("Displayed") + QStringLiteral(": ") +
+	m_ui->searchResultText->setText(totalFoundStr(totalDb) + QLatin1String("; ") +
+	    tr("Displayed") + QLatin1String(": ") +
 	    QString::number(m_contactTableModel.rowCount()));
 
 	if (m_contactTableModel.rowCount() > 0) {
 		m_ui->contactTableView->selectColumn(
 		    BoxContactsModel::CHECKBOX_COL);
-		m_ui->contactTableView->selectRow(0);
+		if (selectForstRow) {
+			m_ui->contactTableView->selectRow(0);
+		}
 	}
 
 	return !gotLastPage; /* Return false when last page received. */
@@ -651,12 +697,13 @@ void DlgDsSearch::queryBoxFulltextAll(
     enum TaskSearchOwnerFulltext::FulltextTarget target,
     enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
 {
-	m_ui->contactTableView->setEnabled(false);
 	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
+
+	m_ui->searchResultText->setText(totalFoundStr(0));
 
 	qint64 pageNum = 0;
 	while (queryBoxFulltextPage(target, boxType, phrase, pageNum)) {
-		QCoreApplication::processEvents();
+		//QCoreApplication::processEvents();
 		++pageNum;
 		if (m_breakDownloadLoop) {
 			m_breakDownloadLoop = false;
@@ -664,7 +711,11 @@ void DlgDsSearch::queryBoxFulltextAll(
 		}
 	}
 
-	m_ui->contactTableView->setEnabled(true);
-
 	//m_ui->contactTableView->resizeColumnsToContents();
+}
+
+QString DlgDsSearch::totalFoundStr(int total)
+{
+	return tr("Total found") + QLatin1String(": ") +
+	    QString::number(total);
 }

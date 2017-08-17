@@ -26,11 +26,36 @@
 
 #include <QDialog>
 #include <QItemSelection>
+#include <QThread>
 
 #include "src/models/combo_box_model.h"
 #include "src/models/data_box_contacts_model.h"
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
+
+class DlgDsSearch; /* Forward declaration. */
+
+/*!
+ * @brief Thread performing full-text data box searching.
+ */
+class FulltextSearchThread : public QThread {
+
+public:
+	/*!
+	 * @brief Constructor.
+	 */
+	explicit FulltextSearchThread(DlgDsSearch *dlg);
+
+protected:
+	/*!
+	 * @brief Thread function.
+	 */
+	virtual
+	void run(void) Q_DECL_OVERRIDE;
+
+private:
+	DlgDsSearch *m_dlg; /*!< Pointer to data box search window. */
+};
 
 namespace Ui {
 	class DlgDsSearch;
@@ -83,6 +108,11 @@ private slots:
 	 * @brief Check input fields sanity and activate search button.
 	 */
 	void checkInputFields(void);
+
+	/*!
+	 * @brief Enables search controls.
+	 */
+	void enableSearchControls(void);
 
 	/*!
 	 * @brief Search for data boxes according given criteria.
@@ -138,6 +168,12 @@ private:
 	void searchDataBoxFulltext(void);
 
 	/*!
+	 * @brief Full-text search for data boxes according given criteria
+	 *     run in background.
+	 */
+	void searchDataBoxFulltextThread(void);
+
+	/*!
 	 * @brief Encapsulates query.
 	 *
 	 * @param[in] boxId Data box identifier.
@@ -176,7 +212,20 @@ private:
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase);
 
+	/*!
+	 * @brief Returns total found string.
+	 *
+	 * @param[in] total Total found number.
+	 * @return String containing total found summary.
+	 */
+	static
+	QString totalFoundStr(int total);
+
+	friend class FulltextSearchThread;
+
 	Ui::DlgDsSearch *m_ui; /*!< UI generated from UI file. */
+
+	FulltextSearchThread m_fulltextThread; /*!< Tread that;s waiting for incoming full-text search result. */
 
 	const QString m_userName; /*!< User name used for searching. */
 	const QString m_dbType; /*!< Data box type used for searching.  */
