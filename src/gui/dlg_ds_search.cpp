@@ -513,8 +513,12 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 	TaskSearchOwner::SoughtOwnerInfo soughtInfo(boxId, boxType, ic, name,
 	    name, name, zipCode);
 
-	TaskSearchOwner *task =
-	    new (std::nothrow) TaskSearchOwner(m_userName, soughtInfo);
+	TaskSearchOwner *task = new (std::nothrow) TaskSearchOwner(m_userName,
+	    soughtInfo);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
@@ -576,6 +580,10 @@ bool DlgDsSearch::queryBoxFulltextPage(
 	TaskSearchOwnerFulltext *task =
 	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, phrase,
 	        target, boxType, pageNum, false);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
+	}
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
