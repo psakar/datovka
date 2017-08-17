@@ -4965,10 +4965,8 @@ void MainWindow::findDatabox(void)
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
 	    .arg(globAccounts[userName].accountName()));
 
-	QDialog *dsSearch = new DlgDsSearch(userName, dbType,
+	DlgDsSearch::search(userName, dbType,
 	    dbEffectiveOVM, dbOpenAddressing, Q_NULLPTR, this);
-	dsSearch->exec();
-	dsSearch->deleteLater();
 }
 
 /* ========================================================================= */

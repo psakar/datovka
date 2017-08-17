@@ -161,10 +161,8 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 void DlgSendMessage::addRecipientFromISDSSearch(void)
 {
 	QStringList dbIDs;
-	QDialog *dsSearch = new DlgDsSearch(m_userName, m_dbType,
-		    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
-	dsSearch->exec();
-	dsSearch->deleteLater();
+	DlgDsSearch::search(m_userName, m_dbType,
+	    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
 	addRecipientBoxes(dbIDs);
 }
 

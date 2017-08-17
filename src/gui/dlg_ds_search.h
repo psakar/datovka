@@ -41,7 +41,7 @@ namespace Ui {
  */
 class DlgDsSearch : public QDialog {
 	Q_OBJECT
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 */
@@ -49,11 +49,20 @@ public:
 	    bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	virtual
 	~DlgDsSearch(void);
+
+	/*!
+	 * @brief Show data box search dialogue.
+	 */
+	static
+	void search(const QString &userName, const QString &dbType,
+	    bool dbEffectiveOVM, bool dbOpenAddressing,
+	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -180,7 +189,7 @@ private:
 
 	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
 
-	bool m_breakDownloadLoop; /*!< Setting to true interrupts download loop. */
+	volatile bool m_breakDownloadLoop; /*!< Setting to true interrupts download loop. */
 
 	bool m_showInfoLabel;
 };

@@ -144,6 +144,15 @@ DlgDsSearch::~DlgDsSearch(void)
 	delete m_ui;
 }
 
+void DlgDsSearch::search(const QString &userName, const QString &dbType,
+    bool dbEffectiveOVM, bool dbOpenAddressing, QStringList *dbIdList,
+    QWidget *parent)
+{
+	DlgDsSearch dlg(userName, dbType, dbEffectiveOVM, dbOpenAddressing,
+	    dbIdList, parent);
+	dlg.exec();
+}
+
 void DlgDsSearch::enableOkButton(void)
 {
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
@@ -187,6 +196,8 @@ void DlgDsSearch::searchDataBox(void)
 
 void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
 {
+	setBreakDownloadLoop(); /* Break download loop. */
+
 	if (index.isValid() && (m_dbIdList != Q_NULLPTR)) {
 		m_dbIdList->append(index.sibling(index.row(),
 		    BoxContactsModel::BOX_ID_COL).data(
