@@ -32,8 +32,6 @@
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
 
-class QTimer; /*!< Forward declaration. */
-
 namespace Ui {
 	class DlgDsSearch;
 }
@@ -96,11 +94,6 @@ private slots:
 	 * @brief Signals breaking of download loop.
 	 */
 	void setBreakDownloadLoop(void);
-
-	/*!
-	 * @brief Ping the ISDS server, test whether connection is active.
-	 */
-	void pingIsdsServer(void) const;
 
 	/*!
 	 * @brief Displays elements relevant for normal or full-text search.
@@ -189,7 +182,6 @@ private:
 
 	bool m_breakDownloadLoop; /*!< Setting to true interrupts download loop. */
 
-	QTimer *m_pingTimer;
 	bool m_showInfoLabel;
 };
 

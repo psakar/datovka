@@ -23,14 +23,12 @@
 
 #include <QCoreApplication>
 #include <QMessageBox>
-#include <QTimer>
 
 #include "src/gui/dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
-#include "src/worker/task_keep_alive.h"
 #include "ui_dlg_ds_search.h"
 
 #define CBOX_TARGET_ALL 0
@@ -58,7 +56,6 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     m_fulltextCBoxModel(this),
     m_dbIdList(dbIdList),
     m_breakDownloadLoop(false),
-    m_pingTimer(Q_NULLPTR),
     m_showInfoLabel(false)
 {
 	m_ui->setupUi(this);
@@ -139,21 +136,11 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	m_ui->contactTableView->installEventFilter(
 	    new TableSpaceSelectionFilter(this));
 
-#if 0 /* Don't use the timer. */
-	m_pingTimer = new QTimer(this);
-	m_pingTimer->start(DLG_ISDS_KEEPALIVE_MS);
-
-	connect(m_pingTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
-#endif
-
 	initContent();
 }
 
 DlgDsSearch::~DlgDsSearch(void)
 {
-	if (m_pingTimer != Q_NULLPTR) {
-		delete m_pingTimer;
-	}
 	delete m_ui;
 }
 
@@ -221,13 +208,6 @@ void DlgDsSearch::addSelectedDbIDs(void)
 void DlgDsSearch::setBreakDownloadLoop(void)
 {
 	m_breakDownloadLoop = true;
-}
-
-void DlgDsSearch::pingIsdsServer(void) const
-{
-	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
-	task->setAutoDelete(true);
-	globWorkPool.assignHi(task);
 }
 
 void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
