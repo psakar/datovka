@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DsSearch</class>
- <widget class="QDialog" name="DsSearch">
+ <class>DlgDsSearch</class>
+ <widget class="QDialog" name="DlgDsSearch">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -279,7 +279,7 @@ contain all otherwise matching databoxes.</string>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>DsSearch</receiver>
+   <receiver>DlgDsSearch</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -295,7 +295,7 @@ contain all otherwise matching databoxes.</string>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>DsSearch</receiver>
+   <receiver>DlgDsSearch</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

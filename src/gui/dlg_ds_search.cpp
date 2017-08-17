@@ -23,6 +23,7 @@
 
 #include <QCoreApplication>
 #include <QMessageBox>
+#include <QTimer>
 
 #include "src/gui/dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
@@ -30,6 +31,7 @@
 #include "src/views/table_space_selection_filter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_keep_alive.h"
+#include "ui_dlg_ds_search.h"
 
 #define CBOX_TARGET_ALL 0
 #define CBOX_TARGET_ADDRESS 1
@@ -46,6 +48,7 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     bool dbEffectiveOVM, bool dbOpenAddressing, QStringList *dbIdList,
     QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgDsSearch),
     m_userName(userName),
     m_dbType(dbType),
     m_dbEffectiveOVM(dbEffectiveOVM),
@@ -58,10 +61,11 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     m_pingTimer(Q_NULLPTR),
     m_showInfoLabel(false)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+
 	/* Set default line height for table views/widgets. */
-	this->contactTableView->setNarrowedLineHeight();
-	this->contactTableView->setSelectionBehavior(
+	m_ui->contactTableView->setNarrowedLineHeight();
+	m_ui->contactTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
 	m_boxTypeCBoxModel.appendRow(
@@ -79,7 +83,7 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	m_boxTypeCBoxModel.appendRow(
 	    tr("FO") + QStringLiteral(" - ") + tr("Fyzická osoba"),
 	    CBOX_TYPE_FO);
-	this->dataBoxTypeCBox->setModel(&m_boxTypeCBoxModel);
+	m_ui->dataBoxTypeCBox->setModel(&m_boxTypeCBoxModel);
 
 	m_fulltextCBoxModel.appendRow(
 	    tr("All") + QStringLiteral(" - ") + tr("Search in all fields"),
@@ -93,46 +97,46 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	m_fulltextCBoxModel.appendRow(
 	    tr("ID") + QStringLiteral(" - ") + tr("Box identifier"),
 	    CBOX_TARGET_BOX_ID);
-	this->fulltextTargetCBox->setModel(&m_fulltextCBoxModel);
+	m_ui->fulltextTargetCBox->setModel(&m_fulltextCBoxModel);
 
 	m_contactTableModel.setHeader();
-	this->contactTableView->setModel(&m_contactTableModel);
+	m_ui->contactTableView->setModel(&m_contactTableModel);
 
-	connect(this->contactTableView->selectionModel(),
+	connect(m_ui->contactTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 	    this, SLOT(setFirstColumnActive(QItemSelection, QItemSelection)));
 
-	connect(this->textLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->textLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(this->iDLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->iDLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(this->iCLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->iCLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(this->nameLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->nameLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(this->pscLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->pscLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(this->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
+	connect(m_ui->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
 	    this, SLOT(checkInputFields()));
 	connect(&m_contactTableModel,
 	    SIGNAL(dataChanged(QModelIndex, QModelIndex)),
 	    this, SLOT(enableOkButton()));
-	connect(this->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
+	connect(m_ui->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
-	connect(this->buttonBox, SIGNAL(accepted()),
+	connect(m_ui->buttonBox, SIGNAL(accepted()),
 	    this, SLOT(addSelectedDbIDs()));
-	connect(this->buttonBox, SIGNAL(rejected()),
+	connect(m_ui->buttonBox, SIGNAL(rejected()),
 	    this, SLOT(setBreakDownloadLoop()));
-	connect(this->searchPushButton, SIGNAL(clicked()),
+	connect(m_ui->searchPushButton, SIGNAL(clicked()),
 	    this, SLOT(searchDataBox()));
 
-	connect(this->useFulltextCheckBox, SIGNAL(stateChanged(int)),
+	connect(m_ui->useFulltextCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(makeSearchElelementsVisible(int)));
-	this->useFulltextCheckBox->setCheckState(Qt::Checked);
+	m_ui->useFulltextCheckBox->setCheckState(Qt::Checked);
 
-	this->contactTableView->installEventFilter(
+	m_ui->contactTableView->installEventFilter(
 	    new TableHomeEndFilter(this));
-	this->contactTableView->installEventFilter(
+	m_ui->contactTableView->installEventFilter(
 	    new TableSpaceSelectionFilter(this));
 
 #if 0 /* Don't use the timer. */
@@ -150,11 +154,12 @@ DlgDsSearch::~DlgDsSearch(void)
 	if (m_pingTimer != Q_NULLPTR) {
 		delete m_pingTimer;
 	}
+	delete m_ui;
 }
 
 void DlgDsSearch::enableOkButton(void)
 {
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
 	    m_contactTableModel.somethingChecked());
 }
 
@@ -166,13 +171,13 @@ void DlgDsSearch::setFirstColumnActive(const QItemSelection &selected,
 	if (selected.isEmpty()) {
 		return;
 	}
-	this->contactTableView->selectColumn(BoxContactsModel::CHECKBOX_COL);
-	this->contactTableView->selectRow(selected.first().top());
+	m_ui->contactTableView->selectColumn(BoxContactsModel::CHECKBOX_COL);
+	m_ui->contactTableView->selectRow(selected.first().top());
 }
 
 void DlgDsSearch::checkInputFields(void)
 {
-	if (Qt::Checked == this->useFulltextCheckBox->checkState()) {
+	if (Qt::Checked == m_ui->useFulltextCheckBox->checkState()) {
 		checkInputFieldsFulltext();
 	} else {
 		checkInputFieldsNormal();
@@ -181,16 +186,16 @@ void DlgDsSearch::checkInputFields(void)
 
 void DlgDsSearch::searchDataBox(void)
 {
-	this->useFulltextCheckBox->setEnabled(false);
-	this->searchPushButton->setEnabled(false);
+	m_ui->useFulltextCheckBox->setEnabled(false);
+	m_ui->searchPushButton->setEnabled(false);
 	QCoreApplication::processEvents();
-	if (Qt::Checked == this->useFulltextCheckBox->checkState()) {
+	if (Qt::Checked == m_ui->useFulltextCheckBox->checkState()) {
 		searchDataBoxFulltext();
 	} else {
 		searchDataBoxNormal();
 	}
-	this->useFulltextCheckBox->setEnabled(true);
-	this->searchPushButton->setEnabled(true);
+	m_ui->useFulltextCheckBox->setEnabled(true);
+	m_ui->searchPushButton->setEnabled(true);
 }
 
 void DlgDsSearch::contactItemDoubleClicked(const QModelIndex &index)
@@ -227,79 +232,79 @@ void DlgDsSearch::pingIsdsServer(void) const
 
 void DlgDsSearch::makeSearchElelementsVisible(int fulltextState)
 {
-	labelSearchInfo->hide();
+	m_ui->labelSearchInfo->hide();
 
-	fulltextTargetLabel->hide();
-	fulltextTargetCBox->hide();
+	m_ui->fulltextTargetLabel->hide();
+	m_ui->fulltextTargetCBox->hide();
 
-	iDLineLabel->hide();
-	iDLineEdit->clear();
-	iDLineEdit->hide();
+	m_ui->iDLineLabel->hide();
+	m_ui->iDLineEdit->clear();
+	m_ui->iDLineEdit->hide();
 
-	iCLineLabel->hide();
-	iCLineEdit->clear();
-	iCLineEdit->hide();
+	m_ui->iCLineLabel->hide();
+	m_ui->iCLineEdit->clear();
+	m_ui->iCLineEdit->hide();
 
-	nameLineLabel->hide();
-	nameLineEdit->clear();
-	nameLineEdit->hide();
+	m_ui->nameLineLabel->hide();
+	m_ui->nameLineEdit->clear();
+	m_ui->nameLineEdit->hide();
 
-	pscLineLabel->hide();
-	pscLineEdit->clear();
-	pscLineEdit->hide();
+	m_ui->pscLineLabel->hide();
+	m_ui->pscLineEdit->clear();
+	m_ui->pscLineEdit->hide();
 
-	textLineLabel->hide();
-	textLineEdit->clear();
-	textLineEdit->hide();
+	m_ui->textLineLabel->hide();
+	m_ui->textLineEdit->clear();
+	m_ui->textLineEdit->hide();
 
-	searchResultText->setText(QString());
+	m_ui->searchResultText->setText(QString());
 
 	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
 	if (Qt::Checked == fulltextState) {
-		labelSearchDescr->setText(
+		m_ui->labelSearchDescr->setText(
 		    tr("Full-text data box search. Enter phrase for finding and set optional restrictions:"));
 
 		m_boxTypeCBoxModel.setEnabled(CBOX_TYPE_ALL, true);
 
-		contactTableView->setColumnHidden(
+		m_ui->contactTableView->setColumnHidden(
 		    BoxContactsModel::POST_CODE_COL, true);
-		contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+		m_ui->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
 		    true);
 
-		fulltextTargetLabel->show();
-		fulltextTargetCBox->show();
+		m_ui->fulltextTargetLabel->show();
+		m_ui->fulltextTargetCBox->show();
 
-		textLineLabel->show();
-		textLineEdit->show();
+		m_ui->textLineLabel->show();
+		m_ui->textLineEdit->show();
 	} else {
-		labelSearchDescr->setText(
+		m_ui->labelSearchDescr->setText(
 		    tr("Enter the ID, IČ or at least three letters from the name of the data box you look for:"));
 
 		/* Cannot search for all data box types. */
 		m_boxTypeCBoxModel.setEnabled(CBOX_TYPE_ALL, false);
-		if (dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt() ==
+		if (m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt() ==
 		    CBOX_TYPE_ALL) {
-			dataBoxTypeCBox->setCurrentIndex(
+			m_ui->dataBoxTypeCBox->setCurrentIndex(
 			    m_boxTypeCBoxModel.findRow(CBOX_TYPE_OVM));
 		}
 
-		contactTableView->setColumnHidden(
+		m_ui->contactTableView->setColumnHidden(
 		    BoxContactsModel::POST_CODE_COL, false);
-		contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+		m_ui->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
 		    true);
 
-		iDLineLabel->show();
-		iDLineEdit->show();
+		m_ui->iDLineLabel->show();
+		m_ui->iDLineEdit->show();
 
-		iCLineLabel->show();
-		iCLineEdit->show();
+		m_ui->iCLineLabel->show();
+		m_ui->iCLineEdit->show();
 
-		nameLineLabel->show();
-		nameLineEdit->show();
+		m_ui->nameLineLabel->show();
+		m_ui->nameLineEdit->show();
 
-		pscLineLabel->show();
-		pscLineEdit->show();
+		m_ui->pscLineLabel->show();
+		m_ui->pscLineEdit->show();
 	}
 }
 
@@ -333,114 +338,114 @@ void DlgDsSearch::initContent(void)
 		m_showInfoLabel = true;
 	}
 
-	this->accountInfo->setText("<strong>" + m_userName +
-	    "</strong>" + " - " + m_dbType + dbOpenAddressing);
+	m_ui->accountInfo->setText("<strong>" + m_userName + "</strong>" +
+	    " - " + m_dbType + dbOpenAddressing);
 
-	this->labelSearchInfo->setStyleSheet("QLabel { color: red }");
-	this->labelSearchInfo->setToolTip(toolTipInfo);
-	this->labelSearchInfo->hide();
+	m_ui->labelSearchInfo->setStyleSheet("QLabel { color: red }");
+	m_ui->labelSearchInfo->setToolTip(toolTipInfo);
+	m_ui->labelSearchInfo->hide();
 
-	this->contactTableView->setColumnWidth(BoxContactsModel::CHECKBOX_COL, 20);
-	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 60);
-	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_TYPE_COL, 70);
-	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 120);
-	this->contactTableView->setColumnWidth(BoxContactsModel::ADDRESS_COL, 100);
+	m_ui->contactTableView->setColumnWidth(BoxContactsModel::CHECKBOX_COL, 20);
+	m_ui->contactTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 60);
+	m_ui->contactTableView->setColumnWidth(BoxContactsModel::BOX_TYPE_COL, 70);
+	m_ui->contactTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 120);
+	m_ui->contactTableView->setColumnWidth(BoxContactsModel::ADDRESS_COL, 100);
 
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	this->contactTableView->
-	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	m_ui->contactTableView->setEditTriggers(
+	    QAbstractItemView::NoEditTriggers);
 
 	checkInputFields();
 }
 
 void DlgDsSearch::checkInputFieldsNormal(void)
 {
-	this->nameLineEdit->setEnabled(true);
-	this->pscLineEdit->setEnabled((true));
-	this->iCLineEdit->setEnabled((true));
-	this->iDLineEdit->setEnabled((true));
+	m_ui->nameLineEdit->setEnabled(true);
+	m_ui->pscLineEdit->setEnabled((true));
+	m_ui->iCLineEdit->setEnabled((true));
+	m_ui->iDLineEdit->setEnabled((true));
 
-	switch (this->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
+	switch (m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
 	case CBOX_TYPE_OVM:
-		this->iCLineEdit->setEnabled(true);
-		this->nameLineLabel->setText(tr("Subject Name:"));
-		this->nameLineLabel->setToolTip(tr("Enter name of subject"));
-		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
-		this->labelSearchInfo->hide();
+		m_ui->iCLineEdit->setEnabled(true);
+		m_ui->nameLineLabel->setText(tr("Subject Name:"));
+		m_ui->nameLineLabel->setToolTip(tr("Enter name of subject"));
+		m_ui->nameLineEdit->setToolTip(tr("Enter name of subject"));
+		m_ui->labelSearchInfo->hide();
 		break;
 	case CBOX_TYPE_PO:
-		this->iCLineEdit->setEnabled(true);
-		this->nameLineLabel->setText(tr("Subject Name:"));
-		this->nameLineLabel->setToolTip(tr("Enter name of subject"));
-		this->nameLineEdit->setToolTip(tr("Enter name of subject"));
-		this->labelSearchInfo->setVisible(m_showInfoLabel);
+		m_ui->iCLineEdit->setEnabled(true);
+		m_ui->nameLineLabel->setText(tr("Subject Name:"));
+		m_ui->nameLineLabel->setToolTip(tr("Enter name of subject"));
+		m_ui->nameLineEdit->setToolTip(tr("Enter name of subject"));
+		m_ui->labelSearchInfo->setVisible(m_showInfoLabel);
 		break;
 	case CBOX_TYPE_PFO:
-		this->iCLineEdit->setEnabled(true);
-		this->nameLineLabel->setText(tr("Name:"));
-		this->nameLineLabel->setToolTip(tr("Enter last name of the PFO or company name."));
-		this->nameLineEdit->setToolTip(tr("Enter last name of the PFO or company name."));
-		this->labelSearchInfo->setVisible(m_showInfoLabel);
+		m_ui->iCLineEdit->setEnabled(true);
+		m_ui->nameLineLabel->setText(tr("Name:"));
+		m_ui->nameLineLabel->setToolTip(tr("Enter last name of the PFO or company name."));
+		m_ui->nameLineEdit->setToolTip(tr("Enter last name of the PFO or company name."));
+		m_ui->labelSearchInfo->setVisible(m_showInfoLabel);
 		break;
 	case CBOX_TYPE_FO:
-		this->iCLineEdit->setEnabled(false);
-		this->nameLineLabel->setText(tr("Last Name:"));
-		this->nameLineLabel->setToolTip(tr("Enter last name or last name at birth of the FO."));
-		this->nameLineEdit->setToolTip(tr("Enter last name or last name at birth of the FO."));
-		this->labelSearchInfo->setVisible(m_showInfoLabel);
+		m_ui->iCLineEdit->setEnabled(false);
+		m_ui->nameLineLabel->setText(tr("Last Name:"));
+		m_ui->nameLineLabel->setToolTip(tr("Enter last name or last name at birth of the FO."));
+		m_ui->nameLineEdit->setToolTip(tr("Enter last name or last name at birth of the FO."));
+		m_ui->labelSearchInfo->setVisible(m_showInfoLabel);
 		break;
 	default:
 		break;
 	}
 
-	if (!this->iDLineEdit->text().isEmpty()) {
-		this->nameLineEdit->setEnabled(false);
-		this->pscLineEdit->setEnabled(false);
-		this->iCLineEdit->setEnabled(false);
+	if (!m_ui->iDLineEdit->text().isEmpty()) {
+		m_ui->nameLineEdit->setEnabled(false);
+		m_ui->pscLineEdit->setEnabled(false);
+		m_ui->iCLineEdit->setEnabled(false);
 
-		if (this->iDLineEdit->text().length() == 7) {
-			this->searchPushButton->setEnabled(true);
+		if (m_ui->iDLineEdit->text().length() == 7) {
+			m_ui->searchPushButton->setEnabled(true);
 		}
 		else {
-			this->searchPushButton->setEnabled(false);
+			m_ui->searchPushButton->setEnabled(false);
 		}
-	} else if (!this->iCLineEdit->text().isEmpty()) {
-		this->iDLineEdit->setEnabled(false);
-		this->nameLineEdit->setEnabled(false);
-		this->pscLineEdit->setEnabled(false);
+	} else if (!m_ui->iCLineEdit->text().isEmpty()) {
+		m_ui->iDLineEdit->setEnabled(false);
+		m_ui->nameLineEdit->setEnabled(false);
+		m_ui->pscLineEdit->setEnabled(false);
 
-		if (this->iCLineEdit->text().length() == 8) {
-			this->searchPushButton->setEnabled(true);
+		if (m_ui->iCLineEdit->text().length() == 8) {
+			m_ui->searchPushButton->setEnabled(true);
 		}
 		else {
-			this->searchPushButton->setEnabled(false);
+			m_ui->searchPushButton->setEnabled(false);
 		}
-	} else if (!this->nameLineEdit->text().isEmpty()) {
-		this->iDLineEdit->setEnabled(false);
+	} else if (!m_ui->nameLineEdit->text().isEmpty()) {
+		m_ui->iDLineEdit->setEnabled(false);
 
-		if (this->nameLineEdit->text().length() > 2) {
-			this->searchPushButton->setEnabled(true);
+		if (m_ui->nameLineEdit->text().length() > 2) {
+			m_ui->searchPushButton->setEnabled(true);
 		}
 		else {
-			this->searchPushButton->setEnabled(false);
+			m_ui->searchPushButton->setEnabled(false);
 		}
 	} else {
-		this->searchPushButton->setEnabled(false);
-		this->iDLineEdit->setEnabled(true);
-		this->nameLineEdit->setEnabled(true);
-		this->pscLineEdit->setEnabled(true);
+		m_ui->searchPushButton->setEnabled(false);
+		m_ui->iDLineEdit->setEnabled(true);
+		m_ui->nameLineEdit->setEnabled(true);
+		m_ui->pscLineEdit->setEnabled(true);
 	}
 }
 
 void DlgDsSearch::checkInputFieldsFulltext(void)
 {
-	this->searchPushButton->setEnabled(
-	    this->textLineEdit->text().size() > 2);
+	m_ui->searchPushButton->setEnabled(
+	    m_ui->textLineEdit->text().size() > 2);
 }
 
 void DlgDsSearch::searchDataBoxNormal(void)
 {
-	if (this->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
+	if (m_ui->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
 		QMessageBox::information(this, tr("Search result"),
 		    tr("This is a special ID for system databox of "
 		    "Datové schránky. You can't use this ID for "
@@ -450,7 +455,7 @@ void DlgDsSearch::searchDataBoxNormal(void)
 	}
 
 	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
-	switch (this->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
+	switch (m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
 	case CBOX_TYPE_FO:
 		boxType = TaskSearchOwner::BT_FO;
 		break;
@@ -466,16 +471,16 @@ void DlgDsSearch::searchDataBoxNormal(void)
 		break;
 	}
 
-	queryBoxNormal(this->iDLineEdit->text(), boxType,
-	    this->iCLineEdit->text(), this->nameLineEdit->text(),
-	    this->pscLineEdit->text());
+	queryBoxNormal(m_ui->iDLineEdit->text(), boxType,
+	    m_ui->iCLineEdit->text(), m_ui->nameLineEdit->text(),
+	    m_ui->pscLineEdit->text());
 }
 
 void DlgDsSearch::searchDataBoxFulltext(void)
 {
 	enum TaskSearchOwnerFulltext::FulltextTarget target =
 	    TaskSearchOwnerFulltext::FT_ALL;
-	switch (this->fulltextTargetCBox->currentData(CBoxModel::valueRole).toInt()) {
+	switch (m_ui->fulltextTargetCBox->currentData(CBoxModel::valueRole).toInt()) {
 	case CBOX_TARGET_ALL:
 		target = TaskSearchOwnerFulltext::FT_ALL;
 		break;
@@ -493,7 +498,7 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 
 	enum TaskSearchOwnerFulltext::BoxType boxType =
 	    TaskSearchOwnerFulltext::BT_ALL;
-	switch (this->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
+	switch (m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
 	case CBOX_TYPE_FO:
 		boxType = TaskSearchOwnerFulltext::BT_FO;
 		break;
@@ -512,18 +517,18 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 		break;
 	}
 
-	queryBoxFulltextAll(target, boxType, this->textLineEdit->text());
+	queryBoxFulltextAll(target, boxType, m_ui->textLineEdit->text());
 }
 
 void DlgDsSearch::queryBoxNormal(const QString &boxId,
     enum TaskSearchOwner::BoxType boxType, const QString &ic,
     const QString &name, const QString &zipCode)
 {
-	this->contactTableView->setEnabled(false);
+	m_ui->contactTableView->setEnabled(false);
 	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
 	QString resultString(tr("Total found") + QStringLiteral(": "));
-	this->searchResultText->setText(resultString + QStringLiteral("0"));
+	m_ui->searchResultText->setText(resultString + QStringLiteral("0"));
 
 	TaskSearchOwner::SoughtOwnerInfo soughtInfo(boxId, boxType, ic, name,
 	    name, name, zipCode);
@@ -566,18 +571,18 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 
 	m_contactTableModel.appendData(foundBoxes);
 
-	this->searchResultText->setText(
+	m_ui->searchResultText->setText(
 	    resultString + QString::number(foundBoxes.size()));
 
 	if (m_contactTableModel.rowCount() > 0) {
-		this->contactTableView->selectColumn(
+		m_ui->contactTableView->selectColumn(
 		    BoxContactsModel::CHECKBOX_COL);
-		this->contactTableView->selectRow(0);
+		m_ui->contactTableView->selectRow(0);
 	}
 
-	this->contactTableView->setEnabled(true);
+	m_ui->contactTableView->setEnabled(true);
 
-	//this->contactTableView->resizeColumnsToContents();
+	//m_ui->contactTableView->resizeColumnsToContents();
 }
 
 bool DlgDsSearch::queryBoxFulltextPage(
@@ -586,7 +591,7 @@ bool DlgDsSearch::queryBoxFulltextPage(
 	    const QString &phrase, qint64 pageNum)
 {
 	QString resultString(tr("Total found") + QStringLiteral(": "));
-	this->searchResultText->setText(resultString + QStringLiteral("0"));
+	m_ui->searchResultText->setText(resultString + QStringLiteral("0"));
 
 	TaskSearchOwnerFulltext *task =
 	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, phrase,
@@ -629,15 +634,15 @@ bool DlgDsSearch::queryBoxFulltextPage(
 
 	m_contactTableModel.appendData(foundBoxes);
 
-	this->searchResultText->setText(
+	m_ui->searchResultText->setText(
 	    resultString + QString::number(totalDb) + QStringLiteral("; ") +
 	    tr("Displayed") + QStringLiteral(": ") +
 	    QString::number(m_contactTableModel.rowCount()));
 
 	if (m_contactTableModel.rowCount() > 0) {
-		this->contactTableView->selectColumn(
+		m_ui->contactTableView->selectColumn(
 		    BoxContactsModel::CHECKBOX_COL);
-		this->contactTableView->selectRow(0);
+		m_ui->contactTableView->selectRow(0);
 	}
 
 	return !gotLastPage; /* Return false when last page received. */
@@ -647,7 +652,7 @@ void DlgDsSearch::queryBoxFulltextAll(
     enum TaskSearchOwnerFulltext::FulltextTarget target,
     enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
 {
-	this->contactTableView->setEnabled(false);
+	m_ui->contactTableView->setEnabled(false);
 	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
 	qint64 pageNum = 0;
@@ -660,7 +665,7 @@ void DlgDsSearch::queryBoxFulltextAll(
 		}
 	}
 
-	this->contactTableView->setEnabled(true);
+	m_ui->contactTableView->setEnabled(true);
 
-	//this->contactTableView->resizeColumnsToContents();
+	//m_ui->contactTableView->resizeColumnsToContents();
 }

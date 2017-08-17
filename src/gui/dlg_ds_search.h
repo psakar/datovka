@@ -25,19 +25,23 @@
 #define _DLG_DS_SEARCH_H_
 
 #include <QDialog>
-#include <QTimer>
+#include <QItemSelection>
 
-#include "src/common.h"
 #include "src/models/combo_box_model.h"
 #include "src/models/data_box_contacts_model.h"
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
-#include "ui_dlg_ds_search.h"
+
+class QTimer; /*!< Forward declaration. */
+
+namespace Ui {
+	class DlgDsSearch;
+}
 
 /*!
  * @brief Data box search dialogue.
  */
-class DlgDsSearch : public QDialog, public Ui::DsSearch {
+class DlgDsSearch : public QDialog {
 	Q_OBJECT
 public:
 	/*!
@@ -169,6 +173,8 @@ private:
 	    enum TaskSearchOwnerFulltext::FulltextTarget target,
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase);
+
+	Ui::DlgDsSearch *m_ui; /*!< UI generated from UI file. */
 
 	const QString m_userName; /*!< User name used for searching. */
 	const QString m_dbType; /*!< Data box type used for searching.  */
