@@ -235,7 +235,7 @@ private:
 	 * @return QMessageBox::StandardButton value describing the pressed
 	 *         button.
 	 */
-	int notifyOfPDZ(int pdzCount) const;
+	int notifyOfPDZ(int pdzCount);
 
 	/*!
 	 * @brief Calculates and shows total attachment size.
