@@ -22,8 +22,8 @@
  */
 
 #include <QColorDialog>
-#include <QMessageBox>
 
+#include "src/gui/dlg_msg_box_informative.h"
 #include "src/gui/dlg_tag.h"
 #include "src/io/tag_db.h"
 #include "ui_dlg_tag.h"
@@ -100,31 +100,24 @@ void DlgTag::saveTag(void)
 	m_tagItem.name = m_ui->tagNamelineEdit->text();
 
 	if (m_tagItem.name.isEmpty()) {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setWindowTitle(tr("Tag error"));
-		msgBox.setText(tr("Tag name is empty."));
-		msgBox.setInformativeText(tr("Tag wasn't created."));
-		msgBox.exec();
+		DlgMsgBox::message(this, QMessageBox::Critical, tr("Tag error"),
+		    tr("Tag name is empty."), tr("Tag wasn't created."),
+		    QString());
 		return;
 	}
 
 	Q_ASSERT(TagItem::isValidColourStr(m_tagItem.colour));
-
-	QMessageBox msgBox;
-	msgBox.setIcon(QMessageBox::Critical);
 
 	if (m_tagItem.id >= 0) {
 		m_tagDbPtr->updateTag(m_tagItem.id, m_tagItem.name,
 		    m_tagItem.colour);
 	} else {
 		if (!m_tagDbPtr->insertTag(m_tagItem.name, m_tagItem.colour)) {
-			msgBox.setWindowTitle(tr("Tag error"));
-			msgBox.setText(tr("Tag with name '%1'' already "
-			    "exists in database.").arg(m_tagItem.name));
-			msgBox.setInformativeText(
-			    tr("Tag wasn't created again."));
-			msgBox.exec();
+			DlgMsgBox::message(this, QMessageBox::Critical,
+			    tr("Tag error"),
+			    tr("Tag with name '%1'' already exists in database.")
+			        .arg(m_tagItem.name),
+			    tr("Tag wasn't created."), QString());
 		}
 	}
 }
