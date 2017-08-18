@@ -25,14 +25,17 @@
 #include <QMessageBox>
 
 #include "src/gui/dlg_tag.h"
+#include "src/io/tag_db.h"
+#include "ui_dlg_tag.h"
 
 DlgTag::DlgTag(const QString &userName, TagDb *tagDb, QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgTag),
     m_userName(userName),
     m_tagDbPtr(tagDb),
     m_tagItem()
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
 	initDlg();
 }
@@ -40,24 +43,30 @@ DlgTag::DlgTag(const QString &userName, TagDb *tagDb, QWidget *parent)
 DlgTag::DlgTag(const QString &userName, TagDb *tagDb, const TagItem &tag,
     QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgTag),
     m_userName(userName),
     m_tagDbPtr(tagDb),
     m_tagItem(tag)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
 	initDlg();
 }
 
+DlgTag::~DlgTag(void)
+{
+	delete m_ui;
+}
+
 void DlgTag::initDlg(void)
 {
-	this->currentColor->setEnabled(false);
-	this->tagNamelineEdit->setText(m_tagItem.name);
+	m_ui->currentColor->setEnabled(false);
+	m_ui->tagNamelineEdit->setText(m_tagItem.name);
 	setPreviewButtonColor();
 
-	connect(this->changeColorPushButton, SIGNAL(clicked()), this,
+	connect(m_ui->changeColorPushButton, SIGNAL(clicked()), this,
 	    SLOT(chooseNewColor()));
-	connect(this->buttonBox, SIGNAL(accepted()), this,
+	connect(m_ui->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(saveTag()));
 }
 
@@ -77,7 +86,7 @@ void DlgTag::chooseNewColor(void)
 
 void DlgTag::saveTag(void)
 {
-	m_tagItem.name = this->tagNamelineEdit->text();
+	m_tagItem.name = m_ui->tagNamelineEdit->text();
 
 	if (m_tagItem.name.isEmpty()) {
 		QMessageBox msgBox;
@@ -111,8 +120,8 @@ void DlgTag::saveTag(void)
 
 void DlgTag::setPreviewButtonColor(void)
 {
-	QPalette pal = this->currentColor->palette();
+	QPalette pal(m_ui->currentColor->palette());
 	pal.setColor(QPalette::Button, QColor("#" + m_tagItem.colour));
 	const QString style = "border-style: outset; background-color: ";
-	this->currentColor->setStyleSheet(style + "#" + m_tagItem.colour);
+	m_ui->currentColor->setStyleSheet(style + "#" + m_tagItem.colour);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,13 +28,17 @@
 #include <QString>
 
 #include "src/delegates/tag_item.h"
-#include "ui_dlg_tag.h"
-#include "src/io/tag_db.h"
+
+class TagDb; /* Forward declaration. */
+
+namespace Ui {
+	class DlgTag;
+}
 
 /*!
  * @brief Create new tag dialogue.
  */
-class DlgTag : public QDialog, public Ui::TagDialog {
+class DlgTag : public QDialog {
     Q_OBJECT
 
 public:
@@ -57,6 +61,11 @@ public:
 	explicit DlgTag(const QString &userName, TagDb *tagDb,
 	    const TagItem &tag, QWidget *parent = Q_NULLPTR);
 
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgTag(void);
+
 private slots:
 	/*!
 	 * @brief Insert or update tag data into database.
@@ -78,6 +87,8 @@ private:
 	 * @brief Set actual tag colour on the preview button.
 	 */
 	void setPreviewButtonColor(void);
+
+	Ui::DlgTag *m_ui; /*!< UI generated from UI file. */
 
 	const QString m_userName; /*!< Account username. */
 	TagDb *m_tagDbPtr; /*!< Tag db pointer. */
