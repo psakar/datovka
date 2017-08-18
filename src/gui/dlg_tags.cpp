@@ -28,12 +28,15 @@
 #include "src/delegates/tags_delegate.h"
 #include "src/gui/dlg_tag.h"
 #include "src/gui/dlg_tags.h"
+#include "src/io/tag_db.h"
 #include "src/models/tags_model.h"
+#include "ui_dlg_tags.h"
 
 #define WRONG_TAG_ID -1 /** TODO -- Remove. */
 
 DlgTags::DlgTags(const QString &userName, TagDb *tagDb, QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgTags),
     m_userName(userName),
     m_tagDbPtr(tagDb),
     m_msgIdList(),
@@ -41,13 +44,14 @@ DlgTags::DlgTags(const QString &userName, TagDb *tagDb, QWidget *parent)
     m_tagsModel(Q_NULLPTR),
     m_retCode(NO_ACTION)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 	initDlg();
 }
 
 DlgTags::DlgTags(const QString &userName, TagDb *tagDb,
     const QList<qint64> &msgIdList, QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgTags),
     m_userName(userName),
     m_tagDbPtr(tagDb),
     m_msgIdList(msgIdList),
@@ -55,7 +59,7 @@ DlgTags::DlgTags(const QString &userName, TagDb *tagDb,
     m_tagsModel(Q_NULLPTR),
     m_retCode(NO_ACTION)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 	initDlg();
 	selectAllAssingedTagsFromMsgs();
 }
@@ -68,6 +72,8 @@ DlgTags::~DlgTags(void)
 	if (Q_NULLPTR != m_tagsModel) {
 		delete m_tagsModel;
 	}
+
+	delete m_ui;
 }
 
 int DlgTags::exec(void)
@@ -87,7 +93,8 @@ void DlgTags::addTag(void)
 void DlgTags::updateTag(void)
 {
 	TagItem tagItem(m_tagDbPtr->getTagData(
-	    getTagIdFromIndex(tagListView->selectionModel()->currentIndex())));
+	    getTagIdFromIndex(
+	        m_ui->tagListView->selectionModel()->currentIndex())));
 
 	if (DlgTag::editTag(m_tagDbPtr, tagItem, this)) {
 		/* Existing tag has very likely just been changed. */
@@ -99,7 +106,8 @@ void DlgTags::updateTag(void)
 
 void DlgTags::deleteTag(void)
 {
-	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
+	QModelIndexList slctIdxs(
+	    m_ui->tagListView->selectionModel()->selectedRows());
 
 	if (slctIdxs.isEmpty()) {
 		/* Nothing to do. */
@@ -118,7 +126,8 @@ void DlgTags::deleteTag(void)
 
 void DlgTags::assignSelectedTagsToMsgs(void)
 {
-	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
+	QModelIndexList slctIdxs(
+	    m_ui->tagListView->selectionModel()->selectedRows());
 
 	if (slctIdxs.isEmpty()) {
 		/* Nothing to do. */
@@ -142,7 +151,8 @@ void DlgTags::assignSelectedTagsToMsgs(void)
 
 void DlgTags::removeSelectedTagsFromMsgs(void)
 {
-	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
+	QModelIndexList slctIdxs(
+	    m_ui->tagListView->selectionModel()->selectedRows());
 
 	if (slctIdxs.isEmpty()) {
 		/* Nothing to do. */
@@ -180,22 +190,23 @@ void DlgTags::removeAllTagsFromMsgs(void)
 
 void DlgTags::handleSelectionChanged(void)
 {
-	QModelIndexList slctIdxs(tagListView->selectionModel()->selectedRows());
+	QModelIndexList slctIdxs(
+	    m_ui->tagListView->selectionModel()->selectedRows());
 
 	if (slctIdxs.isEmpty()) {
-		this->pushButtonUpdate->setEnabled(false);
-		this->pushButtonDelete->setEnabled(false);
-		this->pushButtonRemove->setEnabled(false);
-		this->pushButtonAssign->setEnabled(false);
+		m_ui->pushButtonUpdate->setEnabled(false);
+		m_ui->pushButtonDelete->setEnabled(false);
+		m_ui->pushButtonRemove->setEnabled(false);
+		m_ui->pushButtonAssign->setEnabled(false);
 	} else {
 		if (slctIdxs.count() > 1) {
-			this->pushButtonUpdate->setEnabled(false);
+			m_ui->pushButtonUpdate->setEnabled(false);
 		} else {
-			this->pushButtonUpdate->setEnabled(true);
+			m_ui->pushButtonUpdate->setEnabled(true);
 		}
-		this->pushButtonDelete->setEnabled(true);
-		this->pushButtonRemove->setEnabled(true);
-		this->pushButtonAssign->setEnabled(true);
+		m_ui->pushButtonDelete->setEnabled(true);
+		m_ui->pushButtonRemove->setEnabled(true);
+		m_ui->pushButtonAssign->setEnabled(true);
 	}
 }
 
@@ -212,27 +223,27 @@ void DlgTags::initDlg(void)
 	m_tagsDelegate = new TagsDelegate(this);
 	m_tagsModel = new TagsModel(this);
 
-	tagListView->setItemDelegate(m_tagsDelegate);
-	tagListView->setModel(m_tagsModel);
+	m_ui->tagListView->setItemDelegate(m_tagsDelegate);
+	m_ui->tagListView->setModel(m_tagsModel);
 
-	tagListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	tagListView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_ui->tagListView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_ui->tagListView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-	this->pushButtonUpdate->setEnabled(false);
-	this->pushButtonDelete->setEnabled(false);
-	this->pushButtonRemove->setEnabled(false);
-	this->pushButtonAssign->setEnabled(false);
+	m_ui->pushButtonUpdate->setEnabled(false);
+	m_ui->pushButtonDelete->setEnabled(false);
+	m_ui->pushButtonRemove->setEnabled(false);
+	m_ui->pushButtonAssign->setEnabled(false);
 
-	this->tagAssignGroup->setEnabled(false);
-	this->tagAssignGroup->setVisible(false);
+	m_ui->tagAssignGroup->setEnabled(false);
+	m_ui->tagAssignGroup->setVisible(false);
 
-	connect(this->pushButtonAdd, SIGNAL(clicked()), this,
+	connect(m_ui->pushButtonAdd, SIGNAL(clicked()), this,
 	    SLOT(addTag()));
-	connect(this->pushButtonUpdate, SIGNAL(clicked()), this,
+	connect(m_ui->pushButtonUpdate, SIGNAL(clicked()), this,
 	    SLOT(updateTag()));
-	connect(this->pushButtonDelete, SIGNAL(clicked()), this,
+	connect(m_ui->pushButtonDelete, SIGNAL(clicked()), this,
 	    SLOT(deleteTag()));
-	connect(tagListView->selectionModel(),
+	connect(m_ui->tagListView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
 	    SLOT(handleSelectionChanged()));
 
@@ -240,15 +251,15 @@ void DlgTags::initDlg(void)
 	/* any messages was selected */
 	if (!m_msgIdList.isEmpty()) {
 
-		connect(this->pushButtonAssign, SIGNAL(clicked()), this,
+		connect(m_ui->pushButtonAssign, SIGNAL(clicked()), this,
 		    SLOT(assignSelectedTagsToMsgs()));
-		connect(this->pushButtonRemove, SIGNAL(clicked()), this,
+		connect(m_ui->pushButtonRemove, SIGNAL(clicked()), this,
 		    SLOT(removeSelectedTagsFromMsgs()));
-		connect(this->pushButtonRemoveAll, SIGNAL(clicked()), this,
+		connect(m_ui->pushButtonRemoveAll, SIGNAL(clicked()), this,
 		    SLOT(removeAllTagsFromMsgs()));
 
-		this->tagAssignGroup->setVisible(true);
-		this->tagAssignGroup->setEnabled(true);
+		m_ui->tagAssignGroup->setVisible(true);
+		m_ui->tagAssignGroup->setEnabled(true);
 	}
 
 	fillTagsToListView();
@@ -271,16 +282,16 @@ int DlgTags::getTagIdFromIndex(const QModelIndex &idx)
 
 void DlgTags::selectAllAssingedTagsFromMsgs(void)
 {
-	int rows = tagListView->model()->rowCount();
+	int rows = m_ui->tagListView->model()->rowCount();
 	for (int i = 0; i < rows; ++i) {
-		const QModelIndex idx = tagListView->model()->index(i, 0);
+		const QModelIndex idx = m_ui->tagListView->model()->index(i, 0);
 		const qint64 id = getTagIdFromIndex(idx);
 		foreach (const qint64 &msgId, m_msgIdList) {
 			const TagItemList tags =
 			    m_tagDbPtr->getMessageTags(m_userName, msgId);
 			foreach (const TagItem &tag, tags) {
 				if (tag.id == id) {
-					tagListView->selectionModel()->select(
+					m_ui->tagListView->selectionModel()->select(
 					    idx, QItemSelectionModel::Select);
 				}
 			}

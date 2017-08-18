@@ -27,14 +27,17 @@
 #include <QDialog>
 #include <QList>
 
-#include "ui_dlg_tags.h"
-#include "src/io/tag_db.h"
+class TagDb; /* Forward declaration. */
+
+namespace Ui {
+	class DlgTags;
+}
 
 /*!
  * @brief Tags management dialogue.
  */
-class DlgTags : public QDialog, public Ui::TagsDialog {
-    Q_OBJECT
+class DlgTags : public QDialog {
+	Q_OBJECT
 
 public:
 	/*!
@@ -140,6 +143,8 @@ private:
 	 *        which are assigned in selected messages.
 	 */
 	void selectAllAssingedTagsFromMsgs(void);
+
+	Ui::DlgTags *m_ui; /*!< UI generated from UI file. */
 
 	const QString m_userName; /*!< Account username. */
 	TagDb *m_tagDbPtr; /*!< Tag db pointer. */
