@@ -79,9 +79,7 @@ int DlgTags::exec(void)
 
 void DlgTags::addTag(void)
 {
-	QDialog *tagDlg = new DlgTag(m_userName, m_tagDbPtr, this);
-	tagDlg->exec();
-	tagDlg->deleteLater();
+	DlgTag::createTag(m_userName, m_tagDbPtr, this);
 
 	fillTagsToListView();
 }
@@ -91,11 +89,7 @@ void DlgTags::updateTag(void)
 	TagItem tagItem(m_tagDbPtr->getTagData(
 	    getTagIdFromIndex(tagListView->selectionModel()->currentIndex())));
 
-	QDialog *tagDlg = new DlgTag(m_userName, m_tagDbPtr, tagItem, this);
-	int retVal = tagDlg->exec();
-	tagDlg->deleteLater();
-
-	if (retVal == QDialog::Accepted) {
+	if (DlgTag::editTag(m_userName, m_tagDbPtr, tagItem, this)) {
 		/* Existing tag has very likely just been changed. */
 		m_retCode = TAGS_CHANGED;
 	}

@@ -39,32 +39,49 @@ namespace Ui {
  * @brief Create new tag dialogue.
  */
 class DlgTag : public QDialog {
-    Q_OBJECT
+	Q_OBJECT
 
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] userName     Account user name.
-	 * @param[in] parent       Parent widget.
-	 */
-	explicit DlgTag(const QString &userName, TagDb *tagDb,
-	    QWidget *parent = Q_NULLPTR);
-
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] userName     Account user name.
-	 * @param[in] tag          Tag.
-	 * @param[in] parent       Parent widget.
+	 * @param[in] userName Account user name.
+	 * @param[in] tagDb Tag database.
+	 * @param[in] tag Tag to be modified.
+	 * @param[in] parent Parent widget.
 	 */
 	explicit DlgTag(const QString &userName, TagDb *tagDb,
 	    const TagItem &tag, QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgTag(void);
+
+	/*!
+	 * @brief Create new tag.
+	 *
+	 * @param[in] userName Account user name.
+	 * @param[in] tagDb Tag database.
+	 * @param[in] parent Parent widget.
+	 */
+	static
+	void createTag(const QString &userName, TagDb *tagDb,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Edit existing tag.
+	 *
+	 * @param[in] userName Account user name.
+	 * @param[in] tagDb Tag database.
+	 * @param[in] tag Tag to be modified.
+	 * @param[in] parent Parent widget.
+	 * @return True when tag has been changed.
+	 */
+	static
+	bool editTag(const QString &userName, TagDb *tagDb, const TagItem &tag,
+	    QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!

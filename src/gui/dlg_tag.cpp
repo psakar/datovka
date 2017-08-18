@@ -28,18 +28,6 @@
 #include "src/io/tag_db.h"
 #include "ui_dlg_tag.h"
 
-DlgTag::DlgTag(const QString &userName, TagDb *tagDb, QWidget *parent)
-    : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgTag),
-    m_userName(userName),
-    m_tagDbPtr(tagDb),
-    m_tagItem()
-{
-	m_ui->setupUi(this);
-
-	initDlg();
-}
-
 DlgTag::DlgTag(const QString &userName, TagDb *tagDb, const TagItem &tag,
     QWidget *parent)
     : QDialog(parent),
@@ -56,6 +44,29 @@ DlgTag::DlgTag(const QString &userName, TagDb *tagDb, const TagItem &tag,
 DlgTag::~DlgTag(void)
 {
 	delete m_ui;
+}
+
+void DlgTag::createTag(const QString &userName, TagDb *tagDb, QWidget *parent)
+{
+	if (Q_UNLIKELY(Q_NULLPTR == tagDb)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	DlgTag dlg(userName, tagDb, TagItem(), parent);
+	dlg.exec();
+}
+
+bool DlgTag::editTag(const QString &userName, TagDb *tagDb, const TagItem &tag,
+    QWidget *parent)
+{
+	if (Q_UNLIKELY(Q_NULLPTR == tagDb)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	DlgTag dlg(userName, tagDb, tag, parent);
+	return dlg.exec() == QDialog::Accepted;
 }
 
 void DlgTag::initDlg(void)
