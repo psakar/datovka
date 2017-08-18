@@ -45,13 +45,10 @@ private:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] userName Account user name.
-	 * @param[in] tagDb Tag database.
 	 * @param[in] tag Tag to be modified.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgTag(const QString &userName, TagDb *tagDb,
-	    const TagItem &tag, QWidget *parent = Q_NULLPTR);
+	explicit DlgTag(const TagItem &tag, QWidget *parent = Q_NULLPTR);
 
 public:
 	/*!
@@ -62,32 +59,31 @@ public:
 	/*!
 	 * @brief Create new tag.
 	 *
-	 * @param[in] userName Account user name.
 	 * @param[in] tagDb Tag database.
 	 * @param[in] parent Parent widget.
 	 */
 	static
-	void createTag(const QString &userName, TagDb *tagDb,
-	    QWidget *parent = Q_NULLPTR);
+	bool createTag(TagDb *tagDb, QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Edit existing tag.
 	 *
-	 * @param[in] userName Account user name.
 	 * @param[in] tagDb Tag database.
 	 * @param[in] tag Tag to be modified.
 	 * @param[in] parent Parent widget.
 	 * @return True when tag has been changed.
 	 */
 	static
-	bool editTag(const QString &userName, TagDb *tagDb, const TagItem &tag,
+	bool editTag(TagDb *tagDb, const TagItem &tag,
 	    QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
-	 * @brief Insert or update tag data into database.
+	 * @brief Sets window elements according to tag name.
+	 *
+	 * @param[in] tagName Tag name.
 	 */
-	void saveTag(void);
+	void tagNameChanged(const QString &tagName);
 
 	/*!
 	 * @brief Choose or change tag colour.
@@ -96,19 +92,24 @@ private slots:
 
 private:
 	/*!
-	 * @brief Initialises new tag dialogue.
-	 */
-	void initDlg(void);
-
-	/*!
 	 * @brief Set actual tag colour on the preview button.
 	 */
 	void setPreviewButtonColor(void);
 
+	/*!
+	 * @brief Insert or update tag data into database.
+	 *
+	 * @param[in] tagDb Tag database.
+	 * @param[in] tagItem Tag to be saved.
+	 * @param[in] parent Parent widget.
+	 * @return True when tag has been saved.
+	 */
+	static
+	bool saveTag(TagDb *tagDb, const TagItem &tagItem,
+	    QWidget *parent = Q_NULLPTR);
+
 	Ui::DlgTag *m_ui; /*!< UI generated from UI file. */
 
-	const QString m_userName; /*!< Account username. */
-	TagDb *m_tagDbPtr; /*!< Tag db pointer. */
 	TagItem m_tagItem; /*!< Created tag. */
 };
 

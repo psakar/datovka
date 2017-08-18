@@ -79,7 +79,7 @@ int DlgTags::exec(void)
 
 void DlgTags::addTag(void)
 {
-	DlgTag::createTag(m_userName, m_tagDbPtr, this);
+	DlgTag::createTag(m_tagDbPtr, this);
 
 	fillTagsToListView();
 }
@@ -89,7 +89,7 @@ void DlgTags::updateTag(void)
 	TagItem tagItem(m_tagDbPtr->getTagData(
 	    getTagIdFromIndex(tagListView->selectionModel()->currentIndex())));
 
-	if (DlgTag::editTag(m_userName, m_tagDbPtr, tagItem, this)) {
+	if (DlgTag::editTag(m_tagDbPtr, tagItem, this)) {
 		/* Existing tag has very likely just been changed. */
 		m_retCode = TAGS_CHANGED;
 	}
