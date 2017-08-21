@@ -227,16 +227,17 @@ private:
 	static
 	QString totalFoundStr(int total);
 
+	/* Allow access from search thread to dialogue controls. */
 	friend class FulltextSearchThread;
 
 	Ui::DlgDsSearch *m_ui; /*!< UI generated from UI file. */
 
-	FulltextSearchThread m_fulltextThread; /*!< Tread that;s waiting for incoming full-text search result. */
+	FulltextSearchThread m_fulltextThread; /*!< Tread that's waiting for incoming full-text search result. */
 
 	const QString m_userName; /*!< User name used for searching. */
 	const QString m_dbType; /*!< Data box type used for searching.  */
-	const bool m_dbEffectiveOVM;
-	const bool m_dbOpenAddressing;
+	const bool m_dbEffectiveOVM; /*!< True if box has OVM status. */
+	const bool m_dbOpenAddressing; /*!< True if open addressing is enabled. */
 
 	SortFilterProxyModel m_contactListProxyModel; /*!<
 	                                               * Used for message
@@ -250,7 +251,7 @@ private:
 
 	volatile bool m_breakDownloadLoop; /*!< Setting to true interrupts download loop. */
 
-	bool m_showInfoLabel;
+	bool m_showInfoLabel; /*!< Controls the notification about limited search results. */
 };
 
 #endif /* DLG_DS_SEARCH_H */
