@@ -63,7 +63,7 @@ DlgTags::DlgTags(const QString &userName, TagDb *tagDb,
 {
 	m_ui->setupUi(this);
 	initDlg();
-	selectAllAssingedTagsFromMsgs();
+	//selectAllAssingedTagsFromMsgs();
 }
 
 DlgTags::~DlgTags(void)
@@ -289,15 +289,16 @@ void DlgTags::fillTagsToListViews(void)
 	}
 
 	{
-		/*
-		 * Remove tags already assigned to all supplied messages from
-		 * available tags.
-		 */
-		availableTags -= assignedTagsIntersection;
-
 		TagItemList availableTagList(availableTags.toList());
 		availableTagList.sortNames();
 		m_availableTagsModel.setTagList(availableTagList);
+
+		/*
+		 * Disable model interaction for tags that are already assigned
+		 * to all related messages.
+		 */
+		m_availableTagsModel.setDisabledTagList(
+		    assignedTagsIntersection.toList());
 	}
 
 	{
