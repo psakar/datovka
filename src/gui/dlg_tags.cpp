@@ -199,7 +199,7 @@ void DlgTags::assignSelectedTagsToMsgs(void)
 
 void DlgTags::removeSelectedTagsFromMsgs(void)
 {
-	QModelIndexList slctIdxs(selectedIndexes(m_ui->availableTagsView));
+	QModelIndexList slctIdxs(selectedIndexes(m_ui->assignedTagsView));
 	if (Q_UNLIKELY(slctIdxs.isEmpty())) {
 		/* Nothing to do. */
 		return;
@@ -305,6 +305,8 @@ void DlgTags::fillTagsToListViews(void)
 		TagItemList assignedTagList(assignedTagsUnion.toList());
 		assignedTagList.sortNames();
 		m_assignedTagsModel.setTagList(assignedTagList);
+
+		m_ui->removeAllButton->setEnabled(assignedTagList.count() > 0);
 	}
 }
 
