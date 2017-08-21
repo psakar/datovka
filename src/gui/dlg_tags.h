@@ -27,6 +27,9 @@
 #include <QDialog>
 #include <QList>
 
+#include "src/delegates/tags_delegate.h"
+#include "src/models/tags_model.h"
+
 class TagDb; /* Forward declaration. */
 
 namespace Ui {
@@ -116,27 +119,25 @@ private slots:
 	void removeAllTagsFromMsgs(void);
 
 	/*!
-	 * @brief Activate/deactivate tag buttons on selection change.
+	 * @brief Activate/deactivate buttons on available selection change.
 	 */
-	void handleSelectionChanged(void);
+	void handleAvailableSelectionChanged(void);
+
+	/*!
+	 * @brief Activate/deactivate buttons on assigned selection change.
+	 */
+	void handleAssignedSelectionChanged(void);
 
 private:
 	/*!
-	 * @brief Fill all tags to table view from database.
+	 * @brief Fill all tag enries into list views from database.
 	 */
-	void fillTagsToListView(void);
+	void fillTagsToListViews(void);
 
 	/*!
 	 * @brief Initialises the dialogue.
 	 */
 	void initDlg(void);
-
-	/*!
-	 * @brief Get tag id from index.
-	 *
-	 * @return Tag id if success else -1.
-	 */
-	int getTagIdFromIndex(const QModelIndex &idx);
 
 	/*!
 	 * @brief Choose (select) all tags in the listview
@@ -150,12 +151,13 @@ private:
 	TagDb *m_tagDbPtr; /*!< Tag db pointer. */
 	const QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 
-	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
-	class TagsModel *m_tagsModel; /*!< Tags model. */
+	TagsDelegate m_availableTagsDelegate; /*!< Responsible for painting. */
+	TagsModel m_availableTagsModel; /*!< Available tags model. */
+
+	TagsDelegate m_assignedTagsDelegate; /*!< Responsible for painting. */
+	TagsModel m_assignedTagsModel; /*!< Assigned tags model. */
 
 	enum ReturnCode m_retCode; /*!< Dialogue return code. */
-
-	QString m_errStr;
 };
 
 #endif /* _DLG_TAGS_H_ */

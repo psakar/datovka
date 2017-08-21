@@ -74,6 +74,14 @@ public:
 		static
 		bool isValidColourStr(const QString &colourStr);
 
+		/*!
+		 * @brief Comparison operator.
+		 *
+		 * @param[in] other Another object to compare this one with.
+		 * @return True is the other entry is equal to this one.
+		 */
+		bool operator==(const TagEntry &other) const;
+
 		int id; /*!< Tag identifier. */
 		QString name; /*!< Name of the tag. */
 		QString colour; /*!<
@@ -216,5 +224,13 @@ private:
  * @brief Global tag database.
  */
 extern TagDb *globTagDbPtr;
+
+/*!
+ * @brief Return a hash value for the supplied tag entry.
+ *
+ * @param[in] entry Tag entry to compute hash from.
+ * @param[in] seed Is used to initialise the hash if specified.
+ */
+uint qHash(const TagDb::TagEntry &entry, uint seed = 0);
 
 #endif /* _TAG_DB_H_ */

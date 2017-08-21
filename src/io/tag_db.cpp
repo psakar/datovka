@@ -60,6 +60,12 @@ bool TagDb::TagEntry::isValidColourStr(const QString &colourStr)
 	return re.exactMatch(colourStr);
 }
 
+bool TagDb::TagEntry::operator==(const TagEntry &other) const
+{
+	return (id == other.id) && (name == other.name) &&
+	    (colour == other.colour);
+}
+
 TagDb::TagDb(const QString &connectionName)
     : SQLiteDb(connectionName)
 {
@@ -449,3 +455,8 @@ QList<class SQLiteTbl *> TagDb::listOfTables(void)
 }
 
 TagDb *globTagDbPtr = 0;
+
+uint qHash(const TagDb::TagEntry &entry, uint seed)
+{
+	return ::qHash(entry.id, seed);
+}
