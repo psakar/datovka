@@ -76,7 +76,6 @@ Qt::ItemFlags TagsModel::flags(const QModelIndex &index) const
 	Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
 
 	if (!m_enabled.at(index.row())) {
-		defaultFlags &= ~Qt::ItemIsSelectable;
 		defaultFlags &= ~Qt::ItemIsEnabled;
 	}
 
