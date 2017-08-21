@@ -25,21 +25,49 @@
 #define _DLG_DS_SEARCH_H_
 
 #include <QDialog>
-#include <QTimer>
+#include <QItemSelection>
+#include <QThread>
 
-#include "src/common.h"
 #include "src/models/combo_box_model.h"
 #include "src/models/data_box_contacts_model.h"
+#include "src/models/sort_filter_proxy_model.h"
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
-#include "ui_dlg_ds_search.h"
+
+class DlgDsSearch; /* Forward declaration. */
+
+/*!
+ * @brief Thread performing full-text data box searching.
+ */
+class FulltextSearchThread : public QThread {
+
+public:
+	/*!
+	 * @brief Constructor.
+	 */
+	explicit FulltextSearchThread(DlgDsSearch *dlg);
+
+protected:
+	/*!
+	 * @brief Thread function.
+	 */
+	virtual
+	void run(void) Q_DECL_OVERRIDE;
+
+private:
+	DlgDsSearch *m_dlg; /*!< Pointer to data box search window. */
+};
+
+namespace Ui {
+	class DlgDsSearch;
+}
 
 /*!
  * @brief Data box search dialogue.
  */
-class DlgDsSearch : public QDialog, public Ui::DsSearch {
+class DlgDsSearch : public QDialog {
 	Q_OBJECT
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 */
@@ -47,11 +75,20 @@ public:
 	    bool dbEffectiveOVM, bool dbOpenAddressing,
 	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	virtual
 	~DlgDsSearch(void);
+
+	/*!
+	 * @brief Show data box search dialogue.
+	 */
+	static
+	void search(const QString &userName, const QString &dbType,
+	    bool dbEffectiveOVM, bool dbOpenAddressing,
+	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -74,6 +111,11 @@ private slots:
 	void checkInputFields(void);
 
 	/*!
+	 * @brief Enables search controls.
+	 */
+	void enableSearchControls(void);
+
+	/*!
 	 * @brief Search for data boxes according given criteria.
 	 */
 	void searchDataBox(void);
@@ -94,16 +136,16 @@ private slots:
 	void setBreakDownloadLoop(void);
 
 	/*!
-	 * @brief Ping the ISDS server, test whether connection is active.
-	 */
-	void pingIsdsServer(void) const;
-
-	/*!
 	 * @brief Displays elements relevant for normal or full-text search.
 	 *
 	 * @param[in] fulltextCheckState STate of full-text checkbox state.
 	 */
 	void makeSearchElelementsVisible(int fulltextState);
+
+	/*!
+	 * @brief Apply filter text on the table.
+	 */
+	void filterContact(const QString &text);
 
 private:
 	/*!
@@ -130,6 +172,12 @@ private:
 	 * @brief Full-text search for data boxes according given criteria.
 	 */
 	void searchDataBoxFulltext(void);
+
+	/*!
+	 * @brief Full-text search for data boxes according given criteria
+	 *     run in background.
+	 */
+	void searchDataBoxFulltextThread(void);
 
 	/*!
 	 * @brief Encapsulates query.
@@ -170,21 +218,40 @@ private:
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase);
 
+	/*!
+	 * @brief Returns total found string.
+	 *
+	 * @param[in] total Total found number.
+	 * @return String containing total found summary.
+	 */
+	static
+	QString totalFoundStr(int total);
+
+	/* Allow access from search thread to dialogue controls. */
+	friend class FulltextSearchThread;
+
+	Ui::DlgDsSearch *m_ui; /*!< UI generated from UI file. */
+
+	FulltextSearchThread m_fulltextThread; /*!< Tread that's waiting for incoming full-text search result. */
+
 	const QString m_userName; /*!< User name used for searching. */
 	const QString m_dbType; /*!< Data box type used for searching.  */
-	const bool m_dbEffectiveOVM;
-	const bool m_dbOpenAddressing;
+	const bool m_dbEffectiveOVM; /*!< True if box has OVM status. */
+	const bool m_dbOpenAddressing; /*!< True if open addressing is enabled. */
 
+	SortFilterProxyModel m_contactListProxyModel; /*!<
+	                                               * Used for message
+	                                               * sorting and filtering.
+	                                               */
 	BoxContactsModel m_contactTableModel; /*!< Model of found data boxes. */
 	CBoxModel m_boxTypeCBoxModel; /*!< Data box type combo box model. */
 	CBoxModel m_fulltextCBoxModel; /*!< Full-text combo box model. */
 
 	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
 
-	bool m_breakDownloadLoop; /*!< Setting to true interrupts download loop. */
+	volatile bool m_breakDownloadLoop; /*!< Setting to true interrupts download loop. */
 
-	QTimer *m_pingTimer;
-	bool m_showInfoLabel;
+	bool m_showInfoLabel; /*!< Controls the notification about limited search results. */
 };
 
 #endif /* DLG_DS_SEARCH_H */

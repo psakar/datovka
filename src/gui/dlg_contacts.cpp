@@ -70,6 +70,7 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 
 	fillContactsFromMessageDb();
 
+	this->filterLine->setToolTip(tr("Enter sought expression"));
 	this->filterLine->setClearButtonEnabled(true);
 
 	connect(this->filterLine, SIGNAL(textChanged(QString)),
