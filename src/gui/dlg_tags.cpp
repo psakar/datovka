@@ -245,6 +245,10 @@ void DlgTags::handleAvailableSelectionChanged(void)
 	m_ui->pushButtonDelete->setEnabled(!slctIdxs.isEmpty());
 	m_ui->pushButtonUpdate->setEnabled(slctIdxs.count() == 1);
 	m_ui->assignButton->setEnabled(!slctIdxs.isEmpty());
+
+	if (!slctIdxs.isEmpty()) {
+		m_ui->assignedTagsView->clearSelection();
+	}
 }
 
 void DlgTags::handleAssignedSelectionChanged(void)
@@ -252,6 +256,10 @@ void DlgTags::handleAssignedSelectionChanged(void)
 	QModelIndexList slctIdxs(selectedIndexes(m_ui->assignedTagsView));
 
 	m_ui->removeButton->setEnabled(!slctIdxs.isEmpty());
+
+	if (!slctIdxs.isEmpty()) {
+		m_ui->availableTagsView->clearSelection();
+	}
 }
 
 void DlgTags::fillTagsToListViews(void)
