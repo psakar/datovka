@@ -1,5 +1,6 @@
 
 # TODO -- Modify the co de so that widgets are not heeded.
+QT += sql
 QT += widgets
 
 DEFINES += \
@@ -18,6 +19,7 @@ SOURCES += \
 	$${top_srcdir}src/io/filesystem.cpp \
 	$${top_srcdir}src/io/isds_login.cpp \
 	$${top_srcdir}src/io/isds_sessions.cpp \
+	$${top_srcdir}src/settings/account.cpp \
 	$${top_srcdir}src/settings/accounts.cpp \
 	$${top_srcdir}src/settings/preferences.cpp \
 	$${top_srcdir}tests/test_isds_login.cpp
@@ -29,6 +31,7 @@ HEADERS += \
 	$${top_srcdir}src/io/filesystem.h \
 	$${top_srcdir}src/io/isds_login.h \
 	$${top_srcdir}src/io/isds_sessions.h \
+	$${top_srcdir}src/settings/account.h \
 	$${top_srcdir}src/settings/accounts.h \
 	$${top_srcdir}src/settings/preferences.h \
 	$${top_srcdir}tests/test_isds_login.h
