@@ -77,30 +77,14 @@ public:
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
-	 * @brief Used for checkable elements.
-	 *
-	 * @param[in] index Index which to obtain flags for.
-	 */
-	virtual
-	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
-
-	/*!
 	 * @brief Set model data.
 	 *
 	 * @param[in] tagList Tag list.
 	 */
 	void setTagList(const TagItemList &tagList);
 
-	/*!
-	 * @brief Set disabled tags.
-	 *
-	 * @param[in] disabledTagList DIsabled tag list.
-	 */
-	void setDisabledTagList(const TagItemList &disabledTagList);
-
 private:
 	TagItemList m_tagList; /*!< Tags ordered according to tag name. */
-	QVector<bool> m_enabled; /*!< Whether element at position is enabled. */
 };
 
 #endif /* _TAGS_MODEL_H_ */

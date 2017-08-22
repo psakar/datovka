@@ -67,40 +67,11 @@ QVariant TagsModel::headerData(int section, Qt::Orientation orientation,
 	}
 }
 
-Qt::ItemFlags TagsModel::flags(const QModelIndex &index) const
-{
-	if (Q_UNLIKELY(!index.isValid())) {
-		return Qt::NoItemFlags;
-	}
-
-	Qt::ItemFlags defaultFlags = QAbstractListModel::flags(index);
-
-	if (!m_enabled.at(index.row())) {
-		defaultFlags &= ~Qt::ItemIsEnabled;
-	}
-
-	return defaultFlags;
-}
-
 void TagsModel::setTagList(const TagItemList &tagList)
 {
 	beginResetModel();
 
 	m_tagList = tagList;
-	m_enabled = QVector<bool>(tagList.size(), true);
 
 	endResetModel();
-}
-
-void  TagsModel::setDisabledTagList(const TagItemList &disabledTagList)
-{
-	foreach (const TagItem &disabledItem, disabledTagList) {
-		int row = m_tagList.indexOf(disabledItem);
-		if (row == -1) {
-			continue;
-		}
-		m_enabled[row] = false;
-		emit dataChanged(QAbstractListModel::index(row, 0),
-		    QAbstractListModel::index(row, 0));
-	}
 }

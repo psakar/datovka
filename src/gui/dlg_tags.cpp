@@ -295,16 +295,14 @@ void DlgTags::fillTagsToListViews(void)
 	}
 
 	{
+		/*
+		 * Don't disable model interaction for tags that are already
+		 * assigned to all related messages.
+		 */
+
 		TagItemList availableTagList(availableTags.toList());
 		availableTagList.sortNames();
 		m_availableTagsModel.setTagList(availableTagList);
-
-		/*
-		 * Disable model interaction for tags that are already assigned
-		 * to all related messages.
-		 */
-		m_availableTagsModel.setDisabledTagList(
-		    assignedTagsIntersection.toList());
 	}
 
 	{
