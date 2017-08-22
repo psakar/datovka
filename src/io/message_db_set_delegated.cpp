@@ -259,9 +259,6 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_msgsRcvdEntriesWithin90Days(void
 		    db1->fileName());
 #endif /* DISABLE_DB_ATTACHING */
 	}
-
-	Q_ASSERT(0);
-	return QList<MessageDb::RcvdEntry>();
 }
 
 QList<MessageDb::RcvdEntry> MessageDbSet::msgsRcvdEntriesWithin90Days(void) const
@@ -756,9 +753,6 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_msgsSntEntriesWithin90Days(void) 
 		    db1->fileName());
 #endif /* DISABLE_DB_ATTACHING */
 	}
-
-	Q_ASSERT(0);
-	return QList<MessageDb::SntEntry>();
 }
 
 QList<MessageDb::SntEntry> MessageDbSet::msgsSntEntriesWithin90Days(void) const
