@@ -249,6 +249,7 @@ SOURCES += \
     src/gui/dlg_ds_search.cpp \
     src/gui/dlg_import_zfo.cpp \
     src/gui/dlg_import_zfo_result.cpp \
+    src/gui/dlg_msg_box_informative.cpp \
     src/gui/dlg_msg_search.cpp \
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
@@ -368,6 +369,7 @@ HEADERS += \
     src/gui/dlg_ds_search.h \
     src/gui/dlg_import_zfo.h \
     src/gui/dlg_import_zfo_result.h \
+    src/gui/dlg_msg_box_informative.h \
     src/gui/dlg_msg_search.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \

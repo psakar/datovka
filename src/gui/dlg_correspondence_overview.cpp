@@ -29,6 +29,7 @@
 
 #include "src/delegates/tag_item.h"
 #include "src/gui/dlg_correspondence_overview.h"
+#include "src/gui/dlg_msg_box_informative.h"
 #include "src/io/exports.h"
 #include "src/io/filesystem.h"
 #include "src/settings/accounts.h"
@@ -708,12 +709,6 @@ void DlgCorrespondenceOverview::exportChosenData(const QString &userName,
 	}
 
 finish:
-	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Information);
-	msgBox.setWindowTitle(tr("Export results"));
-	msgBox.setText(
-	    tr("Export of correspondence overview finished with these results:"));
-
 	if (!errorList.isEmpty()) {
 		summaryMsg += QStringLiteral("<br/><b>") +
 		    tr("Some errors occurred during export.") +
@@ -721,17 +716,13 @@ finish:
 		    tr("See detail for more info...") +
 		    QStringLiteral("<br/><br/>");
 	}
-	msgBox.setInformativeText(summaryMsg);
-
-	QString msg;
+	QString detailMsg;
 	if (!errorList.isEmpty()) {
 		for (int i = 0; i < errorList.count(); ++i) {
-			msg += errorList.at(i) + QStringLiteral("\n");
+			detailMsg += errorList.at(i) + QStringLiteral("\n");
 		}
-		msgBox.setDetailedText(msg);
 	}
-
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.setDefaultButton(QMessageBox::Ok);
-	msgBox.exec();
+	DlgMsgBox::message(this, QMessageBox::Information, tr("Export results"),
+	    tr("Export of correspondence overview finished with these results:"),
+	    summaryMsg, detailMsg, QMessageBox::Ok, QMessageBox::Ok);
 }

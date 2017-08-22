@@ -31,6 +31,7 @@
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_msg_box_informative.h"
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
 #include "src/model_interaction/attachment_interaction.h"
@@ -435,34 +436,6 @@ void DlgSendMessage::sendMessage(void)
 	sendMessageISDS(recipEntries);
 }
 
-/*!
- * @brief Show message box with informative text.
- *
- * @param[in] parent Window parent.
- * @param[in] icon Windows icon.
- * @param[in] title Window title.
- * @param[in] text Text to be displayed.
- * @param[in] infoText Informative text.
- * @param[in] buttons Displayed buttons.
- * @param[in] defaultButton Default button.
- * @return Standard button code.
- */
-static
-int showMessageBox(QWidget *parent, enum QMessageBox::Icon icon,
-    const QString &title, const QString &text, const QString &infoText,
-    QMessageBox::StandardButtons buttons = QMessageBox::Ok,
-    enum QMessageBox::StandardButton defaultButton = QMessageBox::NoButton)
-{
-	QMessageBox msgBox(parent);
-	msgBox.setIcon(icon);
-	msgBox.setWindowTitle(title);
-	msgBox.setText(text);
-	msgBox.setInformativeText(infoText);
-	msgBox.setStandardButtons(buttons);
-	msgBox.setDefaultButton(defaultButton);
-	return msgBox.exec();
-}
-
 void DlgSendMessage::collectSendMessageStatus(const QString &userName,
     const QString &transactId, int result, const QString &resultDesc,
     const QString &dbIDRecipient, const QString &recipientName,
@@ -498,7 +471,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 	this->setEnabled(true);
 
 	int successfullySentCnt = 0;
-	QString detailText;
+	QString infoText;
 
 	foreach (const TaskSendMessage::ResultData &resultData,
 	         m_sentMsgResultList) {
@@ -506,7 +479,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 			++successfullySentCnt;
 
 			if (resultData.isPDZ) {
-				detailText += tr(
+				infoText += tr(
 				    "Message was successfully sent to "
 				    "<i>%1 (%2)</i> as PDZ with number "
 				    "<i>%3</i>.").
@@ -514,7 +487,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 				    arg(resultData.dbIDRecipient).
 				    arg(resultData.dmId) + "<br/>";
 			} else {
-				detailText += tr(
+				infoText += tr(
 				    "Message was successfully sent to "
 				    "<i>%1 (%2)</i> as message number "
 				    "<i>%3</i>.").
@@ -523,7 +496,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 				    arg(resultData.dmId) + "<br/>";
 			}
 		} else {
-			detailText += tr("Message was NOT sent to "
+			infoText += tr("Message was NOT sent to "
 			    "<i>%1 (%2)</i>. Server says: %3").
 			    arg(resultData.recipientName).
 			    arg(resultData.dbIDRecipient).
@@ -533,18 +506,18 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 	m_sentMsgResultList.clear();
 
 	if (m_recipientTableModel.rowCount() == successfullySentCnt) {
-		showMessageBox(this, QMessageBox::Information,
+		DlgMsgBox::message(this, QMessageBox::Information,
 		    tr("Message sent"),
 		    "<b>" + tr("Message was successfully sent to all recipients.") + "</b>",
-		    detailText, QMessageBox::Ok, QMessageBox::Ok);
+		    infoText, QString(), QMessageBox::Ok, QMessageBox::Ok);
 		this->accept(); /* Set return code to accepted. */
 	} else {
-		detailText += "<br/><br/><b>" +
+		infoText += "<br/><br/><b>" +
 		    tr("Do you want to close the Send message form?") + "</b>";
-		int ret = showMessageBox(this, QMessageBox::Warning,
+		int ret = DlgMsgBox::message(this, QMessageBox::Warning,
 		    tr("Message sending error"),
 		    "<b>" + tr("Message was NOT sent to all recipients.") + "</b>",
-		    detailText, QMessageBox::Yes | QMessageBox::No,
+		    infoText, QString(), QMessageBox::Yes | QMessageBox::No,
 		    QMessageBox::No);
 		if (ret == QMessageBox::Yes) {
 			this->close(); /* Set return code to closed. */
@@ -954,8 +927,9 @@ int DlgSendMessage::notifyOfPDZ(int pdzCnt)
 
 	info += "\n\n" + tr("Your remaining credit is ") + m_pdzCredit + " Kč";
 
-	return showMessageBox(this, QMessageBox::Information, title, title,
-	    info, QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+	return DlgMsgBox::message(this, QMessageBox::Information, title, title,
+	    info, QString(), QMessageBox::Yes | QMessageBox::No,
+	    QMessageBox::Yes);
 }
 
 bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
@@ -1043,11 +1017,11 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 		address = entry.address;
 		boxType = entry.type;
 		if (!entry.active) {
-			showMessageBox(this, QMessageBox::Warning,
+			DlgMsgBox::message(this, QMessageBox::Warning,
 			    tr("Data box is not active"),
 			    tr("Recipient with data box ID '%1' does not have active data box.")
 			        .arg(boxId),
-			    tr("The message cannot be delivered."),
+			    tr("The message cannot be delivered."), QString(),
 			    QMessageBox::Ok, QMessageBox::Ok);
 			return;
 		}
@@ -1058,13 +1032,13 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 		} else if (entry.effectiveOVM) {
 			pdz = false;
 		} else {
-			showMessageBox(this, QMessageBox::Critical,
+			DlgMsgBox::message(this, QMessageBox::Critical,
 			    tr("Cannot send to data box"),
 			    tr("Cannot send message to recipient with data box ID '%1'.")
 			        .arg(boxId),
 			    tr("You won't be able as user '%1' to send messages into data box '%2'.")
 			        .arg(m_userName).arg(boxId),
-			    QMessageBox::Ok, QMessageBox::Ok);
+			    QString(), QMessageBox::Ok, QMessageBox::Ok);
 			return;
 		}
 	} else if (foundBoxes.isEmpty()) {
@@ -1270,7 +1244,7 @@ bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
 void DlgSendMessage::sendMessageISDS(
     const QList<BoxContactsModel::PartialEntry> &recipEntries)
 {
-	QString detailText;
+	QString infoText;
 
 	/* List of unique identifiers. */
 	QList<QString> taskIdentifiers;
@@ -1303,11 +1277,11 @@ void DlgSendMessage::sendMessageISDS(
 
 	/* Attach envelope and attachment files to message structure. */
 	if (!buildDocuments(message.documents)) {
-		detailText = tr("An error occurred while loading attachments into message.");
+		infoText = tr("An error occurred while loading attachments into message.");
 		goto finish;
 	}
 	if (!buildEnvelope(message.envelope)) {
-		detailText = tr("An error occurred during message envelope creation.");
+		infoText = tr("An error occurred during message envelope creation.");
 		goto finish;
 	}
 
@@ -1347,9 +1321,9 @@ void DlgSendMessage::sendMessageISDS(
 	return;
 
 finish:
-	detailText += "\n\n" + tr("The message will be discarded.");
-	showMessageBox(this, QMessageBox::Critical, tr("Send message error"),
+	infoText += "\n\n" + tr("The message will be discarded.");
+	DlgMsgBox::message(this, QMessageBox::Critical, tr("Send message error"),
 	    tr("It has not been possible to send a message to the ISDS server."),
-	    detailText, QMessageBox::Ok);
+	    infoText, QString(), QMessageBox::Ok);
 	this->close();
 }

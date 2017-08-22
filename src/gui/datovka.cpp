@@ -54,6 +54,7 @@
 #include "src/gui/dlg_change_directory.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/gui/dlg_ds_search.h"
+#include "src/gui/dlg_msg_box_informative.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
@@ -2113,25 +2114,18 @@ void MainWindow::collectDownloadMessageStatus(const QString &usrName,
 	} else {
 		/* Notify the user. */
 		if (!listScheduled) {
-			QMessageBox msgBox(this);
-
 			showStatusTextWithTimeout(tr("It was not possible download "
 			    "complete message \"%1\" from ISDS server.").arg(msgId));
-			msgBox.setIcon(QMessageBox::Warning);
-			msgBox.setWindowTitle(tr("Download message error"));
-			msgBox.setText(tr("It was not possible to download a complete "
-			    "message \"%1\" from server Datové schránky.").arg(msgId));
-			if (!errDesc.isEmpty()) {
-				msgBox.setInformativeText(tr("ISDS: ") + errDesc);
-			} else {
-				msgBox.setInformativeText(tr("A connection error "
-				    "occurred or the message has already been deleted "
-				    "from the server."));
-			}
 
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.setDefaultButton(QMessageBox::Ok);
-			msgBox.exec();
+			QString infoText(!errDesc.isEmpty() ?
+			    tr("ISDS") + QLatin1String(": ") + errDesc :
+			    tr("A connection error occurred or the message has already been deleted from the server."));
+			DlgMsgBox::message(this, QMessageBox::Warning,
+			    tr("Download message error"),
+			    tr("It was not possible to download a complete message \"%1\" from ISDS server.")
+			        .arg(msgId),
+			    infoText, QString(), QMessageBox::Ok,
+			    QMessageBox::Ok);
 		} else {
 			showStatusTextWithTimeout(
 			    tr("Couldn't download message '%1'.").arg(msgId));
@@ -2152,8 +2146,6 @@ void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
 
 	if (TaskDownloadMessageList::DL_SUCCESS != result) {
 		/* Notify the user. */
-		QMessageBox msgBox(this);
-
 		QString errorMessage = (MSG_RECEIVED == direction) ?
 		    tr("It was not possible download received message list from"
 		        " server.") :
@@ -2161,20 +2153,13 @@ void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
 		        " server.");
 
 		showStatusTextWithTimeout(errorMessage);
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Download message list error"));
-		msgBox.setText(errorMessage);
-		if (!errDesc.isEmpty()) {
-			msgBox.setInformativeText(
-			    tr("Server") + QLatin1String(": ") + errDesc);
-		} else {
-			msgBox.setInformativeText(
-			    tr("A connection error occurred."));
-		}
 
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
+		QString infoText(!errDesc.isEmpty() ?
+		    tr("Server") + QLatin1String(": ") + errDesc :
+		    tr("A connection error occurred."));
+		DlgMsgBox::message(this, QMessageBox::Warning,
+		    tr("Download message list error"), errorMessage, infoText,
+		    QString(), QMessageBox::Ok, QMessageBox::Ok);
 	}
 }
 
@@ -5995,22 +5980,14 @@ bool MainWindow::messageMissingOfferDownload(MessageDb::MsgId &msgId,
 {
 	debugFuncCall();
 
-	QMessageBox msgBox(this);
-
-	msgBox.setWindowTitle(title);
-	msgBox.setText(tr("Complete message '%1' is missing.").arg(msgId.dmId));
-
-	msgBox.setIcon(QMessageBox::Warning);
-	msgBox.setInformativeText(
+	int dlgRet = DlgMsgBox::message(this, QMessageBox::Warning, title,
+	    tr("Complete message '%1' is missing.").arg(msgId.dmId),
 	    tr("First you must download the complete message to continue with the action.") +
 	    "\n\n" +
-	    tr("Do you want to download the complete message now?"));
+	    tr("Do you want to download the complete message now?"),
+	    QString(), QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
-	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-	msgBox.setDefaultButton(QMessageBox::Yes);
-
-	if ((QMessageBox::Yes == msgBox.exec()) &&
-	    downloadCompleteMessage(msgId)) {
+	if ((QMessageBox::Yes == dlgRet) && downloadCompleteMessage(msgId)) {
 		showStatusTextWithTimeout(
 		    tr("Complete message '%1' has been downloaded.").
 		    arg(msgId.dmId));
@@ -6378,13 +6355,11 @@ void MainWindow::openSelectedMessageExternally(void)
 
 	QByteArray base64 = messageDb->msgsMessageBase64(msgId.dmId);
 	if (base64.isEmpty()) {
-		QMessageBox msgBox(this);;
-		msgBox.setWindowTitle(tr("Datovka - Export error!"));
-		msgBox.setText(tr("Cannot export the message ") + msgId.dmId);
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setInformativeText(
-		  tr("First you must download message before its export..."));
-		msgBox.exec();
+		DlgMsgBox::message(this, QMessageBox::Warning,
+		    tr("Datovka - Export error!"),
+		    tr("Cannot export the message '%1'.").arg(msgId.dmId),
+		    tr("First you must download the message before its export..."),
+		    QString());
 		return;
 	}
 
@@ -6457,13 +6432,11 @@ void MainWindow::openDeliveryInfoExternally(void)
 
 	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 	if (base64.isEmpty()) {
-		QMessageBox msgBox(this);
-		msgBox.setWindowTitle(tr("Datovka - Export error!"));
-		msgBox.setText(tr("Cannot export the message ") + msgId.dmId);
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setInformativeText(
-		  tr("First you must download message before its export..."));
-		msgBox.exec();
+		DlgMsgBox::message(this, QMessageBox::Warning,
+		    tr("Datovka - Export error!"),
+		    tr("Cannot export the message '%1'.").arg(msgId.dmId),
+		    tr("First you must download the message before its export..."),
+		    QString());
 		return;
 	}
 
@@ -6987,22 +6960,19 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
 	debugFuncCall();
 
-	QMessageBox msgBox(this);
-	msgBox.setWindowTitle(tr("Datovka"));
-
 	/*
 	 * Check whether currently some tasks are being processed or are
 	 * pending. If nothing works finish immediately, else show question.
 	 */
 	if (globWorkPool.working()) {
-		msgBox.setIcon(QMessageBox::Question);
-		msgBox.setText(
-		    tr("Datovka is currently processing some tasks."));
-		msgBox.setInformativeText(tr(
-		    "Do you want to abort pending actions and close Datovka?"));
-		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-		msgBox.setDefaultButton(QMessageBox::No);
-		if (QMessageBox::Yes == msgBox.exec()) {
+		int dlgRet = DlgMsgBox::message(this, QMessageBox::Question,
+		    tr("Datovka"),
+		    tr("Datovka is currently processing some tasks."),
+		    tr("Do you want to abort pending actions and close Datovka?"),
+		    QString(), QMessageBox::No | QMessageBox::Yes,
+		    QMessageBox::No);
+
+		if (QMessageBox::Yes == dlgRet) {
 			globWorkPool.stop();
 			globWorkPool.clear();
 		} else {
@@ -7346,35 +7316,33 @@ int MainWindow::showDialogueAboutPwdExpir(const QString &accountName,
 {
 	debugFuncCall();
 
-	QMessageBox msgBox(this);
-	msgBox.setWindowTitle(tr("Password expiration"));
-	msgBox.setIcon(QMessageBox::Information);
+	int dlgRet = QMessageBox::No;
+
 	if (days < 0) {
-		msgBox.setText(tr("According to the last available information, "
-		    "your password for account '%1' (login '%2') "
-		    "expired %3 days ago (%4).")
-		    .arg(accountName).arg(userName).arg(days*(-1))
-		    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
-		msgBox.setInformativeText(tr("You have to change your password "
-		    "from the ISDS web interface. "
-		    "Your new password will be valid for 90 days."));
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
+		DlgMsgBox::message(this, QMessageBox::Information,
+		    tr("Password expiration"),
+		    tr("According to the last available information, "
+		        "your password for account '%1' (login '%2') expired %3 days ago (%4).")
+		        .arg(accountName).arg(userName).arg(days*(-1))
+		        .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")),
+		    tr("You have to change your password from the ISDS web interface. "
+		        "Your new password will be valid for 90 days."),
+		    QString(), QMessageBox::Ok, QMessageBox::Ok);
 	} else {
-		msgBox.setText(tr("According to the last available information, "
-		    "your password for account '%1' (login '%2') "
-		    "will expire in %3 days (%4).")
-		    .arg(accountName).arg(userName).arg(days)
-		    .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")));
-		msgBox.setInformativeText(tr("You can change your password now, "
-		    "or later using the 'Change password' command. "
-		    "Your new password will be valid for 90 days.\n\n"
-		    "Change password now?"));
-		msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-		msgBox.setDefaultButton(QMessageBox::No);
+		dlgRet = DlgMsgBox::message(this, QMessageBox::Information,
+		    tr("Password expiration"),
+		    tr("According to the last available information, "
+		        "your password for account '%1' (login '%2') will expire in %3 days (%4).")
+		        .arg(accountName).arg(userName).arg(days)
+		        .arg(dateTime.toString("dd.MM.yyyy hh:mm:ss")),
+		    tr("You can change your password now or later using the '%1' command. "
+		        "Your new password will be valid for 90 days.\n\n"
+		        "Change password now?").arg(ui->actionChange_password->text()),
+		    QString(), QMessageBox::No | QMessageBox::Yes,
+		    QMessageBox::No);
 	}
 
-	return msgBox.exec();
+	return dlgRet;
 }
 
 
@@ -7509,7 +7477,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 
 	QByteArray tstData;
 	int msgCnt = 0;
-	QString infoText;
+	QString dlgText;
 	bool showExportOption = true;
 
 	if (userName.isEmpty()) {
@@ -7561,8 +7529,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 		isds_message_free(&message);
 		isds_ctx_free(&dummy_session);
 
-		infoText = tr("Time stamp expiration check of ZFO files "
-		    "finished with result:")
+		dlgText = tr("Time stamp expiration check of ZFO files finished with result:")
 		    + "<br/><br/>" +
 		    tr("Total of ZFO files: %1").arg(msgCnt)
 		    + "<br/><b>" +
@@ -7602,7 +7569,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 			}
 		}
 
-		infoText = tr("Time stamp expiration check "
+		dlgText = tr("Time stamp expiration check "
 		    "in account '%1' finished with result:").arg(
 		        globAccounts[userName].accountName())
 		    + "<br/><br/>" +
@@ -7615,10 +7582,10 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 		    tr("Unchecked messages: %1").arg(errorMsgIds.count());
 	}
 
-	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Information);
-	msgBox.setWindowTitle(tr("Time stamp expiration check results"));
-	msgBox.setText(infoText);
+	QString infoText;
+	QString detailText;
+	QMessageBox::StandardButtons buttons = QMessageBox::Ok;
+	enum QMessageBox::StandardButton dfltDutton = QMessageBox::Ok;
 
 	if (!expirMsgIds.isEmpty() || !expirMsgFileNames.isEmpty() ||
 	    !errorMsgIds.isEmpty() || !errorMsgFileNames.isEmpty()) {
@@ -7628,58 +7595,52 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 			    tr("Do you want to export the expiring "
 			    "messages to ZFO?") + "</b><br/><br/>";
 		}
-		msgBox.setInformativeText(infoText);
 
-		infoText.clear();
 		if (!expirMsgIds.isEmpty() || !errorMsgIds.isEmpty()) {
 			for (int i = 0; i < expirMsgIds.count(); ++i) {
-				infoText += tr("Time stamp of message %1 expires "
+				detailText += tr("Time stamp of message %1 expires "
 				    "within specified interval.").arg(expirMsgIds.at(i).dmId);
 				if (((expirMsgIds.count() - 1) != i) ||
 				    errorMsgIds.count()) {
-					infoText += "\n";
+					detailText += "\n";
 				}
 			}
 			for (int i = 0; i < errorMsgIds.count(); ++i) {
-				infoText += tr("Time stamp of message %1 "
+				detailText += tr("Time stamp of message %1 "
 				    "is not present.").arg(errorMsgIds.at(i).dmId);
 				if ((expirMsgIds.count() - 1) != i) {
-					infoText += "\n";
+					detailText += "\n";
 				}
 			}
 		} else {
 			for (int i = 0; i < expirMsgFileNames.count(); ++i) {
-				infoText += tr("Time stamp of message %1 expires "
+				detailText += tr("Time stamp of message %1 expires "
 				    "within specified interval.").arg(expirMsgFileNames.at(i));
 				if (((expirMsgFileNames.count() - 1) != i) ||
 				    errorMsgFileNames.count()) {
-					infoText += "\n";
+					detailText += "\n";
 				}
 			}
 			for (int i = 0; i < errorMsgFileNames.count(); ++i) {
-				infoText += tr("Time stamp of message %1 "
+				detailText += tr("Time stamp of message %1 "
 				    "is not present.").arg(errorMsgFileNames.at(i));
 				if ((expirMsgFileNames.count() - 1) != i) {
-					infoText += "\n";
+					detailText += "\n";
 				}
 			}
 		}
-		msgBox.setDetailedText(infoText);
 
 		if (!expirMsgIds.isEmpty() && showExportOption) {
-			msgBox.setStandardButtons(QMessageBox::Yes
-			    | QMessageBox::No);
-			msgBox.setDefaultButton(QMessageBox::No);
-		} else {
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.setDefaultButton(QMessageBox::Ok);
+			buttons = QMessageBox::No | QMessageBox::Yes;
+			dfltDutton = QMessageBox::No;
 		}
-	} else {
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
 	}
 
-	if (QMessageBox::Yes == msgBox.exec()) {
+	int dlgRet = DlgMsgBox::message(this, QMessageBox::Information,
+	    tr("Time stamp expiration check results"), dlgText, infoText,
+	    detailText, buttons, dfltDutton);
+
+	if (QMessageBox::Yes == dlgRet) {
 		if (!userName.isEmpty()) {
 			exportExpirMessagesToZFO(userName, expirMsgIds);
 		}
@@ -7738,19 +7699,17 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 	const QString userName =
 	    m_accountModel.userName(currentAccountModelIndex());
 
-	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Question);
-	msgBox.setWindowTitle(tr("Import of mesages from database"));
-	msgBox.setText(tr("This action allow to import messages from selected"
-	    " database files into current account. Keep in mind that this "
-	    "action may takes a few minutes based on number of messages "
-	    "in the imported database. Import progress will be displayed "
-	    "in the status bar."));
-	msgBox.setInformativeText(tr("Do you want to continue?"));
-	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-	msgBox.setDefaultButton(QMessageBox::No);
-	if (QMessageBox::No == msgBox.exec()) {
-		return;
+	{
+		int dlgRet = DlgMsgBox::message(this, QMessageBox::Question,
+		    tr("Import messages from database"),
+		    tr("This action allow to import messages from selected database files into current account. "
+		        "Keep in mind that this action may take a while based on number of messages in the imported database. "
+		        "Import progress will be displayed in the status bar."),
+		    tr("Do you want to continue?"), QString(),
+		    QMessageBox::No | QMessageBox::Yes, QMessageBox::No);
+		if (QMessageBox::No == dlgRet) {
+			return;
+		}
 	}
 
 	/* get list of selected database files */
@@ -7787,26 +7746,22 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 {
 	debugSlotCall();
 
-	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Question);
-	msgBox.setWindowTitle(tr("Database split"));
-	msgBox.setText(tr("This action split current account message database "
-	    "into several new databases which will contain messages relevant "
-	    "by year only. It is recommended for large database because the "
-	    "performance of application will be better."));
-	msgBox.setInformativeText(tr("Original database file will copy to "
-	    "selected directory and new database files will created in "
-	    "the same location. If action finished with success, new databases"
-	    " will be used instead of original. Restart of application "
-	    "is required.")
-	    +"\n\n" +
-	    tr("Note: Keep in mind that this action may "
-	    "takes a few minutes based on number of messages in the database.")
-	    + "\n\n" + tr("Do you want to continue?"));
-	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-	msgBox.setDefaultButton(QMessageBox::No);
-	if (QMessageBox::No == msgBox.exec()) {
-		return;
+	{
+		int dlgRet = DlgMsgBox::message(this, QMessageBox::Question,
+		    tr("Database split"),
+		    tr("This action splits current account message database into several separate databases which will contain messages relevant to one year only. "
+		        "It is recommended for large databases in order to improve the performance."),
+		    tr("The original database file will be copied to selected directory and new database files will be created in the original location. "
+		        "If action finishes with success then new databases will be used instead of the original. "
+		        "Application restart is required.")
+		    + "\n\n" +
+		    tr("Note: Keep in mind that this action may take a while based on the number of messages in the database.")
+		    + "\n\n" + tr("Do you want to continue?"), QString(),
+		    QMessageBox::No | QMessageBox::Yes, QMessageBox::No);
+
+		if (QMessageBox::No == dlgRet) {
+			return;
+		}
 	}
 
 	QString newDbDir;
@@ -7841,12 +7796,13 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 			clearProgressBar();
 			showStatusTextWithTimeout(tr("Split of message database "
 			    "finished with error"));
-			msgBox.setIcon(QMessageBox::Critical);
-			msgBox.setWindowTitle(tr("Database file error"));
-			msgBox.setText(tr("Database file cannot split into same directory."));
-			msgBox.setInformativeText(tr("Please, you must choose another directory."));
-			msgBox.setStandardButtons(QMessageBox::Ok);
-			msgBox.exec();
+
+			DlgMsgBox::message(this, QMessageBox::Critical,
+			    tr("Database file error"),
+			    tr("Database file cannot be split into original directory."),
+			    tr("Please choose another directory."), QString(),
+			    QMessageBox::Ok);
+
 			clearStatusBar();
 		}
 	} while (dbDir == newDbDir);
@@ -7865,29 +7821,28 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 
 	QApplication::restoreOverrideCursor();
 
+	/* Show final notification. */
 	if (task->m_success) {
 		showStatusTextWithTimeout(tr("Split of message database finished"));
-		msgBox.setIcon(QMessageBox::Information);
-		msgBox.setText(tr("Congratulation: message database for "
-		    "account '%1' was split successfully. Please, restart the "
-		    "application for loading of new databases.").arg(userName));
-		msgBox.setInformativeText(tr("Note: Original database file was backup to:")
-		    + "\n" + newDbDir);
+
+		DlgMsgBox::message(this, QMessageBox::Information,
+		    tr("Database split result"),
+		    tr("Congratulation: message database for account '%1' was split successfully. "
+		        "Please, restart the application for loading of new databases.")
+		        .arg(userName),
+		    tr("Note: Original database file was backed up to:") + "\n" + newDbDir,
+		    QString(), QMessageBox::Ok);
 	} else {
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setText(tr("Split of message database for "
-		    "account '%1' was not successfully. Please, restart the "
-		    "application for loading original database.").arg(userName));
-		msgBox.setInformativeText(task->m_error);
+		DlgMsgBox::message(this, QMessageBox::Critical,
+		    tr("Database split result"),
+		    tr("Splitting of message database for account '%1' was not successful. "
+		        "Please, restart the application in order to reload the  original database.")
+		        .arg(userName),
+		    task->m_error, QString(), QMessageBox::Ok);
 	}
 
 	delete task;
 	clearProgressBar();
-
-	/* show final notification */
-	msgBox.setWindowTitle(tr("Database split result"));
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.exec();
 
 	clearStatusBar();
 
@@ -8213,15 +8168,11 @@ void MainWindow::vacuumMsgDbSlot(void)
 	if (!globPref.store_messages_on_disk) {
 		showStatusTextWithTimeout(tr("Vacuum cannot be performed on databases in memory."));
 
-		QMessageBox msgBox(this);
-		msgBox.setIcon(QMessageBox::Warning);
-		msgBox.setWindowTitle(tr("Database operation error"));
-		msgBox.setText(tr("Database clean-up cannot be performed on database in memory."));
-		msgBox.setInformativeText(tr("Cannot call VACUUM on database in memory."));
-
-		msgBox.setStandardButtons(QMessageBox::Ok);
-		msgBox.setDefaultButton(QMessageBox::Ok);
-		msgBox.exec();
+		DlgMsgBox::message(this, QMessageBox::Warning,
+		    tr("Database operation error"),
+		    tr("Database clean-up cannot be performed on database in memory."),
+		    tr("Cannot call VACUUM on database in memory."), QString(),
+		    QMessageBox::Ok, QMessageBox::Ok);
 		return;
 	}
 
@@ -8248,17 +8199,16 @@ void MainWindow::vacuumMsgDbSlot(void)
 	}
 
 	{
-		QMessageBox msgBox(this);
-		msgBox.setIcon(QMessageBox::Question);
-		msgBox.setWindowTitle(tr("Clean message database"));
-		msgBox.setText(tr("Performs a message database clean-up for the selected account. "
-		    "This action will block the entire application. "
-		    "The action may take several minutes to be completed. "
-		    "Furthermore, it requires more than %1 of free disk space to successfully proceed.").arg(size));
-		msgBox.setInformativeText(tr("Do you want to continue?"));
-		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-		msgBox.setDefaultButton(QMessageBox::No);
-		if (QMessageBox::Yes != msgBox.exec()) {
+		int dlgRet = DlgMsgBox::message(this, QMessageBox::Question,
+		    tr("Clean message database"),
+		    tr("Performs a message database clean-up for the selected account. "
+		        "This action will block the entire application. "
+		        "The action may take several minutes to be completed. "
+		        "Furthermore, it requires more than %1 of free disk space to successfully proceed.")
+		        .arg(size),
+		    tr("Do you want to continue?"), QString(),
+		    QMessageBox::No | QMessageBox::Yes, QMessageBox::No);
+		if (QMessageBox::Yes != dlgRet) {
 			return;
 		}
 	}
@@ -8297,27 +8247,17 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 		return;
 	}
 
-	QDialog *tagsDlg = Q_NULLPTR;
+	int dlgRet = DlgTags::NO_ACTION;
 
 	if (msgIdList.isEmpty()) {
-		tagsDlg = new DlgTags(userName, globTagDbPtr, this);
+		dlgRet = DlgTags::editAvailable(userName, globTagDbPtr, this);
 	} else if ((!userName.isEmpty() && !msgIdList.isEmpty()) || (!userName.isEmpty())) {
-		/*
-		 * FIXME -- The tags dialogue as it now exists is not suitable
-		 * for adding tags to messages.
-		 */
-		tagsDlg = new DlgTags(userName, globTagDbPtr, msgIdList, this);
+		dlgRet = DlgTags::editAssignment(userName, globTagDbPtr,
+		    msgIdList, this);
 	} else {
 		Q_ASSERT(0);
 		return;
 	}
-	if (tagsDlg == Q_NULLPTR) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	int dlgRet = tagsDlg->exec();
-	tagsDlg->deleteLater();
 
 	if (userName.isEmpty() || (dlgRet == DlgTags::NO_ACTION)) {
 		/* Nothing else to do. */
@@ -8410,29 +8350,22 @@ void MainWindow::showImportZfoResultDialogue(int filesCnt,
 void MainWindow::showImportMessageResults(const QString &userName,
     const QStringList &errImportList, int totalMsgs, int importedMsgs)
 {
-	showStatusTextPermanently(tr("Import of messages to account %1 "
-	     "finished").arg(userName));
+	showStatusTextPermanently(
+	    tr("Import of messages to account %1 finished").arg(userName));
 
-	QMessageBox msgBox(this);
-	msgBox.setIcon(QMessageBox::Information);
-	msgBox.setWindowTitle(tr("Messages import result"));
-	QString msg = tr("Import of messages into account '%1' "
-	    "finished with result:").arg(userName);
-	msgBox.setText(msg);
-	msg = tr("Total of messages in database: %1").arg(totalMsgs)
-	    + "<br/><b>" +
-	    tr("Imported messages: %1").arg(importedMsgs)
-	    + "<br/>" +
-	    tr("Non-imported messages: %1").arg(errImportList.count()) +
-	    "</b><br/>";
-	msgBox.setInformativeText(msg);
+	QString detailText;
 	if (errImportList.count() > 0) {
-		msg = "";
 		for (int m = 0; m < errImportList.count(); ++ m) {
-			msg += errImportList.at(m) + "\n";
+			detailText += errImportList.at(m) + "\n";
 		}
-		msgBox.setDetailedText(msg);
 	}
-	msgBox.setStandardButtons(QMessageBox::Ok);
-	msgBox.exec();
+
+	DlgMsgBox::message(this, QMessageBox::Information,
+	    tr("Messages import result"),
+	    tr("Import of messages into account '%1' finished with result:")
+	        .arg(userName),
+	    tr("Total of messages in database: %1").arg(totalMsgs) + "<br/><b>" +
+	        tr("Imported messages: %1").arg(importedMsgs) + "<br/>" +
+	        tr("Non-imported messages: %1").arg(errImportList.count()) + "</b><br/>",
+	    detailText, QMessageBox::Ok);
 }

@@ -22,43 +22,69 @@
  */
 
 #include <QColorDialog>
-#include <QMessageBox>
 
+#include "src/gui/dlg_msg_box_informative.h"
 #include "src/gui/dlg_tag.h"
+#include "src/io/tag_db.h"
+#include "ui_dlg_tag.h"
 
-DlgTag::DlgTag(const QString &userName, TagDb *tagDb, QWidget *parent)
+DlgTag::DlgTag(const TagItem &tag, QWidget *parent)
     : QDialog(parent),
-    m_userName(userName),
-    m_tagDbPtr(tagDb),
-    m_tagItem()
-{
-	setupUi(this);
-
-	initDlg();
-}
-
-DlgTag::DlgTag(const QString &userName, TagDb *tagDb, const TagItem &tag,
-    QWidget *parent)
-    : QDialog(parent),
-    m_userName(userName),
-    m_tagDbPtr(tagDb),
+    m_ui(new (std::nothrow) Ui::DlgTag),
     m_tagItem(tag)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	initDlg();
-}
-
-void DlgTag::initDlg(void)
-{
-	this->currentColor->setEnabled(false);
-	this->tagNamelineEdit->setText(m_tagItem.name);
+	m_ui->currentColor->setEnabled(false);
+	m_ui->tagNamelineEdit->setText(m_tagItem.name);
+	tagNameChanged(m_tagItem.name);
 	setPreviewButtonColor();
 
-	connect(this->changeColorPushButton, SIGNAL(clicked()), this,
-	    SLOT(chooseNewColor()));
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(saveTag()));
+	connect(m_ui->tagNamelineEdit, SIGNAL(textChanged(QString)),
+	    this, SLOT(tagNameChanged(QString)));
+	connect(m_ui->changeColorPushButton, SIGNAL(clicked()),
+	    this, SLOT(chooseNewColor()));
+}
+
+DlgTag::~DlgTag(void)
+{
+	delete m_ui;
+}
+
+bool DlgTag::createTag(TagDb *tagDb, QWidget *parent)
+{
+	if (Q_UNLIKELY(Q_NULLPTR == tagDb)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	DlgTag dlg(TagItem(), parent);
+	if (dlg.exec() == QDialog::Accepted) {
+		return saveTag(tagDb, dlg.m_tagItem, parent);
+	}
+	return false;
+}
+
+bool DlgTag::editTag(TagDb *tagDb, const TagItem &tag, QWidget *parent)
+{
+	if (Q_UNLIKELY(Q_NULLPTR == tagDb)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	DlgTag dlg(tag, parent);
+	if (dlg.exec() == QDialog::Accepted) {
+		return saveTag(tagDb, dlg.m_tagItem, parent);
+	}
+	return false;
+}
+
+void DlgTag::tagNameChanged(const QString &tagName)
+{
+	m_tagItem.name = tagName;
+
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	    !tagName.isEmpty());
 }
 
 void DlgTag::chooseNewColor(void)
@@ -75,44 +101,42 @@ void DlgTag::chooseNewColor(void)
 	}
 }
 
-void DlgTag::saveTag(void)
-{
-	m_tagItem.name = this->tagNamelineEdit->text();
-
-	if (m_tagItem.name.isEmpty()) {
-		QMessageBox msgBox;
-		msgBox.setIcon(QMessageBox::Critical);
-		msgBox.setWindowTitle(tr("Tag error"));
-		msgBox.setText(tr("Tag name is empty."));
-		msgBox.setInformativeText(tr("Tag wasn't created."));
-		msgBox.exec();
-		return;
-	}
-
-	Q_ASSERT(TagItem::isValidColourStr(m_tagItem.colour));
-
-	QMessageBox msgBox;
-	msgBox.setIcon(QMessageBox::Critical);
-
-	if (m_tagItem.id >= 0) {
-		m_tagDbPtr->updateTag(m_tagItem.id, m_tagItem.name,
-		    m_tagItem.colour);
-	} else {
-		if (!m_tagDbPtr->insertTag(m_tagItem.name, m_tagItem.colour)) {
-			msgBox.setWindowTitle(tr("Tag error"));
-			msgBox.setText(tr("Tag with name '%1'' already "
-			    "exists in database.").arg(m_tagItem.name));
-			msgBox.setInformativeText(
-			    tr("Tag wasn't created again."));
-			msgBox.exec();
-		}
-	}
-}
-
 void DlgTag::setPreviewButtonColor(void)
 {
-	QPalette pal = this->currentColor->palette();
+	QPalette pal(m_ui->currentColor->palette());
 	pal.setColor(QPalette::Button, QColor("#" + m_tagItem.colour));
 	const QString style = "border-style: outset; background-color: ";
-	this->currentColor->setStyleSheet(style + "#" + m_tagItem.colour);
+	m_ui->currentColor->setStyleSheet(style + "#" + m_tagItem.colour);
+}
+
+bool DlgTag::saveTag(TagDb *tagDb, const TagItem &tagItem, QWidget *parent)
+{
+	if (Q_UNLIKELY(Q_NULLPTR == tagDb)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	if (Q_UNLIKELY(tagItem.name.isEmpty())) {
+		DlgMsgBox::message(parent, QMessageBox::Critical,
+		    tr("Tag error"), tr("Tag name is empty."),
+		    tr("Tag wasn't created."), QString());
+		return false;
+	}
+
+	Q_ASSERT(TagItem::isValidColourStr(tagItem.colour));
+
+	if (tagItem.id >= 0) {
+		tagDb->updateTag(tagItem.id, tagItem.name, tagItem.colour);
+	} else {
+		if (!tagDb->insertTag(tagItem.name, tagItem.colour)) {
+			DlgMsgBox::message(parent, QMessageBox::Critical,
+			    tr("Tag error"),
+			    tr("Tag with name '%1'' already exists in database.")
+			        .arg(tagItem.name),
+			    tr("Tag wasn't created."), QString());
+			return false;
+		}
+	}
+
+	return true;
 }

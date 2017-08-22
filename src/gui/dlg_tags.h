@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,14 +27,20 @@
 #include <QDialog>
 #include <QList>
 
-#include "ui_dlg_tags.h"
-#include "src/io/tag_db.h"
+#include "src/delegates/tags_delegate.h"
+#include "src/models/tags_model.h"
+
+class TagDb; /* Forward declaration. */
+
+namespace Ui {
+	class DlgTags;
+}
 
 /*!
  * @brief Tags management dialogue.
  */
-class DlgTags : public QDialog, public Ui::TagsDialog {
-    Q_OBJECT
+class DlgTags : public QDialog {
+	Q_OBJECT
 
 public:
 	/*!
@@ -46,38 +52,49 @@ public:
 		TAGS_CHANGED /*!< Actual tags have been deleted or changed. */
 	};
 
+private:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] userName  Account user name.
-	 * @param[in] parent    Parent widget.
-	 */
-	explicit DlgTags(const QString &userName, TagDb *tagDb,
-	    QWidget *parent = Q_NULLPTR);
-
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] userName            Account user name.
-	 * @param[in] msgIdList           List of message ids.
-	 * @param[in] parent              Parent widget.
+	 * @param[in] userName Account user name.
+	 * @param[in] tagDb Pointer to tag database.
+	 * @param[in] msgIdList List of message ids, empty list if no assignment
+	 *                      should be edited.
+	 * @param[in] parent Parent widget.
 	 */
 	explicit DlgTags(const QString &userName, TagDb *tagDb,
 	    const QList<qint64> &msgIdList, QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgTags(void);
 
-public slots:
 	/*!
-	 * @brief Shows the dialogue as a modal dialogue.
+	 * @brief Edit all tags.
 	 *
-	 * @return Method returns ReturnCode.
+	 * @param[in] userName Account user name.
+	 * @param[in] tagDb Pointer to tag database.
+	 * @param[in] parent Parent widget.
+	 * @return Return code.
 	 */
-	virtual
-	int exec(void) Q_DECL_OVERRIDE;
+	static
+	enum ReturnCode editAvailable(const QString &userName, TagDb *tagDb,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Edit assigned tags.
+	 *
+	 * @param[in] userName Account user name.
+	 * @param[in] tagDb Pointer to tag database.
+	 * @param[in] msgIdList List of message ids.
+	 * @param[in] parent Parent widget.
+	 * @return Return code.
+	 */
+	static
+	enum ReturnCode editAssignment(const QString &userName, TagDb *tagDb,
+	    const QList<qint64> &msgIdList, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -113,15 +130,20 @@ private slots:
 	void removeAllTagsFromMsgs(void);
 
 	/*!
-	 * @brief Activate/deactivate tag buttons on selection change.
+	 * @brief Activate/deactivate buttons on available selection change.
 	 */
-	void handleSelectionChanged(void);
+	void handleAvailableSelectionChange(void);
+
+	/*!
+	 * @brief Activate/deactivate buttons on assigned selection change.
+	 */
+	void handleAssignedSelectionChange(void);
 
 private:
 	/*!
-	 * @brief Fill all tags to table view from database.
+	 * @brief Fill all tag entries into list views from database.
 	 */
-	void fillTagsToListView(void);
+	void fillTagsToListViews(void);
 
 	/*!
 	 * @brief Initialises the dialogue.
@@ -129,28 +151,24 @@ private:
 	void initDlg(void);
 
 	/*!
-	 * @brief Get tag id from index.
-	 *
-	 * @return Tag id if success else -1.
-	 */
-	int getTagIdFromIndex(const QModelIndex &idx);
-
-	/*!
-	 * @brief Choose (select) all tags in the listview
+	 * @brief Choose (select) all tags in the list view
 	 *        which are assigned in selected messages.
 	 */
 	void selectAllAssingedTagsFromMsgs(void);
+
+	Ui::DlgTags *m_ui; /*!< UI generated from UI file. */
 
 	const QString m_userName; /*!< Account username. */
 	TagDb *m_tagDbPtr; /*!< Tag db pointer. */
 	const QList<qint64> m_msgIdList; /*!< List of message identifiers. */
 
-	class TagsDelegate *m_tagsDelegate; /*!< Responsible for painting. */
-	class TagsModel *m_tagsModel; /*!< Tags model. */
+	TagsDelegate m_availableTagsDelegate; /*!< Responsible for painting. */
+	TagsModel m_availableTagsModel; /*!< Available tags model. */
+
+	TagsDelegate m_assignedTagsDelegate; /*!< Responsible for painting. */
+	TagsModel m_assignedTagsModel; /*!< Assigned tags model. */
 
 	enum ReturnCode m_retCode; /*!< Dialogue return code. */
-
-	QString m_errStr;
 };
 
 #endif /* _DLG_TAGS_H_ */
