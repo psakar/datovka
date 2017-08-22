@@ -272,6 +272,10 @@ void DlgTags::fillTagsToListViews(void)
 {
 	Q_ASSERT(!m_userName.isEmpty());
 
+	/* This should also disable all related buttons. */
+	m_ui->availableTagsView->clearSelection();
+	m_ui->assignedTagsView->clearSelection();
+
 	/* Get all available tags. */
 	QSet<TagDb::TagEntry> availableTags(m_tagDbPtr->getAllTags().toSet());
 
