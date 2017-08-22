@@ -8247,27 +8247,17 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 		return;
 	}
 
-	QDialog *tagsDlg = Q_NULLPTR;
+	int dlgRet = DlgTags::NO_ACTION;
 
 	if (msgIdList.isEmpty()) {
-		tagsDlg = new DlgTags(userName, globTagDbPtr, this);
+		dlgRet = DlgTags::editAvailable(userName, globTagDbPtr, this);
 	} else if ((!userName.isEmpty() && !msgIdList.isEmpty()) || (!userName.isEmpty())) {
-		/*
-		 * FIXME -- The tags dialogue as it now exists is not suitable
-		 * for adding tags to messages.
-		 */
-		tagsDlg = new DlgTags(userName, globTagDbPtr, msgIdList, this);
+		dlgRet = DlgTags::editAssignment(userName, globTagDbPtr,
+		    msgIdList, this);
 	} else {
 		Q_ASSERT(0);
 		return;
 	}
-	if (tagsDlg == Q_NULLPTR) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	int dlgRet = tagsDlg->exec();
-	tagsDlg->deleteLater();
 
 	if (userName.isEmpty() || (dlgRet == DlgTags::NO_ACTION)) {
 		/* Nothing else to do. */

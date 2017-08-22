@@ -32,22 +32,6 @@
 
 #define WRONG_TAG_ID -1 /** TODO -- Remove. */
 
-DlgTags::DlgTags(const QString &userName, TagDb *tagDb, QWidget *parent)
-    : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgTags),
-    m_userName(userName),
-    m_tagDbPtr(tagDb),
-    m_msgIdList(),
-    m_availableTagsDelegate(this),
-    m_availableTagsModel(this),
-    m_assignedTagsDelegate(this),
-    m_assignedTagsModel(this),
-    m_retCode(NO_ACTION)
-{
-	m_ui->setupUi(this);
-	initDlg();
-}
-
 DlgTags::DlgTags(const QString &userName, TagDb *tagDb,
     const QList<qint64> &msgIdList, QWidget *parent)
     : QDialog(parent),
@@ -63,6 +47,7 @@ DlgTags::DlgTags(const QString &userName, TagDb *tagDb,
 {
 	m_ui->setupUi(this);
 	initDlg();
+	fillTagsToListViews();
 	//selectAllAssingedTagsFromMsgs();
 }
 
@@ -71,11 +56,32 @@ DlgTags::~DlgTags(void)
 	delete m_ui;
 }
 
-int DlgTags::exec(void)
+enum DlgTags::ReturnCode DlgTags::editAvailable(const QString &userName,
+    TagDb *tagDb, QWidget *parent)
 {
-	QDialog::exec();
+	if (Q_UNLIKELY(tagDb == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return NO_ACTION;
+	}
 
-	return m_retCode;
+	DlgTags dlg(userName, tagDb, QList<qint64>(), parent);
+	dlg.exec();
+
+	return dlg.m_retCode;
+}
+
+enum DlgTags::ReturnCode DlgTags::editAssignment(const QString &userName,
+    TagDb *tagDb, const QList<qint64> &msgIdList, QWidget *parent)
+{
+	if (Q_UNLIKELY((tagDb == Q_NULLPTR) || msgIdList.isEmpty())) {
+		Q_ASSERT(0);
+		return NO_ACTION;
+	}
+
+	DlgTags dlg(userName, tagDb, msgIdList, parent);
+	dlg.exec();
+
+	return dlg.m_retCode;
 }
 
 void DlgTags::addTag(void)
@@ -238,12 +244,12 @@ void DlgTags::removeAllTagsFromMsgs(void)
 	fillTagsToListViews();
 }
 
-void DlgTags::handleAvailableSelectionChanged(void)
+void DlgTags::handleAvailableSelectionChange(void)
 {
 	QModelIndexList slctIdxs(selectedIndexes(m_ui->availableTagsView));
 
-	m_ui->pushButtonDelete->setEnabled(!slctIdxs.isEmpty());
-	m_ui->pushButtonUpdate->setEnabled(slctIdxs.count() == 1);
+	m_ui->deleteTagButton->setEnabled(!slctIdxs.isEmpty());
+	m_ui->updateTagButton->setEnabled(slctIdxs.count() == 1);
 	m_ui->assignButton->setEnabled(!slctIdxs.isEmpty());
 
 	if (!slctIdxs.isEmpty()) {
@@ -251,7 +257,7 @@ void DlgTags::handleAvailableSelectionChanged(void)
 	}
 }
 
-void DlgTags::handleAssignedSelectionChanged(void)
+void DlgTags::handleAssignedSelectionChange(void)
 {
 	QModelIndexList slctIdxs(selectedIndexes(m_ui->assignedTagsView));
 
@@ -314,62 +320,48 @@ void DlgTags::initDlg(void)
 {
 	m_ui->availableTagsView->setItemDelegate(&m_availableTagsDelegate);
 	m_ui->availableTagsView->setModel(&m_availableTagsModel);
-
 	m_ui->availableTagsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_ui->availableTagsView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 	m_ui->assignedTagsView->setItemDelegate(&m_assignedTagsDelegate);
 	m_ui->assignedTagsView->setModel(&m_assignedTagsModel);
-
 	m_ui->assignedTagsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	m_ui->assignedTagsView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
-	m_ui->pushButtonUpdate->setEnabled(false);
-	m_ui->pushButtonDelete->setEnabled(false);
-
-	m_ui->assignButton->setEnabled(false);
-	m_ui->assignButton->setVisible(false);
-	m_ui->removeButton->setEnabled(false);
-	m_ui->removeButton->setVisible(false);
-
-	m_ui->assignedGroup->setEnabled(false);
-	m_ui->assignedGroup->setVisible(false);
-
 	connect(m_ui->availableTagsView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
-	    SLOT(handleAvailableSelectionChanged()));
-
-	connect(m_ui->pushButtonAdd, SIGNAL(clicked()), this,
-	    SLOT(addTag()));
-	connect(m_ui->pushButtonUpdate, SIGNAL(clicked()), this,
-	    SLOT(updateTag()));
-	connect(m_ui->pushButtonDelete, SIGNAL(clicked()), this,
-	    SLOT(deleteTag()));
+	    SLOT(handleAvailableSelectionChange()));
 
 	connect(m_ui->assignedTagsView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
-	    SLOT(handleAssignedSelectionChanged()));
+	    SLOT(handleAssignedSelectionChange()));
 
-	/* any messages was selected */
+	connect(m_ui->addTagButton, SIGNAL(clicked()), this, SLOT(addTag()));
+	connect(m_ui->deleteTagButton, SIGNAL(clicked()), this,
+	    SLOT(deleteTag()));
+	connect(m_ui->updateTagButton, SIGNAL(clicked()), this,
+	    SLOT(updateTag()));
+
+	/* Message tag assignment is going to be edited. */
 	if (!m_msgIdList.isEmpty()) {
-
 		connect(m_ui->assignButton, SIGNAL(clicked()), this,
 		    SLOT(assignSelectedTagsToMsgs()));
 		connect(m_ui->removeButton, SIGNAL(clicked()), this,
 		    SLOT(removeSelectedTagsFromMsgs()));
 		connect(m_ui->removeAllButton, SIGNAL(clicked()), this,
 		    SLOT(removeAllTagsFromMsgs()));
-
-		//m_ui->assignButton->setEnabled(true);
-		m_ui->assignButton->setVisible(true);
-		//m_ui->removeButton->setEnabled(true);
-		m_ui->removeButton->setVisible(true);
-
-		m_ui->assignedGroup->setVisible(true);
-		m_ui->assignedGroup->setEnabled(true);
 	}
 
-	fillTagsToListViews();
+	m_ui->deleteTagButton->setEnabled(false);
+	m_ui->updateTagButton->setEnabled(false);
+
+	m_ui->assignButton->setEnabled(false);
+	m_ui->assignButton->setVisible(!m_msgIdList.isEmpty());
+	m_ui->removeButton->setEnabled(false);
+	m_ui->removeButton->setVisible(!m_msgIdList.isEmpty());
+
+	m_ui->assignedGroup->setEnabled(!m_msgIdList.isEmpty());
+	m_ui->assignedGroup->setVisible(!m_msgIdList.isEmpty());
 }
 
 void DlgTags::selectAllAssingedTagsFromMsgs(void)

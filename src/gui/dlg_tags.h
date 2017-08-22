@@ -52,38 +52,49 @@ public:
 		TAGS_CHANGED /*!< Actual tags have been deleted or changed. */
 	};
 
+private:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] userName  Account user name.
-	 * @param[in] parent    Parent widget.
-	 */
-	explicit DlgTags(const QString &userName, TagDb *tagDb,
-	    QWidget *parent = Q_NULLPTR);
-
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] userName            Account user name.
-	 * @param[in] msgIdList           List of message ids.
-	 * @param[in] parent              Parent widget.
+	 * @param[in] userName Account user name.
+	 * @param[in] tagDb Pointer to tag database.
+	 * @param[in] msgIdList List of message ids, empty list if no assignment
+	 *                      should be edited.
+	 * @param[in] parent Parent widget.
 	 */
 	explicit DlgTags(const QString &userName, TagDb *tagDb,
 	    const QList<qint64> &msgIdList, QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgTags(void);
 
-public slots:
 	/*!
-	 * @brief Shows the dialogue as a modal dialogue.
+	 * @brief Edit all tags.
 	 *
-	 * @return Method returns ReturnCode.
+	 * @param[in] userName Account user name.
+	 * @param[in] tagDb Pointer to tag database.
+	 * @param[in] parent Parent widget.
+	 * @return Return code.
 	 */
-	virtual
-	int exec(void) Q_DECL_OVERRIDE;
+	static
+	enum ReturnCode editAvailable(const QString &userName, TagDb *tagDb,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Edit assigned tags.
+	 *
+	 * @param[in] userName Account user name.
+	 * @param[in] tagDb Pointer to tag database.
+	 * @param[in] msgIdList List of message ids.
+	 * @param[in] parent Parent widget.
+	 * @return Return code.
+	 */
+	static
+	enum ReturnCode editAssignment(const QString &userName, TagDb *tagDb,
+	    const QList<qint64> &msgIdList, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -121,16 +132,16 @@ private slots:
 	/*!
 	 * @brief Activate/deactivate buttons on available selection change.
 	 */
-	void handleAvailableSelectionChanged(void);
+	void handleAvailableSelectionChange(void);
 
 	/*!
 	 * @brief Activate/deactivate buttons on assigned selection change.
 	 */
-	void handleAssignedSelectionChanged(void);
+	void handleAssignedSelectionChange(void);
 
 private:
 	/*!
-	 * @brief Fill all tag enries into list views from database.
+	 * @brief Fill all tag entries into list views from database.
 	 */
 	void fillTagsToListViews(void);
 
@@ -140,7 +151,7 @@ private:
 	void initDlg(void);
 
 	/*!
-	 * @brief Choose (select) all tags in the listview
+	 * @brief Choose (select) all tags in the list view
 	 *        which are assigned in selected messages.
 	 */
 	void selectAllAssingedTagsFromMsgs(void);

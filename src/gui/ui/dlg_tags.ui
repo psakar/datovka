@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>500</width>
-    <height>325</height>
+    <width>740</width>
+    <height>320</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,7 +35,7 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
-           <widget class="QPushButton" name="pushButtonAdd">
+           <widget class="QPushButton" name="addTagButton">
             <property name="text">
              <string>Add</string>
             </property>
@@ -46,7 +46,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButtonDelete">
+           <widget class="QPushButton" name="deleteTagButton">
             <property name="text">
              <string>Delete</string>
             </property>
@@ -57,7 +57,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButtonUpdate">
+           <widget class="QPushButton" name="updateTagButton">
             <property name="text">
              <string>Update</string>
             </property>
@@ -66,6 +66,19 @@
               <normaloff>:/icons/3party/pencil_16.png</normaloff>:/icons/3party/pencil_16.png</iconset>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
          </layout>
         </item>
@@ -136,15 +149,32 @@
            <widget class="QListView" name="assignedTagsView"/>
           </item>
           <item>
-           <widget class="QPushButton" name="removeAllButton">
-            <property name="text">
-             <string>Remove all</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../../../res/resources.qrc">
-              <normaloff>:/icons/3party/left_16.png</normaloff>:/icons/3party/left_16.png</iconset>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QPushButton" name="removeAllButton">
+              <property name="text">
+               <string>Remove all</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../../../res/resources.qrc">
+                <normaloff>:/icons/3party/left_16.png</normaloff>:/icons/3party/left_16.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
