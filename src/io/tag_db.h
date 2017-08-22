@@ -230,6 +230,7 @@ extern TagDb *globTagDbPtr;
  *
  * @param[in] entry Tag entry to compute hash from.
  * @param[in] seed Is used to initialise the hash if specified.
+ * @return Hashed tag entry.
  */
 uint qHash(const TagDb::TagEntry &entry, uint seed = 0);
 
