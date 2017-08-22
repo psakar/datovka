@@ -5261,7 +5261,7 @@ void MainWindow::refreshAccountList(const QString &userName)
 	/* There may be no account selected. */
 
 	enum AccountModel::NodeType nodeType = AccountModel::nodeUnknown;
-	MessageDb::MessageType msgType;
+	MessageDb::MessageType msgType = MessageDb::TYPE_RECEIVED;
 	QString year;
 	qint64 dmId = -1;
 
@@ -5336,6 +5336,7 @@ void MainWindow::showAboutApplicationDialog(void)
 {
 	DlgAbout::about(this);
 }
+
 void MainWindow::showImportDatabaseDialog(void)
 {
 	QDialog *prepareCreateAccount = new CreateAccountFromDbDialog(this);
