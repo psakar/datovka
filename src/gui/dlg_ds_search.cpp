@@ -607,6 +607,7 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 	    soughtInfo);
 	if (Q_UNLIKELY(task == Q_NULLPTR)) {
 		Q_ASSERT(0);
+		m_ui->contactTableView->setEnabled(true);
 		return;
 	}
 	task->setAutoDelete(false);
@@ -625,6 +626,7 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 	case TaskSearchOwner::SO_BAD_DATA:
 		QMessageBox::information(this, tr("Search result"),
 		    longErrMsg, QMessageBox::Ok);
+		m_ui->contactTableView->setEnabled(true);
 		return;
 		break;
 	case TaskSearchOwner::SO_COM_ERROR:
@@ -632,6 +634,7 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 		    tr("It was not possible find any data box because") +
 		    QStringLiteral(":\n\n") + longErrMsg,
 		    QMessageBox::Ok);
+		m_ui->contactTableView->setEnabled(true);
 		return;
 		break;
 	case TaskSearchOwner::SO_ERROR:
@@ -639,6 +642,7 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 		QMessageBox::critical(this, tr("Search error"),
 		    tr("It was not possible find any data box because an error occurred during the search process!"),
 		    QMessageBox::Ok);
+		m_ui->contactTableView->setEnabled(true);
 		return;
 		break;
 	}
