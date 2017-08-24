@@ -40,12 +40,22 @@ class DlgDsSearch; /* Forward declaration. */
  * @brief Thread performing full-text data box searching.
  */
 class FulltextSearchThread : public QThread {
+	Q_OBJECT
 
 public:
 	/*!
 	 * @brief Constructor.
 	 */
 	explicit FulltextSearchThread(DlgDsSearch *dlg);
+
+signals:
+	/*!
+	 * @brief Emitted when search finishes.
+	 *
+	 * @param[in] result Task result code.
+	 * @param[in] longErrMsg Long error message.
+	 */
+	void searchFinished(int result, const QString &longErrMsg);
 
 protected:
 	/*!
@@ -67,6 +77,7 @@ namespace Ui {
  */
 class DlgDsSearch : public QDialog {
 	Q_OBJECT
+
 private:
 	/*!
 	 * @brief Constructor.
@@ -111,9 +122,13 @@ private slots:
 	void checkInputFields(void);
 
 	/*!
-	 * @brief Enables search controls.
+	 * @brief Run on search thread exit.
+	 *
+	 * @param[in] result Full-text task result code.
+	 * @param[in] longErrMsg Long error message.
 	 */
-	void enableSearchControls(void);
+	void collectFulltextThreadOutcome(int result,
+	    const QString &longErrMsg);
 
 	/*!
 	 * @brief Search for data boxes according given criteria.
@@ -149,6 +164,43 @@ private slots:
 
 private:
 	/*!
+	 * @brief Normal search result.
+	 */
+	class SearchResult {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		SearchResult(enum TaskSearchOwner::Result r,
+		    const QString &lErr)
+		    : result(r), longErrMsg(lErr)
+		{
+		}
+
+		enum TaskSearchOwner::Result result;
+		QString longErrMsg;
+	};
+
+	/*!
+	 * @brief Full-text search result.
+	 */
+	class SearchResultFt {
+	public:
+		/*!
+		 * @brief Constructor.
+		 */
+		SearchResultFt(enum TaskSearchOwnerFulltext::Result r,
+		    const QString &lErr, bool lp)
+		    : result(r), longErrMsg(lErr), lastPage(lp)
+		{
+		}
+
+		enum TaskSearchOwnerFulltext::Result result;
+		QString longErrMsg;
+		bool lastPage; /*!< True if last page acquired. */
+	};
+
+	/*!
 	 * @brief Initialise dialogue content.
 	 */
 	void initContent(void);
@@ -166,12 +218,12 @@ private:
 	/*!
 	 * @brief Normal search for data boxes according given criteria.
 	 */
-	void searchDataBoxNormal(void);
+	SearchResult searchDataBoxNormal(void);
 
 	/*!
 	 * @brief Full-text search for data boxes according given criteria.
 	 */
-	void searchDataBoxFulltext(void);
+	SearchResultFt searchDataBoxFulltext(void);
 
 	/*!
 	 * @brief Full-text search for data boxes according given criteria
@@ -187,10 +239,18 @@ private:
 	 * @param[in] ic Identifier number.
 	 * @param[in] name Name to search for.
 	 * @param[in] zipCode ZIP code.
+	 * @return Search result.
 	 */
-	void queryBoxNormal(const QString &boxId,
+	SearchResult queryBoxNormal(const QString &boxId,
 	    enum TaskSearchOwner::BoxType boxType, const QString &ic,
 	    const QString &name, const QString &zipCode);
+
+	/*!
+	 * @brief Display message about search result.
+	 *
+	 * @param[in] searchResult Search task result code.
+	 */
+	void displaySearchResult(const SearchResult &searchResult);
 
 	/*!
 	 * @brief Encapsulates full-text query for a single page.
@@ -199,9 +259,9 @@ private:
 	 * @param[in] boxType Type of data box to search for.
 	 * @param[in] phrase Text phrase to search for.
 	 * @param[in] pageNum Page umber to ask for.
-	 * @return False on error or when last page downloaded.
+	 * @return Search result.
 	 */
-	bool queryBoxFulltextPage(
+	SearchResultFt queryBoxFulltextPage(
 	    enum TaskSearchOwnerFulltext::FulltextTarget target,
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase, qint64 pageNum);
@@ -213,10 +273,18 @@ private:
 	 * @param[in] boxType Type of data box to search for.
 	 * @param[in] phrase Text phrase to search for.
 	 */
-	void queryBoxFulltextAll(
+	SearchResultFt queryBoxFulltextAll(
 	    enum TaskSearchOwnerFulltext::FulltextTarget target,
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase);
+
+	/*!
+	 * @brief Display message about full-text search result.
+	 *
+	 * @param[in] result Full-text task result code.
+	 * @param[in] longErrMsg Long error message.
+	 */
+	void displaySearchResultFt(int result, const QString &longErrMsg);
 
 	/*!
 	 * @brief Returns total found string.

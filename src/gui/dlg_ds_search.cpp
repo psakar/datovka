@@ -54,7 +54,9 @@ void FulltextSearchThread::run(void)
 		Q_ASSERT(0);
 		return;
 	}
-	m_dlg->searchDataBoxFulltext();
+	DlgDsSearch::SearchResultFt searchResult(m_dlg->searchDataBoxFulltext());
+
+	emit searchFinished(searchResult.result, searchResult.longErrMsg);
 }
 
 DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
@@ -153,8 +155,8 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	connect(m_ui->searchPushButton, SIGNAL(clicked()),
 	    this, SLOT(searchDataBox()));
 
-	connect(&m_fulltextThread, SIGNAL(finished()),
-	    this, SLOT(enableSearchControls()));
+	connect(&m_fulltextThread, SIGNAL(searchFinished(int, QString)),
+	    this, SLOT(collectFulltextThreadOutcome(int, QString)));
 
 	connect(m_ui->useFulltextCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(makeSearchElelementsVisible(int)));
@@ -234,8 +236,11 @@ void setSearchControlsEnabled(Ui::DlgDsSearch *ui, bool enabled)
 	ui->searchPushButton->setEnabled(enabled);
 }
 
-void DlgDsSearch::enableSearchControls(void)
+void DlgDsSearch::collectFulltextThreadOutcome(int result,
+    const QString &longErrMsg)
 {
+	displaySearchResultFt(result, longErrMsg);
+
 	setSearchControlsEnabled(m_ui, true);
 }
 
@@ -244,10 +249,21 @@ void DlgDsSearch::searchDataBox(void)
 	setSearchControlsEnabled(m_ui, false);
 	QCoreApplication::processEvents();
 	if (Qt::Checked == m_ui->useFulltextCheckBox->checkState()) {
-//		searchDataBoxFulltext();
+#if 0
+		displaySearchResultFt(searchDataBoxFulltext());
+		setSearchControlsEnabled(m_ui, true);
+#else
 		searchDataBoxFulltextThread();
+#endif
 	} else {
-		searchDataBoxNormal();
+		if (m_ui->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
+			QMessageBox::information(this, tr("Search result"),
+			    tr("This is a special ID for system databox of Datové schránky. "
+			        "You can't use this ID for message delivery. Try again."),
+			    QMessageBox::Ok);
+		} else {
+			displaySearchResult(searchDataBoxNormal());
+		}
 		setSearchControlsEnabled(m_ui, true);
 	}
 }
@@ -509,17 +525,8 @@ void DlgDsSearch::checkInputFieldsFulltext(void)
 	    m_ui->textLineEdit->text().size() > 2);
 }
 
-void DlgDsSearch::searchDataBoxNormal(void)
+DlgDsSearch::SearchResult DlgDsSearch::searchDataBoxNormal(void)
 {
-	if (m_ui->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
-		QMessageBox::information(this, tr("Search result"),
-		    tr("This is a special ID for system databox of "
-		    "Datové schránky. You can't use this ID for "
-		    "message delivery. Try again."),
-		    QMessageBox::Ok);
-		return;
-	}
-
 	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
 	switch (m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
 	case CBOX_TYPE_FO:
@@ -537,12 +544,12 @@ void DlgDsSearch::searchDataBoxNormal(void)
 		break;
 	}
 
-	queryBoxNormal(m_ui->iDLineEdit->text(), boxType,
+	return queryBoxNormal(m_ui->iDLineEdit->text(), boxType,
 	    m_ui->iCLineEdit->text(), m_ui->nameLineEdit->text(),
 	    m_ui->pscLineEdit->text());
 }
 
-void DlgDsSearch::searchDataBoxFulltext(void)
+DlgDsSearch::SearchResultFt DlgDsSearch::searchDataBoxFulltext(void)
 {
 	enum TaskSearchOwnerFulltext::FulltextTarget target =
 	    TaskSearchOwnerFulltext::FT_ALL;
@@ -583,7 +590,7 @@ void DlgDsSearch::searchDataBoxFulltext(void)
 		break;
 	}
 
-	queryBoxFulltextAll(target, boxType, m_ui->textLineEdit->text());
+	return queryBoxFulltextAll(target, boxType, m_ui->textLineEdit->text());
 }
 
 void DlgDsSearch::searchDataBoxFulltextThread(void)
@@ -591,7 +598,7 @@ void DlgDsSearch::searchDataBoxFulltextThread(void)
 	m_fulltextThread.start();
 }
 
-void DlgDsSearch::queryBoxNormal(const QString &boxId,
+DlgDsSearch::SearchResult DlgDsSearch::queryBoxNormal(const QString &boxId,
     enum TaskSearchOwner::BoxType boxType, const QString &ic,
     const QString &name, const QString &zipCode)
 {
@@ -608,31 +615,57 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 	if (Q_UNLIKELY(task == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		m_ui->contactTableView->setEnabled(true);
-		return;
+		return SearchResult(TaskSearchOwner::SO_ERROR, QString());
 	}
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
-	enum TaskSearchOwner::Result result = task->m_result;
-	QString errMsg = task->m_isdsError;
-	QString longErrMsg = task->m_isdsLongError;
+	enum TaskSearchOwner::Result taskResult = task->m_result;
+	QString longErrMsg(task->m_isdsLongError);
 	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
 
 	delete task; task = Q_NULLPTR;
 
-	switch (result) {
+	if (taskResult != TaskSearchOwner::SO_SUCCESS) {
+		return SearchResult(taskResult, longErrMsg);
+	}
+
+	bool selectFirstRow = m_contactTableModel.rowCount() == 0;
+	m_contactTableModel.appendData(foundBoxes);
+
+	m_ui->searchResultText->setText(totalFoundStr(foundBoxes.size()));
+
+	if (m_contactTableModel.rowCount() > 0) {
+		m_ui->contactTableView->selectColumn(
+		    BoxContactsModel::CHECKBOX_COL);
+		if (selectFirstRow) {
+			m_ui->contactTableView->selectRow(0);
+		}
+	}
+
+	m_ui->contactTableView->setEnabled(true);
+
+	//m_ui->contactTableView->resizeColumnsToContents();
+
+	return SearchResult(taskResult, QString());
+}
+
+void DlgDsSearch::displaySearchResult(const SearchResult &searchResult)
+{
+	switch (searchResult.result) {
 	case TaskSearchOwner::SO_SUCCESS:
+		/* Don't display anything on success. */
 		break;
 	case TaskSearchOwner::SO_BAD_DATA:
 		QMessageBox::information(this, tr("Search result"),
-		    longErrMsg, QMessageBox::Ok);
+		    searchResult.longErrMsg, QMessageBox::Ok);
 		m_ui->contactTableView->setEnabled(true);
 		return;
 		break;
 	case TaskSearchOwner::SO_COM_ERROR:
 		QMessageBox::information(this, tr("Search result"),
 		    tr("It was not possible find any data box because") +
-		    QStringLiteral(":\n\n") + longErrMsg,
+		    QStringLiteral(":\n\n") + searchResult.longErrMsg,
 		    QMessageBox::Ok);
 		m_ui->contactTableView->setEnabled(true);
 		return;
@@ -646,74 +679,41 @@ void DlgDsSearch::queryBoxNormal(const QString &boxId,
 		return;
 		break;
 	}
-
-	bool selectForstRow = m_contactTableModel.rowCount() == 0;
-	m_contactTableModel.appendData(foundBoxes);
-
-	m_ui->searchResultText->setText(totalFoundStr(foundBoxes.size()));
-
-	if (m_contactTableModel.rowCount() > 0) {
-		m_ui->contactTableView->selectColumn(
-		    BoxContactsModel::CHECKBOX_COL);
-		if (selectForstRow) {
-			m_ui->contactTableView->selectRow(0);
-		}
-	}
-
-	m_ui->contactTableView->setEnabled(true);
-
-	//m_ui->contactTableView->resizeColumnsToContents();
 }
 
-bool DlgDsSearch::queryBoxFulltextPage(
-	    enum TaskSearchOwnerFulltext::FulltextTarget target,
-	    enum TaskSearchOwnerFulltext::BoxType boxType,
-	    const QString &phrase, qint64 pageNum)
+DlgDsSearch::SearchResultFt DlgDsSearch::queryBoxFulltextPage(
+    enum TaskSearchOwnerFulltext::FulltextTarget target,
+    enum TaskSearchOwnerFulltext::BoxType boxType,
+    const QString &phrase, qint64 pageNum)
 {
 	TaskSearchOwnerFulltext *task =
 	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, phrase,
 	        target, boxType, pageNum, false);
 	if (Q_UNLIKELY(task == Q_NULLPTR)) {
 		Q_ASSERT(0);
-		return false;
+		return SearchResultFt(TaskSearchOwnerFulltext::SOF_ERROR,
+		    QString(), false);
 	}
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
-	enum TaskSearchOwnerFulltext::Result result = task->m_result;
-	QString errMsg = task->m_isdsError;
-	QString longErrMsg = task->m_isdsLongError;
+	enum TaskSearchOwnerFulltext::Result taskResult = task->m_result;
+	QString longErrMsg(task->m_isdsLongError);
 	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
 	quint64 totalDb = task->m_totalMatchingBoxes;
 	bool gotLastPage = task->m_gotLastPage;
 
 	delete task; task = Q_NULLPTR;
 
-	switch (result) {
-	case TaskSearchOwnerFulltext::SOF_SUCCESS:
-		break;
-	case TaskSearchOwnerFulltext::SOF_BAD_DATA:
-		QMessageBox::information(this, tr("Search result"),
-		    longErrMsg, QMessageBox::Ok);
-		return false;
-		break;
-	case TaskSearchOwnerFulltext::SOF_COM_ERROR:
-		QMessageBox::information(this, tr("Search result"),
-		    tr("It was not possible find any data box because") +
-		    QStringLiteral(":\n\n") + longErrMsg,
-		    QMessageBox::Ok);
-		return false;
-		break;
-	case TaskSearchOwnerFulltext::SOF_ERROR:
-	default:
-		QMessageBox::critical(this, tr("Search error"),
-		    tr("It was not possible find any data box because an error occurred during the search process!"),
-		    QMessageBox::Ok);
-		return false;
-		break;
+	/*
+	 * No dialogue can be raised here because this method can be called
+	 * from a non-GUI thread.
+	 */
+	if (taskResult != TaskSearchOwnerFulltext::SOF_SUCCESS) {
+		return SearchResultFt(taskResult, longErrMsg, gotLastPage);
 	}
 
-	bool selectForstRow = m_contactTableModel.rowCount() == 0;
+	bool selectFirstRow = m_contactTableModel.rowCount() == 0;
 	m_contactTableModel.appendData(foundBoxes);
 
 	m_ui->searchResultText->setText(totalFoundStr(totalDb) + QLatin1String("; ") +
@@ -723,15 +723,15 @@ bool DlgDsSearch::queryBoxFulltextPage(
 	if (m_contactTableModel.rowCount() > 0) {
 		m_ui->contactTableView->selectColumn(
 		    BoxContactsModel::CHECKBOX_COL);
-		if (selectForstRow) {
+		if (selectFirstRow) {
 			m_ui->contactTableView->selectRow(0);
 		}
 	}
 
-	return !gotLastPage; /* Return false when last page received. */
+	return SearchResultFt(taskResult, QString(), gotLastPage);
 }
 
-void DlgDsSearch::queryBoxFulltextAll(
+DlgDsSearch::SearchResultFt DlgDsSearch::queryBoxFulltextAll(
     enum TaskSearchOwnerFulltext::FulltextTarget target,
     enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
 {
@@ -740,7 +740,10 @@ void DlgDsSearch::queryBoxFulltextAll(
 	m_ui->searchResultText->setText(totalFoundStr(0));
 
 	qint64 pageNum = 0;
-	while (queryBoxFulltextPage(target, boxType, phrase, pageNum)) {
+	SearchResultFt searchResult(TaskSearchOwnerFulltext::SOF_ERROR,
+	    QString(), false);
+	while (searchResult = queryBoxFulltextPage(target, boxType, phrase, pageNum),
+	       ((searchResult.result == TaskSearchOwnerFulltext::SOF_SUCCESS) && !searchResult.lastPage)) {
 		//QCoreApplication::processEvents();
 		++pageNum;
 		if (m_breakDownloadLoop) {
@@ -750,6 +753,36 @@ void DlgDsSearch::queryBoxFulltextAll(
 	}
 
 	//m_ui->contactTableView->resizeColumnsToContents();
+
+	return searchResult;
+}
+
+void DlgDsSearch::displaySearchResultFt(int result, const QString &longErrMsg)
+{
+	switch (result) {
+	case TaskSearchOwnerFulltext::SOF_SUCCESS:
+		/* Don't display anything on success. */
+		break;
+	case TaskSearchOwnerFulltext::SOF_BAD_DATA:
+		QMessageBox::information(this, tr("Search result"),
+		    longErrMsg, QMessageBox::Ok);
+		return;
+		break;
+	case TaskSearchOwnerFulltext::SOF_COM_ERROR:
+		QMessageBox::information(this, tr("Search result"),
+		    tr("It was not possible find any data box because") +
+		        QStringLiteral(":\n\n") + longErrMsg,
+		    QMessageBox::Ok);
+		return;
+		break;
+	case TaskSearchOwnerFulltext::SOF_ERROR:
+	default:
+		QMessageBox::critical(this, tr("Search error"),
+		    tr("It was not possible find any data box because an error occurred during the search process!"),
+		    QMessageBox::Ok);
+		return;
+		break;
+	}
 }
 
 QString DlgDsSearch::totalFoundStr(int total)
