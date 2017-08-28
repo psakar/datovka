@@ -1254,88 +1254,93 @@ process of all accounts on the background</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="171"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="173"/>
         <source>Enter sought expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="331"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="273"/>
+        <source>This is a special ID for a ISDS system data box. You can&apos;t use this ID for message delivery. Try again.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="343"/>
         <source>Full-text data box search. Enter phrase for finding and set optional restrictions:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="347"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="359"/>
         <source>Enter the ID, IČ or at least three letters from the name of the data box you look for:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="400"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="412"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="424"/>
         <source>Your account is of type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="402"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="414"/>
         <source>You have also Post Data Messages activated.
 This means you can only search for accounts of type OVM and accounts that have Post Data Messages delivery activated.
 Because of this limitation the results of your current search might not contain all otherwise matching databoxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="410"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="422"/>
         <source>commercial messages are enabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="414"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="426"/>
         <source>This means you can only search for accounts of type OVM.
 The current search settings will thus probably yield no result.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="418"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="430"/>
         <source>commercial messages are disabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="475"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="476"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="487"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="488"/>
         <source>Enter last name or last name at birth of the FO.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="790"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="802"/>
         <source>Total found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="667"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="773"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="679"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="785"/>
         <source>It was not possible find any data box because</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="676"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="781"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="688"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="793"/>
         <source>It was not possible find any data box because an error occurred during the search process!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="720"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="732"/>
         <source>Displayed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="453"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="460"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="465"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="472"/>
         <source>Subject Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="454"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="455"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="461"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="462"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="466"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="467"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="473"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="474"/>
         <source>Enter name of subject</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1402,7 +1407,7 @@ contain all otherwise matching databoxes.</source>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_ds_search.ui" line="170"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="467"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="479"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1422,33 +1427,28 @@ contain all otherwise matching databoxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="468"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="469"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="480"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="481"/>
         <source>Enter last name of the PFO or company name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="474"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="486"/>
         <source>Last Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="260"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="660"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="666"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="767"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="772"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="272"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="672"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="678"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="779"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="784"/>
         <source>Search result</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="261"/>
-        <source>This is a special ID for system databox of Datové schránky. You can&apos;t use this ID for message delivery. Try again.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="675"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="780"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="687"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="792"/>
         <source>Search error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1667,244 +1667,244 @@ to upload the message &apos;%1&apos; into.</source>
 <context>
     <name>DlgSendMessage</name>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="272"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="271"/>
         <source>Enter reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="944"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="943"/>
         <source>Warning: The permitted amount (%1) of attachments has been exceeded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="954"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="953"/>
         <source>Total size of attachments is ~%1 KB</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="960"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="959"/>
         <source>Warning: Total size of attachments is larger than %1 MB!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="966"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="965"/>
         <source>Total size of attachments is ~%1 B</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="912"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="911"/>
         <source>Message contains non-OVM recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="183"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="182"/>
         <source>Wrong data box ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="184"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="183"/>
         <source>Wrong data box ID &apos;%1&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="482"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="481"/>
         <source>Message was successfully sent to &lt;i&gt;%1 (%2)&lt;/i&gt; as PDZ with number &lt;i&gt;%3&lt;/i&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="490"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="489"/>
         <source>Message was successfully sent to &lt;i&gt;%1 (%2)&lt;/i&gt; as message number &lt;i&gt;%3&lt;/i&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="499"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="498"/>
         <source>Message was NOT sent to &lt;i&gt;%1 (%2)&lt;/i&gt;. Server says: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="511"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="510"/>
         <source>Message was successfully sent to all recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="519"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="518"/>
         <source>Message was NOT sent to all recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="913"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="912"/>
         <source>Your message contains %1 non-OVM recipients therefore this message will be sent as a commercial messages (PDZ) for these recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="920"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="919"/>
         <source>Message contains non-OVM recipient.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="921"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="920"/>
         <source>Your message contains non-OVM recipient therefore this message will be sent as a commercial message (PDZ) for this recipient.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="928"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="927"/>
         <source>Your remaining credit is </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1047"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1046"/>
         <source>Wrong Recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1054"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1053"/>
         <source>Recipient Search Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1055"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1054"/>
         <source>Information about recipient data box could not be obtained.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1057"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1056"/>
         <source>Do you still want to add the box &apos;%1&apos; into the recipient list?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1058"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1057"/>
         <source>Enable commercial messages (PDZ).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1060"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1059"/>
         <source>Obtained ISDS error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1326"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1325"/>
         <source>It has not been possible to send a message to the ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="516"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="515"/>
         <source>Do you want to close the Send message form?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1006"/>
         <location filename="../src/gui/dlg_send_message.cpp" line="1007"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1008"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1021"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1020"/>
         <source>Data box is not active</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1022"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1021"/>
         <source>Recipient with data box ID &apos;%1&apos; does not have active data box.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1024"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1023"/>
         <source>The message cannot be delivered.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1036"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1035"/>
         <source>Cannot send to data box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1037"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1036"/>
         <source>Cannot send message to recipient with data box ID &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1039"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1038"/>
         <source>You won&apos;t be able as user &apos;%1&apos; to send messages into data box &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1048"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1047"/>
         <source>Recipient with data box ID &apos;%1&apos; does not exist.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1325"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1324"/>
         <source>Send message error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1280"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1279"/>
         <source>An error occurred while loading attachments into message.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1284"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1283"/>
         <source>An error occurred during message envelope creation.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1324"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1323"/>
         <source>The message will be discarded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="510"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="509"/>
         <source>Message sent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="518"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="517"/>
         <source>Message sending error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="174"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="173"/>
         <source>Databox ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="175"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="174"/>
         <source>Enter Databox ID (7 characters):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="918"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="917"/>
         <source>Do you want to send all messages?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="659"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="971"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="658"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="970"/>
         <source>Total size of attachments is %1 B</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="415"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="414"/>
         <source>sending of PDZ: enabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="416"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="415"/>
         <source>remaining credit: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="419"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="418"/>
         <source>sending of PDZ: disabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="265"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="264"/>
         <source>Our reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="925"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="924"/>
         <source>Do you want to send message?</source>
         <translation type="unfinished"></translation>
     </message>
