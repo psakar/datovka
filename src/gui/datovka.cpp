@@ -3519,6 +3519,8 @@ MessageDbSet *MainWindow::accountDbSet(const QString &userName)
 	MessageDbSet *dbSet = AccountInteraction::accessDbSet(userName, status,
 	    dbDir, namesStr);
 
+	dbDir = QDir::toNativeSeparators(dbDir);
+
 	switch (status) {
 	case AccountInteraction::AS_DB_ALREADY_PRESENT:
 		QMessageBox::information(this,
