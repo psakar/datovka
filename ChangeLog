@@ -1,4 +1,4 @@
-4.9.2 /
+4.9.2 / 2017-08-28
  * Changed tag dialogue to contain two views when editing tag assignment.
  * Using the prefix 'ODZ_' for sent and 'DDZ_' for received data messages when
    uploading them into records management service.
