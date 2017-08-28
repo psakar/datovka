@@ -5,6 +5,8 @@
  * Default documentation location can be changed when running qmake using the
    TEXT_FILES_INST_DIR variable.
  * Full-text data-box search does not block the search dialogue.
+ * Full-text data-box search can be interrupted and restarted again without
+   closing the dialogue.
  * Separated core and GUI code. Removed models from database interface.
  * Added new CLI option '--get-msg-ids'.
  * Command-line application without GUI can be built separately. This
