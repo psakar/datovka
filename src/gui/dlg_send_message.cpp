@@ -161,9 +161,8 @@ void DlgSendMessage::addRecipientFromLocalContact(void)
 
 void DlgSendMessage::addRecipientFromISDSSearch(void)
 {
-	QStringList dbIDs;
-	DlgDsSearch::search(m_userName, m_dbType,
-	    m_dbEffectiveOVM, m_dbOpenAddressing, &dbIDs, this);
+	QStringList dbIDs(DlgDsSearch::search(m_userName, m_dbType,
+	    m_dbEffectiveOVM, m_dbOpenAddressing, this));
 	addRecipientBoxes(dbIDs);
 }
 

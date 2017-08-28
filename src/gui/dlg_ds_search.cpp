@@ -183,13 +183,16 @@ DlgDsSearch::~DlgDsSearch(void)
 	delete m_ui;
 }
 
-void DlgDsSearch::search(const QString &userName, const QString &dbType,
-    bool dbEffectiveOVM, bool dbOpenAddressing, QStringList *dbIdList,
-    QWidget *parent)
+QStringList DlgDsSearch::search(const QString &userName, const QString &dbType,
+    bool dbEffectiveOVM, bool dbOpenAddressing, QWidget *parent)
 {
+	QStringList dbIdList;
+
 	DlgDsSearch dlg(userName, dbType, dbEffectiveOVM, dbOpenAddressing,
-	    dbIdList, parent);
+	    &dbIdList, parent);
 	dlg.exec();
+
+	return dbIdList;
 }
 
 void DlgDsSearch::enableOkButton(void)
