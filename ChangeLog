@@ -1,3 +1,16 @@
+4.9.2 /
+ * Changed tag dialogue to contain two views when editing tag assignment.
+ * Using the prefix 'ODZ_' for sent and 'DDZ_' for received data messages when
+   uploading them into records management service.
+ * Default documentation location can be changed when running qmake using the
+   TEXT_FILES_INST_DIR variable.
+ * Full-text data-box search does not block the search dialogue.
+ * Separated core and GUI code. Removed models from database interface.
+ * Added new CLI option '--get-msg-ids'.
+ * Command-line application without GUI can be built separately. This
+   executable is going to be distributed in Windows packages together with the
+   GUI application.
+
 4.9.1 / 2017-07-26
  * Added experimental support for new data-box and user types that are going
    to be introduced into the ISDS production environment and which are already
