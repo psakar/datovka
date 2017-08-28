@@ -141,7 +141,9 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	    this, SLOT(checkInputFields()));
 	connect(m_ui->pscLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
+	connect(m_ui->dataBoxTypeCBox, SIGNAL(currentIndexChanged(int)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->fulltextTargetCBox, SIGNAL(currentIndexChanged(int)),
 	    this, SLOT(checkInputFields()));
 	connect(&m_contactTableModel,
 	    SIGNAL(dataChanged(QModelIndex, QModelIndex)),
