@@ -141,7 +141,9 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	    this, SLOT(checkInputFields()));
 	connect(m_ui->pscLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->dataBoxTypeCBox, SIGNAL(currentIndexChanged (int)),
+	connect(m_ui->dataBoxTypeCBox, SIGNAL(currentIndexChanged(int)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->fulltextTargetCBox, SIGNAL(currentIndexChanged(int)),
 	    this, SLOT(checkInputFields()));
 	connect(&m_contactTableModel,
 	    SIGNAL(dataChanged(QModelIndex, QModelIndex)),
@@ -183,13 +185,16 @@ DlgDsSearch::~DlgDsSearch(void)
 	delete m_ui;
 }
 
-void DlgDsSearch::search(const QString &userName, const QString &dbType,
-    bool dbEffectiveOVM, bool dbOpenAddressing, QStringList *dbIdList,
-    QWidget *parent)
+QStringList DlgDsSearch::search(const QString &userName, const QString &dbType,
+    bool dbEffectiveOVM, bool dbOpenAddressing, QWidget *parent)
 {
+	QStringList dbIdList;
+
 	DlgDsSearch dlg(userName, dbType, dbEffectiveOVM, dbOpenAddressing,
-	    dbIdList, parent);
+	    &dbIdList, parent);
 	dlg.exec();
+
+	return dbIdList;
 }
 
 void DlgDsSearch::enableOkButton(void)
@@ -253,12 +258,19 @@ void DlgDsSearch::searchDataBox(void)
 		displaySearchResultFt(searchDataBoxFulltext());
 		setSearchControlsEnabled(m_ui, true);
 #else
+		/* Signal stop to any possibly running thread. */
+		setBreakDownloadLoop();
+		/* Wait for thread to finish. */
+		m_fulltextThread.wait();
+		/* Just in case the thread was not running. */
+		m_breakDownloadLoop = false;
+		/* Execute search thread. */
 		searchDataBoxFulltextThread();
 #endif
 	} else {
 		if (m_ui->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
 			QMessageBox::information(this, tr("Search result"),
-			    tr("This is a special ID for system databox of Datové schránky. "
+			    tr("This is a special ID for a ISDS system data box. "
 			        "You can't use this ID for message delivery. Try again."),
 			    QMessageBox::Ok);
 		} else {

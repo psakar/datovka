@@ -95,11 +95,13 @@ public:
 
 	/*!
 	 * @brief Show data box search dialogue.
+	 *
+	 * @return List of data-box identifiers.
 	 */
 	static
-	void search(const QString &userName, const QString &dbType,
+	QStringList search(const QString &userName, const QString &dbType,
 	    bool dbEffectiveOVM, bool dbOpenAddressing,
-	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
+	    QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
