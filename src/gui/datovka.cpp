@@ -3512,14 +3512,15 @@ QString MainWindow::createDatovkaBanner(const QString &version) const
 
 MessageDbSet *MainWindow::accountDbSet(const QString &userName)
 {
-	enum AccountInteraction::AccessStatus status;
+	enum AccountInteraction::AccessStatus status =
+	    AccountInteraction::AS_ERR;
 	QString dbDir, namesStr;
 
 	MessageDbSet *dbSet = AccountInteraction::accessDbSet(userName, status,
 	    dbDir, namesStr);
 
 	switch (status) {
-	case AccountInteraction::AS_DB_PRESENT:
+	case AccountInteraction::AS_DB_ALREADY_PRESENT:
 		QMessageBox::information(this,
 		    tr("Datovka: Database file present"),
 		    tr("Database file for account '%1' already exists.").arg(userName) +
