@@ -256,12 +256,19 @@ void DlgDsSearch::searchDataBox(void)
 		displaySearchResultFt(searchDataBoxFulltext());
 		setSearchControlsEnabled(m_ui, true);
 #else
+		/* Signal stop to any possibly running thread. */
+		setBreakDownloadLoop();
+		/* Wait for thread to finish. */
+		m_fulltextThread.wait();
+		/* Just in case the thread was not running. */
+		m_breakDownloadLoop = false;
+		/* Execute search thread. */
 		searchDataBoxFulltextThread();
 #endif
 	} else {
 		if (m_ui->iDLineEdit->text() == ID_ISDS_SYS_DATABOX) {
 			QMessageBox::information(this, tr("Search result"),
-			    tr("This is a special ID for system databox of Datové schránky. "
+			    tr("This is a special ID for a ISDS system data box. "
 			        "You can't use this ID for message delivery. Try again."),
 			    QMessageBox::Ok);
 		} else {
