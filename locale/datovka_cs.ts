@@ -2975,7 +2975,7 @@ zanést neplatná data.</translation>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3567"/>
         <source>The file either does not contain an sqlite database or the file is corrupted.</source>
-        <translation>Soubor buď neobsahuje slite databázi nebo je poškozen.</translation>
+        <translation>Soubor buď neobsahuje sqlite databázi nebo je poškozen.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3596"/>

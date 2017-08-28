@@ -92,7 +92,9 @@ MessageDbSet *AccountInteraction::accessDbSet(const QString &userName,
 			    namesStr.toUtf8().constData(),
 			    userName.toUtf8().constData(),
 			    dbDir.toUtf8().constData());
-			status = AS_DB_PRESENT;
+			status = AS_DB_ALREADY_PRESENT;
+		} else {
+			status = AS_OK;
 		}
 		dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
 		    itemSettings.isTestAccount(),
@@ -107,6 +109,8 @@ MessageDbSet *AccountInteraction::accessDbSet(const QString &userName,
 			    userName.toUtf8().constData(),
 			    dbDir.toUtf8().constData());
 			status = AS_DB_NOT_PRESENT;
+		} else {
+			status = AS_OK;
 		}
 		dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
 		    itemSettings.isTestAccount(),

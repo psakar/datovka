@@ -49,7 +49,7 @@ private:
 public:
 	enum AccessStatus {
 		AS_OK = 0, /*!< Database successfully opened. */
-		AS_DB_PRESENT, /*!< Database already present even though it should not exist. */
+		AS_DB_ALREADY_PRESENT, /*!< Database already present even though it should not exist. */
 		AS_DB_NOT_PRESENT, /*!< Database is not present even though it should exist. */
 		AS_DB_NOT_FILES, /*!< Some of the database locations are not files. */
 		AS_DB_FILES_INACCESSIBLE, /*!< Some files cannot be accessed. */
