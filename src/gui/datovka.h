@@ -441,11 +441,6 @@ private slots:
 	void showImportDatabaseDialog(void);
 
 	/*!
-	 * @brief Prepare import database directory.
-	 */
-	void prepareCreateAccountFromDatabaseFile(bool fromDirectory);
-
-	/*!
 	 * @brief Prepare import of messages from database.
 	 */
 	void prepareMsgsImportFromDatabase(void);
@@ -690,6 +685,11 @@ private:
 
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
+
+	/*!
+	 * @brief Prepare import database directory.
+	 */
+	void prepareCreateAccountFromDatabaseFile(bool fromDirectory)
 
 	/*!
 	 * @brief Shows tag editing dialogue.

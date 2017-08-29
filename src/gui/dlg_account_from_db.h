@@ -30,6 +30,9 @@ namespace Ui {
 	class DlgCreateAccountFromDb;
 }
 
+/*!
+ * @brief Provides interface for account creation from database.
+ */
 class DlgCreateAccountFromDb : public QDialog {
 	Q_OBJECT
 
@@ -38,9 +41,12 @@ public:
 	 * @brief Action chosen by the user.
 	 */
 	enum Action {
+		ACT_NOTHING, /*!< Nothing to be performed. */
+		ACT_FROM_DIRECTORY, /*!< Read directory content. */
+		ACT_FROM_FILES /*!< Read selected files. */
 	};
 
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 *
@@ -48,17 +54,21 @@ public:
 	 */
 	explicit DlgCreateAccountFromDb(QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	virtual
 	~DlgCreateAccountFromDb(void);
 
-signals:
-	void returnAction(bool);
-
-private slots:
-	void CreateAccountFromDbDialogAction(void);
+	/*!
+	 * @brief Select source to import database from.
+	 *
+	 * @param[in] parent Parent widget.
+	 * @return Chosen action.
+	 */
+	static
+	enum Action chooseAction(QWidget *parent = Q_NULLPTR);
 
 private:
 	Ui::DlgCreateAccountFromDb *m_ui; /*!< UI generated from UI file. */

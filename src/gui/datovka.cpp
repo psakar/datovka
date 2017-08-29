@@ -5342,11 +5342,17 @@ void MainWindow::showAboutApplicationDialog(void)
 
 void MainWindow::showImportDatabaseDialog(void)
 {
-	QDialog *prepareCreateAccount = new DlgCreateAccountFromDb(this);
-	connect(prepareCreateAccount, SIGNAL(returnAction(bool)), this,
-	    SLOT(prepareCreateAccountFromDatabaseFile(bool)));
-	prepareCreateAccount->exec();
-	prepareCreateAccount->deleteLater();
+	switch (DlgCreateAccountFromDb::chooseAction(this)) {
+	case DlgCreateAccountFromDb::ACT_FROM_DIRECTORY:
+		prepareCreateAccountFromDatabaseFile(true);
+		break;
+	case DlgCreateAccountFromDb::ACT_FROM_FILES:
+		prepareCreateAccountFromDatabaseFile(false);
+		break;
+	default:
+		/* Do nothing. */
+		break;
+	}
 }
 
 void MainWindow::prepareCreateAccountFromDatabaseFile(bool fromDirectory)

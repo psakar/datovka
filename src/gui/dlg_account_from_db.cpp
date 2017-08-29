@@ -29,17 +29,13 @@ DlgCreateAccountFromDb::DlgCreateAccountFromDb(QWidget *parent)
     m_ui(new (std::nothrow) Ui::DlgCreateAccountFromDb)
 {
 	m_ui->setupUi(this);
-	m_ui->info->setText(tr("A new account will be created according to "
-	    "the name and the content of the database file. This account will "
-	    "operate over the selected database. Should such an account or "
-	    "database file already exist in Datovka then the association will fail."
-	    " During the association no database file copy is created nor is the "
-	    "content of the database file modified. Nevertheless, we strongly"
-	    " advice you to back-up all important files before associating a "
-	    "database file. In order for the association to succeed you will need "
-	    "an active connection to the ISDS server."));
-	connect(m_ui->buttonBox, SIGNAL(accepted()),
-	    this, SLOT(CreateAccountFromDbDialogAction()));
+	m_ui->info->setText(tr(
+	    "A new account will be created according to the name and the content of the database file. "
+	    "This account will operate over the selected database. "
+	    "Should such an account or database file already exist in Datovka then the association will fail. "
+	    "During the association no database file copy is created nor is the content of the database file modified. "
+	    "Nevertheless, we strongly advice you to back-up all important files before associating a database file. "
+	    "In order for the association to succeed you will need an active connection to the ISDS server."));
 }
 
 DlgCreateAccountFromDb::~DlgCreateAccountFromDb(void)
@@ -47,11 +43,14 @@ DlgCreateAccountFromDb::~DlgCreateAccountFromDb(void)
 	delete m_ui;
 }
 
-void DlgCreateAccountFromDb::CreateAccountFromDbDialogAction(void)
+enum DlgCreateAccountFromDb::Action DlgCreateAccountFromDb::chooseAction(
+    QWidget *parent)
 {
-	if (m_ui->directory->isChecked()) {
-		emit returnAction(true);
+	DlgCreateAccountFromDb dlg(parent);
+	if (QDialog::Accepted == dlg.exec()) {
+		return dlg.m_ui->directory->isChecked() ? ACT_FROM_DIRECTORY :
+		    ACT_FROM_FILES;
 	} else {
-		emit returnAction(false);
+		return ACT_NOTHING;
 	}
 }
