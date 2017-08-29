@@ -5342,9 +5342,8 @@ void MainWindow::showAboutApplicationDialog(void)
 
 void MainWindow::showImportDatabaseDialog(void)
 {
-	QDialog *prepareCreateAccount = new CreateAccountFromDbDialog(this);
-	connect(prepareCreateAccount,
-	    SIGNAL(returnAction(bool)), this,
+	QDialog *prepareCreateAccount = new DlgCreateAccountFromDb(this);
+	connect(prepareCreateAccount, SIGNAL(returnAction(bool)), this,
 	    SLOT(prepareCreateAccountFromDatabaseFile(bool)));
 	prepareCreateAccount->exec();
 	prepareCreateAccount->deleteLater();

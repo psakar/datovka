@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,25 +21,47 @@
  * the two.
  */
 
-
 #ifndef _DLG_ACCOUNT_FROM_DB_H_
 #define _DLG_ACCOUNT_FROM_DB_H_
 
 #include <QDialog>
-#include "src/common.h"
-#include "ui_dlg_account_from_db.h"
 
-class CreateAccountFromDbDialog : public QDialog, public Ui::CreateAccountFromDb
-{
+namespace Ui {
+	class DlgCreateAccountFromDb;
+}
+
+class DlgCreateAccountFromDb : public QDialog {
 	Q_OBJECT
 
 public:
-	CreateAccountFromDbDialog(QWidget *parent = 0);
+	/*!
+	 * @brief Action chosen by the user.
+	 */
+	enum Action {
+	};
+
+public:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent widget.
+	 */
+	explicit DlgCreateAccountFromDb(QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	virtual
+	~DlgCreateAccountFromDb(void);
+
 signals:
 	void returnAction(bool);
 
 private slots:
 	void CreateAccountFromDbDialogAction(void);
+
+private:
+	Ui::DlgCreateAccountFromDb *m_ui; /*!< UI generated from UI file. */
 };
 
 #endif /* _DLG_ACCOUNT_FROM_DB_H_ */
