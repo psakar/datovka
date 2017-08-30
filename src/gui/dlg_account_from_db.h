@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,25 +21,57 @@
  * the two.
  */
 
-
 #ifndef _DLG_ACCOUNT_FROM_DB_H_
 #define _DLG_ACCOUNT_FROM_DB_H_
 
 #include <QDialog>
-#include "src/common.h"
-#include "ui_dlg_account_from_db.h"
 
-class CreateAccountFromDbDialog : public QDialog, public Ui::CreateAccountFromDb
-{
+namespace Ui {
+	class DlgCreateAccountFromDb;
+}
+
+/*!
+ * @brief Provides interface for account creation from database.
+ */
+class DlgCreateAccountFromDb : public QDialog {
 	Q_OBJECT
 
 public:
-	CreateAccountFromDbDialog(QWidget *parent = 0);
-signals:
-	void returnAction(bool);
+	/*!
+	 * @brief Action chosen by the user.
+	 */
+	enum Action {
+		ACT_NOTHING, /*!< Nothing to be performed. */
+		ACT_FROM_DIRECTORY, /*!< Read directory content. */
+		ACT_FROM_FILES /*!< Read selected files. */
+	};
 
-private slots:
-	void CreateAccountFromDbDialogAction(void);
+private:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent widget.
+	 */
+	explicit DlgCreateAccountFromDb(QWidget *parent = Q_NULLPTR);
+
+public:
+	/*!
+	 * @brief Destructor.
+	 */
+	virtual
+	~DlgCreateAccountFromDb(void);
+
+	/*!
+	 * @brief Select source to import database from.
+	 *
+	 * @param[in] parent Parent widget.
+	 * @return Chosen action.
+	 */
+	static
+	enum Action chooseAction(QWidget *parent = Q_NULLPTR);
+
+private:
+	Ui::DlgCreateAccountFromDb *m_ui; /*!< UI generated from UI file. */
 };
 
 #endif /* _DLG_ACCOUNT_FROM_DB_H_ */

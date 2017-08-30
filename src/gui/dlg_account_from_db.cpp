@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,32 +21,36 @@
  * the two.
  */
 
+#include "src/gui/dlg_account_from_db.h"
+#include "ui_dlg_account_from_db.h"
 
-#include "dlg_account_from_db.h"
-#include "src/common.h"
-
-CreateAccountFromDbDialog::CreateAccountFromDbDialog(QWidget *parent) :
-    QDialog(parent)
+DlgCreateAccountFromDb::DlgCreateAccountFromDb(QWidget *parent)
+    : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgCreateAccountFromDb)
 {
-	setupUi(this);
-	this->info->setText(tr("A new account will be created according to "
-	    "the name and the content of the database file. This account will "
-	    "operate over the selected database. Should such an account or "
-	    "database file already exist in Datovka then the association will fail."
-	    " During the association no database file copy is created nor is the "
-	    "content of the database file modified. Nevertheless, we strongly"
-	    " advice you to back-up all important files before associating a "
-	    "database file. In order for the association to succeed you will need "
-	    "an active connection to the ISDS server."));
-	connect(this->buttonBox, SIGNAL(accepted()),
-	    this, SLOT(CreateAccountFromDbDialogAction()));
+	m_ui->setupUi(this);
+	m_ui->info->setText(tr(
+	    "A new account will be created according to the name and the content of the database file. "
+	    "This account will operate over the selected database. "
+	    "Should such an account or database file already exist in Datovka then the association will fail. "
+	    "During the association no database file copy is created nor is the content of the database file modified. "
+	    "Nevertheless, we strongly advice you to back-up all important files before associating a database file. "
+	    "In order for the association to succeed you will need an active connection to the ISDS server."));
 }
 
-void CreateAccountFromDbDialog::CreateAccountFromDbDialogAction(void)
+DlgCreateAccountFromDb::~DlgCreateAccountFromDb(void)
 {
-	if (this->directory->isChecked()) {
-		emit returnAction(true);
+	delete m_ui;
+}
+
+enum DlgCreateAccountFromDb::Action DlgCreateAccountFromDb::chooseAction(
+    QWidget *parent)
+{
+	DlgCreateAccountFromDb dlg(parent);
+	if (QDialog::Accepted == dlg.exec()) {
+		return dlg.m_ui->directory->isChecked() ? ACT_FROM_DIRECTORY :
+		    ACT_FROM_FILES;
 	} else {
-		emit returnAction(false);
+		return ACT_NOTHING;
 	}
 }
