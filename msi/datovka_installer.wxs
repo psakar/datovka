@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+
+<?define ProductVersion = "4.9.2"?>
+<?define ProductUpgradeCode = "C1B3CE89-4773-4FF3-BFF7-12144DEF2F15"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <Product Id="*" 
+    UpgradeCode="$(var.ProductUpgradeCode)"
+    Name="Datovka"    
+    Version="$(var.ProductVersion)"
+    Manufacturer="CZ.NIC, z.s.p.o."
+    Language="1033">
+    
+    <Package InstallerVersion="200" Compressed="yes" Comments="Windows Installer Package"/>
+    <Media Id="1" Cabinet="datovka.cab" EmbedCab="yes"/>
+    <Icon Id="ProductIcon" SourceFile="SourceDir\datovka.ico"/>
+    
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon"/>
+    <Property Id="ARPHELPLINK" Value="http://www.datovka.cz"/>
+    <Property Id="ARPURLINFOABOUT" Value="http://www.nic.cz"/>
+    <Property Id="ARPNOREPAIR" Value="1"/>
+    <Property Id="ARPNOMODIFY" Value="1"/> 
+           
+    <Feature Id="ProductFeature" Level="1" Title="Datovka">
+      <ComponentGroupRef Id="FileList"/>      
+    </Feature>
+    
+  </Product>
+  
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLLOCATION" Name="Datovka">
+          <Directory Id="FileList"></Directory>
+        </Directory>            
+      </Directory>
+    </Directory>
+  </Fragment>    
+  
+</Wix>
