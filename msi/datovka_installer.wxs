@@ -1,41 +1,104 @@
 <?xml version="1.0"?>
 
-<?define ProductVersion = "4.9.2"?>
 <?define ProductUpgradeCode = "C1B3CE89-4773-4FF3-BFF7-12144DEF2F15"?>
+<?define ProductName = "Datovka2"?>
+<?define ProductDescription = "Datovka - Free client for Datove Schranky"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-
-  <Product Id="*" 
+<Product Id="*" 
     UpgradeCode="$(var.ProductUpgradeCode)"
-    Name="Datovka"    
+    Name="$(var.ProductName)"
     Version="$(var.ProductVersion)"
     Manufacturer="CZ.NIC, z.s.p.o."
     Language="1033">
-    
-    <Package InstallerVersion="200" Compressed="yes" Comments="Windows Installer Package"/>
+
+    <!--Define msi package info-->
+    <Package InstallerVersion="400"
+        Compressed="yes"
+        Manufacturer="CZ.NIC, z.s.p.o."
+        Comments="Datovka Windows Installer Package"
+        Description="$(var.ProductDescription)"
+        Keywords="Datovka"
+        InstallScope="perMachine"/>
+
+    <!--Define the installer UI-->
+    <UIRef Id="WixUI_InstallDir" />
+
+    <!--Define cab properties of msi-->
     <Media Id="1" Cabinet="datovka.cab" EmbedCab="yes"/>
-    <Icon Id="ProductIcon" SourceFile="SourceDir\datovka.ico"/>
-    
-    <Property Id="ARPPRODUCTICON" Value="ProductIcon"/>
+    <!--Define icons (ID should not be longer than 18 chars and must end with ".exe")-->
+    <Icon Id="ProductIcon.exe" SourceFile="SourceDir\datovka.ico"/>
+    <!--Define properties of msi package-->
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon.exe"/>
     <Property Id="ARPHELPLINK" Value="http://www.datovka.cz"/>
     <Property Id="ARPURLINFOABOUT" Value="http://www.nic.cz"/>
-    <Property Id="ARPNOREPAIR" Value="1"/>
-    <Property Id="ARPNOMODIFY" Value="1"/> 
-           
+    <Property Id="WIXUI_INSTALLDIR" Value="TESTFILEPRODUCTDIR" />
+    <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
+
+    <!--License agreement-->
+    <WixVariable Id="WixUILicenseRtf" Value="eula\eula.rtf" />
+    <!--UI customization-->
+    <WixVariable Id="WixUIBannerBmp" Value="banners\banner_top.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="banners\banner_main.bmp" />
+    <!--Launch conditions. Check minimum OS version. If not, the installation is aborted-->
+    <Condition Message="This product requires at least Windows 7 / Server 2008 R2.">
+        <![CDATA[Installed OR (VersionNT > 600)]]>
+    </Condition>
+
+    <!--Features-->
     <Feature Id="ProductFeature" Level="1" Title="Datovka">
-      <ComponentGroupRef Id="FileList"/>      
+        <ComponentGroupRef Id="FileList"/>
+        <ComponentRef Id="ApplicationShortcut" />
+        <ComponentRef Id="ApplicationShortcutDesktop" />
     </Feature>
-    
-  </Product>
-  
-  <Fragment>
+
+</Product>
+
+<Fragment>
+    <!--Shortcut structure-->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+        <Component Id="ApplicationShortcut" Guid="C1B3CE89-4773-4FF3-BFF7-12144DEF2F10">
+            <Shortcut Id="ApplicationStartMenuShortcut"
+                Name="$(var.ProductName)"
+                Description="$(var.ProductVersion)"
+                Target="[INSTALLFOLDER]datovka.exe"
+                WorkingDirectory="TESTFILEPRODUCTDIR"
+                Icon="ProductIcon.exe"
+                IconIndex="0"/>
+            <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+            <RegistryValue Root="HKLM" Key="Software\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DesktopFolder">
+        <Component Id="ApplicationShortcutDesktop" Guid="C1B3CE89-4773-4FF3-BFF7-12144DEF2F11">
+            <Shortcut Id="ApplicationDesktopShortcut"
+                Name="$(var.ProductName)"
+                Description="$(var.ProductVersion)"
+                Target="[INSTALLFOLDER]datovka.exe"
+                WorkingDirectory="TESTFILEPRODUCTDIR"
+                Icon="ProductIcon.exe"
+                IconIndex="0"/>
+            <RemoveFolder Id="RemoveDesktopFolder" Directory="DesktopFolder" On="uninstall" />
+            <RegistryValue Root="HKLM" Key="Software\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+        </Component>
+    </DirectoryRef>
+</Fragment>
+
+<Fragment>
+    <!--Directory structure-->
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLLOCATION" Name="Datovka">
-          <Directory Id="FileList"></Directory>
-        </Directory>            
-      </Directory>
+        <Directory Id="ProgramFilesFolder">
+            <Directory Id="CZNICDir" Name="CZ.NIC">
+                <Directory Id="TESTFILEPRODUCTDIR" Name="$(var.ProductName)">
+                    <Directory Id="FileList"></Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+        <Directory Id="ProgramMenuFolder">
+            <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)"></Directory>
+                <Directory Id="DesktopFolder" Name="Desktop"></Directory>
+        </Directory>
     </Directory>
-  </Fragment>    
-  
+</Fragment>
+
 </Wix>

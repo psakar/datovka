@@ -90,6 +90,7 @@ copy "AUTHORS" %DATOVKAPORTPATH%
 copy "copyING" %DATOVKAPORTPATH%
 copy "Changelog" %DATOVKAPORTPATH%
 copy "scripts\datovka-portable-log.bat" %DATOVKAPORTPATH%
+copy "nsis\datovka-install\datovka.ico" %DATOVKAPORTPATH%
 copy "locale\datovka_cs.qm" "%DATOVKAPORTPATH%\locale"
 for /R "mingw32built\bin\" %%x in (*.dll) do copy "%%x" %DATOVKAPORTPATH% /Y
 windeployqt --release "%DATOVKAPORTPATH%\datovka-portable.exe"
