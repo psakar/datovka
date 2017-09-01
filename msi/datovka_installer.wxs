@@ -68,6 +68,17 @@
         <![CDATA[Installed OR (VersionNT > 600)]]>
     </Condition>
 
+    <!--Update/remove previous version-->
+    <Upgrade Id="$(var.ProductUpgradeCode)">
+        <UpgradeVersion Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" Property="NEWERVERSIONDETECTED" />
+        <UpgradeVersion Minimum="0.0.0" Maximum="$(var.ProductVersion)" IncludeMinimum="yes" IncludeMaximum="yes" Property="OLDERVERSIONBEINGUPGRADED" />
+    </Upgrade>
+    <InstallExecuteSequence>
+        <RemoveExistingProducts After="InstallInitialize" />
+        <Custom Action="NewerVersion" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
+    </InstallExecuteSequence>
+    <CustomAction Id="NewerVersion" Error="A later version of [ProductName] is already installed." />
+
     <!--Features section-->
     <Feature Id="ProductFeature" Level="1" Title="$(var.ProductName)">
         <ComponentGroupRef Id="FileList"/>
