@@ -34,8 +34,9 @@
         Keywords="Datovka"
         InstallScope="perMachine"/>
 
-    <!--Define the installer UI-->
+    <!--Define the installer UI and dialogs-->
     <UIRef Id="WixUI_InstallDir"/>
+    <UIRef Id="WixUI_ErrorProgressText"/>
 
     <!--Define cab properties of msi-->
     <Media Id="1" Cabinet="datovka.cab" EmbedCab="yes"/>
