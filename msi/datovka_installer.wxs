@@ -1,7 +1,16 @@
 <?xml version="1.0"?>
 
-<?define ProductUpgradeCode = "C1B3CE89-4773-4FF3-BFF7-12144DEF2F15"?>
+<!-- 
+* Project: Datovka
+* Author: CZ.NIC, z.s.p.o. 2017
+* FileInfo: Datovka MSI installer source XML for Windows.
+* Description: The XML file describes structure of MSI installer (*.msi)
+*              for application Datovka.
+-->
+
+<!--Define some constants and strings. Do not change ProductUpgradeCode GUID!-->
 <?define ProductName = "Datovka2"?>
+<?define ProductUpgradeCode = "C1B3CE89-4773-4FF3-BFF7-12144DEF2F15"?>
 <?define ProductDescription = "Datovka - Free client for Datove Schranky"?>
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
@@ -32,12 +41,12 @@
     <Property Id="ARPPRODUCTICON" Value="ProductIcon.exe"/>
     <Property Id="ARPHELPLINK" Value="http://www.datovka.cz"/>
     <Property Id="ARPURLINFOABOUT" Value="http://www.nic.cz"/>
-    <Property Id="WIXUI_INSTALLDIR" Value="TESTFILEPRODUCTDIR" />
+    <Property Id="WIXUI_INSTALLDIR" Value="FileInstallPath" />
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
 
     <!--License agreement-->
     <WixVariable Id="WixUILicenseRtf" Value="eula\eula.rtf" />
-    <!--UI customization-->
+    <!--UI customization and banners-->
     <WixVariable Id="WixUIBannerBmp" Value="banners\banner_top.bmp" />
     <WixVariable Id="WixUIDialogBmp" Value="banners\banner_main.bmp" />
     <!--Launch conditions. Check minimum OS version. If not, the installation is aborted-->
@@ -45,8 +54,8 @@
         <![CDATA[Installed OR (VersionNT > 600)]]>
     </Condition>
 
-    <!--Features-->
-    <Feature Id="ProductFeature" Level="1" Title="Datovka">
+    <!--Features section-->
+    <Feature Id="ProductFeature" Level="1" Title="$(var.ProductName)">
         <ComponentGroupRef Id="FileList"/>
         <ComponentRef Id="ApplicationShortcut" />
         <ComponentRef Id="ApplicationShortcutDesktop" />
@@ -55,27 +64,28 @@
 </Product>
 
 <Fragment>
-    <!--Shortcut structure-->
+    <!--Shortcut ApplicationProgramsFolder (start button)-->
     <DirectoryRef Id="ApplicationProgramsFolder">
         <Component Id="ApplicationShortcut" Guid="C1B3CE89-4773-4FF3-BFF7-12144DEF2F10">
             <Shortcut Id="ApplicationStartMenuShortcut"
                 Name="$(var.ProductName)"
                 Description="$(var.ProductVersion)"
-                Target="[INSTALLFOLDER]datovka.exe"
-                WorkingDirectory="TESTFILEPRODUCTDIR"
+                Target="[FileInstallPath]datovka.exe"
+                WorkingDirectory="FileInstallPath"
                 Icon="ProductIcon.exe"
                 IconIndex="0"/>
             <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
             <RegistryValue Root="HKLM" Key="Software\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes" />
         </Component>
     </DirectoryRef>
+    <!--Desktop Shortcut-->
     <DirectoryRef Id="DesktopFolder">
         <Component Id="ApplicationShortcutDesktop" Guid="C1B3CE89-4773-4FF3-BFF7-12144DEF2F11">
             <Shortcut Id="ApplicationDesktopShortcut"
                 Name="$(var.ProductName)"
                 Description="$(var.ProductVersion)"
-                Target="[INSTALLFOLDER]datovka.exe"
-                WorkingDirectory="TESTFILEPRODUCTDIR"
+                Target="[FileInstallPath]datovka.exe"
+                WorkingDirectory="FileInstallPath"
                 Icon="ProductIcon.exe"
                 IconIndex="0"/>
             <RemoveFolder Id="RemoveDesktopFolder" Directory="DesktopFolder" On="uninstall" />
@@ -85,18 +95,20 @@
 </Fragment>
 
 <Fragment>
-    <!--Directory structure-->
+    <!--File section-->
     <Directory Id="TARGETDIR" Name="SourceDir">
+        <!--Directory structure (install path) and application file list-->
         <Directory Id="ProgramFilesFolder">
             <Directory Id="CZNICDir" Name="CZ.NIC">
-                <Directory Id="TESTFILEPRODUCTDIR" Name="$(var.ProductName)">
+                <Directory Id="FileInstallPath" Name="$(var.ProductName)">
                     <Directory Id="FileList"></Directory>
                 </Directory>
             </Directory>
         </Directory>
+        <!--Shortcut install path (start button, desktop)-->
         <Directory Id="ProgramMenuFolder">
-            <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)"></Directory>
-                <Directory Id="DesktopFolder" Name="Desktop"></Directory>
+            <Directory Id="ApplicationProgramsFolder" Name="CZ.NIC"></Directory>
+            <Directory Id="DesktopFolder" Name="Desktop"></Directory>
         </Directory>
     </Directory>
 </Fragment>

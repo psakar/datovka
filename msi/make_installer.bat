@@ -48,7 +48,7 @@ md %SOURCEDIRNAME%
 xcopy /s /i /q /y /c /d "./../packages/datovka-%VERSION%" %SOURCEDIRNAME%
 
 :: Run heat.exe to obtain xml files hierarchy
-heat dir %SOURCEDIRNAME% -cg FileList -gg -ke -scom -sreg -sfrag -srd -dr TESTFILEPRODUCTDIR -out %TMPFILELISTNAME%.wxs
+heat dir %SOURCEDIRNAME% -cg FileList -gg -ke -scom -sreg -sfrag -srd -dr FileInstallPath -out %TMPFILELISTNAME%.wxs
 :: Run WiX compiler
 candle %TMPFILELISTNAME%.wxs %SCRIPTNAME%.wxs -dProductVersion=%VERSION%
 :: Run WiX linker
@@ -62,4 +62,4 @@ del %TMPFILELISTNAME%.wixobj
 del %SCRIPTNAME%.wixobj
 del %MSIFILENAME%.wixpdb
 @echo.
-::@pause
+REM @pause
