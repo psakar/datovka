@@ -52,7 +52,7 @@ heat dir %SOURCEDIRNAME% -cg FileList -gg -ke -scom -sreg -sfrag -srd -dr FileIn
 :: Run WiX compiler
 candle %TMPFILELISTNAME%.wxs %SCRIPTNAME%.wxs -dProductVersion=%VERSION%
 :: Run WiX linker
-light %SCRIPTNAME%.wixobj -ext WixUIExtension -out %PACKAGENAME% -v %TMPFILELISTNAME%.wixobj
+light %SCRIPTNAME%.wixobj -ext WixUIExtension -out %PACKAGENAME% -v %TMPFILELISTNAME%.wixobj -cultures:cs-cz
 move /Y %PACKAGENAME% "./../packages/"
 
 :: Clean up

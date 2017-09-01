@@ -10,21 +10,23 @@
 ******************************************************************************
 -->
 
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
 <!--Define some constants and strings. Do not change ProductUpgradeCode GUID!-->
 <?define ProductName = "Datovka"?>
 <?define ProductNameVersion = "$(var.ProductName) $(var.ProductVersion)"?>
 <?define ProductManufacturer = "CZ.NIC, z.s.p.o."?>
 <?define ProductUpgradeCode = "C1B3CE89-4773-4FF3-BFF7-12144DEF2F15"?>
-<?define ProductDescription = "Datovka - Free client for Datove Schranky"?>
+<?define ProductDescription = "Datovka - klient pro Datove Schranky"?>
 <?define ProductParentDir = "CZ.NIC"?>
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 <Product Id="*"
     UpgradeCode="$(var.ProductUpgradeCode)"
     Name="$(var.ProductNameVersion)"
     Version="$(var.ProductVersion)"
     Manufacturer="$(var.ProductManufacturer)"
-    Language="1033">
+    Language="1029"
+    Codepage="1250">
 
     <!--Define msi package info-->
     <Package InstallerVersion="200"
@@ -33,14 +35,19 @@
         Comments="Datovka Windows Installer Package"
         Description="$(var.ProductDescription)"
         Keywords="Datovka"
-        InstallScope="perMachine"/>
+        InstallPrivileges="elevated"
+        InstallScope="perMachine"
+        ReadOnly="no"
+        AdminImage="no"
+        SummaryCodepage="1250"
+    />
 
     <!--Define the installer UI and dialogs-->
     <UIRef Id="WixUI_InstallDir"/>
     <UIRef Id="WixUI_ErrorProgressText"/>
 
     <!--Define cab properties of msi-->
-    <Media Id="1" Cabinet="datovka.cab" EmbedCab="yes"/>
+    <Media Id="1" Cabinet="datovka.cab" EmbedCab="yes" CompressionLevel="mszip"/>
     <!--Define icons (ID should not be longer than 18 chars and must end with ".exe")-->
     <Icon Id="ProductIcon.exe" SourceFile="SourceDir\datovka.ico"/>
     <!--Define properties of msi package-->
@@ -48,15 +55,16 @@
     <Property Id="ARPHELPLINK" Value="http://www.datovka.cz"/>
     <Property Id="ARPURLINFOABOUT" Value="http://www.nic.cz"/>
     <Property Id="WIXUI_INSTALLDIR" Value="FileInstallPath"/>
+    <Property Id='ARPCOMMENTS'>"$(var.ProductDescription)"</Property>
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes"/>
 
     <!--License agreement-->
-    <WixVariable Id="WixUILicenseRtf" Value="eula\eula.rtf"/>
+    <WixVariable Id="WixUILicenseRtf" Value="eula\eula_cs.rtf"/>
     <!--UI customization and banners-->
     <WixVariable Id="WixUIBannerBmp" Value="banners\banner_top.bmp"/>
     <WixVariable Id="WixUIDialogBmp" Value="banners\banner_main.bmp"/>
     <!--Launch conditions. Check minimum OS version. If not, the installation is aborted-->
-    <Condition Message="This product requires at least Windows 7 / Server 2008 R2.">
+    <Condition Message="Aplikace Datovka nepodporuje Windows Vista nebo starsi.">
         <![CDATA[Installed OR (VersionNT > 600)]]>
     </Condition>
 
@@ -81,7 +89,7 @@
                 Icon="ProductIcon.exe"
                 IconIndex="0"/>
             <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall"/>
-            <RegistryValue Root="HKLM" Key="Software\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
         </Component>
     </DirectoryRef>
     <!--Desktop Shortcut-->
@@ -95,7 +103,7 @@
                 Icon="ProductIcon.exe"
                 IconIndex="0"/>
             <RemoveFolder Id="RemoveDesktopFolder" Directory="DesktopFolder" On="uninstall"/>
-            <RegistryValue Root="HKLM" Key="Software\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
         </Component>
     </DirectoryRef>
 </Fragment>
