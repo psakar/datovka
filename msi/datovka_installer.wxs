@@ -11,7 +11,8 @@
 -->
 
 <!--Define some constants and strings. Do not change ProductUpgradeCode GUID!-->
-<?define ProductName = "Datovka2"?>
+<?define ProductName = "Datovka"?>
+<?define ProductNameVersion = "$(var.ProductName) $(var.ProductVersion)"?>
 <?define ProductManufacturer = "CZ.NIC, z.s.p.o."?>
 <?define ProductUpgradeCode = "C1B3CE89-4773-4FF3-BFF7-12144DEF2F15"?>
 <?define ProductDescription = "Datovka - Free client for Datove Schranky"?>
@@ -20,13 +21,13 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 <Product Id="*"
     UpgradeCode="$(var.ProductUpgradeCode)"
-    Name="$(var.ProductName)"
+    Name="$(var.ProductNameVersion)"
     Version="$(var.ProductVersion)"
     Manufacturer="$(var.ProductManufacturer)"
     Language="1033">
 
     <!--Define msi package info-->
-    <Package InstallerVersion="400"
+    <Package InstallerVersion="200"
         Compressed="yes"
         Manufacturer="$(var.ProductManufacturer)"
         Comments="Datovka Windows Installer Package"
@@ -104,8 +105,8 @@
     <Directory Id="TARGETDIR" Name="SourceDir">
         <!--Directory structure (install path) and application file list-->
         <Directory Id="ProgramFilesFolder">
-            <Directory Id="CZNICDir" Name="$(var.ProductName)">
-                <Directory Id="FileInstallPath" Name="$(var.ProductParentDir)">
+            <Directory Id="CZNICDir" Name="$(var.ProductParentDir)">
+                <Directory Id="FileInstallPath" Name="$(var.ProductName)">
                     <Directory Id="FileList"/>
                 </Directory>
             </Directory>
