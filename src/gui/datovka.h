@@ -689,7 +689,7 @@ private:
 	/*!
 	 * @brief Prepare import database directory.
 	 */
-	void prepareCreateAccountFromDatabaseFile(bool fromDirectory)
+	void prepareCreateAccountFromDatabaseFile(bool fromDirectory);
 
 	/*!
 	 * @brief Shows tag editing dialogue.
