@@ -882,7 +882,6 @@ QList<MessageDb::ContactEntry> MessageDb::uniqueContacts(void) const
 /* ========================================================================= */
 {
 	QMap<QString, ContactEntry> mapOfBoxes;
-	QMap<QString, ContactEntry>::iterator it;
 	QList<ContactEntry> contactList;
 	QSqlQuery query(m_db);
 
