@@ -25,6 +25,9 @@
 #define _DLG_ACCOUNT_FROM_DB_H_
 
 #include <QDialog>
+#include <QString>
+
+#include "src/models/accounts_model.h"
 
 namespace Ui {
 	class DlgCreateAccountFromDb;
@@ -35,16 +38,6 @@ namespace Ui {
  */
 class DlgCreateAccountFromDb : public QDialog {
 	Q_OBJECT
-
-public:
-	/*!
-	 * @brief Action chosen by the user.
-	 */
-	enum Action {
-		ACT_NOTHING, /*!< Nothing to be performed. */
-		ACT_FROM_DIRECTORY, /*!< Read directory content. */
-		ACT_FROM_FILES /*!< Read selected files. */
-	};
 
 private:
 	/*!
@@ -62,6 +55,29 @@ public:
 	~DlgCreateAccountFromDb(void);
 
 	/*!
+	 * @brief Creates an accounts from database files and adds them into
+	 *     account model.
+	 *
+	 * @param[in,out] accountModel Account model to add data into.
+	 * @param[in,out] lastImportDir Import location directory.
+	 * @param[in]     parent Parent widget.
+	 * @return List of user names of newly created accounts.
+	 */
+	static
+	QStringList createAccount(AccountModel &accountModel,
+	    QString &lastImportDir, QWidget *parent = Q_NULLPTR);
+
+private:
+	/*!
+	 * @brief Action chosen by the user.
+	 */
+	enum Action {
+		ACT_NOTHING, /*!< Nothing to be performed. */
+		ACT_FROM_DIRECTORY, /*!< Read directory content. */
+		ACT_FROM_FILES /*!< Read selected files. */
+	};
+
+	/*!
 	 * @brief Select source to import database from.
 	 *
 	 * @param[in] parent Parent widget.
@@ -70,7 +86,6 @@ public:
 	static
 	enum Action chooseAction(QWidget *parent = Q_NULLPTR);
 
-private:
 	Ui::DlgCreateAccountFromDb *m_ui; /*!< UI generated from UI file. */
 };
 

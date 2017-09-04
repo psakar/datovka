@@ -5343,181 +5343,18 @@ void MainWindow::showAboutApplicationDialog(void)
 
 void MainWindow::showImportDatabaseDialog(void)
 {
-	switch (DlgCreateAccountFromDb::chooseAction(this)) {
-	case DlgCreateAccountFromDb::ACT_FROM_DIRECTORY:
-		prepareCreateAccountFromDatabaseFile(true);
-		break;
-	case DlgCreateAccountFromDb::ACT_FROM_FILES:
-		prepareCreateAccountFromDatabaseFile(false);
-		break;
-	default:
-		/* Do nothing. */
-		break;
-	}
-}
+	QStringList createdUserNames(
+	    DlgCreateAccountFromDb::createAccount(m_accountModel,
+	        m_on_import_database_dir_activate, this));
 
-void MainWindow::prepareCreateAccountFromDatabaseFile(bool fromDirectory)
-{
-	debugSlotCall();
-
-	QString importDir;
-	QStringList fileList, filePathList;
-	QStringList nameFilter("*.db");
-	QDir directory(QDir::home());
-	fileList.clear();
-	filePathList.clear();
-
-	if (fromDirectory) {
-		importDir = QFileDialog::getExistingDirectory(this,
-		    tr("Select directory"), m_on_import_database_dir_activate,
-		    QFileDialog::ShowDirsOnly |
-		    QFileDialog::DontResolveSymlinks);
-
-		if (importDir.isEmpty()) {
-			return;
-		}
-
-		m_on_import_database_dir_activate = importDir;
-		directory.setPath(importDir);
-		fileList = directory.entryList(nameFilter);
-
-		if (fileList.isEmpty()) {
-			qDebug() << "No *.db selected file(s)";
-			/* TODO - show dialog*/
-			showStatusTextWithTimeout(tr("Database file(s) not found in "
-			    "selected directory."));
-			return;
-		}
-
-		for (int i = 0; i < fileList.size(); ++i) {
-			filePathList.append(importDir + "/" + fileList.at(i));
-		}
-	} else {
-		filePathList = QFileDialog::getOpenFileNames(this,
-		    tr("Select db file(s)"), m_on_import_database_dir_activate,
-		    tr("Database file (*.db)"));
-
-		if (filePathList.isEmpty()) {
-			qDebug() << "No *.db selected file(s)";
-			showStatusTextWithTimeout(
-			    tr("Database file(s) not selected."));
-			return;
-		}
-
-		m_on_import_database_dir_activate =
-		    QFileInfo(filePathList.at(0)).absoluteDir().absolutePath();
-	}
-
-	createAccountFromDatabaseFileList(filePathList);
-}
-
-
-/* ========================================================================= */
-/*
- * Create accounts from list of database directory to application
- */
-void MainWindow::createAccountFromDatabaseFileList(
-    const QStringList &filePathList)
-/* ========================================================================= */
-{
-
-	debugFuncCall();
-
-	const int dbFilesCnt = filePathList.size();
-
-	if (0 == dbFilesCnt) {
-		return;
-	}
-
-	QStringList currentAccountList;
-	QString errMsg;
-
-	int accountCount = ui->accountList->model()->rowCount();
-	for (int i = 0; i < accountCount; i++) {
-		QModelIndex index = m_accountModel.index(i, 0);
-		const QString userName(m_accountModel.userName(index));
-		Q_ASSERT(!userName.isEmpty());
-		currentAccountList.append(userName);
-	}
-
-	for (int i = 0; i < dbFilesCnt; ++i) {
-
-		QFileInfo file(filePathList.at(i));
-		QString dbFileName = file.fileName();
-		QString dbUserName;
-		QString dbYearFlag;
-		bool dbTestingFlag;
-
-		/* Split and check the database file name. */
-		if (!isValidDatabaseFileName(dbFileName, dbUserName,
-		    dbYearFlag, dbTestingFlag, errMsg)) {
-			QMessageBox::warning(this,
-			    tr("Create account: %1").arg(dbUserName),
-			    tr("File") + ": " + filePathList.at(i) +
-			    "\n\n" + errMsg,
-			    QMessageBox::Ok);
-			continue;
-		}
-
-		/* Check whether account already exists. */
-		bool exists = false;
-		for (int j = 0; j < accountCount; ++j) {
-			if (currentAccountList.at(j) == dbUserName) {
-				exists = true;
-				break;
-			}
-		}
-
-		if (exists) {
-			errMsg = tr(
-			    "Account with user name '%1' and "
-			    "its message database already exist. "
-			    "New account was not created and "
-			    "selected database file was not "
-			    "associated with this account.").
-			    arg(dbUserName);
-			QMessageBox::warning(this,
-			    tr("Create account: %1").arg(dbUserName),
-			    tr("File") + ": " + filePathList.at(i) +
-			    "\n\n" + errMsg,
-			    QMessageBox::Ok);
-			continue;
-		}
-
-		AcntSettings itemSettings;
-		itemSettings.setTestAccount(dbTestingFlag);
-		itemSettings.setAccountName(dbUserName);
-		itemSettings.setUserName(dbUserName);
-		itemSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD);
-		itemSettings.setPassword("");
-		itemSettings.setRememberPwd(false);
-		itemSettings.setSyncWithAll(false);
-		itemSettings.setDbDir(m_on_import_database_dir_activate);
-		m_accountModel.addAccount(itemSettings);
-		errMsg = tr("Account with name '%1' has been "
-		    "created (user name '%1').").arg(dbUserName)
-		    + " " +
-		    tr("This database file has been set as "
-		    "actual message database for this account. "
-		    "Maybe you have to change account "
-		    "properties for correct login to the "
-		    "server Datové schránky.");
-
-		QMessageBox::information(this,
-		    tr("Create account: %1").arg(dbUserName),
-		    tr("File") + ": " + filePathList.at(i) +
-		    "\n\n" + errMsg,
-		    QMessageBox::Ok);
-
-		refreshAccountList(dbUserName);
-
+	if (!createdUserNames.isEmpty()) {
+		refreshAccountList(createdUserNames.last());
 		saveSettings();
 	}
 
 	activeAccountMenuAndButtons(true);
 	ui->accountList->expandAll();
 }
-
 
 /* ========================================================================= */
 /*

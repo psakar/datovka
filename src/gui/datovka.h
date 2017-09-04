@@ -687,11 +687,6 @@ private:
 	int m_timeoutSyncAccounts;
 
 	/*!
-	 * @brief Prepare import database directory.
-	 */
-	void prepareCreateAccountFromDatabaseFile(bool fromDirectory);
-
-	/*!
 	 * @brief Shows tag editing dialogue.
 	 *
 	 * @no If no message identifiers are supplied then just the tags are
@@ -999,12 +994,6 @@ private:
 	 * @brief Sent and check a new version of Datovka.
 	 */
 	void checkNewDatovkaVersion(void);
-
-	/*!
-	 * @brief Sent and check a new version of Datovka.
-	 */
-	void createAccountFromDatabaseFileList(
-	    const QStringList &filePathList);
 
 	/*!
 	 * @brief Download complete message synchronously
