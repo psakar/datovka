@@ -5318,9 +5318,10 @@ void MainWindow::refreshAccountList(const QString &userName)
 			    msgType));
 			if (yearIdx.isValid()) {
 				ui->accountList->setCurrentIndex(yearIdx);
-				accountItemCurrentChanged(selectedIdx);
 			}
 		}
+
+		accountItemCurrentChanged(selectedIdx);
 
 		if (dmId != -1) {
 			QModelIndex msgIdx(messageIndex(ui->messageList, dmId));
