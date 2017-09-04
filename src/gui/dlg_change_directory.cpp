@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,92 +21,78 @@
  * the two.
  */
 
-
 #include <QFileDialog>
 
-#include "dlg_change_directory.h"
-#include "src/log/log.h"
+#include "src/gui/dlg_change_directory.h"
+#include "ui_dlg_change_directory.h"
 
-DlgChangeDirectory::DlgChangeDirectory(QString dirPath, QWidget *parent) :
-    QDialog(parent),
-    m_dirPath(dirPath)
-{
-	setupUi(this);
-	initDialog();
+namespace Ui {
+	class DlgChangeDirectory;
 }
 
-/* ========================================================================= */
-/*
- * Init dialog
- */
-void DlgChangeDirectory::initDialog(void)
-/* ========================================================================= */
+DlgChangeDirectory::DlgChangeDirectory(const QString &dirPath, QWidget *parent)
+    : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgChangeDirectory),
+    m_dirPath(dirPath)
 {
-	this->newPath->setText("");
-	this->currentPath->setText(m_dirPath);
-	this->labelWarning->setStyleSheet("QLabel { color: red }");
+	m_ui->setupUi(this);
 
-	if (this->newPath->text().isEmpty() || this->newPath->text().isNull()) {
-		this->labelWarning->hide();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	} else if (this->currentPath->text() != this->newPath->text()) {
-		this->labelWarning->hide();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+	m_ui->newPath->setText("");
+	m_ui->currentPath->setText(m_dirPath);
+	m_ui->labelWarning->setStyleSheet("QLabel { color: red }");
+
+	if (m_ui->newPath->text().isEmpty()) {
+		m_ui->labelWarning->hide();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	} else if (m_ui->currentPath->text() != m_ui->newPath->text()) {
+		m_ui->labelWarning->hide();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 	} else {
-		this->labelWarning->show();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+		m_ui->labelWarning->show();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	}
 
-	connect(this->chooseButton, SIGNAL(clicked()), this,
+	connect(m_ui->chooseButton, SIGNAL(clicked()), this,
 	    SLOT(onDirectoryChange(void)));
 
-	connect(this->buttonBox, SIGNAL(accepted()), this,
+	connect(m_ui->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(setNewDataDirectory(void)));
 }
 
-
-/* ========================================================================= */
-/*
- * Choose new data directory
- */
-void DlgChangeDirectory::onDirectoryChange(void)
-/* ========================================================================= */
+DlgChangeDirectory::~DlgChangeDirectory(void)
 {
-	QString newdir = QFileDialog::getExistingDirectory(this,
-	    tr("Open Directory"), NULL, QFileDialog::ShowDirsOnly |
-	    QFileDialog::DontResolveSymlinks);
-	this->newPath->setText(newdir);
+	delete m_ui;
+}
 
-	if (this->newPath->text().isEmpty() || this->newPath->text().isNull()) {
-		this->labelWarning->hide();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	} else if (this->currentPath->text() != this->newPath->text()) {
-		this->labelWarning->hide();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+void DlgChangeDirectory::onDirectoryChange(void)
+{
+	QString newDir(QFileDialog::getExistingDirectory(this,
+	    tr("Open Directory"), QString(),
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+	m_ui->newPath->setText(newDir);
+
+	if (m_ui->newPath->text().isEmpty()) {
+		m_ui->labelWarning->hide();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	} else if (m_ui->currentPath->text() != m_ui->newPath->text()) {
+		m_ui->labelWarning->hide();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 	} else {
-		this->labelWarning->show();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+		m_ui->labelWarning->show();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Set new data directory and save path
- */
 void DlgChangeDirectory::setNewDataDirectory(void)
-/* ========================================================================= */
 {
-	debugSlotCall();
-
 	QString action;
-	if (this->moveDataRadioButton->isChecked()) {
+	if (m_ui->moveDataRadioButton->isChecked()) {
 		action = "move";
-	} else if (this->copyDataRadioButton->isChecked()) {
+	} else if (m_ui->copyDataRadioButton->isChecked()) {
 		action = "copy";
 	} else {
 		action = "new";
 	}
 
-	emit sentNewPath(m_dirPath, this->newPath->text(), action);
+	emit sentNewPath(m_dirPath, m_ui->newPath->text(), action);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,34 +21,53 @@
  * the two.
  */
 
-
 #ifndef _DLG_CHANGE_DIRECTORY_H_
 #define _DLG_CHANGE_DIRECTORY_H_
 
-
 #include <QDialog>
+#include <QString>
 
-#include "src/common.h"
-#include "ui_dlg_change_directory.h"
+namespace Ui {
+	class DlgChangeDirectory;
+}
 
-
-class DlgChangeDirectory : public QDialog, public Ui::ChangeDirectory {
-    Q_OBJECT
+/*!
+ * @brief Provides interface for database file location change.
+ */
+class DlgChangeDirectory : public QDialog {
+	Q_OBJECT
 
 public:
-	DlgChangeDirectory(QString dirPath, QWidget *parent = 0);
+	/*!
+	 * @brief Constructor.
+	 */
+	explicit DlgChangeDirectory(const QString &dirPath,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	virtual
+	~DlgChangeDirectory(void);
 
 private slots:
+	/*
+	 * Choose new data directory
+	 */
 	void onDirectoryChange(void);
+
+	/*
+	 * Set new data directory and save path
+	 */
 	void setNewDataDirectory(void);
 
 signals:
 	void sentNewPath(QString, QString, QString);
 
 private:
-	QString m_dirPath;
-	void initDialog(void);
-};
+	Ui::DlgChangeDirectory *m_ui; /*!< UI generated from UI file. */
 
+	QString m_dirPath;
+};
 
 #endif /* _DLG_CHANGE_DIRECTORY_H_ */
