@@ -27,6 +27,8 @@
 #include <QDialog>
 #include <QString>
 
+class MessageDbSet; /* Forward declaration. */
+
 namespace Ui {
 	class DlgChangeDirectory;
 }
@@ -40,8 +42,11 @@ class DlgChangeDirectory : public QDialog {
 public:
 	/*!
 	 * @brief Constructor.
+	 *
+	 * @param[in] currentDir Current database location directory.
+	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgChangeDirectory(const QString &dirPath,
+	explicit DlgChangeDirectory(const QString &currentDir,
 	    QWidget *parent = Q_NULLPTR);
 
 	/*!
@@ -50,24 +55,65 @@ public:
 	virtual
 	~DlgChangeDirectory(void);
 
+	/*!
+	 * @brief Asks the user for the new database location and relocates it.
+	 *
+	 * @param[in] userName User name identifying related account.
+	 * @param[in] dbSet Affected database set.
+	 * @param[in] parent Parent widget.
+	 * @return True on success.
+	 */
+	static
+	bool changeDataDirectory(const QString &userName, MessageDbSet *dbSet,
+	    QWidget *parent = Q_NULLPTR);
+
 private slots:
-	/*
-	 * Choose new data directory
+	/*!
+	 * @brief Choose new data directory.
 	 */
-	void onDirectoryChange(void);
-
-	/*
-	 * Set new data directory and save path
-	 */
-	void setNewDataDirectory(void);
-
-signals:
-	void sentNewPath(QString, QString, QString);
+	void chooseNewDirectory(void);
 
 private:
-	Ui::DlgChangeDirectory *m_ui; /*!< UI generated from UI file. */
+	/*!
+	 * @brief Identifies chosen action.
+	 */
+	enum Action {
+		ACT_MOVE, /*!< Move database location, delete in original location. */
+		ACT_COPY, /*!< Copy database to new location, leave in original location. */
+		ACT_NEW /*!< Start new database in new location, leave in original location. */
+	};
 
-	QString m_dirPath;
+	/*!
+	 * @brief Generates a dialogue asking the user for new location.
+	 *
+	 * @param[in]  currentDir Current directory.
+	 * @param[out] newDir Chosen new directory.
+	 * @param[out] action Chosen relocation action.
+	 * @param[in] parent Parent widget.
+	 * @return True if a new directory and relocation action has been
+	 *     selected.
+	 */
+	static
+	bool chooseAction(const QString &currentDir, QString &newDir,
+	    enum Action &action, QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Performs a database relocation.
+	 *
+	 * @param[in] userName User name identifying related account.
+	 * @param[in] dbSet Affected database set.
+	 * @param[in] oldDir Old location.
+	 * @param[in] newDir New location.
+	 * @param[in] action Type or relocation operation.
+	 * @param[in] parent Parent widget.
+	 * @return True on success.
+	 */
+	static
+	bool relocateDatabase(const QString &userName, MessageDbSet *dbSet,
+	    const QString &oldDir, const QString &newDir, enum Action action,
+	    QWidget *parent = Q_NULLPTR);
+
+	Ui::DlgChangeDirectory *m_ui; /*!< UI generated from UI file. */
 };
 
 #endif /* _DLG_CHANGE_DIRECTORY_H_ */
