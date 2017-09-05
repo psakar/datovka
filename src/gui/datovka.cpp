@@ -4804,8 +4804,11 @@ void MainWindow::changeDataDirectory(void)
 	showStatusTextWithTimeout(tr("Change data dierctory of account \"%1\".")
 	    .arg(itemSettings.accountName()));
 
+	QModelIndex accountIdx(currentAccountModelIndex());
+
 	if (DlgChangeDirectory::changeDataDirectory(userName, dbSet, this)) {
 		saveSettings();
+		accountItemCurrentChanged(accountIdx);
 	}
 }
 

@@ -31,10 +31,6 @@
 #include "src/settings/preferences.h"
 #include "ui_dlg_change_directory.h"
 
-namespace Ui {
-	class DlgChangeDirectory;
-}
-
 DlgChangeDirectory::DlgChangeDirectory(const QString &currentDir,
     QWidget *parent)
     : QDialog(parent),
