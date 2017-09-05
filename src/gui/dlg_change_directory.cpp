@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,92 +21,210 @@
  * the two.
  */
 
-
 #include <QFileDialog>
+#include <QMessageBox>
 
-#include "dlg_change_directory.h"
+#include "src/gui/dlg_change_directory.h"
+#include "src/io/message_db_set.h"
 #include "src/log/log.h"
+#include "src/settings/accounts.h"
+#include "src/settings/preferences.h"
+#include "ui_dlg_change_directory.h"
 
-DlgChangeDirectory::DlgChangeDirectory(QString dirPath, QWidget *parent) :
-    QDialog(parent),
-    m_dirPath(dirPath)
+DlgChangeDirectory::DlgChangeDirectory(const QString &currentDir,
+    QWidget *parent)
+    : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgChangeDirectory)
 {
-	setupUi(this);
-	initDialog();
-}
+	m_ui->setupUi(this);
 
-/* ========================================================================= */
-/*
- * Init dialog
- */
-void DlgChangeDirectory::initDialog(void)
-/* ========================================================================= */
-{
-	this->newPath->setText("");
-	this->currentPath->setText(m_dirPath);
-	this->labelWarning->setStyleSheet("QLabel { color: red }");
+	m_ui->newPath->setText("");
+	m_ui->currentPath->setText(currentDir);
+	m_ui->labelWarning->setStyleSheet("QLabel { color: red }");
 
-	if (this->newPath->text().isEmpty() || this->newPath->text().isNull()) {
-		this->labelWarning->hide();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	} else if (this->currentPath->text() != this->newPath->text()) {
-		this->labelWarning->hide();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+	if (m_ui->newPath->text().isEmpty()) {
+		m_ui->labelWarning->hide();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	} else if (m_ui->currentPath->text() != m_ui->newPath->text()) {
+		m_ui->labelWarning->hide();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 	} else {
-		this->labelWarning->show();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+		m_ui->labelWarning->show();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	}
 
-	connect(this->chooseButton, SIGNAL(clicked()), this,
-	    SLOT(onDirectoryChange(void)));
-
-	connect(this->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(setNewDataDirectory(void)));
+	connect(m_ui->chooseButton, SIGNAL(clicked()), this,
+	    SLOT(chooseNewDirectory(void)));
 }
 
-
-/* ========================================================================= */
-/*
- * Choose new data directory
- */
-void DlgChangeDirectory::onDirectoryChange(void)
-/* ========================================================================= */
+DlgChangeDirectory::~DlgChangeDirectory(void)
 {
-	QString newdir = QFileDialog::getExistingDirectory(this,
-	    tr("Open Directory"), NULL, QFileDialog::ShowDirsOnly |
-	    QFileDialog::DontResolveSymlinks);
-	this->newPath->setText(newdir);
+	delete m_ui;
+}
 
-	if (this->newPath->text().isEmpty() || this->newPath->text().isNull()) {
-		this->labelWarning->hide();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	} else if (this->currentPath->text() != this->newPath->text()) {
-		this->labelWarning->hide();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
+bool DlgChangeDirectory::changeDataDirectory(const QString &userName,
+    MessageDbSet *dbSet, QWidget *parent)
+{
+	if (Q_UNLIKELY(userName.isEmpty() || (dbSet == Q_NULLPTR))) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	enum Action action = ACT_MOVE;
+	QString newDirPath;
+
+	/* Get current settings. */
+	const AcntSettings &itemSettings(globAccounts[userName]);
+
+	QString oldDbDir(itemSettings.dbDir());
+	if (oldDbDir.isEmpty()) {
+		/* Set default directory name. */
+		oldDbDir = globPref.confDir();
+	}
+
+	if (!chooseAction(oldDbDir, newDirPath, action, parent)) {
+		return false;
+	}
+
+	if (Q_UNLIKELY(newDirPath.isEmpty())) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	return relocateDatabase(userName, dbSet, oldDbDir, newDirPath, action,
+	    parent);
+}
+
+void DlgChangeDirectory::chooseNewDirectory(void)
+{
+	QString newDir(QFileDialog::getExistingDirectory(this,
+	    tr("Open Directory"), QString(),
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks));
+	m_ui->newPath->setText(newDir);
+
+	if (m_ui->newPath->text().isEmpty()) {
+		m_ui->labelWarning->hide();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	} else if (m_ui->currentPath->text() != m_ui->newPath->text()) {
+		m_ui->labelWarning->hide();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(true);
 	} else {
-		this->labelWarning->show();
-		this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+		m_ui->labelWarning->show();
+		m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Set new data directory and save path
- */
-void DlgChangeDirectory::setNewDataDirectory(void)
-/* ========================================================================= */
+bool DlgChangeDirectory::chooseAction(const QString &currentDir,
+    QString &newDir, enum Action &action, QWidget *parent)
 {
-	debugSlotCall();
-
-	QString action;
-	if (this->moveDataRadioButton->isChecked()) {
-		action = "move";
-	} else if (this->copyDataRadioButton->isChecked()) {
-		action = "copy";
+	DlgChangeDirectory dlg(currentDir, parent);
+	if (QDialog::Accepted == dlg.exec()) {
+		newDir = dlg.m_ui->newPath->text();
+		if (dlg.m_ui->moveDataRadioButton->isChecked()) {
+			action = ACT_MOVE;
+		} else if (dlg.m_ui->copyDataRadioButton->isChecked()) {
+			action = ACT_COPY;
+		} else {
+			action = ACT_NEW;
+		}
+		return true;
 	} else {
-		action = "new";
+		return false;
+	}
+}
+
+bool DlgChangeDirectory::relocateDatabase(const QString &userName,
+    MessageDbSet *dbSet, const QString &oldDir, const QString &newDir,
+    enum Action action, QWidget *parent)
+{
+	if (Q_UNLIKELY(userName.isEmpty()) || (dbSet == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
 	}
 
-	emit sentNewPath(m_dirPath, this->newPath->text(), action);
+	/* Get current settings. */
+	AcntSettings &itemSettings(globAccounts[userName]);
+
+	switch (action) {
+	case ACT_MOVE:
+		/* Move account database into new directory. */
+		if (dbSet->moveToLocation(newDir)) {
+			itemSettings.setDbDir(newDir);
+
+			logInfo("Database files for '%s' have been moved from '%s' to '%s'.\n",
+			    userName.toUtf8().constData(),
+			    oldDir.toUtf8().constData(),
+			    newDir.toUtf8().constData());
+
+			QMessageBox::information(parent,
+			    tr("Change data directory for current account"),
+			    tr("Database files for '%1' have been successfully moved to\n\n'%2'.")
+			        .arg(userName).arg(newDir),
+			    QMessageBox::Ok);
+
+			return true;
+		} else {
+			QMessageBox::critical(parent,
+			    tr("Change data directory for current account"),
+			    tr("Database files for '%1' could not be moved to\n\n'%2'.")
+			        .arg(userName).arg(newDir),
+			    QMessageBox::Ok);
+		}
+		break;
+	case ACT_COPY:
+		/* Copy account database into new directory. */
+		if (dbSet->copyToLocation(newDir)) {
+			itemSettings.setDbDir(newDir);
+
+			logInfo("Database files for '%s' have been copied from '%s' to '%s'.\n",
+			    userName.toUtf8().constData(),
+			    oldDir.toUtf8().constData(),
+			    newDir.toUtf8().constData());
+
+			QMessageBox::information(parent,
+			    tr("Change data directory for current account"),
+			    tr("Database files for '%1' have been successfully copied to\n\n'%2'.")
+			        .arg(userName).arg(newDir),
+			    QMessageBox::Ok);
+
+			return true;
+		} else {
+			QMessageBox::critical(parent,
+			    tr("Change data directory for current account"),
+			    tr("Database files for '%1' could not be copied to\n\n'%2'.")
+			        .arg(userName).arg(newDir),
+			    QMessageBox::Ok);
+		}
+		break;
+	case ACT_NEW:
+		/* Create a new account database into new directory. */
+		if (dbSet->reopenLocation(newDir, MessageDbSet::DO_YEARLY,
+		        MessageDbSet::CM_CREATE_EMPTY_CURRENT)) {
+			itemSettings.setDbDir(newDir);
+
+			logInfo("Database files for '%s' have been created in '%s'.\n",
+			    userName.toUtf8().constData(),
+			    newDir.toUtf8().constData());
+
+			QMessageBox::information(parent,
+			    tr("Change data directory for current account"),
+			    tr("New database files for '%1' have been successfully created in\n\n'%2'.")
+			        .arg(userName).arg(newDir),
+			    QMessageBox::Ok);
+
+			return true;
+		} else {
+			QMessageBox::critical(parent,
+			    tr("Change data directory for current account"),
+			    tr("New database files for '%1' could not be created in\n\n'%2'.")
+			        .arg(userName).arg(newDir),
+			    QMessageBox::Ok);
+		}
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	return false;
 }

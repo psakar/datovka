@@ -4793,44 +4793,6 @@ void MainWindow::changeDataDirectory(void)
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
-	const AcntSettings &itemSettings(globAccounts[userName]);
-
-	QString dbDir = itemSettings.dbDir();
-	if (dbDir.isEmpty()) {
-		/* Set default directory name. */
-		dbDir = globPref.confDir();
-	}
-
-	showStatusTextWithTimeout(tr("Change data dierctory of account \"%1\".")
-	    .arg(itemSettings.accountName()));
-
-	QDialog *change_directory = new DlgChangeDirectory(dbDir, this);
-
-	connect(change_directory, SIGNAL(sentNewPath(QString, QString, QString)),
-	    this, SLOT(receiveNewDataPath(QString, QString, QString)));
-
-	change_directory->exec();
-	change_directory->deleteLater();
-}
-
-
-/* ========================================================================= */
-/*
- * Receive and store new account database path. Change data
- *     directory path in settings.
- */
-void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
-    QString action)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
-
-	/* Get current settings. */
-	AcntSettings &itemSettings(globAccounts[userName]);
 
 	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
@@ -4838,86 +4800,17 @@ void MainWindow::receiveNewDataPath(QString oldDir, QString newDir,
 		return;
 	}
 
-	/* Move account database into new directory */
-	if ("move" == action) {
-		if (dbSet->moveToLocation(newDir)) {
-			itemSettings.setDbDir(newDir);
-			saveSettings();
+	const AcntSettings &itemSettings(globAccounts[userName]);
+	showStatusTextWithTimeout(tr("Change data dierctory of account \"%1\".")
+	    .arg(itemSettings.accountName()));
 
-			logInfo("Database files for '%s' have been moved "
-			    "from '%s' to '%s'.\n",
-			    userName.toUtf8().constData(),
-			    oldDir.toUtf8().constData(),
-			    newDir.toUtf8().constData());
+	QModelIndex accountIdx(currentAccountModelIndex());
 
-			QMessageBox::information(this,
-			    tr("Change data directory for current account"),
-			    tr("Database files for '%1' have been successfully"
-			    " moved to\n\n'%2'.").arg(userName).arg(newDir),
-			    QMessageBox::Ok);
-		} else {
-			QMessageBox::critical(this,
-			    tr("Change data directory for current account"),
-			    tr("Database files for '%1' could not be moved "
-			        "to\n\n'%2'.").arg(userName).arg(newDir),
-			    QMessageBox::Ok);
-		}
-
-	/* Copy account database into new directory */
-	} else if ("copy" == action) {
-		if (dbSet->copyToLocation(newDir)) {
-			itemSettings.setDbDir(newDir);
-			saveSettings();
-
-			logInfo("Database files for '%s' have been copied "
-			    "from '%s' to '%s'.\n",
-			    userName.toUtf8().constData(),
-			    oldDir.toUtf8().constData(),
-			    newDir.toUtf8().constData());
-
-			QMessageBox::information(this,
-			    tr("Change data directory for current account"),
-			    tr("Database files for '%1' have been successfully"
-			    " copied to\n\n'%2'.").arg(userName).arg(newDir),
-			    QMessageBox::Ok);
-		} else {
-			QMessageBox::critical(this,
-			    tr("Change data directory for current account"),
-			    tr("Database files for '%1' could not be copied "
-			    "to\n\n'%2'.").arg(userName).arg(newDir),
-			    QMessageBox::Ok);
-		}
-
-	/* Create a new account database into new directory */
-	} else if ("new" == action) {
-		if (dbSet->reopenLocation(newDir,
-		        MessageDbSet::DO_YEARLY,
-		        MessageDbSet::CM_CREATE_EMPTY_CURRENT)) {
-			itemSettings.setDbDir(newDir);
-			saveSettings();
-
-			logInfo("Database files for '%s' have been created "
-			    "in '%s'.\n", userName.toUtf8().constData(),
-			    newDir.toUtf8().constData());
-
-			QMessageBox::information(this,
-			    tr("Change data directory for current account"),
-			    tr("New database files for '%1' have been "
-			    "successfully created in\n\n'%2'.")
-			    .arg(userName).arg(newDir),
-			    QMessageBox::Ok);
-		} else {
-			QMessageBox::critical(this,
-			    tr("Change data directory for current account"),
-			    tr("New database files for '%1' could not be "
-			    "created in\n\n'%2'.").arg(userName).arg(newDir),
-			    QMessageBox::Ok);
-		}
-	} else {
-		Q_ASSERT(0);
+	if (DlgChangeDirectory::changeDataDirectory(userName, dbSet, this)) {
+		saveSettings();
+		accountItemCurrentChanged(accountIdx);
 	}
 }
-
 
 /* ========================================================================= */
 /*

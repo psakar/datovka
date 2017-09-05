@@ -618,13 +618,6 @@ private slots:
 	void setWindowsAfterInit(void);
 
 	/*!
-	 * @brief Receive and store new account database path. Change data
-	 *     directory path in settings.
-	 */
-	void receiveNewDataPath(QString oldDir, QString newDir,
-	    QString action);
-
-	/*!
 	 * @brief set message process state into db
 	 */
 	void msgSetSelectedMessageProcessState(int stateIndex);
