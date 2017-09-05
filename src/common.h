@@ -52,9 +52,9 @@
 #define CZ_NIC_URL "https://www.nic.cz"
 #define DATOVKA_ONLINE_HELP_URL "https://secure.nic.cz/files/datove_schranky/redirect/prirucka.html"
 #define DATOVKA_FAQ_URL "https://secure.nic.cz/files/datove_schranky/redirect/faq.html"
-#define DATOVKA_HOMEPAGE_URL "https://labs.nic.cz/cs/datovka.html"
+#define DATOVKA_HOMEPAGE_URL "https://www.datovka.cz/"
 #define DATOVKA_CHECK_NEW_VERSION_URL "https://secure.nic.cz/files/datove_schranky/Version"
-#define DATOVKA_DOWNLOAD_URL "https://labs.nic.cz/cs/datovka.html"
+#define DATOVKA_DOWNLOAD_URL "https://www.datovka.cz/"
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
 /* return values of Datovka login methods */
