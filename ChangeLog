@@ -1,4 +1,4 @@
-4.9.3 /
+4.9.3 / 2017-09-06
  * Fixed a problem when message list was not updated after account
    synchronisation when a message was selected.
  * Fixed a bug when database location may have been saved even though the
