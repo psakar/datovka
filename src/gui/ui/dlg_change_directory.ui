@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Change data directory for current  account</string>
+   <string>Change data directory for current account</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -100,7 +100,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Cannot used the original directory as destination!</string>
+      <string>You cannot use the original directory as destination!</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

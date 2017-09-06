@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Create account form database file</string>
+   <string>Create account from database file</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -30,7 +30,7 @@
       <item>
        <widget class="QRadioButton" name="directory">
         <property name="text">
-         <string>Database file(s) from directory</string>
+         <string>Database files from directory</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -40,7 +40,7 @@
       <item>
        <widget class="QRadioButton" name="files">
         <property name="text">
-         <string>Selected database file(s)</string>
+         <string>Selected database files</string>
         </property>
        </widget>
       </item>

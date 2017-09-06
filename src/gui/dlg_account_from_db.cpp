@@ -86,10 +86,10 @@ QStringList getDatabaseFilesFromLocation(bool fromDirectory,
 		    QDir(importDir).entryList(QStringList("*.db")));
 
 		if (fileList.isEmpty()) {
-			logWarningNL("%s", "No selected *.db file(s).");
+			logWarningNL("%s", "No selected *.db files.");
 			QMessageBox::warning(parent,
-			    DlgCreateAccountFromDb::tr("No Database File Found"),
-			    DlgCreateAccountFromDb::tr("Database file(s) not found in selected directory '%1'.")
+			    DlgCreateAccountFromDb::tr("No database file found"),
+			    DlgCreateAccountFromDb::tr("No database file found in selected directory '%1'.")
 			        .arg(importDir),
 			    QMessageBox::Ok);
 			return QStringList();
@@ -100,11 +100,11 @@ QStringList getDatabaseFilesFromLocation(bool fromDirectory,
 		}
 	} else {
 		filePathList = QFileDialog::getOpenFileNames(parent,
-		    DlgCreateAccountFromDb::tr("Select db file(s)"), lastImportDir,
+		    DlgCreateAccountFromDb::tr("Select database files"), lastImportDir,
 		    DlgCreateAccountFromDb::tr("Database file (*.db)"));
 
 		if (filePathList.isEmpty()) {
-			logWarningNL("%s", "No selected *.db file(s).");
+			logWarningNL("%s", "No selected *.db files.");
 			return QStringList();
 		}
 
