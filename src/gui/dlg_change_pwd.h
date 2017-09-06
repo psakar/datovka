@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,26 +21,24 @@
  * the two.
  */
 
-
 #ifndef _DLG_CHANGE_PWD_H_
 #define _DLG_CHANGE_PWD_H_
 
-#define PWD_MIN_LENGTH 8 // min length of pwd is 8 chars
-
 #include <QDialog>
 #include <QTimer>
-#include <QTreeView>
 
-#include "src/common.h"
-#include "ui_dlg_change_pwd.h"
+namespace Ui {
+	class DlgChangePwd;
+}
 
-
-class DlgChangePwd : public QDialog, public Ui::ChangePwd {
+class DlgChangePwd : public QDialog {
 	Q_OBJECT
 
 public:
 	DlgChangePwd(const QString &boxId, const QString &userName,
-	    QWidget *parent = 0);
+	    QWidget *parent = Q_NULLPTR);
+
+	~DlgChangePwd(void);
 
 	static
 	QString generateRandomString(int stringLength);
@@ -54,8 +52,11 @@ private slots:
 	void sendSmsCode(void);
 
 private:
-	QTimer *pingTimer;
 	void initPwdChangeDialog(void);
+
+	Ui::DlgChangePwd *m_ui; /*!< UI generated from UI file. */
+
+	QTimer m_pingTimer; /*!< Fires ISDS ping operation. */
 
 	static
 	const QString possibleCharacters;
@@ -65,6 +66,5 @@ private:
 	const QString m_boxId;
 	const QString m_userName;
 };
-
 
 #endif /* _DLG_CHANGE_PWD_H_ */

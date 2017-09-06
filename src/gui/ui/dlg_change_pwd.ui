@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ChangePwd</class>
- <widget class="QDialog" name="ChangePwd">
+ <class>DlgChangePwd</class>
+ <widget class="QDialog" name="DlgChangePwd">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -246,7 +246,7 @@ at least one digit and one capital letter.</string>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ChangePwd</receiver>
+   <receiver>DlgChangePwd</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -262,7 +262,7 @@ at least one digit and one capital letter.</string>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ChangePwd</receiver>
+   <receiver>DlgChangePwd</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
