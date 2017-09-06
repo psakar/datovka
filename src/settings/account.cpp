@@ -21,6 +21,8 @@
  * the two.
  */
 
+#include <QDir>
+
 #include "src/common.h"
 #include "src/settings/account.h"
 #include "src/settings/preferences.h"
@@ -429,7 +431,7 @@ void AcntSettings::saveToSettings(QSettings &settings,
 	}
 
 	if (!dbDir().isEmpty()) {
-		if (dbDir() != globPref.confDir()) {
+		if (QDir(dbDir()) != QDir(globPref.confDir())) {
 			settings.setValue(CredNames::dbDir, dbDir());
 		}
 	}
