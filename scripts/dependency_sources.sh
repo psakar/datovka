@@ -6,7 +6,7 @@ _EXPAT_ARCHIVE="expat-2.2.4.tar.bz2"
 _LIBTOOL_ARCHIVE="libtool-2.4.6.tar.xz"
 
 _LIBICONV_ARCHIVE="libiconv-1.15.tar.gz"
-_LIBXML2_ARCHIVE="libxml2-2.9.4.tar.gz"
+_LIBXML2_ARCHIVE="libxml2-2.9.5.tar.gz"
 _GETTEXT_ARCHIVE="gettext-0.19.8.1.tar.xz"
 
 _LIBCURL_ARCHIVE="curl-7.55.1.tar.bz2"
