@@ -1,3 +1,10 @@
+4.9.3 /
+ * Fixed a problem when message list was not updated after account
+   synchronisation when a message was selected.
+ * Fixed a bug when database location may have been saved even though the
+   databases reside in default location. This problem was visible especially
+   on Windows.
+
 4.9.2 / 2017-08-28
  * Changed tag dialogue to contain two views when editing tag assignment.
  * Using the prefix 'ODZ_' for sent and 'DDZ_' for received data messages when
@@ -242,7 +249,7 @@
  * Messages can be imported from a existing older database file.
  * Fixed problem when entering wrong password for the first time, then the
    application remembered the wrong password.
- * Fixed problem when the application saved the account password even thou it
+ * Fixed problem when the application saved the account password even though it
    shouldn't be saved.
  * When saving files then the sender name can be used.
  * Fixed problem with saving messages that contain illegal characters. Illegal
