@@ -81,8 +81,12 @@ private slots:
 	 */
 	void pingIsdsServer(void);
 
-	void changePassword(void);
+	/*!
+	 * @brief Send SMS code request into ISDS.
+	 */
 	void sendSmsCode(void);
+
+	void changePassword(void);
 
 private:
 	Ui::DlgChangePwd *m_ui; /*!< UI generated from UI file. */

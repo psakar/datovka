@@ -170,71 +170,57 @@ void DlgChangePwd::pingIsdsServer(void)
 	globWorkPool.assignHi(task);
 }
 
-/* ========================================================================= */
-/*
- * Send SMS code request into ISDS
- */
 void DlgChangePwd::sendSmsCode(void)
-/* ========================================================================= */
 {
-	Q_ASSERT(!m_userName.isEmpty());
+	if (Q_UNLIKELY(m_userName.isEmpty())) {
+		Q_ASSERT(0);
+		return;
+	}
 
-	/* show Premium SMS request dialog */
+	/* Show Premium SMS request dialogue. */
 	QMessageBox::StandardButton reply = QMessageBox::question(this,
-	    tr("SMS code for account ") +
-	    globAccounts[m_userName].accountName(),
-	    tr("Account \"%1\" requires authentication via security code "
-	    "for connection to databox.")
-	        .arg(globAccounts[m_userName].accountName())
-	    + "<br/>" +
+	    tr("SMS code for account '%1'").arg(globAccounts[m_userName].accountName()),
+	    tr("Account \"%1\" requires authentication via security code for connection to data box.")
+	        .arg(globAccounts[m_userName].accountName()) +
+	    "<br/>" +
 	    tr("Security code will be sent you via Premium SMS.") +
 	    "<br/><br/>" +
-	    tr("Do you want to send Premium SMS with "
-	    "security code into your mobile phone?"),
+	    tr("Do you want to send Premium SMS with security code into your mobile phone?"),
 	    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
 	if (reply == QMessageBox::No) {
 		return;
 	}
 
-	int status;
-	TaskChangePwd *task;
-
-	task = new (std::nothrow) TaskChangePwd(m_userName,
+	TaskChangePwd *task = new (std::nothrow) TaskChangePwd(m_userName,
 	    m_ui->currentPwdLine->text().toUtf8().constData(),
-	    m_ui->newPwdLine->text().toUtf8().constData(),
-	    OTP_TIME, QString());
+	    m_ui->newPwdLine->text().toUtf8().constData(), OTP_TIME, QString());
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
-	status = task->m_isdsRetError;
+	int taskStatus = task->m_isdsRetError;
 	delete task; task = Q_NULLPTR;
 
-	if (IE_PARTIAL_SUCCESS == status) {
+	if (IE_PARTIAL_SUCCESS == taskStatus) {
 		QMessageBox::information(this, tr("Enter SMS security code"),
-		    tr("SMS security code for account \"%1\"<br/>"
-		    "has been sent on your mobile phone...")
-		    .arg(globAccounts[m_userName].accountName())
-		     + "<br/><br/>" +
-		    tr("Enter SMS security code for account")
-		    + "<br/><b>"
-		    + globAccounts[m_userName].accountName()
-		    + " </b>(" + m_userName + ").",
+		    tr("SMS security code for account \"%1\"<br/>has been sent on your mobile phone...")
+		        .arg(globAccounts[m_userName].accountName()) +
+		    "<br/><br/>" +
+		    tr("Enter SMS security code for account") +
+		        "<br/><b>" +
+		        globAccounts[m_userName].accountName() +
+		        "</b> (" + m_userName + ").",
 		    QMessageBox::Ok);
 		m_ui->otpLabel->setText(tr("Enter SMS code:"));
 		m_ui->smsPushButton->setEnabled(false);
 	} else {
 		QMessageBox::critical(this, tr("Login error"),
-		    tr("An error occurred while preparing "
-		    "request for SMS with OTP security code.") +
+		    tr("An error occurred while preparing request for SMS with OTP security code.") +
 		    "<br/><br/>" +
-		    tr("Please try again later or you have to use the "
-		    "official web interface of Datové schránky for "
-		    "access to your data box."),
+		    tr("Please try again later or you have to use the official web interface of Datové schránky to access to your data box."),
 		    QMessageBox::Ok);
 	}
 }
-
 
 /* ========================================================================= */
 /*
