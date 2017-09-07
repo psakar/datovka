@@ -86,6 +86,9 @@ private slots:
 	 */
 	void sendSmsCode(void);
 
+	/*!
+	 * @brief Send new password request to ISDS.
+	 */
 	void changePassword(void);
 
 private:

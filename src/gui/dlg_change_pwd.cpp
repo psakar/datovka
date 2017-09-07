@@ -222,16 +222,14 @@ void DlgChangePwd::sendSmsCode(void)
 	}
 }
 
-/* ========================================================================= */
-/*
- * Sent new password request into ISDS
- */
 void DlgChangePwd::changePassword(void)
-/* ========================================================================= */
 {
-	int status;
-	QString errorStr, longErrorStr;
-	TaskChangePwd *task;
+	if (Q_UNLIKELY(m_userName.isEmpty())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	TaskChangePwd *task = Q_NULLPTR;
 
 	if (globAccounts[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_HOTP ||
@@ -250,39 +248,36 @@ void DlgChangePwd::changePassword(void)
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
-	status = task->m_isdsRetError;
-	errorStr = task->m_isdsError;
-	longErrorStr = task->m_isdsLongError;
+	int taskStatus = task->m_isdsRetError;
+	QString errorStr(task->m_isdsError);
+	QString longErrorStr(task->m_isdsLongError);
 	delete task; task = Q_NULLPTR;
 
-	if (status == IE_SUCCESS) {
+	if (taskStatus == IE_SUCCESS) {
 		QMessageBox::information(this, tr("Password has been changed"),
-		    tr("Password has been changed "
-		        "successfully on the server ISDS.")
-		    + "\n\n" +
-		    tr("Restart the application. Also don't forget to remember "
-		        "the new password so you will still be able to log "
-		        "into your data box via the web interface."),
+		    tr("Password has been successfully changed on the ISDS server.") +
+		    "\n\n" +
+		    tr("Restart the application. "
+		        "Also don't forget to remember the new password so you will still be able to log into your data box via the web interface."),
 		    QMessageBox::Ok);
 
 		globAccounts[m_userName].setPassword(
 		    m_ui->newPwdLine->text());
 
-		/* TODO - delete and create new
-		 * isds context with new settings
+		/*
+		 * TODO - Delete and create new ISDS context with new settings.
 		 */
 	} else {
-		Q_ASSERT(!m_userName.isEmpty());
-		QString error = tr("Error: ") + errorStr;
+		QString error(tr("Error: ") + errorStr);
 		if (!longErrorStr.isEmpty()) {
 			error = tr("ISDS returns") + QLatin1String(": ") +
 			    longErrorStr;
 		}
 
 		QMessageBox::warning(this, tr("Password error"),
-		    tr("An error occurred while password was changed.")
-		    + "\n\n" + error + "\n\n" +
-		    tr("You have to fix the problem and try to again."),
+		    tr("An error occurred while an attempt to change the password.") +
+		    "\n\n" + error + "\n\n" +
+		    tr("Fix the problem and try it again."),
 		    QMessageBox::Ok);
 	}
 }
