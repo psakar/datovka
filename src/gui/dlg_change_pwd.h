@@ -76,14 +76,18 @@ private slots:
 	 */
 	void checkInputFields(void);
 
-	void changePassword(void);
+	/*!
+	 * @brief ISDS connection keep-alive function.
+	 */
 	void pingIsdsServer(void);
+
+	void changePassword(void);
 	void sendSmsCode(void);
 
 private:
 	Ui::DlgChangePwd *m_ui; /*!< UI generated from UI file. */
 
-	QTimer m_pingTimer; /*!< Fires ISDS ping operation. */
+	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
 
 	const QString m_userName; /*!< Account username. */
 };

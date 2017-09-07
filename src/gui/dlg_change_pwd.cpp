@@ -28,6 +28,7 @@
 #include "src/settings/accounts.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_change_pwd.h"
+#include "src/worker/task_keep_alive.h"
 #include "ui_dlg_change_pwd.h"
 
 #define PWD_MIN_LENGTH 8 /* Minimal password length is 8 characters. */
@@ -36,7 +37,7 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
     QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgChangePwd),
-    m_pingTimer(this),
+    m_keepAliveTimer(this),
     m_userName(userName)
 {
 	m_ui->setupUi(this);
@@ -82,8 +83,9 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
 	connect(m_ui->buttonBox, SIGNAL(accepted()), this,
 	    SLOT(changePassword()));
 
-	m_pingTimer.start(DLG_ISDS_KEEPALIVE_MS);
-	connect(&m_pingTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
+	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
+	connect(&m_keepAliveTimer, SIGNAL(timeout()), this,
+	    SLOT(pingIsdsServer()));
 }
 
 DlgChangePwd::~DlgChangePwd(void)
@@ -158,18 +160,14 @@ void DlgChangePwd::checkInputFields(void)
 	    buttonEnabled);
 }
 
-/* ========================================================================= */
-/*
- * Ping isds server, test if connection on isds server is active
- */
 void DlgChangePwd::pingIsdsServer(void)
-/* ========================================================================= */
 {
-	if (globIsdsSessions.isConnectedToIsds(m_userName)) {
-		qDebug("%s", "Connection to ISDS is alive :)");
-	} else {
-		qDebug("%s", "Connection to ISDS is dead :(");
+	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		return;
 	}
+	task->setAutoDelete(true);
+	globWorkPool.assignHi(task);
 }
 
 /* ========================================================================= */
