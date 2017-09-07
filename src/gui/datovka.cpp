@@ -6650,10 +6650,8 @@ bool MainWindow::connectToIsds(const QString &userName)
 				    .arg(settingsCopy.accountName()));
 				const QString dbId(
 				    globAccountDbPtr->dbId(acntDbKey));
-				QDialog *changePwd = new DlgChangePwd(
-				    dbId, userName, this);
-				changePwd->exec();
-				changePwd->deleteLater();
+				DlgChangePwd::changePassword(dbId, userName,
+				    this);
 			}
 		}
 	}
