@@ -37,12 +37,53 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgChangePwd),
     m_pingTimer(this),
-    m_boxId(boxId),
     m_userName(userName)
 {
 	m_ui->setupUi(this);
 
-	initPwdChangeDialog();
+	m_ui->userNameLine->setText(m_userName);
+	m_ui->accountLine->setText(boxId);
+	connect(m_ui->togglePwdVisibilityButton, SIGNAL(clicked()), this,
+	    SLOT(togglePwdVisibility()));
+	connect(m_ui->generateButton, SIGNAL(clicked()), this,
+	    SLOT(generatePassword()));
+
+	connect(m_ui->currentPwdLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->newPwdLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->newPwdLine2, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->secCodeLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+
+	m_ui->otpLabel->setEnabled(false);
+	m_ui->secCodeLine->setEnabled(false);
+	m_ui->smsPushButton->setEnabled(false);
+
+	if (globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_HOTP) {
+		m_ui->otpLabel->setText(tr("Enter security code:"));
+		m_ui->otpLabel->setEnabled(true);
+		m_ui->secCodeLine->setEnabled(true);
+	}
+
+	if (globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_TOTP) {
+		m_ui->otpLabel->setText(tr("Enter SMS code:"));
+		m_ui->otpLabel->setEnabled(true);
+		m_ui->secCodeLine->setEnabled(true);
+		m_ui->smsPushButton->setEnabled(true);
+		connect(m_ui->smsPushButton, SIGNAL(clicked()), this,
+		    SLOT(sendSmsCode()));
+	}
+
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	connect(m_ui->buttonBox, SIGNAL(accepted()), this,
+	    SLOT(changePassword()));
+
+	m_pingTimer.start(DLG_ISDS_KEEPALIVE_MS);
+	connect(&m_pingTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
 }
 
 DlgChangePwd::~DlgChangePwd(void)
@@ -50,58 +91,20 @@ DlgChangePwd::~DlgChangePwd(void)
 	delete m_ui;
 }
 
-/* ========================================================================= */
-/*
- * Init dialog
- */
-void DlgChangePwd::initPwdChangeDialog(void)
-/* ========================================================================= */
+void DlgChangePwd::togglePwdVisibility(void)
 {
-	m_ui->userNameLneEdit->setText(m_userName);
-	m_ui->accountLineEdit->setText(m_boxId);
-	connect(m_ui->generateButton, SIGNAL(clicked()), this,
-	    SLOT(generatePassword()));
-	connect(m_ui->showHideButton, SIGNAL(clicked()), this,
-	    SLOT(showHidePasswordLine()));
+	enum QLineEdit::EchoMode echoMode =
+	    (m_ui->currentPwdLine->echoMode() == QLineEdit::Password) ?
+	        QLineEdit::Normal : QLineEdit::Password;
+	QString buttonText(
+	    (m_ui->currentPwdLine->echoMode() == QLineEdit::Password) ?
+	        tr("Hide") : tr("Show"));
 
-	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	connect(m_ui->newPwdLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(m_ui->currentPwdLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(m_ui->NewPwdLineEdit2, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(m_ui->secCodeLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(m_ui->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(changePassword(void)));
-
-	m_ui->secCodeLineEdit->setEnabled(false);
-	m_ui->otpLabel->setEnabled(false);
-	m_ui->smsPushButton->setEnabled(false);
-
-	if (globAccounts[m_userName].loginMethod() ==
-	    AcntSettings::LIM_UNAME_PWD_HOTP) {
-		m_ui->secCodeLineEdit->setEnabled(true);
-		m_ui->otpLabel->setText(tr("Enter security code:"));
-		m_ui->otpLabel->setEnabled(true);
-	}
-
-	if (globAccounts[m_userName].loginMethod() ==
-	    AcntSettings::LIM_UNAME_PWD_TOTP) {
-		m_ui->secCodeLineEdit->setEnabled(true);
-		m_ui->smsPushButton->setEnabled(true);
-		m_ui->otpLabel->setText(tr("Enter SMS code:"));
-		m_ui->otpLabel->setEnabled(true);
-		connect(m_ui->smsPushButton, SIGNAL(clicked()), this,
-		    SLOT(sendSmsCode()));
-	}
-
-	m_pingTimer.start(DLG_ISDS_KEEPALIVE_MS);
-
-	connect(&m_pingTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
+	m_ui->currentPwdLine->setEchoMode(echoMode);
+	m_ui->newPwdLine->setEchoMode(echoMode);
+	m_ui->newPwdLine2->setEchoMode(echoMode);
+	m_ui->togglePwdVisibilityButton->setText(buttonText);
 }
-
 
 /* ========================================================================= */
 /*
@@ -126,8 +129,8 @@ void DlgChangePwd::generatePassword(void)
 {
 	/* set one digit as last char */
 	QString pwd = generateRandomString(randomStringLength) + "0";
-	m_ui->newPwdLineEdit->setText(pwd);
-	m_ui->NewPwdLineEdit2->setText(pwd);
+	m_ui->newPwdLine->setText(pwd);
+	m_ui->newPwdLine2->setText(pwd);
 }
 
 
@@ -156,12 +159,12 @@ QString DlgChangePwd::generateRandomString(int stringLength)
 void DlgChangePwd::checkInputFields(void)
 /* ========================================================================= */
 {
-	bool buttonEnabled = !m_ui->currentPwdLineEdit->text().isEmpty() &&
-	    !m_ui->newPwdLineEdit->text().isEmpty() &&
-	    m_ui->newPwdLineEdit->text().length() >= PWD_MIN_LENGTH &&
-	    !m_ui->NewPwdLineEdit2->text().isEmpty() &&
-	    m_ui->NewPwdLineEdit2->text().length() >= PWD_MIN_LENGTH &&
-	    m_ui->NewPwdLineEdit2->text() == m_ui->newPwdLineEdit->text();
+	bool buttonEnabled = !m_ui->currentPwdLine->text().isEmpty() &&
+	    !m_ui->newPwdLine->text().isEmpty() &&
+	    m_ui->newPwdLine->text().length() >= PWD_MIN_LENGTH &&
+	    !m_ui->newPwdLine2->text().isEmpty() &&
+	    m_ui->newPwdLine2->text().length() >= PWD_MIN_LENGTH &&
+	    m_ui->newPwdLine->text() == m_ui->newPwdLine2->text();
 
 	Q_ASSERT(!m_userName.isEmpty());
 
@@ -170,31 +173,11 @@ void DlgChangePwd::checkInputFields(void)
 	    globAccounts[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		buttonEnabled = buttonEnabled &&
-		    !m_ui->secCodeLineEdit->text().isEmpty();
+		    !m_ui->secCodeLine->text().isEmpty();
 	}
 
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
 	    buttonEnabled);
-}
-
-/* ========================================================================= */
-/*
- * Show/hide text represantion of password in the textlines
- */
-void DlgChangePwd::showHidePasswordLine(void)
-/* ========================================================================= */
-{
-	if (m_ui->currentPwdLineEdit->echoMode() == QLineEdit::Password) {
-		m_ui->currentPwdLineEdit->setEchoMode(QLineEdit::Normal);
-		m_ui->newPwdLineEdit->setEchoMode(QLineEdit::Normal);
-		m_ui->NewPwdLineEdit2->setEchoMode(QLineEdit::Normal);
-		m_ui->showHideButton->setText(tr("Hide"));
-	} else {
-		m_ui->currentPwdLineEdit->setEchoMode(QLineEdit::Password);
-		m_ui->newPwdLineEdit->setEchoMode(QLineEdit::Password);
-		m_ui->NewPwdLineEdit2->setEchoMode(QLineEdit::Password);
-		m_ui->showHideButton->setText(tr("Show"));
-	}
 }
 
 /* ========================================================================= */
@@ -228,8 +211,8 @@ void DlgChangePwd::sendSmsCode(void)
 	TaskChangePwd *task;
 
 	task = new (std::nothrow) TaskChangePwd(m_userName,
-	    m_ui->currentPwdLineEdit->text().toUtf8().constData(),
-	    m_ui->newPwdLineEdit->text().toUtf8().constData(),
+	    m_ui->currentPwdLine->text().toUtf8().constData(),
+	    m_ui->newPwdLine->text().toUtf8().constData(),
 	    OTP_TIME, QString());
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
@@ -279,14 +262,14 @@ void DlgChangePwd::changePassword(void)
 	    globAccounts[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		task = new (std::nothrow) TaskChangePwd(m_userName,
-		    m_ui->currentPwdLineEdit->text().toUtf8().constData(),
-		    m_ui->newPwdLineEdit->text().toUtf8().constData(),
+		    m_ui->currentPwdLine->text().toUtf8().constData(),
+		    m_ui->newPwdLine->text().toUtf8().constData(),
 		    (globAccounts[m_userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
-		    m_ui->secCodeLineEdit->text());
+		    m_ui->secCodeLine->text());
 	} else {
 		task = new (std::nothrow) TaskChangePwd(m_userName,
-		    m_ui->currentPwdLineEdit->text().toUtf8().constData(),
-		    m_ui->newPwdLineEdit->text().toUtf8().constData());
+		    m_ui->currentPwdLine->text().toUtf8().constData(),
+		    m_ui->newPwdLine->text().toUtf8().constData());
 	}
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
@@ -307,7 +290,7 @@ void DlgChangePwd::changePassword(void)
 		    QMessageBox::Ok);
 
 		globAccounts[m_userName].setPassword(
-		    m_ui->newPwdLineEdit->text());
+		    m_ui->newPwdLine->text());
 
 		/* TODO - delete and create new
 		 * isds context with new settings

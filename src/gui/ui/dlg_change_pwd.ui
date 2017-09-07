@@ -27,7 +27,7 @@
    <item>
     <widget class="QLabel" name="infoLabel">
      <property name="text">
-      <string>This sets a new password on the ISDS server. Please enter your current and new password below:</string>
+      <string>This changes the password on the ISDS server. Please enter your current and the new password below:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -42,12 +42,12 @@
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>DataBox ID:</string>
+        <string>Data-box ID:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLineEdit" name="accountLineEdit">
+      <widget class="QLineEdit" name="accountLine">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -64,7 +64,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="currentPwdLineEdit">
+      <widget class="QLineEdit" name="currentPwdLine">
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
        </property>
@@ -82,7 +82,7 @@ must contain at least one digit and one capital letter.</string>
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QLineEdit" name="newPwdLineEdit">
+      <widget class="QLineEdit" name="newPwdLine">
        <property name="toolTip">
         <string>The password must be at least 8 characters long and
 must contain at least one digit and one capital letter.</string>
@@ -105,7 +105,7 @@ at least one digit and one capital letter.</string>
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QLineEdit" name="NewPwdLineEdit2">
+      <widget class="QLineEdit" name="newPwdLine2">
        <property name="toolTip">
         <string>Repeat the password. The password must be
 at least 8 characters long and must contain
@@ -139,7 +139,7 @@ at least one digit and one capital letter.</string>
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="showHideButton">
+        <widget class="QPushButton" name="togglePwdVisibilityButton">
          <property name="text">
           <string>Show</string>
          </property>
@@ -162,7 +162,7 @@ at least one digit and one capital letter.</string>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="userNameLneEdit">
+      <widget class="QLineEdit" name="userNameLine">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -174,7 +174,7 @@ at least one digit and one capital letter.</string>
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="infoPassword">
+    <widget class="QLabel" name="infoPwdLabel">
      <property name="font">
       <font>
        <italic>true</italic>
@@ -202,7 +202,7 @@ at least one digit and one capital letter.</string>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="secCodeLineEdit">
+      <widget class="QLineEdit" name="secCodeLine">
        <property name="toolTip">
         <string>Enter SMS or security code</string>
        </property>

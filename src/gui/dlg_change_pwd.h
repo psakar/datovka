@@ -35,25 +35,37 @@ class DlgChangePwd : public QDialog {
 	Q_OBJECT
 
 public:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] boxId Data-box identifier.
+	 * @param[in] userName Account username.
+	 * @param[in] parent Parent widget.
+	 */
 	DlgChangePwd(const QString &boxId, const QString &userName,
 	    QWidget *parent = Q_NULLPTR);
 
+	/*!
+	 * @brief Destructor.
+	 */
 	~DlgChangePwd(void);
 
 	static
 	QString generateRandomString(int stringLength);
 
 private slots:
+	/*!
+	 * @brief Show/hide text representation of password in the text lines.
+	 */
+	void togglePwdVisibility(void);
+
 	void generatePassword(void);
-	void showHidePasswordLine(void);
 	void changePassword(void);
 	void checkInputFields(void);
 	void pingIsdsServer(void);
 	void sendSmsCode(void);
 
 private:
-	void initPwdChangeDialog(void);
-
 	Ui::DlgChangePwd *m_ui; /*!< UI generated from UI file. */
 
 	QTimer m_pingTimer; /*!< Fires ISDS ping operation. */
@@ -63,7 +75,6 @@ private:
 	static
 	const int randomStringLength;
 
-	const QString m_boxId;
 	const QString m_userName;
 };
 
