@@ -80,8 +80,6 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
 	}
 
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	connect(m_ui->buttonBox, SIGNAL(accepted()), this,
-	    SLOT(changePassword()));
 
 	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 	connect(&m_keepAliveTimer, SIGNAL(timeout()), this,
@@ -91,6 +89,25 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
 DlgChangePwd::~DlgChangePwd(void)
 {
 	delete m_ui;
+}
+
+bool DlgChangePwd::changePassword(const QString &boxId, const QString &userName,
+    QWidget *parent)
+{
+	if (Q_UNLIKELY(boxId.isEmpty() || userName.isEmpty())) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	DlgChangePwd dlg(boxId, userName, parent);
+	if (QDialog::Accepted == dlg.exec()) {
+		return sendChangePwdRequest(userName,
+		    dlg.m_ui->currentPwdLine->text(),
+		    dlg.m_ui->newPwdLine->text(), dlg.m_ui->secCodeLine->text(),
+		    parent);
+	} else {
+		return false;
+	}
 }
 
 QString DlgChangePwd::generateRandomString(int length)
@@ -193,8 +210,12 @@ void DlgChangePwd::sendSmsCode(void)
 	}
 
 	TaskChangePwd *task = new (std::nothrow) TaskChangePwd(m_userName,
-	    m_ui->currentPwdLine->text().toUtf8().constData(),
-	    m_ui->newPwdLine->text().toUtf8().constData(), OTP_TIME, QString());
+	    m_ui->currentPwdLine->text(), m_ui->newPwdLine->text(),
+	    OTP_TIME, QString());
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
 
@@ -222,28 +243,32 @@ void DlgChangePwd::sendSmsCode(void)
 	}
 }
 
-void DlgChangePwd::changePassword(void)
+bool DlgChangePwd::sendChangePwdRequest(const QString &userName,
+    const QString &currentPwd, const QString &newPwd, const QString &secCode,
+    QWidget *parent)
 {
-	if (Q_UNLIKELY(m_userName.isEmpty())) {
+	if (Q_UNLIKELY(userName.isEmpty())) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 
 	TaskChangePwd *task = Q_NULLPTR;
 
-	if (globAccounts[m_userName].loginMethod() ==
+	if (globAccounts[userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_HOTP ||
-	    globAccounts[m_userName].loginMethod() ==
+	    globAccounts[userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
-		task = new (std::nothrow) TaskChangePwd(m_userName,
-		    m_ui->currentPwdLine->text().toUtf8().constData(),
-		    m_ui->newPwdLine->text().toUtf8().constData(),
-		    (globAccounts[m_userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
-		    m_ui->secCodeLine->text());
+		task = new (std::nothrow) TaskChangePwd(userName,
+		    currentPwd, newPwd,
+		    (globAccounts[userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
+		    secCode);
 	} else {
-		task = new (std::nothrow) TaskChangePwd(m_userName,
-		    m_ui->currentPwdLine->text().toUtf8().constData(),
-		    m_ui->newPwdLine->text().toUtf8().constData());
+		task = new (std::nothrow) TaskChangePwd(userName, currentPwd,
+		    newPwd);
+	}
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
 	}
 	task->setAutoDelete(false);
 	globWorkPool.runSingle(task);
@@ -254,15 +279,15 @@ void DlgChangePwd::changePassword(void)
 	delete task; task = Q_NULLPTR;
 
 	if (taskStatus == IE_SUCCESS) {
-		QMessageBox::information(this, tr("Password has been changed"),
+		QMessageBox::information(parent,
+		    tr("Password has been changed"),
 		    tr("Password has been successfully changed on the ISDS server.") +
 		    "\n\n" +
 		    tr("Restart the application. "
 		        "Also don't forget to remember the new password so you will still be able to log into your data box via the web interface."),
 		    QMessageBox::Ok);
 
-		globAccounts[m_userName].setPassword(
-		    m_ui->newPwdLine->text());
+		globAccounts[userName].setPassword(newPwd);
 
 		/*
 		 * TODO - Delete and create new ISDS context with new settings.
@@ -274,10 +299,12 @@ void DlgChangePwd::changePassword(void)
 			    longErrorStr;
 		}
 
-		QMessageBox::warning(this, tr("Password error"),
+		QMessageBox::warning(parent, tr("Password error"),
 		    tr("An error occurred while an attempt to change the password.") +
 		    "\n\n" + error + "\n\n" +
 		    tr("Fix the problem and try it again."),
 		    QMessageBox::Ok);
 	}
+
+	return taskStatus == IE_SUCCESS;
 }

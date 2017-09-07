@@ -34,7 +34,7 @@ namespace Ui {
 class DlgChangePwd : public QDialog {
 	Q_OBJECT
 
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 *
@@ -45,10 +45,23 @@ public:
 	DlgChangePwd(const QString &boxId, const QString &userName,
 	    QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgChangePwd(void);
+
+	/*!
+	 * @brief Changes password for account.
+	 *
+	 * @param[in] boxId Data-box identifier.
+	 * @param[in] userName Account username.
+	 * @param[in] parent Parent widget.
+	 * @return True on success.
+	 */
+	static
+	bool changePassword(const QString &boxId, const QString &userName,
+	    QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Returns Randomly generated string composed of predefined
@@ -86,12 +99,22 @@ private slots:
 	 */
 	void sendSmsCode(void);
 
+private:
 	/*!
 	 * @brief Send new password request to ISDS.
+	 *
+	 * @param[in] userName Account username.
+	 * @param[in] currentPwd Current password.
+	 * @param[in] newPwd New password.
+	 * @param[in] secCode Security code.
+	 * @param[in] parent Parent widget.
+	 * @return True on success.
 	 */
-	void changePassword(void);
+	static
+	bool sendChangePwdRequest(const QString &userName,
+	    const QString &currentPwd, const QString &newPwd,
+	    const QString &secCode, QWidget *parent = Q_NULLPTR);
 
-private:
 	Ui::DlgChangePwd *m_ui; /*!< UI generated from UI file. */
 
 	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
