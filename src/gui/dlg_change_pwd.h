@@ -50,8 +50,15 @@ public:
 	 */
 	~DlgChangePwd(void);
 
+	/*!
+	 * @brief Returns Randomly generated string composed of predefined
+	 *     characters.
+	 *
+	 * @param[in] length String length.
+	 * @return Randomly generated string.
+	 */
 	static
-	QString generateRandomString(int stringLength);
+	QString generateRandomString(int length);
 
 private slots:
 	/*!
@@ -69,11 +76,6 @@ private:
 	Ui::DlgChangePwd *m_ui; /*!< UI generated from UI file. */
 
 	QTimer m_pingTimer; /*!< Fires ISDS ping operation. */
-
-	static
-	const QString possibleCharacters;
-	static
-	const int randomStringLength;
 
 	const QString m_userName;
 };

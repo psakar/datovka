@@ -91,6 +91,24 @@ DlgChangePwd::~DlgChangePwd(void)
 	delete m_ui;
 }
 
+QString DlgChangePwd::generateRandomString(int length)
+{
+	static const QString possibleCharacters(
+	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	    "abcdefghijklmnopqrstuvwxyz"
+	    "0123456789"
+	    "!#$%&()*+,-.:=?@[]_{|}~");
+
+	QString randomString;
+
+	for(int i = 0; i < length; ++i) {
+		int index = qrand() % possibleCharacters.length();
+		QChar nextChar = possibleCharacters.at(index);
+		randomString.append(nextChar);
+	}
+	return randomString;
+}
+
 void DlgChangePwd::togglePwdVisibility(void)
 {
 	enum QLineEdit::EchoMode echoMode =
@@ -128,29 +146,10 @@ void DlgChangePwd::generatePassword(void)
 /* ========================================================================= */
 {
 	/* set one digit as last char */
-	QString pwd = generateRandomString(randomStringLength) + "0";
+	QString pwd = generateRandomString(PWD_MIN_LENGTH) + "0";
 	m_ui->newPwdLine->setText(pwd);
 	m_ui->newPwdLine2->setText(pwd);
 }
-
-
-/* ========================================================================= */
-/*
- * Generate a new password string from set of char
- */
-QString DlgChangePwd::generateRandomString(int stringLength)
-/* ========================================================================= */
-{
-	QString randomString;
-
-	for(int i = 0; i < stringLength; ++i) {
-		int index = qrand() % possibleCharacters.length();
-		QChar nextChar = possibleCharacters.at(index);
-		randomString.append(nextChar);
-	}
-	return randomString;
-}
-
 
 /* ========================================================================= */
 /*
@@ -310,16 +309,3 @@ void DlgChangePwd::changePassword(void)
 		    QMessageBox::Ok);
 	}
 }
-
-
-/* ========================================================================= */
-/*
- * Set of possible chars for generation of new password
- */
-const QString DlgChangePwd::possibleCharacters(
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "abcdefghijklmnopqrstuvwxyz"
-    "0123456789"
-    "!#$%&()*+,-.:=?@[]_{|}~");
-const int DlgChangePwd::randomStringLength = PWD_MIN_LENGTH;
-/* ========================================================================= */
