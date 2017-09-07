@@ -66,9 +66,17 @@ private slots:
 	 */
 	void togglePwdVisibility(void);
 
+	/*!
+	 * @brief Fill the new password into the text lines.
+	 */
 	void generatePassword(void);
-	void changePassword(void);
+
+	/*!
+	 * @brief Check input text lines, password length. Activated OK button.
+	 */
 	void checkInputFields(void);
+
+	void changePassword(void);
 	void pingIsdsServer(void);
 	void sendSmsCode(void);
 
@@ -77,7 +85,7 @@ private:
 
 	QTimer m_pingTimer; /*!< Fires ISDS ping operation. */
 
-	const QString m_userName;
+	const QString m_userName; /*!< Account username. */
 };
 
 #endif /* _DLG_CHANGE_PWD_H_ */

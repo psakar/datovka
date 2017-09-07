@@ -124,6 +124,40 @@ void DlgChangePwd::togglePwdVisibility(void)
 	m_ui->togglePwdVisibilityButton->setText(buttonText);
 }
 
+void DlgChangePwd::generatePassword(void)
+{
+	/* Set one digit as last character. */
+	const QString pwd(generateRandomString(PWD_MIN_LENGTH) + "0");
+	m_ui->newPwdLine->setText(pwd);
+	m_ui->newPwdLine2->setText(pwd);
+}
+
+void DlgChangePwd::checkInputFields(void)
+{
+	bool buttonEnabled = !m_ui->currentPwdLine->text().isEmpty() &&
+	    !m_ui->newPwdLine->text().isEmpty() &&
+	    m_ui->newPwdLine->text().length() >= PWD_MIN_LENGTH &&
+	    !m_ui->newPwdLine2->text().isEmpty() &&
+	    m_ui->newPwdLine2->text().length() >= PWD_MIN_LENGTH &&
+	    m_ui->newPwdLine->text() == m_ui->newPwdLine2->text();
+
+	if (Q_UNLIKELY(m_userName.isEmpty())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_HOTP ||
+	    globAccounts[m_userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_TOTP) {
+		buttonEnabled = buttonEnabled &&
+		    !m_ui->secCodeLine->text().isEmpty();
+	}
+
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	    buttonEnabled);
+}
+
 /* ========================================================================= */
 /*
  * Ping isds server, test if connection on isds server is active
@@ -136,47 +170,6 @@ void DlgChangePwd::pingIsdsServer(void)
 	} else {
 		qDebug("%s", "Connection to ISDS is dead :(");
 	}
-}
-
-/* ========================================================================= */
-/*
- * Fill the new password in the textlines
- */
-void DlgChangePwd::generatePassword(void)
-/* ========================================================================= */
-{
-	/* set one digit as last char */
-	QString pwd = generateRandomString(PWD_MIN_LENGTH) + "0";
-	m_ui->newPwdLine->setText(pwd);
-	m_ui->newPwdLine2->setText(pwd);
-}
-
-/* ========================================================================= */
-/*
- * Check input textline, passwor length and activated OK button
- */
-void DlgChangePwd::checkInputFields(void)
-/* ========================================================================= */
-{
-	bool buttonEnabled = !m_ui->currentPwdLine->text().isEmpty() &&
-	    !m_ui->newPwdLine->text().isEmpty() &&
-	    m_ui->newPwdLine->text().length() >= PWD_MIN_LENGTH &&
-	    !m_ui->newPwdLine2->text().isEmpty() &&
-	    m_ui->newPwdLine2->text().length() >= PWD_MIN_LENGTH &&
-	    m_ui->newPwdLine->text() == m_ui->newPwdLine2->text();
-
-	Q_ASSERT(!m_userName.isEmpty());
-
-	if (globAccounts[m_userName].loginMethod() ==
-	    AcntSettings::LIM_UNAME_PWD_HOTP ||
-	    globAccounts[m_userName].loginMethod() ==
-	    AcntSettings::LIM_UNAME_PWD_TOTP) {
-		buttonEnabled = buttonEnabled &&
-		    !m_ui->secCodeLine->text().isEmpty();
-	}
-
-	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
-	    buttonEnabled);
 }
 
 /* ========================================================================= */
