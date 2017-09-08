@@ -100,21 +100,6 @@ private slots:
 	void sendSmsCode(void);
 
 private:
-	/*!
-	 * @brief Send new password request to ISDS.
-	 *
-	 * @param[in] userName Account username.
-	 * @param[in] currentPwd Current password.
-	 * @param[in] newPwd New password.
-	 * @param[in] secCode Security code.
-	 * @param[in] parent Parent widget.
-	 * @return True on success.
-	 */
-	static
-	bool sendChangePwdRequest(const QString &userName,
-	    const QString &currentPwd, const QString &newPwd,
-	    const QString &secCode, QWidget *parent = Q_NULLPTR);
-
 	Ui::DlgChangePwd *m_ui; /*!< UI generated from UI file. */
 
 	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */

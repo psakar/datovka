@@ -91,6 +91,83 @@ DlgChangePwd::~DlgChangePwd(void)
 	delete m_ui;
 }
 
+/*!
+ * @brief Send new password request to ISDS.
+ *
+ * @param[in] userName Account username.
+ * @param[in] currentPwd Current password.
+ * @param[in] newPwd New password.
+ * @param[in] secCode Security code.
+ * @param[in] parent Parent widget.
+ * @return True on success.
+ */
+static
+bool sendChangePwdRequest(const QString &userName,
+    const QString &currentPwd, const QString &newPwd,
+    const QString &secCode, QWidget *parent = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(userName.isEmpty())) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	TaskChangePwd *task = Q_NULLPTR;
+
+	if (globAccounts[userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_HOTP ||
+	    globAccounts[userName].loginMethod() ==
+	    AcntSettings::LIM_UNAME_PWD_TOTP) {
+		task = new (std::nothrow) TaskChangePwd(userName,
+		    currentPwd, newPwd,
+		    (globAccounts[userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
+		    secCode);
+	} else {
+		task = new (std::nothrow) TaskChangePwd(userName, currentPwd,
+		    newPwd);
+	}
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	task->setAutoDelete(false);
+	globWorkPool.runSingle(task);
+
+	int taskStatus = task->m_isdsRetError;
+	QString errorStr(task->m_isdsError);
+	QString longErrorStr(task->m_isdsLongError);
+	delete task; task = Q_NULLPTR;
+
+	if (taskStatus == IE_SUCCESS) {
+		QMessageBox::information(parent,
+		    DlgChangePwd::tr("Password has been changed"),
+		    DlgChangePwd::tr("Password has been successfully changed on the ISDS server.") +
+		    "\n\n" +
+		    DlgChangePwd::tr("Restart the application. "
+		        "Also don't forget to remember the new password so you will still be able to log into your data box via the web interface."),
+		    QMessageBox::Ok);
+
+		globAccounts[userName].setPassword(newPwd);
+
+		/*
+		 * TODO - Delete and create new ISDS context with new settings.
+		 */
+	} else {
+		QString error(DlgChangePwd::tr("Error: ") + errorStr);
+		if (!longErrorStr.isEmpty()) {
+			error += "\n" + DlgChangePwd::tr("ISDS returns") +
+			    QLatin1String(": ") + longErrorStr;
+		}
+
+		QMessageBox::warning(parent, DlgChangePwd::tr("Password error"),
+		    DlgChangePwd::tr("An error occurred while an attempt to change the password.") +
+		    "\n\n" + error + "\n\n" +
+		    DlgChangePwd::tr("Fix the problem and try it again."),
+		    QMessageBox::Ok);
+	}
+
+	return taskStatus == IE_SUCCESS;
+}
+
 bool DlgChangePwd::changePassword(const QString &boxId, const QString &userName,
     QWidget *parent)
 {
@@ -241,70 +318,4 @@ void DlgChangePwd::sendSmsCode(void)
 		    tr("Please try again later or you have to use the official web interface of Datové schránky to access to your data box."),
 		    QMessageBox::Ok);
 	}
-}
-
-bool DlgChangePwd::sendChangePwdRequest(const QString &userName,
-    const QString &currentPwd, const QString &newPwd, const QString &secCode,
-    QWidget *parent)
-{
-	if (Q_UNLIKELY(userName.isEmpty())) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	TaskChangePwd *task = Q_NULLPTR;
-
-	if (globAccounts[userName].loginMethod() ==
-	    AcntSettings::LIM_UNAME_PWD_HOTP ||
-	    globAccounts[userName].loginMethod() ==
-	    AcntSettings::LIM_UNAME_PWD_TOTP) {
-		task = new (std::nothrow) TaskChangePwd(userName,
-		    currentPwd, newPwd,
-		    (globAccounts[userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
-		    secCode);
-	} else {
-		task = new (std::nothrow) TaskChangePwd(userName, currentPwd,
-		    newPwd);
-	}
-	if (Q_UNLIKELY(task == Q_NULLPTR)) {
-		Q_ASSERT(0);
-		return false;
-	}
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
-
-	int taskStatus = task->m_isdsRetError;
-	QString errorStr(task->m_isdsError);
-	QString longErrorStr(task->m_isdsLongError);
-	delete task; task = Q_NULLPTR;
-
-	if (taskStatus == IE_SUCCESS) {
-		QMessageBox::information(parent,
-		    tr("Password has been changed"),
-		    tr("Password has been successfully changed on the ISDS server.") +
-		    "\n\n" +
-		    tr("Restart the application. "
-		        "Also don't forget to remember the new password so you will still be able to log into your data box via the web interface."),
-		    QMessageBox::Ok);
-
-		globAccounts[userName].setPassword(newPwd);
-
-		/*
-		 * TODO - Delete and create new ISDS context with new settings.
-		 */
-	} else {
-		QString error(tr("Error: ") + errorStr);
-		if (!longErrorStr.isEmpty()) {
-			error = tr("ISDS returns") + QLatin1String(": ") +
-			    longErrorStr;
-		}
-
-		QMessageBox::warning(parent, tr("Password error"),
-		    tr("An error occurred while an attempt to change the password.") +
-		    "\n\n" + error + "\n\n" +
-		    tr("Fix the problem and try it again."),
-		    QMessageBox::Ok);
-	}
-
-	return taskStatus == IE_SUCCESS;
 }
