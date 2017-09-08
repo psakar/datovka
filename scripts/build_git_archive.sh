@@ -121,9 +121,16 @@ compute_checksum() {
 		return 1
 	fi
 
+	SED=sed
+	if [ $(uname) = "Darwin" ]; then
+		# OS X version of sed does not recognise \s as white space
+		# identifier .
+		SED=gsed
+	fi
+
 	if [ "x${CMD_SHA256SUM}" != "x" -a "${CMD_OPENSSL}" != "x" ]; then
-		SHA256SUM_SUM=$("${CMD_SHA256SUM}" "${FILE_NAME}" | sed -e 's/\s.*$//g')
-		OPENSSL_SUM=$("${CMD_OPENSSL}" sha256 "${FILE_NAME}" | sed -e 's/^.*\s//g')
+		SHA256SUM_SUM=$("${CMD_SHA256SUM}" "${FILE_NAME}" | "${SED}" -e 's/\s.*$//g')
+		OPENSSL_SUM=$("${CMD_OPENSSL}" sha256 "${FILE_NAME}" | "${SED}" -e 's/^.*\s//g')
 
 		# Compare checksums.
 		if [ "x${SHA256SUM_SUM}" = "x${OPENSSL_SUM}" -a "x${SHA256SUM_SUM}" != "x" ]; then
@@ -134,9 +141,9 @@ compute_checksum() {
 			return 1
 		fi
 	elif [ "x${CMD_SHA256SUM}" != "x" ]; then
-		"${CMD_SHA256SUM}" "${FILE_NAME}" | sed -e 's/\s.*$//g' > "${FILE_NAME}.${SUMSUFF}"
+		"${CMD_SHA256SUM}" "${FILE_NAME}" | "${SED}" -e 's/\s.*$//g' > "${FILE_NAME}.${SUMSUFF}"
 	elif [ "x${CMD_OPENSSL}" != "x" ]; then
-		"${CMD_OPENSSL}" sha256 "${FILE_NAME}" | sed -e 's/^.*\s//g' > "${FILE_NAME}.${SUMSUFF}"
+		"${CMD_OPENSSL}" sha256 "${FILE_NAME}" | "${SED}" -e 's/^.*\s//g' > "${FILE_NAME}.${SUMSUFF}"
 	else
 		echo "No command to compute sha256 checksum." >&2
 		return 1
