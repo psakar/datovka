@@ -102,12 +102,18 @@ archive_add_qm_files() {
 compute_checksum() {
 	FILE_NAME="$1"
 
-	CHECKSUM=sha256sum
+	CMD_SHA256SUM=sha256sum
+	CMD_OPENSSL=openssl
 	SUMSUFF=sha256
 
-	if [ -z $(command -v "${CHECKSUM}") ]; then
-		echo "Install '${CHECKSUM}' to be able to create checksum file." >&2
-		return 1
+	if [ -z $(command -v "${CMD_SHA256SUM}") ]; then
+		echo "Install '${CMD_SHA256SUM}' to be able to check checksum file." >&2
+		CMD_SHA256SUM=""
+	fi
+
+	if [ -z $(command -v "${CMD_OPENSSL}") ]; then
+		echo "Install '${CMD_OPENSSL}' to be able to check checksum file." >&2
+		CMD_OPENSSL=""
 	fi
 
 	if [ "x${FILE_NAME}" = "x" ]; then
@@ -115,7 +121,26 @@ compute_checksum() {
 		return 1
 	fi
 
-	"${CHECKSUM}" "${FILE_NAME}" | sed -e 's/\s.*$//g' > "${FILE_NAME}.${SUMSUFF}"
+	if [ "x${CMD_SHA256SUM}" != "x" -a "${CMD_OPENSSL}" != "x" ]; then
+		SHA256SUM_SUM=$("${CMD_SHA256SUM}" "${FILE_NAME}" | sed -e 's/\s.*$//g')
+		OPENSSL_SUM=$("${CMD_OPENSSL}" sha256 "${FILE_NAME}" | sed -e 's/^.*\s//g')
+
+		# Compare checksums.
+		if [ "x${SHA256SUM_SUM}" = "x${OPENSSL_SUM}" -a "x${SHA256SUM_SUM}" != "x" ]; then
+			echo "Checksum comparison OK."
+			echo "${SHA256SUM_SUM}" > "${FILE_NAME}.${SUMSUFF}"
+		else
+			echo "Checksums differ or are empty." >&2
+			return 1
+		fi
+	elif [ "x${CMD_SHA256SUM}" != "x" ]; then
+		"${CMD_SHA256SUM}" "${FILE_NAME}" | sed -e 's/\s.*$//g' > "${FILE_NAME}.${SUMSUFF}"
+	elif [ "x${CMD_OPENSSL}" != "x" ]; then
+		"${CMD_OPENSSL}" sha256 "${FILE_NAME}" | sed -e 's/^.*\s//g' > "${FILE_NAME}.${SUMSUFF}"
+	else
+		echo "No command to compute sha256 checksum." >&2
+		return 1
+	fi
 }
 
 rm -f "${TARGTET_TAR}" "${TARGET_COMPRESSED}"
