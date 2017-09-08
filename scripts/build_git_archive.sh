@@ -87,6 +87,11 @@ archive_add_qm_files() {
 	# Add .qm files into .tar archive.
 	for file in ${GENERATED_QM_FILES}; do
 		ADDED_FILE_NAME="${PACKAGE_NAME}/locale/${file}"
+
+		# Modify timestamps of generated files in order to be able
+		# to generate reproducible checksums.
+		touch -r "${PACKAGE_NAME}/datovka.pro" "${ADDED_FILE_NAME}"
+
 		tar --append -f "../${ARCHIVE}" "${ADDED_FILE_NAME}"
 	done
 
