@@ -148,6 +148,21 @@ compute_checksum() {
 		echo "No command to compute sha256 checksum." >&2
 		return 1
 	fi
+
+	SUM_FILE_SIZE=""
+	EXPECTED_SUM_FILE_SIZE="65"
+	if [ $(uname) != "Darwin" ]; then
+		SUM_FILE_SIZE=$(stat -c '%s' "${FILE_NAME}.${SUMSUFF}")
+	else
+		SUM_FILE_SIZE=$(stat -f '%z' "${FILE_NAME}.${SUMSUFF}")
+	fi
+	if [ "x${SUM_FILE_SIZE}" = "x${EXPECTED_SUM_FILE_SIZE}" ]; then
+		echo "File size of '${FILE_NAME}.${SUMSUFF}' OK."
+	else
+		echo "Unexpected size '${SUM_FILE_SIZE}' of file '${FILE_NAME}.${SUMSUFF}'."
+		rm "${FILE_NAME}.${SUMSUFF}"
+		return 1
+	fi
 }
 
 rm -f "${TARGTET_TAR}" "${TARGET_COMPRESSED}"
