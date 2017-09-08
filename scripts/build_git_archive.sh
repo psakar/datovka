@@ -44,4 +44,8 @@ git archive --format=tar --prefix=datovka-${DESIRED_VERSION}/ "${DESIRED_TAG}" |
 # Create sha256 checksum, if sha256sum exists.
 CHECKSUM=sha256sum
 SUMSUFF=sha256
-command -v "${CHECKSUM}" >/dev/null 2>&1 && "${CHECKSUM}" "${TARGET_FILE}" | sed -e 's/\s.*$//g' > "${TARGET_FILE}.${SUMSUFF}"
+if [ ! -z $(command -v "${CHECKSUM}") ]; then
+	"${CHECKSUM}" "${TARGET_FILE}" | sed -e 's/\s.*$//g' > "${TARGET_FILE}.${SUMSUFF}"
+else
+	echo "Install '${CHECKSUM}' to be able to create checksum file." >&2
+fi
