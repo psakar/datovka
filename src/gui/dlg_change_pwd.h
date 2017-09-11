@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,50 +21,90 @@
  * the two.
  */
 
-
 #ifndef _DLG_CHANGE_PWD_H_
 #define _DLG_CHANGE_PWD_H_
 
-#define PWD_MIN_LENGTH 8 // min length of pwd is 8 chars
-
 #include <QDialog>
 #include <QTimer>
-#include <QTreeView>
 
-#include "src/common.h"
-#include "ui_dlg_change_pwd.h"
+namespace Ui {
+	class DlgChangePwd;
+}
 
-
-class DlgChangePwd : public QDialog, public Ui::ChangePwd {
+class DlgChangePwd : public QDialog {
 	Q_OBJECT
 
-public:
+private:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] boxId Data-box identifier.
+	 * @param[in] userName Account username.
+	 * @param[in] parent Parent widget.
+	 */
 	DlgChangePwd(const QString &boxId, const QString &userName,
-	    QWidget *parent = 0);
+	    QWidget *parent = Q_NULLPTR);
 
+public:
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgChangePwd(void);
+
+	/*!
+	 * @brief Changes password for account.
+	 *
+	 * @param[in] boxId Data-box identifier.
+	 * @param[in] userName Account username.
+	 * @param[in] parent Parent widget.
+	 * @return True on success.
+	 */
 	static
-	QString generateRandomString(int stringLength);
+	bool changePassword(const QString &boxId, const QString &userName,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Returns Randomly generated string composed of predefined
+	 *     characters.
+	 *
+	 * @param[in] length String length.
+	 * @return Randomly generated string.
+	 */
+	static
+	QString generateRandomString(int length);
 
 private slots:
+	/*!
+	 * @brief Show/hide text representation of password in the text lines.
+	 */
+	void togglePwdVisibility(void);
+
+	/*!
+	 * @brief Fill the new password into the text lines.
+	 */
 	void generatePassword(void);
-	void showHidePasswordLine(void);
-	void changePassword(void);
+
+	/*!
+	 * @brief Check input text lines, password length. Activated OK button.
+	 */
 	void checkInputFields(void);
+
+	/*!
+	 * @brief ISDS connection keep-alive function.
+	 */
 	void pingIsdsServer(void);
+
+	/*!
+	 * @brief Send SMS code request into ISDS.
+	 */
 	void sendSmsCode(void);
 
 private:
-	QTimer *pingTimer;
-	void initPwdChangeDialog(void);
+	Ui::DlgChangePwd *m_ui; /*!< UI generated from UI file. */
 
-	static
-	const QString possibleCharacters;
-	static
-	const int randomStringLength;
+	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
 
-	const QString m_boxId;
-	const QString m_userName;
+	const QString m_userName; /*!< Account username. */
 };
-
 
 #endif /* _DLG_CHANGE_PWD_H_ */

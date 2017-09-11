@@ -4700,12 +4700,10 @@ void MainWindow::changeAccountPassword(void)
 
 	const AcntSettings &accountInfo(globAccounts[userName]);
 
-	showStatusTextWithTimeout(tr("Change password of account "
-	    "\"%1\".").arg(accountInfo.accountName()));
+	showStatusTextWithTimeout(tr("Change password of account \"%1\".")
+	    .arg(accountInfo.accountName()));
 
-	QDialog *changePwd = new DlgChangePwd(dbId, userName, this);
-	changePwd->exec();
-	changePwd->deleteLater();
+	DlgChangePwd::changePassword(dbId, userName, this);
 }
 
 
@@ -6652,10 +6650,8 @@ bool MainWindow::connectToIsds(const QString &userName)
 				    .arg(settingsCopy.accountName()));
 				const QString dbId(
 				    globAccountDbPtr->dbId(acntDbKey));
-				QDialog *changePwd = new DlgChangePwd(
-				    dbId, userName, this);
-				changePwd->exec();
-				changePwd->deleteLater();
+				DlgChangePwd::changePassword(dbId, userName,
+				    this);
 			}
 		}
 	}
