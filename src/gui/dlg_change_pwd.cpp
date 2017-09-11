@@ -159,7 +159,7 @@ bool sendChangePwdRequest(const QString &userName,
 		}
 
 		QMessageBox::warning(parent, DlgChangePwd::tr("Password error"),
-		    DlgChangePwd::tr("An error occurred while an attempt to change the password.") +
+		    DlgChangePwd::tr("An error occurred during an attempt to change the password.") +
 		    "\n\n" + error + "\n\n" +
 		    DlgChangePwd::tr("Fix the problem and try it again."),
 		    QMessageBox::Ok);
