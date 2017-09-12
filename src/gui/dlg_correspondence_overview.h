@@ -49,6 +49,7 @@ public:
 		QList<MessageDb::MsgId> receivedDmIDs; /*!< Received message identifiers. */
 	};
 
+private:
 	/*!
 	 * @brief Constructor.
 	 */
@@ -56,6 +57,7 @@ public:
 	    const QString &dbId, const QString &userName, TagDb &tagDb,
 	    QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
