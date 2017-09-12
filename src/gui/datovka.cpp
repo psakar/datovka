@@ -4567,7 +4567,8 @@ void MainWindow::showAddNewAccountDialog(void)
 	debugSlotCall();
 
 	DlgCreateAccount *accountDlg = new DlgCreateAccount(AcntSettings(),
-	    DlgCreateAccount::ACT_ADDNEW, this);
+	    DlgCreateAccount::ACT_ADDNEW, ui->actionSync_all_accounts->text(),
+	    this);
 
 	showStatusTextWithTimeout(tr("Create a new account."));
 
@@ -4724,7 +4725,8 @@ void MainWindow::manageAccountProperties(void)
 	    .arg(globAccounts[userName].accountName()));
 
 	DlgCreateAccount *accountDlg = new DlgCreateAccount(
-	    globAccounts[userName], DlgCreateAccount::ACT_EDIT, this);
+	    globAccounts[userName], DlgCreateAccount::ACT_EDIT,
+	    ui->actionSync_all_accounts->text(), this);
 
 	int dlgRet = accountDlg->exec();
 
@@ -6410,7 +6412,8 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 		case IsdsLogin::EC_NO_PWD:
 			{
 				accountDlg = new DlgCreateAccount(acntSettings,
-				    DlgCreateAccount::ACT_PWD, this);
+				    DlgCreateAccount::ACT_PWD,
+				    ui->actionSync_all_accounts->text(), this);
 				int dlgRet = accountDlg->exec();
 				if (QDialog::Accepted == dlgRet) {
 					acntSettings = accountDlg->getSubmittedData();
@@ -6432,7 +6435,8 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 				acntSettings._setPassphrase(QString());
 
 				accountDlg = new DlgCreateAccount(acntSettings,
-				    DlgCreateAccount::ACT_CERT, this);
+				    DlgCreateAccount::ACT_CERT,
+				    ui->actionSync_all_accounts->text(), this);
 				int dlgRet = accountDlg->exec();
 				if (QDialog::Accepted == dlgRet) {
 					acntSettings = accountDlg->getSubmittedData();
@@ -6451,7 +6455,8 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 				acntSettings._setPassphrase(QString());
 
 				accountDlg = new DlgCreateAccount(acntSettings,
-				    DlgCreateAccount::ACT_CERTPWD, this);
+				    DlgCreateAccount::ACT_CERTPWD,
+				    ui->actionSync_all_accounts->text(), this);
 				int dlgRet = accountDlg->exec();
 				if (QDialog::Accepted == dlgRet) {
 					acntSettings = accountDlg->getSubmittedData();
@@ -6553,7 +6558,8 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 		case IsdsLogin::EC_NOT_LOGGED_IN:
 			{
 				accountDlg = new DlgCreateAccount(acntSettings,
-				    DlgCreateAccount::ACT_EDIT, this);
+				    DlgCreateAccount::ACT_EDIT,
+				    ui->actionSync_all_accounts->text(), this);
 				int dlgRet = accountDlg->exec();
 				if (QDialog::Accepted == dlgRet) {
 					acntSettings = accountDlg->getSubmittedData();

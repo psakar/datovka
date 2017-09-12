@@ -40,7 +40,7 @@ enum LoginMethodIndex {
 };
 
 DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
-    enum Action action, QWidget *parent)
+    enum Action action, const QString &syncAllActName, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgCreateAccount),
     m_accountInfo(accountInfo),
@@ -53,11 +53,15 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	m_ui->loginMethodComboBox->addItem(tr("Password"));
 	m_ui->loginMethodComboBox->addItem(tr("Certificate"));
 	m_ui->loginMethodComboBox->addItem(tr("Certificate + Password"));
-	m_ui->loginMethodComboBox->addItem(tr("Password + Secure code"));
-	m_ui->loginMethodComboBox->addItem(tr("Password + Secure SMS"));
+	m_ui->loginMethodComboBox->addItem(tr("Password + Security code"));
+	m_ui->loginMethodComboBox->addItem(tr("Password + Security SMS"));
 
 	m_ui->certLabel->setEnabled(false);
 	m_ui->addCertButton->setEnabled(false);
+
+	m_ui->syncAllCheckBox->setText(
+	    tr("Synchronise this account when '%1' is activated")
+	        .arg(syncAllActName));
 
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 

@@ -56,10 +56,11 @@ public:
 	 *
 	 * @param[in] accountInfo Account settings.
 	 * @param[in] action Specifies which parts of dialogue to be enabled.
+	 * @Param[in] syncAllActName Synchronise all accounts action name.
 	 * @param[in] parent Parent object.
 	 */
 	DlgCreateAccount(const AcntSettings &accountInfo, enum Action action,
-	    QWidget *parent = Q_NULLPTR);
+	    const QString &syncAllActName, QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.

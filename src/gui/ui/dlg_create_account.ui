@@ -233,7 +233,7 @@ your account security.</string>
 process of all accounts on the background</string>
      </property>
      <property name="text">
-      <string>Synchronise account when &quot;Synchronise all&quot; is activated</string>
+      <string>Synchronise this account when 'Synchronise all' is activated</string>
      </property>
      <property name="checked">
       <bool>true</bool>
