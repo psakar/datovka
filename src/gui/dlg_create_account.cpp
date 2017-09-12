@@ -25,7 +25,6 @@
 
 #include "src/common.h"
 #include "src/gui/dlg_create_account.h"
-#include "src/io/dbs.h"
 #include "src/log/log.h"
 #include "ui_dlg_create_account.h"
 

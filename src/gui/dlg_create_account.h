@@ -27,7 +27,7 @@
 #include <QDialog>
 #include <QString>
 
-#include "src/models/accounts_model.h"
+#include "src/settings/account.h"
 
 namespace Ui {
 	class DlgCreateAccount;
