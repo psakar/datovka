@@ -56,14 +56,14 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="accountLabel">
+      <widget class="QLabel" name="acntNameLabel">
        <property name="text">
         <string>Custom account name:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="accountLineEdit">
+      <widget class="QLineEdit" name="acntNameLine">
        <property name="toolTip">
         <string>You can give a descriptive name to your account.</string>
        </property>
@@ -84,7 +84,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="usernameLineEdit">
+      <widget class="QLineEdit" name="usernameLine">
        <property name="toolTip">
         <string>Enter your username</string>
        </property>
@@ -104,7 +104,7 @@
       </spacer>
      </item>
      <item row="3" column="1">
-      <widget class="QCheckBox" name="testAccountCheckBox">
+      <widget class="QCheckBox" name="testAcntCheckBox">
        <property name="toolTip">
         <string>If the credentials you entered are for a test account,
 select this option. For normal account
@@ -116,14 +116,14 @@ select this option. For normal account
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="loginmethodLabel">
+      <widget class="QLabel" name="loginMethodLabel">
        <property name="text">
         <string>Login method:</string>
        </property>
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QComboBox" name="loginmethodComboBox">
+      <widget class="QComboBox" name="loginMethodComboBox">
        <property name="toolTip">
         <string>Select authorization method for login into your databox</string>
        </property>
@@ -137,14 +137,14 @@ select this option. For normal account
       </widget>
      </item>
      <item row="6" column="0">
-      <widget class="QLabel" name="passwordLabel">
+      <widget class="QLabel" name="pwdLabel">
        <property name="text">
         <string>Password:</string>
        </property>
       </widget>
      </item>
      <item row="6" column="1">
-      <widget class="QLineEdit" name="passwordLineEdit">
+      <widget class="QLineEdit" name="pwdLine">
        <property name="toolTip">
         <string>Enter your password</string>
        </property>
@@ -167,7 +167,7 @@ select this option. For normal account
       </spacer>
      </item>
      <item row="8" column="1">
-      <widget class="QCheckBox" name="rememberPswcheckBox">
+      <widget class="QCheckBox" name="rememberPwdCheckBox">
        <property name="toolTip">
         <string>The password will be saved in a readable form in the 
 configuration file of Datovka in your home directory.
@@ -180,7 +180,7 @@ your account security.</string>
       </widget>
      </item>
      <item row="9" column="0">
-      <widget class="QLabel" name="certificateLabel">
+      <widget class="QLabel" name="certLabel">
        <property name="text">
         <string>Certificate file:</string>
        </property>
@@ -196,7 +196,7 @@ your account security.</string>
      <item row="9" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QPushButton" name="addCertificateButton">
+        <widget class="QPushButton" name="addCertButton">
          <property name="toolTip">
           <string>Select a certificate</string>
          </property>
@@ -227,7 +227,7 @@ your account security.</string>
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="synchroCheckBox">
+    <widget class="QCheckBox" name="syncAllCheckBox">
      <property name="toolTip">
       <string>Account will be included into synchronisation
 process of all accounts on the background</string>
@@ -241,7 +241,7 @@ process of all accounts on the background</string>
     </widget>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="accountButtonBox">
+    <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
@@ -257,7 +257,7 @@ process of all accounts on the background</string>
  </resources>
  <connections>
   <connection>
-   <sender>accountButtonBox</sender>
+   <sender>buttonBox</sender>
    <signal>accepted()</signal>
    <receiver>DlgCreateAccount</receiver>
    <slot>accept()</slot>
@@ -273,7 +273,7 @@ process of all accounts on the background</string>
    </hints>
   </connection>
   <connection>
-   <sender>accountButtonBox</sender>
+   <sender>buttonBox</sender>
    <signal>rejected()</signal>
    <receiver>DlgCreateAccount</receiver>
    <slot>reject()</slot>
