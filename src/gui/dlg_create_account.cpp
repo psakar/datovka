@@ -22,7 +22,6 @@
  */
 
 #include <QFileDialog>
-#include <QMessageBox>
 
 #include "src/common.h"
 #include "src/gui/dlg_create_account.h"
@@ -36,7 +35,7 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
     m_ui(new (std::nothrow) Ui::DlgCreateAccount),
     m_accountInfo(accountInfo),
     m_action(action),
-    m_loginmethod(0),
+    m_loginmethod(USER_NAME),
     m_certPath()
 {
 	m_ui->setupUi(this);

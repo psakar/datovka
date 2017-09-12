@@ -25,6 +25,7 @@
 #define _DLG_CREATE_ACCOUNT_H_
 
 #include <QDialog>
+#include <QString>
 
 #include "src/models/accounts_model.h"
 
