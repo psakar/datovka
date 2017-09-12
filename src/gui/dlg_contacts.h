@@ -25,26 +25,46 @@
 #define _DLG_CONTACTS_H_
 
 #include <QDialog>
+#include <QString>
 
-#include "src/common.h"
 #include "src/io/message_db_set.h"
 #include "src/models/data_box_contacts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
-#include "ui_dlg_contacts.h"
 
-class DlgContacts : public QDialog, public Ui::Contacts {
+namespace Ui {
+	class DlgContacts;
+}
+
+class DlgContacts : public QDialog {
 	Q_OBJECT
 
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] dbSet Database container.
-	 * @Param[in] dbId Current database container.
+	 * @param[in]  dbSet Database container.
 	 * @param[out] dbIdList List of selected box identifiers to be set.
-	 * @param[in] parent Parent object.
+	 * @param[in]  parent Parent object.
 	 */
-	DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
+	DlgContacts(const MessageDbSet &dbSet,
+	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
+
+public:
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgContacts(void);
+
+	/*!
+	 * @brief Let the user select from contacts stored in database.
+	 *
+	 * @param[in]  dbSet Database container.
+	 * @param[out] dbIdList List of selected box identifiers to be set.
+	 * @param[in]  parent Parent object.
+	 * @return True if dialogue was accepted.
+	 */
+	static
+	bool selectContacts(const MessageDbSet &dbSet,
 	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
 private slots:
@@ -80,11 +100,12 @@ private slots:
 private:
 	/*!
 	 * @brief Get contacts from message database and fill table model.
+	 *
+	 * @param[in] dbSet Database container.
 	 */
-	void fillContactsFromMessageDb(void);
+	void fillContactsFromMessageDb(const MessageDbSet &dbSet);
 
-	const MessageDbSet &m_dbSet; /*!< Database set container. */
-	const QString m_dbId; /*!< Database identifier. */
+	Ui::DlgContacts *m_ui; /*!< UI generated from UI file. */
 
 	SortFilterProxyModel m_contactListProxyModel; /*!<
 	                                               * Used for message
@@ -92,7 +113,7 @@ private:
 	                                               */
 	BoxContactsModel m_contactTableModel; /*!< Model of found data boxes. */
 
-	QStringList *m_dbIdList; /*!< List of box identifiers to append to. */
+	QStringList *const m_dbIdList; /*!< List of box identifiers to append to. */
 };
 
 #endif /* _DLG_CONTACTS_H_ */

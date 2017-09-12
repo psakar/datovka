@@ -26,21 +26,20 @@
 #include "src/gui/dlg_contacts.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
+#include "ui_dlg_contacts.h"
 
-
-DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
-    QStringList *dbIdList, QWidget *parent)
+DlgContacts::DlgContacts(const MessageDbSet &dbSet, QStringList *dbIdList,
+    QWidget *parent)
     : QDialog(parent),
-    m_dbSet(dbSet),
-    m_dbId(dbId),
+    m_ui(new (std::nothrow) Ui::DlgContacts),
     m_contactListProxyModel(this),
     m_contactTableModel(this),
     m_dbIdList(dbIdList)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 	/* Set default line height for table views/widgets. */
-	this->contactTableView->setNarrowedLineHeight();
-	this->contactTableView->setSelectionBehavior(
+	m_ui->contactTableView->setNarrowedLineHeight();
+	m_ui->contactTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
 	m_contactTableModel.setHeader();
@@ -53,51 +52,63 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 		columnList.append(BoxContactsModel::ADDRESS_COL);
 		m_contactListProxyModel.setFilterKeyColumns(columnList);
 	}
-	this->contactTableView->setModel(&m_contactListProxyModel);
+	m_ui->contactTableView->setModel(&m_contactListProxyModel);
 
-	this->contactTableView->setColumnWidth(BoxContactsModel::CHECKBOX_COL, 20);
-	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 70);
-	this->contactTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 150);
+	m_ui->contactTableView->setColumnWidth(BoxContactsModel::CHECKBOX_COL, 20);
+	m_ui->contactTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 70);
+	m_ui->contactTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 150);
 
-	this->contactTableView->setColumnHidden(BoxContactsModel::BOX_TYPE_COL,
+	m_ui->contactTableView->setColumnHidden(BoxContactsModel::BOX_TYPE_COL,
 	    true);
-	this->contactTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL,
+	m_ui->contactTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL,
 	    true);
-	this->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
+	m_ui->contactTableView->setColumnHidden(BoxContactsModel::PDZ_COL,
 	    true);
 
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-	fillContactsFromMessageDb();
+	fillContactsFromMessageDb(dbSet);
 
-	this->filterLine->setToolTip(tr("Enter sought expression"));
-	this->filterLine->setClearButtonEnabled(true);
+	m_ui->filterLine->setToolTip(tr("Enter sought expression"));
+	m_ui->filterLine->setClearButtonEnabled(true);
 
-	connect(this->filterLine, SIGNAL(textChanged(QString)),
+	connect(m_ui->filterLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterContact(QString)));
 	connect(&m_contactTableModel,
 	    SIGNAL(dataChanged(QModelIndex, QModelIndex)),
 	    this, SLOT(enableOkButton()));
-	connect(this->contactTableView->selectionModel(),
+	connect(m_ui->contactTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 	    this, SLOT(setFirstColumnActive(QItemSelection, QItemSelection)));
-	connect(this->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
+	connect(m_ui->contactTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(contactItemDoubleClicked(QModelIndex)));
-	connect(this->buttonBox, SIGNAL(accepted()),
+	connect(m_ui->buttonBox, SIGNAL(accepted()),
 	    this, SLOT(addSelectedDbIDs()));
 
-	this->contactTableView->
-	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+	m_ui->contactTableView->setEditTriggers(
+	    QAbstractItemView::NoEditTriggers);
 
-	this->contactTableView->installEventFilter(
+	m_ui->contactTableView->installEventFilter(
 	    new TableHomeEndFilter(this));
-	this->contactTableView->installEventFilter(
+	m_ui->contactTableView->installEventFilter(
 	    new TableSpaceSelectionFilter(this));
+}
+
+DlgContacts::~DlgContacts(void)
+{
+	delete m_ui;
+}
+
+bool DlgContacts::selectContacts(const MessageDbSet &dbSet,
+    QStringList *dbIdList, QWidget *parent)
+{
+	DlgContacts dlg(dbSet, dbIdList, parent);
+	return QDialog::Accepted == dlg.exec();
 }
 
 void DlgContacts::enableOkButton(void)
 {
-	this->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
 	    m_contactTableModel.somethingChecked());
 }
 
@@ -109,8 +120,8 @@ void DlgContacts::setFirstColumnActive(const QItemSelection &selected,
 	if (selected.isEmpty()) {
 		return;
 	}
-	this->contactTableView->selectColumn(BoxContactsModel::CHECKBOX_COL);
-	this->contactTableView->selectRow(selected.first().top());
+	m_ui->contactTableView->selectColumn(BoxContactsModel::CHECKBOX_COL);
+	m_ui->contactTableView->selectRow(selected.first().top());
 }
 
 void DlgContacts::contactItemDoubleClicked(const QModelIndex &index)
@@ -120,7 +131,7 @@ void DlgContacts::contactItemDoubleClicked(const QModelIndex &index)
 		    BoxContactsModel::BOX_ID_COL).data(
 		        Qt::DisplayRole).toString());
 	}
-	this->close();
+	this->accept();
 }
 
 void DlgContacts::addSelectedDbIDs(void) const
@@ -137,32 +148,32 @@ void DlgContacts::filterContact(const QString &text)
 	    Qt::CaseInsensitive, QRegExp::FixedString));
 	/* Set filter field background colour. */
 	if (text.isEmpty()) {
-		this->filterLine->setStyleSheet(
+		m_ui->filterLine->setStyleSheet(
 		    SortFilterProxyModel::blankFilterEditStyle);
 	} else if (m_contactListProxyModel.rowCount() != 0) {
-		this->filterLine->setStyleSheet(
+		m_ui->filterLine->setStyleSheet(
 		    SortFilterProxyModel::foundFilterEditStyle);
 	} else {
-		this->filterLine->setStyleSheet(
+		m_ui->filterLine->setStyleSheet(
 		    SortFilterProxyModel::notFoundFilterEditStyle);
 	}
 }
 
-void DlgContacts::fillContactsFromMessageDb(void)
+void DlgContacts::fillContactsFromMessageDb(const MessageDbSet &dbSet)
 {
-	this->contactTableView->setEnabled(false);
+	m_ui->contactTableView->setEnabled(false);
 	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
-	QList<MessageDb::ContactEntry> foundBoxes(m_dbSet.uniqueContacts());
+	QList<MessageDb::ContactEntry> foundBoxes(dbSet.uniqueContacts());
 
-	this->contactTableView->setEnabled(true);
+	m_ui->contactTableView->setEnabled(true);
 	m_contactTableModel.appendData(foundBoxes);
 
 	if (m_contactTableModel.rowCount() > 0) {
-		this->contactTableView->selectColumn(
+		m_ui->contactTableView->selectColumn(
 		    BoxContactsModel::CHECKBOX_COL);
-		this->contactTableView->selectRow(0);
+		m_ui->contactTableView->selectRow(0);
 	}
 
-	//this->contactTableView->resizeColumnsToContents();
+	//m_ui->contactTableView->resizeColumnsToContents();
 }
