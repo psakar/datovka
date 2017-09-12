@@ -88,12 +88,13 @@ private slots:
 private:
 	/*!
 	 * @brief Get contacts from message database and fill table model.
+	 *
+	 * @param[in] dbSet Database container.
 	 */
-	void fillContactsFromMessageDb(void);
+	void fillContactsFromMessageDb(const MessageDbSet &dbSet);
 
 	Ui::DlgContacts *m_ui; /*!< UI generated from UI file. */
 
-	const MessageDbSet &m_dbSet; /*!< Database set container. */
 	const QString m_dbId; /*!< Database identifier. */
 
 	SortFilterProxyModel m_contactListProxyModel; /*!<

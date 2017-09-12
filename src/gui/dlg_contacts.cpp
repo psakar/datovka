@@ -33,7 +33,6 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
     QStringList *dbIdList, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgContacts),
-    m_dbSet(dbSet),
     m_dbId(dbId),
     m_contactListProxyModel(this),
     m_contactTableModel(this),
@@ -70,7 +69,7 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
 
-	fillContactsFromMessageDb();
+	fillContactsFromMessageDb(dbSet);
 
 	m_ui->filterLine->setToolTip(tr("Enter sought expression"));
 	m_ui->filterLine->setClearButtonEnabled(true);
@@ -155,12 +154,12 @@ void DlgContacts::filterContact(const QString &text)
 	}
 }
 
-void DlgContacts::fillContactsFromMessageDb(void)
+void DlgContacts::fillContactsFromMessageDb(const MessageDbSet &dbSet)
 {
 	m_ui->contactTableView->setEnabled(false);
 	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
 
-	QList<MessageDb::ContactEntry> foundBoxes(m_dbSet.uniqueContacts());
+	QList<MessageDb::ContactEntry> foundBoxes(dbSet.uniqueContacts());
 
 	m_ui->contactTableView->setEnabled(true);
 	m_contactTableModel.appendData(foundBoxes);
