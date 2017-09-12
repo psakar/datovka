@@ -35,6 +35,9 @@ namespace Ui {
 	class DlgContacts;
 }
 
+/*!
+ * @brief List of contacts generated from message database.
+ */
 class DlgContacts : public QDialog {
 	Q_OBJECT
 
