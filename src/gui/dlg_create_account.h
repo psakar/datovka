@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,22 +21,23 @@
  * the two.
  */
 
-
 #ifndef _DLG_CREATE_ACCOUNT_H_
 #define _DLG_CREATE_ACCOUNT_H_
 
 #include <QDialog>
-#include <QFileDialog>
-#include <QTreeView>
 
 #include "src/models/accounts_model.h"
-#include "ui_dlg_create_account.h"
+
+namespace Ui {
+	class DlgCreateAccount;
+}
 
 /*!
  * @brief Account properties dialogue.
  */
-class DlgCreateAccount : public QDialog, public Ui::CreateAccount {
+class DlgCreateAccount : public QDialog {
 	Q_OBJECT
+
 public:
 	/*!
 	 * Login method order as they are listed in the dialogue.
@@ -67,8 +68,13 @@ public:
 	 * @param[in] action Specifies which parts of dialogue to be enabled.
 	 * @param[in] parent Parent object.
 	 */
-	DlgCreateAccount(const AcntSettings &accountInfo, Action action,
-	    QWidget *parent = 0);
+	DlgCreateAccount(const AcntSettings &accountInfo, enum Action action,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgCreateAccount(void);
 
 	/*!
 	 * @brief Obtains account data as the have been submitted by the user.
@@ -122,8 +128,10 @@ private:
 	 */
 	AcntSettings getContent(void) const;
 
+	Ui::DlgCreateAccount *m_ui; /*!< UI generated from UI file. */
+
 	AcntSettings m_accountInfo; /*!< Account data with submitted changes. */
-	const Action m_action; /*!< Actual action the dialogue should be configured to. */
+	const enum Action m_action; /*!< Actual action the dialogue should be configured to. */
 	int m_loginmethod; /*!< Specifies the method the user uses for logging in. */
 	QString m_certPath; /*!< Path to certificate. */
 };

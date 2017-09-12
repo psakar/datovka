@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,28 +21,37 @@
  * the two.
  */
 
+#include <QFileDialog>
 #include <QMessageBox>
 
 #include "src/common.h"
 #include "src/gui/dlg_create_account.h"
 #include "src/io/dbs.h"
 #include "src/log/log.h"
+#include "ui_dlg_create_account.h"
 
 DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
-    Action action, QWidget *parent)
+    enum Action action, QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgCreateAccount),
     m_accountInfo(accountInfo),
     m_action(action),
     m_loginmethod(0),
     m_certPath()
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+
 	initialiseDialogue();
 
 	/* Set dialogue content for existing account. */
 	if (ACT_ADDNEW != m_action) {
 		setContent(m_accountInfo);
 	}
+}
+
+DlgCreateAccount::~DlgCreateAccount(void)
+{
+	delete m_ui;
 }
 
 AcntSettings DlgCreateAccount::getSubmittedData(void) const
@@ -56,29 +65,29 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 
 	switch (m_loginmethod) {
 	case CERTIFICATE:
-		this->certificateLabel->setEnabled(true);
-		this->addCertificateButton->setEnabled(true);
-		this->passwordLabel->setEnabled(false);
-		this->passwordLineEdit->setEnabled(false);
-		this->rememberPswcheckBox->setEnabled(false);
+		m_ui->certificateLabel->setEnabled(true);
+		m_ui->addCertificateButton->setEnabled(true);
+		m_ui->passwordLabel->setEnabled(false);
+		m_ui->passwordLineEdit->setEnabled(false);
+		m_ui->rememberPswcheckBox->setEnabled(false);
 		break;
 	case USER_CERTIFICATE:
-		this->certificateLabel->setEnabled(true);
-		this->addCertificateButton->setEnabled(true);
-		this->passwordLabel->setEnabled(true);
-		this->passwordLineEdit->setEnabled(true);
-		this->rememberPswcheckBox->setEnabled(true);
+		m_ui->certificateLabel->setEnabled(true);
+		m_ui->addCertificateButton->setEnabled(true);
+		m_ui->passwordLabel->setEnabled(true);
+		m_ui->passwordLineEdit->setEnabled(true);
+		m_ui->rememberPswcheckBox->setEnabled(true);
 		break;
 	default:
-		this->certificateLabel->setEnabled(false);
-		this->addCertificateButton->setEnabled(false);
-		this->passwordLabel->setEnabled((true));
-		this->passwordLineEdit->setEnabled((true));
-		this->rememberPswcheckBox->setEnabled(true);
+		m_ui->certificateLabel->setEnabled(false);
+		m_ui->addCertificateButton->setEnabled(false);
+		m_ui->passwordLabel->setEnabled((true));
+		m_ui->passwordLineEdit->setEnabled((true));
+		m_ui->rememberPswcheckBox->setEnabled(true);
 		break;
 	}
-	this->usernameLineEdit->setEnabled(m_action == ACT_ADDNEW);
-	this->testAccountCheckBox->setEnabled(m_action == ACT_ADDNEW);
+	m_ui->usernameLineEdit->setEnabled(m_action == ACT_ADDNEW);
+	m_ui->testAccountCheckBox->setEnabled(m_action == ACT_ADDNEW);
 
 	checkInputFields();
 }
@@ -89,24 +98,24 @@ void DlgCreateAccount::checkInputFields(void)
 
 	switch (m_loginmethod) {
 	case CERTIFICATE:
-		buttonEnabled = !this->accountLineEdit->text().isEmpty()
-		    && !this->usernameLineEdit->text().isEmpty()
+		buttonEnabled = !m_ui->accountLineEdit->text().isEmpty()
+		    && !m_ui->usernameLineEdit->text().isEmpty()
 		    && !m_certPath.isEmpty();
 		break;
 	case USER_CERTIFICATE:
-		buttonEnabled = !this->accountLineEdit->text().isEmpty()
-		    && !this->usernameLineEdit->text().isEmpty()
-		    && !this->passwordLineEdit->text().isEmpty()
+		buttonEnabled = !m_ui->accountLineEdit->text().isEmpty()
+		    && !m_ui->usernameLineEdit->text().isEmpty()
+		    && !m_ui->passwordLineEdit->text().isEmpty()
 		    && !m_certPath.isEmpty();
 		break;
 	default:
-		buttonEnabled = !this->accountLineEdit->text().isEmpty()
-		    && !this->usernameLineEdit->text().isEmpty()
-		    && !this->passwordLineEdit->text().isEmpty();
+		buttonEnabled = !m_ui->accountLineEdit->text().isEmpty()
+		    && !m_ui->usernameLineEdit->text().isEmpty()
+		    && !m_ui->passwordLineEdit->text().isEmpty();
 		break;
 	}
 
-	this->accountButtonBox->button(QDialogButtonBox::Ok)->
+	m_ui->accountButtonBox->button(QDialogButtonBox::Ok)->
 	    setEnabled(buttonEnabled);
 }
 
@@ -116,8 +125,8 @@ void DlgCreateAccount::addCertificateFile(void)
 	    tr("Open Certificate"), "",
 	    tr("Certificate Files (*.p12 *.pem)"));
 	if (!certFileName.isEmpty()) {
-		this->addCertificateButton->setText(certFileName);
-		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
+		m_ui->addCertificateButton->setText(certFileName);
+		m_ui->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
 		QString("key_16.png")));
 		m_certPath = certFileName;
 		checkInputFields();
@@ -134,26 +143,26 @@ void DlgCreateAccount::saveAccount(void)
 
 void DlgCreateAccount::initialiseDialogue(void)
 {
-	this->loginmethodComboBox->addItem(tr("Password"));
-	this->loginmethodComboBox->addItem(tr("Certificate"));
-	this->loginmethodComboBox->addItem(tr("Certificate + Password"));
-	this->loginmethodComboBox->addItem(tr("Password + Secure code"));
-	this->loginmethodComboBox->addItem(tr("Password + Secure SMS"));
-	this->certificateLabel->setEnabled(false);
-	this->accountButtonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-	this->addCertificateButton->setEnabled(false);
+	m_ui->loginmethodComboBox->addItem(tr("Password"));
+	m_ui->loginmethodComboBox->addItem(tr("Certificate"));
+	m_ui->loginmethodComboBox->addItem(tr("Certificate + Password"));
+	m_ui->loginmethodComboBox->addItem(tr("Password + Secure code"));
+	m_ui->loginmethodComboBox->addItem(tr("Password + Secure SMS"));
+	m_ui->certificateLabel->setEnabled(false);
+	m_ui->accountButtonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+	m_ui->addCertificateButton->setEnabled(false);
 
-	connect(this->loginmethodComboBox, SIGNAL(currentIndexChanged (int)),
+	connect(m_ui->loginmethodComboBox, SIGNAL(currentIndexChanged (int)),
 	    this, SLOT(activateContent(int)));
-	connect(this->addCertificateButton, SIGNAL(clicked()), this,
+	connect(m_ui->addCertificateButton, SIGNAL(clicked()), this,
 	    SLOT(addCertificateFile()));
-	connect(this->accountButtonBox, SIGNAL(accepted()), this,
+	connect(m_ui->accountButtonBox, SIGNAL(accepted()), this,
 	    SLOT(saveAccount(void)));
-	connect(this->accountLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->accountLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(this->usernameLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->usernameLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(this->passwordLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->passwordLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 }
 
@@ -174,36 +183,36 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	case ACT_PWD:
 		windowTitle = tr("Enter password for account %1")
 		    .arg(acntData.accountName());
-		this->infoLabel->setEnabled(false);
-		this->accountLineEdit->setEnabled(false);
-		this->loginmethodComboBox->setEnabled(false);
-		this->addCertificateButton->setEnabled(false);
+		m_ui->infoLabel->setEnabled(false);
+		m_ui->accountLineEdit->setEnabled(false);
+		m_ui->loginmethodComboBox->setEnabled(false);
+		m_ui->addCertificateButton->setEnabled(false);
 		break;
 	case ACT_CERT:
 		windowTitle = tr("Set certificate for account %1")
 		    .arg(acntData.accountName());
-		this->infoLabel->setEnabled(false);
-		this->accountLineEdit->setEnabled(false);
-		this->loginmethodComboBox->setEnabled(false);
-		this->passwordLineEdit->setEnabled(false);
+		m_ui->infoLabel->setEnabled(false);
+		m_ui->accountLineEdit->setEnabled(false);
+		m_ui->loginmethodComboBox->setEnabled(false);
+		m_ui->passwordLineEdit->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
 		windowTitle = tr("Enter password/certificate for account %1")
 		    .arg(acntData.accountName());
-		this->infoLabel->setEnabled(false);
-		this->accountLineEdit->setEnabled(false);
-		this->loginmethodComboBox->setEnabled(false);
+		m_ui->infoLabel->setEnabled(false);
+		m_ui->accountLineEdit->setEnabled(false);
+		m_ui->loginmethodComboBox->setEnabled(false);
 		break;
 	default:
 		Q_ASSERT(0);
 		break;
 	}
 
-	this->setWindowTitle(windowTitle);
-	this->accountLineEdit->setText(acntData.accountName());
-	this->usernameLineEdit->setText(acntData.userName());
-	this->usernameLineEdit->setEnabled(false);
-	this->testAccountCheckBox->setEnabled(false);
+	setWindowTitle(windowTitle);
+	m_ui->accountLineEdit->setText(acntData.accountName());
+	m_ui->usernameLineEdit->setText(acntData.userName());
+	m_ui->usernameLineEdit->setEnabled(false);
+	m_ui->testAccountCheckBox->setEnabled(false);
 
 	int itemIdx;
 	switch (acntData.loginMethod()) {
@@ -228,19 +237,19 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 		break;
 	}
 
-	this->loginmethodComboBox->setCurrentIndex(itemIdx);
+	m_ui->loginmethodComboBox->setCurrentIndex(itemIdx);
 	activateContent(itemIdx);
 
-	this->passwordLineEdit->setText(acntData.password());
-	this->testAccountCheckBox->setChecked(acntData.isTestAccount());
-	this->rememberPswcheckBox->setChecked(acntData.rememberPwd());
-	this->synchroCheckBox->setChecked(acntData.syncWithAll());
+	m_ui->passwordLineEdit->setText(acntData.password());
+	m_ui->testAccountCheckBox->setChecked(acntData.isTestAccount());
+	m_ui->rememberPswcheckBox->setChecked(acntData.rememberPwd());
+	m_ui->synchroCheckBox->setChecked(acntData.syncWithAll());
 
 	if (!acntData.p12File().isEmpty()) {
-		this->addCertificateButton->setText(QDir::
-		    toNativeSeparators(acntData.p12File()));
-		this->addCertificateButton->setIcon(QIcon(ICON_3PARTY_PATH +
-		QString("key_16.png")));
+		m_ui->addCertificateButton->setText(
+		    QDir::toNativeSeparators(acntData.p12File()));
+		m_ui->addCertificateButton->setIcon(
+		    QIcon(ICON_3PARTY_PATH + QString("key_16.png")));
 		m_certPath = QDir::toNativeSeparators(acntData.p12File());
 	}
 
@@ -269,7 +278,7 @@ AcntSettings DlgCreateAccount::getContent(void) const
 		{
 			const QString userName(m_accountInfo.userName());
 			Q_ASSERT(!userName.isEmpty());
-			Q_ASSERT(userName == this->usernameLineEdit->text().trimmed());
+			Q_ASSERT(userName == m_ui->usernameLineEdit->text().trimmed());
 			newAccountSettings = m_accountInfo;
 		}
 		break;
@@ -279,14 +288,14 @@ AcntSettings DlgCreateAccount::getContent(void) const
 	}
 
 	/* set account items */
-	newAccountSettings.setAccountName(this->accountLineEdit->text().trimmed());
-	newAccountSettings.setUserName(this->usernameLineEdit->text().trimmed());
-	newAccountSettings.setRememberPwd(this->rememberPswcheckBox->isChecked());
-	newAccountSettings.setPassword(this->passwordLineEdit->text().trimmed());
-	newAccountSettings.setTestAccount(this->testAccountCheckBox->isChecked());
-	newAccountSettings.setSyncWithAll(this->synchroCheckBox->isChecked());
+	newAccountSettings.setAccountName(m_ui->accountLineEdit->text().trimmed());
+	newAccountSettings.setUserName(m_ui->usernameLineEdit->text().trimmed());
+	newAccountSettings.setRememberPwd(m_ui->rememberPswcheckBox->isChecked());
+	newAccountSettings.setPassword(m_ui->passwordLineEdit->text().trimmed());
+	newAccountSettings.setTestAccount(m_ui->testAccountCheckBox->isChecked());
+	newAccountSettings.setSyncWithAll(m_ui->synchroCheckBox->isChecked());
 
-	switch (this->loginmethodComboBox->currentIndex()) {
+	switch (m_ui->loginmethodComboBox->currentIndex()) {
 	case USER_NAME:
 		newAccountSettings.setLoginMethod(AcntSettings::LIM_UNAME_PWD);
 		newAccountSettings.setP12File(QString());

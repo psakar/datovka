@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CreateAccount</class>
- <widget class="QDialog" name="CreateAccount">
+ <class>DlgCreateAccount</class>
+ <widget class="QDialog" name="DlgCreateAccount">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -256,7 +256,7 @@ process of all accounts on the background</string>
   <connection>
    <sender>accountButtonBox</sender>
    <signal>accepted()</signal>
-   <receiver>CreateAccount</receiver>
+   <receiver>DlgCreateAccount</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -272,7 +272,7 @@ process of all accounts on the background</string>
   <connection>
    <sender>accountButtonBox</sender>
    <signal>rejected()</signal>
-   <receiver>CreateAccount</receiver>
+   <receiver>DlgCreateAccount</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

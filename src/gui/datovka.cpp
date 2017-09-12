@@ -6359,7 +6359,7 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 
 	do {
 		errCode = loginCtx.logIn();
-		DlgCreateAccount *accountDlg = 0;
+		DlgCreateAccount *accountDlg = Q_NULLPTR;
 
 		acntSettings._setOtp(QString()); /* Erase OTP. */
 
