@@ -99,6 +99,13 @@ DlgContacts::~DlgContacts(void)
 	delete m_ui;
 }
 
+bool DlgContacts::selectContacts(const MessageDbSet &dbSet,
+    QStringList *dbIdList, QWidget *parent)
+{
+	DlgContacts dlg(dbSet, dbIdList, parent);
+	return QDialog::Accepted == dlg.exec();
+}
+
 void DlgContacts::enableOkButton(void)
 {
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
@@ -124,7 +131,7 @@ void DlgContacts::contactItemDoubleClicked(const QModelIndex &index)
 		    BoxContactsModel::BOX_ID_COL).data(
 		        Qt::DisplayRole).toString());
 	}
-	this->close();
+	this->accept();
 }
 
 void DlgContacts::addSelectedDbIDs(void) const
