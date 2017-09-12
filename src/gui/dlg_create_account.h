@@ -41,17 +41,6 @@ class DlgCreateAccount : public QDialog {
 
 public:
 	/*!
-	 * Login method order as they are listed in the dialogue.
-	 */
-	enum LoginMethodIndex {
-		USER_NAME = 0,
-		CERTIFICATE = 1,
-		USER_CERTIFICATE = 2,
-		HOTP = 3,
-		TOTP = 4
-	};
-
-	/*!
 	 * @brief Specifies the action to be performed.
 	 */
 	enum Action {
@@ -109,12 +98,6 @@ private slots:
 	void saveAccount(void);
 
 private:
-	/*!
-	 * @brief Initialises remaining bits of dialogue that haven't been
-	 *     specified in the dialogue UI.
-	 */
-	void initialiseDialogue(void);
-
 	/*!
 	 * @brief Sets dialogue content from supplied account data.
 	 *

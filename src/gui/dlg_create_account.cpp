@@ -28,6 +28,17 @@
 #include "src/log/log.h"
 #include "ui_dlg_create_account.h"
 
+/*!
+ * @brief Login method order as they are listed in the dialogue.
+ */
+enum LoginMethodIndex {
+	USER_NAME = 0,
+	CERTIFICATE = 1,
+	USER_CERTIFICATE = 2,
+	HOTP = 3,
+	TOTP = 4
+};
+
 DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
     enum Action action, QWidget *parent)
     : QDialog(parent),
@@ -39,7 +50,28 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 {
 	m_ui->setupUi(this);
 
-	initialiseDialogue();
+	m_ui->loginMethodComboBox->addItem(tr("Password"));
+	m_ui->loginMethodComboBox->addItem(tr("Certificate"));
+	m_ui->loginMethodComboBox->addItem(tr("Certificate + Password"));
+	m_ui->loginMethodComboBox->addItem(tr("Password + Secure code"));
+	m_ui->loginMethodComboBox->addItem(tr("Password + Secure SMS"));
+
+	m_ui->certLabel->setEnabled(false);
+	m_ui->addCertButton->setEnabled(false);
+
+	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
+
+	connect(m_ui->loginMethodComboBox, SIGNAL(currentIndexChanged(int)),
+	    this, SLOT(activateContent(int)));
+	connect(m_ui->addCertButton, SIGNAL(clicked()), this,
+	    SLOT(addCertificateFile()));
+	connect(m_ui->buttonBox, SIGNAL(accepted()), this, SLOT(saveAccount()));
+	connect(m_ui->acntNameLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->usernameLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->pwdLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
 
 	/* Set dialogue content for existing account. */
 	if (ACT_ADDNEW != m_action) {
@@ -138,32 +170,6 @@ void DlgCreateAccount::saveAccount(void)
 	m_accountInfo = getContent();
 }
 
-void DlgCreateAccount::initialiseDialogue(void)
-{
-	m_ui->loginMethodComboBox->addItem(tr("Password"));
-	m_ui->loginMethodComboBox->addItem(tr("Certificate"));
-	m_ui->loginMethodComboBox->addItem(tr("Certificate + Password"));
-	m_ui->loginMethodComboBox->addItem(tr("Password + Secure code"));
-	m_ui->loginMethodComboBox->addItem(tr("Password + Secure SMS"));
-
-	m_ui->certLabel->setEnabled(false);
-	m_ui->addCertButton->setEnabled(false);
-
-	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
-
-	connect(m_ui->loginMethodComboBox, SIGNAL(currentIndexChanged(int)),
-	    this, SLOT(activateContent(int)));
-	connect(m_ui->addCertButton, SIGNAL(clicked()), this,
-	    SLOT(addCertificateFile()));
-	connect(m_ui->buttonBox, SIGNAL(accepted()), this, SLOT(saveAccount()));
-	connect(m_ui->acntNameLine, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(m_ui->usernameLine, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(m_ui->pwdLine, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-}
-
 void DlgCreateAccount::setContent(const AcntSettings &acntData)
 {
 	if (acntData.userName().isEmpty()) {
@@ -253,7 +259,6 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 
 	checkInputFields();
 }
-
 
 AcntSettings DlgCreateAccount::getContent(void) const
 {
