@@ -25,14 +25,17 @@
 #define _DLG_CONTACTS_H_
 
 #include <QDialog>
+#include <QString>
 
-#include "src/common.h"
 #include "src/io/message_db_set.h"
 #include "src/models/data_box_contacts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
-#include "ui_dlg_contacts.h"
 
-class DlgContacts : public QDialog, public Ui::Contacts {
+namespace Ui {
+	class DlgContacts;
+}
+
+class DlgContacts : public QDialog {
 	Q_OBJECT
 
 public:
@@ -46,6 +49,11 @@ public:
 	 */
 	DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
 	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgContacts(void);
 
 private slots:
 	/*!
@@ -82,6 +90,8 @@ private:
 	 * @brief Get contacts from message database and fill table model.
 	 */
 	void fillContactsFromMessageDb(void);
+
+	Ui::DlgContacts *m_ui; /*!< UI generated from UI file. */
 
 	const MessageDbSet &m_dbSet; /*!< Database set container. */
 	const QString m_dbId; /*!< Database identifier. */
