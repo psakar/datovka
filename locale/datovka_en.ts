@@ -272,94 +272,6 @@
     </message>
 </context>
 <context>
-    <name>CorrespondenceOverview</name>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="14"/>
-        <source>Correspondence overview</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="28"/>
-        <source>Account:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="66"/>
-        <source>Output format:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="91"/>
-        <source>Select the dates and types of messages to export.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="102"/>
-        <source>From date:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="129"/>
-        <source>To date:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="156"/>
-        <source>Message type:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="164"/>
-        <source>Sent</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="198"/>
-        <source>Received</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="233"/>
-        <source>HTML overview:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="241"/>
-        <source>Add tags</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="248"/>
-        <source>Colour tags</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="260"/>
-        <source>Export selected messages also as:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="268"/>
-        <source>ZFO message files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="275"/>
-        <source>PDF envelope files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="286"/>
-        <source>ZFO acceptance info files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="293"/>
-        <source>PDF acceptance info files</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>CreateAccount</name>
     <message>
         <location filename="../src/gui/ui/dlg_create_account.ui" line="26"/>
@@ -902,207 +814,272 @@ at least one digit and one capital letter.</source>
 <context>
     <name>DlgCorrespondenceOverview</name>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="142"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="145"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="152"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="155"/>
         <source>messages: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="421"/>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="164"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="431"/>
         <source>Sent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="431"/>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="198"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="441"/>
         <source>Received</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="392"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="403"/>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="14"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="402"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="413"/>
         <source>Correspondence overview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="406"/>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="28"/>
+        <source>Account:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="66"/>
+        <source>Output format:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="91"/>
+        <source>Select the dates and types of messages to export.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="102"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="416"/>
         <source>From date:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="410"/>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="129"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="420"/>
         <source>To date:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="414"/>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="156"/>
+        <source>Message type:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="233"/>
+        <source>HTML overview:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="241"/>
+        <source>Add tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="248"/>
+        <source>Colour tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="260"/>
+        <source>Export selected messages also as:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="268"/>
+        <source>ZFO message files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="275"/>
+        <source>PDF envelope files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="286"/>
+        <source>ZFO acceptance info files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_correspondence_overview.ui" line="293"/>
+        <source>PDF acceptance info files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="424"/>
         <source>Generated:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="328"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="338"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="329"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="339"/>
         <source>Message type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="330"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="340"/>
         <source>Delivery time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="331"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="341"/>
         <source>Acceptance time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="289"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="332"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="299"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="342"/>
         <source>Subject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="293"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="333"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="303"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="343"/>
         <source>Sender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="334"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="344"/>
         <source>Sender Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="297"/>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="335"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="307"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="345"/>
         <source>Recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="279"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="289"/>
         <source>Delivery</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="284"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="294"/>
         <source>Acceptance</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="336"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="346"/>
         <source>Recipient Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="337"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="347"/>
         <source>Our file mark</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="338"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="348"/>
         <source>Our reference number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="339"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="349"/>
         <source>Your file mark</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="340"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="350"/>
         <source>Your reference number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="452"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="462"/>
         <source>Overview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="462"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="472"/>
         <source>Select file to save correspondence overview</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="478"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="488"/>
         <source>Correspondence Overview Export Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="486"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="496"/>
         <source>correspondence overview file was exported to HTML.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="487"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="497"/>
         <source>correspondence overview file was exported to CSV.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="491"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="501"/>
         <source>correspondence overview file was exported.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="611"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="621"/>
         <source>Select directory for export of ZFO/PDF file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="618"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="628"/>
         <source>messages were successfully exported to ZFO/PDF.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="644"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="654"/>
         <source>messages were successfully exported to ZFO.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="665"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="675"/>
         <source>acceptance infos were successfully exported to ZFO.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="707"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="717"/>
         <source>acceptance infos were successfully exported to PDF.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="686"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="696"/>
         <source>message envelopes were successfully exported to PDF.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="725"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="735"/>
         <source>Export results</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="726"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="736"/>
         <source>Export of correspondence overview finished with these results:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="714"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="724"/>
         <source>Some errors occurred during export.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="716"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="726"/>
         <source>See detail for more info...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="463"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="473"/>
         <source>Files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="479"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="489"/>
         <source>Correspondence overview file &apos;%1&apos; could not be written.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6658,27 +6635,27 @@ to origin path
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="246"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="256"/>
         <source>Tags</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="514"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="524"/>
         <source>Message &apos;%1&apos; does not contain data necessary for ZFO export.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="521"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="531"/>
         <source>Message &apos;%1&apos; does not contain acceptance info data necessary for ZFO export.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="535"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="545"/>
         <source>Message &apos;%1&apos; does not contain acceptance info data necessary for PDF export.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="528"/>
+        <location filename="../src/gui/dlg_correspondence_overview.cpp" line="538"/>
         <source>Message &apos;%1&apos; does not contain message envelope data necessary for PDF export.</source>
         <translation type="unfinished"></translation>
     </message>
