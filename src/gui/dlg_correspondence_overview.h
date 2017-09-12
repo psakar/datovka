@@ -28,14 +28,16 @@
 
 #include "src/io/message_db_set.h"
 #include "src/io/tag_db.h"
-#include "ui_dlg_correspondence_overview.h"
+
+namespace Ui {
+	class DlgCorrespondenceOverview;
+}
 
 /*!
  * @brief Correspondence overview dialogue.
  */
-class DlgCorrespondenceOverview : public QDialog,
-    public Ui::CorrespondenceOverview {
-    Q_OBJECT
+class DlgCorrespondenceOverview : public QDialog {
+	Q_OBJECT
 
 public:
 	/*!
@@ -53,6 +55,11 @@ public:
 	DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	    const QString &dbId, const QString &userName, TagDb &tagDb,
 	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgCorrespondenceOverview(void);
 
 	/*!
 	 * @brief Calls the dialogue and preforms export action.
@@ -152,6 +159,8 @@ private:
 	 */
 	void exportChosenData(const QString &userName,
 	    QString &exportCorrespondDir);
+
+	Ui::DlgCorrespondenceOverview *m_ui; /*!< UI generated from UI file. */
 
 	const MessageDbSet &m_messDbSet; /*!< Database set to be accessed. */
 	const QString &m_dbId; /*!< Account database identifier. */
