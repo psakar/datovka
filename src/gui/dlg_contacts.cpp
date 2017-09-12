@@ -28,12 +28,10 @@
 #include "src/views/table_space_selection_filter.h"
 #include "ui_dlg_contacts.h"
 
-
-DlgContacts::DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
-    QStringList *dbIdList, QWidget *parent)
+DlgContacts::DlgContacts(const MessageDbSet &dbSet, QStringList *dbIdList,
+    QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgContacts),
-    m_dbId(dbId),
     m_contactListProxyModel(this),
     m_contactTableModel(this),
     m_dbIdList(dbIdList)

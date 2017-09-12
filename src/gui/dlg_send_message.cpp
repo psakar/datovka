@@ -153,7 +153,7 @@ void DlgSendMessage::checkInputFields(void)
 void DlgSendMessage::addRecipientFromLocalContact(void)
 {
 	QStringList dbIDs;
-	QDialog *dlgCont = new DlgContacts(*m_dbSet, m_dbId, &dbIDs, this);
+	QDialog *dlgCont = new DlgContacts(*m_dbSet, &dbIDs, this);
 	dlgCont->exec();
 	dlgCont->deleteLater();
 	addRecipientBoxes(dbIDs);

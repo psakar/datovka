@@ -43,11 +43,10 @@ public:
 	 * @brief Constructor.
 	 *
 	 * @param[in] dbSet Database container.
-	 * @Param[in] dbId Current database container.
 	 * @param[out] dbIdList List of selected box identifiers to be set.
 	 * @param[in] parent Parent object.
 	 */
-	DlgContacts(const MessageDbSet &dbSet, const QString &dbId,
+	DlgContacts(const MessageDbSet &dbSet,
 	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
 	/*!
@@ -94,8 +93,6 @@ private:
 	void fillContactsFromMessageDb(const MessageDbSet &dbSet);
 
 	Ui::DlgContacts *m_ui; /*!< UI generated from UI file. */
-
-	const QString m_dbId; /*!< Database identifier. */
 
 	SortFilterProxyModel m_contactListProxyModel; /*!<
 	                                               * Used for message
