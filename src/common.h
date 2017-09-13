@@ -57,16 +57,6 @@
 #define DATOVKA_DOWNLOAD_URL "https://www.datovka.cz/"
 #define PWD_EXPIRATION_NOTIFICATION_DAYS 7 // show expiration date dialog before xx days
 
-/* return values of Datovka login methods */
-typedef enum {
-	USER_NAME = 0,
-	CERTIFICATE = 1,
-	USER_CERTIFICATE = 2,
-	HOTP = 3,
-	TOTP = 4
-} LoginMethodsIndex;
-
-
 /* return values of Datovka message state */
 enum MessageProcessState {
 	UNSETTLED = 0,
