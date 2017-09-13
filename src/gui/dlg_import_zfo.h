@@ -51,38 +51,38 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[out] zfoType Specifies ZFO type.
-	 * @param[out] locationType Specifies how/where ZFOs will be loaded.
-	 * @param[out] checkZfoOnServer Specifies whether ZFOs are going to be
-	 *                              checked on the ISDS server.
 	 * @param[in] parent Parent widget.
 	 */
-	DlgImportZFO(enum Imports::Type &zfoType,
-	    enum ZFOlocation &locationType, bool &checkZfoOnServer,
-	    QWidget *parent = Q_NULLPTR);
+	explicit DlgImportZFO(QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgImportZFO(void);
 
+	/*!
+	 * @brief Obtain configuration for ZFO import.
+	 *
+	 * @param[out] zfoType Specifies ZFO type.
+	 * @param[out] locationType Specifies how/where ZFOs will be loaded.
+	 * @param[out] checkZfoOnServer Specifies whether ZFOs are going to be
+	 *                              checked on the ISDS server.
+	 * @param[in] parent Parent widget.
+	 * @return True when dialogue has been accepted.
+	 */
+	static
+	bool getImportConfiguration(enum Imports::Type &zfoType,
+	    enum ZFOlocation &locationType, bool &checkZfoOnServer,
+	    QWidget *parent = Q_NULLPTR);
+
 private slots:
 	/*!
-	 * @brief Sets control elements activity according to chosen values.
+	 * @brief Sets activity of control elements according to chosen values.
 	 */
 	void setControlsActivity(void);
 
-	/*!
-	 * @brief Sets chosen values via references to external values.
-	 */
-	void setChosenValues(void);
-
 private:
 	Ui::DlgImportZFO *m_ui; /*!< UI generated from UI file. */
-
-	enum Imports::Type &m_zfoType; /*!< Specifies ZFO type. */
-	enum ZFOlocation &m_locationType; /*!< Specifies how/where ZFOs will be loaded. */
-	bool &m_checkZfoOnServer; /*!< ZFO will be checked on the ISDS server. */
 };
 
 #endif /* _DLG_IMPORT_ZFO_H_ */

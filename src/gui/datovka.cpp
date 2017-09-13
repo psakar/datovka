@@ -5543,10 +5543,10 @@ void MainWindow::showImportZFOActionDialog(void)
 	bool checkZfoOnServer = false;
 
 	/* Import setting dialogue. */
-	DlgImportZFO *importZfo = new DlgImportZFO(zfoType, locationType,
-	   checkZfoOnServer, this);
-	importZfo->exec();
-	importZfo->deleteLater();
+	if (!DlgImportZFO::getImportConfiguration(zfoType, locationType,
+	        checkZfoOnServer, this)) {
+		return;
+	}
 
 	// get userName and pointer to database for all accounts from settings
 	QList<Task::AccountDescr> accountList;

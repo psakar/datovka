@@ -24,13 +24,9 @@
 #include "src/gui/dlg_import_zfo.h"
 #include "ui_dlg_import_zfo.h"
 
-DlgImportZFO::DlgImportZFO(enum Imports::Type &zfoType,
-    enum ZFOlocation &locationType, bool &checkZfoOnServer, QWidget *parent)
+DlgImportZFO::DlgImportZFO(QWidget *parent)
     : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgImportZFO),
-    m_zfoType(zfoType),
-    m_locationType(locationType),
-    m_checkZfoOnServer(checkZfoOnServer)
+    m_ui(new (std::nothrow) Ui::DlgImportZFO)
 {
 	m_ui->setupUi(this);
 
@@ -44,15 +40,45 @@ DlgImportZFO::DlgImportZFO(enum Imports::Type &zfoType,
 	connect(m_ui->radioImportSelected, SIGNAL(clicked()),
 	    this, SLOT(setControlsActivity()));
 
-	connect(m_ui->buttonBox, SIGNAL(accepted()),
-	    this, SLOT(setChosenValues()));
-
 	m_ui->checkOnServer->setCheckState(Qt::Checked);
 }
 
 DlgImportZFO::~DlgImportZFO(void)
 {
 	delete m_ui;
+}
+
+bool DlgImportZFO::getImportConfiguration(enum Imports::Type &zfoType,
+    enum ZFOlocation &locationType, bool &checkZfoOnServer, QWidget *parent)
+{
+	DlgImportZFO dlg(parent);
+	if (QDialog::Accepted != dlg.exec()) {
+		return false;
+	}
+
+	/* Obtain chosen values. */
+	if (dlg.m_ui->messageZFO->isChecked()) {
+		zfoType = Imports::IMPORT_MESSAGE;
+	} else if (dlg.m_ui->deliveryZFO->isChecked()) {
+		zfoType = Imports::IMPORT_DELIVERY;
+	} else {
+		zfoType = Imports::IMPORT_ANY;
+	}
+
+	if (dlg.m_ui->radioImportAll->isChecked()) {
+		if (dlg.m_ui->includeSubDir->isChecked()) {
+			locationType = IMPORT_FROM_SUBDIR;
+		} else {
+			locationType = IMPORT_FROM_DIR;
+		}
+	} else if (dlg.m_ui->radioImportSelected->isChecked()) {
+		locationType = IMPORT_SEL_FILES;
+	}
+
+	checkZfoOnServer =
+	    Qt::Unchecked != dlg.m_ui->checkOnServer->checkState();
+
+	return true;
 }
 
 void DlgImportZFO::setControlsActivity(void)
@@ -62,27 +88,4 @@ void DlgImportZFO::setControlsActivity(void)
 	} else {
 		m_ui->includeSubDir->setEnabled(false);
 	}
-}
-
-void DlgImportZFO::setChosenValues(void)
-{
-	if (m_ui->messageZFO->isChecked()) {
-		m_zfoType = Imports::IMPORT_MESSAGE;
-	} else if (m_ui->deliveryZFO->isChecked()) {
-		m_zfoType = Imports::IMPORT_DELIVERY;
-	} else {
-		m_zfoType = Imports::IMPORT_ANY;
-	}
-
-	if (m_ui->radioImportAll->isChecked()) {
-		if (m_ui->includeSubDir->isChecked()) {
-			m_locationType = IMPORT_FROM_SUBDIR;
-		} else {
-			m_locationType = IMPORT_FROM_DIR;
-		}
-	} else if (m_ui->radioImportSelected->isChecked()) {
-		m_locationType = IMPORT_SEL_FILES;
-	}
-
-	m_checkZfoOnServer = Qt::Unchecked != m_ui->checkOnServer->checkState();
 }
