@@ -69,7 +69,8 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	    this, SLOT(activateContent(int)));
 	connect(m_ui->addCertButton, SIGNAL(clicked()), this,
 	    SLOT(addCertificateFile()));
-	connect(m_ui->buttonBox, SIGNAL(accepted()), this, SLOT(saveAccount()));
+	connect(m_ui->buttonBox, SIGNAL(accepted()), this,
+	    SLOT(collectAccountData()));
 	connect(m_ui->acntNameLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 	connect(m_ui->usernameLine, SIGNAL(textChanged(QString)),
@@ -88,9 +89,17 @@ DlgCreateAccount::~DlgCreateAccount(void)
 	delete m_ui;
 }
 
-AcntSettings DlgCreateAccount::getSubmittedData(void) const
+bool DlgCreateAccount::modify(AcntSettings &accountInfo, enum Action action,
+    const QString &syncAllActName, QWidget *parent)
 {
-	return m_accountInfo;
+	DlgCreateAccount dlg(accountInfo, action, syncAllActName, parent);
+	if (QDialog::Accepted == dlg.exec()) {
+		/* Store submitted data. */
+		accountInfo = dlg.m_accountInfo;
+		return true;
+	} else {
+		return false;
+	}
 }
 
 void DlgCreateAccount::activateContent(int loginMethodIdx)
@@ -166,7 +175,7 @@ void DlgCreateAccount::addCertificateFile(void)
 	}
 }
 
-void DlgCreateAccount::saveAccount(void)
+void DlgCreateAccount::collectAccountData(void)
 {
 	debugSlotCall();
 

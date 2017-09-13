@@ -44,36 +44,44 @@ public:
 	 * @brief Specifies the action to be performed.
 	 */
 	enum Action {
-		ACT_ADDNEW,
-		ACT_EDIT,
-		ACT_PWD,
-		ACT_CERT,
-		ACT_CERTPWD
+		ACT_ADDNEW, /*!< Create new account. */
+		ACT_EDIT, /*!< Modify existing account. */
+		ACT_PWD, /*!< Change/enter locally stored password. */
+		ACT_CERT, /*!< Change/enter certificate data.  */
+		ACT_CERTPWD /*!< Change/enter certificate or password data. */
 	};
 
+private:
 	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] accountInfo Account settings.
 	 * @param[in] action Specifies which parts of dialogue to be enabled.
 	 * @Param[in] syncAllActName Synchronise all accounts action name.
-	 * @param[in] parent Parent object.
+	 * @param[in] parent Parent widget.
 	 */
 	DlgCreateAccount(const AcntSettings &accountInfo, enum Action action,
 	    const QString &syncAllActName, QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgCreateAccount(void);
 
 	/*!
-	 * @brief Obtains account data as the have been submitted by the user.
+	 * @brief Performs modification of the supplied account data.
 	 *
-	 * @return Data that have been submitted by the user when he pressed
-	 *     the Accept/OK button.
+	 * @param[in,out] accountInfo Account data structure to be modified.
+	 * @param[in]     action Modification action to be performed.
+	 * @param[in]     syncAllActName Synchronise all accounts action name.
+	 * @param[in]     parent Parent widget.
+	 * @return True when dialogue has been accepted and new account data
+	 *     have been updated.
 	 */
-	AcntSettings getSubmittedData(void) const;
+	static
+	bool modify(AcntSettings &accountInfo, enum Action action,
+	    const QString &syncAllActName, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -94,9 +102,9 @@ private slots:
 	void addCertificateFile(void);
 
 	/*!
-	 * @brief Saves current account information.
+	 * @brief Gathers current account information and stores the settings.
 	 */
-	void saveAccount(void);
+	void collectAccountData(void);
 
 private:
 	/*!

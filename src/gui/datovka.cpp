@@ -4566,25 +4566,21 @@ void MainWindow::showAddNewAccountDialog(void)
 {
 	debugSlotCall();
 
-	DlgCreateAccount *accountDlg = new DlgCreateAccount(AcntSettings(),
-	    DlgCreateAccount::ACT_ADDNEW, ui->actionSync_all_accounts->text(),
-	    this);
-
 	showStatusTextWithTimeout(tr("Create a new account."));
 
-	int dlgRet = accountDlg->exec();
-
-	if (QDialog::Accepted == dlgRet) {
-		AcntSettings newAcntSettings(accountDlg->getSubmittedData());
-		getAccountUserDataboxInfo(newAcntSettings);
-
-		if (ui->accountList->model()->rowCount() > 0) {
-			activeAccountMenuAndButtons(true);
-			saveSettings();
-		}
+	AcntSettings newAcntSettings;
+	if (!DlgCreateAccount::modify(newAcntSettings,
+	        DlgCreateAccount::ACT_ADDNEW,
+	        ui->actionSync_all_accounts->text(), this)) {
+		return;
 	}
 
-	accountDlg->deleteLater();
+	getAccountUserDataboxInfo(newAcntSettings);
+
+	if (ui->accountList->model()->rowCount() > 0) {
+		activeAccountMenuAndButtons(true);
+		saveSettings();
+	}
 }
 
 /* ========================================================================= */
@@ -4707,13 +4703,7 @@ void MainWindow::changeAccountPassword(void)
 	DlgChangePwd::changePassword(dbId, userName, this);
 }
 
-
-/* ========================================================================= */
-/*
- * Shows account properties dialog.
- */
 void MainWindow::manageAccountProperties(void)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -4724,23 +4714,18 @@ void MainWindow::manageAccountProperties(void)
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
 	    .arg(globAccounts[userName].accountName()));
 
-	DlgCreateAccount *accountDlg = new DlgCreateAccount(
-	    globAccounts[userName], DlgCreateAccount::ACT_EDIT,
-	    ui->actionSync_all_accounts->text(), this);
-
-	int dlgRet = accountDlg->exec();
-
-	if (QDialog::Accepted == dlgRet) {
-		/* Save changes. */
-		globAccounts[userName] = accountDlg->getSubmittedData();
-		emit globAccounts.accountDataChanged(userName);
-
-		showStatusTextWithTimeout(tr("Account \"%1\" was updated.")
-		    .arg(userName));
-		saveSettings();
+	if (!DlgCreateAccount::modify(globAccounts[userName],
+	        DlgCreateAccount::ACT_EDIT,
+	        ui->actionSync_all_accounts->text(), this)) {
+		return;
 	}
 
-	accountDlg->deleteLater();
+	/* Save changes. */
+	emit globAccounts.accountDataChanged(userName);
+
+	showStatusTextWithTimeout(
+	    tr("Account '%1' was updated.").arg(userName));
+	saveSettings();
 }
 
 /* ========================================================================= */
@@ -6361,7 +6346,6 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 
 	do {
 		errCode = loginCtx.logIn();
-		DlgCreateAccount *accountDlg = Q_NULLPTR;
 
 		acntSettings._setOtp(QString()); /* Erase OTP. */
 
@@ -6410,63 +6394,42 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 			/* Do nothing. */
 			break;
 		case IsdsLogin::EC_NO_PWD:
-			{
-				accountDlg = new DlgCreateAccount(acntSettings,
-				    DlgCreateAccount::ACT_PWD,
-				    ui->actionSync_all_accounts->text(), this);
-				int dlgRet = accountDlg->exec();
-				if (QDialog::Accepted == dlgRet) {
-					acntSettings = accountDlg->getSubmittedData();
-				} else {
-					acntSettings.setRememberPwd(false);
-					acntSettings.setPassword(QString());
-					showStatusTextWithTimeout(tr(
-					    "It was not possible to connect to your data box from account \"%1\".")
-					    .arg(acntSettings.accountName()));
-					return false;
-				}
-				accountDlg->deleteLater();
+			if (!DlgCreateAccount::modify(acntSettings,
+			        DlgCreateAccount::ACT_PWD,
+			        ui->actionSync_all_accounts->text(), this)) {
+				acntSettings.setRememberPwd(false);
+				acntSettings.setPassword(QString());
+				showStatusTextWithTimeout(
+				    tr("It was not possible to connect to your data box from account '%1'.")
+				        .arg(acntSettings.accountName()));
+				return false;
 			}
 			break;
 		case IsdsLogin::EC_NO_CRT:
 		case IsdsLogin::EC_NO_CRT_AGAIN:
-			{
-				/* Erase pass-phrase. */
-				acntSettings._setPassphrase(QString());
+			/* Erase pass-phrase. */
+			acntSettings._setPassphrase(QString());
 
-				accountDlg = new DlgCreateAccount(acntSettings,
-				    DlgCreateAccount::ACT_CERT,
-				    ui->actionSync_all_accounts->text(), this);
-				int dlgRet = accountDlg->exec();
-				if (QDialog::Accepted == dlgRet) {
-					acntSettings = accountDlg->getSubmittedData();
-				} else {
-					showStatusTextWithTimeout(tr(
-					    "It was not possible to connect to your data box from account \"%1\".")
-					    .arg(acntSettings.accountName()));
-					return false;
-				}
-				accountDlg->deleteLater();
+			if (!DlgCreateAccount::modify(acntSettings,
+			        DlgCreateAccount::ACT_CERT,
+			        ui->actionSync_all_accounts->text(), this)) {
+				showStatusTextWithTimeout(
+				    tr("It was not possible to connect to your data box from account '%1'.")
+				        .arg(acntSettings.accountName()));
+				return false;
 			}
 			break;
 		case IsdsLogin::EC_NO_CRT_PWD:
-			{
-				/* Erase pass-phrase. */
-				acntSettings._setPassphrase(QString());
+			/* Erase pass-phrase. */
+			acntSettings._setPassphrase(QString());
 
-				accountDlg = new DlgCreateAccount(acntSettings,
-				    DlgCreateAccount::ACT_CERTPWD,
-				    ui->actionSync_all_accounts->text(), this);
-				int dlgRet = accountDlg->exec();
-				if (QDialog::Accepted == dlgRet) {
-					acntSettings = accountDlg->getSubmittedData();
-				} else {
-					showStatusTextWithTimeout(tr(
-					    "It was not possible to connect to your data box from account \"%1\".")
-					    .arg(acntSettings.accountName()));
-					return false;
-				}
-				accountDlg->deleteLater();
+			if (!DlgCreateAccount::modify(acntSettings,
+			        DlgCreateAccount::ACT_CERTPWD,
+			        ui->actionSync_all_accounts->text(), this)) {
+				showStatusTextWithTimeout(
+				    tr("It was not possible to connect to your data box from account '%1'.")
+				        .arg(acntSettings.accountName()));
+				return false;
 			}
 			break;
 		case IsdsLogin::EC_NO_CRT_PPHR:
@@ -6556,21 +6519,14 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 			}
 			break;
 		case IsdsLogin::EC_NOT_LOGGED_IN:
-			{
-				accountDlg = new DlgCreateAccount(acntSettings,
-				    DlgCreateAccount::ACT_EDIT,
-				    ui->actionSync_all_accounts->text(), this);
-				int dlgRet = accountDlg->exec();
-				if (QDialog::Accepted == dlgRet) {
-					acntSettings = accountDlg->getSubmittedData();
-				} else {
-					/* Don't clear password here. */
-					showStatusTextWithTimeout(tr(
-					    "It was not possible to connect to your data box from account \"%1\".")
-					    .arg(acntSettings.accountName()));
-					return false;
-				}
-				accountDlg->deleteLater();
+			if (!DlgCreateAccount::modify(acntSettings,
+			        DlgCreateAccount::ACT_EDIT,
+			        ui->actionSync_all_accounts->text(), this)) {
+				/* Don't clear password here. */
+				showStatusTextWithTimeout(
+				    tr("It was not possible to connect to your data box from account '%1'.")
+				        .arg(acntSettings.accountName()));
+				return false;
 			}
 			break;
 		default:
