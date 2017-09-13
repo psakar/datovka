@@ -41,9 +41,9 @@ class DlgImportZFOResult : public QDialog {
 
 public:
 	DlgImportZFOResult(int filesCnt,
-	    QList< QPair<QString, QString> > errImportList,
-	    QList< QPair<QString, QString> > succImportList,
-	    QList< QPair<QString, QString> > existImportList,
+	    const QList< QPair<QString, QString> > &succImportList,
+	    const QList< QPair<QString, QString> > &existImportList,
+	    const QList< QPair<QString, QString> > &errImportList,
 	    QWidget *parent = Q_NULLPTR);
 
 	/*!
@@ -53,11 +53,6 @@ public:
 
 private:
 	Ui::DlgImportZFOResult *m_ui; /*!< UI generated from UI file. */
-
-	int m_filesCnt;
-	QList< QPair<QString, QString> > m_errImportList;
-	QList< QPair<QString, QString> > m_succImportList;
-	QList< QPair<QString, QString> > m_existImportList;
 };
 
 #endif /* _DLG_IMPORT_ZFO_RESULT_H_ */

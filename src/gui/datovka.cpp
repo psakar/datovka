@@ -5490,7 +5490,7 @@ void MainWindow::showImportZFOActionDialog(void)
 	bool checkZfoOnServer = false;
 
 	/* Import setting dialogue. */
-	QDialog *importZfo = new DlgImportZFO(zfoType, locationType,
+	DlgImportZFO *importZfo = new DlgImportZFO(zfoType, locationType,
 	   checkZfoOnServer, this);
 	importZfo->exec();
 	importZfo->deleteLater();
@@ -8039,8 +8039,8 @@ void MainWindow::showImportZfoResultDialogue(int filesCnt,
 {
 	debugFuncCall();
 
-	QDialog *importZfoResult = new DlgImportZFOResult(filesCnt,
-	    errorFilesList, successFilesList, existFilesList, this);
+	DlgImportZFOResult *importZfoResult = new DlgImportZFOResult(filesCnt,
+	    successFilesList, existFilesList, errorFilesList, this);
 	importZfoResult->exec();
 	importZfoResult->deleteLater();
 }
