@@ -2193,8 +2193,8 @@ void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
 	}
 
 	if (m_zfoFilesToImport.isEmpty()) {
-		showImportZfoResultDialogue(m_numFilesToImport,
-		    m_importSucceeded, m_importExisted, m_importFailed);
+		DlgImportZFOResult::view(m_numFilesToImport,
+		    m_importSucceeded, m_importExisted, m_importFailed, this);
 
 		m_numFilesToImport = 0;
 		m_importSucceeded.clear();
@@ -8030,19 +8030,6 @@ void MainWindow::doExportOfSelectedFiles(
 		}
 
 	}
-}
-
-void MainWindow::showImportZfoResultDialogue(int filesCnt,
-    const QList<QPair<QString,QString>> &successFilesList,
-    const QList<QPair<QString,QString>> &existFilesList,
-    const QList<QPair<QString,QString>> &errorFilesList)
-{
-	debugFuncCall();
-
-	DlgImportZFOResult *importZfoResult = new DlgImportZFOResult(filesCnt,
-	    successFilesList, existFilesList, errorFilesList, this);
-	importZfoResult->exec();
-	importZfoResult->deleteLater();
 }
 
 void MainWindow::showImportMessageResults(const QString &userName,

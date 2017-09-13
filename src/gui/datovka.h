@@ -1043,14 +1043,6 @@ private:
 	 */
 	void doExportOfSelectedFiles(enum Exports::ExportFileType expFileType);
 
-	/*
-	 * @brief Show ZFO import notification dialog with results of import.
-	 */
-	void showImportZfoResultDialogue(int filesCnt,
-	    const QList<QPair<QString,QString>> &successFilesList,
-	    const QList<QPair<QString,QString>> &existFilesList,
-	    const QList<QPair<QString,QString>> &errorFilesList);
-
 	QString m_confDirName; /*!< Configuration directory location. */
 	QString m_confFileName; /*!< Configuration file location. */
 

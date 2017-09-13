@@ -56,17 +56,16 @@ void setListData(const QList< QPair<QString, QString> > &importList,
 	}
 }
 
-DlgImportZFOResult::DlgImportZFOResult(int filesCnt,
+DlgImportZFOResult::DlgImportZFOResult(int fileCnt,
     const QList< QPair<QString, QString> > &succImportList,
     const QList< QPair<QString, QString> > &existImportList,
-    const QList< QPair<QString, QString> > &errImportList,
-    QWidget *parent)
+    const QList< QPair<QString, QString> > &errImportList, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgImportZFOResult)
 {
 	m_ui->setupUi(this);
 
-	m_ui->zfoTotal->setText(QString::number(filesCnt));
+	m_ui->zfoTotal->setText(QString::number(fileCnt));
 
 	m_ui->zfoInserted->setStyleSheet("QLabel { color: green }");
 	m_ui->zfoInserted->setText(QString::number(succImportList.size()));
@@ -82,4 +81,14 @@ DlgImportZFOResult::DlgImportZFOResult(int filesCnt,
 DlgImportZFOResult::~DlgImportZFOResult(void)
 {
 	delete m_ui;
+}
+
+void DlgImportZFOResult::view(int fileCnt,
+    const QList< QPair<QString, QString> > &succImportList,
+    const QList< QPair<QString, QString> > &existImportList,
+    const QList< QPair<QString, QString> > &errImportList, QWidget *parent)
+{
+	DlgImportZFOResult dlg(fileCnt, succImportList, existImportList,
+	    errImportList, parent);
+	dlg.exec();
 }

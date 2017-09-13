@@ -39,17 +39,50 @@ namespace Ui {
 class DlgImportZFOResult : public QDialog {
 	Q_OBJECT
 
-public:
-	DlgImportZFOResult(int filesCnt,
+private:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] fileCnt Total number of imported files.
+	 * @param[in] succImportList List of successfully imported file names
+	 *                           and import messages.
+	 * @param[in] existImportList List of already exiting file names
+	 *                            and import messages.
+	 * @param[in] errImportList List of file names which could not be
+	 *                          imported.
+	 * @param[in] parent Parent widget.
+	 */
+	DlgImportZFOResult(int fileCnt,
 	    const QList< QPair<QString, QString> > &succImportList,
 	    const QList< QPair<QString, QString> > &existImportList,
 	    const QList< QPair<QString, QString> > &errImportList,
 	    QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgImportZFOResult(void);
+
+	/*!
+	 * @brief Shows ZFO import notification dialogue with displaying
+	 *     results.
+	 *
+	 * @param[in] fileCnt Total number of imported files.
+	 * @param[in] succImportList List of successfully imported file names
+	 *                           and import messages.
+	 * @param[in] existImportList List of already exiting file names
+	 *                            and import messages.
+	 * @param[in] errImportList List of file names which could not be
+	 *                          imported.
+	 * @param[in] parent Parent widget.
+	 */
+	static
+	void view(int fileCnt,
+	    const QList< QPair<QString, QString> > &succImportList,
+	    const QList< QPair<QString, QString> > &existImportList,
+	    const QList< QPair<QString, QString> > &errImportList,
+	    QWidget *parent = Q_NULLPTR);
 
 private:
 	Ui::DlgImportZFOResult *m_ui; /*!< UI generated from UI file. */
