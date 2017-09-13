@@ -6375,9 +6375,9 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 				QMessageBox::critical(this, pair.first,
 				    pair.second, QMessageBox::Ok);
 			}
-			showStatusTextWithTimeout(tr(
-			    "It was not possible to connect to your data box from account \"%1\".")
-			    .arg(acntSettings.accountName()));
+			showStatusTextWithTimeout(
+			    tr("It was not possible to connect to the data box from account '%1'.")
+			        .arg(acntSettings.accountName()));
 			break;
 		case IsdsLogin::EC_NOT_IMPL:
 			showStatusTextWithTimeout(tr(
@@ -6400,7 +6400,7 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 				acntSettings.setRememberPwd(false);
 				acntSettings.setPassword(QString());
 				showStatusTextWithTimeout(
-				    tr("It was not possible to connect to your data box from account '%1'.")
+				    tr("It was not possible to connect to the data box from account '%1'.")
 				        .arg(acntSettings.accountName()));
 				return false;
 			}
@@ -6414,7 +6414,7 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 			        DlgCreateAccount::ACT_CERT,
 			        ui->actionSync_all_accounts->text(), this)) {
 				showStatusTextWithTimeout(
-				    tr("It was not possible to connect to your data box from account '%1'.")
+				    tr("It was not possible to connect to the data box from account '%1'.")
 				        .arg(acntSettings.accountName()));
 				return false;
 			}
@@ -6427,7 +6427,7 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 			        DlgCreateAccount::ACT_CERTPWD,
 			        ui->actionSync_all_accounts->text(), this)) {
 				showStatusTextWithTimeout(
-				    tr("It was not possible to connect to your data box from account '%1'.")
+				    tr("It was not possible to connect to the data box from account '%1'.")
 				        .arg(acntSettings.accountName()));
 				return false;
 			}
@@ -6485,7 +6485,7 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 					    Qt::WindowStaysOnTopHint);
 					if (!ok) {
 						showStatusTextWithTimeout(
-						    tr("It was not possible to connect to your data box from account \"%1\".")
+						    tr("It was not possible to connect to the data box from account '%1'.")
 						        .arg(acntSettings.accountName()));
 						return false;
 					}
@@ -6510,7 +6510,7 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 
 				if (reply == QMessageBox::No) {
 					showStatusTextWithTimeout(tr(
-					    "It was not possible to connect to your data box from account \"%1\".")
+					    "It was not possible to connect to the data box from account '%1'.")
 					    .arg(acntSettings.accountName()));
 					return false;
 				}
@@ -6524,7 +6524,7 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 			        ui->actionSync_all_accounts->text(), this)) {
 				/* Don't clear password here. */
 				showStatusTextWithTimeout(
-				    tr("It was not possible to connect to your data box from account '%1'.")
+				    tr("It was not possible to connect to the data box from account '%1'.")
 				        .arg(acntSettings.accountName()));
 				return false;
 			}

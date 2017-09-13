@@ -33,7 +33,7 @@
    <item>
     <widget class="QLabel" name="infoLabel">
      <property name="text">
-      <string>Please enter credentials for your Data Box.</string>
+      <string>Please enter credentials for your data box.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -65,7 +65,7 @@
      <item row="0" column="1">
       <widget class="QLineEdit" name="acntNameLine">
        <property name="toolTip">
-        <string>You can give a descriptive name to your account.</string>
+        <string>You can give a descriptive name for your account.</string>
        </property>
       </widget>
      </item>
@@ -86,7 +86,7 @@
      <item row="2" column="1">
       <widget class="QLineEdit" name="usernameLine">
        <property name="toolTip">
-        <string>Enter your username</string>
+        <string>Enter the username for this account.</string>
        </property>
       </widget>
      </item>
@@ -125,7 +125,7 @@ select this option. For normal account
      <item row="4" column="1">
       <widget class="QComboBox" name="loginMethodComboBox">
        <property name="toolTip">
-        <string>Select authorization method for login into your databox</string>
+        <string>Select authorisation method for logging in to the databox.</string>
        </property>
       </widget>
      </item>
@@ -146,7 +146,7 @@ select this option. For normal account
      <item row="6" column="1">
       <widget class="QLineEdit" name="pwdLine">
        <property name="toolTip">
-        <string>Enter your password</string>
+        <string>Enter your password.</string>
        </property>
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
@@ -169,10 +169,10 @@ select this option. For normal account
      <item row="8" column="1">
       <widget class="QCheckBox" name="rememberPwdCheckBox">
        <property name="toolTip">
-        <string>The password will be saved in a readable form in the 
-configuration file of Datovka in your home directory.
-Do not use this unless you are pretty sure about
-your account security.</string>
+        <string>The password will be saved in a readable format in the
+configuration file which is usually located in your home
+directory. Do not use this possibility if you are concerned
+about the security of your account.</string>
        </property>
        <property name="text">
         <string>Remember password</string>
@@ -198,7 +198,7 @@ your account security.</string>
        <item>
         <widget class="QPushButton" name="addCertButton">
          <property name="toolTip">
-          <string>Select a certificate</string>
+          <string>Select a certificate.</string>
          </property>
          <property name="text">
           <string>Add</string>
@@ -229,11 +229,11 @@ your account security.</string>
    <item>
     <widget class="QCheckBox" name="syncAllCheckBox">
      <property name="toolTip">
-      <string>Account will be included into synchronisation
-process of all accounts on the background</string>
+      <string>If selected, the account will be included into
+the synchronisation process of all accounts.</string>
      </property>
      <property name="text">
-      <string>Synchronise this account when 'Synchronise all' is activated</string>
+      <string>Synchronise this account together with all accounts</string>
      </property>
      <property name="checked">
       <bool>true</bool>
