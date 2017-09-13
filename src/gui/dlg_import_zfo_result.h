@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,32 +21,43 @@
  * the two.
  */
 
-
 #ifndef _DLG_IMPORT_ZFO_RESULT_H_
 #define _DLG_IMPORT_ZFO_RESULT_H_
 
-
 #include <QDialog>
-#include "src/common.h"
-#include "ui_dlg_import_zfo_result.h"
+#include <QList>
+#include <QPair>
+#include <QString>
 
+namespace Ui {
+	class DlgImportZFOResult;
+}
 
-class ImportZFOResultDialog : public QDialog, public Ui::ImportZFOResult
-{
+/*!
+ * @brief Import ZFO files result dialogue.
+ */
+class DlgImportZFOResult : public QDialog {
 	Q_OBJECT
 
 public:
-	ImportZFOResultDialog(int filesCnt,
-	    QList<QPair<QString,QString>> errImportList,
-	    QList<QPair<QString,QString>> succImportList,
-	    QList<QPair<QString,QString>> existImportList,
-	    QWidget *parent = 0);
+	DlgImportZFOResult(int filesCnt,
+	    QList< QPair<QString, QString> > errImportList,
+	    QList< QPair<QString, QString> > succImportList,
+	    QList< QPair<QString, QString> > existImportList,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgImportZFOResult(void);
 
 private:
+	Ui::DlgImportZFOResult *m_ui; /*!< UI generated from UI file. */
+
 	int m_filesCnt;
-	QList<QPair<QString,QString>> m_errImportList;
-	QList<QPair<QString,QString>> m_succImportList;
-	QList<QPair<QString,QString>> m_existImportList;
+	QList< QPair<QString, QString> > m_errImportList;
+	QList< QPair<QString, QString> > m_succImportList;
+	QList< QPair<QString, QString> > m_existImportList;
 };
 
 #endif /* _DLG_IMPORT_ZFO_RESULT_H_ */

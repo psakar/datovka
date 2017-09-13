@@ -8039,8 +8039,8 @@ void MainWindow::showImportZfoResultDialogue(int filesCnt,
 {
 	debugFuncCall();
 
-	QDialog *importZfoResult = new ImportZFOResultDialog(filesCnt,
-	    errorFilesList, successFilesList, existFilesList, 0);
+	QDialog *importZfoResult = new DlgImportZFOResult(filesCnt,
+	    errorFilesList, successFilesList, existFilesList, this);
 	importZfoResult->exec();
 	importZfoResult->deleteLater();
 }

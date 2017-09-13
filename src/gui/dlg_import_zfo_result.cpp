@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,73 +21,71 @@
  * the two.
  */
 
+#include "src/gui/dlg_import_zfo_result.h"
+#include "ui_dlg_import_zfo_result.h"
 
-#include "dlg_import_zfo_result.h"
-#include "src/common.h"
-
-
-ImportZFOResultDialog::ImportZFOResultDialog(int filesCnt,
+DlgImportZFOResult::DlgImportZFOResult(int filesCnt,
     QList<QPair<QString,QString>> errImportList,
     QList<QPair<QString,QString>> succImportList,
     QList<QPair<QString,QString>> existImportList,
-    QWidget *parent) :
-    QDialog(parent),
+    QWidget *parent)
+    : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgImportZFOResult),
     m_filesCnt(filesCnt),
     m_errImportList(errImportList),
     m_succImportList(succImportList),
     m_existImportList(existImportList)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	QString zfoList = "";
+	m_ui->zfoTotal->setText(QString::number(m_filesCnt));
+	m_ui->zfoInserted->setStyleSheet("QLabel { color: green }");
+	m_ui->zfoInserted->setText(QString::number(m_succImportList.size()));
+	m_ui->zfoExist->setText(QString::number(m_existImportList.size()));
+	m_ui->zfoErrors->setStyleSheet("QLabel { color: red }");
+	m_ui->zfoErrors->setText(QString::number(m_errImportList.size()));
 
-	this->zfoInserted->setStyleSheet("QLabel { color: green }");
-	this->zfoErrors->setStyleSheet("QLabel { color: red }");
-	this->zfoTotal->setText(QString::number(m_filesCnt));
-	this->zfoInserted->setText(QString::number(m_succImportList.size()));
-	this->zfoErrors->setText(QString::number(m_errImportList.size()));
-	this->zfoExist->setText(QString::number(m_existImportList.size()));
+	QString zfoList;
 
 	if (m_succImportList.size() == 0) {
-		this->succListHeader->setEnabled(false);
-		this->succListHeader->hide();
-		this->successList->setEnabled(false);
-		this->successList->hide();
+		m_ui->succListHeader->setEnabled(false);
+		m_ui->succListHeader->hide();
+		m_ui->successList->setEnabled(false);
+		m_ui->successList->hide();
 	} else {
 
-		for (int i = 0; i < m_succImportList.size(); i++) {
-			zfoList += " <b>" + QString::number(i+1) +
+		for (int i = 0; i < m_succImportList.size(); ++i) {
+			zfoList += " <b>" + QString::number(i + 1) +
 			    ". " + m_succImportList.at(i).first + "</b><br/>"
 			    + m_succImportList.at(i).second;
 		}
-		this->successList->setText(zfoList);
+		m_ui->successList->setText(zfoList);
 	}
 
-
-	zfoList = "";
+	zfoList.clear();
 
 	if (m_existImportList.size() == 0) {
-		this->existListHeader->setEnabled(false);
-		this->existListHeader->hide();
-		this->existList->setEnabled(false);
-		this->existList->hide();
+		m_ui->existListHeader->setEnabled(false);
+		m_ui->existListHeader->hide();
+		m_ui->existList->setEnabled(false);
+		m_ui->existList->hide();
 	} else {
-		for (int i = 0; i < m_existImportList.size(); i++) {
-			zfoList += " <b>" + QString::number(i+1) +
+		for (int i = 0; i < m_existImportList.size(); ++i) {
+			zfoList += " <b>" + QString::number(i + 1) +
 			    ". " + m_existImportList.at(i).first + "</b><br/>"
 			    + m_existImportList.at(i).second;
 		}
 
-		this->existList->setText(zfoList);
+		m_ui->existList->setText(zfoList);
 	}
 
-	zfoList = "";
+	zfoList.clear();
 
 	if (m_errImportList.size() == 0) {
-		this->errListHeader->setEnabled(false);
-		this->errListHeader->hide();
-		this->errorList->setEnabled(false);
-		this->errorList->hide();
+		m_ui->errListHeader->setEnabled(false);
+		m_ui->errListHeader->hide();
+		m_ui->errorList->setEnabled(false);
+		m_ui->errorList->hide();
 	} else {
 		for (int i = 0; i < m_errImportList.size(); i++) {
 			zfoList += " <b>" + QString::number(i+1) +
@@ -95,6 +93,11 @@ ImportZFOResultDialog::ImportZFOResultDialog(int filesCnt,
 			    + m_errImportList.at(i).second + "<br/>";
 		}
 
-		this->errorList->setText(zfoList);
+		m_ui->errorList->setText(zfoList);
 	}
+}
+
+DlgImportZFOResult::~DlgImportZFOResult(void)
+{
+	delete m_ui;
 }
