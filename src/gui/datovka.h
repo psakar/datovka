@@ -28,7 +28,6 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QMainWindow>
-#include <QSet>
 #include <QStandardItemModel>
 #include <QProgressBar>
 #include <QTimer>
@@ -1082,15 +1081,6 @@ private:
 	QRect m_geometry; /* Non-maximised window geometry. */
 
 	QList<DbMsgsTblModel::AppendedCol> m_msgTblAppendedCols; /*< Appended columns. */
-
-	QSet<QString> m_zfoFilesToImport; /*!< Set of files to be imported. */
-	int m_numFilesToImport; /*!< Input ZFO count. */
-	/*!< QPair in following lists means:
-	 * first string - zfo file name,
-	 * second = import result text */
-	QList< QPair<QString, QString> > m_importSucceeded; /*!< Success import resulty lists. */
-	QList< QPair<QString, QString> > m_importExisted; /*!< Import exists resulty lists. */
-	QList< QPair<QString, QString> > m_importFailed; /*!< Import error resulty lists. */
 
 	/* User interface elements. */
 	Ui::MainWindow *ui; /*!< User interface as generated from ui files. */
