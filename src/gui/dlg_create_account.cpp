@@ -22,6 +22,7 @@
  */
 
 #include <QFileDialog>
+#include <QFileInfo>
 
 #include "src/common.h"
 #include "src/gui/dlg_create_account.h"
@@ -58,6 +59,12 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 
 	m_ui->certLabel->setEnabled(false);
 	m_ui->addCertButton->setEnabled(false);
+	{
+		QIcon ico;
+		ico.addFile(ICON_3PARTY_PATH + QString("plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(ICON_3PARTY_PATH + QString("plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->addCertButton->setIcon(ico);
+	}
 
 	m_ui->syncAllCheckBox->setText(
 	    tr("Synchronise this account when '%1' is activated")
@@ -168,8 +175,13 @@ void DlgCreateAccount::addCertificateFile(void)
 	    tr("Certificate Files (*.p12 *.pem)")));
 	if (!certFileName.isEmpty()) {
 		m_ui->addCertButton->setText(certFileName);
-		m_ui->addCertButton->setIcon(
-		    QIcon(ICON_3PARTY_PATH + QString("key_16.png")));
+		{
+			QIcon ico;
+			ico.addFile(ICON_3PARTY_PATH + QString("key_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(ICON_3PARTY_PATH + QString("key_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+			m_ui->addCertButton->setIcon(ico);
+		}
+		m_ui->addCertButton->setToolTip(QString());
 		m_certPath = certFileName;
 		checkInputFields();
 	}
@@ -265,8 +277,20 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	if (!acntData.p12File().isEmpty()) {
 		m_ui->addCertButton->setText(
 		    QDir::toNativeSeparators(acntData.p12File()));
-		m_ui->addCertButton->setIcon(
-		    QIcon(ICON_3PARTY_PATH + QString("key_16.png")));
+		QFileInfo fileInfo(acntData.p12File());
+		if (fileInfo.exists() && fileInfo.isFile() &&
+		    fileInfo.isReadable()) {
+			QIcon ico;
+			ico.addFile(ICON_3PARTY_PATH + QString("key_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(ICON_3PARTY_PATH + QString("key_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+			m_ui->addCertButton->setIcon(ico);
+		} else {
+			QIcon ico;
+			ico.addFile(ICON_3PARTY_PATH + QString("warning_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(ICON_3PARTY_PATH + QString("warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+			m_ui->addCertButton->setIcon(ico);
+			m_ui->addCertButton->setToolTip(tr("File does not exists or cannot be read."));
+		}
 		m_certPath = QDir::toNativeSeparators(acntData.p12File());
 	}
 
