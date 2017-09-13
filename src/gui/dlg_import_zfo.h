@@ -27,13 +27,17 @@
 #include <QDialog>
 
 #include "src/io/imports.h"
-#include "ui_dlg_import_zfo.h"
+
+namespace Ui {
+	class DlgImportZFO;
+}
 
 /*!
  * @brief Import ZFO files settings dialogue.
  */
-class ImportZFODialog : public QDialog, public Ui::ImportZFO {
+class DlgImportZFO : public QDialog {
 	Q_OBJECT
+
 public:
 	/*!
 	 * Specifies how/where ZFOs will load.
@@ -47,15 +51,20 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[out] zfoType  - Specifies ZFO type.
-	 * @param[out] locationType - Specifies how/where ZFOs will load.
-	 * @param[out] checkZfoOnServer - Specifies if every ZFO
-	 *                                will check on the ISDS server.
-	 * @param[in] parent - Parent object.
+	 * @param[out] zfoType Specifies ZFO type.
+	 * @param[out] locationType Specifies how/where ZFOs will be loaded.
+	 * @param[out] checkZfoOnServer Specifies whether ZFOs are going to be
+	 *                              checked on the ISDS server.
+	 * @param[in] parent Parent widget.
 	 */
-	ImportZFODialog(enum Imports::Type &zfoType,
+	DlgImportZFO(enum Imports::Type &zfoType,
 	    enum ZFOlocation &locationType, bool &checkZfoOnServer,
 	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgImportZFO(void);
 
 private slots:
 	/*!
@@ -69,9 +78,11 @@ private slots:
 	void setChosenValues(void);
 
 private:
+	Ui::DlgImportZFO *m_ui; /*!< UI generated from UI file. */
+
 	enum Imports::Type &m_zfoType; /*!< Specifies ZFO type. */
-	enum ZFOlocation &m_locationType; /*!< Specifies how/where ZFOs will load. */
-	bool &m_checkZfoOnServer; /*!< ZFO will check on the ISDS server. */
+	enum ZFOlocation &m_locationType; /*!< Specifies how/where ZFOs will be loaded. */
+	bool &m_checkZfoOnServer; /*!< ZFO will be checked on the ISDS server. */
 };
 
 #endif /* _DLG_IMPORT_ZFO_H_ */

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>ImportZFO</class>
- <widget class="QDialog" name="ImportZFO">
+ <class>DlgImportZFO</class>
+ <widget class="QDialog" name="DlgImportZFO">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -21,7 +21,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <widget class="QLabel" name="info">
+    <widget class="QLabel" name="infoLabel">
      <property name="text">
       <string/>
      </property>
@@ -204,7 +204,7 @@ into your local database.</string>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>ImportZFO</receiver>
+   <receiver>DlgImportZFO</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -220,7 +220,7 @@ into your local database.</string>
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>ImportZFO</receiver>
+   <receiver>DlgImportZFO</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

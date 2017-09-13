@@ -5485,12 +5485,12 @@ void MainWindow::showImportZFOActionDialog(void)
 	debugSlotCall();
 
 	enum Imports::Type zfoType = Imports::IMPORT_MESSAGE;
-	enum ImportZFODialog::ZFOlocation locationType =
-	    ImportZFODialog::IMPORT_FROM_DIR;
+	enum DlgImportZFO::ZFOlocation locationType =
+	    DlgImportZFO::IMPORT_FROM_DIR;
 	bool checkZfoOnServer = false;
 
-	/* import setting dialog */
-	QDialog *importZfo = new ImportZFODialog(zfoType, locationType,
+	/* Import setting dialogue. */
+	QDialog *importZfo = new DlgImportZFO(zfoType, locationType,
 	   checkZfoOnServer, this);
 	importZfo->exec();
 	importZfo->deleteLater();
@@ -5523,9 +5523,9 @@ void MainWindow::showImportZFOActionDialog(void)
 
 	// dialog select zfo files or directory
 	switch (locationType) {
-	case ImportZFODialog::IMPORT_FROM_SUBDIR:
+	case DlgImportZFO::IMPORT_FROM_SUBDIR:
 		includeSubdir = true;
-	case ImportZFODialog::IMPORT_FROM_DIR:
+	case DlgImportZFO::IMPORT_FROM_DIR:
 		importDir = QFileDialog::getExistingDirectory(this,
 		    tr("Select directory"), m_import_zfo_path,
 		    QFileDialog::ShowDirsOnly |
@@ -5567,7 +5567,7 @@ void MainWindow::showImportZFOActionDialog(void)
 
 		break;
 
-	case ImportZFODialog::IMPORT_SEL_FILES:
+	case DlgImportZFO::IMPORT_SEL_FILES:
 		filePathList = QFileDialog::getOpenFileNames(this,
 		    tr("Select ZFO file(s)"), m_import_zfo_path,
 		    tr("ZFO file (*.zfo)"));
