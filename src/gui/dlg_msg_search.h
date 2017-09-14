@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,27 +21,34 @@
  * the two.
  */
 
-
 #ifndef _DLG_MSG_SEARCH_H_
 #define _DLG_MSG_SEARCH_H_
-
 
 #include <QDialog>
 
 #include "src/io/message_db_set.h"
-#include "ui_dlg_msg_search.h"
 
+namespace Ui {
+	class DlgMsgSearch;
+}
 
-/* tooltip is generated for every item in the search result table */
-#define ENABLE_TOOLTIP 1
-
-class DlgMsgSearch : public QDialog, public Ui::msgSearchDialog {
+/*!
+ * @brief Message search dialogue.
+ */
+class DlgMsgSearch : public QDialog {
 	Q_OBJECT
 
 public:
-	DlgMsgSearch(const QList< QPair<QString, MessageDbSet *> > messageDbSetList,
-	    const QString &userName, QWidget *parent = 0,
+	DlgMsgSearch(
+	    const QList< QPair<QString, MessageDbSet *> > messageDbSetList,
+	    const QString &userName, QWidget *parent = Q_NULLPTR,
 	    Qt::WindowFlags f = 0);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	virtual
+	~DlgMsgSearch(void);
 
 private slots:
 	void checkInputFields(void);
@@ -53,14 +60,16 @@ signals:
 	void focusSelectedMsg(QString, qint64, QString, int);
 
 private:
-	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
-	const QString m_userName;
-
 	void initSearchWindow(void);
 	int howManyFieldsAreFilledWithoutTag(void);
 	void appendMsgsToTable(
 	    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
 	    const QList<MessageDb::SoughtMsg> &msgDataList);
+
+	Ui::DlgMsgSearch *m_ui; /*!< UI generated from UI file. */
+
+	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
+	const QString m_userName;
 };
 
 #endif /* _DLG_MSG_SEARCH_H_ */
