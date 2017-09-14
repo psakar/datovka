@@ -62,7 +62,7 @@
       <item>
        <widget class="QRadioButton" name="allZFO">
         <property name="text">
-         <string>Message and acceptance info ZFO file(s)</string>
+         <string>Message and acceptance info ZFO files</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -72,7 +72,7 @@
       <item>
        <widget class="QRadioButton" name="messageZFO">
         <property name="text">
-         <string>Only message ZFO file(s)</string>
+         <string>Only message ZFO files</string>
         </property>
         <property name="checked">
          <bool>false</bool>
@@ -82,7 +82,7 @@
       <item>
        <widget class="QRadioButton" name="deliveryZFO">
         <property name="text">
-         <string>Only acceptance info ZFO file(s)</string>
+         <string>Only acceptance info ZFO files</string>
         </property>
        </widget>
       </item>
@@ -98,7 +98,7 @@
       <item>
        <widget class="QRadioButton" name="radioImportSelected">
         <property name="text">
-         <string>Import selected ZFO file(s)</string>
+         <string>Import selected ZFO files</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -123,7 +123,7 @@
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Include subdirectory to the import</string>
+           <string>Include subdirectories to the import</string>
           </property>
           <property name="checked">
            <bool>false</bool>
