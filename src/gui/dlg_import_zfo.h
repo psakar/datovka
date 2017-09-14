@@ -48,6 +48,7 @@ public:
 		IMPORT_SEL_FILES
 	};
 
+private:
 	/*!
 	 * @brief Constructor.
 	 *
@@ -55,6 +56,7 @@ public:
 	 */
 	explicit DlgImportZFO(QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
