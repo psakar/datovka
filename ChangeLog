@@ -1,3 +1,11 @@
+4.x.y /
+ * Fixed error when import was performed when the import dialogue was cancelled.
+ * Fixed memory leaks when calling create account dialogue.
+ * Removed potential source of crashes. Using keep-alive task inside change
+   password dialogue.
+ * Fixed memory leak inside change password dialogue.
+ * Distributing *.qm files in source package.
+
 4.9.3 / 2017-09-06
  * Fixed a problem when message list was not updated after account
    synchronisation when a message was selected.
