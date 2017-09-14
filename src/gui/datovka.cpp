@@ -35,6 +35,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QPrinter>
+#include <QSet>
 #include <QSettings>
 #include <QStackedWidget>
 #include <QTableView>
@@ -2163,6 +2164,57 @@ void MainWindow::collectDownloadMessageListStatus(const QString &usrName,
 	}
 }
 
+/*!
+ * @brief ZFO import context singleton.
+ */
+class ZFOImportCtx {
+private:
+	/*!
+	 * @brief Constructor.
+	 */
+	ZFOImportCtx(void)
+	    : zfoFilesToImport(), numFilesToImport(0),
+	    importSucceeded(), importExisted(), importFailed()
+	{
+	}
+
+public:
+	/*!
+	 * @brief Return reference to singleton instance.
+	 */
+	static
+	ZFOImportCtx &getInstance(void)
+	{
+		static
+		ZFOImportCtx ctx;
+
+		return ctx;
+	}
+
+	/*!
+	 * @brief Erase content.
+	 */
+	void clear(void)
+	{
+		zfoFilesToImport.clear();
+		numFilesToImport = 0;
+		importSucceeded.clear();
+		importExisted.clear();
+		importFailed.clear();
+	}
+
+	QSet<QString> zfoFilesToImport; /*!< Set of names of files to be imported. */
+	int numFilesToImport; /*!< Input ZFO count. */
+	/*
+	 * QPair in following lists means:
+	 * first string - ZFO file name,
+	 * second - import result text
+	 */
+	QList< QPair<QString, QString> > importSucceeded; /*!< Successful import result lists. */
+	QList< QPair<QString, QString> > importExisted; /*!< Import existed result lists. */
+	QList< QPair<QString, QString> > importFailed; /*!< Import error result lists. */
+};
+
 void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
     const QString &resultDesc)
 {
@@ -2172,34 +2224,35 @@ void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
 	    fileName.toUtf8().constData(), result,
 	    resultDesc.toUtf8().constData());
 
+	ZFOImportCtx &importCtx(ZFOImportCtx::getInstance());
+
 	switch (result) {
 	case TaskImportZfo::IMP_SUCCESS:
-		m_importSucceeded.append(
+		importCtx.importSucceeded.append(
 		    QPair<QString, QString>(fileName, resultDesc));
 		break;
 	case TaskImportZfo::IMP_DB_EXISTS:
-		m_importExisted.append(
+		importCtx.importExisted.append(
 		    QPair<QString, QString>(fileName, resultDesc));
 		break;
 	default:
-		m_importFailed.append(
+		importCtx.importFailed.append(
 		    QPair<QString, QString>(fileName, resultDesc));
 		break;
 	}
 
-	if (!m_zfoFilesToImport.remove(fileName)) {
-		logErrorNL("Processed ZFO file that '%s' the application "
-		    "has not been aware of.", fileName.toUtf8().constData());
+	if (!importCtx.zfoFilesToImport.remove(fileName)) {
+		logErrorNL(
+		    "Processed ZFO file which '%s' the application has not been aware of.",
+		    fileName.toUtf8().constData());
 	}
 
-	if (m_zfoFilesToImport.isEmpty()) {
-		showImportZfoResultDialogue(m_numFilesToImport,
-		    m_importSucceeded, m_importExisted, m_importFailed);
+	if (importCtx.zfoFilesToImport.isEmpty()) {
+		DlgImportZFOResult::view(importCtx.numFilesToImport,
+		    importCtx.importSucceeded, importCtx.importExisted,
+		    importCtx.importFailed, this);
 
-		m_numFilesToImport = 0;
-		m_importSucceeded.clear();
-		m_importExisted.clear();
-		m_importFailed.clear();
+		importCtx.clear();
 
 		/* Activate import buttons. */
 		ui->actionImport_messages_from_database->setEnabled(true);
@@ -5485,15 +5538,15 @@ void MainWindow::showImportZFOActionDialog(void)
 	debugSlotCall();
 
 	enum Imports::Type zfoType = Imports::IMPORT_MESSAGE;
-	enum ImportZFODialog::ZFOlocation locationType =
-	    ImportZFODialog::IMPORT_FROM_DIR;
+	enum DlgImportZFO::ZFOlocation locationType =
+	    DlgImportZFO::IMPORT_FROM_DIR;
 	bool checkZfoOnServer = false;
 
-	/* import setting dialog */
-	QDialog *importZfo = new ImportZFODialog(zfoType, locationType,
-	   checkZfoOnServer, this);
-	importZfo->exec();
-	importZfo->deleteLater();
+	/* Import setting dialogue. */
+	if (!DlgImportZFO::getImportConfiguration(zfoType, locationType,
+	        checkZfoOnServer, this)) {
+		return;
+	}
 
 	// get userName and pointer to database for all accounts from settings
 	QList<Task::AccountDescr> accountList;
@@ -5523,9 +5576,9 @@ void MainWindow::showImportZFOActionDialog(void)
 
 	// dialog select zfo files or directory
 	switch (locationType) {
-	case ImportZFODialog::IMPORT_FROM_SUBDIR:
+	case DlgImportZFO::IMPORT_FROM_SUBDIR:
 		includeSubdir = true;
-	case ImportZFODialog::IMPORT_FROM_DIR:
+	case DlgImportZFO::IMPORT_FROM_DIR:
 		importDir = QFileDialog::getExistingDirectory(this,
 		    tr("Select directory"), m_import_zfo_path,
 		    QFileDialog::ShowDirsOnly |
@@ -5567,7 +5620,7 @@ void MainWindow::showImportZFOActionDialog(void)
 
 		break;
 
-	case ImportZFODialog::IMPORT_SEL_FILES:
+	case DlgImportZFO::IMPORT_SEL_FILES:
 		filePathList = QFileDialog::getOpenFileNames(this,
 		    tr("Select ZFO file(s)"), m_import_zfo_path,
 		    tr("ZFO file (*.zfo)"));
@@ -5603,20 +5656,18 @@ void MainWindow::showImportZFOActionDialog(void)
 		return;
 	}
 
-	/* Block import gui buttons. */
+	/* Block import GUI buttons. */
 	ui->actionImport_messages_from_database->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
 
 	QString errTxt;
-	m_zfoFilesToImport.clear();
-	m_importSucceeded.clear();
-	m_importExisted.clear();
-	m_importFailed.clear();
-	m_numFilesToImport = 0;
+
+	ZFOImportCtx &importCtx(ZFOImportCtx::getInstance());
+	importCtx.clear();
 
 	Imports::importZfoIntoDatabase(filePathList, accountList,
-	    zfoType, checkZfoOnServer, m_zfoFilesToImport, m_importFailed,
-	    m_numFilesToImport, errTxt);
+	    zfoType, checkZfoOnServer, importCtx.zfoFilesToImport,
+	    importCtx.importFailed, importCtx.numFilesToImport, errTxt);
 
 	if (!errTxt.isEmpty()) {
 		logInfo("%s\n", errTxt.toUtf8().constData());
@@ -8030,19 +8081,6 @@ void MainWindow::doExportOfSelectedFiles(
 		}
 
 	}
-}
-
-void MainWindow::showImportZfoResultDialogue(int filesCnt,
-    const QList<QPair<QString,QString>> &successFilesList,
-    const QList<QPair<QString,QString>> &existFilesList,
-    const QList<QPair<QString,QString>> &errorFilesList)
-{
-	debugFuncCall();
-
-	QDialog *importZfoResult = new ImportZFOResultDialog(filesCnt,
-	    errorFilesList, successFilesList, existFilesList, 0);
-	importZfoResult->exec();
-	importZfoResult->deleteLater();
 }
 
 void MainWindow::showImportMessageResults(const QString &userName,

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,80 +21,74 @@
  * the two.
  */
 
+#include "src/gui/dlg_import_zfo_result.h"
+#include "ui_dlg_import_zfo_result.h"
 
-#include "dlg_import_zfo_result.h"
-#include "src/common.h"
-
-
-ImportZFOResultDialog::ImportZFOResultDialog(int filesCnt,
-    QList<QPair<QString,QString>> errImportList,
-    QList<QPair<QString,QString>> succImportList,
-    QList<QPair<QString,QString>> existImportList,
-    QWidget *parent) :
-    QDialog(parent),
-    m_filesCnt(filesCnt),
-    m_errImportList(errImportList),
-    m_succImportList(succImportList),
-    m_existImportList(existImportList)
+/*!
+ * @brief Set text edit header and content according to supplied list.
+ *
+ * @param[in]     importList List of file name and error description pairs.
+ * @param[in,out] listHeader Header label to set.
+ * @param[in,out] textEdit Text field whose content to set.
+ */
+static
+void setListData(const QList< QPair<QString, QString> > &importList,
+    QLabel *listHeader, QTextEdit *textEdit)
 {
-	setupUi(this);
-
-	QString zfoList = "";
-
-	this->zfoInserted->setStyleSheet("QLabel { color: green }");
-	this->zfoErrors->setStyleSheet("QLabel { color: red }");
-	this->zfoTotal->setText(QString::number(m_filesCnt));
-	this->zfoInserted->setText(QString::number(m_succImportList.size()));
-	this->zfoErrors->setText(QString::number(m_errImportList.size()));
-	this->zfoExist->setText(QString::number(m_existImportList.size()));
-
-	if (m_succImportList.size() == 0) {
-		this->succListHeader->setEnabled(false);
-		this->succListHeader->hide();
-		this->successList->setEnabled(false);
-		this->successList->hide();
-	} else {
-
-		for (int i = 0; i < m_succImportList.size(); i++) {
-			zfoList += " <b>" + QString::number(i+1) +
-			    ". " + m_succImportList.at(i).first + "</b><br/>"
-			    + m_succImportList.at(i).second;
-		}
-		this->successList->setText(zfoList);
+	if (Q_UNLIKELY((Q_NULLPTR == listHeader) || (Q_NULLPTR == textEdit))) {
+		Q_ASSERT(0);
+		return;
 	}
 
-
-	zfoList = "";
-
-	if (m_existImportList.size() == 0) {
-		this->existListHeader->setEnabled(false);
-		this->existListHeader->hide();
-		this->existList->setEnabled(false);
-		this->existList->hide();
+	if (importList.size() == 0) {
+		listHeader->setEnabled(false);
+		listHeader->hide();
+		textEdit->setEnabled(false);
+		textEdit->hide();
 	} else {
-		for (int i = 0; i < m_existImportList.size(); i++) {
-			zfoList += " <b>" + QString::number(i+1) +
-			    ". " + m_existImportList.at(i).first + "</b><br/>"
-			    + m_existImportList.at(i).second;
+		QString message;
+		for (int i = 0; i < importList.size(); ++i) {
+			message += " <b>" + QString::number(i + 1) +
+			    ". " + importList.at(i).first + "</b><br/>"
+			    + importList.at(i).second;
 		}
-
-		this->existList->setText(zfoList);
+		textEdit->setText(message);
 	}
+}
 
-	zfoList = "";
+DlgImportZFOResult::DlgImportZFOResult(int fileCnt,
+    const QList< QPair<QString, QString> > &succImportList,
+    const QList< QPair<QString, QString> > &existImportList,
+    const QList< QPair<QString, QString> > &errImportList, QWidget *parent)
+    : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgImportZFOResult)
+{
+	m_ui->setupUi(this);
 
-	if (m_errImportList.size() == 0) {
-		this->errListHeader->setEnabled(false);
-		this->errListHeader->hide();
-		this->errorList->setEnabled(false);
-		this->errorList->hide();
-	} else {
-		for (int i = 0; i < m_errImportList.size(); i++) {
-			zfoList += " <b>" + QString::number(i+1) +
-			    ". " + m_errImportList.at(i).first + "</b><br/>"
-			    + m_errImportList.at(i).second + "<br/>";
-		}
+	m_ui->zfoTotal->setText(QString::number(fileCnt));
 
-		this->errorList->setText(zfoList);
-	}
+	m_ui->zfoInserted->setStyleSheet("QLabel { color: green }");
+	m_ui->zfoInserted->setText(QString::number(succImportList.size()));
+	m_ui->zfoExist->setText(QString::number(existImportList.size()));
+	m_ui->zfoErrors->setStyleSheet("QLabel { color: red }");
+	m_ui->zfoErrors->setText(QString::number(errImportList.size()));
+
+	setListData(succImportList, m_ui->succListHeader, m_ui->successList);
+	setListData(existImportList, m_ui->existListHeader, m_ui->existList);
+	setListData(errImportList, m_ui->errListHeader, m_ui->errorList);
+}
+
+DlgImportZFOResult::~DlgImportZFOResult(void)
+{
+	delete m_ui;
+}
+
+void DlgImportZFOResult::view(int fileCnt,
+    const QList< QPair<QString, QString> > &succImportList,
+    const QList< QPair<QString, QString> > &existImportList,
+    const QList< QPair<QString, QString> > &errImportList, QWidget *parent)
+{
+	DlgImportZFOResult dlg(fileCnt, succImportList, existImportList,
+	    errImportList, parent);
+	dlg.exec();
 }

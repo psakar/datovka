@@ -27,13 +27,17 @@
 #include <QDialog>
 
 #include "src/io/imports.h"
-#include "ui_dlg_import_zfo.h"
+
+namespace Ui {
+	class DlgImportZFO;
+}
 
 /*!
  * @brief Import ZFO files settings dialogue.
  */
-class ImportZFODialog : public QDialog, public Ui::ImportZFO {
+class DlgImportZFO : public QDialog {
 	Q_OBJECT
+
 public:
 	/*!
 	 * Specifies how/where ZFOs will load.
@@ -44,34 +48,43 @@ public:
 		IMPORT_SEL_FILES
 	};
 
+private:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[out] zfoType  - Specifies ZFO type.
-	 * @param[out] locationType - Specifies how/where ZFOs will load.
-	 * @param[out] checkZfoOnServer - Specifies if every ZFO
-	 *                                will check on the ISDS server.
-	 * @param[in] parent - Parent object.
+	 * @param[in] parent Parent widget.
 	 */
-	ImportZFODialog(enum Imports::Type &zfoType,
+	explicit DlgImportZFO(QWidget *parent = Q_NULLPTR);
+
+public:
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgImportZFO(void);
+
+	/*!
+	 * @brief Obtain configuration for ZFO import.
+	 *
+	 * @param[out] zfoType Specifies ZFO type.
+	 * @param[out] locationType Specifies how/where ZFOs will be loaded.
+	 * @param[out] checkZfoOnServer Specifies whether ZFOs are going to be
+	 *                              checked on the ISDS server.
+	 * @param[in] parent Parent widget.
+	 * @return True when dialogue has been accepted.
+	 */
+	static
+	bool getImportConfiguration(enum Imports::Type &zfoType,
 	    enum ZFOlocation &locationType, bool &checkZfoOnServer,
 	    QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
-	 * @brief Sets control elements activity according to chosen values.
+	 * @brief Sets activity of control elements according to chosen values.
 	 */
 	void setControlsActivity(void);
 
-	/*!
-	 * @brief Sets chosen values via references to external values.
-	 */
-	void setChosenValues(void);
-
 private:
-	enum Imports::Type &m_zfoType; /*!< Specifies ZFO type. */
-	enum ZFOlocation &m_locationType; /*!< Specifies how/where ZFOs will load. */
-	bool &m_checkZfoOnServer; /*!< ZFO will check on the ISDS server. */
+	Ui::DlgImportZFO *m_ui; /*!< UI generated from UI file. */
 };
 
 #endif /* _DLG_IMPORT_ZFO_H_ */

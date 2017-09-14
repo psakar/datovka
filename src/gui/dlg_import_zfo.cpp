@@ -22,63 +22,70 @@
  */
 
 #include "src/gui/dlg_import_zfo.h"
+#include "ui_dlg_import_zfo.h"
 
-ImportZFODialog::ImportZFODialog(enum Imports::Type &zfoType,
-    enum ZFOlocation &locationType, bool &checkZfoOnServer,
-    QWidget *parent)
+DlgImportZFO::DlgImportZFO(QWidget *parent)
     : QDialog(parent),
-    m_zfoType(zfoType),
-    m_locationType(locationType),
-    m_checkZfoOnServer(checkZfoOnServer)
+    m_ui(new (std::nothrow) Ui::DlgImportZFO)
 {
-	setupUi(this);
-	this->info->setText(tr("Here you can import whole messages and "
-	    "message acceptance information from ZFO files into local database."
-	    " The message or acceptance information import will succeed only "
-	    "for those files whose validity can be approved by the Datové "
-	    "schránky server (working connection to server is required). "
-	    "Acceptance information ZFO will be inserted into local database "
-	    "only if a corresponding complete message already exists in the "
-	    "database."));
+	m_ui->setupUi(this);
 
-	connect(this->buttonBox, SIGNAL(accepted()),
-	    this, SLOT(setChosenValues()));
-	connect(this->radioImportAll, SIGNAL(clicked()),
+	m_ui->infoLabel->setText(tr(
+	    "Here you can import whole messages and message acceptance information from ZFO files into the local database. "
+	    "The message or acceptance information import will succeed only for those files whose validity can be approved by the ISDS server (working connection to server is required). "
+	    "Acceptance information ZFOs will be inserted into the local database only if a corresponding complete message already exists in the local database."));
+
+	connect(m_ui->radioImportAll, SIGNAL(clicked()),
 	    this, SLOT(setControlsActivity()));
-	connect(this->radioImportSelected, SIGNAL(clicked()),
+	connect(m_ui->radioImportSelected, SIGNAL(clicked()),
 	    this, SLOT(setControlsActivity()));
 
-	this->checkOnServer->setCheckState(Qt::Checked);
+	m_ui->checkOnServer->setCheckState(Qt::Checked);
 }
 
-void ImportZFODialog::setControlsActivity(void)
+DlgImportZFO::~DlgImportZFO(void)
 {
-	if (this->radioImportAll->isChecked()) {
-		this->includeSubDir->setEnabled(true);
-	} else {
-		this->includeSubDir->setEnabled(false);
-	}
+	delete m_ui;
 }
 
-void ImportZFODialog::setChosenValues(void)
+bool DlgImportZFO::getImportConfiguration(enum Imports::Type &zfoType,
+    enum ZFOlocation &locationType, bool &checkZfoOnServer, QWidget *parent)
 {
-	if (this->messageZFO->isChecked()) {
-		m_zfoType = Imports::IMPORT_MESSAGE;
-	} else if (this->deliveryZFO->isChecked()) {
-		m_zfoType = Imports::IMPORT_DELIVERY;
-	} else {
-		m_zfoType = Imports::IMPORT_ANY;
+	DlgImportZFO dlg(parent);
+	if (QDialog::Accepted != dlg.exec()) {
+		return false;
 	}
 
-	if (this->radioImportAll->isChecked()) {
-		if (this->includeSubDir->isChecked()) {
-			m_locationType = IMPORT_FROM_SUBDIR;
+	/* Obtain chosen values. */
+	if (dlg.m_ui->messageZFO->isChecked()) {
+		zfoType = Imports::IMPORT_MESSAGE;
+	} else if (dlg.m_ui->deliveryZFO->isChecked()) {
+		zfoType = Imports::IMPORT_DELIVERY;
+	} else {
+		zfoType = Imports::IMPORT_ANY;
+	}
+
+	if (dlg.m_ui->radioImportAll->isChecked()) {
+		if (dlg.m_ui->includeSubDir->isChecked()) {
+			locationType = IMPORT_FROM_SUBDIR;
 		} else {
-			m_locationType = IMPORT_FROM_DIR;
+			locationType = IMPORT_FROM_DIR;
 		}
-	} else if (this->radioImportSelected->isChecked()) {
-		m_locationType = IMPORT_SEL_FILES;
+	} else if (dlg.m_ui->radioImportSelected->isChecked()) {
+		locationType = IMPORT_SEL_FILES;
 	}
 
-	m_checkZfoOnServer = Qt::Unchecked != checkOnServer->checkState();
+	checkZfoOnServer =
+	    Qt::Unchecked != dlg.m_ui->checkOnServer->checkState();
+
+	return true;
+}
+
+void DlgImportZFO::setControlsActivity(void)
+{
+	if (m_ui->radioImportAll->isChecked()) {
+		m_ui->includeSubDir->setEnabled(true);
+	} else {
+		m_ui->includeSubDir->setEnabled(false);
+	}
 }
