@@ -77,6 +77,9 @@ private slots:
 	 */
 	void getSelectedMsg(int row, int col);
 
+	/*!
+	 * @brief Collects data from dialogue and searches for messages
+	 */
 	void searchMessages(void);
 
 signals:
