@@ -51,7 +51,11 @@ public:
 	~DlgMsgSearch(void);
 
 private slots:
+	/*!
+	 * @brief Check dialogue elements and enable/disable the search button.
+	 */
 	void checkInputFields(void);
+
 	void searchMessages(void);
 	void setFirtsColumnActive(void);
 	void getSelectedMsg(int row, int column);

@@ -40,6 +40,8 @@
 /* Tooltip is generated for every item in the search result table. */
 #define ENABLE_TOOLTIP 1
 
+#define BOX_ID_LEN 7
+
 DlgMsgSearch::DlgMsgSearch(
     const QList< QPair <QString, MessageDbSet *> > messageDbSetList,
     const QString &userName,
@@ -59,6 +61,84 @@ DlgMsgSearch::DlgMsgSearch(
 DlgMsgSearch::~DlgMsgSearch(void)
 {
 	delete m_ui;
+}
+
+void DlgMsgSearch::checkInputFields(void)
+{
+	bool isAnyMsgTypeChecked = true;
+
+	m_ui->searchPushButton->setEnabled(false);
+	m_ui->tooManyFields->hide();
+
+	/* is any message type checked? */
+	if (!m_ui->searchRcvdMsgCheckBox->isChecked() &&
+	    !m_ui->searchSntMsgCheckBox->isChecked()) {
+		isAnyMsgTypeChecked = false;
+	}
+
+	const bool msgIdMissing = m_ui->msgIdLine->text().isEmpty();
+
+	m_ui->subjectLine->setEnabled(msgIdMissing);
+	m_ui->sndrBoxIdLine->setEnabled(msgIdMissing);
+	m_ui->sndrNameLine->setEnabled(msgIdMissing);
+	m_ui->sndrRefNumLine->setEnabled(msgIdMissing);
+	m_ui->sndrFileMarkLine->setEnabled(msgIdMissing);
+	m_ui->rcpntBoxIdLine->setEnabled(msgIdMissing);
+	m_ui->rcpntNameLine->setEnabled(msgIdMissing);
+	m_ui->rcpntRefNumLine->setEnabled(msgIdMissing);
+	m_ui->rcpntFileMarkLine->setEnabled(msgIdMissing);
+	m_ui->addressLine->setEnabled(msgIdMissing);
+	m_ui->toHandsLine->setEnabled(msgIdMissing);
+	m_ui->tagLine->setEnabled(msgIdMissing);
+
+	if (!msgIdMissing) {
+		/* Search via message ID. */
+		m_ui->tagLine->clear();
+	} else {
+		/* Use either sender box ID or sender name for searching. */
+		m_ui->sndrBoxIdLine->setEnabled(m_ui->sndrNameLine->text().isEmpty());
+		m_ui->sndrNameLine->setEnabled(m_ui->sndrBoxIdLine->text().isEmpty());
+
+		/* Use either recipient box ID or recipient name for searching. */
+		m_ui->rcpntBoxIdLine->setEnabled(m_ui->rcpntNameLine->text().isEmpty());
+		m_ui->rcpntNameLine->setEnabled(m_ui->rcpntBoxIdLine->text().isEmpty());
+	}
+
+	/* Search using message ID only. */
+	if (!msgIdMissing) {
+		/* Test if message ID to be a number. */
+		QRegExp re("\\d*"); /* A digit (\d), zero or more times (*). */
+		/* Test whether message ID is at least 3 characters. */
+		m_ui->searchPushButton->setEnabled(isAnyMsgTypeChecked &&
+		    re.exactMatch(m_ui->msgIdLine->text()) &&
+		    (m_ui->msgIdLine->text().size() > 2));
+		return;
+	}
+
+	/* Search according to supplied tag text. */
+	const bool tagCorrect = m_ui->tagLine->text().isEmpty() ||
+	    (m_ui->tagLine->text().length() > 2);
+
+	/* Data-box ID must have 7 characters. */
+	const bool boxIdCorrect =
+	    (m_ui->sndrBoxIdLine->text().isEmpty() ||
+	     (m_ui->sndrBoxIdLine->text().size() == BOX_ID_LEN)) &&
+	    (m_ui->rcpntBoxIdLine->text().isEmpty() ||
+	     (m_ui->rcpntBoxIdLine->text().size() == BOX_ID_LEN));
+
+	/* only 3 fields can be set together */
+	bool isNotFillManyFileds = true;
+
+	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
+	if (itemsWithoutTag > 3) {
+		isNotFillManyFileds = false;
+		m_ui->tooManyFields->show();
+	} else if ((itemsWithoutTag < 1) && m_ui->tagLine->text().isEmpty()) {
+		isNotFillManyFileds = false;
+	}
+
+	m_ui->searchPushButton->setEnabled(isAnyMsgTypeChecked &&
+	    boxIdCorrect && tagCorrect && isNotFillManyFileds);
 }
 
 void DlgMsgSearch::initSearchWindow(const QString &username)
@@ -147,131 +227,6 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	    new TableHomeEndFilter(this));
 }
 
-
-/* ========================================================================= */
-/*
- * Check dialogue elements and set search button enable/disable
- */
-void DlgMsgSearch::checkInputFields(void)
-/* ========================================================================= */
-{
-	bool isAnyMsgTypeChecked = true;
-
-	m_ui->searchPushButton->setEnabled(false);
-	m_ui->tooManyFields->hide();
-
-	/* is any message type checked? */
-	if (!m_ui->searchRcvdMsgCheckBox->isChecked() &&
-	    !m_ui->searchSntMsgCheckBox->isChecked()) {
-		isAnyMsgTypeChecked = false;
-	}
-
-	/* search via message ID */
-	if (!m_ui->msgIdLine->text().isEmpty()) {
-		m_ui->subjectLine->setEnabled(false);
-		m_ui->sndrBoxIdLine->setEnabled(false);
-		m_ui->sndrNameLine->setEnabled(false);
-		m_ui->sndrRefNumLine->setEnabled(false);
-		m_ui->sndrFileMarkLine->setEnabled(false);
-		m_ui->rcpntBoxIdLine->setEnabled(false);
-		m_ui->rcpntNameLine->setEnabled(false);
-		m_ui->rcpntRefNumLine->setEnabled(false);
-		m_ui->rcpntFileMarkLine->setEnabled(false);
-		m_ui->addressLine->setEnabled(false);
-		m_ui->toHandsLine->setEnabled(false);
-		m_ui->tagLine->setEnabled(false);
-		m_ui->tagLine->clear();
-		goto finish;
-	} else {
-		m_ui->subjectLine->setEnabled(true);
-		m_ui->sndrBoxIdLine->setEnabled(true);
-		m_ui->sndrNameLine->setEnabled(true);
-		m_ui->sndrRefNumLine->setEnabled(true);
-		m_ui->sndrFileMarkLine->setEnabled(true);
-		m_ui->rcpntBoxIdLine->setEnabled(true);
-		m_ui->rcpntNameLine->setEnabled(true);
-		m_ui->rcpntRefNumLine->setEnabled(true);
-		m_ui->rcpntFileMarkLine->setEnabled(true);
-		m_ui->addressLine->setEnabled(true);
-		m_ui->toHandsLine->setEnabled(true);
-		m_ui->tagLine->setEnabled(true);
-	}
-
-	/* Use the sender data box ID for searching. */
-	if (!m_ui->sndrBoxIdLine->text().isEmpty()) {
-		m_ui->sndrBoxIdLine->setEnabled(true);
-		m_ui->sndrNameLine->setEnabled(false);
-	} else if (!m_ui->sndrNameLine->text().isEmpty()){
-		m_ui->sndrBoxIdLine->setEnabled(false);
-		m_ui->sndrNameLine->setEnabled(true);
-	} else {
-		m_ui->sndrBoxIdLine->setEnabled(true);
-		m_ui->sndrNameLine->setEnabled(true);
-	}
-
-	/* Use the recipient data box ID for searching. */
-	if (!m_ui->rcpntBoxIdLine->text().isEmpty()) {
-		m_ui->rcpntBoxIdLine->setEnabled(true);
-		m_ui->rcpntNameLine->setEnabled(false);
-	} else if (!m_ui->rcpntNameLine->text().isEmpty()){
-		m_ui->rcpntBoxIdLine->setEnabled(false);
-		m_ui->rcpntNameLine->setEnabled(true);
-	} else {
-		m_ui->rcpntBoxIdLine->setEnabled(true);
-		m_ui->rcpntNameLine->setEnabled(true);
-	}
-
-finish:
-	/* search by message ID only */
-	if (!m_ui->msgIdLine->text().isEmpty()) {
-		/* test if message ID is number */
-		QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
-		/* test if message is fill and message ID > 3 chars */
-		if (isAnyMsgTypeChecked &&
-		    re.exactMatch(m_ui->msgIdLine->text()) &&
-		    m_ui->msgIdLine->text().size() > 2) {
-			m_ui->searchPushButton->setEnabled(true);
-		} else {
-			m_ui->searchPushButton->setEnabled(false);
-
-		}
-		return;
-	}
-
-	/* Search according to supplied tag text. */
-	bool isTagCorrect = true;
-	if (!m_ui->tagLine->text().isEmpty() &&
-	    (m_ui->tagLine->text().length() <= 2)) {
-		isTagCorrect = false;
-	}
-
-	bool isDbIdCorrect = true;
-	/* Data-box ID must have 7 characters. */
-	if (!m_ui->sndrBoxIdLine->text().isEmpty() &&
-	    (m_ui->sndrBoxIdLine->text().size() != 7)) {
-		isDbIdCorrect = false;
-	}
-	if (!m_ui->rcpntBoxIdLine->text().isEmpty() &&
-	    (m_ui->rcpntBoxIdLine->text().size() != 7)) {
-		isDbIdCorrect = false;
-	}
-
-	/* only 3 fields can be set together */
-	bool isNotFillManyFileds = true;
-
-	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
-	if (itemsWithoutTag > 3) {
-		isNotFillManyFileds = false;
-		m_ui->tooManyFields->show();
-	} else if ((itemsWithoutTag < 1) && m_ui->tagLine->text().isEmpty()) {
-		isNotFillManyFileds = false;
-	}
-
-	m_ui->searchPushButton->setEnabled(isAnyMsgTypeChecked &&
-	    isDbIdCorrect && isTagCorrect && isNotFillManyFileds);
-}
-
-
 /* ========================================================================= */
 /*
  * Detect, how many search fileds are filled
@@ -315,9 +270,6 @@ int DlgMsgSearch::howManyFieldsAreFilledWithoutTag(void)
 		cnt++;
 	}
 	if (!m_ui->toHandsLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->tagLine->text().isEmpty()) {
 		cnt++;
 	}
 
