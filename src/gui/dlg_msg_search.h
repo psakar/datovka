@@ -40,7 +40,7 @@ class DlgMsgSearch : public QDialog {
 
 public:
 	DlgMsgSearch(
-	    const QList< QPair<QString, MessageDbSet *> > messageDbSetList,
+	    const QList< QPair<QString, MessageDbSet *> > msgSetEntryList,
 	    const QString &userName, QWidget *parent = Q_NULLPTR,
 	    Qt::WindowFlags f = 0);
 
@@ -71,15 +71,26 @@ private:
 	 */
 	void initSearchWindow(const QString &username);
 
-	int howManyFieldsAreFilledWithoutTag(void);
+	/*!
+	 * @brief Computes filled-in fields except the tag field.
+	 *
+	 * @return Number of filled-in fields except the tag field.
+	 */
+	int filledInExceptTags(void) const;
 
+	/*!
+	 * @brief Append message list to result table.
+	 *
+	 * @param[in] msgSetEntry Pair of username and related database set.
+	 * @param[in] msgDataList Message data list.
+	 */
 	void appendMsgsToTable(
-	    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
+	    const QPair<QString, MessageDbSet *> &msgSetEntry,
 	    const QList<MessageDb::SoughtMsg> &msgDataList);
 
 	Ui::DlgMsgSearch *m_ui; /*!< UI generated from UI file. */
 
-	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
+	const QList< QPair<QString, MessageDbSet *> > m_msgSetEntryList;
 };
 
 #endif /* _DLG_MSG_SEARCH_H_ */

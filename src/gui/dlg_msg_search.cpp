@@ -43,12 +43,12 @@
 #define BOX_ID_LEN 7
 
 DlgMsgSearch::DlgMsgSearch(
-    const QList< QPair <QString, MessageDbSet *> > messageDbSetList,
+    const QList< QPair <QString, MessageDbSet *> > msgSetEntryList,
     const QString &userName,
     QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f),
     m_ui(new (std::nothrow) Ui::DlgMsgSearch),
-    m_messageDbSetList(messageDbSetList)
+    m_msgSetEntryList(msgSetEntryList)
 {
 	m_ui->setupUi(this);
 
@@ -129,7 +129,7 @@ void DlgMsgSearch::checkInputFields(void)
 	/* only 3 fields can be set together */
 	bool isNotFillManyFileds = true;
 
-	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
+	const int itemsWithoutTag = filledInExceptTags();
 	if (itemsWithoutTag > 3) {
 		isNotFillManyFileds = false;
 		m_ui->tooManyFields->show();
@@ -158,7 +158,7 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	    " (" + username + ")");
 
 	/* Only one account available. */
-	if (m_messageDbSetList.count() <= 1) {
+	if (m_msgSetEntryList.count() <= 1) {
 		m_ui->searchAllAcntCheckBox->setEnabled(false);
 	}
 
@@ -227,55 +227,91 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	    new TableHomeEndFilter(this));
 }
 
-/* ========================================================================= */
-/*
- * Detect, how many search fileds are filled
- */
-int DlgMsgSearch::howManyFieldsAreFilledWithoutTag(void)
-/* ========================================================================= */
+int DlgMsgSearch::filledInExceptTags(void) const
 {
 	int cnt = 0;
 
-	if (!m_ui->msgIdLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->subjectLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->sndrBoxIdLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->sndrNameLine->text().isEmpty())  {
-		cnt++;
-	}
-	if (!m_ui->sndrRefNumLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->sndrFileMarkLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->rcpntBoxIdLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->rcpntNameLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->rcpntRefNumLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->rcpntFileMarkLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->addressLine->text().isEmpty()) {
-		cnt++;
-	}
-	if (!m_ui->toHandsLine->text().isEmpty()) {
-		cnt++;
-	}
+	if (!m_ui->msgIdLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->subjectLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->sndrBoxIdLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->sndrNameLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->sndrRefNumLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->sndrFileMarkLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->rcpntBoxIdLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->rcpntNameLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->rcpntRefNumLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->rcpntFileMarkLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->addressLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->toHandsLine->text().isEmpty()) { ++cnt; }
 
 	return cnt;
 }
 
+/*!
+ * @brief Append message entry into message table widget.
+ *
+ * @param[in,out] tabWid Table widget to put message entries into.
+ * @param[in]     msgSetEntry Username and pointer to database set.
+ * @param[in]     msgData Message entry.
+ */
+static
+void appendMsgToWidget(QTableWidget *tabWid,
+    const QPair<QString, MessageDbSet *> &msgSetEntry,
+    const MessageDb::SoughtMsg &msgData)
+{
+	if (Q_UNLIKELY(Q_NULLPTR == tabWid)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const int row = tabWid->rowCount();
+	tabWid->insertRow(row);
+
+	tabWid->setItem(row, COL_USER_NAME,
+	    new QTableWidgetItem(msgSetEntry.first));
+	QTableWidgetItem *item = new QTableWidgetItem;
+	item->setText(QString::number(msgData.mId.dmId));
+	if (ENABLE_TOOLTIP) {
+		const MessageDb *messageDb =
+		    msgSetEntry.second->constAccessMessageDb(
+		        msgData.mId.deliveryTime);
+		if (Q_NULLPTR != messageDb) {
+			item->setToolTip(messageDb->descriptionHtml(
+			    msgData.mId.dmId, true, false, true));
+		} else {
+			Q_ASSERT(0);
+		}
+	}
+	tabWid->setItem(row, COL_MESSAGE_ID, item);
+	tabWid->setItem(row, COL_DELIVERY_YEAR,
+	    new QTableWidgetItem(
+	        MessageDbSet::yearFromDateTime(
+	            msgData.mId.deliveryTime)));
+	tabWid->setItem(row, COL_MESSAGE_TYPE,
+	    new QTableWidgetItem(QString::number(msgData.type)));
+	tabWid->setItem(row, COL_ANNOTATION,
+	    new QTableWidgetItem(msgData.dmAnnotation));
+	tabWid->setItem(row, COL_SENDER,
+	    new QTableWidgetItem(msgData.dmSender));
+	tabWid->setItem(row, COL_RECIPIENT,
+	    new QTableWidgetItem(msgData.dmRecipient));
+}
+
+void DlgMsgSearch::appendMsgsToTable(
+    const QPair<QString, MessageDbSet *> &msgSetEntry,
+    const QList<MessageDb::SoughtMsg> &msgDataList)
+{
+	m_ui->resultsTableWidget->setEnabled(true);
+
+	foreach (const MessageDb::SoughtMsg &msgData, msgDataList) {
+		appendMsgToWidget(m_ui->resultsTableWidget, msgSetEntry,
+		    msgData);
+	}
+
+	m_ui->resultsTableWidget->resizeColumnsToContents();
+	m_ui->resultsTableWidget->
+	    horizontalHeader()->setStretchLastSection(true);
+}
 
 /* ========================================================================= */
 /*
@@ -341,11 +377,11 @@ void DlgMsgSearch::searchMessages(void)
 	/* selected account or all accounts will be used for search request */
 	int dbCount = 1;
 	if (m_ui->searchAllAcntCheckBox->isChecked()) {
-		dbCount = m_messageDbSetList.count();
+		dbCount = m_msgSetEntryList.count();
 	}
 
 	/* how many fields without tag item are filled in the search dialog */
-	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
+	int itemsWithoutTag = filledInExceptTags();
 
 	/* over selected account or all accounts do */
 	for (int i = 0; i < dbCount; ++i) {
@@ -359,7 +395,7 @@ void DlgMsgSearch::searchMessages(void)
 			 * get messages envelope data
 			 * where search items are applied
 			 */
-			msgEnvlpResultList = m_messageDbSetList.at(i).second->
+			msgEnvlpResultList = m_msgSetEntryList.at(i).second->
 			    msgsAdvancedSearchMessageEnvelope(
 			    m_ui->msgIdLine->text().isEmpty() ? -1 :
 			        m_ui->msgIdLine->text().toLongLong(),
@@ -394,7 +430,7 @@ void DlgMsgSearch::searchMessages(void)
 				    msgEnvlpResultList) {
 					if (msg.mId.dmId == msgId) {
 						msgData =
-						    m_messageDbSetList.at(i).
+						    m_msgSetEntryList.at(i).
 						    second->msgsGetMsgDataFromId(msgId);
 						if (msgData.mId.dmId != -1) {
 							msgListForTableView.append(msgData);
@@ -403,7 +439,7 @@ void DlgMsgSearch::searchMessages(void)
 				}
 			}
 			if (!msgListForTableView.isEmpty()) {
-				appendMsgsToTable(m_messageDbSetList.at(i),
+				appendMsgsToTable(m_msgSetEntryList.at(i),
 				    msgListForTableView);
 			}
 
@@ -422,7 +458,7 @@ void DlgMsgSearch::searchMessages(void)
 		 * we show result for msg envelope list only
 		  */
 		} else if (!applyTag && !msgEnvlpResultList.isEmpty()) {
-			appendMsgsToTable(m_messageDbSetList.at(i),
+			appendMsgsToTable(m_msgSetEntryList.at(i),
 			    msgEnvlpResultList);
 
 		/*
@@ -434,7 +470,7 @@ void DlgMsgSearch::searchMessages(void)
 
 			foreach (const qint64 msgId, tagMsgIdList) {
 
-				msgData = m_messageDbSetList.at(i).second->
+				msgData = m_msgSetEntryList.at(i).second->
 				    msgsGetMsgDataFromId(msgId);
 
 				if (msgData.mId.dmId != -1) {
@@ -443,62 +479,12 @@ void DlgMsgSearch::searchMessages(void)
 			}
 
 			if (!msgListForTableView.isEmpty()) {
-				appendMsgsToTable(m_messageDbSetList.at(i),
+				appendMsgsToTable(m_msgSetEntryList.at(i),
 				    msgListForTableView);
 			}
 		}
 	}
 }
-
-
-/* ========================================================================= */
-/*
- * Append message list to result tablewidget
- */
-void DlgMsgSearch::appendMsgsToTable(
-    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
-    const QList<MessageDb::SoughtMsg> &msgDataList)
-/* ========================================================================= */
-{
-	m_ui->resultsTableWidget->setEnabled(true);
-
-	foreach (const MessageDb::SoughtMsg &msgData, msgDataList) {
-		int row = m_ui->resultsTableWidget->rowCount();
-		m_ui->resultsTableWidget->insertRow(row);
-
-		m_ui->resultsTableWidget->setItem(row, COL_USER_NAME,
-		    new QTableWidgetItem(usrNmAndMsgDbSet.first));
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(QString::number(msgData.mId.dmId));
-		if (ENABLE_TOOLTIP) {
-			const MessageDb *messageDb =
-			    usrNmAndMsgDbSet.second->constAccessMessageDb(
-			        msgData.mId.deliveryTime);
-			Q_ASSERT(0 != messageDb);
-
-			item->setToolTip(messageDb->descriptionHtml(
-			    msgData.mId.dmId, true, false, true));
-		}
-		m_ui->resultsTableWidget->setItem(row, COL_MESSAGE_ID, item);
-		m_ui->resultsTableWidget->setItem(row, COL_DELIVERY_YEAR,
-		    new QTableWidgetItem(
-		        MessageDbSet::yearFromDateTime(
-		            msgData.mId.deliveryTime)));
-		m_ui->resultsTableWidget->setItem(row, COL_MESSAGE_TYPE,
-		    new QTableWidgetItem(QString::number(msgData.type)));
-		m_ui->resultsTableWidget->setItem(row, COL_ANNOTATION,
-		    new QTableWidgetItem(msgData.dmAnnotation));
-		m_ui->resultsTableWidget->setItem(row, COL_SENDER,
-		    new QTableWidgetItem(msgData.dmSender));
-		m_ui->resultsTableWidget->setItem(row, COL_RECIPIENT,
-		    new QTableWidgetItem(msgData.dmRecipient));
-	}
-
-	m_ui->resultsTableWidget->resizeColumnsToContents();
-	m_ui->resultsTableWidget->
-	    horizontalHeader()->setStretchLastSection(true);
-}
-
 
 /* ========================================================================= */
 /*
