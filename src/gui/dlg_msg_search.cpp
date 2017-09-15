@@ -313,13 +313,11 @@ void DlgMsgSearch::searchMessages(void)
 
 void DlgMsgSearch::initSearchWindow(const QString &username)
 {
-	m_ui->infoTextLabel->setText(
-	   tr("Here it is possible to search for messages according to "
-	   "supplied criteria. You can search for messages in selected "
-	   "account or in all accounts. Double clicking on a found message "
-	   "will change focus to the selected message in the application "
-	   "window. Note: You can view additional information when hovering "
-	   "your mouse cursor over the message ID."));
+	m_ui->infoTextLabel->setText(tr(
+	    "Here it is possible to search for messages according to supplied criteria. "
+	    "You can search for messages in the selected account or in all accounts. "
+	    "Double clicking on a found message will change focus of the selected message in the main application window. "
+	    "Note: You can view additional information when hovering the mouse cursor over the message ID."));
 
 	Q_ASSERT(!username.isEmpty());
 
