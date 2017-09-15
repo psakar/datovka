@@ -21,7 +21,6 @@
  * the two.
  */
 
-#include "src/common.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/io/message_db.h"
 #include "src/io/tag_db.h"
@@ -47,15 +46,14 @@ DlgMsgSearch::DlgMsgSearch(
     QWidget *parent, Qt::WindowFlags f)
     : QDialog(parent, f),
     m_ui(new (std::nothrow) Ui::DlgMsgSearch),
-    m_messageDbSetList(messageDbSetList),
-    m_userName(userName)
+    m_messageDbSetList(messageDbSetList)
 {
 	m_ui->setupUi(this);
 
 	/* Set default line height for table views/widgets. */
 	m_ui->resultsTableWidget->setNarrowedLineHeight();
 
-	initSearchWindow();
+	initSearchWindow(userName);
 }
 
 DlgMsgSearch::~DlgMsgSearch(void)
@@ -63,12 +61,7 @@ DlgMsgSearch::~DlgMsgSearch(void)
 	delete m_ui;
 }
 
-/* ========================================================================= */
-/*
- * Init message search dialog
- */
-void DlgMsgSearch::initSearchWindow(void)
-/* ========================================================================= */
+void DlgMsgSearch::initSearchWindow(const QString &username)
 {
 	m_ui->infoTextLabel->setText(
 	   tr("Here it is possible to search for messages according to "
@@ -78,20 +71,19 @@ void DlgMsgSearch::initSearchWindow(void)
 	   "window. Note: You can view additional information when hovering "
 	   "your mouse cursor over the message ID."));
 
-	Q_ASSERT(!m_userName.isEmpty());
+	Q_ASSERT(!username.isEmpty());
 
-	/* set account name and user name to label */
-	QString accountName = globAccounts[m_userName].accountName() + " (" +
-	    m_userName + ")";
-	m_ui->currentAccountName->setText(accountName);
+	/* Set account name and user name to label. */
+	m_ui->crntAcntNameLabel->setText(globAccounts[username].accountName() +
+	    " (" + username + ")");
 
-	m_ui->tooMuchFields->setStyleSheet("QLabel { color: red }");
-	m_ui->tooMuchFields->hide();
-
-	/* is only one account available */
+	/* Only one account available. */
 	if (m_messageDbSetList.count() <= 1) {
 		m_ui->searchAllAcntCheckBox->setEnabled(false);
 	}
+
+	m_ui->tooManyFields->setStyleSheet("QLabel { color: red }");
+	m_ui->tooManyFields->hide();
 
 	m_ui->resultsTableWidget->setColumnCount(7);
 	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_USER_NAME, new QTableWidgetItem(tr("Account")));
@@ -106,36 +98,41 @@ void DlgMsgSearch::initSearchWindow(void)
 	m_ui->resultsTableWidget->setColumnHidden(COL_DELIVERY_YEAR, true);
 	m_ui->resultsTableWidget->setColumnHidden(COL_MESSAGE_TYPE, true);
 
-	connect(m_ui->searchReceivedMsgCheckBox, SIGNAL(clicked()),
+	connect(m_ui->searchRcvdMsgCheckBox, SIGNAL(clicked()),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->searchSentMsgCheckBox, SIGNAL(clicked()),
+	connect(m_ui->searchSntMsgCheckBox, SIGNAL(clicked()),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->messageIdLineEdit, SIGNAL(textChanged(QString)),
+
+	connect(m_ui->msgIdLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->senderDbIdLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->subjectLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->senderNameLineEdit, SIGNAL(textChanged(QString)),
+
+	connect(m_ui->sndrBoxIdLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->recipientDbIdLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->sndrNameLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->recipientNameLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->sndrRefNumLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->subjectLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->sndrFileMarkLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->toHandsLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->rcpntBoxIdLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->addressLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->rcpntNameLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->senderRefNumLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->rcpntRefNumLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->senderFileMarkLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->rcpntFileMarkLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->recipientRefNumLineEdit, SIGNAL(textChanged(QString)),
+
+	connect(m_ui->addressLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->recipientFileMarkLineEdit, SIGNAL(textChanged(QString)),
+	connect(m_ui->toHandsLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->tagLineEdit, SIGNAL(textChanged(QString)),
+
+	connect(m_ui->tagLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
+
 	connect(m_ui->searchPushButton, SIGNAL(clicked()), this,
 	    SLOT(searchMessages()));
 	connect(m_ui->resultsTableWidget, SIGNAL(itemSelectionChanged()),
@@ -158,83 +155,81 @@ void DlgMsgSearch::initSearchWindow(void)
 void DlgMsgSearch::checkInputFields(void)
 /* ========================================================================= */
 {
-	//debugSlotCall();
-
 	bool isAnyMsgTypeChecked = true;
 
 	m_ui->searchPushButton->setEnabled(false);
-	m_ui->tooMuchFields->hide();
+	m_ui->tooManyFields->hide();
 
 	/* is any message type checked? */
-	if (!m_ui->searchReceivedMsgCheckBox->isChecked() &&
-	    !m_ui->searchSentMsgCheckBox->isChecked()) {
+	if (!m_ui->searchRcvdMsgCheckBox->isChecked() &&
+	    !m_ui->searchSntMsgCheckBox->isChecked()) {
 		isAnyMsgTypeChecked = false;
 	}
 
 	/* search via message ID */
-	if (!m_ui->messageIdLineEdit->text().isEmpty()) {
-		m_ui->subjectLineEdit->setEnabled(false);
-		m_ui->senderDbIdLineEdit->setEnabled(false);
-		m_ui->senderNameLineEdit->setEnabled(false);
-		m_ui->senderRefNumLineEdit->setEnabled(false);
-		m_ui->senderFileMarkLineEdit->setEnabled(false);
-		m_ui->recipientDbIdLineEdit->setEnabled(false);
-		m_ui->recipientNameLineEdit->setEnabled(false);
-		m_ui->recipientRefNumLineEdit->setEnabled(false);
-		m_ui->recipientFileMarkLineEdit->setEnabled(false);
-		m_ui->addressLineEdit->setEnabled(false);
-		m_ui->toHandsLineEdit->setEnabled(false);
-		m_ui->tagLineEdit->setEnabled(false);
-		m_ui->tagLineEdit->clear();
+	if (!m_ui->msgIdLine->text().isEmpty()) {
+		m_ui->subjectLine->setEnabled(false);
+		m_ui->sndrBoxIdLine->setEnabled(false);
+		m_ui->sndrNameLine->setEnabled(false);
+		m_ui->sndrRefNumLine->setEnabled(false);
+		m_ui->sndrFileMarkLine->setEnabled(false);
+		m_ui->rcpntBoxIdLine->setEnabled(false);
+		m_ui->rcpntNameLine->setEnabled(false);
+		m_ui->rcpntRefNumLine->setEnabled(false);
+		m_ui->rcpntFileMarkLine->setEnabled(false);
+		m_ui->addressLine->setEnabled(false);
+		m_ui->toHandsLine->setEnabled(false);
+		m_ui->tagLine->setEnabled(false);
+		m_ui->tagLine->clear();
 		goto finish;
 	} else {
-		m_ui->subjectLineEdit->setEnabled(true);
-		m_ui->senderDbIdLineEdit->setEnabled(true);
-		m_ui->senderNameLineEdit->setEnabled(true);
-		m_ui->senderRefNumLineEdit->setEnabled(true);
-		m_ui->senderFileMarkLineEdit->setEnabled(true);
-		m_ui->recipientDbIdLineEdit->setEnabled(true);
-		m_ui->recipientNameLineEdit->setEnabled(true);
-		m_ui->recipientRefNumLineEdit->setEnabled(true);
-		m_ui->recipientFileMarkLineEdit->setEnabled(true);
-		m_ui->addressLineEdit->setEnabled(true);
-		m_ui->toHandsLineEdit->setEnabled(true);
-		m_ui->tagLineEdit->setEnabled(true);
+		m_ui->subjectLine->setEnabled(true);
+		m_ui->sndrBoxIdLine->setEnabled(true);
+		m_ui->sndrNameLine->setEnabled(true);
+		m_ui->sndrRefNumLine->setEnabled(true);
+		m_ui->sndrFileMarkLine->setEnabled(true);
+		m_ui->rcpntBoxIdLine->setEnabled(true);
+		m_ui->rcpntNameLine->setEnabled(true);
+		m_ui->rcpntRefNumLine->setEnabled(true);
+		m_ui->rcpntFileMarkLine->setEnabled(true);
+		m_ui->addressLine->setEnabled(true);
+		m_ui->toHandsLine->setEnabled(true);
+		m_ui->tagLine->setEnabled(true);
 	}
 
-	/* search via sender databox ID */
-	if (!m_ui->senderDbIdLineEdit->text().isEmpty()) {
-		m_ui->senderDbIdLineEdit->setEnabled(true);
-		m_ui->senderNameLineEdit->setEnabled(false);
-	} else if (!m_ui->senderNameLineEdit->text().isEmpty()){
-		m_ui->senderDbIdLineEdit->setEnabled(false);
-		m_ui->senderNameLineEdit->setEnabled(true);
+	/* Use the sender data box ID for searching. */
+	if (!m_ui->sndrBoxIdLine->text().isEmpty()) {
+		m_ui->sndrBoxIdLine->setEnabled(true);
+		m_ui->sndrNameLine->setEnabled(false);
+	} else if (!m_ui->sndrNameLine->text().isEmpty()){
+		m_ui->sndrBoxIdLine->setEnabled(false);
+		m_ui->sndrNameLine->setEnabled(true);
 	} else {
-		m_ui->senderNameLineEdit->setEnabled(true);
-		m_ui->senderDbIdLineEdit->setEnabled(true);
+		m_ui->sndrBoxIdLine->setEnabled(true);
+		m_ui->sndrNameLine->setEnabled(true);
 	}
 
-	/* search via recipient databox ID */
-	if (!m_ui->recipientDbIdLineEdit->text().isEmpty()) {
-		m_ui->recipientDbIdLineEdit->setEnabled(true);
-		m_ui->recipientNameLineEdit->setEnabled(false);
-	} else if (!m_ui->recipientNameLineEdit->text().isEmpty()){
-		m_ui->recipientDbIdLineEdit->setEnabled(false);
-		m_ui->recipientNameLineEdit->setEnabled(true);
+	/* Use the recipient data box ID for searching. */
+	if (!m_ui->rcpntBoxIdLine->text().isEmpty()) {
+		m_ui->rcpntBoxIdLine->setEnabled(true);
+		m_ui->rcpntNameLine->setEnabled(false);
+	} else if (!m_ui->rcpntNameLine->text().isEmpty()){
+		m_ui->rcpntBoxIdLine->setEnabled(false);
+		m_ui->rcpntNameLine->setEnabled(true);
 	} else {
-		m_ui->recipientNameLineEdit->setEnabled(true);
-		m_ui->recipientDbIdLineEdit->setEnabled(true);
+		m_ui->rcpntBoxIdLine->setEnabled(true);
+		m_ui->rcpntNameLine->setEnabled(true);
 	}
 
 finish:
 	/* search by message ID only */
-	if (!m_ui->messageIdLineEdit->text().isEmpty()) {
+	if (!m_ui->msgIdLine->text().isEmpty()) {
 		/* test if message ID is number */
 		QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
 		/* test if message is fill and message ID > 3 chars */
 		if (isAnyMsgTypeChecked &&
-		    (re.exactMatch(m_ui->messageIdLineEdit->text())) &&
-		    m_ui->messageIdLineEdit->text().size() > 2) {
+		    re.exactMatch(m_ui->msgIdLine->text()) &&
+		    m_ui->msgIdLine->text().size() > 2) {
 			m_ui->searchPushButton->setEnabled(true);
 		} else {
 			m_ui->searchPushButton->setEnabled(false);
@@ -243,23 +238,22 @@ finish:
 		return;
 	}
 
-	/* search by text of tags */
+	/* Search according to supplied tag text. */
 	bool isTagCorrect = true;
-	if (!(m_ui->tagLineEdit->text().isEmpty()) &&
-	    (m_ui->tagLineEdit->text().length() <= 2)) {
+	if (!m_ui->tagLine->text().isEmpty() &&
+	    (m_ui->tagLine->text().length() <= 2)) {
 		isTagCorrect = false;
 	}
 
 	bool isDbIdCorrect = true;
-	/* databox ID must have 7 chars */
-	if (!m_ui->senderDbIdLineEdit->text().isEmpty() &&
-	    m_ui->senderDbIdLineEdit->text().size() != 7) {
-			isDbIdCorrect = false;
+	/* Data-box ID must have 7 characters. */
+	if (!m_ui->sndrBoxIdLine->text().isEmpty() &&
+	    (m_ui->sndrBoxIdLine->text().size() != 7)) {
+		isDbIdCorrect = false;
 	}
-	/* databox ID must have 7 chars */
-	if (!m_ui->recipientDbIdLineEdit->text().isEmpty() &&
-	    m_ui->recipientDbIdLineEdit->text().size() != 7) {
-			isDbIdCorrect = false;
+	if (!m_ui->rcpntBoxIdLine->text().isEmpty() &&
+	    (m_ui->rcpntBoxIdLine->text().size() != 7)) {
+		isDbIdCorrect = false;
 	}
 
 	/* only 3 fields can be set together */
@@ -268,8 +262,8 @@ finish:
 	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
 	if (itemsWithoutTag > 3) {
 		isNotFillManyFileds = false;
-		m_ui->tooMuchFields->show();
-	} else if (itemsWithoutTag < 1 && m_ui->tagLineEdit->text().isEmpty()) {
+		m_ui->tooManyFields->show();
+	} else if ((itemsWithoutTag < 1) && m_ui->tagLine->text().isEmpty()) {
 		isNotFillManyFileds = false;
 	}
 
@@ -287,43 +281,43 @@ int DlgMsgSearch::howManyFieldsAreFilledWithoutTag(void)
 {
 	int cnt = 0;
 
-	if (!m_ui->messageIdLineEdit->text().isEmpty()) {
+	if (!m_ui->msgIdLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->subjectLineEdit->text().isEmpty()) {
+	if (!m_ui->subjectLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->senderDbIdLineEdit->text().isEmpty()) {
+	if (!m_ui->sndrBoxIdLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->senderNameLineEdit->text().isEmpty())  {
+	if (!m_ui->sndrNameLine->text().isEmpty())  {
 		cnt++;
 	}
-	if (!m_ui->addressLineEdit->text().isEmpty()) {
+	if (!m_ui->sndrRefNumLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->recipientDbIdLineEdit->text().isEmpty()) {
+	if (!m_ui->sndrFileMarkLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->recipientNameLineEdit->text().isEmpty()) {
+	if (!m_ui->rcpntBoxIdLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->addressLineEdit->text().isEmpty()) {
+	if (!m_ui->rcpntNameLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->senderRefNumLineEdit->text().isEmpty()) {
+	if (!m_ui->rcpntRefNumLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->senderFileMarkLineEdit->text().isEmpty()) {
+	if (!m_ui->rcpntFileMarkLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->recipientRefNumLineEdit->text().isEmpty()) {
+	if (!m_ui->addressLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->recipientFileMarkLineEdit->text().isEmpty()) {
+	if (!m_ui->toHandsLine->text().isEmpty()) {
 		cnt++;
 	}
-	if (!m_ui->toHandsLineEdit->text().isEmpty()) {
+	if (!m_ui->tagLine->text().isEmpty()) {
 		cnt++;
 	}
 
@@ -372,12 +366,12 @@ void DlgMsgSearch::searchMessages(void)
 
 	/* message types where search process will be applied */
 	enum MessageDirection msgType = MSG_ALL;
-	if (m_ui->searchReceivedMsgCheckBox->isChecked() &&
-	    m_ui->searchSentMsgCheckBox->isChecked()) {
+	if (m_ui->searchRcvdMsgCheckBox->isChecked() &&
+	    m_ui->searchSntMsgCheckBox->isChecked()) {
 		msgType = MSG_ALL;
-	} else if (m_ui->searchReceivedMsgCheckBox->isChecked()) {
+	} else if (m_ui->searchRcvdMsgCheckBox->isChecked()) {
 		msgType = MSG_RECEIVED;
-	} else if (m_ui->searchSentMsgCheckBox->isChecked()) {
+	} else if (m_ui->searchSntMsgCheckBox->isChecked()) {
 		msgType = MSG_SENT;
 	}
 
@@ -386,9 +380,9 @@ void DlgMsgSearch::searchMessages(void)
 	 * where input search text like with tag name
 	*/
 	bool applyTag = false;
-	if (!m_ui->tagLineEdit->text().isEmpty()) {
+	if (!m_ui->tagLine->text().isEmpty()) {
 		tagMsgIdList = globTagDbPtr->getMsgIdsContainSearchTagText(
-		    m_ui->tagLineEdit->text());
+		    m_ui->tagLine->text());
 		applyTag = true;
 	}
 
@@ -415,19 +409,19 @@ void DlgMsgSearch::searchMessages(void)
 			 */
 			msgEnvlpResultList = m_messageDbSetList.at(i).second->
 			    msgsAdvancedSearchMessageEnvelope(
-			    m_ui->messageIdLineEdit->text().isEmpty() ? -1 :
-			        m_ui->messageIdLineEdit->text().toLongLong(),
-			    m_ui->subjectLineEdit->text(),
-			    m_ui->senderDbIdLineEdit->text(),
-			    m_ui->senderNameLineEdit->text(),
-			    m_ui->addressLineEdit->text(),
-			    m_ui->recipientDbIdLineEdit->text(),
-			    m_ui->recipientNameLineEdit->text(),
-			    m_ui->senderRefNumLineEdit->text(),
-			    m_ui->senderFileMarkLineEdit->text(),
-			    m_ui->recipientRefNumLineEdit->text(),
-			    m_ui->recipientFileMarkLineEdit->text(),
-			    m_ui->toHandsLineEdit->text(),
+			    m_ui->msgIdLine->text().isEmpty() ? -1 :
+			        m_ui->msgIdLine->text().toLongLong(),
+			    m_ui->subjectLine->text(),
+			    m_ui->sndrBoxIdLine->text(),
+			    m_ui->sndrNameLine->text(),
+			    m_ui->addressLine->text(),
+			    m_ui->rcpntBoxIdLine->text(),
+			    m_ui->rcpntNameLine->text(),
+			    m_ui->sndrRefNumLine->text(),
+			    m_ui->sndrFileMarkLine->text(),
+			    m_ui->rcpntRefNumLine->text(),
+			    m_ui->rcpntFileMarkLine->text(),
+			    m_ui->toHandsLine->text(),
 			    QString(), QString(), msgType);
 		}
 

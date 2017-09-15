@@ -60,8 +60,15 @@ signals:
 	void focusSelectedMsg(QString, qint64, QString, int);
 
 private:
-	void initSearchWindow(void);
+	/*!
+	 * @brief Initialise message search dialogue.
+	 *
+	 * @param[in] username Account username.
+	 */
+	void initSearchWindow(const QString &username);
+
 	int howManyFieldsAreFilledWithoutTag(void);
+
 	void appendMsgsToTable(
 	    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
 	    const QList<MessageDb::SoughtMsg> &msgDataList);
@@ -69,7 +76,6 @@ private:
 	Ui::DlgMsgSearch *m_ui; /*!< UI generated from UI file. */
 
 	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
-	const QString m_userName;
 };
 
 #endif /* _DLG_MSG_SEARCH_H_ */
