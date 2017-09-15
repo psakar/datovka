@@ -39,10 +39,18 @@ class DlgMsgSearch : public QDialog {
 	Q_OBJECT
 
 public:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] msgSetEntryList List of username and database set pairs.
+	 * @param[in] userName Username.
+	 * @param[in] parent Parent widget.
+	 * @param[in] flags Window flags.
+	 */
 	DlgMsgSearch(
 	    const QList< QPair<QString, MessageDbSet *> > msgSetEntryList,
 	    const QString &userName, QWidget *parent = Q_NULLPTR,
-	    Qt::WindowFlags f = 0);
+	    Qt::WindowFlags flags = 0);
 
 	/*!
 	 * @brief Destructor.
@@ -56,12 +64,33 @@ private slots:
 	 */
 	void checkInputFields(void);
 
-	void searchMessages(void);
+	/*!
+	 * @brief Set first column with checkbox active if item was changed.
+	 */
 	void setFirtsColumnActive(void);
-	void getSelectedMsg(int row, int column);
+
+	/*!
+	 * @brief Emit ID of message entry.
+	 *
+	 * @param[in] row Message entry row.
+	 * @param[in] col Message entry column.
+	 */
+	void getSelectedMsg(int row, int col);
+
+	void searchMessages(void);
 
 signals:
-	void focusSelectedMsg(QString, qint64, QString, int);
+	/*!
+	 * @brief Signals that a message was selected should be focused
+	 *     elsewhere.
+	 *
+	 * @param[in] username Username identifying an account.
+	 * @param[in] dmId Message identifier.
+	 * @param[in] year Message delivery year.
+	 * @param[in] msgType Message type.
+	 */
+	void focusSelectedMsg(QString username, qint64 dmId, QString year,
+	    int msgType);
 
 private:
 	/*!
@@ -90,7 +119,7 @@ private:
 
 	Ui::DlgMsgSearch *m_ui; /*!< UI generated from UI file. */
 
-	const QList< QPair<QString, MessageDbSet *> > m_msgSetEntryList;
+	const QList< QPair<QString, MessageDbSet *> > m_msgSetEntryList; /*!< Usernames and database sets. */
 };
 
 #endif /* _DLG_MSG_SEARCH_H_ */

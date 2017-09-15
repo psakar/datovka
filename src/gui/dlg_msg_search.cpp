@@ -44,9 +44,8 @@
 
 DlgMsgSearch::DlgMsgSearch(
     const QList< QPair <QString, MessageDbSet *> > msgSetEntryList,
-    const QString &userName,
-    QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f),
+    const QString &userName, QWidget *parent, Qt::WindowFlags flags)
+    : QDialog(parent, flags),
     m_ui(new (std::nothrow) Ui::DlgMsgSearch),
     m_msgSetEntryList(msgSetEntryList)
 {
@@ -141,6 +140,24 @@ void DlgMsgSearch::checkInputFields(void)
 	    boxIdCorrect && tagCorrect && isNotFillManyFileds);
 }
 
+void DlgMsgSearch::setFirtsColumnActive(void)
+{
+	m_ui->resultsTableWidget->selectColumn(0);
+	m_ui->resultsTableWidget->selectRow(
+	    m_ui->resultsTableWidget->currentRow());
+}
+
+void DlgMsgSearch::getSelectedMsg(int row, int col)
+{
+	Q_UNUSED(col);
+	emit focusSelectedMsg(
+	    m_ui->resultsTableWidget->item(row, COL_USER_NAME)->text(),
+	    m_ui->resultsTableWidget->item(row, COL_MESSAGE_ID)->text().toLongLong(),
+	    m_ui->resultsTableWidget->item(row, COL_DELIVERY_YEAR)->text(),
+	    m_ui->resultsTableWidget->item(row, COL_MESSAGE_TYPE)->text().toInt());
+	/* Don't close the dialogue. */
+}
+
 void DlgMsgSearch::initSearchWindow(const QString &username)
 {
 	m_ui->infoTextLabel->setText(
@@ -213,12 +230,13 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	connect(m_ui->tagLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
-	connect(m_ui->searchPushButton, SIGNAL(clicked()), this,
-	    SLOT(searchMessages()));
 	connect(m_ui->resultsTableWidget, SIGNAL(itemSelectionChanged()),
 	    this, SLOT(setFirtsColumnActive()));
 	connect(m_ui->resultsTableWidget, SIGNAL(cellDoubleClicked(int, int)),
 	    this, SLOT(getSelectedMsg(int, int)));
+
+	connect(m_ui->searchPushButton, SIGNAL(clicked()), this,
+	    SLOT(searchMessages()));
 
 	m_ui->resultsTableWidget->
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -312,19 +330,6 @@ void DlgMsgSearch::appendMsgsToTable(
 	m_ui->resultsTableWidget->
 	    horizontalHeader()->setStretchLastSection(true);
 }
-
-/* ========================================================================= */
-/*
- * Set first column with checkbox active if item was changed
- */
-void DlgMsgSearch::setFirtsColumnActive(void)
-/* ========================================================================= */
-{
-	m_ui->resultsTableWidget->selectColumn(0);
-	m_ui->resultsTableWidget->selectRow(
-	    m_ui->resultsTableWidget->currentRow());
-}
-
 
 /* ========================================================================= */
 /*
@@ -484,20 +489,4 @@ void DlgMsgSearch::searchMessages(void)
 			}
 		}
 	}
-}
-
-/* ========================================================================= */
-/*
- * Get ID of selected message and set focus in MessageList Tableview
- */
-void DlgMsgSearch::getSelectedMsg(int row, int column)
-/* ========================================================================= */
-{
-	Q_UNUSED(column);
-	emit focusSelectedMsg(
-	    m_ui->resultsTableWidget->item(row, COL_USER_NAME)->text(),
-	    m_ui->resultsTableWidget->item(row, COL_MESSAGE_ID)->text().toLongLong(),
-	    m_ui->resultsTableWidget->item(row, COL_DELIVERY_YEAR)->text(),
-	    m_ui->resultsTableWidget->item(row, COL_MESSAGE_TYPE)->text().toInt());
-	//this->close();
 }
