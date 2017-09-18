@@ -152,28 +152,25 @@ void DlgPreferences::initPrefDialog(void)
 	connect(m_ui->addFilePathPushButton, SIGNAL(clicked()),
 	    this, SLOT(setAddFilePath()));
 
-	/* .. */
-	m_ui->language->setCurrentIndex(getLangugeIndex(globPref.language));
-	m_ui->all_attachments_save_zfo_msg->setChecked(
+	/* saving */
+	m_ui->allAttachmentsSaveZfoMsg->setChecked(
 	    globPref.all_attachments_save_zfo_msg);
-	m_ui->all_attachments_save_zfo_delinfo->setChecked(
+	m_ui->allAttachmentsSaveZfoDelInfo->setChecked(
 	    globPref.all_attachments_save_zfo_delinfo);
-	m_ui->all_attachments_save_pdf_msgenvel->setChecked(
+	m_ui->allAttachmentsSavePdfMsgEnvel->setChecked(
 	    globPref.all_attachments_save_pdf_msgenvel);
-	m_ui->all_attachments_save_pdf_delinfo->setChecked(
+	m_ui->allAttachmentsSavePdfDelInfo->setChecked(
 	    globPref.all_attachments_save_pdf_delinfo);
-	m_ui->delivery_info_for_every_file->setChecked(
+	m_ui->msgFileNameFmt->setText(globPref.message_filename_format);
+	m_ui->delInfoFileNameFmt->setText(globPref.delivery_filename_format);
+	m_ui->attachFileNameFmt->setText(globPref.attachment_filename_format);
+	m_ui->delInfoForEveryFile->setChecked(
 	    globPref.delivery_info_for_every_file);
-
-	m_ui->message_filename_format->setText(
-	    globPref.message_filename_format);
-	m_ui->delivery_filename_format->setText(
-	    globPref.delivery_filename_format);
-	m_ui->attachment_filename_format->setText(
-	    globPref.attachment_filename_format);
-
-	m_ui->delivery_filename_format_all_attach->setText(
+	m_ui->allAttachDelInfoFileNameFmt->setText(
 	    globPref.delivery_filename_format_all_attach);
+
+	/* language */
+	m_ui->langComboBox->setCurrentIndex(getLangugeIndex(globPref.language));
 
 	connect(m_ui->prefButtonBox, SIGNAL(accepted()),
 	    this, SLOT(saveChanges(void)));
@@ -300,26 +297,24 @@ void DlgPreferences::saveChanges(void) const
 	globPref.save_attachments_path = m_ui->savePath->text();
 	globPref.add_file_to_attachments_path = m_ui->addFilePath->text();
 
-	/* ... */
-	globPref.language = getIndexFromLanguge(m_ui->language->currentIndex());
-
+	/* saving */
 	globPref.all_attachments_save_zfo_msg =
-	    m_ui->all_attachments_save_zfo_msg->isChecked();
+	    m_ui->allAttachmentsSaveZfoMsg->isChecked();
 	globPref.all_attachments_save_zfo_delinfo =
-	    m_ui->all_attachments_save_zfo_delinfo->isChecked();
+	    m_ui->allAttachmentsSaveZfoDelInfo->isChecked();
 	globPref.all_attachments_save_pdf_msgenvel =
-	    m_ui->all_attachments_save_pdf_msgenvel->isChecked();
+	    m_ui->allAttachmentsSavePdfMsgEnvel->isChecked();
 	globPref.all_attachments_save_pdf_delinfo =
-	    m_ui->all_attachments_save_pdf_delinfo->isChecked();
+	    m_ui->allAttachmentsSavePdfDelInfo->isChecked();
+	globPref.message_filename_format = m_ui->msgFileNameFmt->text();
+	globPref.delivery_filename_format = m_ui->delInfoFileNameFmt->text();
+	globPref.attachment_filename_format = m_ui->attachFileNameFmt->text();
 	globPref.delivery_info_for_every_file =
-	    m_ui->delivery_info_for_every_file->isChecked();
-
-	globPref.message_filename_format =
-	    m_ui->message_filename_format->text();
-	globPref.delivery_filename_format =
-	    m_ui->delivery_filename_format->text();
-	globPref.attachment_filename_format =
-	    m_ui->attachment_filename_format->text();
+	    m_ui->delInfoForEveryFile->isChecked();
 	globPref.delivery_filename_format_all_attach =
-	    m_ui->delivery_filename_format_all_attach->text();
+	    m_ui->allAttachDelInfoFileNameFmt->text();
+
+	/* language */
+	globPref.language =
+	    getIndexFromLanguge(m_ui->langComboBox->currentIndex());
 }

@@ -1144,7 +1144,7 @@ Per-account path remembering will be disabled.</string>
              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
             </property>
             <item row="0" column="0">
-             <widget class="QCheckBox" name="all_attachments_save_zfo_msg">
+             <widget class="QCheckBox" name="allAttachmentsSaveZfoMsg">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1161,7 +1161,7 @@ signed message as ZFO to the same path.</string>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QCheckBox" name="all_attachments_save_pdf_msgenvel">
+             <widget class="QCheckBox" name="allAttachmentsSavePdfMsgEnvel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1178,7 +1178,7 @@ message envelope as PDF to the same path.</string>
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QCheckBox" name="all_attachments_save_zfo_delinfo">
+             <widget class="QCheckBox" name="allAttachmentsSaveZfoDelInfo">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1195,7 +1195,7 @@ signed acceptance info as ZFO to the same path.</string>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QCheckBox" name="all_attachments_save_pdf_delinfo">
+             <widget class="QCheckBox" name="allAttachmentsSavePdfDelInfo">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1239,8 +1239,11 @@ file name including its suffix).</string>
             <property name="fieldGrowthPolicy">
              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
             </property>
+            <property name="labelAlignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
             <item row="0" column="0">
-             <widget class="QLabel" name="label_3">
+             <widget class="QLabel" name="msgFileNameLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1255,7 +1258,7 @@ file name including its suffix).</string>
             <item row="0" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_8">
               <item>
-               <widget class="QLineEdit" name="message_filename_format">
+               <widget class="QLineEdit" name="msgFileNameFmt">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1265,7 +1268,7 @@ file name including its suffix).</string>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_6">
+               <widget class="QLabel" name="suffLabel_1">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1280,7 +1283,7 @@ file name including its suffix).</string>
              </layout>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_7">
+             <widget class="QLabel" name="delInfoFileNameLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1293,7 +1296,7 @@ file name including its suffix).</string>
              </widget>
             </item>
             <item row="2" column="0">
-             <widget class="QLabel" name="label_9">
+             <widget class="QLabel" name="attachFileNameLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1308,7 +1311,7 @@ file name including its suffix).</string>
             <item row="1" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_9">
               <item>
-               <widget class="QLineEdit" name="delivery_filename_format">
+               <widget class="QLineEdit" name="delInfoFileNameFmt">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1318,7 +1321,7 @@ file name including its suffix).</string>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_8">
+               <widget class="QLabel" name="suffLabel_2">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1335,7 +1338,7 @@ file name including its suffix).</string>
             <item row="2" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_10">
               <item>
-               <widget class="QLineEdit" name="attachment_filename_format">
+               <widget class="QLineEdit" name="attachFileNameFmt">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1749,7 +1752,7 @@ file name including its suffix).</string>
            </layout>
           </item>
           <item>
-           <widget class="QLabel" name="label_38">
+           <widget class="QLabel" name="characterReplacementNotificationLabel">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -1772,7 +1775,7 @@ file name including its suffix).</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
-             <widget class="QCheckBox" name="delivery_info_for_every_file">
+             <widget class="QCheckBox" name="delInfoForEveryFile">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1790,7 +1793,7 @@ attachment file name (parameter %f is required).</string>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="delivery_filename_format_all_attach">
+             <widget class="QLineEdit" name="allAttachDelInfoFileNameFmt">
               <property name="enabled">
                <bool>true</bool>
               </property>
@@ -1840,7 +1843,7 @@ attachment file name (parameter %f is required).</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QComboBox" name="language">
+           <widget class="QComboBox" name="langComboBox">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -1865,7 +1868,7 @@ attachment file name (parameter %f is required).</string>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="langNotificationLabel">
             <property name="font">
              <font>
               <weight>50</weight>
