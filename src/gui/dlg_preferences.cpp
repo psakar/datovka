@@ -142,11 +142,18 @@ void DlgPreferences::initPrefDialog(void)
 		Q_ASSERT(0);
 	}
 
-	/* .. */
-	m_ui->language->setCurrentIndex(getLangugeIndex(globPref.language));
+	/* directories */
 	m_ui->enableGlobalPaths->setChecked(globPref.use_global_paths);
 	m_ui->savePath->setText(globPref.save_attachments_path);
 	m_ui->addFilePath->setText(globPref.add_file_to_attachments_path);
+
+	connect(m_ui->savePathPushButton, SIGNAL(clicked()),
+	    this, SLOT(setSavePath()));
+	connect(m_ui->addFilePathPushButton, SIGNAL(clicked()),
+	    this, SLOT(setAddFilePath()));
+
+	/* .. */
+	m_ui->language->setCurrentIndex(getLangugeIndex(globPref.language));
 	m_ui->all_attachments_save_zfo_msg->setChecked(
 	    globPref.all_attachments_save_zfo_msg);
 	m_ui->all_attachments_save_zfo_delinfo->setChecked(
@@ -168,10 +175,6 @@ void DlgPreferences::initPrefDialog(void)
 	m_ui->delivery_filename_format_all_attach->setText(
 	    globPref.delivery_filename_format_all_attach);
 
-	connect(m_ui->savePathPushButton, SIGNAL(clicked()),
-	    this, SLOT(setSavePath()));
-	connect(m_ui->addFilePathPushButton, SIGNAL(clicked()),
-	    this, SLOT(setAddFilePath()));
 	connect(m_ui->prefButtonBox, SIGNAL(accepted()),
 	    this, SLOT(saveChanges(void)));
 }
@@ -292,12 +295,14 @@ void DlgPreferences::saveChanges(void) const
 		globPref.toolbar_button_style = Qt::ToolButtonTextUnderIcon;
 	}
 
-	/* ... */
-	globPref.language = getIndexFromLanguge(m_ui->language->currentIndex());
-
+	/* directories */
 	globPref.use_global_paths = m_ui->enableGlobalPaths->isChecked();
 	globPref.save_attachments_path = m_ui->savePath->text();
 	globPref.add_file_to_attachments_path = m_ui->addFilePath->text();
+
+	/* ... */
+	globPref.language = getIndexFromLanguge(m_ui->language->currentIndex());
+
 	globPref.all_attachments_save_zfo_msg =
 	    m_ui->all_attachments_save_zfo_msg->isChecked();
 	globPref.all_attachments_save_zfo_delinfo =
