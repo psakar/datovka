@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Preferences</class>
- <widget class="QDialog" name="Preferences">
+ <class>DlgPreferences</class>
+ <widget class="QDialog" name="DlgPreferences">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -1917,7 +1917,7 @@ attachment file name (parameter %f is required).</string>
   <connection>
    <sender>prefButtonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Preferences</receiver>
+   <receiver>DlgPreferences</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1933,7 +1933,7 @@ attachment file name (parameter %f is required).</string>
   <connection>
    <sender>prefButtonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Preferences</receiver>
+   <receiver>DlgPreferences</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

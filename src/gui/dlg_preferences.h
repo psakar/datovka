@@ -24,18 +24,31 @@
 #ifndef _DLG_PREFERENCES_H_
 #define _DLG_PREFERENCES_H_
 
-
 #include <QDialog>
+#include <QString>
 
-#include "src/common.h"
-#include "ui_dlg_preferences.h"
+namespace Ui {
+	class DlgPreferences;
+}
 
-
-class DlgPreferences : public QDialog, public Ui::Preferences {
-    Q_OBJECT
+/*!
+ * @brief Preferences dialogue.
+ */
+class DlgPreferences : public QDialog {
+	Q_OBJECT
 
 public:
-	DlgPreferences(QWidget *parent = Q_NULLPTR);
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent widget.
+	 */
+	explicit DlgPreferences(QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgPreferences(void);
 
 private slots:
 	void setActiveTimerSetup(int);
@@ -52,7 +65,8 @@ private:
 
 	static
 	const QString &getIndexFromLanguge(int index);
-};
 
+	Ui::DlgPreferences *m_ui; /*!< UI generated from UI file. */
+};
 
 #endif /* _DLG_PREFERENCES_H_ */
