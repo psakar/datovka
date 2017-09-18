@@ -53,41 +53,47 @@ DlgPreferences::~DlgPreferences(void)
 
 void DlgPreferences::initPrefDialog(void)
 {
-	m_ui->download_at_start->setChecked(globPref.download_at_start);
-	m_ui->auto_download_whole_messages->setChecked(
-	    globPref.auto_download_whole_messages);
-	m_ui->download_on_background->setChecked(
-	    globPref.download_on_background);
+	/* downloading */
+	m_ui->downloadOnBackground->setChecked(globPref.download_on_background);
 	m_ui->timerSpinBox->setValue(globPref.timer_value);
-	m_ui->timestampExpirSpinBox->setValue(
-	    globPref.timestamp_expir_before_days);
+	m_ui->autoDownloadWholeMessages->setChecked(
+	    globPref.auto_download_whole_messages);
+	m_ui->downloadAtStart->setChecked(globPref.download_at_start);
 	m_ui->timeoutMinSpinBox->setValue(
 	    globPref.isds_download_timeout_ms / 60000);
-	m_ui->labelTimeoutNote->setText(
-	    tr("Note: If you have a slow network connection or you cannot "
-	    "download complete messages, here you can increase "
-	    "the connection timeout. Default value is %1 minutes. "
-	    "Use 0 to disable timeout limit (not recommended).").arg(
-	        ISDS_DOWNLOAD_TIMEOUT_MS / 60000));
+	m_ui->labelTimeoutNote->setText(tr(
+	    "Note: If you have a slow network connection or you cannot download complete messages, here you can increase the connection timeout. "
+	    "Default value is %1 minutes. Use 0 to disable timeout limit (not recommended).")
+	        .arg(ISDS_DOWNLOAD_TIMEOUT_MS / 60000));
 	m_ui->timeoutMarkMsgSpinBox->setValue(
 	    globPref.message_mark_as_read_timeout / 1000);
-	m_ui->noteMarkMsgLabel->setText(
-	    tr("Note: Marked unread message will be marked as read after set "
-	       "interval. Default value is %1 seconds. Use -1 disable "
-	       "the function.").arg(TIMER_MARK_MSG_READ_MS / 1000));
-	m_ui->check_new_versions->setChecked(globPref.check_new_versions);
+	m_ui->noteMarkMsgLabel->setText(tr(
+	    "Note: Marked unread message will be marked as read after set interval. "
+	    "Default value is %1 seconds. Use -1 disable the function.")
+	        .arg(TIMER_MARK_MSG_READ_MS / 1000));
+	m_ui->checkNewVersions->setChecked(globPref.check_new_versions);
+	/* TODO - this choice must be disabled */
+//	m_ui->sendStatsWithVersionChecks->setChecked(
+//	    globPref.send_stats_with_version_checks);
+//	m_ui->sendStatsWithVersionChecks->setEnabled(
+//	    m_ui->checkNewVersions->isChecked());
+
+	connect(m_ui->downloadOnBackground, SIGNAL(stateChanged(int)),
+	    this, SLOT(setActiveTimerSetup(int)));
+	connect(m_ui->checkNewVersions, SIGNAL(stateChanged(int)),
+	    this, SLOT(setActiveCheckBox(int)));
+
+	setActiveTimerSetup(m_ui->downloadOnBackground->checkState());
+
+	/* .. */
+	m_ui->timestampExpirSpinBox->setValue(
+	    globPref.timestamp_expir_before_days);
 	m_ui->store_messages_on_disk->setChecked(
 	    globPref.store_messages_on_disk);
 	m_ui->store_additional_data_on_disk->setChecked(
 	    globPref.store_additional_data_on_disk);
 	m_ui->check_crl->setChecked(globPref.check_crl);
 	m_ui->language->setCurrentIndex(getLangugeIndex(globPref.language));
-	m_ui->timerLabelPre->setEnabled(
-	    m_ui->download_on_background->isChecked());
-	m_ui->timerLabelPost->setEnabled(
-	    m_ui->download_on_background->isChecked());
-	m_ui->timerSpinBox->setEnabled(
-	    m_ui->download_on_background->isChecked());
 	m_ui->enableGlobalPaths->setChecked(globPref.use_global_paths);
 	m_ui->savePath->setText(globPref.save_attachments_path);
 	m_ui->addFilePath->setText(globPref.add_file_to_attachments_path);
@@ -112,17 +118,6 @@ void DlgPreferences::initPrefDialog(void)
 	m_ui->delivery_filename_format_all_attach->setText(
 	    globPref.delivery_filename_format_all_attach);
 
-
-	/* TODO - this choice must be disabled */
-//	m_ui->send_stats_with_version_checks->
-//	    setChecked(globPref.send_stats_with_version_checks);
-//	m_ui->send_stats_with_version_checks->
-//	    setEnabled(m_ui->check_new_versions->isChecked());
-
-	connect(m_ui->check_new_versions, SIGNAL(stateChanged(int)),
-	    this, SLOT(setActiveCheckBox(int)));
-	connect(m_ui->download_on_background, SIGNAL(stateChanged(int)),
-	    this, SLOT(setActiveTimerSetup(int)));
 	connect(m_ui->savePathPushButton, SIGNAL(clicked()),
 	    this, SLOT(setSavePath()));
 	connect(m_ui->addFilePathPushButton, SIGNAL(clicked()),
@@ -208,9 +203,9 @@ const QString &DlgPreferences::getIndexFromLanguge(int index)
 
 void DlgPreferences::setActiveTimerSetup(int state)
 {
-	m_ui->timerLabelPre->setEnabled(Qt::Checked == state);
-	m_ui->timerLabelPost->setEnabled(Qt::Checked == state);
+	m_ui->timerPreLabel->setEnabled(Qt::Checked == state);
 	m_ui->timerSpinBox->setEnabled(Qt::Checked == state);
+	m_ui->timerPostLabel->setEnabled(Qt::Checked == state);
 }
 
 
@@ -218,7 +213,7 @@ void DlgPreferences::setActiveCheckBox(int state)
 {
 	Q_UNUSED(state);
 	/* TODO - this choice must be disabled */
-//	m_ui->send_stats_with_version_checks->setEnabled(Qt::Checked == state);
+//	m_ui->sendStatsWithVersionChecks->setEnabled(Qt::Checked == state);
 }
 
 
@@ -247,11 +242,22 @@ void DlgPreferences::setAddFilePath(void)
 
 void DlgPreferences::saveChanges(void) const
 {
-	globPref.auto_download_whole_messages =
-	    m_ui->auto_download_whole_messages->isChecked();
+	/* downloading */
 	globPref.download_on_background =
-	    m_ui->download_on_background->isChecked();
-	globPref.download_at_start = m_ui->download_at_start->isChecked();
+	    m_ui->downloadOnBackground->isChecked();
+	globPref.timer_value = m_ui->timerSpinBox->value();
+	globPref.auto_download_whole_messages =
+	    m_ui->autoDownloadWholeMessages->isChecked();
+	globPref.download_at_start = m_ui->downloadAtStart->isChecked();
+	globPref.isds_download_timeout_ms =
+	    m_ui->timeoutMinSpinBox->value() * 60000;
+	globPref.message_mark_as_read_timeout =
+	    m_ui->timeoutMarkMsgSpinBox->value() * 1000;
+	globPref.check_new_versions = m_ui->checkNewVersions->isChecked();
+	globPref.send_stats_with_version_checks =
+	    m_ui->sendStatsWithVersionChecks->isChecked();
+
+	/* ... */
 	globPref.store_messages_on_disk =
 	    m_ui->store_messages_on_disk->isChecked();
 	globPref.store_additional_data_on_disk =
@@ -261,14 +267,6 @@ void DlgPreferences::saveChanges(void) const
 	        GlobPreferences::DOWNLOAD_DATE :
 	        GlobPreferences::CURRENT_DATE;
 	globPref.check_crl = m_ui->check_crl->isChecked();
-	globPref.check_new_versions = m_ui->check_new_versions->isChecked();
-	globPref.send_stats_with_version_checks =
-	    m_ui->send_stats_with_version_checks->isChecked();
-	globPref.timer_value = m_ui->timerSpinBox->value();
-	globPref.isds_download_timeout_ms =
-	    m_ui->timeoutMinSpinBox->value() * 60000;
-	globPref.message_mark_as_read_timeout =
-	    m_ui->timeoutMarkMsgSpinBox->value() * 1000;
 	globPref.timestamp_expir_before_days =
 	    m_ui->timestampExpirSpinBox->value();
 	globPref.language = getIndexFromLanguge(m_ui->language->currentIndex());

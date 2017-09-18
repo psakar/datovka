@@ -67,7 +67,7 @@
           <bool>false</bool>
          </property>
          <property name="title">
-          <string>Messages downloading</string>
+          <string>Message downloading</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignJustify|Qt::AlignVCenter</set>
@@ -77,7 +77,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QCheckBox" name="download_on_background">
+           <widget class="QCheckBox" name="downloadOnBackground">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -97,7 +97,7 @@ Download period you can set bellow.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-             <widget class="QLabel" name="timerLabelPre">
+             <widget class="QLabel" name="timerPreLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -137,7 +137,7 @@ synchronise all accounts in the background.</string>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="timerLabelPost">
+             <widget class="QLabel" name="timerPostLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -165,7 +165,7 @@ synchronise all accounts in the background.</string>
            </layout>
           </item>
           <item>
-           <widget class="QCheckBox" name="auto_download_whole_messages">
+           <widget class="QCheckBox" name="autoDownloadWholeMessages">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -185,7 +185,7 @@ slower internet connections.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="download_at_start">
+           <widget class="QCheckBox" name="downloadAtStart">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -219,7 +219,7 @@ and also download new messages on background at startup.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QLabel" name="label_4">
+             <widget class="QLabel" name="timeoutMinPreLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -260,7 +260,7 @@ connection timeout.</string>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_5">
+             <widget class="QLabel" name="timeoutMinPostLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -325,7 +325,7 @@ connection timeout.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
-             <widget class="QLabel" name="label_39">
+             <widget class="QLabel" name="timeoutMarkMsgPreLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -365,7 +365,7 @@ automatically marking message as read.</string>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_40">
+             <widget class="QLabel" name="timeoutMarkMsgPostLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -425,7 +425,7 @@ automatically marking message as read.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QCheckBox" name="check_new_versions">
+           <widget class="QCheckBox" name="checkNewVersions">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -445,7 +445,7 @@ check for new Datovka versions on startup.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="send_stats_with_version_checks">
+           <widget class="QCheckBox" name="sendStatsWithVersionChecks">
             <property name="enabled">
              <bool>false</bool>
             </property>
