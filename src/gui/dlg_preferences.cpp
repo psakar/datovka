@@ -61,6 +61,17 @@ DlgPreferences::~DlgPreferences(void)
 	delete m_ui;
 }
 
+bool DlgPreferences::modify(QWidget *parent)
+{
+	DlgPreferences dlg(parent);
+	if (QDialog::Accepted == dlg.exec()) {
+		dlg.saveSettings();
+		return true;
+	} else {
+		return false;
+	}
+}
+
 void DlgPreferences::activateBackgroundTimer(int checkState)
 {
 	const bool enable = Qt::Checked == checkState;
@@ -329,7 +340,4 @@ void DlgPreferences::initDialogue(void)
 	m_ui->langComboBox->addItem(tr("English"));
 	m_ui->langComboBox->setCurrentIndex(
 	    settingsLangtoIndex(globPref.language));
-
-	connect(m_ui->prefButtonBox, SIGNAL(accepted()),
-	    this, SLOT(saveSettings()));
 }

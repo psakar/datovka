@@ -36,7 +36,7 @@ namespace Ui {
 class DlgPreferences : public QDialog {
 	Q_OBJECT
 
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 *
@@ -44,10 +44,21 @@ public:
 	 */
 	explicit DlgPreferences(QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgPreferences(void);
+
+	/*!
+	 * @brief Modifies global preferences.
+	 *
+	 * @param[in] parent Parent widget.
+	 * @return True when dialogue has been accepted and preference data
+	 *     have been updated.
+	 */
+	static
+	bool modify(QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -67,12 +78,12 @@ private slots:
 	 */
 	void setAddFilePath(void);
 
+private:
 	/*!
 	 * @brief Save dialogue content to settings.
 	 */
 	void saveSettings(void) const;
 
-private:
 	/*!
 	 * @brief Initialises the dialogue according to settings.
 	 */

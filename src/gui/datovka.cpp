@@ -632,9 +632,9 @@ void MainWindow::showPreferencesDialog(void)
 {
 	debugSlotCall();
 
-	QDialog *dlgPrefs = new DlgPreferences(this);
-	dlgPrefs->exec();
-	dlgPrefs->deleteLater();
+	if (!DlgPreferences::modify(this)) {
+		return;
+	}
 
 	// set actual download timer value from settings if is enable
 	if (globPref.download_on_background) {
