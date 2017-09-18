@@ -50,7 +50,7 @@ public:
 	DlgMsgSearch(
 	    const QList< QPair<QString, MessageDbSet *> > msgSetEntryList,
 	    const QString &userName, QWidget *parent = Q_NULLPTR,
-	    Qt::WindowFlags flags = 0);
+	    Qt::WindowFlags flags = Qt::WindowFlags());
 
 	/*!
 	 * @brief Destructor.
