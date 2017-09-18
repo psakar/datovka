@@ -25,7 +25,6 @@
 #define _DLG_PREFERENCES_H_
 
 #include <QDialog>
-#include <QString>
 
 namespace Ui {
 	class DlgPreferences;
@@ -78,12 +77,6 @@ private:
 	 * @brief Initialises the dialogue according to settings.
 	 */
 	void initDialogue(void);
-
-	static
-	int getLangugeIndex(const QString &language);
-
-	static
-	const QString &getIndexFromLanguge(int index);
 
 	Ui::DlgPreferences *m_ui; /*!< UI generated from UI file. */
 };

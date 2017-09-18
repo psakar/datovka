@@ -22,6 +22,7 @@
  */
 
 #include <QFileDialog>
+#include <QString>
 
 #include "src/common.h"
 #include "src/dimensions/dimensions.h"
@@ -86,6 +87,46 @@ void DlgPreferences::setAddFilePath(void)
 	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
 	if (!newDir.isEmpty()) {
 		m_ui->addFilePath->setText(newDir);
+	}
+}
+
+/*!
+ * @brief Converts selected language index to language name.
+ *
+ * @param[in] index Language entry index.
+ * @return Language name as used in settings.
+ */
+static
+const QString &indexToSettingsLang(int index)
+{
+	switch (index) {
+	case LANG_CZECH:
+		return Localisation::langCs;
+		break;
+	case LANG_ENGLISH:
+		return Localisation::langEn;
+		break;
+	default:
+		return Localisation::langSystem;
+		break;
+	}
+}
+
+/*!
+ * @brief Converts language name to index.
+ *
+ * @param[in] lang Language name as used in settings.
+ * @return Corresponding index.
+ */
+static
+int settingsLangtoIndex(const QString &lang)
+{
+	if (Localisation::langCs == lang) {
+		return LANG_CZECH;
+	} else if (Localisation::langEn == lang) {
+		return LANG_ENGLISH;
+	} else {
+		return LANG_SYSTEM;
 	}
 }
 
@@ -163,7 +204,7 @@ void DlgPreferences::saveSettings(void) const
 
 	/* language */
 	globPref.language =
-	    getIndexFromLanguge(m_ui->langComboBox->currentIndex());
+	    indexToSettingsLang(m_ui->langComboBox->currentIndex());
 }
 
 void DlgPreferences::initDialogue(void)
@@ -283,34 +324,12 @@ void DlgPreferences::initDialogue(void)
 	    globPref.delivery_filename_format_all_attach);
 
 	/* language */
-	m_ui->langComboBox->setCurrentIndex(getLangugeIndex(globPref.language));
+	m_ui->langComboBox->addItem(tr("Use system language"));
+	m_ui->langComboBox->addItem(tr("Czech"));
+	m_ui->langComboBox->addItem(tr("English"));
+	m_ui->langComboBox->setCurrentIndex(
+	    settingsLangtoIndex(globPref.language));
 
 	connect(m_ui->prefButtonBox, SIGNAL(accepted()),
 	    this, SLOT(saveSettings()));
-}
-
-int DlgPreferences::getLangugeIndex(const QString &language)
-{
-	if (Localisation::langCs == language) {
-		return 1;
-	} else if (Localisation::langEn == language) {
-		return 2;
-	} else {
-		return 0;
-	}
-}
-
-const QString &DlgPreferences::getIndexFromLanguge(int index)
-{
-	switch (index) {
-	case 1:
-		return Localisation::langCs;
-		break;
-	case 2:
-		return Localisation::langEn;
-		break;
-	default:
-		return Localisation::langSystem;
-		break;
-	}
 }

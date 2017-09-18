@@ -1850,21 +1850,6 @@ attachment file name (parameter %f is required).</string>
               <bold>false</bold>
              </font>
             </property>
-            <item>
-             <property name="text">
-              <string>Use system language</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Czech</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>English</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item>
