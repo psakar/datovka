@@ -1628,43 +1628,153 @@ into your local database.</source>
 <context>
     <name>DlgMsgSearch</name>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="64"/>
-        <source>Here it is possible to search for messages according to supplied criteria. You can search for messages in selected account or in all accounts. Double clicking on a found message will change focus to the selected message in the application window. Note: You can view additional information when hovering your mouse cursor over the message ID.</source>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="316"/>
+        <source>Here it is possible to search for messages according to supplied criteria. You can search for messages in the selected account or in all accounts. Double clicking on a found message will change focus of the selected message in the main application window. Note: You can view additional information when hovering the mouse cursor over the message ID.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="87"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="337"/>
         <source>Account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="88"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="338"/>
         <source>Message ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="89"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="339"/>
         <source>Subject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="90"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="340"/>
         <source>Sender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="91"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="341"/>
         <source>Recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="92"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="342"/>
         <source>Delivery Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="93"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="343"/>
         <source>Message Type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="20"/>
+        <source>Advanced message search</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="48"/>
+        <source>Current account:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="90"/>
+        <source>Search also in other accounts (can be slow).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="97"/>
+        <source>Message type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="103"/>
+        <source>Received</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="113"/>
+        <source>Sent</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="126"/>
+        <source>Fill in data according to which you want to search:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="136"/>
+        <source>Message ID:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="150"/>
+        <source>Subject:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="174"/>
+        <source>Sender data-box ID:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="191"/>
+        <source>Sender name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="201"/>
+        <source>Our reference number:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="211"/>
+        <source>Our file mark:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="231"/>
+        <source>Recipient name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="245"/>
+        <source>Recipient data-box ID:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="255"/>
+        <source>Your reference number:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="265"/>
+        <source>Your file mark:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="283"/>
+        <source>Address:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="297"/>
+        <source>To hands:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="320"/>
+        <source>Tag text:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="335"/>
+        <source>Too many parameters to search for!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="354"/>
+        <source>Search</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7034,119 +7144,6 @@ the message is considered to be accepted after
     <message>
         <location filename="../src/gui/ui/dlg_view_zfo.ui" line="56"/>
         <source>Verify Signature</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>msgSearchDialog</name>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="20"/>
-        <source>Advanced message search</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="48"/>
-        <source>Current account:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="90"/>
-        <source>Search also in other accounts (can be slow).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="97"/>
-        <source>Message type</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="103"/>
-        <source>Received</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="113"/>
-        <source>Sent</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="126"/>
-        <source>Fill in data according to which you want to search:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="136"/>
-        <source>Message ID:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="150"/>
-        <source>Subject:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="174"/>
-        <source>Sender Databox ID:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="191"/>
-        <source>Sender name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="201"/>
-        <source>Our reference number:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="211"/>
-        <source>Our file mark:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="231"/>
-        <source>Recipient name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="245"/>
-        <source>Recipient Databox ID:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="255"/>
-        <source>Your reference number:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="265"/>
-        <source>Your file mark:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="281"/>
-        <source>Address:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="291"/>
-        <source>To hands:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="312"/>
-        <source>Tag text:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="327"/>
-        <source>Too much parameters for search!</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="346"/>
-        <source>Search</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
