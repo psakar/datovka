@@ -51,14 +51,33 @@ public:
 	~DlgPreferences(void);
 
 private slots:
-	void setActiveTimerSetup(int);
-	void setActiveCheckBox(int);
-	void saveChanges(void) const;
+	/*!
+	 * @brief Enables background download timer settings.
+	 *
+	 * @param[in] checkState Background timer checkbox state.
+	 */
+	void activateBackgroundTimer(int checkState);
+
+	/*!
+	 * @brief Sets path for attachment saving.
+	 */
 	void setSavePath(void);
+
+	/*!
+	 * @brief Sets path for adding attachments.
+	 */
 	void setAddFilePath(void);
 
+	/*!
+	 * @brief Save dialogue content to settings.
+	 */
+	void saveSettings(void) const;
+
 private:
-	void initPrefDialog(void);
+	/*!
+	 * @brief Initialises the dialogue according to settings.
+	 */
+	void initDialogue(void);
 
 	static
 	int getLangugeIndex(const QString &language);

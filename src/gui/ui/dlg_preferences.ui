@@ -989,7 +989,7 @@ Per-account path remembering will be disabled.</string>
              </font>
             </property>
             <property name="text">
-             <string>Path for saving of attachments is currently set on:</string>
+             <string>Path for attachment saving is currently set to:</string>
             </property>
            </widget>
           </item>
@@ -1049,7 +1049,7 @@ Per-account path remembering will be disabled.</string>
              </font>
             </property>
             <property name="text">
-             <string>Path for adding of file to attachments is currently set on:</string>
+             <string>Path for adding files as attachments is currently set to:</string>
             </property>
            </widget>
           </item>
