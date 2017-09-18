@@ -1,4 +1,5 @@
 4.x.y /
+ * Fixed error when address line was counted twice in message search dialogue.
  * Fixed error when import was performed when the import dialogue was cancelled.
  * Fixed memory leaks when calling create account dialogue.
  * Removed potential source of crashes. Using keep-alive task inside change
