@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,21 +21,35 @@
  * the two.
  */
 
-
 #ifndef _DLG_PROXYSETS_H_
 #define _DLG_PROXYSETS_H_
 
 #include <QDialog>
 
 #include "src/settings/proxy.h"
-#include "ui_dlg_proxysets.h"
 
+namespace Ui {
+	class DlgProxysets;
+}
 
-class DlgProxysets : public QDialog, public Ui::Proxysets {
-    Q_OBJECT
+/*!
+ * @brief Proxy settings dialogue.
+ */
+class DlgProxysets : public QDialog {
+	Q_OBJECT
 
 public:
-	DlgProxysets(QWidget *parent = 0);
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent widget.
+	 */
+	explicit DlgProxysets(QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgProxysets(void);
 
 private slots:
 	void showHttpProxyPassword(int state);
@@ -53,7 +67,8 @@ private slots:
 
 private:
 	void loadProxyDialog(const ProxiesSettings &proxySettings);
-};
 
+	Ui::DlgProxysets *m_ui; /*!< UI generated from UI file. */
+};
 
 #endif /* _DLG_PROXYSETS_H_ */
