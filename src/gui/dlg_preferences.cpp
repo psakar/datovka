@@ -123,6 +123,25 @@ void DlgPreferences::initPrefDialog(void)
 		Q_ASSERT(0);
 	}
 
+	/* interface */
+	if (Qt::ToolButtonIconOnly == globPref.toolbar_button_style) {
+		m_ui->toolButtonIconOnly->setChecked(true);
+		m_ui->toolButtonTextBesideIcon->setChecked(false);
+		m_ui->toolButtonTextUnderIcon->setChecked(false);
+	} else if (Qt::ToolButtonTextBesideIcon ==
+	   globPref.toolbar_button_style) {
+		m_ui->toolButtonIconOnly->setChecked(false);
+		m_ui->toolButtonTextBesideIcon->setChecked(true);
+		m_ui->toolButtonTextUnderIcon->setChecked(false);
+	} else if (Qt::ToolButtonTextUnderIcon ==
+	    globPref.toolbar_button_style) {
+		m_ui->toolButtonIconOnly->setChecked(false);
+		m_ui->toolButtonTextBesideIcon->setChecked(false);
+		m_ui->toolButtonTextUnderIcon->setChecked(true);
+	} else {
+		Q_ASSERT(0);
+	}
+
 	/* .. */
 	m_ui->language->setCurrentIndex(getLangugeIndex(globPref.language));
 	m_ui->enableGlobalPaths->setChecked(globPref.use_global_paths);
@@ -155,24 +174,6 @@ void DlgPreferences::initPrefDialog(void)
 	    this, SLOT(setAddFilePath()));
 	connect(m_ui->prefButtonBox, SIGNAL(accepted()),
 	    this, SLOT(saveChanges(void)));
-
-	if (Qt::ToolButtonIconOnly == globPref.toolbar_button_style) {
-		m_ui->rToolButtonIconOnly->setChecked(true);
-		m_ui->rToolButtonTextBesideIcon->setChecked(false);
-		m_ui->rToolButtonTextUnderIcon->setChecked(false);
-	} else if (Qt::ToolButtonTextBesideIcon ==
-	   globPref.toolbar_button_style) {
-		m_ui->rToolButtonIconOnly->setChecked(false);
-		m_ui->rToolButtonTextBesideIcon->setChecked(true);
-		m_ui->rToolButtonTextUnderIcon->setChecked(false);
-	} else if (Qt::ToolButtonTextUnderIcon ==
-	    globPref.toolbar_button_style) {
-		m_ui->rToolButtonIconOnly->setChecked(false);
-		m_ui->rToolButtonTextBesideIcon->setChecked(false);
-		m_ui->rToolButtonTextUnderIcon->setChecked(true);
-	} else {
-		Q_ASSERT(0);
-	}
 }
 
 int DlgPreferences::getLangugeIndex(const QString &language)
@@ -281,17 +282,18 @@ void DlgPreferences::saveChanges(void) const
 		globPref.after_start_select = GlobPreferences::SELECT_NOTHING;
 	}
 
-	/* ... */
-	globPref.language = getIndexFromLanguge(m_ui->language->currentIndex());
-
-	if (m_ui->rToolButtonIconOnly->isChecked()) {
+	/* interface */
+	if (m_ui->toolButtonIconOnly->isChecked()) {
 		globPref.toolbar_button_style = Qt::ToolButtonIconOnly;
-	} else if (m_ui->rToolButtonTextBesideIcon->isChecked()) {
+	} else if (m_ui->toolButtonTextBesideIcon->isChecked()) {
 		globPref.toolbar_button_style =
 		    Qt::ToolButtonTextBesideIcon;
 	} else {
 		globPref.toolbar_button_style = Qt::ToolButtonTextUnderIcon;
 	}
+
+	/* ... */
+	globPref.language = getIndexFromLanguge(m_ui->language->currentIndex());
 
 	globPref.use_global_paths = m_ui->enableGlobalPaths->isChecked();
 	globPref.save_attachments_path = m_ui->savePath->text();
