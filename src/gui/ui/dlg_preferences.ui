@@ -775,7 +775,7 @@ of timestamp will be message included in the check results.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
-           <widget class="QRadioButton" name="after_start_select_1">
+           <widget class="QRadioButton" name="afterStartSelectNewest">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -795,7 +795,7 @@ the newest message will be activated.</string>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="after_start_select_2">
+           <widget class="QRadioButton" name="afterStartSelectLast">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -812,7 +812,7 @@ displayed in this account will be selected.</string>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="after_start_select_3">
+           <widget class="QRadioButton" name="afterStartSelectNothing">
             <property name="font">
              <font>
               <weight>50</weight>

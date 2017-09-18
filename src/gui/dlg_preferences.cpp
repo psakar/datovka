@@ -104,6 +104,25 @@ void DlgPreferences::initPrefDialog(void)
 	m_ui->timestampExpirSpinBox->setValue(
 	    globPref.timestamp_expir_before_days);
 
+	/* navigation */
+	if (GlobPreferences::SELECT_NEWEST == globPref.after_start_select) {
+		m_ui->afterStartSelectNewest->setChecked(true);
+		m_ui->afterStartSelectLast->setChecked(false);
+		m_ui->afterStartSelectNothing->setChecked(false);
+	} else if (GlobPreferences::SELECT_LAST_VISITED ==
+	   globPref.after_start_select) {
+		m_ui->afterStartSelectNewest->setChecked(false);
+		m_ui->afterStartSelectLast->setChecked(true);
+		m_ui->afterStartSelectNothing->setChecked(false);
+	} else if (GlobPreferences::SELECT_NOTHING ==
+	    globPref.after_start_select) {
+		m_ui->afterStartSelectNewest->setChecked(false);
+		m_ui->afterStartSelectLast->setChecked(false);
+		m_ui->afterStartSelectNothing->setChecked(true);
+	} else {
+		Q_ASSERT(0);
+	}
+
 	/* .. */
 	m_ui->language->setCurrentIndex(getLangugeIndex(globPref.language));
 	m_ui->enableGlobalPaths->setChecked(globPref.use_global_paths);
@@ -151,24 +170,6 @@ void DlgPreferences::initPrefDialog(void)
 		m_ui->rToolButtonIconOnly->setChecked(false);
 		m_ui->rToolButtonTextBesideIcon->setChecked(false);
 		m_ui->rToolButtonTextUnderIcon->setChecked(true);
-	} else {
-		Q_ASSERT(0);
-	}
-
-	if (GlobPreferences::SELECT_NEWEST == globPref.after_start_select) {
-		m_ui->after_start_select_1->setChecked(true);
-		m_ui->after_start_select_2->setChecked(false);
-		m_ui->after_start_select_3->setChecked(false);
-	} else if (GlobPreferences::SELECT_LAST_VISITED ==
-	   globPref.after_start_select) {
-		m_ui->after_start_select_1->setChecked(false);
-		m_ui->after_start_select_2->setChecked(true);
-		m_ui->after_start_select_3->setChecked(false);
-	} else if (GlobPreferences::SELECT_NOTHING ==
-	    globPref.after_start_select) {
-		m_ui->after_start_select_1->setChecked(false);
-		m_ui->after_start_select_2->setChecked(false);
-		m_ui->after_start_select_3->setChecked(true);
 	} else {
 		Q_ASSERT(0);
 	}
@@ -270,16 +271,18 @@ void DlgPreferences::saveChanges(void) const
 	globPref.timestamp_expir_before_days =
 	    m_ui->timestampExpirSpinBox->value();
 
-	/* ... */
-	globPref.language = getIndexFromLanguge(m_ui->language->currentIndex());
-	if (m_ui->after_start_select_1->isChecked()) {
+	/* navigation */
+	if (m_ui->afterStartSelectNewest->isChecked()) {
 		globPref.after_start_select = GlobPreferences::SELECT_NEWEST;
-	} else if (m_ui->after_start_select_2->isChecked()) {
+	} else if (m_ui->afterStartSelectLast->isChecked()) {
 		globPref.after_start_select =
 		    GlobPreferences::SELECT_LAST_VISITED;
 	} else {
 		globPref.after_start_select = GlobPreferences::SELECT_NOTHING;
 	}
+
+	/* ... */
+	globPref.language = getIndexFromLanguge(m_ui->language->currentIndex());
 
 	if (m_ui->rToolButtonIconOnly->isChecked()) {
 		globPref.toolbar_button_style = Qt::ToolButtonIconOnly;
