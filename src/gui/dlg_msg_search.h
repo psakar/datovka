@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,46 +21,108 @@
  * the two.
  */
 
-
 #ifndef _DLG_MSG_SEARCH_H_
 #define _DLG_MSG_SEARCH_H_
-
 
 #include <QDialog>
 
 #include "src/io/message_db_set.h"
-#include "ui_dlg_msg_search.h"
 
+namespace Ui {
+	class DlgMsgSearch;
+}
 
-/* tooltip is generated for every item in the search result table */
-#define ENABLE_TOOLTIP 1
-
-class DlgMsgSearch : public QDialog, public Ui::msgSearchDialog {
+/*!
+ * @brief Message search dialogue.
+ */
+class DlgMsgSearch : public QDialog {
 	Q_OBJECT
 
 public:
-	DlgMsgSearch(const QList< QPair<QString, MessageDbSet *> > messageDbSetList,
-	    const QString &userName, QWidget *parent = 0,
-	    Qt::WindowFlags f = 0);
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] msgSetEntryList List of username and database set pairs.
+	 * @param[in] userName Username.
+	 * @param[in] parent Parent widget.
+	 * @param[in] flags Window flags.
+	 */
+	DlgMsgSearch(
+	    const QList< QPair<QString, MessageDbSet *> > msgSetEntryList,
+	    const QString &userName, QWidget *parent = Q_NULLPTR,
+	    Qt::WindowFlags flags = Qt::WindowFlags());
+
+	/*!
+	 * @brief Destructor.
+	 */
+	virtual
+	~DlgMsgSearch(void);
 
 private slots:
+	/*!
+	 * @brief Check dialogue elements and enable/disable the search button.
+	 */
 	void checkInputFields(void);
-	void searchMessages(void);
+
+	/*!
+	 * @brief Set first column with checkbox active if item was changed.
+	 */
 	void setFirtsColumnActive(void);
-	void getSelectedMsg(int row, int column);
+
+	/*!
+	 * @brief Emit ID of message entry.
+	 *
+	 * @param[in] row Message entry row.
+	 * @param[in] col Message entry column.
+	 */
+	void getSelectedMsg(int row, int col);
+
+	/*!
+	 * @brief Collects data from dialogue and searches for messages
+	 */
+	void searchMessages(void);
 
 signals:
-	void focusSelectedMsg(QString, qint64, QString, int);
+	/*!
+	 * @brief Signals that a message was selected should be focused
+	 *     elsewhere.
+	 *
+	 * @param[in] username Username identifying an account.
+	 * @param[in] dmId Message identifier.
+	 * @param[in] year Message delivery year.
+	 * @param[in] msgType Message type.
+	 */
+	void focusSelectedMsg(QString username, qint64 dmId, QString year,
+	    int msgType);
 
 private:
-	const QList< QPair<QString, MessageDbSet *> > m_messageDbSetList;
-	const QString m_userName;
+	/*!
+	 * @brief Initialise message search dialogue.
+	 *
+	 * @param[in] username Account username.
+	 */
+	void initSearchWindow(const QString &username);
 
-	void initSearchWindow(void);
-	int howManyFieldsAreFilledWithoutTag(void);
+	/*!
+	 * @brief Computes filled-in fields except the tag field.
+	 *
+	 * @return Number of filled-in fields except the tag field.
+	 */
+	int filledInExceptTags(void) const;
+
+	/*!
+	 * @brief Append message list to result table.
+	 *
+	 * @param[in] msgSetEntry Pair of username and related database set.
+	 * @param[in] msgDataList Message data list.
+	 */
 	void appendMsgsToTable(
-	    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
+	    const QPair<QString, MessageDbSet *> &msgSetEntry,
 	    const QList<MessageDb::SoughtMsg> &msgDataList);
+
+	Ui::DlgMsgSearch *m_ui; /*!< UI generated from UI file. */
+
+	const QList< QPair<QString, MessageDbSet *> > m_msgSetEntryList; /*!< Usernames and database sets. */
 };
 
 #endif /* _DLG_MSG_SEARCH_H_ */

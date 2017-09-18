@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>msgSearchDialog</class>
- <widget class="QDialog" name="msgSearchDialog">
+ <class>DlgMsgSearch</class>
+ <widget class="QDialog" name="DlgMsgSearch">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -50,7 +50,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="currentAccountName">
+      <widget class="QLabel" name="crntAcntNameLabel">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -98,7 +98,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
-       <widget class="QCheckBox" name="searchReceivedMsgCheckBox">
+       <widget class="QCheckBox" name="searchRcvdMsgCheckBox">
         <property name="text">
          <string>Received</string>
         </property>
@@ -108,7 +108,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="searchSentMsgCheckBox">
+       <widget class="QCheckBox" name="searchSntMsgCheckBox">
         <property name="text">
          <string>Sent</string>
         </property>
@@ -131,28 +131,28 @@
         <item>
          <layout class="QFormLayout" name="formLayout_5">
           <item row="0" column="0">
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="msgIdLabel">
             <property name="text">
              <string>Message ID:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="messageIdLineEdit"/>
+           <widget class="QLineEdit" name="msgIdLine"/>
           </item>
          </layout>
         </item>
         <item>
          <layout class="QFormLayout" name="formLayout_2">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="subjectLabel">
             <property name="text">
              <string>Subject:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="subjectLineEdit"/>
+           <widget class="QLineEdit" name="subjectLine"/>
           </item>
          </layout>
         </item>
@@ -169,14 +169,14 @@
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
           <item row="0" column="0">
-           <widget class="QLabel" name="senderDbIdLabel">
+           <widget class="QLabel" name="sndrBoxIdLabel">
             <property name="text">
-             <string>Sender Databox ID:</string>
+             <string>Sender data-box ID:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="senderDbIdLineEdit">
+           <widget class="QLineEdit" name="sndrBoxIdLine">
             <property name="text">
              <string/>
             </property>
@@ -186,34 +186,34 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="senderNameLabel">
+           <widget class="QLabel" name="sndrNameLabel">
             <property name="text">
              <string>Sender name:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="senderNameLineEdit"/>
+           <widget class="QLineEdit" name="sndrNameLine"/>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_6">
+           <widget class="QLabel" name="sndrRefNumLabel">
             <property name="text">
              <string>Our reference number:</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="senderRefNumLineEdit"/>
+           <widget class="QLineEdit" name="sndrRefNumLine"/>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_9">
+           <widget class="QLabel" name="sndrFileMarkLabel">
             <property name="text">
              <string>Our file mark:</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QLineEdit" name="senderFileMarkLineEdit"/>
+           <widget class="QLineEdit" name="sndrFileMarkLine"/>
           </item>
          </layout>
         </item>
@@ -226,48 +226,48 @@
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
           <item row="1" column="0">
-           <widget class="QLabel" name="recipientNameLineLabel">
+           <widget class="QLabel" name="rcpntNameLabel">
             <property name="text">
              <string>Recipient name:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="recipientDbIdLineEdit">
+           <widget class="QLineEdit" name="rcpntBoxIdLine">
             <property name="maxLength">
              <number>7</number>
             </property>
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="recipientDbIdLabel">
+           <widget class="QLabel" name="rcpntBoxIdLabel">
             <property name="text">
-             <string>Recipient Databox ID:</string>
+             <string>Recipient data-box ID:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLineEdit" name="recipientNameLineEdit"/>
+           <widget class="QLineEdit" name="rcpntNameLine"/>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_7">
+           <widget class="QLabel" name="rcpntRefNumLabel">
             <property name="text">
              <string>Your reference number:</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QLineEdit" name="recipientRefNumLineEdit"/>
+           <widget class="QLineEdit" name="rcpntRefNumLine"/>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_10">
+           <widget class="QLabel" name="rcpntFileMarkLabel">
             <property name="text">
              <string>Your file mark:</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QLineEdit" name="recipientFileMarkLineEdit"/>
+           <widget class="QLineEdit" name="rcpntFileMarkLine"/>
           </item>
          </layout>
         </item>
@@ -276,24 +276,32 @@
       <item>
        <layout class="QHBoxLayout" name="h3">
         <item>
-         <widget class="QLabel" name="label_12">
-          <property name="text">
-           <string>Address:</string>
-          </property>
-         </widget>
+         <layout class="QFormLayout" name="formLayout_4">
+          <item row="0" column="0">
+           <widget class="QLabel" name="addressLabel">
+            <property name="text">
+             <string>Address:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="addressLine"/>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QLineEdit" name="addressLineEdit"/>
-        </item>
-        <item>
-         <widget class="QLabel" name="label_11">
-          <property name="text">
-           <string>To hands:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="toHandsLineEdit"/>
+         <layout class="QFormLayout" name="formLayout_7">
+          <item row="0" column="0">
+           <widget class="QLabel" name="toHandsLabel">
+            <property name="text">
+             <string>To hands:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="toHandsLine"/>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -307,24 +315,24 @@
       <item>
        <layout class="QHBoxLayout" name="h4">
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="tagLabel">
           <property name="text">
            <string>Tag text:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="tagLineEdit"/>
+         <widget class="QLineEdit" name="tagLine"/>
         </item>
        </layout>
       </item>
       <item>
-       <widget class="QLabel" name="tooMuchFields">
+       <widget class="QLabel" name="tooManyFields">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="text">
-         <string>Too much parameters for search!</string>
+         <string>Too many parameters to search for!</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -417,7 +425,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>msgSearchDialog</receiver>
+   <receiver>DlgMsgSearch</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -433,7 +441,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>msgSearchDialog</receiver>
+   <receiver>DlgMsgSearch</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -21,13 +21,13 @@
  * the two.
  */
 
-#include "src/common.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/io/message_db.h"
 #include "src/io/tag_db.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/views/table_home_end_filter.h"
+#include "ui_dlg_msg_search.h"
 
 #define COL_USER_NAME 0
 #define COL_MESSAGE_ID 1
@@ -37,527 +37,447 @@
 #define COL_SENDER 5
 #define COL_RECIPIENT 6
 
+/* Tooltip is generated for every item in the search result table. */
+#define ENABLE_TOOLTIP 1
+
+#define BOX_ID_LEN 7
+
 DlgMsgSearch::DlgMsgSearch(
-    const QList< QPair <QString, MessageDbSet *> > messageDbSetList,
-    const QString &userName,
-    QWidget *parent, Qt::WindowFlags f)
-    : QDialog(parent, f),
-    m_messageDbSetList(messageDbSetList),
-    m_userName(userName)
+    const QList< QPair <QString, MessageDbSet *> > msgSetEntryList,
+    const QString &userName, QWidget *parent, Qt::WindowFlags flags)
+    : QDialog(parent, flags),
+    m_ui(new (std::nothrow) Ui::DlgMsgSearch),
+    m_msgSetEntryList(msgSetEntryList)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+
 	/* Set default line height for table views/widgets. */
-	resultsTableWidget->setNarrowedLineHeight();
+	m_ui->resultsTableWidget->setNarrowedLineHeight();
 
-	initSearchWindow();
+	initSearchWindow(userName);
 }
 
-
-/* ========================================================================= */
-/*
- * Init message search dialog
- */
-void DlgMsgSearch::initSearchWindow(void)
-/* ========================================================================= */
+DlgMsgSearch::~DlgMsgSearch(void)
 {
-	this->infoTextLabel->setText(
-	   tr("Here it is possible to search for messages according to "
-	   "supplied criteria. You can search for messages in selected "
-	   "account or in all accounts. Double clicking on a found message "
-	   "will change focus to the selected message in the application "
-	   "window. Note: You can view additional information when hovering "
-	   "your mouse cursor over the message ID."));
-
-	Q_ASSERT(!m_userName.isEmpty());
-
-	/* set account name and user name to label */
-	QString accountName = globAccounts[m_userName].accountName() + " (" +
-	    m_userName + ")";
-	this->currentAccountName->setText(accountName);
-
-	this->tooMuchFields->setStyleSheet("QLabel { color: red }");
-	this->tooMuchFields->hide();
-
-	/* is only one account available */
-	if (m_messageDbSetList.count() <= 1) {
-		this->searchAllAcntCheckBox->setEnabled(false);
-	}
-
-	this->resultsTableWidget->setColumnCount(7);
-	this->resultsTableWidget->setHorizontalHeaderItem(COL_USER_NAME, new QTableWidgetItem(tr("Account")));
-	this->resultsTableWidget->setHorizontalHeaderItem(COL_MESSAGE_ID, new QTableWidgetItem(tr("Message ID")));
-	this->resultsTableWidget->setHorizontalHeaderItem(COL_ANNOTATION, new QTableWidgetItem(tr("Subject")));
-	this->resultsTableWidget->setHorizontalHeaderItem(COL_SENDER, new QTableWidgetItem(tr("Sender")));
-	this->resultsTableWidget->setHorizontalHeaderItem(COL_RECIPIENT, new QTableWidgetItem(tr("Recipient")));
-	this->resultsTableWidget->setHorizontalHeaderItem(COL_DELIVERY_YEAR, new QTableWidgetItem(tr("Delivery Year")));
-	this->resultsTableWidget->setHorizontalHeaderItem(COL_MESSAGE_TYPE, new QTableWidgetItem(tr("Message Type")));
-
-	/* Hide column with delivery time and message type. */
-	this->resultsTableWidget->setColumnHidden(COL_DELIVERY_YEAR, true);
-	this->resultsTableWidget->setColumnHidden(COL_MESSAGE_TYPE, true);
-
-	connect(this->searchReceivedMsgCheckBox, SIGNAL(clicked()),
-	    this, SLOT(checkInputFields()));
-	connect(this->searchSentMsgCheckBox, SIGNAL(clicked()),
-	    this, SLOT(checkInputFields()));
-	connect(this->messageIdLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->senderDbIdLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->senderNameLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->recipientDbIdLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->recipientNameLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->subjectLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->toHandsLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->addressLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->senderRefNumLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->senderFileMarkLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->recipientRefNumLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->recipientFileMarkLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->tagLineEdit, SIGNAL(textChanged(QString)),
-	    this, SLOT(checkInputFields()));
-	connect(this->searchPushButton, SIGNAL(clicked()), this,
-	    SLOT(searchMessages()));
-	connect(this->resultsTableWidget,
-	    SIGNAL(itemSelectionChanged()), this,
-	    SLOT(setFirtsColumnActive()));
-	connect(this->resultsTableWidget,
-	    SIGNAL(cellDoubleClicked(int,int)), this,
-	    SLOT(getSelectedMsg(int, int)));
-
-	this->resultsTableWidget->
-	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-	this->resultsTableWidget->installEventFilter(
-	    new TableHomeEndFilter(this));
+	delete m_ui;
 }
 
-
-/* ========================================================================= */
-/*
- * Check dialogue elements and set search button enable/disable
- */
 void DlgMsgSearch::checkInputFields(void)
-/* ========================================================================= */
 {
-	//debugSlotCall();
-
 	bool isAnyMsgTypeChecked = true;
 
-	this->searchPushButton->setEnabled(false);
-	this->tooMuchFields->hide();
+	m_ui->searchPushButton->setEnabled(false);
+	m_ui->tooManyFields->hide();
 
 	/* is any message type checked? */
-	if (!this->searchReceivedMsgCheckBox->isChecked() &&
-	    !this->searchSentMsgCheckBox->isChecked()) {
+	if (!m_ui->searchRcvdMsgCheckBox->isChecked() &&
+	    !m_ui->searchSntMsgCheckBox->isChecked()) {
 		isAnyMsgTypeChecked = false;
 	}
 
-	/* search via message ID */
-	if (!this->messageIdLineEdit->text().isEmpty()) {
-		this->subjectLineEdit->setEnabled(false);
-		this->senderDbIdLineEdit->setEnabled(false);
-		this->senderNameLineEdit->setEnabled(false);
-		this->senderRefNumLineEdit->setEnabled(false);
-		this->senderFileMarkLineEdit->setEnabled(false);
-		this->recipientDbIdLineEdit->setEnabled(false);
-		this->recipientNameLineEdit->setEnabled(false);
-		this->recipientRefNumLineEdit->setEnabled(false);
-		this->recipientFileMarkLineEdit->setEnabled(false);
-		this->addressLineEdit->setEnabled(false);
-		this->toHandsLineEdit->setEnabled(false);
-		this->tagLineEdit->setEnabled(false);
-		this->tagLineEdit->clear();
-		goto finish;
+	const bool msgIdMissing = m_ui->msgIdLine->text().isEmpty();
+
+	m_ui->subjectLine->setEnabled(msgIdMissing);
+	m_ui->sndrBoxIdLine->setEnabled(msgIdMissing);
+	m_ui->sndrNameLine->setEnabled(msgIdMissing);
+	m_ui->sndrRefNumLine->setEnabled(msgIdMissing);
+	m_ui->sndrFileMarkLine->setEnabled(msgIdMissing);
+	m_ui->rcpntBoxIdLine->setEnabled(msgIdMissing);
+	m_ui->rcpntNameLine->setEnabled(msgIdMissing);
+	m_ui->rcpntRefNumLine->setEnabled(msgIdMissing);
+	m_ui->rcpntFileMarkLine->setEnabled(msgIdMissing);
+	m_ui->addressLine->setEnabled(msgIdMissing);
+	m_ui->toHandsLine->setEnabled(msgIdMissing);
+	m_ui->tagLine->setEnabled(msgIdMissing);
+
+	if (!msgIdMissing) {
+		/* Search via message ID. */
+		m_ui->tagLine->clear();
 	} else {
-		this->subjectLineEdit->setEnabled(true);
-		this->senderDbIdLineEdit->setEnabled(true);
-		this->senderNameLineEdit->setEnabled(true);
-		this->senderRefNumLineEdit->setEnabled(true);
-		this->senderFileMarkLineEdit->setEnabled(true);
-		this->recipientDbIdLineEdit->setEnabled(true);
-		this->recipientNameLineEdit->setEnabled(true);
-		this->recipientRefNumLineEdit->setEnabled(true);
-		this->recipientFileMarkLineEdit->setEnabled(true);
-		this->addressLineEdit->setEnabled(true);
-		this->toHandsLineEdit->setEnabled(true);
-		this->tagLineEdit->setEnabled(true);
+		/* Use either sender box ID or sender name for searching. */
+		m_ui->sndrBoxIdLine->setEnabled(m_ui->sndrNameLine->text().isEmpty());
+		m_ui->sndrNameLine->setEnabled(m_ui->sndrBoxIdLine->text().isEmpty());
+
+		/* Use either recipient box ID or recipient name for searching. */
+		m_ui->rcpntBoxIdLine->setEnabled(m_ui->rcpntNameLine->text().isEmpty());
+		m_ui->rcpntNameLine->setEnabled(m_ui->rcpntBoxIdLine->text().isEmpty());
 	}
 
-	/* search via sender databox ID */
-	if (!this->senderDbIdLineEdit->text().isEmpty()) {
-		this->senderDbIdLineEdit->setEnabled(true);
-		this->senderNameLineEdit->setEnabled(false);
-	} else if (!this->senderNameLineEdit->text().isEmpty()){
-		this->senderDbIdLineEdit->setEnabled(false);
-		this->senderNameLineEdit->setEnabled(true);
-	} else {
-		this->senderNameLineEdit->setEnabled(true);
-		this->senderDbIdLineEdit->setEnabled(true);
-	}
-
-	/* search via recipient databox ID */
-	if (!this->recipientDbIdLineEdit->text().isEmpty()) {
-		this->recipientDbIdLineEdit->setEnabled(true);
-		this->recipientNameLineEdit->setEnabled(false);
-	} else if (!this->recipientNameLineEdit->text().isEmpty()){
-		this->recipientDbIdLineEdit->setEnabled(false);
-		this->recipientNameLineEdit->setEnabled(true);
-	} else {
-		this->recipientNameLineEdit->setEnabled(true);
-		this->recipientDbIdLineEdit->setEnabled(true);
-	}
-
-finish:
-	/* search by message ID only */
-	if (!this->messageIdLineEdit->text().isEmpty()) {
-		/* test if message ID is number */
-		QRegExp re("\\d*");  // a digit (\d), zero or more times (*)
-		/* test if message is fill and message ID > 3 chars */
-		if (isAnyMsgTypeChecked &&
-		    (re.exactMatch(this->messageIdLineEdit->text())) &&
-		    this->messageIdLineEdit->text().size() > 2) {
-			this->searchPushButton->setEnabled(true);
-		} else {
-			this->searchPushButton->setEnabled(false);
-
-		}
+	/* Search using message ID only. */
+	if (!msgIdMissing) {
+		/* Test if message ID to be a number. */
+		QRegExp re("\\d*"); /* A digit (\d), zero or more times (*). */
+		/* Test whether message ID is at least 3 characters. */
+		m_ui->searchPushButton->setEnabled(isAnyMsgTypeChecked &&
+		    re.exactMatch(m_ui->msgIdLine->text()) &&
+		    (m_ui->msgIdLine->text().size() > 2));
 		return;
 	}
 
-	/* search by text of tags */
-	bool isTagCorrect = true;
-	if (!(this->tagLineEdit->text().isEmpty()) &&
-	    (this->tagLineEdit->text().length() <= 2)) {
-		isTagCorrect = false;
-	}
+	/* Search according to supplied tag text. */
+	const bool tagCorrect = m_ui->tagLine->text().isEmpty() ||
+	    (m_ui->tagLine->text().length() > 2);
 
-	bool isDbIdCorrect = true;
-	/* databox ID must have 7 chars */
-	if (!this->senderDbIdLineEdit->text().isEmpty() &&
-	    this->senderDbIdLineEdit->text().size() != 7) {
-			isDbIdCorrect = false;
-	}
-	/* databox ID must have 7 chars */
-	if (!this->recipientDbIdLineEdit->text().isEmpty() &&
-	    this->recipientDbIdLineEdit->text().size() != 7) {
-			isDbIdCorrect = false;
-	}
+	/* Data-box ID must have 7 characters. */
+	const bool boxIdCorrect =
+	    (m_ui->sndrBoxIdLine->text().isEmpty() ||
+	     (m_ui->sndrBoxIdLine->text().size() == BOX_ID_LEN)) &&
+	    (m_ui->rcpntBoxIdLine->text().isEmpty() ||
+	     (m_ui->rcpntBoxIdLine->text().size() == BOX_ID_LEN));
 
 	/* only 3 fields can be set together */
 	bool isNotFillManyFileds = true;
 
-	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
+	const int itemsWithoutTag = filledInExceptTags();
 	if (itemsWithoutTag > 3) {
 		isNotFillManyFileds = false;
-		this->tooMuchFields->show();
-	} else if (itemsWithoutTag < 1 &&  this->tagLineEdit->text().isEmpty()) {
+		m_ui->tooManyFields->show();
+	} else if ((itemsWithoutTag < 1) && m_ui->tagLine->text().isEmpty()) {
 		isNotFillManyFileds = false;
 	}
 
-	this->searchPushButton->setEnabled(isAnyMsgTypeChecked &&
-	    isDbIdCorrect && isTagCorrect && isNotFillManyFileds);
+	m_ui->searchPushButton->setEnabled(isAnyMsgTypeChecked &&
+	    boxIdCorrect && tagCorrect && isNotFillManyFileds);
 }
 
+void DlgMsgSearch::setFirtsColumnActive(void)
+{
+	m_ui->resultsTableWidget->selectColumn(0);
+	m_ui->resultsTableWidget->selectRow(
+	    m_ui->resultsTableWidget->currentRow());
+}
 
-/* ========================================================================= */
-/*
- * Detect, how many search fileds are filled
+void DlgMsgSearch::getSelectedMsg(int row, int col)
+{
+	Q_UNUSED(col);
+	emit focusSelectedMsg(
+	    m_ui->resultsTableWidget->item(row, COL_USER_NAME)->text(),
+	    m_ui->resultsTableWidget->item(row, COL_MESSAGE_ID)->text().toLongLong(),
+	    m_ui->resultsTableWidget->item(row, COL_DELIVERY_YEAR)->text(),
+	    m_ui->resultsTableWidget->item(row, COL_MESSAGE_TYPE)->text().toInt());
+	/* Don't close the dialogue. */
+}
+
+/*!
+ * @brief Computes intersection between tag and envelope search result data.
+ *
+ * @param[in] envelData Envelope search result data.
+ * @param[in] tagData Tag search data.
+ * @param[in] msgSetEntry Username and database set pair.
+ * @return Intersection data.
  */
-int DlgMsgSearch::howManyFieldsAreFilledWithoutTag(void)
-/* ========================================================================= */
+static
+QList<MessageDb::SoughtMsg> dataIntersect(
+    const QList<MessageDb::SoughtMsg> &envelData, const QList<qint64> &tagData,
+    const QPair<QString, MessageDbSet *> &msgSetEntry)
+{
+	QList<MessageDb::SoughtMsg> result;
+
+	foreach (const qint64 msgId, tagData) {
+		foreach (const MessageDb::SoughtMsg msg, envelData) {
+			if (msg.mId.dmId == msgId) {
+				MessageDb::SoughtMsg msgData(
+				    msgSetEntry.second->msgsGetMsgDataFromId(msgId));
+				if (msgData.mId.dmId != -1) {
+					result.append(msgData);
+				}
+			}
+		}
+	}
+
+	return result;
+}
+
+/*!
+ * @brief Obtains data from databases that match found tag data.
+ *
+ * @param[in] tagData Tag search data.
+ * @param[in] msgSetEntry Username and database set pair.
+ * @return Message data.
+ */
+static
+QList<MessageDb::SoughtMsg> displayableTagData(const QList<qint64> &tagData,
+    const QPair<QString, MessageDbSet *> &msgSetEntry)
+{
+	QList<MessageDb::SoughtMsg> result;
+
+	foreach (const qint64 msgId, tagData) {
+		MessageDb::SoughtMsg msgData(
+		    msgSetEntry.second->msgsGetMsgDataFromId(msgId));
+
+		if (msgData.mId.dmId != -1) {
+			result.append(msgData);
+		}
+	}
+
+	return result;
+}
+
+void DlgMsgSearch::searchMessages(void)
+{
+	debugSlotCall();
+
+	m_ui->resultsTableWidget->setRowCount(0);
+	m_ui->resultsTableWidget->setEnabled(false);
+
+	/* Message envelope search results. */
+	QList<MessageDb::SoughtMsg> envelResults;
+
+	/* Tag search result. */
+	QList<qint64> tagResults;
+
+	/* Displayed results. */
+	QList<MessageDb::SoughtMsg> resultsToBeDisplayed;
+
+	/* Types of messages to search for. */
+	enum MessageDirection msgType = MSG_ALL;
+	if (m_ui->searchRcvdMsgCheckBox->isChecked() &&
+	    m_ui->searchSntMsgCheckBox->isChecked()) {
+		msgType = MSG_ALL;
+	} else if (m_ui->searchRcvdMsgCheckBox->isChecked()) {
+		msgType = MSG_RECEIVED;
+	} else if (m_ui->searchSntMsgCheckBox->isChecked()) {
+		msgType = MSG_SENT;
+	}
+
+	/* If tag data were supplied, get message ids from tag table. */
+	const bool searchTags = !m_ui->tagLine->text().isEmpty();
+	if (searchTags) {
+		tagResults = globTagDbPtr->getMsgIdsContainSearchTagText(
+		    m_ui->tagLine->text());
+	}
+
+	/* Number of accounts in which to search for messages in. */
+	const int dbCount = m_ui->searchAllAcntCheckBox->isChecked() ?
+	    m_msgSetEntryList.count() : 1;
+
+	/* How many envelope fields (without tags) are supplied. */
+	const int envelopeItems = filledInExceptTags();
+
+	/* Search in accounts. */
+	for (int i = 0; i < dbCount; ++i) {
+		const QPair<QString, MessageDbSet *> &msgSetEntry(
+		    m_msgSetEntryList.at(i));
+
+		envelResults.clear();
+		resultsToBeDisplayed.clear();
+
+		if (envelopeItems > 0) {
+			/* Search in envelope envelope data. */
+			envelResults =
+			    msgSetEntry.second->msgsAdvancedSearchMessageEnvelope(
+			        m_ui->msgIdLine->text().isEmpty() ? -1 :
+			            m_ui->msgIdLine->text().toLongLong(),
+			        m_ui->subjectLine->text(),
+			        m_ui->sndrBoxIdLine->text(),
+			        m_ui->sndrNameLine->text(),
+			        m_ui->addressLine->text(),
+			        m_ui->rcpntBoxIdLine->text(),
+			        m_ui->rcpntNameLine->text(),
+			        m_ui->sndrRefNumLine->text(),
+			        m_ui->sndrFileMarkLine->text(),
+			        m_ui->rcpntRefNumLine->text(),
+			        m_ui->rcpntFileMarkLine->text(),
+			        m_ui->toHandsLine->text(),
+			        QString(), QString(), msgType);
+		}
+
+		if (searchTags && !tagResults.isEmpty() && !envelResults.isEmpty()) {
+			/*
+			 * Tag data were supplied and some envelope data also.
+			 * Intersection of tag and envelope search results is
+			 * needed.
+			 */
+			resultsToBeDisplayed = dataIntersect(envelResults,
+			    tagResults, msgSetEntry);
+		} else if (!searchTags && !envelResults.isEmpty()) {
+			/*
+			 * No tag data were supplied. Envelope were supplied.
+			 * Use envelope search results only.
+			 */
+			resultsToBeDisplayed = envelResults;
+		} else if (searchTags && !tagResults.isEmpty()) {
+			/*
+			 * Only tag tag data were supplied.
+			 * Convert tag results into displayable form.
+			 */
+			resultsToBeDisplayed = displayableTagData(tagResults,
+			    msgSetEntry);
+		}
+
+		if (!resultsToBeDisplayed.isEmpty()) {
+			appendMsgsToTable(msgSetEntry, resultsToBeDisplayed);
+		}
+	}
+}
+
+void DlgMsgSearch::initSearchWindow(const QString &username)
+{
+	m_ui->infoTextLabel->setText(tr(
+	    "Here it is possible to search for messages according to supplied criteria. "
+	    "You can search for messages in the selected account or in all accounts. "
+	    "Double clicking on a found message will change focus of the selected message in the main application window. "
+	    "Note: You can view additional information when hovering the mouse cursor over the message ID."));
+
+	Q_ASSERT(!username.isEmpty());
+
+	/* Set account name and user name to label. */
+	m_ui->crntAcntNameLabel->setText(globAccounts[username].accountName() +
+	    " (" + username + ")");
+
+	/* Only one account available. */
+	if (m_msgSetEntryList.count() <= 1) {
+		m_ui->searchAllAcntCheckBox->setEnabled(false);
+	}
+
+	m_ui->tooManyFields->setStyleSheet("QLabel { color: red }");
+	m_ui->tooManyFields->hide();
+
+	m_ui->resultsTableWidget->setColumnCount(7);
+	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_USER_NAME, new QTableWidgetItem(tr("Account")));
+	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_MESSAGE_ID, new QTableWidgetItem(tr("Message ID")));
+	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_ANNOTATION, new QTableWidgetItem(tr("Subject")));
+	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_SENDER, new QTableWidgetItem(tr("Sender")));
+	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_RECIPIENT, new QTableWidgetItem(tr("Recipient")));
+	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_DELIVERY_YEAR, new QTableWidgetItem(tr("Delivery Year")));
+	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_MESSAGE_TYPE, new QTableWidgetItem(tr("Message Type")));
+
+	/* Hide column with delivery time and message type. */
+	m_ui->resultsTableWidget->setColumnHidden(COL_DELIVERY_YEAR, true);
+	m_ui->resultsTableWidget->setColumnHidden(COL_MESSAGE_TYPE, true);
+
+	connect(m_ui->searchRcvdMsgCheckBox, SIGNAL(clicked()),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->searchSntMsgCheckBox, SIGNAL(clicked()),
+	    this, SLOT(checkInputFields()));
+
+	connect(m_ui->msgIdLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->subjectLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+
+	connect(m_ui->sndrBoxIdLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->sndrNameLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->sndrRefNumLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->sndrFileMarkLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->rcpntBoxIdLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->rcpntNameLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->rcpntRefNumLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->rcpntFileMarkLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+
+	connect(m_ui->addressLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+	connect(m_ui->toHandsLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+
+	connect(m_ui->tagLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+
+	connect(m_ui->resultsTableWidget, SIGNAL(itemSelectionChanged()),
+	    this, SLOT(setFirtsColumnActive()));
+	connect(m_ui->resultsTableWidget, SIGNAL(cellDoubleClicked(int, int)),
+	    this, SLOT(getSelectedMsg(int, int)));
+
+	connect(m_ui->searchPushButton, SIGNAL(clicked()), this,
+	    SLOT(searchMessages()));
+
+	m_ui->resultsTableWidget->
+	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+	m_ui->resultsTableWidget->installEventFilter(
+	    new TableHomeEndFilter(this));
+}
+
+int DlgMsgSearch::filledInExceptTags(void) const
 {
 	int cnt = 0;
 
-	if (!this->messageIdLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->subjectLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->senderDbIdLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->senderNameLineEdit->text().isEmpty())  {
-		cnt++;
-	}
-	if (!this->addressLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->recipientDbIdLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->recipientNameLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->addressLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->senderRefNumLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->senderFileMarkLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->recipientRefNumLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->recipientFileMarkLineEdit->text().isEmpty()) {
-		cnt++;
-	}
-	if (!this->toHandsLineEdit->text().isEmpty()) {
-		cnt++;
-	}
+	if (!m_ui->msgIdLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->subjectLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->sndrBoxIdLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->sndrNameLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->sndrRefNumLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->sndrFileMarkLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->rcpntBoxIdLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->rcpntNameLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->rcpntRefNumLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->rcpntFileMarkLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->addressLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->toHandsLine->text().isEmpty()) { ++cnt; }
 
 	return cnt;
 }
 
-
-/* ========================================================================= */
-/*
- * Set first column with checkbox active if item was changed
+/*!
+ * @brief Append message entry into message table widget.
+ *
+ * @param[in,out] tabWid Table widget to put message entries into.
+ * @param[in]     msgSetEntry Username and pointer to database set.
+ * @param[in]     msgData Message entry.
  */
-void DlgMsgSearch::setFirtsColumnActive(void)
-/* ========================================================================= */
+static
+void appendMsgToWidget(QTableWidget *tabWid,
+    const QPair<QString, MessageDbSet *> &msgSetEntry,
+    const MessageDb::SoughtMsg &msgData)
 {
-	this->resultsTableWidget->selectColumn(0);
-	this->resultsTableWidget->selectRow(
-	    this->resultsTableWidget->currentRow());
-}
-
-
-/* ========================================================================= */
-/*
- * Search messages
- */
-void DlgMsgSearch::searchMessages(void)
-/* ========================================================================= */
-{
-	debugSlotCall();
-
-	this->resultsTableWidget->setRowCount(0);
-	this->resultsTableWidget->setEnabled(false);
-
-	MessageDb::SoughtMsg msgData;
-
-	/* holds search result data from message envelope table */
-	QList<MessageDb::SoughtMsg> msgEnvlpResultList;
-
-	/*
-	 * holds all message ids of from message_tags table
-	 * where input search text like with tag name
-	 */
-	QList<qint64> tagMsgIdList;
-
-	/* holds messages (data) which will add to result widget */
-	QList<MessageDb::SoughtMsg> msgListForTableView;
-
-	/* message types where search process will be applied */
-	enum MessageDirection msgType = MSG_ALL;
-	if (this->searchReceivedMsgCheckBox->isChecked() &&
-	    this->searchSentMsgCheckBox->isChecked()) {
-		msgType = MSG_ALL;
-	} else if (this->searchReceivedMsgCheckBox->isChecked()) {
-		msgType = MSG_RECEIVED;
-	} else if (this->searchSentMsgCheckBox->isChecked()) {
-		msgType = MSG_SENT;
+	if (Q_UNLIKELY(Q_NULLPTR == tabWid)) {
+		Q_ASSERT(0);
+		return;
 	}
 
-	/*
-	 * if tag input was filled, get message ids from message_tags table
-	 * where input search text like with tag name
-	*/
-	bool applyTag = false;
-	if (!this->tagLineEdit->text().isEmpty()) {
-		tagMsgIdList = globTagDbPtr->getMsgIdsContainSearchTagText(
-		    this->tagLineEdit->text());
-		applyTag = true;
-	}
+	const int row = tabWid->rowCount();
+	tabWid->insertRow(row);
 
-	/* selected account or all accounts will be used for search request */
-	int dbCount = 1;
-	if (this->searchAllAcntCheckBox->isChecked()) {
-		dbCount = m_messageDbSetList.count();
-	}
-
-	/* how many fields without tag item are filled in the search dialog */
-	int itemsWithoutTag = howManyFieldsAreFilledWithoutTag();
-
-	/* over selected account or all accounts do */
-	for (int i = 0; i < dbCount; ++i) {
-
-		msgEnvlpResultList.clear();
-		msgListForTableView.clear();
-
-		/* when at least one field is filled (without tag) */
-		if (itemsWithoutTag > 0) {
-			/*
-			 * get messages envelope data
-			 * where search items are applied
-			 */
-			msgEnvlpResultList = m_messageDbSetList.at(i).second->
-			    msgsAdvancedSearchMessageEnvelope(
-			    this->messageIdLineEdit->text().isEmpty() ? -1 :
-			        this->messageIdLineEdit->text().toLongLong(),
-			    this->subjectLineEdit->text(),
-			    this->senderDbIdLineEdit->text(),
-			    this->senderNameLineEdit->text(),
-			    this->addressLineEdit->text(),
-			    this->recipientDbIdLineEdit->text(),
-			    this->recipientNameLineEdit->text(),
-			    this->senderRefNumLineEdit->text(),
-			    this->senderFileMarkLineEdit->text(),
-			    this->recipientRefNumLineEdit->text(),
-			    this->recipientFileMarkLineEdit->text(),
-			    this->toHandsLineEdit->text(),
-			    QString(), QString(), msgType);
-		}
-
-		/* Results processing section - 4 scenarios */
-
-		/*
-		 * First scenario:
-		 * tag input was filled and another envelope fileds were filled,
-		 * tag list and msg envelope search list results are not empty,
-		 * so we must penetration both list (prunik) and
-		 * choose relevant records and show it (fill msgListForView).
-		 */
-		if (applyTag && (!tagMsgIdList.isEmpty()) &&
-		    (!msgEnvlpResultList.isEmpty())) {
-
-			foreach (const qint64 msgId, tagMsgIdList) {
-				foreach (const MessageDb::SoughtMsg msg,
-				    msgEnvlpResultList) {
-					if (msg.mId.dmId == msgId) {
-						msgData =
-						    m_messageDbSetList.at(i).
-						    second->msgsGetMsgDataFromId(msgId);
-						if (msgData.mId.dmId != -1) {
-							msgListForTableView.append(msgData);
-						}
-					}
-				}
-			}
-			if (!msgListForTableView.isEmpty()) {
-				appendMsgsToTable(m_messageDbSetList.at(i),
-				    msgListForTableView);
-			}
-
-		/*
-		 * Second scenario:
-		 * tag input was filled and another envelope fileds were filled
-		 * but msg envelope search result list is empty = no match,
-		 * we show (do) nothing
-		 */
-		} else if (applyTag && msgEnvlpResultList.isEmpty() &&
-		    (itemsWithoutTag > 0)) {
-
-		/*
-		 * Third scenario:
-		 * tag input was not filled and msg envelope list is not empty,
-		 * we show result for msg envelope list only
-		  */
-		} else if (!applyTag && !msgEnvlpResultList.isEmpty()) {
-			appendMsgsToTable(m_messageDbSetList.at(i),
-			    msgEnvlpResultList);
-
-		/*
-		 * Last scenario:
-		 * only tag input was filled and tag list are not empty,
-		 * we show result for tag results only (fill msgListForView).
-		 */
-		} else if (applyTag && (!tagMsgIdList.isEmpty())) {
-
-			foreach (const qint64 msgId, tagMsgIdList) {
-
-				msgData = m_messageDbSetList.at(i).second->
-				    msgsGetMsgDataFromId(msgId);
-
-				if (msgData.mId.dmId != -1) {
-					msgListForTableView.append(msgData);
-				}
-			}
-
-			if (!msgListForTableView.isEmpty()) {
-				appendMsgsToTable(m_messageDbSetList.at(i),
-				    msgListForTableView);
-			}
-		}
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Append message list to result tablewidget
- */
-void DlgMsgSearch::appendMsgsToTable(
-    const QPair<QString, MessageDbSet *> &usrNmAndMsgDbSet,
-    const QList<MessageDb::SoughtMsg> &msgDataList)
-/* ========================================================================= */
-{
-	this->resultsTableWidget->setEnabled(true);
-
-	foreach (const MessageDb::SoughtMsg &msgData, msgDataList) {
-		int row = this->resultsTableWidget->rowCount();
-		this->resultsTableWidget->insertRow(row);
-
-		this->resultsTableWidget->setItem(row, COL_USER_NAME,
-		    new QTableWidgetItem(usrNmAndMsgDbSet.first));
-		QTableWidgetItem *item = new QTableWidgetItem;
-		item->setText(QString::number(msgData.mId.dmId));
-		if (ENABLE_TOOLTIP) {
-			const MessageDb *messageDb =
-			    usrNmAndMsgDbSet.second->constAccessMessageDb(
-			        msgData.mId.deliveryTime);
-			Q_ASSERT(0 != messageDb);
-
+	tabWid->setItem(row, COL_USER_NAME,
+	    new QTableWidgetItem(msgSetEntry.first));
+	QTableWidgetItem *item = new QTableWidgetItem;
+	item->setText(QString::number(msgData.mId.dmId));
+	if (ENABLE_TOOLTIP) {
+		const MessageDb *messageDb =
+		    msgSetEntry.second->constAccessMessageDb(
+		        msgData.mId.deliveryTime);
+		if (Q_NULLPTR != messageDb) {
 			item->setToolTip(messageDb->descriptionHtml(
 			    msgData.mId.dmId, true, false, true));
+		} else {
+			Q_ASSERT(0);
 		}
-		this->resultsTableWidget->setItem(row, COL_MESSAGE_ID, item);
-		this->resultsTableWidget->setItem(row, COL_DELIVERY_YEAR,
-		    new QTableWidgetItem(
-		        MessageDbSet::yearFromDateTime(
-		            msgData.mId.deliveryTime)));
-		this->resultsTableWidget->setItem(row, COL_MESSAGE_TYPE,
-		    new QTableWidgetItem(QString::number(msgData.type)));
-		this->resultsTableWidget->setItem(row, COL_ANNOTATION,
-		    new QTableWidgetItem(msgData.dmAnnotation));
-		this->resultsTableWidget->setItem(row, COL_SENDER,
-		    new QTableWidgetItem(msgData.dmSender));
-		this->resultsTableWidget->setItem(row, COL_RECIPIENT,
-		    new QTableWidgetItem(msgData.dmRecipient));
 	}
-
-	this->resultsTableWidget->resizeColumnsToContents();
-	this->resultsTableWidget->
-	    horizontalHeader()->setStretchLastSection(true);
+	tabWid->setItem(row, COL_MESSAGE_ID, item);
+	tabWid->setItem(row, COL_DELIVERY_YEAR,
+	    new QTableWidgetItem(
+	        MessageDbSet::yearFromDateTime(
+	            msgData.mId.deliveryTime)));
+	tabWid->setItem(row, COL_MESSAGE_TYPE,
+	    new QTableWidgetItem(QString::number(msgData.type)));
+	tabWid->setItem(row, COL_ANNOTATION,
+	    new QTableWidgetItem(msgData.dmAnnotation));
+	tabWid->setItem(row, COL_SENDER,
+	    new QTableWidgetItem(msgData.dmSender));
+	tabWid->setItem(row, COL_RECIPIENT,
+	    new QTableWidgetItem(msgData.dmRecipient));
 }
 
-
-/* ========================================================================= */
-/*
- * Get ID of selected message and set focus in MessageList Tableview
- */
-void DlgMsgSearch::getSelectedMsg(int row, int column)
-/* ========================================================================= */
+void DlgMsgSearch::appendMsgsToTable(
+    const QPair<QString, MessageDbSet *> &msgSetEntry,
+    const QList<MessageDb::SoughtMsg> &msgDataList)
 {
-	Q_UNUSED(column);
-	emit focusSelectedMsg(
-	    this->resultsTableWidget->item(row, COL_USER_NAME)->text(),
-	    this->resultsTableWidget->item(row, COL_MESSAGE_ID)->text().toLongLong(),
-	    this->resultsTableWidget->item(row, COL_DELIVERY_YEAR)->text(),
-	    this->resultsTableWidget->item(row, COL_MESSAGE_TYPE)->text().toInt());
-	//this->close();
+	m_ui->resultsTableWidget->setEnabled(true);
+
+	foreach (const MessageDb::SoughtMsg &msgData, msgDataList) {
+		appendMsgToWidget(m_ui->resultsTableWidget, msgSetEntry,
+		    msgData);
+	}
+
+	m_ui->resultsTableWidget->resizeColumnsToContents();
+	m_ui->resultsTableWidget->
+	    horizontalHeader()->setStretchLastSection(true);
 }
