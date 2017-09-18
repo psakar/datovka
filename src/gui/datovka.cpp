@@ -632,7 +632,7 @@ void MainWindow::showPreferencesDialog(void)
 {
 	debugSlotCall();
 
-	if (!DlgPreferences::modify(this)) {
+	if (!DlgPreferences::modify(globPref, this)) {
 		return;
 	}
 

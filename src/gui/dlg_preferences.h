@@ -26,6 +26,8 @@
 
 #include <QDialog>
 
+#include "src/settings/preferences.h"
+
 namespace Ui {
 	class DlgPreferences;
 }
@@ -40,9 +42,11 @@ private:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] prefs Preferences according to which to set the dialogue.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgPreferences(QWidget *parent = Q_NULLPTR);
+	explicit DlgPreferences(const GlobPreferences &prefs,
+	    QWidget *parent = Q_NULLPTR);
 
 public:
 	/*!
@@ -53,12 +57,13 @@ public:
 	/*!
 	 * @brief Modifies global preferences.
 	 *
-	 * @param[in] parent Parent widget.
+	 * @param[in,out] prefs Preferences to be modified.
+	 * @param[in]     parent Parent widget.
 	 * @return True when dialogue has been accepted and preference data
 	 *     have been updated.
 	 */
 	static
-	bool modify(QWidget *parent = Q_NULLPTR);
+	bool modify(GlobPreferences &prefs, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -81,13 +86,17 @@ private slots:
 private:
 	/*!
 	 * @brief Save dialogue content to settings.
+	 *
+	 * @param[out] prefs Preferences to be modified.
 	 */
-	void saveSettings(void) const;
+	void saveSettings(GlobPreferences &prefs) const;
 
 	/*!
 	 * @brief Initialises the dialogue according to settings.
+	 *
+	 * @param[in] prefs Preferences according to which to set the dialogue.
 	 */
-	void initDialogue(void);
+	void initDialogue(const GlobPreferences &prefs);
 
 	Ui::DlgPreferences *m_ui; /*!< UI generated from UI file. */
 };
