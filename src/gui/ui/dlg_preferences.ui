@@ -508,7 +508,7 @@ The data is used solely for statistical purposes.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <item>
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="storageOptionsLabel">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -517,7 +517,7 @@ The data is used solely for statistical purposes.</string>
              </font>
             </property>
             <property name="text">
-             <string>It migth be possible for a person with access to your home directory to modify data in the Datovka database with malicious intent or to steal you login credentials for Datové Schránky. Using the checkboxes below, you can influence which data Datovka stores on the disk. Note: Password storage can be adjusted on per-account basis in the credentials dialog.</string>
+             <string>It migth be possible for a person with access to to the configuration directory to modify data in the application databases with a malicious intent or to steal you data-box login credentials. Using the checkboxes below, you can influence which data the application stores on the disk. Note: Password storing can be adjusted on a per-account basis in the credentials dialogue.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -525,7 +525,7 @@ The data is used solely for statistical purposes.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="store_messages_on_disk">
+           <widget class="QCheckBox" name="storeMessagesOnDisk">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -548,7 +548,7 @@ than 90 day may not be available.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="store_additional_data_on_disk">
+           <widget class="QCheckBox" name="storeAdditionalDataOnDisk">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -585,7 +585,7 @@ an attacker, but their nature makes it a relatively harmless possibility.</strin
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
-           <widget class="QRadioButton" name="certificate_validation_date_1">
+           <widget class="QRadioButton" name="certValidationDateNow">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -606,7 +606,7 @@ compromised certificate exploit.</string>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="certificate_validation_date_2">
+           <widget class="QRadioButton" name="certValidationDateDownload">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -633,7 +633,7 @@ download date in the Datovka database.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="check_crl">
+           <widget class="QCheckBox" name="checkCrl">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -671,7 +671,7 @@ of days will be included into the expiration notification summary.</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_12">
           <item>
-           <widget class="QLabel" name="label_36">
+           <widget class="QLabel" name="timestampExpirPre">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -714,7 +714,7 @@ of timestamp will be message included in the check results.</string>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_37">
+           <widget class="QLabel" name="timestampExpirPost">
             <property name="font">
              <font>
               <weight>50</weight>

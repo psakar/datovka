@@ -85,14 +85,26 @@ void DlgPreferences::initPrefDialog(void)
 
 	setActiveTimerSetup(m_ui->downloadOnBackground->checkState());
 
-	/* .. */
+	/* storage */
+	m_ui->storeMessagesOnDisk->setChecked(globPref.store_messages_on_disk);
+	m_ui->storeAdditionalDataOnDisk->setChecked(
+	    globPref.store_additional_data_on_disk);
+	if (GlobPreferences::CURRENT_DATE ==
+	    globPref.certificate_validation_date) {
+		m_ui->certValidationDateNow->setChecked(true);
+		m_ui->certValidationDateDownload->setChecked(false);
+	} else if (GlobPreferences::DOWNLOAD_DATE ==
+	    globPref.certificate_validation_date) {
+		m_ui->certValidationDateNow->setChecked(false);
+		m_ui->certValidationDateDownload->setChecked(true);
+	} else {
+		Q_ASSERT(0);
+	}
+	m_ui->checkCrl->setChecked(globPref.check_crl);
 	m_ui->timestampExpirSpinBox->setValue(
 	    globPref.timestamp_expir_before_days);
-	m_ui->store_messages_on_disk->setChecked(
-	    globPref.store_messages_on_disk);
-	m_ui->store_additional_data_on_disk->setChecked(
-	    globPref.store_additional_data_on_disk);
-	m_ui->check_crl->setChecked(globPref.check_crl);
+
+	/* .. */
 	m_ui->language->setCurrentIndex(getLangugeIndex(globPref.language));
 	m_ui->enableGlobalPaths->setChecked(globPref.use_global_paths);
 	m_ui->savePath->setText(globPref.save_attachments_path);
@@ -157,18 +169,6 @@ void DlgPreferences::initPrefDialog(void)
 		m_ui->after_start_select_1->setChecked(false);
 		m_ui->after_start_select_2->setChecked(false);
 		m_ui->after_start_select_3->setChecked(true);
-	} else {
-		Q_ASSERT(0);
-	}
-
-	if (GlobPreferences::DOWNLOAD_DATE ==
-	    globPref.certificate_validation_date) {
-		m_ui->certificate_validation_date_1->setChecked(true);
-		m_ui->certificate_validation_date_2->setChecked(false);
-	} else if (GlobPreferences::CURRENT_DATE ==
-	    globPref.certificate_validation_date) {
-		m_ui->certificate_validation_date_1->setChecked(false);
-		m_ui->certificate_validation_date_2->setChecked(true);
 	} else {
 		Q_ASSERT(0);
 	}
@@ -257,18 +257,20 @@ void DlgPreferences::saveChanges(void) const
 	globPref.send_stats_with_version_checks =
 	    m_ui->sendStatsWithVersionChecks->isChecked();
 
-	/* ... */
+	/* storage */
 	globPref.store_messages_on_disk =
-	    m_ui->store_messages_on_disk->isChecked();
+	    m_ui->storeMessagesOnDisk->isChecked();
 	globPref.store_additional_data_on_disk =
-	    m_ui->store_additional_data_on_disk->isChecked();
+	    m_ui->storeAdditionalDataOnDisk->isChecked();
 	globPref.certificate_validation_date =
-	    m_ui->certificate_validation_date_1->isChecked() ?
-	        GlobPreferences::DOWNLOAD_DATE :
-	        GlobPreferences::CURRENT_DATE;
-	globPref.check_crl = m_ui->check_crl->isChecked();
+	    m_ui->certValidationDateNow->isChecked() ?
+	        GlobPreferences::CURRENT_DATE :
+	        GlobPreferences::DOWNLOAD_DATE;
+	globPref.check_crl = m_ui->checkCrl->isChecked();
 	globPref.timestamp_expir_before_days =
 	    m_ui->timestampExpirSpinBox->value();
+
+	/* ... */
 	globPref.language = getIndexFromLanguge(m_ui->language->currentIndex());
 	if (m_ui->after_start_select_1->isChecked()) {
 		globPref.after_start_select = GlobPreferences::SELECT_NEWEST;
