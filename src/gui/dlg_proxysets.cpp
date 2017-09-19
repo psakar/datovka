@@ -39,7 +39,7 @@ DlgProxysets::DlgProxysets(QWidget *parent)
 	    this, SLOT(toggleHttpProxyDetection(bool)));
 	connect(m_ui->httpManualProxyRadioButton, SIGNAL(toggled(bool)),
 	    this, SLOT(setActiveHttpProxyEdit(bool)));
-	connect(m_ui->httpAuthenticationCheckbox, SIGNAL(stateChanged(int)),
+	connect(m_ui->httpAuthCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(showHttpProxyPassword(int)));
 
 	{
@@ -60,7 +60,7 @@ DlgProxysets::DlgProxysets(QWidget *parent)
 	    this, SLOT(toggleHttpsProxyDetection(bool)));
 	connect(m_ui->httpsManualProxyRadioButton, SIGNAL(toggled (bool)),
 	    this, SLOT(setActiveHttpsProxyEdit(bool)));
-	connect(m_ui->httpsAuthenticationCheckbox, SIGNAL(stateChanged(int)),
+	connect(m_ui->httpsAuthCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(showHttpsProxyPassword(int)));
 
 	{
@@ -86,148 +86,162 @@ DlgProxysets::~DlgProxysets(void)
 void DlgProxysets::loadProxyDialog(const ProxiesSettings &proxySettings)
 {
 	m_ui->httpProxyAuth->setHidden(true);
-	m_ui->httpAuthenticationCheckbox->setCheckState(Qt::Unchecked);
+	m_ui->httpAuthCheckBox->setCheckState(Qt::Unchecked);
 
 	if (ProxiesSettings::ProxySettings::AUTO_PROXY == proxySettings.http.usage) {
 		m_ui->httpNoProxyRadioButton->setChecked(false);
 		m_ui->httpAutoProxyRadioButton->setChecked(true);
 		m_ui->httpProxyDetectionLabel->setEnabled(true);
 		m_ui->httpManualProxyRadioButton->setChecked(false);
-		m_ui->httpLabel_1->setEnabled(false);
-		m_ui->httpLabel_2->setEnabled(false);
-		m_ui->httpHostnameLineEdit->setEnabled(false);
-		m_ui->httpPortLineEdit->setEnabled(false);
+		m_ui->httpHostnameLabel->setEnabled(false);
+		m_ui->httpHostnameLine->setEnabled(false);
+		m_ui->httpPortLabel->setEnabled(false);
+		m_ui->httpPortLine->setEnabled(false);
 
 		m_ui->httpUnameLabel->setEnabled(true);
+		m_ui->httpUnameLine->setEnabled(true);
 		m_ui->httpPwdLabel->setEnabled(true);
-		m_ui->httpUnameEdit->setEnabled(true);
-		m_ui->httpPwdEdit->setEnabled(true);
+		m_ui->httpPwdLine->setEnabled(true);
 	} else if (ProxiesSettings::ProxySettings::NO_PROXY == proxySettings.http.usage) {
 		m_ui->httpNoProxyRadioButton->setChecked(true);
 		m_ui->httpAutoProxyRadioButton->setChecked(false);
 		m_ui->httpProxyDetectionLabel->setEnabled(false);
 		m_ui->httpManualProxyRadioButton->setChecked(false);
-		m_ui->httpLabel_1->setEnabled(false);
-		m_ui->httpLabel_2->setEnabled(false);
-		m_ui->httpHostnameLineEdit->setEnabled(false);
-		m_ui->httpPortLineEdit->setEnabled(false);
+		m_ui->httpHostnameLabel->setEnabled(false);
+		m_ui->httpHostnameLine->setEnabled(false);
+		m_ui->httpPortLabel->setEnabled(false);
+		m_ui->httpPortLine->setEnabled(false);
 
 		m_ui->httpUnameLabel->setEnabled(false);
+		m_ui->httpUnameLine->setEnabled(false);
 		m_ui->httpPwdLabel->setEnabled(false);
-		m_ui->httpUnameEdit->setEnabled(false);
-		m_ui->httpPwdEdit->setEnabled(false);
+		m_ui->httpPwdLine->setEnabled(false);
 	} else {
 		m_ui->httpNoProxyRadioButton->setChecked(false);
 		m_ui->httpAutoProxyRadioButton->setChecked(false);
 		m_ui->httpProxyDetectionLabel->setEnabled(false);
 		m_ui->httpManualProxyRadioButton->setChecked(true);
-		m_ui->httpLabel_1->setEnabled(true);
-		m_ui->httpLabel_2->setEnabled(true);
-		m_ui->httpHostnameLineEdit->setEnabled(true);
-		m_ui->httpHostnameLineEdit->setText(
-		    proxySettings.http.hostName);
-		m_ui->httpPortLineEdit->setText(
+		m_ui->httpHostnameLabel->setEnabled(true);
+		m_ui->httpHostnameLine->setEnabled(true);
+		m_ui->httpHostnameLine->setText(proxySettings.http.hostName);
+		m_ui->httpPortLabel->setEnabled(true);
+		m_ui->httpPortLine->setText(
 		    (proxySettings.http.port >= 0) ?
 		        QString::number(proxySettings.http.port, 10) :
 		        QString());
 
 		m_ui->httpUnameLabel->setEnabled(true);
+		m_ui->httpUnameLine->setEnabled(true);
 		m_ui->httpPwdLabel->setEnabled(true);
-		m_ui->httpUnameEdit->setEnabled(true);
-		m_ui->httpPwdEdit->setEnabled(true);
+		m_ui->httpPwdLine->setEnabled(true);
 	}
-	m_ui->httpUnameEdit->setText(globProxSet.http.userName);
-	m_ui->httpPwdEdit->setText(globProxSet.http.password);
+	m_ui->httpUnameLine->setText(globProxSet.http.userName);
+	m_ui->httpPwdLine->setText(globProxSet.http.password);
 
 	m_ui->httpsProxyAuth->setHidden(true);
-	m_ui->httpsAuthenticationCheckbox->setCheckState(Qt::Unchecked);
+	m_ui->httpsAuthCheckBox->setCheckState(Qt::Unchecked);
 
 	if (ProxiesSettings::ProxySettings::AUTO_PROXY == proxySettings.https.usage) {
 		m_ui->httpsNoProxyRadioButton->setChecked(false);
 		m_ui->httpsAutoProxyRadioButton->setChecked(true);
 		m_ui->httpsProxyDetectionLabel->setEnabled(true);
 		m_ui->httpsManualProxyRadioButton->setChecked(false);
-		m_ui->httpsLabel_1->setEnabled(false);
-		m_ui->httpsLabel_2->setEnabled(false);
-		m_ui->httpsHostnameLineEdit->setEnabled(false);
-		m_ui->httpsPortLineEdit->setEnabled(false);
+		m_ui->httpsHostnameLabel->setEnabled(false);
+		m_ui->httpsHostnameLine->setEnabled(false);
+		m_ui->httpsPortLabel->setEnabled(false);
+		m_ui->httpsPortLine->setEnabled(false);
 
 		m_ui->httpsUnameLabel->setEnabled(true);
+		m_ui->httpsUnameLine->setEnabled(true);
 		m_ui->httpsPwdLabel->setEnabled(true);
-		m_ui->httpsUnameEdit->setEnabled(true);
-		m_ui->httpsPwdEdit->setEnabled(true);
+		m_ui->httpsPwdLine->setEnabled(true);
 	} else if (ProxiesSettings::ProxySettings::NO_PROXY == proxySettings.https.usage) {
 		m_ui->httpsNoProxyRadioButton->setChecked(true);
 		m_ui->httpsAutoProxyRadioButton->setChecked(false);
 		m_ui->httpsProxyDetectionLabel->setEnabled(false);
 		m_ui->httpsManualProxyRadioButton->setChecked(false);
-		m_ui->httpsLabel_1->setEnabled(false);
-		m_ui->httpsLabel_2->setEnabled(false);
-		m_ui->httpsHostnameLineEdit->setEnabled(false);
-		m_ui->httpsPortLineEdit->setEnabled(false);
+		m_ui->httpsHostnameLabel->setEnabled(false);
+		m_ui->httpsHostnameLine->setEnabled(false);
+		m_ui->httpsPortLabel->setEnabled(false);
+		m_ui->httpsPortLine->setEnabled(false);
 
 		m_ui->httpsUnameLabel->setEnabled(false);
+		m_ui->httpsUnameLine->setEnabled(false);
 		m_ui->httpsPwdLabel->setEnabled(false);
-		m_ui->httpsUnameEdit->setEnabled(false);
-		m_ui->httpsPwdEdit->setEnabled(false);
+		m_ui->httpsPwdLine->setEnabled(false);
 	} else {
 		m_ui->httpsNoProxyRadioButton->setChecked(false);
 		m_ui->httpsAutoProxyRadioButton->setChecked(false);
 		m_ui->httpsProxyDetectionLabel->setEnabled(false);
 		m_ui->httpsManualProxyRadioButton->setChecked(true);
-		m_ui->httpsLabel_1->setEnabled(true);
-		m_ui->httpsLabel_2->setEnabled(true);
-		m_ui->httpsHostnameLineEdit->setEnabled(true);
-		m_ui->httpsHostnameLineEdit->setText(
-		    proxySettings.https.hostName);
-		m_ui->httpsPortLineEdit->setText(
+		m_ui->httpsHostnameLabel->setEnabled(true);
+		m_ui->httpsHostnameLine->setEnabled(true);
+		m_ui->httpsHostnameLine->setText(proxySettings.https.hostName);
+		m_ui->httpsPortLabel->setEnabled(true);
+		m_ui->httpsPortLine->setText(
 		    (proxySettings.https.port >= 0) ?
 		        QString::number(proxySettings.https.port, 10) :
 		        QString());
 
 		m_ui->httpsUnameLabel->setEnabled(true);
+		m_ui->httpsUnameLine->setEnabled(true);
 		m_ui->httpsPwdLabel->setEnabled(true);
-		m_ui->httpsUnameEdit->setEnabled(true);
-		m_ui->httpsPwdEdit->setEnabled(true);
+		m_ui->httpsPwdLine->setEnabled(true);
 	}
-	m_ui->httpsUnameEdit->setText(globProxSet.https.userName);
-	m_ui->httpsPwdEdit->setText(globProxSet.https.password);
+	m_ui->httpsUnameLine->setText(globProxSet.https.userName);
+	m_ui->httpsPwdLine->setText(globProxSet.https.password);
 }
 
-void DlgProxysets::showHttpProxyPassword(int state)
+void DlgProxysets::showHttpProxyPassword(int checkState)
 {
-	m_ui->httpProxyAuth->setHidden(Qt::Unchecked == state);
+	m_ui->httpProxyAuth->setHidden(Qt::Unchecked == checkState);
 }
 
-void DlgProxysets::showHttpsProxyPassword(int state)
+void DlgProxysets::showHttpsProxyPassword(int checkState)
 {
-	m_ui->httpsProxyAuth->setHidden(Qt::Unchecked == state);
+	m_ui->httpsProxyAuth->setHidden(Qt::Unchecked == checkState);
 }
 
-void DlgProxysets::toggleHttpProxyDetection(bool state)
+void DlgProxysets::toggleHttpProxyDetection(bool enabled)
 {
-	m_ui->httpProxyDetectionLabel->setEnabled(state);
+	m_ui->httpProxyDetectionLabel->setEnabled(enabled);
 }
 
-void DlgProxysets::toggleHttpsProxyDetection(bool state)
+void DlgProxysets::toggleHttpsProxyDetection(bool enabled)
 {
-	m_ui->httpsProxyDetectionLabel->setEnabled(state);
+	m_ui->httpsProxyDetectionLabel->setEnabled(enabled);
 }
 
-void DlgProxysets::toggleHttpProxyPassword(bool state)
+void DlgProxysets::toggleHttpProxyPassword(bool checked)
 {
-	m_ui->httpUnameLabel->setEnabled(!state);
-	m_ui->httpPwdLabel->setEnabled(!state);
-	m_ui->httpUnameEdit->setEnabled(!state);
-	m_ui->httpPwdEdit->setEnabled(!state);
+	m_ui->httpUnameLabel->setEnabled(!checked);
+	m_ui->httpUnameLine->setEnabled(!checked);
+	m_ui->httpPwdLabel->setEnabled(!checked);
+	m_ui->httpPwdLine->setEnabled(!checked);
 }
 
-void DlgProxysets::toggleHttpsProxyPassword(bool state)
+void DlgProxysets::toggleHttpsProxyPassword(bool checked)
 {
-	m_ui->httpsUnameLabel->setEnabled(!state);
-	m_ui->httpsPwdLabel->setEnabled(!state);
-	m_ui->httpsUnameEdit->setEnabled(!state);
-	m_ui->httpsPwdEdit->setEnabled(!state);
+	m_ui->httpsUnameLabel->setEnabled(!checked);
+	m_ui->httpsUnameLine->setEnabled(!checked);
+	m_ui->httpsPwdLabel->setEnabled(!checked);
+	m_ui->httpsPwdLine->setEnabled(!checked);
+}
+
+void DlgProxysets::setActiveHttpProxyEdit(bool enabled)
+{
+	m_ui->httpHostnameLabel->setEnabled(enabled);
+	m_ui->httpHostnameLine->setEnabled(enabled);
+	m_ui->httpPortLabel->setEnabled(enabled);
+	m_ui->httpPortLine->setEnabled(enabled);
+}
+
+void DlgProxysets::setActiveHttpsProxyEdit(bool enabled)
+{
+	m_ui->httpsHostnameLabel->setEnabled(enabled);
+	m_ui->httpsHostnameLine->setEnabled(enabled);
+	m_ui->httpsPortLabel->setEnabled(enabled);
+	m_ui->httpsPortLine->setEnabled(enabled);
 }
 
 void DlgProxysets::saveChanges(void) const
@@ -246,15 +260,14 @@ void DlgProxysets::saveChanges(void) const
 		globProxSet.http.port = -1;
 	} else {
 		globProxSet.http.usage = ProxiesSettings::ProxySettings::DEFINED_PROXY;
-		globProxSet.http.hostName = m_ui->httpHostnameLineEdit->text();
-		globProxSet.http.port =
-		    m_ui->httpPortLineEdit->text().toInt(&ok, 10);
+		globProxSet.http.hostName = m_ui->httpHostnameLine->text();
+		globProxSet.http.port = m_ui->httpPortLine->text().toInt(&ok, 10);
 		if (!ok) {
 			globProxSet.http.port = -1;
 		}
 	}
-	globProxSet.http.userName = m_ui->httpUnameEdit->text();
-	globProxSet.http.password = m_ui->httpPwdEdit->text();
+	globProxSet.http.userName = m_ui->httpUnameLine->text();
+	globProxSet.http.password = m_ui->httpPwdLine->text();
 
 	if (m_ui->httpsNoProxyRadioButton->isChecked()) {
 		globProxSet.https.usage = ProxiesSettings::ProxySettings::NO_PROXY;
@@ -266,35 +279,18 @@ void DlgProxysets::saveChanges(void) const
 		globProxSet.https.port = -1;
 	} else {
 		globProxSet.https.usage = ProxiesSettings::ProxySettings::DEFINED_PROXY;
-		globProxSet.https.hostName = m_ui->httpsHostnameLineEdit->text();
-		globProxSet.https.port =
-		    m_ui->httpsPortLineEdit->text().toInt(&ok, 10);
+		globProxSet.https.hostName = m_ui->httpsHostnameLine->text();
+		globProxSet.https.port = m_ui->httpsPortLine->text().toInt(&ok, 10);
 		if (!ok) {
 			globProxSet.https.port = -1;
 		}
 	}
-	globProxSet.https.userName = m_ui->httpsUnameEdit->text();
-	globProxSet.https.password = m_ui->httpsPwdEdit->text();
+	globProxSet.https.userName = m_ui->httpsUnameLine->text();
+	globProxSet.https.password = m_ui->httpsPwdLine->text();
 
 	/*
 	 * Apply to global variables, although, restart may be needed if
 	 * already connected.
 	 */
 	globProxSet.setProxyEnvVars();
-}
-
-void DlgProxysets::setActiveHttpProxyEdit(bool state)
-{
-	m_ui->httpLabel_1->setEnabled(state);
-	m_ui->httpLabel_2->setEnabled(state);
-	m_ui->httpHostnameLineEdit->setEnabled(state);
-	m_ui->httpPortLineEdit->setEnabled(state);
-}
-
-void DlgProxysets::setActiveHttpsProxyEdit(bool state)
-{
-	m_ui->httpsLabel_1->setEnabled(state);
-	m_ui->httpsLabel_2->setEnabled(state);
-	m_ui->httpsHostnameLineEdit->setEnabled(state);
-	m_ui->httpsPortLineEdit->setEnabled(state);
 }

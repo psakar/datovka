@@ -52,18 +52,63 @@ public:
 	~DlgProxysets(void);
 
 private slots:
-	void showHttpProxyPassword(int state);
-	void showHttpsProxyPassword(int state);
+	/*!
+	 * @brief View/hide HTTP proxy password settings.
+	 *
+	 * @param[in] checkState Check box state controlling the visibility.
+	 */
+	void showHttpProxyPassword(int checkState);
 
-	void toggleHttpProxyDetection(bool state);
-	void toggleHttpsProxyDetection(bool state);
+	/*!
+	 * @brief View/hide HTTPS proxy password settings.
+	 *
+	 * @param[in] checkState Check box state controlling the visibility.
+	 */
+	void showHttpsProxyPassword(int checkState);
 
-	void toggleHttpProxyPassword(bool state);
-	void toggleHttpsProxyPassword(bool state);
+	/*!
+	 * @brief Enable/disable HTTP proxy detection label.
+	 *
+	 * @param[in] enabled True if the label should be enabled.
+	 */
+	void toggleHttpProxyDetection(bool enabled);
+
+	/*!
+	 * @brief Enable/disable HTTPS proxy detection label.
+	 *
+	 * @param[in] enabled True if the label should be enabled.
+	 */
+	void toggleHttpsProxyDetection(bool enabled);
+
+	/*!
+	 * @brief Enable/disable HTTP proxy password settings.
+	 *
+	 * @param[in] checked False if the label should be enabled.
+	 */
+	void toggleHttpProxyPassword(bool checked);
+
+	/*!
+	 * @brief Enable/disable HTTPS proxy password settings.
+	 *
+	 * @param[in] checked False if the label should be enabled.
+	 */
+	void toggleHttpsProxyPassword(bool checked);
+
+	/*!
+	 * @brief Enable/disable HTTP proxy address settings.
+	 *
+	 * @param[in] enabled True if the controls should be enabled.
+	 */
+	void setActiveHttpProxyEdit(bool enabled);
+
+	/*!
+	 * @brief Enable/disable HTTPS proxy address settings.
+	 *
+	 * @param[in] enabled True if the controls should be enabled.
+	 */
+	void setActiveHttpsProxyEdit(bool enabled);
 
 	void saveChanges(void) const;
-	void setActiveHttpProxyEdit(bool state);
-	void setActiveHttpsProxyEdit(bool state);
 
 private:
 	void loadProxyDialog(const ProxiesSettings &proxySettings);

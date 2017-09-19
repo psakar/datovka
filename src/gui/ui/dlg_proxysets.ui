@@ -42,7 +42,7 @@
       <number>1</number>
      </property>
      <property name="text">
-      <string>The HTTPS protocol is used when accessing the Databox server while HTTP is used to download the certificate revocation list and information about new Datovka versions.</string>
+      <string>The HTTPS protocol is used when accessing the ISDS server while HTTP is used to download the certificate revocation list and information about new application versions.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -132,7 +132,7 @@
       <item>
        <layout class="QHBoxLayout" name="httpsHorizontalLayou">
         <item>
-         <widget class="QLabel" name="httpsLabel_1">
+         <widget class="QLabel" name="httpsHostnameLabel">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -145,7 +145,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="httpsHostnameLineEdit">
+         <widget class="QLineEdit" name="httpsHostnameLine">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -158,7 +158,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="httpsLabel_2">
+         <widget class="QLabel" name="httpsPortLabel">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -171,7 +171,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="httpsPortLineEdit">
+         <widget class="QLineEdit" name="httpsPortLine">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -199,7 +199,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="httpsAuthenticationCheckbox">
+       <widget class="QCheckBox" name="httpsAuthCheckBox">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -231,7 +231,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="httpsUnameEdit">
+          <widget class="QLineEdit" name="httpsUnameLine">
            <property name="toolTip">
             <string>Enter your username</string>
            </property>
@@ -251,7 +251,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="httpsPwdEdit">
+          <widget class="QLineEdit" name="httpsPwdLine">
            <property name="toolTip">
             <string>Enter your password</string>
            </property>
@@ -346,7 +346,7 @@
       <item>
        <layout class="QHBoxLayout" name="httpHorizontalLayout">
         <item>
-         <widget class="QLabel" name="httpLabel_1">
+         <widget class="QLabel" name="httpHostnameLabel">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -359,7 +359,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="httpHostnameLineEdit">
+         <widget class="QLineEdit" name="httpHostnameLine">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -372,7 +372,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="httpLabel_2">
+         <widget class="QLabel" name="httpPortLabel">
           <property name="font">
            <font>
             <weight>50</weight>
@@ -385,7 +385,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="httpPortLineEdit">
+         <widget class="QLineEdit" name="httpPortLine">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -425,7 +425,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="httpAuthenticationCheckbox">
+       <widget class="QCheckBox" name="httpAuthCheckBox">
         <property name="font">
          <font>
           <weight>50</weight>
@@ -457,7 +457,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="httpUnameEdit">
+          <widget class="QLineEdit" name="httpUnameLine">
            <property name="toolTip">
             <string>Enter your username</string>
            </property>
@@ -477,7 +477,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="httpPwdEdit">
+          <widget class="QLineEdit" name="httpPwdLine">
            <property name="toolTip">
             <string>Enter your password</string>
            </property>
