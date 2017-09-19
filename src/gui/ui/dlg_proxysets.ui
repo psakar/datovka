@@ -210,7 +210,7 @@
          <string>Show HTTPS proxy authentication</string>
         </property>
         <property name="text">
-         <string>Show HTTPS proxy authentication.</string>
+         <string>Show HTTPS proxy authentication</string>
         </property>
        </widget>
       </item>
@@ -433,10 +433,10 @@
          </font>
         </property>
         <property name="toolTip">
-         <string>Show HTTP proxy authentication.</string>
+         <string>Show HTTP proxy authentication</string>
         </property>
         <property name="text">
-         <string>Show HTTP proxy authentication.</string>
+         <string>Show HTTP proxy authentication</string>
         </property>
        </widget>
       </item>
