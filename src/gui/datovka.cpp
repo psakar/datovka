@@ -655,12 +655,10 @@ void MainWindow::showProxySettingsDialog(void)
 {
 	debugSlotCall();
 
-	QDialog *dlgProxy = new DlgProxysets(this);
-	if (QDialog::Accepted == dlgProxy->exec()) {
+	if (DlgProxysets::modify(globProxSet, this)) {
 		/* Dialog accepted, store all settings. */
 		saveSettings();
 	}
-	dlgProxy->deleteLater();
 }
 
 /*!

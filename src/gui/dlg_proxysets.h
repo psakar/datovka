@@ -38,18 +38,32 @@ namespace Ui {
 class DlgProxysets : public QDialog {
 	Q_OBJECT
 
-public:
+private:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] sett Setting according to which to set the dialogue.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgProxysets(QWidget *parent = Q_NULLPTR);
+	explicit DlgProxysets(const ProxiesSettings &sett,
+	    QWidget *parent = Q_NULLPTR);
 
+public:
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgProxysets(void);
+
+	/*!
+	 * @brief Modifies proxy settings.
+	 *
+	 * @param[in,out] sett Proxy settings to be modified.
+	 * @param[in]     parent Parent widget.
+	 * @return True when dialogue has been accepted and settings data
+	 *     have been updated.
+	 */
+	static
+	bool modify(ProxiesSettings &sett, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -108,10 +122,20 @@ private slots:
 	 */
 	void setActiveHttpsProxyEdit(bool enabled);
 
-	void saveChanges(void) const;
-
 private:
-	void loadProxyDialog(const ProxiesSettings &proxySettings);
+	/*!
+	 * @brief Save dialogue content to settings.
+	 *
+	 * @param[out] sett Setting to be modified.
+	 */
+	void saveSettings(ProxiesSettings &sett) const;
+
+	/*!
+	 * @brief Initialises the dialogue according to settings.
+	 *
+	 * @param[in] sett Settings according to which to set the dialogue.
+	 */
+	void initDialogue(const ProxiesSettings &sett);
 
 	Ui::DlgProxysets *m_ui; /*!< UI generated from UI file. */
 };
