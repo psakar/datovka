@@ -24,35 +24,81 @@
 #ifndef _DLG_PREFERENCES_H_
 #define _DLG_PREFERENCES_H_
 
-
 #include <QDialog>
 
-#include "src/common.h"
-#include "ui_dlg_preferences.h"
+#include "src/settings/preferences.h"
 
+namespace Ui {
+	class DlgPreferences;
+}
 
-class DlgPreferences : public QDialog, public Ui::Preferences {
-    Q_OBJECT
+/*!
+ * @brief Preferences dialogue.
+ */
+class DlgPreferences : public QDialog {
+	Q_OBJECT
+
+private:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] prefs Preferences according to which to set the dialogue.
+	 * @param[in] parent Parent widget.
+	 */
+	explicit DlgPreferences(const GlobPreferences &prefs,
+	    QWidget *parent = Q_NULLPTR);
 
 public:
-	DlgPreferences(QWidget *parent = Q_NULLPTR);
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgPreferences(void);
+
+	/*!
+	 * @brief Modifies global preferences.
+	 *
+	 * @param[in,out] prefs Preferences to be modified.
+	 * @param[in]     parent Parent widget.
+	 * @return True when dialogue has been accepted and preference data
+	 *     have been updated.
+	 */
+	static
+	bool modify(GlobPreferences &prefs, QWidget *parent = Q_NULLPTR);
 
 private slots:
-	void setActiveTimerSetup(int);
-	void setActiveCheckBox(int);
-	void saveChanges(void) const;
+	/*!
+	 * @brief Enables background download timer settings.
+	 *
+	 * @param[in] checkState Background timer checkbox state.
+	 */
+	void activateBackgroundTimer(int checkState);
+
+	/*!
+	 * @brief Sets path for attachment saving.
+	 */
 	void setSavePath(void);
+
+	/*!
+	 * @brief Sets path for adding attachments.
+	 */
 	void setAddFilePath(void);
 
 private:
-	void initPrefDialog(void);
+	/*!
+	 * @brief Save dialogue content to settings.
+	 *
+	 * @param[out] prefs Preferences to be modified.
+	 */
+	void saveSettings(GlobPreferences &prefs) const;
 
-	static
-	int getLangugeIndex(const QString &language);
+	/*!
+	 * @brief Initialises the dialogue according to settings.
+	 *
+	 * @param[in] prefs Preferences according to which to set the dialogue.
+	 */
+	void initDialogue(const GlobPreferences &prefs);
 
-	static
-	const QString &getIndexFromLanguge(int index);
+	Ui::DlgPreferences *m_ui; /*!< UI generated from UI file. */
 };
-
 
 #endif /* _DLG_PREFERENCES_H_ */

@@ -22,174 +22,101 @@
  */
 
 #include <QFileDialog>
+#include <QString>
 
+#include "src/common.h"
 #include "src/dimensions/dimensions.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/localisation/localisation.h"
-#include "src/settings/preferences.h"
 #include "ui_dlg_preferences.h"
 
-DlgPreferences::DlgPreferences(QWidget *parent)
-    : QDialog(parent)
+#define MSEC_IN_SEC 1000 /* One second in milliseconds. */
+#define MSEC_IN_MIN 60000 /* One minute in milliseconds. */
+
+/*!
+ * @brief Language order as they are listed in the combo box.
+ */
+enum LangIndex {
+	LANG_SYSTEM = 0,
+	LANG_CZECH = 1,
+	LANG_ENGLISH = 2
+};
+
+DlgPreferences::DlgPreferences(const GlobPreferences &prefs, QWidget *parent)
+    : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgPreferences)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+
 	{
 		/* Adjust window size according to font size. */
 		QSize newSize = Dimensions::windowSize(this, 46.0, 44.0);
 		if (newSize.isValid()) {
-			this->resize(newSize);
+			resize(newSize);
 		}
 	}
-	initPrefDialog();
+	initDialogue(prefs);
 }
 
-void DlgPreferences::initPrefDialog(void)
+DlgPreferences::~DlgPreferences(void)
 {
-	this->download_at_start->setChecked(globPref.download_at_start);
-	this->auto_download_whole_messages->
-	    setChecked(globPref.auto_download_whole_messages);
-	this->download_on_background->
-	    setChecked(globPref.download_on_background);
-	this->timerSpinBox->setValue(globPref.timer_value);
-	this->timestampExpirSpinBox->setValue(
-	    globPref.timestamp_expir_before_days);
-	this->timeoutMinSpinBox->setValue(
-	    globPref.isds_download_timeout_ms / 60000);
-	this->labelTimeoutNote->setText(
-	    tr("Note: If you have a slow network connection or you cannot "
-	    "download complete messages, here you can increase "
-	    "the connection timeout. Default value is %1 minutes. "
-	    "Use 0 to disable timeout limit (not recommended).").arg(
-	        ISDS_DOWNLOAD_TIMEOUT_MS / 60000));
-	this->timeoutMarkMsgSpinBox->setValue(
-	    globPref.message_mark_as_read_timeout / 1000);
-	this->noteMarkMsgLabel->setText(
-	    tr("Note: Marked unread message will be marked as read after set "
-	       "interval. Default value is %1 seconds. Use -1 disable "
-	       "the function.").arg(TIMER_MARK_MSG_READ_MS / 1000));
-	this->check_new_versions->setChecked(globPref.check_new_versions);
-	this->store_messages_on_disk->
-	    setChecked(globPref.store_messages_on_disk);
-	this->store_additional_data_on_disk->
-	    setChecked(globPref.store_additional_data_on_disk);
-	this->check_crl->setChecked(globPref.check_crl);
-	this->language->setCurrentIndex(getLangugeIndex(globPref.language));
-	this->timerLabelPre->
-	    setEnabled(this->download_on_background->isChecked());
-	this->timerLabelPost->
-	    setEnabled(this->download_on_background->isChecked());
-	this->timerSpinBox->
-	    setEnabled(this->download_on_background->isChecked());
-	this->enableGlobalPaths->setChecked(globPref.use_global_paths);
-	this->savePath->setText(globPref.save_attachments_path);
-	this->addFilePath->setText(globPref.add_file_to_attachments_path);
-	this->all_attachments_save_zfo_msg->
-	    setChecked(globPref.all_attachments_save_zfo_msg);
-	this->all_attachments_save_zfo_delinfo->
-	    setChecked(globPref.all_attachments_save_zfo_delinfo);
-	this->all_attachments_save_pdf_msgenvel->
-	    setChecked(globPref.all_attachments_save_pdf_msgenvel);
-	this->all_attachments_save_pdf_delinfo->
-	    setChecked(globPref.all_attachments_save_pdf_delinfo);
-	this->delivery_info_for_every_file->
-	    setChecked(globPref.delivery_info_for_every_file);
-
-	this->message_filename_format->setText(
-	    globPref.message_filename_format);
-	this->delivery_filename_format->setText(
-	    globPref.delivery_filename_format);
-	this->attachment_filename_format->setText(
-	    globPref.attachment_filename_format);
-
-	this->delivery_filename_format_all_attach->setText(
-	    globPref.delivery_filename_format_all_attach);
-
-
-	/* TODO - this choice must be disabled */
-//	this->send_stats_with_version_checks->
-//	    setChecked(globPref.send_stats_with_version_checks);
-//	this->send_stats_with_version_checks->
-//	    setEnabled(this->check_new_versions->isChecked());
-
-	connect(this->check_new_versions, SIGNAL(stateChanged(int)),
-	    this, SLOT(setActiveCheckBox(int)));
-	connect(this->download_on_background, SIGNAL(stateChanged(int)),
-	    this, SLOT(setActiveTimerSetup(int)));
-	connect(this->savePathPushButton, SIGNAL(clicked()),
-	    this, SLOT(setSavePath()));
-	connect(this->addFilePathPushButton, SIGNAL(clicked()),
-	    this, SLOT(setAddFilePath()));
-	connect(this->prefButtonBox, SIGNAL(accepted()),
-	    this, SLOT(saveChanges(void)));
-
-	if (Qt::ToolButtonIconOnly == globPref.toolbar_button_style) {
-		this->rToolButtonIconOnly->setChecked(true);
-		this->rToolButtonTextBesideIcon->setChecked(false);
-		this->rToolButtonTextUnderIcon->setChecked(false);
-	} else if (Qt::ToolButtonTextBesideIcon ==
-	   globPref.toolbar_button_style) {
-		this->rToolButtonIconOnly->setChecked(false);
-		this->rToolButtonTextBesideIcon->setChecked(true);
-		this->rToolButtonTextUnderIcon->setChecked(false);
-	} else if (Qt::ToolButtonTextUnderIcon ==
-	    globPref.toolbar_button_style) {
-		this->rToolButtonIconOnly->setChecked(false);
-		this->rToolButtonTextBesideIcon->setChecked(false);
-		this->rToolButtonTextUnderIcon->setChecked(true);
-	} else {
-		Q_ASSERT(0);
-	}
-
-	if (GlobPreferences::SELECT_NEWEST == globPref.after_start_select) {
-		this->after_start_select_1->setChecked(true);
-		this->after_start_select_2->setChecked(false);
-		this->after_start_select_3->setChecked(false);
-	} else if (GlobPreferences::SELECT_LAST_VISITED ==
-	   globPref.after_start_select) {
-		this->after_start_select_1->setChecked(false);
-		this->after_start_select_2->setChecked(true);
-		this->after_start_select_3->setChecked(false);
-	} else if (GlobPreferences::SELECT_NOTHING ==
-	    globPref.after_start_select) {
-		this->after_start_select_1->setChecked(false);
-		this->after_start_select_2->setChecked(false);
-		this->after_start_select_3->setChecked(true);
-	} else {
-		Q_ASSERT(0);
-	}
-
-	if (GlobPreferences::DOWNLOAD_DATE ==
-	    globPref.certificate_validation_date) {
-		this->certificate_validation_date_1->setChecked(true);
-		this->certificate_validation_date_2->setChecked(false);
-	} else if (GlobPreferences::CURRENT_DATE ==
-	    globPref.certificate_validation_date) {
-		this->certificate_validation_date_1->setChecked(false);
-		this->certificate_validation_date_2->setChecked(true);
-	} else {
-		Q_ASSERT(0);
-	}
+	delete m_ui;
 }
 
-int DlgPreferences::getLangugeIndex(const QString &language)
+bool DlgPreferences::modify(GlobPreferences &prefs, QWidget *parent)
 {
-	if (Localisation::langCs == language) {
-		return 1;
-	} else if (Localisation::langEn == language) {
-		return 2;
+	DlgPreferences dlg(prefs, parent);
+	if (QDialog::Accepted == dlg.exec()) {
+		dlg.saveSettings(prefs);
+		return true;
 	} else {
-		return 0;
+		return false;
 	}
 }
 
+void DlgPreferences::activateBackgroundTimer(int checkState)
+{
+	const bool enable = Qt::Checked == checkState;
+	m_ui->timerPreLabel->setEnabled(enable);
+	m_ui->timerSpinBox->setEnabled(enable);
+	m_ui->timerPostLabel->setEnabled(enable);
+}
 
-const QString &DlgPreferences::getIndexFromLanguge(int index)
+void DlgPreferences::setSavePath(void)
+{
+	QString newDir = QFileDialog::getExistingDirectory(this,
+	    tr("Select directory"), m_ui->savePath->text(),
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+	if (!newDir.isEmpty()) {
+		m_ui->savePath->setText(newDir);
+	}
+}
+
+void DlgPreferences::setAddFilePath(void)
+{
+	QString newDir = QFileDialog::getExistingDirectory(this,
+	    tr("Select directory"), m_ui->addFilePath->text(),
+	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	if (!newDir.isEmpty()) {
+		m_ui->addFilePath->setText(newDir);
+	}
+}
+
+/*!
+ * @brief Converts selected language index to language name.
+ *
+ * @param[in] index Language entry index.
+ * @return Language name as used in settings.
+ */
+static
+const QString &indexToSettingsLang(int index)
 {
 	switch (index) {
-	case 1:
+	case LANG_CZECH:
 		return Localisation::langCs;
 		break;
-	case 2:
+	case LANG_ENGLISH:
 		return Localisation::langEn;
 		break;
 	default:
@@ -198,112 +125,217 @@ const QString &DlgPreferences::getIndexFromLanguge(int index)
 	}
 }
 
-void DlgPreferences::setActiveTimerSetup(int state)
+/*!
+ * @brief Converts language name to index.
+ *
+ * @param[in] lang Language name as used in settings.
+ * @return Corresponding index.
+ */
+static
+int settingsLangtoIndex(const QString &lang)
 {
-	this->timerLabelPre->setEnabled(Qt::Checked == state);
-	this->timerLabelPost->setEnabled(Qt::Checked == state);
-	this->timerSpinBox->setEnabled(Qt::Checked == state);
+	if (Localisation::langCs == lang) {
+		return LANG_CZECH;
+	} else if (Localisation::langEn == lang) {
+		return LANG_ENGLISH;
+	} else {
+		return LANG_SYSTEM;
+	}
 }
 
-
-void DlgPreferences::setActiveCheckBox(int state)
+void DlgPreferences::saveSettings(GlobPreferences &prefs) const
 {
-	Q_UNUSED(state);
+	/* downloading */
+	prefs.download_on_background = m_ui->downloadOnBackground->isChecked();
+	prefs.timer_value = m_ui->timerSpinBox->value();
+	prefs.auto_download_whole_messages =
+	    m_ui->autoDownloadWholeMessages->isChecked();
+	prefs.download_at_start = m_ui->downloadAtStart->isChecked();
+	prefs.isds_download_timeout_ms =
+	    m_ui->timeoutMinSpinBox->value() * MSEC_IN_MIN;
+	prefs.message_mark_as_read_timeout =
+	    m_ui->timeoutMarkMsgSpinBox->value() * MSEC_IN_SEC;
+	prefs.check_new_versions = m_ui->checkNewVersions->isChecked();
+	prefs.send_stats_with_version_checks =
+	    m_ui->sendStatsWithVersionChecks->isChecked();
+
+	/* storage */
+	prefs.store_messages_on_disk = m_ui->storeMessagesOnDisk->isChecked();
+	prefs.store_additional_data_on_disk =
+	    m_ui->storeAdditionalDataOnDisk->isChecked();
+	prefs.certificate_validation_date =
+	    m_ui->certValidationDateNow->isChecked() ?
+	        GlobPreferences::CURRENT_DATE :
+	        GlobPreferences::DOWNLOAD_DATE;
+	prefs.check_crl = m_ui->checkCrl->isChecked();
+	prefs.timestamp_expir_before_days =
+	    m_ui->timestampExpirSpinBox->value();
+
+	/* navigation */
+	if (m_ui->afterStartSelectNewest->isChecked()) {
+		prefs.after_start_select = GlobPreferences::SELECT_NEWEST;
+	} else if (m_ui->afterStartSelectLast->isChecked()) {
+		prefs.after_start_select = GlobPreferences::SELECT_LAST_VISITED;
+	} else {
+		prefs.after_start_select = GlobPreferences::SELECT_NOTHING;
+	}
+
+	/* interface */
+	if (m_ui->toolButtonIconOnly->isChecked()) {
+		prefs.toolbar_button_style = Qt::ToolButtonIconOnly;
+	} else if (m_ui->toolButtonTextBesideIcon->isChecked()) {
+		prefs.toolbar_button_style = Qt::ToolButtonTextBesideIcon;
+	} else {
+		prefs.toolbar_button_style = Qt::ToolButtonTextUnderIcon;
+	}
+
+	/* directories */
+	prefs.use_global_paths = m_ui->enableGlobalPaths->isChecked();
+	prefs.save_attachments_path = m_ui->savePath->text();
+	prefs.add_file_to_attachments_path = m_ui->addFilePath->text();
+
+	/* saving */
+	prefs.all_attachments_save_zfo_msg =
+	    m_ui->allAttachmentsSaveZfoMsg->isChecked();
+	prefs.all_attachments_save_zfo_delinfo =
+	    m_ui->allAttachmentsSaveZfoDelInfo->isChecked();
+	prefs.all_attachments_save_pdf_msgenvel =
+	    m_ui->allAttachmentsSavePdfMsgEnvel->isChecked();
+	prefs.all_attachments_save_pdf_delinfo =
+	    m_ui->allAttachmentsSavePdfDelInfo->isChecked();
+	prefs.message_filename_format = m_ui->msgFileNameFmt->text();
+	prefs.delivery_filename_format = m_ui->delInfoFileNameFmt->text();
+	prefs.attachment_filename_format = m_ui->attachFileNameFmt->text();
+	prefs.delivery_info_for_every_file =
+	    m_ui->delInfoForEveryFile->isChecked();
+	prefs.delivery_filename_format_all_attach =
+	    m_ui->allAttachDelInfoFileNameFmt->text();
+
+	/* language */
+	prefs.language =
+	    indexToSettingsLang(m_ui->langComboBox->currentIndex());
+}
+
+void DlgPreferences::initDialogue(const GlobPreferences &prefs)
+{
+	/* downloading */
+	m_ui->downloadOnBackground->setChecked(prefs.download_on_background);
+	m_ui->timerSpinBox->setValue(prefs.timer_value);
+	m_ui->autoDownloadWholeMessages->setChecked(
+	    prefs.auto_download_whole_messages);
+	m_ui->downloadAtStart->setChecked(prefs.download_at_start);
+	m_ui->timeoutMinSpinBox->setValue(
+	    prefs.isds_download_timeout_ms / MSEC_IN_MIN);
+	m_ui->labelTimeoutNote->setText(tr(
+	    "Note: If you have a slow network connection or you cannot download complete messages, here you can increase the connection timeout. "
+	    "Default value is %1 minutes. Use 0 to disable timeout limit (not recommended).")
+	        .arg(ISDS_DOWNLOAD_TIMEOUT_MS / MSEC_IN_MIN));
+	m_ui->timeoutMarkMsgSpinBox->setValue(
+	    prefs.message_mark_as_read_timeout / MSEC_IN_SEC);
+	m_ui->noteMarkMsgLabel->setText(tr(
+	    "Note: Marked unread message will be marked as read after set interval. "
+	    "Default value is %1 seconds. Use -1 disable the function.")
+	        .arg(TIMER_MARK_MSG_READ_MS / MSEC_IN_SEC));
+	m_ui->checkNewVersions->setChecked(prefs.check_new_versions);
 	/* TODO - this choice must be disabled */
-//	this->send_stats_with_version_checks->setEnabled(Qt::Checked == state);
-}
+//	m_ui->sendStatsWithVersionChecks->setChecked(
+//	    prefs.send_stats_with_version_checks);
+//	m_ui->sendStatsWithVersionChecks->setEnabled(
+//	    m_ui->checkNewVersions->isChecked());
 
+	connect(m_ui->downloadOnBackground, SIGNAL(stateChanged(int)),
+	    this, SLOT(activateBackgroundTimer(int)));
 
-void DlgPreferences::setSavePath(void)
-{
-	QString newDir = QFileDialog::getExistingDirectory(this,
-	    tr("Select directory"), this->savePath->text(),
-	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	activateBackgroundTimer(m_ui->downloadOnBackground->checkState());
 
-	if (!newDir.isEmpty()) {
-		this->savePath->setText(newDir);
-	}
-}
-
-
-void DlgPreferences::setAddFilePath(void)
-{
-	QString newDir = QFileDialog::getExistingDirectory(this,
-	    tr("Select directory"), this->addFilePath->text(),
-	    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-	if (!newDir.isEmpty()) {
-		this->addFilePath->setText(newDir);
-	}
-}
-
-
-void DlgPreferences::saveChanges(void) const
-{
-	globPref.auto_download_whole_messages =
-	    this->auto_download_whole_messages->isChecked();
-	globPref.download_on_background =
-	    this->download_on_background->isChecked();
-	globPref.download_at_start =
-	    this->download_at_start->isChecked();
-	globPref.store_messages_on_disk =
-	    this->store_messages_on_disk->isChecked();
-	globPref.store_additional_data_on_disk =
-	    this->store_additional_data_on_disk->isChecked();
-	globPref.certificate_validation_date =
-	    this->certificate_validation_date_1->isChecked() ?
-	        GlobPreferences::DOWNLOAD_DATE :
-	        GlobPreferences::CURRENT_DATE;
-	globPref.check_crl = this->check_crl->isChecked();
-	globPref.check_new_versions = this->check_new_versions->isChecked();
-	globPref.send_stats_with_version_checks =
-	    this->send_stats_with_version_checks->isChecked();
-	globPref.timer_value = this->timerSpinBox->value();
-	globPref.isds_download_timeout_ms =
-	    this->timeoutMinSpinBox->value() * 60000;
-	globPref.message_mark_as_read_timeout =
-	    this->timeoutMarkMsgSpinBox->value() * 1000;
-	globPref.timestamp_expir_before_days =
-	    this->timestampExpirSpinBox->value();
-	globPref.language =
-	    getIndexFromLanguge(this->language->currentIndex());
-	if (this->after_start_select_1->isChecked()) {
-		globPref.after_start_select = GlobPreferences::SELECT_NEWEST;
-	} else if (this->after_start_select_2->isChecked()) {
-		globPref.after_start_select =
-		    GlobPreferences::SELECT_LAST_VISITED;
+	/* storage */
+	m_ui->storeMessagesOnDisk->setChecked(prefs.store_messages_on_disk);
+	m_ui->storeAdditionalDataOnDisk->setChecked(
+	    prefs.store_additional_data_on_disk);
+	if (GlobPreferences::CURRENT_DATE ==
+	    prefs.certificate_validation_date) {
+		m_ui->certValidationDateNow->setChecked(true);
+		m_ui->certValidationDateDownload->setChecked(false);
+	} else if (GlobPreferences::DOWNLOAD_DATE ==
+	    prefs.certificate_validation_date) {
+		m_ui->certValidationDateNow->setChecked(false);
+		m_ui->certValidationDateDownload->setChecked(true);
 	} else {
-		globPref.after_start_select = GlobPreferences::SELECT_NOTHING;
+		Q_ASSERT(0);
 	}
+	m_ui->checkCrl->setChecked(prefs.check_crl);
+	m_ui->timestampExpirSpinBox->setValue(
+	    prefs.timestamp_expir_before_days);
 
-	if (this->rToolButtonIconOnly->isChecked()) {
-		globPref.toolbar_button_style = Qt::ToolButtonIconOnly;
-	} else if (this->rToolButtonTextBesideIcon->isChecked()) {
-		globPref.toolbar_button_style =
-		    Qt::ToolButtonTextBesideIcon;
+	/* navigation */
+	if (GlobPreferences::SELECT_NEWEST == prefs.after_start_select) {
+		m_ui->afterStartSelectNewest->setChecked(true);
+		m_ui->afterStartSelectLast->setChecked(false);
+		m_ui->afterStartSelectNothing->setChecked(false);
+	} else if (GlobPreferences::SELECT_LAST_VISITED ==
+	    prefs.after_start_select) {
+		m_ui->afterStartSelectNewest->setChecked(false);
+		m_ui->afterStartSelectLast->setChecked(true);
+		m_ui->afterStartSelectNothing->setChecked(false);
+	} else if (GlobPreferences::SELECT_NOTHING ==
+	    prefs.after_start_select) {
+		m_ui->afterStartSelectNewest->setChecked(false);
+		m_ui->afterStartSelectLast->setChecked(false);
+		m_ui->afterStartSelectNothing->setChecked(true);
 	} else {
-		globPref.toolbar_button_style = Qt::ToolButtonTextUnderIcon;
+		Q_ASSERT(0);
 	}
 
-	globPref.use_global_paths = this->enableGlobalPaths->isChecked();
-	globPref.save_attachments_path = this->savePath->text();
-	globPref.add_file_to_attachments_path = this->addFilePath->text();
-	globPref.all_attachments_save_zfo_msg =
-	    this->all_attachments_save_zfo_msg->isChecked();
-	globPref.all_attachments_save_zfo_delinfo =
-	    this->all_attachments_save_zfo_delinfo->isChecked();
-	globPref.all_attachments_save_pdf_msgenvel =
-	    this->all_attachments_save_pdf_msgenvel->isChecked();
-	globPref.all_attachments_save_pdf_delinfo =
-	    this->all_attachments_save_pdf_delinfo->isChecked();
-	globPref.delivery_info_for_every_file =
-	    this->delivery_info_for_every_file->isChecked();
+	/* interface */
+	if (Qt::ToolButtonIconOnly == prefs.toolbar_button_style) {
+		m_ui->toolButtonIconOnly->setChecked(true);
+		m_ui->toolButtonTextBesideIcon->setChecked(false);
+		m_ui->toolButtonTextUnderIcon->setChecked(false);
+	} else if (Qt::ToolButtonTextBesideIcon ==
+	    prefs.toolbar_button_style) {
+		m_ui->toolButtonIconOnly->setChecked(false);
+		m_ui->toolButtonTextBesideIcon->setChecked(true);
+		m_ui->toolButtonTextUnderIcon->setChecked(false);
+	} else if (Qt::ToolButtonTextUnderIcon ==
+	    prefs.toolbar_button_style) {
+		m_ui->toolButtonIconOnly->setChecked(false);
+		m_ui->toolButtonTextBesideIcon->setChecked(false);
+		m_ui->toolButtonTextUnderIcon->setChecked(true);
+	} else {
+		Q_ASSERT(0);
+	}
 
-	globPref.message_filename_format =
-	    this->message_filename_format->text();
-	globPref.delivery_filename_format =
-	    this->delivery_filename_format->text();
-	globPref.attachment_filename_format =
-	    this->attachment_filename_format->text();
-	globPref.delivery_filename_format_all_attach =
-	    this->delivery_filename_format_all_attach->text();
+	/* directories */
+	m_ui->enableGlobalPaths->setChecked(prefs.use_global_paths);
+	m_ui->savePath->setText(prefs.save_attachments_path);
+	m_ui->addFilePath->setText(prefs.add_file_to_attachments_path);
+
+	connect(m_ui->savePathPushButton, SIGNAL(clicked()),
+	    this, SLOT(setSavePath()));
+	connect(m_ui->addFilePathPushButton, SIGNAL(clicked()),
+	    this, SLOT(setAddFilePath()));
+
+	/* saving */
+	m_ui->allAttachmentsSaveZfoMsg->setChecked(
+	    prefs.all_attachments_save_zfo_msg);
+	m_ui->allAttachmentsSaveZfoDelInfo->setChecked(
+	    prefs.all_attachments_save_zfo_delinfo);
+	m_ui->allAttachmentsSavePdfMsgEnvel->setChecked(
+	    prefs.all_attachments_save_pdf_msgenvel);
+	m_ui->allAttachmentsSavePdfDelInfo->setChecked(
+	    prefs.all_attachments_save_pdf_delinfo);
+	m_ui->msgFileNameFmt->setText(prefs.message_filename_format);
+	m_ui->delInfoFileNameFmt->setText(prefs.delivery_filename_format);
+	m_ui->attachFileNameFmt->setText(prefs.attachment_filename_format);
+	m_ui->delInfoForEveryFile->setChecked(
+	    prefs.delivery_info_for_every_file);
+	m_ui->allAttachDelInfoFileNameFmt->setText(
+	    prefs.delivery_filename_format_all_attach);
+
+	/* language */
+	m_ui->langComboBox->addItem(tr("Use system language"));
+	m_ui->langComboBox->addItem(tr("Czech"));
+	m_ui->langComboBox->addItem(tr("English"));
+	m_ui->langComboBox->setCurrentIndex(
+	    settingsLangtoIndex(prefs.language));
 }

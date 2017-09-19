@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Preferences</class>
- <widget class="QDialog" name="Preferences">
+ <class>DlgPreferences</class>
+ <widget class="QDialog" name="DlgPreferences">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -67,7 +67,7 @@
           <bool>false</bool>
          </property>
          <property name="title">
-          <string>Messages downloading</string>
+          <string>Message downloading</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignJustify|Qt::AlignVCenter</set>
@@ -77,7 +77,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <item>
-           <widget class="QCheckBox" name="download_on_background">
+           <widget class="QCheckBox" name="downloadOnBackground">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -97,7 +97,7 @@ Download period you can set bellow.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-             <widget class="QLabel" name="timerLabelPre">
+             <widget class="QLabel" name="timerPreLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -137,7 +137,7 @@ synchronise all accounts in the background.</string>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="timerLabelPost">
+             <widget class="QLabel" name="timerPostLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -165,7 +165,7 @@ synchronise all accounts in the background.</string>
            </layout>
           </item>
           <item>
-           <widget class="QCheckBox" name="auto_download_whole_messages">
+           <widget class="QCheckBox" name="autoDownloadWholeMessages">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -185,7 +185,7 @@ slower internet connections.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="download_at_start">
+           <widget class="QCheckBox" name="downloadAtStart">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -219,7 +219,7 @@ and also download new messages on background at startup.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
-             <widget class="QLabel" name="label_4">
+             <widget class="QLabel" name="timeoutMinPreLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -260,7 +260,7 @@ connection timeout.</string>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_5">
+             <widget class="QLabel" name="timeoutMinPostLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -325,7 +325,7 @@ connection timeout.</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
-             <widget class="QLabel" name="label_39">
+             <widget class="QLabel" name="timeoutMarkMsgPreLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -365,7 +365,7 @@ automatically marking message as read.</string>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label_40">
+             <widget class="QLabel" name="timeoutMarkMsgPostLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -425,7 +425,7 @@ automatically marking message as read.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout">
           <item>
-           <widget class="QCheckBox" name="check_new_versions">
+           <widget class="QCheckBox" name="checkNewVersions">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -445,7 +445,7 @@ check for new Datovka versions on startup.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="send_stats_with_version_checks">
+           <widget class="QCheckBox" name="sendStatsWithVersionChecks">
             <property name="enabled">
              <bool>false</bool>
             </property>
@@ -508,7 +508,7 @@ The data is used solely for statistical purposes.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_11">
           <item>
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="storageOptionsLabel">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -517,7 +517,7 @@ The data is used solely for statistical purposes.</string>
              </font>
             </property>
             <property name="text">
-             <string>It migth be possible for a person with access to your home directory to modify data in the Datovka database with malicious intent or to steal you login credentials for Datové Schránky. Using the checkboxes below, you can influence which data Datovka stores on the disk. Note: Password storage can be adjusted on per-account basis in the credentials dialog.</string>
+             <string>It migth be possible for a person with access to to the configuration directory to modify data in the application databases with a malicious intent or to steal you data-box login credentials. Using the checkboxes below, you can influence which data the application stores on the disk. Note: Password storing can be adjusted on a per-account basis in the credentials dialogue.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -525,7 +525,7 @@ The data is used solely for statistical purposes.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="store_messages_on_disk">
+           <widget class="QCheckBox" name="storeMessagesOnDisk">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -548,7 +548,7 @@ than 90 day may not be available.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="store_additional_data_on_disk">
+           <widget class="QCheckBox" name="storeAdditionalDataOnDisk">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -585,7 +585,7 @@ an attacker, but their nature makes it a relatively harmless possibility.</strin
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_9">
           <item>
-           <widget class="QRadioButton" name="certificate_validation_date_1">
+           <widget class="QRadioButton" name="certValidationDateNow">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -606,7 +606,7 @@ compromised certificate exploit.</string>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="certificate_validation_date_2">
+           <widget class="QRadioButton" name="certValidationDateDownload">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -633,7 +633,7 @@ download date in the Datovka database.</string>
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="check_crl">
+           <widget class="QCheckBox" name="checkCrl">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -671,7 +671,7 @@ of days will be included into the expiration notification summary.</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_12">
           <item>
-           <widget class="QLabel" name="label_36">
+           <widget class="QLabel" name="timestampExpirPre">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -714,7 +714,7 @@ of timestamp will be message included in the check results.</string>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_37">
+           <widget class="QLabel" name="timestampExpirPost">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -775,7 +775,7 @@ of timestamp will be message included in the check results.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_10">
           <item>
-           <widget class="QRadioButton" name="after_start_select_1">
+           <widget class="QRadioButton" name="afterStartSelectNewest">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -795,7 +795,7 @@ the newest message will be activated.</string>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="after_start_select_2">
+           <widget class="QRadioButton" name="afterStartSelectLast">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -812,7 +812,7 @@ displayed in this account will be selected.</string>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="after_start_select_3">
+           <widget class="QRadioButton" name="afterStartSelectNothing">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -867,7 +867,7 @@ displayed in this account will be selected.</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_18">
           <item>
-           <widget class="QRadioButton" name="rToolButtonIconOnly">
+           <widget class="QRadioButton" name="toolButtonIconOnly">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -883,7 +883,7 @@ displayed in this account will be selected.</string>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="rToolButtonTextBesideIcon">
+           <widget class="QRadioButton" name="toolButtonTextBesideIcon">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -899,7 +899,7 @@ displayed in this account will be selected.</string>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="rToolButtonTextUnderIcon">
+           <widget class="QRadioButton" name="toolButtonTextUnderIcon">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -918,7 +918,7 @@ displayed in this account will be selected.</string>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label_10">
+           <widget class="QLabel" name="toolButtonNotificationLabel">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -989,7 +989,7 @@ Per-account path remembering will be disabled.</string>
              </font>
             </property>
             <property name="text">
-             <string>Path for saving of attachments is currently set on:</string>
+             <string>Path for attachment saving is currently set to:</string>
             </property>
            </widget>
           </item>
@@ -1049,7 +1049,7 @@ Per-account path remembering will be disabled.</string>
              </font>
             </property>
             <property name="text">
-             <string>Path for adding of file to attachments is currently set on:</string>
+             <string>Path for adding files as attachments is currently set to:</string>
             </property>
            </widget>
           </item>
@@ -1144,7 +1144,7 @@ Per-account path remembering will be disabled.</string>
              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
             </property>
             <item row="0" column="0">
-             <widget class="QCheckBox" name="all_attachments_save_zfo_msg">
+             <widget class="QCheckBox" name="allAttachmentsSaveZfoMsg">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1161,7 +1161,7 @@ signed message as ZFO to the same path.</string>
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QCheckBox" name="all_attachments_save_pdf_msgenvel">
+             <widget class="QCheckBox" name="allAttachmentsSavePdfMsgEnvel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1178,7 +1178,7 @@ message envelope as PDF to the same path.</string>
              </widget>
             </item>
             <item row="1" column="0">
-             <widget class="QCheckBox" name="all_attachments_save_zfo_delinfo">
+             <widget class="QCheckBox" name="allAttachmentsSaveZfoDelInfo">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1195,7 +1195,7 @@ signed acceptance info as ZFO to the same path.</string>
              </widget>
             </item>
             <item row="1" column="1">
-             <widget class="QCheckBox" name="all_attachments_save_pdf_delinfo">
+             <widget class="QCheckBox" name="allAttachmentsSavePdfDelInfo">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1239,8 +1239,11 @@ file name including its suffix).</string>
             <property name="fieldGrowthPolicy">
              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
             </property>
+            <property name="labelAlignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
             <item row="0" column="0">
-             <widget class="QLabel" name="label_3">
+             <widget class="QLabel" name="msgFileNameLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1255,7 +1258,7 @@ file name including its suffix).</string>
             <item row="0" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_8">
               <item>
-               <widget class="QLineEdit" name="message_filename_format">
+               <widget class="QLineEdit" name="msgFileNameFmt">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1265,7 +1268,7 @@ file name including its suffix).</string>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_6">
+               <widget class="QLabel" name="suffLabel_1">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1280,7 +1283,7 @@ file name including its suffix).</string>
              </layout>
             </item>
             <item row="1" column="0">
-             <widget class="QLabel" name="label_7">
+             <widget class="QLabel" name="delInfoFileNameLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1293,7 +1296,7 @@ file name including its suffix).</string>
              </widget>
             </item>
             <item row="2" column="0">
-             <widget class="QLabel" name="label_9">
+             <widget class="QLabel" name="attachFileNameLabel">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1308,7 +1311,7 @@ file name including its suffix).</string>
             <item row="1" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_9">
               <item>
-               <widget class="QLineEdit" name="delivery_filename_format">
+               <widget class="QLineEdit" name="delInfoFileNameFmt">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1318,7 +1321,7 @@ file name including its suffix).</string>
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_8">
+               <widget class="QLabel" name="suffLabel_2">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1335,7 +1338,7 @@ file name including its suffix).</string>
             <item row="2" column="1">
              <layout class="QHBoxLayout" name="horizontalLayout_10">
               <item>
-               <widget class="QLineEdit" name="attachment_filename_format">
+               <widget class="QLineEdit" name="attachFileNameFmt">
                 <property name="font">
                  <font>
                   <weight>50</weight>
@@ -1749,7 +1752,7 @@ file name including its suffix).</string>
            </layout>
           </item>
           <item>
-           <widget class="QLabel" name="label_38">
+           <widget class="QLabel" name="characterReplacementNotificationLabel">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -1772,7 +1775,7 @@ file name including its suffix).</string>
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
-             <widget class="QCheckBox" name="delivery_info_for_every_file">
+             <widget class="QCheckBox" name="delInfoForEveryFile">
               <property name="font">
                <font>
                 <weight>50</weight>
@@ -1790,7 +1793,7 @@ attachment file name (parameter %f is required).</string>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="delivery_filename_format_all_attach">
+             <widget class="QLineEdit" name="allAttachDelInfoFileNameFmt">
               <property name="enabled">
                <bool>true</bool>
               </property>
@@ -1840,32 +1843,17 @@ attachment file name (parameter %f is required).</string>
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
-           <widget class="QComboBox" name="language">
+           <widget class="QComboBox" name="langComboBox">
             <property name="font">
              <font>
               <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
-            <item>
-             <property name="text">
-              <string>Use system language</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Czech</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>English</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="langNotificationLabel">
             <property name="font">
              <font>
               <weight>50</weight>
@@ -1917,7 +1905,7 @@ attachment file name (parameter %f is required).</string>
   <connection>
    <sender>prefButtonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Preferences</receiver>
+   <receiver>DlgPreferences</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -1933,7 +1921,7 @@ attachment file name (parameter %f is required).</string>
   <connection>
    <sender>prefButtonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Preferences</receiver>
+   <receiver>DlgPreferences</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
