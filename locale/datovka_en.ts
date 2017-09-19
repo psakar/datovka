@@ -1781,19 +1781,603 @@ into your local database.</source>
 <context>
     <name>DlgPreferences</name>
     <message>
-        <location filename="../src/gui/dlg_preferences.cpp" line="59"/>
+        <location filename="../src/gui/dlg_preferences.cpp" line="229"/>
         <source>Note: If you have a slow network connection or you cannot download complete messages, here you can increase the connection timeout. Default value is %1 minutes. Use 0 to disable timeout limit (not recommended).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_preferences.cpp" line="67"/>
+        <location filename="../src/gui/dlg_preferences.cpp" line="235"/>
         <source>Note: Marked unread message will be marked as read after set interval. Default value is %1 seconds. Use -1 disable the function.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_preferences.cpp" line="220"/>
-        <location filename="../src/gui/dlg_preferences.cpp" line="232"/>
+        <location filename="../src/gui/dlg_preferences.cpp" line="336"/>
+        <source>Use system language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_preferences.cpp" line="337"/>
+        <source>Czech</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_preferences.cpp" line="338"/>
+        <source>English</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_preferences.cpp" line="88"/>
+        <location filename="../src/gui/dlg_preferences.cpp" line="99"/>
         <source>Select directory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="20"/>
+        <source>Datovka - Preferences</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="46"/>
+        <source>Downloading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="70"/>
+        <source>Message downloading</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="88"/>
+        <source>When allowed, the application will automatically download
+messages on background without blocking the user interface.
+Download period can be selected below.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="93"/>
+        <source>Automatically synchronise all in background</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="108"/>
+        <source>Check every</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="121"/>
+        <source>Sets a time interval for automatic synchronisation
+of all accounts on background.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="144"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="261"/>
+        <source>minutes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="172"/>
+        <source>When accessing the data boxes, only envelopes of messages are downloaded at first.
+You can then download the whole message, including any attachments, manually.
+When this option is turned on, the application will perform automatic downloading
+of complete messages. The only downside to this approach is a longer waiting time
+on slower internet connections.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="179"/>
+        <source>Automatically download whole messages (may be slow)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="192"/>
+        <source>When allowed, the application will automatically synchronise accounts
+and will also download new messages on background at startup.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="196"/>
+        <source>Automatically synchronize all accounts on startup</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="212"/>
+        <source>Connection settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="226"/>
+        <source>Timeout for message downloading is set on</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="239"/>
+        <source>Allows to set a timeout interval for network connection.
+If you have a slow network connection or you cannot
+download complete messages, here you can increase
+the connection timeout.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="309"/>
+        <source>Mark message as read settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="326"/>
+        <source>Automatically mark message as read after</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="339"/>
+        <source>Allows to set a timeout interval for
+automatic marking of messages as read.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="362"/>
+        <source>seconds</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="410"/>
+        <source>New versions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="422"/>
+        <source>When this option is active, the application will automatically
+check for new application versions on startup.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="426"/>
+        <source>Check for new application versions on startup</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="445"/>
+        <source>When this option is active, the application will send information about
+the application version and related data as part of the new version request.
+These data contain the application version, versions of libraries, information
+about the operating system and a randomly created identifier.
+
+No personal data of any kind are sent.
+The data are used solely for statistical purposes.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="454"/>
+        <source>Send version info alongside the request</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="481"/>
+        <source>Security</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="493"/>
+        <source>Storage options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="506"/>
+        <source>It migth be possible for a person with access to the configuration directory to modify data in the application databases with a malicious intent or to steal you data-box login credentials. Using the checkboxes below, you can influence which data the application stores on the disk.
+Note: Password storing can be adjusted on a per-account basis in the credentials dialogue.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="523"/>
+        <source>When allowed, messages are stored in database files. Such storage
+might be compromised by an attacker and the content of messages
+might be modified.
+When turned off, messages are freshly downloaded each time you
+start the application. In this case, messages older than 90 days
+may not be available.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="531"/>
+        <source>Allow storing of messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="547"/>
+        <source>The application stores some additional data outside the message
+database. These contain information about the data boxes allowing
+for notification about expiring passwords etc. These data might also
+be changed by an attacker, but with a relative low impact.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="553"/>
+        <source>Allow storing of additional data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="572"/>
+        <source>Signing certificate validity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="589"/>
+        <source>Check against current date (safer)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="612"/>
+        <source>Check against the date of download</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="632"/>
+        <source>Check certificate revocation list (CRL).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="635"/>
+        <source>Check certificate revocation list (CRL)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="654"/>
+        <source>Message time stamps expiring within the selected numer
+of days will be included into the expiration notification summary.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="658"/>
+        <source>Message time stamp expiration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1007"/>
+        <source>Select a new path for attachment saving.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1067"/>
+        <source>Select a new path for adding attachment files.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1214"/>
+        <source>Specifies the format of file names for attachment files
+and other exported files. When saving attachment
+files, the default value is %f (i.e. saved file name will
+match the original file name including its suffix).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="584"/>
+        <source>Validity of the signing certificate will be checked against
+the current date. This provides the highest protection against
+compromised certificates.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="605"/>
+        <source>The validity of the signing certificate is checked against
+the message download date. This allows a long-term storing
+of messages without generating false alarms about invalid
+signatures. It is less safe, because an attacker could modify
+download dates in the application databases.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="670"/>
+        <source>Check for time stamps expiring within</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="683"/>
+        <source>Allows to set an interval specifying how many days before
+a timestamp expiration a message will be included in
+signature check results.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="710"/>
+        <source>days</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="747"/>
+        <source>Navigation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="759"/>
+        <source>When account is opened, select</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="775"/>
+        <source>Newest message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="795"/>
+        <source>Last displayed message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="771"/>
+        <source>After an account is selected,
+select the newest message.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="791"/>
+        <source>After an account is selected,
+select the last displayed message for this account.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="808"/>
+        <source>After an account is selected,
+no particular message will be selected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="812"/>
+        <source>Nothing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="839"/>
+        <source>Interface</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="851"/>
+        <source>Style of toolbar buttons</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="863"/>
+        <source>Only icons will be displayed in the toolbar.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="866"/>
+        <source>Only display the icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="879"/>
+        <source>Icons and text beside them will be displayed in the toolbar.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="882"/>
+        <source>The text appears beside the icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="895"/>
+        <source>Icons and text under them will be displayed in the toolbar.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="898"/>
+        <source>The text appears under the icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="915"/>
+        <source>Note: Toolbar settings will not be applied until you restart the application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="939"/>
+        <source>Directories</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="954"/>
+        <source>When allowed, the application will use the following
+directories as paths for loading and saving files for
+all accounts. Per-account path remembering will
+be disabled.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="960"/>
+        <source>Use global path settings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="978"/>
+        <source>Path for attachment saving is currently set to:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1010"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1070"/>
+        <source>Change</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1038"/>
+        <source>Path for adding files as attachments is currently set to:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1109"/>
+        <source>Saving</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1121"/>
+        <source>These actions will be performed when saving all message attachments.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1124"/>
+        <source>When saving all attachments also</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1141"/>
+        <source>When saving all attachments also save
+signed message as ZFO to the same path.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1145"/>
+        <source>Save signed message to ZFO</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1158"/>
+        <source>When saving all attachments also save
+message envelope as PDF to the same path.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1162"/>
+        <source>Save message envelope to PDF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1175"/>
+        <source>When saving all attachments also save
+signed acceptance info as ZFO to the same path.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1179"/>
+        <source>Save signed acceptance info to ZFO</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1192"/>
+        <source>When saving all attachments also save
+acceptance info as PDF to the same path.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1196"/>
+        <source>Save acceptance info to PDF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1220"/>
+        <source>File name format of saved/exported files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1240"/>
+        <source>Message file name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1280"/>
+        <source>Acceptance info file name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1293"/>
+        <source>Attachment file name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1417"/>
+        <source>acceptance year (YYYY)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1431"/>
+        <source>acceptance month (MM)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1445"/>
+        <source>acceptance day (DD)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1459"/>
+        <source>acceptance minute (mm)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1473"/>
+        <source>acceptance hour (hh)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1547"/>
+        <source>message ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1561"/>
+        <source>message subject (separated by &quot;-&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1575"/>
+        <source>databox ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1603"/>
+        <source>attachment filename (with suffix)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1631"/>
+        <source>user ID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1645"/>
+        <source>name of sender (separated by &quot;-&quot;)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1679"/>
+        <source>Example:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1707"/>
+        <source>means</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1750"/>
+        <source>Note: Illegal characters in the name of file will be replaced.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1772"/>
+        <source>Saves acceptance info for every attachment file separately.
+The acceptance info file name has to contain the original
+attachment file name (parameter %f is required).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1777"/>
+        <source>Save acceptance info for every attachment file. Format:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1816"/>
+        <source>Language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1828"/>
+        <source>Application language</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1851"/>
+        <source>Note: Language settings will not be applied until you restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4945,593 +5529,6 @@ sent reply on this message</source>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="1021"/>
         <source>Save all attachments</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Preferences</name>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="46"/>
-        <source>Downloading</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="70"/>
-        <source>Messages downloading</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="148"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="271"/>
-        <source>minutes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="183"/>
-        <source>Automatically download whole messages (may be slow)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="200"/>
-        <source>Automatically synchronize all accounts on startup</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="424"/>
-        <source>New versions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="20"/>
-        <source>Datovka - Preferences</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="88"/>
-        <source>When allowed, Datovka will automatically download messages 
-on the background of application without blocking of user interface.
-Download period you can set bellow.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="93"/>
-        <source>Automatically synchronise all in background</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="108"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="125"/>
-        <source>Allows to set a time interval for automatically
-synchronise all accounts in the background.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="112"/>
-        <source> Check every</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="176"/>
-        <source>When accessing your Databox, only envelopes of messages are downloaded at first. 
-You can then download the whole message, including any attachments, manually. 
-When this option is turned on, Datovka will perform the download of complete 
-message for you. The only downside to this approach is longer waiting time on 
-slower internet connections.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="196"/>
-        <source>When allowed, Datovka will automatically synchronise accounts 
-and also download new messages on background at startup.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="230"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="249"/>
-        <source>Allows to set a timeout interval for network connection.
-If you have a slow network connection or you cannot 
-download complete messages, here you can increase
-connection timeout.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="319"/>
-        <source>Mark message as read settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="336"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="353"/>
-        <source>Allows to set a timeout interval for
-automatically marking message as read.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="340"/>
-        <source>Automatically mark message as read after</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="376"/>
-        <source>seconds</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="436"/>
-        <source>When this option is active, Datovka will automatically
-check for new Datovka versions on startup.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="440"/>
-        <source>Check for new Datovka versions on startup</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="459"/>
-        <source>When this option is active, Datovka will send information about your 
-Datovka version and related data as part of the request for new versions. 
-This data contains the version of Datovka, version of libraries, operating 
-system platform and an ID randomly created for your application at first start.
-
-No personal data of any kind is sent. 
-The data is used solely for statistical purposes.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="468"/>
-        <source>Send version info alongside the request</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="495"/>
-        <source>Security</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="507"/>
-        <source>Storage options</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="520"/>
-        <source>It migth be possible for a person with access to your home directory to modify data in the Datovka database with malicious intent or to steal you login credentials for Datové Schránky. Using the checkboxes below, you can influence which data Datovka stores on the disk. Note: Password storage can be adjusted on per-account basis in the credentials dialog.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="536"/>
-        <source>When allowed, messages are stored in a database in your home directory. 
-Such storage might be compromised by an attacker and the content of 
-messages might be modified. When turned off, messages are freshly 
-downloaded each time you start Datovka. In this case messages older 
-than 90 day may not be available.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="543"/>
-        <source>Allow message storage</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="559"/>
-        <source>Datovka stores some additional data outside the message database. 
-These are data about the databox which allow for example warning 
-about an expiring password. These data might be also changed by 
-an attacker, but their nature makes it a relatively harmless possibility.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="565"/>
-        <source>Allow storage of additional data</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="682"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="699"/>
-        <source>Allows to set a interval how many days before expiring 
-of timestamp will be message included in the check results.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="725"/>
-        <source>days</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="762"/>
-        <source>Navigation</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="774"/>
-        <source>When account is opened, select</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="786"/>
-        <source>After an account is opened,
-the newest message will be activated.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="790"/>
-        <source>Newest message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="806"/>
-        <source>When account is opened, the last message
-displayed in this account will be selected.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="810"/>
-        <source>Last displayed message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="823"/>
-        <source>When account is opened, random message
-displayed in this account will be selected.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="827"/>
-        <source>Nothing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="854"/>
-        <source>Interface</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="866"/>
-        <source>Style of toolbar buttons</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="878"/>
-        <source>Only icons will be displayed in the toolbar.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="881"/>
-        <source>Only display the icon</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="894"/>
-        <source>Icons and text beside them will be displayed in the toolbar.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="897"/>
-        <source>The text appears beside the icon</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="910"/>
-        <source>Icons and text under them will be displayed in the toolbar.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="913"/>
-        <source>The text appears under the icon</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="930"/>
-        <source>Note: toolbar settings will not be applied until you restart the application.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1021"/>
-        <source>Select a new path for saving of attachments.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1081"/>
-        <source>Select a new path for adding of files to attachments.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1155"/>
-        <source>When saving all attachments also save
-signed message as ZFO to the same path.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1172"/>
-        <source>When saving all attachments also save
-message envelope as PDF to the same path.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1783"/>
-        <source>Saves acceptance info for every attachment file separately.
-The acceptance info file name has to contain the original
-attachment file name (parameter %f is required).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1788"/>
-        <source>Save acceptance info for every attachment file. Format:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1228"/>
-        <source>Specifies file name format for attachment files and other
-exported files. Default value when saving attachment
-files is %f (i.e. saved file name will match the original
-file name including its suffix).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1234"/>
-        <source>File name format of saved/exported files</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1251"/>
-        <source>Message file name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1304"/>
-        <source>Attachment file name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1428"/>
-        <source>acceptance year (YYYY)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1442"/>
-        <source>acceptance month (MM)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1456"/>
-        <source>acceptance day (DD)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1470"/>
-        <source>acceptance minute (mm)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1484"/>
-        <source>acceptance hour (hh)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1656"/>
-        <source>name of sender (separated by &quot;-&quot;)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1761"/>
-        <source>Note: Illegal characters in the name of file will be replaced.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="584"/>
-        <source>Signing certificate validity</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="596"/>
-        <source>Validity of the signing certificate will be checked against
-the current date. This gives the highest protection against
-compromised certificate exploit.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="601"/>
-        <source>Check against current date (safer)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="617"/>
-        <source>The validity of signing certificate is checked against a
-stored download date. This allows long-term storage 
-of messages without false alarms about invalid signature. 
-It is less safe, because the attacker could modify the 
-download date in the Datovka database.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="624"/>
-        <source>Check against the date of download</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="644"/>
-        <source>Check certificate revocation list (CRL).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="647"/>
-        <source>Check certificate revocation list (CRL)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="216"/>
-        <source>Connection settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="236"/>
-        <source>Timeout for message downloading is set on</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1123"/>
-        <source>Saving</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="969"/>
-        <source>When allowed, Datovka will use the following directories
-as paths for loading and saving files in all accounts. 
-Per-account path remembering will be disabled.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="954"/>
-        <source>Directories</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="974"/>
-        <source>Use global path settings</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="992"/>
-        <source>Path for saving of attachments is currently set on:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1024"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1084"/>
-        <source>Change</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1052"/>
-        <source>Path for adding of file to attachments is currently set on:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1135"/>
-        <source>These actions will be performed when saving all message attachments.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1138"/>
-        <source>When saving all attachments also</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1159"/>
-        <source>Save signed message to ZFO</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1176"/>
-        <source>Save message envelope to PDF</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="666"/>
-        <source>Message time stamps expiring within the selected numer
-of days will be included into the expiration notification summary.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="670"/>
-        <source>Message time stamp expiration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="686"/>
-        <source>Check for time stamps expiring within</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1189"/>
-        <source>When saving all attachments also save
-signed acceptance info as ZFO to the same path.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1193"/>
-        <source>Save signed acceptance info to ZFO</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1206"/>
-        <source>When saving all attachments also save
-acceptance info as PDF to the same path.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1210"/>
-        <source>Save acceptance info to PDF</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1291"/>
-        <source>Acceptance info file name:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1558"/>
-        <source>message ID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1572"/>
-        <source>message subject (separated by &quot;-&quot;)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1586"/>
-        <source>databox ID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1614"/>
-        <source>attachment filename (with suffix)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1642"/>
-        <source>user ID</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1690"/>
-        <source>Example:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1718"/>
-        <source>means</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1827"/>
-        <source>Language</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1839"/>
-        <source>Application language</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1852"/>
-        <source>Use system language</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1857"/>
-        <source>Czech</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1862"/>
-        <source>English</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1877"/>
-        <source>Note: language settings will not be applied until you restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

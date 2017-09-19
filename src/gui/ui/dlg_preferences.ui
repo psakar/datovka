@@ -85,9 +85,9 @@
              </font>
             </property>
             <property name="toolTip">
-             <string>When allowed, Datovka will automatically download messages 
-on the background of application without blocking of user interface.
-Download period you can set bellow.</string>
+             <string>When allowed, the application will automatically download
+messages on background without blocking the user interface.
+Download period can be selected below.</string>
             </property>
             <property name="text">
              <string>Automatically synchronise all in background</string>
@@ -104,12 +104,8 @@ Download period you can set bellow.</string>
                 <bold>false</bold>
                </font>
               </property>
-              <property name="toolTip">
-               <string>Allows to set a time interval for automatically
-synchronise all accounts in the background.</string>
-              </property>
               <property name="text">
-               <string> Check every</string>
+               <string>Check every</string>
               </property>
              </widget>
             </item>
@@ -122,8 +118,8 @@ synchronise all accounts in the background.</string>
                </font>
               </property>
               <property name="toolTip">
-               <string>Allows to set a time interval for automatically
-synchronise all accounts in the background.</string>
+               <string>Sets a time interval for automatic synchronisation
+of all accounts on background.</string>
               </property>
               <property name="minimum">
                <number>5</number>
@@ -173,11 +169,11 @@ synchronise all accounts in the background.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>When accessing your Databox, only envelopes of messages are downloaded at first. 
-You can then download the whole message, including any attachments, manually. 
-When this option is turned on, Datovka will perform the download of complete 
-message for you. The only downside to this approach is longer waiting time on 
-slower internet connections.</string>
+             <string>When accessing the data boxes, only envelopes of messages are downloaded at first.
+You can then download the whole message, including any attachments, manually.
+When this option is turned on, the application will perform automatic downloading
+of complete messages. The only downside to this approach is a longer waiting time
+on slower internet connections.</string>
             </property>
             <property name="text">
              <string>Automatically download whole messages (may be slow)</string>
@@ -193,8 +189,8 @@ slower internet connections.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>When allowed, Datovka will automatically synchronise accounts 
-and also download new messages on background at startup.</string>
+             <string>When allowed, the application will automatically synchronise accounts
+and will also download new messages on background at startup.</string>
             </property>
             <property name="text">
              <string>Automatically synchronize all accounts on startup</string>
@@ -226,12 +222,6 @@ and also download new messages on background at startup.</string>
                 <bold>false</bold>
                </font>
               </property>
-              <property name="toolTip">
-               <string>Allows to set a timeout interval for network connection.
-If you have a slow network connection or you cannot 
-download complete messages, here you can increase
-connection timeout.</string>
-              </property>
               <property name="text">
                <string>Timeout for message downloading is set on</string>
               </property>
@@ -247,9 +237,9 @@ connection timeout.</string>
               </property>
               <property name="toolTip">
                <string>Allows to set a timeout interval for network connection.
-If you have a slow network connection or you cannot 
+If you have a slow network connection or you cannot
 download complete messages, here you can increase
-connection timeout.</string>
+the connection timeout.</string>
               </property>
               <property name="maximum">
                <number>15</number>
@@ -332,10 +322,6 @@ connection timeout.</string>
                 <bold>false</bold>
                </font>
               </property>
-              <property name="toolTip">
-               <string>Allows to set a timeout interval for
-automatically marking message as read.</string>
-              </property>
               <property name="text">
                <string>Automatically mark message as read after</string>
               </property>
@@ -351,7 +337,7 @@ automatically marking message as read.</string>
               </property>
               <property name="toolTip">
                <string>Allows to set a timeout interval for
-automatically marking message as read.</string>
+automatic marking of messages as read.</string>
               </property>
               <property name="minimum">
                <number>-1</number>
@@ -433,11 +419,11 @@ automatically marking message as read.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>When this option is active, Datovka will automatically
-check for new Datovka versions on startup.</string>
+             <string>When this option is active, the application will automatically
+check for new application versions on startup.</string>
             </property>
             <property name="text">
-             <string>Check for new Datovka versions on startup</string>
+             <string>Check for new application versions on startup</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -456,13 +442,13 @@ check for new Datovka versions on startup.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>When this option is active, Datovka will send information about your 
-Datovka version and related data as part of the request for new versions. 
-This data contains the version of Datovka, version of libraries, operating 
-system platform and an ID randomly created for your application at first start.
+             <string>When this option is active, the application will send information about
+the application version and related data as part of the new version request.
+These data contain the application version, versions of libraries, information
+about the operating system and a randomly created identifier.
 
-No personal data of any kind is sent. 
-The data is used solely for statistical purposes.</string>
+No personal data of any kind are sent.
+The data are used solely for statistical purposes.</string>
             </property>
             <property name="text">
              <string>Send version info alongside the request</string>
@@ -517,7 +503,8 @@ The data is used solely for statistical purposes.</string>
              </font>
             </property>
             <property name="text">
-             <string>It migth be possible for a person with access to to the configuration directory to modify data in the application databases with a malicious intent or to steal you data-box login credentials. Using the checkboxes below, you can influence which data the application stores on the disk. Note: Password storing can be adjusted on a per-account basis in the credentials dialogue.</string>
+             <string>It migth be possible for a person with access to the configuration directory to modify data in the application databases with a malicious intent or to steal you data-box login credentials. Using the checkboxes below, you can influence which data the application stores on the disk.
+Note: Password storing can be adjusted on a per-account basis in the credentials dialogue.</string>
             </property>
             <property name="wordWrap">
              <bool>true</bool>
@@ -533,14 +520,15 @@ The data is used solely for statistical purposes.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>When allowed, messages are stored in a database in your home directory. 
-Such storage might be compromised by an attacker and the content of 
-messages might be modified. When turned off, messages are freshly 
-downloaded each time you start Datovka. In this case messages older 
-than 90 day may not be available.</string>
+             <string>When allowed, messages are stored in database files. Such storage
+might be compromised by an attacker and the content of messages
+might be modified.
+When turned off, messages are freshly downloaded each time you
+start the application. In this case, messages older than 90 days
+may not be available.</string>
             </property>
             <property name="text">
-             <string>Allow message storage</string>
+             <string>Allow storing of messages</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -556,13 +544,13 @@ than 90 day may not be available.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>Datovka stores some additional data outside the message database. 
-These are data about the databox which allow for example warning 
-about an expiring password. These data might be also changed by 
-an attacker, but their nature makes it a relatively harmless possibility.</string>
+             <string>The application stores some additional data outside the message
+database. These contain information about the data boxes allowing
+for notification about expiring passwords etc. These data might also
+be changed by an attacker, but with a relative low impact.</string>
             </property>
             <property name="text">
-             <string>Allow storage of additional data</string>
+             <string>Allow storing of additional data</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -594,8 +582,8 @@ an attacker, but their nature makes it a relatively harmless possibility.</strin
             </property>
             <property name="toolTip">
              <string>Validity of the signing certificate will be checked against
-the current date. This gives the highest protection against
-compromised certificate exploit.</string>
+the current date. This provides the highest protection against
+compromised certificates.</string>
             </property>
             <property name="text">
              <string>Check against current date (safer)</string>
@@ -614,11 +602,11 @@ compromised certificate exploit.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>The validity of signing certificate is checked against a
-stored download date. This allows long-term storage 
-of messages without false alarms about invalid signature. 
-It is less safe, because the attacker could modify the 
-download date in the Datovka database.</string>
+             <string>The validity of the signing certificate is checked against
+the message download date. This allows a long-term storing
+of messages without generating false alarms about invalid
+signatures. It is less safe, because an attacker could modify
+download dates in the application databases.</string>
             </property>
             <property name="text">
              <string>Check against the date of download</string>
@@ -678,10 +666,6 @@ of days will be included into the expiration notification summary.</string>
               <bold>false</bold>
              </font>
             </property>
-            <property name="toolTip">
-             <string>Allows to set a interval how many days before expiring 
-of timestamp will be message included in the check results.</string>
-            </property>
             <property name="text">
              <string>Check for time stamps expiring within</string>
             </property>
@@ -696,8 +680,9 @@ of timestamp will be message included in the check results.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>Allows to set a interval how many days before expiring 
-of timestamp will be message included in the check results.</string>
+             <string>Allows to set an interval specifying how many days before
+a timestamp expiration a message will be included in
+signature check results.</string>
             </property>
             <property name="readOnly">
              <bool>false</bool>
@@ -783,8 +768,8 @@ of timestamp will be message included in the check results.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>After an account is opened,
-the newest message will be activated.</string>
+             <string>After an account is selected,
+select the newest message.</string>
             </property>
             <property name="text">
              <string>Newest message</string>
@@ -803,8 +788,8 @@ the newest message will be activated.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>When account is opened, the last message
-displayed in this account will be selected.</string>
+             <string>After an account is selected,
+select the last displayed message for this account.</string>
             </property>
             <property name="text">
              <string>Last displayed message</string>
@@ -820,8 +805,8 @@ displayed in this account will be selected.</string>
              </font>
             </property>
             <property name="toolTip">
-             <string>When account is opened, random message
-displayed in this account will be selected.</string>
+             <string>After an account is selected,
+no particular message will be selected.</string>
             </property>
             <property name="text">
              <string>Nothing</string>
@@ -927,7 +912,7 @@ displayed in this account will be selected.</string>
              </font>
             </property>
             <property name="text">
-             <string>Note: toolbar settings will not be applied until you restart the application.</string>
+             <string>Note: Toolbar settings will not be applied until you restart the application.</string>
             </property>
            </widget>
           </item>
@@ -966,9 +951,10 @@ displayed in this account will be selected.</string>
           </font>
          </property>
          <property name="toolTip">
-          <string>When allowed, Datovka will use the following directories
-as paths for loading and saving files in all accounts. 
-Per-account path remembering will be disabled.</string>
+          <string>When allowed, the application will use the following
+directories as paths for loading and saving files for
+all accounts. Per-account path remembering will
+be disabled.</string>
          </property>
          <property name="title">
           <string>Use global path settings</string>
@@ -1018,7 +1004,7 @@ Per-account path remembering will be disabled.</string>
                </font>
               </property>
               <property name="toolTip">
-               <string>Select a new path for saving of attachments.</string>
+               <string>Select a new path for attachment saving.</string>
               </property>
               <property name="text">
                <string>Change</string>
@@ -1078,7 +1064,7 @@ Per-account path remembering will be disabled.</string>
                </font>
               </property>
               <property name="toolTip">
-               <string>Select a new path for adding of files to attachments.</string>
+               <string>Select a new path for adding attachment files.</string>
               </property>
               <property name="text">
                <string>Change</string>
@@ -1225,10 +1211,10 @@ acceptance info as PDF to the same path.</string>
           </font>
          </property>
          <property name="toolTip">
-          <string>Specifies file name format for attachment files and other
-exported files. Default value when saving attachment
-files is %f (i.e. saved file name will match the original
-file name including its suffix).</string>
+          <string>Specifies the format of file names for attachment files
+and other exported files. When saving attachment
+files, the default value is %f (i.e. saved file name will
+match the original file name including its suffix).</string>
          </property>
          <property name="title">
           <string>File name format of saved/exported files</string>
@@ -1862,7 +1848,7 @@ attachment file name (parameter %f is required).</string>
              </font>
             </property>
             <property name="text">
-             <string>Note: language settings will not be applied until you restart the application.</string>
+             <string>Note: Language settings will not be applied until you restart the application.</string>
             </property>
            </widget>
           </item>
