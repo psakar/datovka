@@ -192,25 +192,6 @@ void DlgProxysets::loadProxyDialog(const ProxiesSettings &proxySettings)
 	}
 	m_ui->httpsUnameEdit->setText(globProxSet.https.userName);
 	m_ui->httpsPwdEdit->setText(globProxSet.https.password);
-
-#if 0
-	/* Currently ignore HTTPS proxy settings. */
-	m_ui->httpsNoProxyRadioButton->setChecked(true);
-	m_ui->httpsNoProxyRadioButton->setEnabled(false);
-	m_ui->httpsAutoProxyRadioButton->setChecked(false);
-	m_ui->httpsAutoProxyRadioButton->setEnabled(false);
-	m_ui->httpsProxyDetectionLabel->setEnabled(false);
-	m_ui->httpsManualProxyRadioButton->setChecked(false);
-	m_ui->httpsManualProxyRadioButton->setEnabled(false);
-	m_ui->httpsLabel_1->setEnabled(false);
-	m_ui->httpsLabel_2->setEnabled(false);
-	m_ui->httpsHostnameLineEdit->setEnabled(false);
-	m_ui->httpsPortLineEdit->setEnabled(false);
-	m_ui->httpsUnameLabel->setEnabled(false);
-	m_ui->httpsPwdLabel->setEnabled(false);
-	m_ui->httpsUnameEdit->setEnabled(false);
-	m_ui->httpsPwdEdit->setEnabled(false);
-#endif
 }
 
 void DlgProxysets::showHttpProxyPassword(int state)
