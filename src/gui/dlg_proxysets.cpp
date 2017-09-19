@@ -152,17 +152,17 @@ void DlgProxysets::saveSettings(ProxiesSettings &sett) const
 	if (m_ui->httpNoProxyRadioButton->isChecked()) {
 		sett.http.usage = ProxiesSettings::ProxySettings::NO_PROXY;
 		sett.http.hostName.clear();
-		sett.http.port = -1;
+		sett.http.port = PROXY_NO_PORT;
 	} else if (m_ui->httpAutoProxyRadioButton->isChecked()) {
 		sett.http.usage = ProxiesSettings::ProxySettings::AUTO_PROXY;
 		sett.http.hostName.clear();
-		sett.http.port = -1;
+		sett.http.port = PROXY_NO_PORT;
 	} else {
 		sett.http.usage = ProxiesSettings::ProxySettings::DEFINED_PROXY;
 		sett.http.hostName = m_ui->httpHostnameLine->text();
 		sett.http.port = m_ui->httpPortLine->text().toInt(&ok, 10);
 		if (!ok) {
-			sett.http.port = -1;
+			sett.http.port = PROXY_NO_PORT;
 		}
 	}
 	sett.http.userName = m_ui->httpUnameLine->text();
@@ -171,17 +171,17 @@ void DlgProxysets::saveSettings(ProxiesSettings &sett) const
 	if (m_ui->httpsNoProxyRadioButton->isChecked()) {
 		sett.https.usage = ProxiesSettings::ProxySettings::NO_PROXY;
 		sett.https.hostName.clear();
-		sett.https.port = -1;
+		sett.https.port = PROXY_NO_PORT;
 	} else if (m_ui->httpsAutoProxyRadioButton->isChecked()) {
 		sett.https.usage = ProxiesSettings::ProxySettings::AUTO_PROXY;
 		sett.https.hostName.clear();
-		sett.https.port = -1;
+		sett.https.port = PROXY_NO_PORT;
 	} else {
 		sett.https.usage = ProxiesSettings::ProxySettings::DEFINED_PROXY;
 		sett.https.hostName = m_ui->httpsHostnameLine->text();
 		sett.https.port = m_ui->httpsPortLine->text().toInt(&ok, 10);
 		if (!ok) {
-			sett.https.port = -1;
+			sett.https.port = PROXY_NO_PORT;
 		}
 	}
 	sett.https.userName = m_ui->httpsUnameLine->text();
