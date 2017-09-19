@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,6 @@ ProxiesSettings globProxSet;
 #define NO_PROXY_STR "None"
 #define AUTO_PROXY_STR "-1"
 
-#define NO_PORT -1
-
 const QByteArray ProxiesSettings::httpProxyEnvVar(qgetenv(HTTP_PROXY_VARMAME));
 const QByteArray ProxiesSettings::httpsProxyEnvVar(qgetenv(HTTPS_PROXY_VARMAME));
 
@@ -46,7 +44,7 @@ ProxiesSettings::ProxySettings::ProxySettings(void)
     userName(),
     password(),
     hostName(QLatin1String(NO_PROXY_STR)),
-    port(NO_PORT)
+    port(PROXY_NO_PORT)
 {
 }
 
@@ -344,7 +342,7 @@ bool setProxyEnvVar(enum ProxiesSettings::Type type,
     const ProxiesSettings::ProxySettings &proxy)
 {
 	const char *proxyVarName = NULL;
-	const QByteArray *proxyStartUp = 0;
+	const QByteArray *proxyStartUp = Q_NULLPTR;
 	switch (type) {
 	case ProxiesSettings::HTTP:
 		proxyVarName = HTTP_PROXY_VARMAME;
@@ -360,7 +358,7 @@ bool setProxyEnvVar(enum ProxiesSettings::Type type,
 		break;
 	}
 	Q_ASSERT(proxyVarName != NULL);
-	Q_ASSERT(proxyStartUp != 0);
+	Q_ASSERT(proxyStartUp != Q_NULLPTR);
 
 	QByteArray proxyOld(qgetenv(proxyVarName));
 
@@ -418,7 +416,7 @@ static
 ProxiesSettings::ProxySettings fromEnvVal(QByteArray proxyEnv,
     ProxiesSettings::ProxySettings::Usage usage)
 {
-	ProxiesSettings::ProxySettings settings; /* noProxyStr, NO_PORT */
+	ProxiesSettings::ProxySettings settings; /* noProxyStr, PROXY_NO_PORT */
 
 	int aux;
 
@@ -477,7 +475,7 @@ ProxiesSettings::ProxySettings fromEnvVal(QByteArray proxyEnv,
 ProxiesSettings::ProxySettings ProxiesSettings::proxySettings(
     enum ProxiesSettings::Type type) const
 {
-	const ProxiesSettings::ProxySettings *proxy = 0;
+	const ProxiesSettings::ProxySettings *proxy = Q_NULLPTR;
 
 	switch (type) {
 	case HTTP:
@@ -491,7 +489,7 @@ ProxiesSettings::ProxySettings ProxiesSettings::proxySettings(
 		return ProxiesSettings::ProxySettings();
 		break;
 	}
-	Q_ASSERT(proxy != 0);
+	Q_ASSERT(proxy != Q_NULLPTR);
 
 	ProxiesSettings::ProxySettings returnedVal;
 
