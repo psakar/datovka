@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SendMessage</class>
- <widget class="QDialog" name="SendMessage">
+ <class>DlgSendMessage</class>
+ <widget class="QDialog" name="DlgSendMessage">
   <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>

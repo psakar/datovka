@@ -38,7 +38,10 @@
 #include "src/models/files_model.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
-#include "ui_dlg_send_message.h"
+
+namespace Ui {
+	class DlgSendMessage;
+}
 
 /*!
  * @brief Returns message prefix depending on whether it is sent ore received.
@@ -55,8 +58,8 @@ const QString &dzPrefix(const MessageDb *messageDb, qint64 dmId);
 /*!
  * @brief Send message dialogue.
  */
-class DlgSendMessage : public QDialog, public Ui::SendMessage {
-    Q_OBJECT
+class DlgSendMessage : public QDialog {
+	Q_OBJECT
 
 public:
 	/*!
@@ -83,6 +86,12 @@ public:
 	    enum Action action, const QList<MessageDb::MsgId> &msgIds,
 	    const QString &userName, class MainWindow *mw,
 	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	virtual
+	~DlgSendMessage(void);
 
 signals:
 	/*!
@@ -303,6 +312,8 @@ private:
 	 */
 	void sendMessageISDS(
 	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
+
+	Ui::DlgSendMessage *m_ui; /*!< UI generated from UI file. */
 
 	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
 	const QList<Task::AccountDescr> m_messageDbSetList; /*!< Available accounts.*/
