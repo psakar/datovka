@@ -317,12 +317,12 @@ private:
 	const QList<Task::AccountDescr> m_messageDbSetList; /*!< Available accounts.*/
 
 	QString m_userName; /*!< Selected user name (login). */
-	QString m_dbId; /*!< Name of data box associated with selected user. */
+	QString m_boxId; /*!< Name of data box associated with selected user. */
 	QString m_senderName; /*!< Sender (data box) name. */
 	QString m_dbType; /*!< Data box type identifier string. */
 	bool m_dbEffectiveOVM; /*! True if selected data box has effective OVM. */
 	bool m_dbOpenAddressing; /*! True if selected box has open addressing.  */
-	bool m_isLogged; /*!< True if account has already logged in. */
+	bool m_isLoggedIn; /*!< True if account has already logged in. */
 
 	QString m_lastAttAddPath; /*! Last attachment location. */
 	QString m_pdzCredit; /*! String containing credit value. */

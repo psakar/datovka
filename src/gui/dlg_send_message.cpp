@@ -98,12 +98,12 @@ DlgSendMessage::DlgSendMessage(
     m_keepAliveTimer(),
     m_messageDbSetList(messageDbSetList),
     m_userName(userName),
-    m_dbId(),
+    m_boxId(),
     m_senderName(),
     m_dbType(),
     m_dbEffectiveOVM(false),
     m_dbOpenAddressing(false),
-    m_isLogged(false),
+    m_isLoggedIn(false),
     m_lastAttAddPath(),
     m_pdzCredit("0"),
     m_dmType(),
@@ -128,8 +128,7 @@ DlgSendMessage::DlgSendMessage(
 
 	initContent(action, msgIds);
 
-	Q_ASSERT(!m_dbId.isEmpty());
-
+	Q_ASSERT(!m_boxId.isEmpty());
 	Q_ASSERT(Q_NULLPTR != m_dbSet);
 }
 
@@ -155,7 +154,7 @@ void DlgSendMessage::checkInputFields(void)
 		}
 	}
 
-	if (m_isLogged) {
+	if (m_isLoggedIn) {
 		m_ui->sendButton->setEnabled(enable);
 	} else {
 		/* cannot send message when not logged in. */
@@ -353,6 +352,81 @@ void DlgSendMessage::pingIsdsServer(void) const
 	globWorkPool.assignHi(task);
 }
 
+/*!
+ * @brief Checks whether the related account has an active connection to ISDS.
+ *
+ * @param[in] keepAliveTimer Keep-alive timer.
+ * @param[in] mw Pointer to main window.
+ * @param[in] userName User name identifying the account.
+ * @return True if active connection is present.
+ */
+static
+bool isLoggedIn(QTimer &keepAliveTimer, MainWindow *const mw,
+    const QString &userName)
+{
+	if (Q_UNLIKELY(userName.isEmpty())) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	bool loggedIn = false;
+	keepAliveTimer.stop();
+	{
+		TaskKeepAlive *task =
+		    new (std::nothrow) TaskKeepAlive(userName);
+		if (Q_UNLIKELY(task == Q_NULLPTR)) {
+			return false;
+		}
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+
+		loggedIn = task->m_isAlive;
+
+		delete task;
+	}
+	if (!loggedIn) {
+		if (Q_NULLPTR != mw) {
+			loggedIn = mw->connectToIsds(userName);
+		}
+	}
+	keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
+
+	/* Check the presence of struct isds_ctx . */
+	if (NULL == globIsdsSessions.session(userName)) {
+		logErrorNL("%s", "Missing ISDS session.");
+		loggedIn = false;
+	}
+
+	return loggedIn;
+}
+
+/*!
+ * @brief Find database set relate to account.
+ *
+ * @param[in] acntDescrs Account descriptors.
+ * @param[in] userName User name identifying the account.
+ * @return Pointer related to specified account, Q_NULLPTR on error.
+ */
+static
+MessageDbSet *getDbSet(const QList<Task::AccountDescr> &acntDescrs,
+    const QString &userName)
+{
+	if (Q_UNLIKELY(userName.isEmpty())) {
+		Q_ASSERT(0);
+		return Q_NULLPTR;
+	}
+
+	MessageDbSet *dbSet = Q_NULLPTR;
+	foreach (const Task::AccountDescr &acnt, acntDescrs) {
+		if (acnt.userName == userName) {
+			dbSet = acnt.messageDbSet;
+			break;
+		}
+	}
+
+	return dbSet;
+}
+
 void DlgSendMessage::setAccountInfo(int fromComboIdx)
 {
 	debugSlotCall();
@@ -360,7 +434,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	/* Get user name for selected account. */
 	const QString userName(
 	    m_ui->fromComboBox->itemData(fromComboIdx).toString());
-	if (userName.isEmpty()) {
+	if (Q_UNLIKELY(userName.isEmpty())) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -371,42 +445,18 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		m_userName = userName;
 	}
 
-	m_isLogged = true;
-	m_keepAliveTimer.stop();
-	{
-		TaskKeepAlive *task =
-		    new (std::nothrow) TaskKeepAlive(m_userName);
-		task->setAutoDelete(false);
-		globWorkPool.runSingle(task);
+	m_isLoggedIn = isLoggedIn(m_keepAliveTimer, m_mw, m_userName);
 
-		m_isLogged = task->m_isAlive;
-
-		delete task;
-	}
-	if (!m_isLogged) {
-		if (Q_NULLPTR != m_mw) {
-			m_isLogged = m_mw->connectToIsds(m_userName);
-		}
-	}
-	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
-
-	/* Check for presence of struct isds_ctx . */
-	if (NULL == globIsdsSessions.session(m_userName)) {
-		logErrorNL("%s", "Missing ISDS session.");
-		m_isLogged = false;
-	}
-
-	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
-		if (acnt.userName == m_userName) {
-			m_dbSet = acnt.messageDbSet;
-			break;
-		}
+	m_dbSet = getDbSet(m_messageDbSetList, m_userName);
+	if (Q_UNLIKELY(Q_NULLPTR == m_dbSet)) {
+		Q_ASSERT(0);
+		return;
 	}
 
 	const AcntSettings &accountInfo(globAccounts[m_userName]);
 	const QString acntDbKey(AccountDb::keyFromLogin(m_userName));
-	m_dbId = globAccountDbPtr->dbId(acntDbKey);
-	Q_ASSERT(!m_dbId.isEmpty());
+	m_boxId = globAccountDbPtr->dbId(acntDbKey);
+	Q_ASSERT(!m_boxId.isEmpty());
 	m_senderName = globAccountDbPtr->senderNameGuess(acntDbKey);
 	const QList<QString> accountData(
 	    globAccountDbPtr->getUserDataboxInfo(acntDbKey));
@@ -422,7 +472,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	}
 
 	if (m_dbOpenAddressing) {
-		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
+		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_boxId);
 	}
 
 	QString dbOpenAddressingText;
@@ -448,7 +498,6 @@ void DlgSendMessage::sendMessage(void)
 
 	const QList<BoxContactsModel::PartialEntry> recipEntries(
 	    m_recipTableModel.partialBoxEntries(BoxContactsModel::ANY));
-
 
 	sendMessageISDS(recipEntries);
 }
@@ -898,7 +947,7 @@ void DlgSendMessage::fillContentFromTemplate(
 	}
 
 	/* message is received -> recipient == sender */
-	if (m_dbId != envData.dbIDRecipient) {
+	if (m_boxId != envData.dbIDRecipient) {
 		m_recipTableModel.appendData(envData.dbIDRecipient, -1,
 		    envData.dmRecipient, envData.dmRecipientAddress, QString(),
 		    pdz);
