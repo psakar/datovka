@@ -392,7 +392,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="addRecipient">
+      <widget class="QPushButton" name="addRecipButton">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -412,7 +412,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="removeRecipient">
+      <widget class="QPushButton" name="removeRecipButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -442,7 +442,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="findRecipient">
+      <widget class="QPushButton" name="findRecipButton">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -466,12 +466,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="enterDbIdpushButton">
+      <widget class="QPushButton" name="enterBoxIdButton">
        <property name="toolTip">
         <string>Allows to enter address of Databox manually</string>
        </property>
        <property name="text">
-        <string>Enter DB ID</string>
+        <string>Enter Box ID</string>
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
@@ -613,7 +613,7 @@ of postal data messages active.</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="addAttachment">
+      <widget class="QPushButton" name="addAttachButton">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -633,7 +633,7 @@ of postal data messages active.</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="removeAttachment">
+      <widget class="QPushButton" name="removeAttachButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -663,7 +663,7 @@ of postal data messages active.</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="openAttachment">
+      <widget class="QPushButton" name="openAttachButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -811,8 +811,8 @@ of postal data messages active.</string>
   <tabstop>dmLegalTitleSect</tabstop>
   <tabstop>dmLegalTitlePar</tabstop>
   <tabstop>dmLegalTitlePoint</tabstop>
-  <tabstop>addRecipient</tabstop>
-  <tabstop>addAttachment</tabstop>
+  <tabstop>addRecipButton</tabstop>
+  <tabstop>addAttachButton</tabstop>
   <tabstop>sendButton</tabstop>
   <tabstop>cancelButton</tabstop>
   <tabstop>dmPublishOwnID</tabstop>
@@ -820,10 +820,10 @@ of postal data messages active.</string>
   <tabstop>payReplyCheckBox</tabstop>
   <tabstop>dmAllowSubstDelivery</tabstop>
   <tabstop>optionalFieldsCheckBox</tabstop>
-  <tabstop>removeRecipient</tabstop>
-  <tabstop>findRecipient</tabstop>
-  <tabstop>removeAttachment</tabstop>
-  <tabstop>openAttachment</tabstop>
+  <tabstop>removeRecipButton</tabstop>
+  <tabstop>findRecipButton</tabstop>
+  <tabstop>removeAttachButton</tabstop>
+  <tabstop>openAttachButton</tabstop>
   <tabstop>attachmentTableView</tabstop>
  </tabstops>
  <resources>

@@ -103,7 +103,7 @@ signals:
 
 private slots:
 	/*!
-	 * @brief Check input fields sanity and activate search button.
+	 * @brief Check input fields' sanity and activate search button.
 	 */
 	void checkInputFields(void);
 

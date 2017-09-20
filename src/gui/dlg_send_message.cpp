@@ -140,20 +140,25 @@ DlgSendMessage::~DlgSendMessage(void)
 
 void DlgSendMessage::checkInputFields(void)
 {
-	bool buttonEnabled = calculateAndShowTotalAttachSize() &&
+	bool enable = calculateAndShowTotalAttachSize() &&
 	    !m_ui->subjectLine->text().isEmpty() &&
 	    (m_recipientTableModel.rowCount() > 0) &&
 	    (m_attachmentModel.rowCount() > 0);
 
 	if (m_ui->payReplyCheckBox->isChecked()) {
 		if (m_ui->dmSenderRefNumber->text().isEmpty()) {
-			buttonEnabled = false;
+			/*
+			 * Transfer charges for reply can only be set when
+			 * sender reference number is provided.
+			 */
+			enable = false;
 		}
 	}
 
 	if (m_isLogged) {
-		m_ui->sendButton->setEnabled(buttonEnabled);
+		m_ui->sendButton->setEnabled(enable);
 	} else {
+		/* cannot send message when not logged in. */
 		m_ui->sendButton->setEnabled(false);
 	}
 }
@@ -176,8 +181,8 @@ void DlgSendMessage::addRecipientManually(void)
 {
 	bool ok = false;
 
-	QString dbID = QInputDialog::getText(this, tr("Databox ID"),
-	    tr("Enter Databox ID (7 characters):"), QLineEdit::Normal,
+	QString dbID = QInputDialog::getText(this, tr("Data box ID"),
+	    tr("Enter data box ID (7 characters):"), QLineEdit::Normal,
 	    QString(), &ok, Qt::WindowStaysOnTopHint);
 
 	if (!ok) {
@@ -205,7 +210,7 @@ void DlgSendMessage::recipientSelectionChanged(const QItemSelection &selected,
 	 * PDZ. It should not be possible to delete recipients for those
 	 * messages.
 	 */
-	m_ui->removeRecipient->setEnabled(
+	m_ui->removeRecipButton->setEnabled(
 	    (m_dmType != QStringLiteral(DMTYPE_INIT)) &&
 	    (m_ui->recipientTableView->selectionModel()->selectedRows(0).size() > 0));
 }
@@ -316,8 +321,8 @@ void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
 	int selectionSize =
 	    m_ui->attachmentTableView->selectionModel()->selectedRows(0).size();
 
-	m_ui->removeAttachment->setEnabled(selectionSize > 0);
-	m_ui->openAttachment->setEnabled(selectionSize == 1);
+	m_ui->removeAttachButton->setEnabled(selectionSize > 0);
+	m_ui->openAttachButton->setEnabled(selectionSize == 1);
 }
 
 void DlgSendMessage::deleteSelectedAttachmentFiles(void)
@@ -358,7 +363,6 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		    m_recipientTableModel.rowCount());
 		m_userName = userName;
 	}
-
 
 	m_isLogged = true;
 	m_keepAliveTimer.stop();
@@ -600,20 +604,20 @@ void DlgSendMessage::initContent(enum Action action,
 	connect(m_ui->payReplyCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(showOptionalForm()));
 
-	connect(m_ui->addRecipient, SIGNAL(clicked()),
+	connect(m_ui->addRecipButton, SIGNAL(clicked()),
 	    this, SLOT(addRecipientFromLocalContact()));
-	connect(m_ui->removeRecipient, SIGNAL(clicked()),
+	connect(m_ui->removeRecipButton, SIGNAL(clicked()),
 	    this, SLOT(deleteRecipientEntries()));
-	connect(m_ui->findRecipient, SIGNAL(clicked()),
+	connect(m_ui->findRecipButton, SIGNAL(clicked()),
 	    this, SLOT(addRecipientFromISDSSearch()));
-	connect(m_ui->enterDbIdpushButton, SIGNAL(clicked()),
+	connect(m_ui->enterBoxIdButton, SIGNAL(clicked()),
 	    this, SLOT(addRecipientManually()));
 
-	connect(m_ui->addAttachment, SIGNAL(clicked()), this,
+	connect(m_ui->addAttachButton, SIGNAL(clicked()), this,
 	    SLOT(addAttachmentFile()));
-	connect(m_ui->removeAttachment, SIGNAL(clicked()), this,
+	connect(m_ui->removeAttachButton, SIGNAL(clicked()), this,
 	    SLOT(deleteSelectedAttachmentFiles()));
-	connect(m_ui->openAttachment, SIGNAL(clicked()), this,
+	connect(m_ui->openAttachButton, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
 
 	connect(m_ui->recipientTableView->selectionModel(),
@@ -790,9 +794,9 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 	}
 
 	if (m_dmType == QStringLiteral(DMTYPE_INIT)) {
-		m_ui->addRecipient->setEnabled(false);
-		m_ui->removeRecipient->setEnabled(false);
-		m_ui->findRecipient->setEnabled(false);
+		m_ui->addRecipButton->setEnabled(false);
+		m_ui->removeRecipButton->setEnabled(false);
+		m_ui->findRecipButton->setEnabled(false);
 		m_ui->prepaidReplyLabel->setEnabled(true);
 		m_ui->prepaidReplyLabel->show();
 		m_ui->payReplyCheckBox->setEnabled(false);
