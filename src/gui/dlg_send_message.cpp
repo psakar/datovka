@@ -22,6 +22,8 @@
  */
 
 #include <algorithm> /* std::sort */
+#include <QDateTime>
+#include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDir>

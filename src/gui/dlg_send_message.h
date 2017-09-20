@@ -24,13 +24,11 @@
 #ifndef _DLG_SEND_MESSAGE_H_
 #define _DLG_SEND_MESSAGE_H_
 
-#include <QDateTime>
 #include <QDialog>
-#include <QFileDialog>
+#include <QItemSelection>
 #include <QList>
 #include <QSet>
 #include <QTimer>
-#include <QTreeView>
 
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"

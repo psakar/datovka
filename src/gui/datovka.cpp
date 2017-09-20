@@ -28,6 +28,7 @@
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
+#include <QFileDialog>
 #include <QFileInfo>
 #include <QInputDialog>
 #include <QMenu>
