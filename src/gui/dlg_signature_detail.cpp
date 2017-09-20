@@ -43,6 +43,7 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDbSet &dbSet,
     const MessageDb::MsgId &msgId, QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgSignatureDetail),
     m_msgDER(),
     m_tstDER(),
     m_constructedFromDb(true),
@@ -60,13 +61,13 @@ DlgSignatureDetail::DlgSignatureDetail(const MessageDbSet &dbSet,
 	m_tstDER = messageDb->msgsTimestampRaw(msgId.dmId);
 	m_dbIsVerified = messageDb->msgsVerified(msgId.dmId);
 
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	this->verifyWidget->setHidden(true);
-	connect(this->showVerifyDetail, SIGNAL(stateChanged(int)),
+	m_ui->verifyWidget->setHidden(true);
+	connect(m_ui->showVerifyDetail, SIGNAL(stateChanged(int)),
 	    this, SLOT(showVerificationDetail(int)));
-	this->certDetailWidget->setHidden(true);
-	connect(this->showCertDetail, SIGNAL(stateChanged(int)),
+	m_ui->certDetailWidget->setHidden(true);
+	connect(m_ui->showCertDetail, SIGNAL(stateChanged(int)),
 	    this, SLOT(showCertificateDetail(int)));
 
 	validateMessageSignature();
@@ -86,19 +87,20 @@ DlgSignatureDetail::DlgSignatureDetail(const void *msgDER, size_t msgSize,
     const void *tstDER, size_t tstSize, QWidget *parent)
 /* ========================================================================= */
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgSignatureDetail),
     m_msgDER((char *) msgDER, msgSize),
     m_tstDER((char *) tstDER, tstSize),
     m_constructedFromDb(false),
     m_dbIsVerified(false),
     dSize(QSize())
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
-	this->verifyWidget->setHidden(true);
-	connect(this->showVerifyDetail, SIGNAL(stateChanged(int)),
+	m_ui->verifyWidget->setHidden(true);
+	connect(m_ui->showVerifyDetail, SIGNAL(stateChanged(int)),
 	    this, SLOT(showVerificationDetail(int)));
-	this->certDetailWidget->setHidden(true);
-	connect(this->showCertDetail, SIGNAL(stateChanged(int)),
+	m_ui->certDetailWidget->setHidden(true);
+	connect(m_ui->showCertDetail, SIGNAL(stateChanged(int)),
 	    this, SLOT(showCertificateDetail(int)));
 
 	validateMessageSignature();
@@ -140,6 +142,10 @@ bool DlgSignatureDetail::signingCertValid(const QByteArray &DER,
 	return 1 == ret;
 }
 
+DlgSignatureDetail::~DlgSignatureDetail(void)
+{
+	delete m_ui;
+}
 
 /* ========================================================================= */
 /*
@@ -321,7 +327,7 @@ fail:
 void DlgSignatureDetail::showCertificateDetail(int state)
 /* ========================================================================= */
 {
-	this->certDetailWidget->setHidden(Qt::Unchecked == state);
+	m_ui->certDetailWidget->setHidden(Qt::Unchecked == state);
 	this->setMaximumSize(dSize);
 }
 
@@ -333,7 +339,7 @@ void DlgSignatureDetail::showCertificateDetail(int state)
 void DlgSignatureDetail::showVerificationDetail(int state)
 /* ========================================================================= */
 {
-	this->verifyWidget->setHidden(Qt::Unchecked == state);
+	m_ui->verifyWidget->setHidden(Qt::Unchecked == state);
 	this->setMaximumSize(dSize);
 }
 
@@ -384,9 +390,9 @@ void DlgSignatureDetail::validateMessageSignature(void)
 		}
 	}
 
-	this->mSignatureImage->setIcon(QIcon(iconPath));
-	this->mSignatureStatus->setTextFormat(Qt::RichText);
-	this->mSignatureStatus->setText(resStr);
+	m_ui->mSignatureImage->setIcon(QIcon(iconPath));
+	m_ui->mSignatureStatus->setTextFormat(Qt::RichText);
+	m_ui->mSignatureStatus->setText(resStr);
 }
 
 
@@ -400,16 +406,16 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 	QString iconPath;
 	QString resStr;
 
-	this->showCertDetail->setHidden(false);
-	this->showVerifyDetail->setHidden(false);
+	m_ui->showCertDetail->setHidden(false);
+	m_ui->showVerifyDetail->setHidden(false);
 
 	if (m_msgDER.isEmpty()) {
 		iconPath = ICON_3PARTY_PATH "warning_16.png";
 		resStr = QObject::tr("Message signature is not present.") +
 		    "<br/>";
 		resStr += QObject::tr("Cannot check signing certificate.");
-		this->showCertDetail->setHidden(true);
-		this->showVerifyDetail->setHidden(true);
+		m_ui->showCertDetail->setHidden(true);
+		m_ui->showVerifyDetail->setHidden(true);
 
 		return;
 	}
@@ -433,10 +439,10 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		        "turned off!") + ")</b>";
 	}
 
-	this->cImage->setIcon(QIcon(iconPath));
-	this->cStatus->setTextFormat(Qt::RichText);
-	this->cStatus->setText(resStr);
-	this->cDetail->setText(QString());
+	m_ui->cImage->setIcon(QIcon(iconPath));
+	m_ui->cStatus->setTextFormat(Qt::RichText);
+	m_ui->cStatus->setText(resStr);
+	m_ui->cDetail->setText(QString());
 
 	QString saId, saName;
 	QSslCertificate signingCrt = signingCert(m_msgDER, saId, saName);
@@ -486,8 +492,8 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		    QObject::tr("Certificate signature verified") +
 		    ": </b>" + checkResult + "<br/>";
 
-		this->vDetail->setTextFormat(Qt::RichText);
-		this->vDetail->setText(resStr);
+		m_ui->vDetail->setTextFormat(Qt::RichText);
+		m_ui->vDetail->setText(resStr);
 	}
 
 	resStr.clear();
@@ -573,8 +579,8 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 			    ": " + strList.first() + "<br/>";
 		}
 
-		this->cDetail->setTextFormat(Qt::RichText);
-		this->cDetail->setText(resStr);
+		m_ui->cDetail->setTextFormat(Qt::RichText);
+		m_ui->cDetail->setText(resStr);
 	}
 }
 
@@ -651,12 +657,12 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 			    expir.timeZone().abbreviation(expir) + "<br/>";
 		}
 
-		this->tDetail->setAlignment(Qt::AlignLeft);
-		this->tDetail->setTextFormat(Qt::RichText);
-		this->tDetail->setText(detailStr);
+		m_ui->tDetail->setAlignment(Qt::AlignLeft);
+		m_ui->tDetail->setTextFormat(Qt::RichText);
+		m_ui->tDetail->setText(detailStr);
 	}
 
-	this->tImage->setIcon(QIcon(iconPath));
-	this->tStatus->setTextFormat(Qt::RichText);
-	this->tStatus->setText(resStr);
+	m_ui->tImage->setIcon(QIcon(iconPath));
+	m_ui->tStatus->setTextFormat(Qt::RichText);
+	m_ui->tStatus->setText(resStr);
 }

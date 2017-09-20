@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,24 +24,33 @@
 #ifndef _DLG_SIGNATURE_DETAIL_H_
 #define _DLG_SIGNATURE_DETAIL_H_
 
-
 #include <QByteArray>
 #include <QDialog>
 #include <QSslCertificate>
 
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
-#include "ui_dlg_signature_detail.h"
 
+namespace Ui {
+	class DlgSignatureDetail;
+}
 
-class DlgSignatureDetail : public QDialog, public Ui::SignatureDetail {
-    Q_OBJECT
+/*!
+ * @brief Shows information about message signature.
+ */
+class DlgSignatureDetail : public QDialog {
+	Q_OBJECT
 
 public:
 	DlgSignatureDetail(const MessageDbSet &dbSet,
 	    const MessageDb::MsgId &msgId, QWidget *parent = 0);
 	DlgSignatureDetail(const void *msgDER, size_t msgSize,
 	    const void *tstDER, size_t tstSize, QWidget *parent = 0);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgSignatureDetail(void);
 
 	/*!
 	 * @brief Return whether signing certificate is valid.
@@ -108,12 +117,6 @@ private slots:
 	void showVerificationDetail(int);
 
 private:
-	/* TODO -- Construct these members as constants. */
-	QByteArray m_msgDER; /*!< Message CMS. */
-	QByteArray m_tstDER; /*!< Time stamp CMS. */
-	const bool m_constructedFromDb; /*!< True if constructed from db. */
-	bool m_dbIsVerified; /*!< Set if constructed from db. */
-
 	/*!
 	 * @brief Check message signature, show result in dialog.
 	 */
@@ -129,8 +132,15 @@ private:
 	 */
 	void validateMessageTimestamp(void);
 
+	Ui::DlgSignatureDetail *m_ui; /*!< UI generated from UI file. */
+
+	/* TODO -- Construct these members as constants. */
+	QByteArray m_msgDER; /*!< Message CMS. */
+	QByteArray m_tstDER; /*!< Time stamp CMS. */
+	const bool m_constructedFromDb; /*!< True if constructed from db. */
+	bool m_dbIsVerified; /*!< Set if constructed from db. */
+
 	QSize dSize;
 };
-
 
 #endif /* _DLG_SIGNATURE_DETAIL_H_ */
