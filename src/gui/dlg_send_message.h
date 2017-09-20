@@ -332,8 +332,8 @@ private:
 
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 
-	BoxContactsModel m_recipientTableModel; /*!< Model of data boxes. */
-	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
+	BoxContactsModel m_recipTableModel; /*!< Data box table model. */
+	DbFlsTblModel m_attachModel; /*!< Attachment table model. */
 
 	/* Used to collect sending results. */
 	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */

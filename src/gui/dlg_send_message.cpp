@@ -109,8 +109,8 @@ DlgSendMessage::DlgSendMessage(
     m_dmType(),
     m_dmSenderRefNumber(),
     m_dbSet(Q_NULLPTR),
-    m_recipientTableModel(this),
-    m_attachmentModel(this),
+    m_recipTableModel(this),
+    m_attachModel(this),
     m_transactIds(),
     m_sentMsgResultList(),
     m_mw(mw)
@@ -118,12 +118,12 @@ DlgSendMessage::DlgSendMessage(
 	m_ui->setupUi(this);
 
 	/* Set default line height for table views/widgets. */
-	m_ui->recipientTableView->setNarrowedLineHeight();
-	m_ui->recipientTableView->setSelectionBehavior(
+	m_ui->recipTableView->setNarrowedLineHeight();
+	m_ui->recipTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
-	m_ui->attachmentTableView->setNarrowedLineHeight();
-	m_ui->attachmentTableView->setSelectionBehavior(
+	m_ui->attachTableView->setNarrowedLineHeight();
+	m_ui->attachTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
 	initContent(action, msgIds);
@@ -142,8 +142,8 @@ void DlgSendMessage::checkInputFields(void)
 {
 	bool enable = calculateAndShowTotalAttachSize() &&
 	    !m_ui->subjectLine->text().isEmpty() &&
-	    (m_recipientTableModel.rowCount() > 0) &&
-	    (m_attachmentModel.rowCount() > 0);
+	    (m_recipTableModel.rowCount() > 0) &&
+	    (m_attachModel.rowCount() > 0);
 
 	if (m_ui->payReplyCheckBox->isChecked()) {
 		if (m_ui->dmSenderRefNumber->text().isEmpty()) {
@@ -212,7 +212,7 @@ void DlgSendMessage::recipientSelectionChanged(const QItemSelection &selected,
 	 */
 	m_ui->removeRecipButton->setEnabled(
 	    (m_dmType != QStringLiteral(DMTYPE_INIT)) &&
-	    (m_ui->recipientTableView->selectionModel()->selectedRows(0).size() > 0));
+	    (m_ui->recipTableView->selectionModel()->selectedRows(0).size() > 0));
 }
 
 /*!
@@ -258,7 +258,7 @@ void removeSelectedEntries(const QTableView *view, QAbstractItemModel *model)
 
 void DlgSendMessage::deleteRecipientEntries(void)
 {
-	removeSelectedEntries(m_ui->recipientTableView, &m_recipientTableModel);
+	removeSelectedEntries(m_ui->recipTableView, &m_recipTableModel);
 }
 
 void DlgSendMessage::showOptionalFormElements(void)
@@ -303,8 +303,8 @@ void DlgSendMessage::addAttachmentFile(void)
 	}
 
 	foreach (const QString &fileName, fileNames) {
-		int fileSize = m_attachmentModel.insertAttachmentFile(fileName,
-		    m_attachmentModel.rowCount());
+		int fileSize = m_attachModel.insertAttachmentFile(fileName,
+		    m_attachModel.rowCount());
 		if (fileSize <= 0) {
 			logWarningNL(
 			    "Cannot add empty file '%s' to attachments.",
@@ -324,7 +324,7 @@ void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
 	Q_UNUSED(deselected);
 
 	int selectionSize =
-	    m_ui->attachmentTableView->selectionModel()->selectedRows(0).size();
+	    m_ui->attachTableView->selectionModel()->selectedRows(0).size();
 
 	m_ui->removeAttachButton->setEnabled(selectionSize > 0);
 	m_ui->openAttachButton->setEnabled(selectionSize == 1);
@@ -332,14 +332,14 @@ void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
 
 void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 {
-	removeSelectedEntries(m_ui->attachmentTableView, &m_attachmentModel);
+	removeSelectedEntries(m_ui->attachTableView, &m_attachModel);
 }
 
 void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
 {
 	debugSlotCall();
 
-	AttachmentInteraction::openAttachment(this, *m_ui->attachmentTableView,
+	AttachmentInteraction::openAttachment(this, *m_ui->attachTableView,
 	    index);
 }
 
@@ -364,8 +364,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 
 	/* Remove all recipients if account was changed. */
 	if (m_userName != userName) {
-		m_recipientTableModel.removeRows(0,
-		    m_recipientTableModel.rowCount());
+		m_recipTableModel.removeRows(0, m_recipTableModel.rowCount());
 		m_userName = userName;
 	}
 
@@ -445,7 +444,7 @@ void DlgSendMessage::sendMessage(void)
 	debugSlotCall();
 
 	const QList<BoxContactsModel::PartialEntry> recipEntries(
-	    m_recipientTableModel.partialBoxEntries(BoxContactsModel::ANY));
+	    m_recipTableModel.partialBoxEntries(BoxContactsModel::ANY));
 
 
 	sendMessageISDS(recipEntries);
@@ -520,7 +519,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 	}
 	m_sentMsgResultList.clear();
 
-	if (m_recipientTableModel.rowCount() == successfullySentCnt) {
+	if (m_recipTableModel.rowCount() == successfullySentCnt) {
 		DlgMsgBox::message(this, QMessageBox::Information,
 		    tr("Message sent"),
 		    "<b>" + tr("Message was successfully sent to all recipients.") + "</b>",
@@ -545,34 +544,34 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 void DlgSendMessage::initContent(enum Action action,
     const QList<MessageDb::MsgId> &msgIds)
 {
-	m_recipientTableModel.setHeader();
-	m_ui->recipientTableView->setModel(&m_recipientTableModel);
+	m_recipTableModel.setHeader();
+	m_ui->recipTableView->setModel(&m_recipTableModel);
 
-	m_ui->recipientTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 60);
-	m_ui->recipientTableView->setColumnWidth(BoxContactsModel::BOX_TYPE_COL, 70);
-	m_ui->recipientTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 120);
-	m_ui->recipientTableView->setColumnWidth(BoxContactsModel::ADDRESS_COL, 100);
+	m_ui->recipTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 60);
+	m_ui->recipTableView->setColumnWidth(BoxContactsModel::BOX_TYPE_COL, 70);
+	m_ui->recipTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 120);
+	m_ui->recipTableView->setColumnWidth(BoxContactsModel::ADDRESS_COL, 100);
 
-	m_ui->recipientTableView->setColumnHidden(BoxContactsModel::CHECKBOX_COL, true);
-	m_ui->recipientTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL, true);
+	m_ui->recipTableView->setColumnHidden(BoxContactsModel::CHECKBOX_COL, true);
+	m_ui->recipTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL, true);
 
-	m_attachmentModel.setHeader();
-	m_ui->attachmentTableView->setModel(&m_attachmentModel);
+	m_attachModel.setHeader();
+	m_ui->attachTableView->setModel(&m_attachModel);
 
-	m_ui->attachmentTableView->setColumnWidth(DbFlsTblModel::FNAME_COL, 150);
-	m_ui->attachmentTableView->setColumnWidth(DbFlsTblModel::MIME_COL, 120);
+	m_ui->attachTableView->setColumnWidth(DbFlsTblModel::FNAME_COL, 150);
+	m_ui->attachTableView->setColumnWidth(DbFlsTblModel::MIME_COL, 120);
 
-	m_ui->attachmentTableView->setColumnHidden(DbFlsTblModel::ATTACHID_COL, true);
-	m_ui->attachmentTableView->setColumnHidden(DbFlsTblModel::MSGID_COL, true);
-	m_ui->attachmentTableView->setColumnHidden(DbFlsTblModel::CONTENT_COL, true);
+	m_ui->attachTableView->setColumnHidden(DbFlsTblModel::ATTACHID_COL, true);
+	m_ui->attachTableView->setColumnHidden(DbFlsTblModel::MSGID_COL, true);
+	m_ui->attachTableView->setColumnHidden(DbFlsTblModel::CONTENT_COL, true);
 
 	/* Enable drag and drop on attachment table. */
-	m_ui->attachmentTableView->setAcceptDrops(true);
-	m_ui->attachmentTableView->setDragEnabled(true);
-	m_ui->attachmentTableView->setDragDropOverwriteMode(false);
-	m_ui->attachmentTableView->setDropIndicatorShown(true);
-	m_ui->attachmentTableView->setDragDropMode(QAbstractItemView::DragDrop);
-	m_ui->attachmentTableView->setDefaultDropAction(Qt::CopyAction);
+	m_ui->attachTableView->setAcceptDrops(true);
+	m_ui->attachTableView->setDragEnabled(true);
+	m_ui->attachTableView->setDragDropOverwriteMode(false);
+	m_ui->attachTableView->setDropIndicatorShown(true);
+	m_ui->attachTableView->setDragDropMode(QAbstractItemView::DragDrop);
+	m_ui->attachTableView->setDefaultDropAction(Qt::CopyAction);
 
 	m_ui->prepaidReplyLabel->setEnabled(false);
 	m_ui->prepaidReplyLabel->hide();
@@ -595,11 +594,9 @@ void DlgSendMessage::initContent(enum Action action,
 	connect(m_ui->fromComboBox, SIGNAL(currentIndexChanged(int)),
 	    this, SLOT(setAccountInfo(int)));
 
-	connect(&m_recipientTableModel,
-	    SIGNAL(rowsInserted(QModelIndex, int, int)),
+	connect(&m_recipTableModel, SIGNAL(rowsInserted(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
-	connect(&m_recipientTableModel,
-	    SIGNAL(rowsRemoved(QModelIndex, int, int)),
+	connect(&m_recipTableModel, SIGNAL(rowsRemoved(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
 
 	m_ui->optionalForm->setHidden(true);
@@ -625,38 +622,34 @@ void DlgSendMessage::initContent(enum Action action,
 	connect(m_ui->openAttachButton, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
 
-	connect(m_ui->recipientTableView->selectionModel(),
+	connect(m_ui->recipTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
 	    SLOT(recipientSelectionChanged(QItemSelection, QItemSelection)));
 
-	connect(m_ui->attachmentTableView, SIGNAL(doubleClicked(QModelIndex)),
+	connect(m_ui->attachTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(openSelectedAttachment(QModelIndex)));
 
 	connect(m_ui->subjectLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
-	connect(&m_attachmentModel,
-	    SIGNAL(rowsInserted(QModelIndex, int, int)),
+	connect(&m_attachModel, SIGNAL(rowsInserted(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
-	connect(&m_attachmentModel,
-	    SIGNAL(rowsRemoved(QModelIndex, int, int)),
+	connect(&m_attachModel, SIGNAL(rowsRemoved(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
-	connect(&m_attachmentModel,
+	connect(&m_attachModel,
 	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
 	    this, SLOT(checkInputFields()));
-	connect(m_ui->attachmentTableView->selectionModel(),
+	connect(m_ui->attachTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
 	    SLOT(attachmentSelectionChanged(QItemSelection, QItemSelection)));
 
-	m_ui->recipientTableView->setEditTriggers(
+	m_ui->recipTableView->setEditTriggers(
 	    QAbstractItemView::NoEditTriggers);
-	m_ui->attachmentTableView->setEditTriggers(
+	m_ui->attachTableView->setEditTriggers(
 	    QAbstractItemView::NoEditTriggers);
 
-	m_ui->recipientTableView->installEventFilter(
-	    new TableHomeEndFilter(this));
-	m_ui->attachmentTableView->installEventFilter(
-	    new TableHomeEndFilter(this));
+	m_ui->recipTableView->installEventFilter(new TableHomeEndFilter(this));
+	m_ui->attachTableView->installEventFilter(new TableHomeEndFilter(this));
 
 	connect(m_ui->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
@@ -733,7 +726,7 @@ void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 			continue;
 		}
 
-		m_attachmentModel.appendAttachmentEntry(msgBase64,
+		m_attachModel.appendAttachmentEntry(msgBase64,
 		    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId));
 	}
 }
@@ -812,8 +805,8 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 		pdz = true;
 	}
 
-	m_recipientTableModel.appendData(envData.dbIDSender, -1,
-	    envData.dmSender, envData.dmSenderAddress, QString(), pdz);
+	m_recipTableModel.appendData(envData.dbIDSender, -1, envData.dmSender,
+	    envData.dmSenderAddress, QString(), pdz);
 }
 
 void DlgSendMessage::fillContentFromTemplate(
@@ -903,7 +896,7 @@ void DlgSendMessage::fillContentFromTemplate(
 
 	/* message is received -> recipient == sender */
 	if (m_dbId != envData.dbIDRecipient) {
-		m_recipientTableModel.appendData(envData.dbIDRecipient, -1,
+		m_recipTableModel.appendData(envData.dbIDRecipient, -1,
 		    envData.dmRecipient, envData.dmRecipientAddress, QString(),
 		    pdz);
 	}
@@ -913,8 +906,8 @@ void DlgSendMessage::fillContentFromTemplate(
 	    messageDb->getFilesFromMessage(msgId.dmId);
 
 	foreach (const MessageDb::FileData &fileData, msgFileList) {
-		m_attachmentModel.appendAttachmentEntry(
-		    fileData.dmEncodedContent, fileData.dmFileDescr);
+		m_attachModel.appendAttachmentEntry(fileData.dmEncodedContent,
+		    fileData.dmFileDescr);
 	}
 }
 
@@ -949,11 +942,11 @@ int DlgSendMessage::notifyOfPDZ(int pdzCnt)
 
 bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 {
-	int aSize = m_attachmentModel.totalAttachmentSize();
+	int aSize = m_attachModel.totalAttachmentSize();
 
 	m_ui->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
 
-	if (m_attachmentModel.rowCount() > MAX_ATTACHMENT_FILES) {
+	if (m_attachModel.rowCount() > MAX_ATTACHMENT_FILES) {
 		m_ui->attachmentSizeInfo->
 		     setStyleSheet("QLabel { color: red }");
 		m_ui->attachmentSizeInfo->setText(tr(
@@ -992,7 +985,7 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 void DlgSendMessage::addRecipientBox(const QString &boxId)
 {
 	/* Ignore existent entry. */
-	if (boxId.isEmpty() || m_recipientTableModel.containsBoxId(boxId)) {
+	if (boxId.isEmpty() || m_recipTableModel.containsBoxId(boxId)) {
 		return;
 	}
 
@@ -1092,8 +1085,8 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 		return;
 	}
 
-	m_recipientTableModel.appendData(boxId, boxType, name, address,
-	    QString(), pdz);
+	m_recipTableModel.appendData(boxId, boxType, name, address, QString(),
+	    pdz);
 }
 
 void DlgSendMessage::addRecipientBoxes(const QStringList &boxIds)
@@ -1215,13 +1208,13 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
 {
 	/* Load attachments. */
-	for (int row = 0; row < m_attachmentModel.rowCount(); ++row) {
+	for (int row = 0; row < m_attachModel.rowCount(); ++row) {
 		IsdsDocument document;
 		QModelIndex index;
 
 		document.isXml = false;
 
-		index = m_attachmentModel.index(row, DbFlsTblModel::FNAME_COL);
+		index = m_attachModel.index(row, DbFlsTblModel::FNAME_COL);
 		if (!index.isValid()) {
 			Q_ASSERT(0);
 			continue;
@@ -1241,8 +1234,7 @@ bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
 		 */
 		document.dmMimeType = QStringLiteral("");
 
-		index =
-		    m_attachmentModel.index(row, DbFlsTblModel::CONTENT_COL);
+		index = m_attachModel.index(row, DbFlsTblModel::CONTENT_COL);
 		if (!index.isValid()) {
 			Q_ASSERT(0);
 			continue;

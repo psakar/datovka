@@ -495,7 +495,7 @@
     </layout>
    </item>
    <item>
-    <widget class="LoweredTableView" name="recipientTableView">
+    <widget class="LoweredTableView" name="recipTableView">
      <property name="showGrid">
       <bool>false</bool>
      </property>
@@ -701,7 +701,7 @@ of postal data messages active.</string>
     </layout>
    </item>
    <item>
-    <widget class="AttachmentTableView" name="attachmentTableView">
+    <widget class="AttachmentTableView" name="attachTableView">
      <property name="showGrid">
       <bool>false</bool>
      </property>
@@ -824,7 +824,7 @@ of postal data messages active.</string>
   <tabstop>findRecipButton</tabstop>
   <tabstop>removeAttachButton</tabstop>
   <tabstop>openAttachButton</tabstop>
-  <tabstop>attachmentTableView</tabstop>
+  <tabstop>attachTableView</tabstop>
  </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
