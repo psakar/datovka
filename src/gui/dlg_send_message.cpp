@@ -141,7 +141,7 @@ DlgSendMessage::~DlgSendMessage(void)
 void DlgSendMessage::checkInputFields(void)
 {
 	bool buttonEnabled = calculateAndShowTotalAttachSize() &&
-	    !m_ui->subjectText->text().isEmpty() &&
+	    !m_ui->subjectLine->text().isEmpty() &&
 	    (m_recipientTableModel.rowCount() > 0) &&
 	    (m_attachmentModel.rowCount() > 0);
 
@@ -259,22 +259,22 @@ void DlgSendMessage::deleteRecipientEntries(void)
 void DlgSendMessage::showOptionalForm(void)
 {
 	m_ui->optionalWidget->setHidden(
-	    (m_ui->optionalFieldCheckBox->checkState() == Qt::Unchecked) &&
+	    (m_ui->optionalFieldsCheckBox->checkState() == Qt::Unchecked) &&
 	    (m_ui->payReplyCheckBox->checkState() == Qt::Unchecked));
 
 	checkInputFields();
 
 	if (m_ui->payReplyCheckBox->checkState() == Qt::Unchecked) {
-		m_ui->labeldmSenderRefNumber->setStyleSheet(
+		m_ui->dmSenderRefNumberLabel->setStyleSheet(
 		    "QLabel { color: black }");
-		m_ui->labeldmSenderRefNumber->setText(
+		m_ui->dmSenderRefNumberLabel->setText(
 		    tr("Our reference number:"));
 		disconnect(m_ui->dmSenderRefNumber, SIGNAL(textChanged(QString)),
 		    this, SLOT(checkInputFields()));
 	} else {
-		m_ui->labeldmSenderRefNumber->setStyleSheet(
+		m_ui->dmSenderRefNumberLabel->setStyleSheet(
 		    "QLabel { color: red }");
-		m_ui->labeldmSenderRefNumber->setText(
+		m_ui->dmSenderRefNumberLabel->setText(
 		    tr("Enter reference number:"));
 		m_ui->dmSenderRefNumber->setFocus();
 		connect(m_ui->dmSenderRefNumber, SIGNAL(textChanged(QString)),
@@ -565,8 +565,8 @@ void DlgSendMessage::initContent(enum Action action,
 	m_ui->attachmentTableView->setDragDropMode(QAbstractItemView::DragDrop);
 	m_ui->attachmentTableView->setDefaultDropAction(Qt::CopyAction);
 
-	m_ui->replyLabel->setEnabled(false);
-	m_ui->replyLabel->hide();
+	m_ui->prepaidReplyLabel->setEnabled(false);
+	m_ui->prepaidReplyLabel->hide();
 
 	Q_ASSERT(!m_userName.isEmpty());
 
@@ -595,7 +595,7 @@ void DlgSendMessage::initContent(enum Action action,
 
 	m_ui->optionalWidget->setHidden(true);
 
-	connect(m_ui->optionalFieldCheckBox, SIGNAL(stateChanged(int)),
+	connect(m_ui->optionalFieldsCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(showOptionalForm()));
 	connect(m_ui->payReplyCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(showOptionalForm()));
@@ -623,7 +623,7 @@ void DlgSendMessage::initContent(enum Action action,
 	connect(m_ui->attachmentTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(openSelectedAttachment(QModelIndex)));
 
-	connect(m_ui->subjectText, SIGNAL(textChanged(QString)),
+	connect(m_ui->subjectLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
 	connect(&m_attachmentModel,
@@ -716,7 +716,7 @@ void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 			MessageDb::PartialEnvelopeData envData(
 			    messageDb->msgsReplyData(msgId.dmId));
 
-			m_ui->subjectText->setText("Fwd: " + envData.dmAnnotation);
+			m_ui->subjectLine->setText("Fwd: " + envData.dmAnnotation);
 		}
 
 		QByteArray msgBase64(messageDb->msgsMessageBase64(msgId.dmId));
@@ -753,7 +753,7 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 	m_dmType = envData.dmType;
 	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
-	m_ui->subjectText->setText("Re: " + envData.dmAnnotation);
+	m_ui->subjectLine->setText("Re: " + envData.dmAnnotation);
 
 	if (!envData.dmSenderRefNumber.isEmpty()) {
 		m_ui->dmRecipientRefNumber->setText(envData.dmSenderRefNumber);
@@ -773,7 +773,7 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 	}
 
 	m_ui->optionalWidget->setHidden(hideOptionalWidget);
-	m_ui->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
+	m_ui->optionalFieldsCheckBox->setChecked(!hideOptionalWidget);
 	m_ui->payRecipient->setEnabled(false);
 	m_ui->payRecipient->hide();
 	m_ui->payRecipient->setChecked(false);
@@ -793,8 +793,8 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 		m_ui->addRecipient->setEnabled(false);
 		m_ui->removeRecipient->setEnabled(false);
 		m_ui->findRecipient->setEnabled(false);
-		m_ui->replyLabel->setEnabled(true);
-		m_ui->replyLabel->show();
+		m_ui->prepaidReplyLabel->setEnabled(true);
+		m_ui->prepaidReplyLabel->show();
 		m_ui->payReplyCheckBox->setEnabled(false);
 		m_ui->payReplyCheckBox->hide();
 		m_ui->payRecipient->setEnabled(true);
@@ -830,7 +830,7 @@ void DlgSendMessage::fillContentFromTemplate(
 	m_dmType = envData.dmType;
 	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
-	m_ui->subjectText->setText(envData.dmAnnotation);
+	m_ui->subjectLine->setText(envData.dmAnnotation);
 
 	/* Fill in optional fields.  */
 	if (!envData.dmSenderRefNumber.isEmpty()) {
@@ -879,7 +879,7 @@ void DlgSendMessage::fillContentFromTemplate(
 	}
 
 	m_ui->optionalWidget->setHidden(hideOptionalWidget);
-	m_ui->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
+	m_ui->optionalFieldsCheckBox->setChecked(!hideOptionalWidget);
 
 	bool pdz;
 	if (!m_dbEffectiveOVM) {
@@ -1147,7 +1147,7 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 
 	/* Set mandatory fields of envelope. */
 	envelope.dmID.clear();
-	envelope.dmAnnotation = m_ui->subjectText->text();
+	envelope.dmAnnotation = m_ui->subjectLine->text();
 
 	/* Set optional fields. */
 	envelope.dmSenderIdent = m_ui->dmSenderIdent->text();

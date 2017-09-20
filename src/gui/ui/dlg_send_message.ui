@@ -62,7 +62,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="accountLabel">
        <property name="text">
         <string>Account:</string>
        </property>
@@ -88,7 +88,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="senderLabel">
        <property name="text">
         <string>Sender:</string>
        </property>
@@ -121,7 +121,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="subjectText">
+      <widget class="QLineEdit" name="subjectLine">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -136,7 +136,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="replyLabel">
+    <widget class="QLabel" name="prepaidReplyLabel">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -162,7 +162,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="optionalFieldCheckBox">
+    <widget class="QCheckBox" name="optionalFieldsCheckBox">
      <property name="text">
       <string>Show optional fields</string>
      </property>
@@ -176,6 +176,9 @@
      <layout class="QFormLayout" name="formLayout">
       <property name="fieldGrowthPolicy">
        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <property name="labelAlignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
       <property name="horizontalSpacing">
        <number>2</number>
@@ -196,7 +199,7 @@
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="mandateLabel">
         <property name="text">
          <string>Mandate:</string>
         </property>
@@ -215,7 +218,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="slashLabel">
           <property name="text">
            <string>/</string>
           </property>
@@ -229,7 +232,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="paragraphSignLabel">
           <property name="text">
            <string>§</string>
           </property>
@@ -243,7 +246,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="paragraphLabel">
           <property name="text">
            <string>paragraph</string>
           </property>
@@ -257,7 +260,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="letterLabel">
           <property name="text">
            <string>letter</string>
           </property>
@@ -273,7 +276,7 @@
        </layout>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="labeldmSenderRefNumber">
+       <widget class="QLabel" name="dmSenderRefNumberLabel">
         <property name="text">
          <string>Our reference number:</string>
         </property>
@@ -287,7 +290,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="dmSenderIdentLabel">
         <property name="text">
          <string>Our file mark:</string>
         </property>
@@ -301,7 +304,7 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="labeldmRecipientRefNumber">
+       <widget class="QLabel" name="dmRecipientRefNumberLabel">
         <property name="text">
          <string>Your reference number:</string>
         </property>
@@ -315,7 +318,7 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="label_9">
+       <widget class="QLabel" name="dmRecipientIdentLabel">
         <property name="text">
          <string>Your file mark:</string>
         </property>
@@ -329,7 +332,7 @@
        </widget>
       </item>
       <item row="7" column="0">
-       <widget class="QLabel" name="label_11">
+       <widget class="QLabel" name="dmToHandsLabel">
         <property name="text">
          <string>To hands:</string>
         </property>
@@ -345,7 +348,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_10">
+         <widget class="QLabel" name="dmPersonalDeliveryLabel">
           <property name="text">
            <string>Personal delivery:</string>
           </property>
@@ -816,7 +819,7 @@ of postal data messages active.</string>
   <tabstop>payRecipient</tabstop>
   <tabstop>payReplyCheckBox</tabstop>
   <tabstop>dmAllowSubstDelivery</tabstop>
-  <tabstop>optionalFieldCheckBox</tabstop>
+  <tabstop>optionalFieldsCheckBox</tabstop>
   <tabstop>removeRecipient</tabstop>
   <tabstop>findRecipient</tabstop>
   <tabstop>removeAttachment</tabstop>

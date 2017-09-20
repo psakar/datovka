@@ -66,7 +66,7 @@ public:
 	enum Action {
 		ACT_NEW, /* Create new message. */
 		ACT_REPLY, /* Fill dialogue as a reply on a message. */
-		ACT_FORWARD, /* Forward supplied messages at ZFO attachments. */
+		ACT_FORWARD, /* Forward supplied messages as ZFO attachments. */
 		ACT_NEW_FROM_TMP /* Use existing message as a template. */
 	};
 
