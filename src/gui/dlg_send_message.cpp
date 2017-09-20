@@ -261,10 +261,10 @@ void DlgSendMessage::deleteRecipientEntries(void)
 	removeSelectedEntries(m_ui->recipientTableView, &m_recipientTableModel);
 }
 
-void DlgSendMessage::showOptionalForm(void)
+void DlgSendMessage::showOptionalFormElements(void)
 {
-	m_ui->optionalWidget->setHidden(
-	    (m_ui->optionalFieldsCheckBox->checkState() == Qt::Unchecked) &&
+	m_ui->optionalForm->setHidden(
+	    (m_ui->optionalFormCheckBox->checkState() == Qt::Unchecked) &&
 	    (m_ui->payReplyCheckBox->checkState() == Qt::Unchecked));
 
 	checkInputFields();
@@ -597,12 +597,12 @@ void DlgSendMessage::initContent(enum Action action,
 	    SIGNAL(rowsRemoved(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
 
-	m_ui->optionalWidget->setHidden(true);
+	m_ui->optionalForm->setHidden(true);
 
-	connect(m_ui->optionalFieldsCheckBox, SIGNAL(stateChanged(int)),
-	    this, SLOT(showOptionalForm()));
+	connect(m_ui->optionalFormCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(showOptionalFormElements()));
 	connect(m_ui->payReplyCheckBox, SIGNAL(stateChanged(int)),
-	    this, SLOT(showOptionalForm()));
+	    this, SLOT(showOptionalFormElements()));
 
 	connect(m_ui->addRecipButton, SIGNAL(clicked()),
 	    this, SLOT(addRecipientFromLocalContact()));
@@ -744,7 +744,7 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 	}
 	const MessageDb::MsgId &msgId(msgIds.first());
 
-	bool hideOptionalWidget = true;
+	bool hideOptionalForm = true;
 
 	m_ui->fromComboBox->setEnabled(false);
 
@@ -761,23 +761,23 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 
 	if (!envData.dmSenderRefNumber.isEmpty()) {
 		m_ui->dmRecipientRefNumber->setText(envData.dmSenderRefNumber);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmSenderIdent.isEmpty()) {
 		m_ui->dmRecipientIdent->setText(envData.dmSenderIdent);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmRecipientRefNumber.isEmpty()) {
 		m_ui->dmSenderRefNumber->setText(envData.dmRecipientRefNumber);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmRecipientIdent.isEmpty()) {
 		m_ui->dmSenderIdent->setText(envData.dmRecipientIdent);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 
-	m_ui->optionalWidget->setHidden(hideOptionalWidget);
-	m_ui->optionalFieldsCheckBox->setChecked(!hideOptionalWidget);
+	m_ui->optionalForm->setHidden(hideOptionalForm);
+	m_ui->optionalFormCheckBox->setChecked(!hideOptionalForm);
 	m_ui->payRecipient->setEnabled(false);
 	m_ui->payRecipient->hide();
 	m_ui->payRecipient->setChecked(false);
@@ -823,7 +823,7 @@ void DlgSendMessage::fillContentFromTemplate(
 	}
 	const MessageDb::MsgId &msgId(msgIds.first());
 
-	bool hideOptionalWidget = true;
+	bool hideOptionalForm = true;
 
 	MessageDb *messageDb =
 	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
@@ -839,23 +839,23 @@ void DlgSendMessage::fillContentFromTemplate(
 	/* Fill in optional fields.  */
 	if (!envData.dmSenderRefNumber.isEmpty()) {
 		m_ui->dmSenderRefNumber->setText(envData.dmSenderRefNumber);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmSenderIdent.isEmpty()) {
 		m_ui->dmSenderIdent->setText(envData.dmSenderIdent);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmRecipientRefNumber.isEmpty()) {
 		m_ui->dmRecipientRefNumber->setText(envData.dmRecipientRefNumber);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmRecipientIdent.isEmpty()) {
 		m_ui->dmRecipientIdent->setText(envData.dmRecipientIdent);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmToHands.isEmpty()) {
 		m_ui->dmToHands->setText(envData.dmToHands);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	/* set check boxes */
 	m_ui->dmPersonalDelivery->setChecked(envData.dmPersonalDelivery);
@@ -863,27 +863,27 @@ void DlgSendMessage::fillContentFromTemplate(
 	/* fill optional LegalTitle - Law, year, ... */
 	if (!envData.dmLegalTitleLaw.isEmpty()) {
 		m_ui->dmLegalTitleLaw->setText(envData.dmLegalTitleLaw);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmLegalTitleYear.isEmpty()) {
 		m_ui->dmLegalTitleYear->setText(envData.dmLegalTitleYear);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmLegalTitleSect.isEmpty()) {
 		m_ui->dmLegalTitleSect->setText(envData.dmLegalTitleSect);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmLegalTitlePar.isEmpty()) {
 		m_ui->dmLegalTitlePar->setText(envData.dmLegalTitlePar);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 	if (!envData.dmLegalTitlePoint.isEmpty()) {
 		m_ui->dmLegalTitlePoint->setText(envData.dmLegalTitlePoint);
-		hideOptionalWidget = false;
+		hideOptionalForm = false;
 	}
 
-	m_ui->optionalWidget->setHidden(hideOptionalWidget);
-	m_ui->optionalFieldsCheckBox->setChecked(!hideOptionalWidget);
+	m_ui->optionalForm->setHidden(hideOptionalForm);
+	m_ui->optionalFormCheckBox->setChecked(!hideOptionalForm);
 
 	bool pdz;
 	if (!m_dbEffectiveOVM) {

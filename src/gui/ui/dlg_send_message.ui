@@ -162,14 +162,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="optionalFieldsCheckBox">
+    <widget class="QCheckBox" name="optionalFormCheckBox">
      <property name="text">
       <string>Show optional fields</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="optionalWidget" native="true">
+    <widget class="QWidget" name="optionalForm" native="true">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -819,7 +819,7 @@ of postal data messages active.</string>
   <tabstop>payRecipient</tabstop>
   <tabstop>payReplyCheckBox</tabstop>
   <tabstop>dmAllowSubstDelivery</tabstop>
-  <tabstop>optionalFieldsCheckBox</tabstop>
+  <tabstop>optionalFormCheckBox</tabstop>
   <tabstop>removeRecipButton</tabstop>
   <tabstop>findRecipButton</tabstop>
   <tabstop>removeAttachButton</tabstop>

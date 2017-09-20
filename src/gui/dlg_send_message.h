@@ -139,7 +139,7 @@ private slots:
 	/*!
 	 * @brief Show/hide optional form elements.
 	 */
-	void showOptionalForm(void);
+	void showOptionalFormElements(void);
 
 	/*!
 	 * @brief Add attachment file.
