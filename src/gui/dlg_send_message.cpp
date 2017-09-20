@@ -346,6 +346,9 @@ void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
 void DlgSendMessage::pingIsdsServer(void) const
 {
 	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		return;
+	}
 	task->setAutoDelete(true);
 	globWorkPool.assignHi(task);
 }
