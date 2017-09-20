@@ -306,7 +306,12 @@ void DlgSendMessage::addAttachmentFile(void)
 		int fileSize = m_attachmentModel.insertAttachmentFile(fileName,
 		    m_attachmentModel.rowCount());
 		if (fileSize <= 0) {
-			/* TODO -- Generate some warning message. */
+			logWarningNL(
+			    "Cannot add empty file '%s' to attachments.",
+			    fileName.toUtf8().constData());
+			QMessageBox::warning(this, tr("Empty file"),
+			    tr("Cannot add empty file '%1' to attachments.").arg(fileName),
+			    QMessageBox::Ok, QMessageBox::Ok);
 			continue;
 		}
 	}
