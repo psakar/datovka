@@ -24,13 +24,11 @@
 #ifndef _DLG_SEND_MESSAGE_H_
 #define _DLG_SEND_MESSAGE_H_
 
-#include <QDateTime>
 #include <QDialog>
-#include <QFileDialog>
+#include <QItemSelection>
 #include <QList>
 #include <QSet>
 #include <QTimer>
-#include <QTreeView>
 
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
@@ -38,7 +36,10 @@
 #include "src/models/files_model.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
-#include "ui_dlg_send_message.h"
+
+namespace Ui {
+	class DlgSendMessage;
+}
 
 /*!
  * @brief Returns message prefix depending on whether it is sent ore received.
@@ -55,8 +56,8 @@ const QString &dzPrefix(const MessageDb *messageDb, qint64 dmId);
 /*!
  * @brief Send message dialogue.
  */
-class DlgSendMessage : public QDialog, public Ui::SendMessage {
-    Q_OBJECT
+class DlgSendMessage : public QDialog {
+	Q_OBJECT
 
 public:
 	/*!
@@ -65,7 +66,7 @@ public:
 	enum Action {
 		ACT_NEW, /* Create new message. */
 		ACT_REPLY, /* Fill dialogue as a reply on a message. */
-		ACT_FORWARD, /* Forward supplied messages at ZFO attachments. */
+		ACT_FORWARD, /* Forward supplied messages as ZFO attachments. */
 		ACT_NEW_FROM_TMP /* Use existing message as a template. */
 	};
 
@@ -84,6 +85,12 @@ public:
 	    const QString &userName, class MainWindow *mw,
 	    QWidget *parent = Q_NULLPTR);
 
+	/*!
+	 * @brief Destructor.
+	 */
+	virtual
+	~DlgSendMessage(void);
+
 signals:
 	/*!
 	 * @brief This signal is emitted whenever the attachment path has been
@@ -96,7 +103,7 @@ signals:
 
 private slots:
 	/*!
-	 * @brief Check input fields sanity and activate search button.
+	 * @brief Check input fields' sanity and activate search button.
 	 */
 	void checkInputFields(void);
 
@@ -132,7 +139,7 @@ private slots:
 	/*!
 	 * @brief Show/hide optional form elements.
 	 */
-	void showOptionalForm(void);
+	void showOptionalFormElements(void);
 
 	/*!
 	 * @brief Add attachment file.
@@ -304,16 +311,18 @@ private:
 	void sendMessageISDS(
 	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
 
+	Ui::DlgSendMessage *m_ui; /*!< UI generated from UI file. */
+
 	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */
 	const QList<Task::AccountDescr> m_messageDbSetList; /*!< Available accounts.*/
 
 	QString m_userName; /*!< Selected user name (login). */
-	QString m_dbId; /*!< Name of data box associated with selected user. */
+	QString m_boxId; /*!< Name of data box associated with selected user. */
 	QString m_senderName; /*!< Sender (data box) name. */
 	QString m_dbType; /*!< Data box type identifier string. */
 	bool m_dbEffectiveOVM; /*! True if selected data box has effective OVM. */
 	bool m_dbOpenAddressing; /*! True if selected box has open addressing.  */
-	bool m_isLogged; /*!< True if account has already logged in. */
+	bool m_isLoggedIn; /*!< True if account has already logged in. */
 
 	QString m_lastAttAddPath; /*! Last attachment location. */
 	QString m_pdzCredit; /*! String containing credit value. */
@@ -323,8 +332,8 @@ private:
 
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 
-	BoxContactsModel m_recipientTableModel; /*!< Model of data boxes. */
-	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
+	BoxContactsModel m_recipTableModel; /*!< Data box table model. */
+	DbFlsTblModel m_attachModel; /*!< Attachment table model. */
 
 	/* Used to collect sending results. */
 	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */

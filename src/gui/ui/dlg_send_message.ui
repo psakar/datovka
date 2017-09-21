@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SendMessage</class>
- <widget class="QDialog" name="SendMessage">
+ <class>DlgSendMessage</class>
+ <widget class="QDialog" name="DlgSendMessage">
   <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>
@@ -62,7 +62,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label_8">
+      <widget class="QLabel" name="accountLabel">
        <property name="text">
         <string>Account:</string>
        </property>
@@ -88,7 +88,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_6">
+      <widget class="QLabel" name="senderLabel">
        <property name="text">
         <string>Sender:</string>
        </property>
@@ -121,7 +121,7 @@
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLineEdit" name="subjectText">
+      <widget class="QLineEdit" name="subjectLine">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -136,7 +136,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="replyLabel">
+    <widget class="QLabel" name="prepaidReplyLabel">
      <property name="enabled">
       <bool>true</bool>
      </property>
@@ -162,20 +162,23 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="optionalFieldCheckBox">
+    <widget class="QCheckBox" name="optionalFormCheckBox">
      <property name="text">
       <string>Show optional fields</string>
      </property>
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="optionalWidget" native="true">
+    <widget class="QWidget" name="optionalForm" native="true">
      <property name="enabled">
       <bool>true</bool>
      </property>
      <layout class="QFormLayout" name="formLayout">
       <property name="fieldGrowthPolicy">
        <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
+      <property name="labelAlignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
       <property name="horizontalSpacing">
        <number>2</number>
@@ -196,7 +199,7 @@
        <number>0</number>
       </property>
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="mandateLabel">
         <property name="text">
          <string>Mandate:</string>
         </property>
@@ -215,7 +218,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
+         <widget class="QLabel" name="slashLabel">
           <property name="text">
            <string>/</string>
           </property>
@@ -229,7 +232,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_3">
+         <widget class="QLabel" name="paragraphSignLabel">
           <property name="text">
            <string>§</string>
           </property>
@@ -243,7 +246,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_4">
+         <widget class="QLabel" name="paragraphLabel">
           <property name="text">
            <string>paragraph</string>
           </property>
@@ -257,7 +260,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_5">
+         <widget class="QLabel" name="letterLabel">
           <property name="text">
            <string>letter</string>
           </property>
@@ -273,7 +276,7 @@
        </layout>
       </item>
       <item row="1" column="0">
-       <widget class="QLabel" name="labeldmSenderRefNumber">
+       <widget class="QLabel" name="dmSenderRefNumberLabel">
         <property name="text">
          <string>Our reference number:</string>
         </property>
@@ -287,7 +290,7 @@
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QLabel" name="label_7">
+       <widget class="QLabel" name="dmSenderIdentLabel">
         <property name="text">
          <string>Our file mark:</string>
         </property>
@@ -301,7 +304,7 @@
        </widget>
       </item>
       <item row="3" column="0">
-       <widget class="QLabel" name="labeldmRecipientRefNumber">
+       <widget class="QLabel" name="dmRecipientRefNumberLabel">
         <property name="text">
          <string>Your reference number:</string>
         </property>
@@ -315,7 +318,7 @@
        </widget>
       </item>
       <item row="4" column="0">
-       <widget class="QLabel" name="label_9">
+       <widget class="QLabel" name="dmRecipientIdentLabel">
         <property name="text">
          <string>Your file mark:</string>
         </property>
@@ -329,7 +332,7 @@
        </widget>
       </item>
       <item row="7" column="0">
-       <widget class="QLabel" name="label_11">
+       <widget class="QLabel" name="dmToHandsLabel">
         <property name="text">
          <string>To hands:</string>
         </property>
@@ -345,7 +348,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_10">
+         <widget class="QLabel" name="dmPersonalDeliveryLabel">
           <property name="text">
            <string>Personal delivery:</string>
           </property>
@@ -389,7 +392,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="addRecipient">
+      <widget class="QPushButton" name="addRecipButton">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -409,7 +412,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="removeRecipient">
+      <widget class="QPushButton" name="removeRecipButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -439,7 +442,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="findRecipient">
+      <widget class="QPushButton" name="findRecipButton">
        <property name="enabled">
         <bool>true</bool>
        </property>
@@ -463,12 +466,12 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="enterDbIdpushButton">
+      <widget class="QPushButton" name="enterBoxIdButton">
        <property name="toolTip">
         <string>Allows to enter address of Databox manually</string>
        </property>
        <property name="text">
-        <string>Enter DB ID</string>
+        <string>Enter Box ID</string>
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
@@ -492,7 +495,7 @@
     </layout>
    </item>
    <item>
-    <widget class="LoweredTableView" name="recipientTableView">
+    <widget class="LoweredTableView" name="recipTableView">
      <property name="showGrid">
       <bool>false</bool>
      </property>
@@ -610,7 +613,7 @@ of postal data messages active.</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="addAttachment">
+      <widget class="QPushButton" name="addAttachButton">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -630,7 +633,7 @@ of postal data messages active.</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="removeAttachment">
+      <widget class="QPushButton" name="removeAttachButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -660,7 +663,7 @@ of postal data messages active.</string>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="openAttachment">
+      <widget class="QPushButton" name="openAttachButton">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -698,7 +701,7 @@ of postal data messages active.</string>
     </layout>
    </item>
    <item>
-    <widget class="AttachmentTableView" name="attachmentTableView">
+    <widget class="AttachmentTableView" name="attachTableView">
      <property name="showGrid">
       <bool>false</bool>
      </property>
@@ -808,20 +811,20 @@ of postal data messages active.</string>
   <tabstop>dmLegalTitleSect</tabstop>
   <tabstop>dmLegalTitlePar</tabstop>
   <tabstop>dmLegalTitlePoint</tabstop>
-  <tabstop>addRecipient</tabstop>
-  <tabstop>addAttachment</tabstop>
+  <tabstop>addRecipButton</tabstop>
+  <tabstop>addAttachButton</tabstop>
   <tabstop>sendButton</tabstop>
   <tabstop>cancelButton</tabstop>
   <tabstop>dmPublishOwnID</tabstop>
   <tabstop>payRecipient</tabstop>
   <tabstop>payReplyCheckBox</tabstop>
   <tabstop>dmAllowSubstDelivery</tabstop>
-  <tabstop>optionalFieldCheckBox</tabstop>
-  <tabstop>removeRecipient</tabstop>
-  <tabstop>findRecipient</tabstop>
-  <tabstop>removeAttachment</tabstop>
-  <tabstop>openAttachment</tabstop>
-  <tabstop>attachmentTableView</tabstop>
+  <tabstop>optionalFormCheckBox</tabstop>
+  <tabstop>removeRecipButton</tabstop>
+  <tabstop>findRecipButton</tabstop>
+  <tabstop>removeAttachButton</tabstop>
+  <tabstop>openAttachButton</tabstop>
+  <tabstop>attachTableView</tabstop>
  </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>

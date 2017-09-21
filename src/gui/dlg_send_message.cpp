@@ -22,6 +22,8 @@
  */
 
 #include <algorithm> /* std::sort */
+#include <QDateTime>
+#include <QFileDialog>
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDir>
@@ -92,61 +94,71 @@ DlgSendMessage::DlgSendMessage(
     enum Action action, const QList<MessageDb::MsgId> &msgIds,
     const QString &userName, class MainWindow *mw, QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgSendMessage),
     m_keepAliveTimer(),
     m_messageDbSetList(messageDbSetList),
     m_userName(userName),
-    m_dbId(),
+    m_boxId(),
     m_senderName(),
     m_dbType(),
     m_dbEffectiveOVM(false),
     m_dbOpenAddressing(false),
-    m_isLogged(false),
+    m_isLoggedIn(false),
     m_lastAttAddPath(),
     m_pdzCredit("0"),
     m_dmType(),
     m_dmSenderRefNumber(),
     m_dbSet(Q_NULLPTR),
-    m_recipientTableModel(this),
-    m_attachmentModel(this),
+    m_recipTableModel(this),
+    m_attachModel(this),
     m_transactIds(),
     m_sentMsgResultList(),
     m_mw(mw)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
 
 	/* Set default line height for table views/widgets. */
-	recipientTableView->setNarrowedLineHeight();
-	recipientTableView->setSelectionBehavior(
+	m_ui->recipTableView->setNarrowedLineHeight();
+	m_ui->recipTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
-	attachmentTableView->setNarrowedLineHeight();
-	attachmentTableView->setSelectionBehavior(
+	m_ui->attachTableView->setNarrowedLineHeight();
+	m_ui->attachTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
 	initContent(action, msgIds);
 
-	Q_ASSERT(!m_dbId.isEmpty());
-
+	Q_ASSERT(!m_boxId.isEmpty());
 	Q_ASSERT(Q_NULLPTR != m_dbSet);
+}
+
+DlgSendMessage::~DlgSendMessage(void)
+{
+	delete m_ui;
 }
 
 void DlgSendMessage::checkInputFields(void)
 {
-	bool buttonEnabled = calculateAndShowTotalAttachSize() &&
-	    !this->subjectText->text().isEmpty() &&
-	    (m_recipientTableModel.rowCount() > 0) &&
-	    (m_attachmentModel.rowCount() > 0);
+	bool enable = calculateAndShowTotalAttachSize() &&
+	    !m_ui->subjectLine->text().isEmpty() &&
+	    (m_recipTableModel.rowCount() > 0) &&
+	    (m_attachModel.rowCount() > 0);
 
-	if (this->payReplyCheckBox->isChecked()) {
-		if (this->dmSenderRefNumber->text().isEmpty()) {
-			buttonEnabled = false;
+	if (m_ui->payReplyCheckBox->isChecked()) {
+		if (m_ui->dmSenderRefNumber->text().isEmpty()) {
+			/*
+			 * Transfer charges for reply can only be set when
+			 * sender reference number is provided.
+			 */
+			enable = false;
 		}
 	}
 
-	if (m_isLogged) {
-		this->sendButton->setEnabled(buttonEnabled);
+	if (m_isLoggedIn) {
+		m_ui->sendButton->setEnabled(enable);
 	} else {
-		this->sendButton->setEnabled(false);
+		/* cannot send message when not logged in. */
+		m_ui->sendButton->setEnabled(false);
 	}
 }
 
@@ -168,8 +180,8 @@ void DlgSendMessage::addRecipientManually(void)
 {
 	bool ok = false;
 
-	QString dbID = QInputDialog::getText(this, tr("Databox ID"),
-	    tr("Enter Databox ID (7 characters):"), QLineEdit::Normal,
+	QString dbID = QInputDialog::getText(this, tr("Data box ID"),
+	    tr("Enter data box ID (7 characters):"), QLineEdit::Normal,
 	    QString(), &ok, Qt::WindowStaysOnTopHint);
 
 	if (!ok) {
@@ -197,8 +209,9 @@ void DlgSendMessage::recipientSelectionChanged(const QItemSelection &selected,
 	 * PDZ. It should not be possible to delete recipients for those
 	 * messages.
 	 */
-	removeRecipient->setEnabled((m_dmType != QStringLiteral(DMTYPE_INIT)) &&
-	    recipientTableView->selectionModel()->selectedRows(0).size() > 0);
+	m_ui->removeRecipButton->setEnabled(
+	    (m_dmType != QStringLiteral(DMTYPE_INIT)) &&
+	    (m_ui->recipTableView->selectionModel()->selectedRows(0).size() > 0));
 }
 
 /*!
@@ -244,31 +257,31 @@ void removeSelectedEntries(const QTableView *view, QAbstractItemModel *model)
 
 void DlgSendMessage::deleteRecipientEntries(void)
 {
-	removeSelectedEntries(recipientTableView, &m_recipientTableModel);
+	removeSelectedEntries(m_ui->recipTableView, &m_recipTableModel);
 }
 
-void DlgSendMessage::showOptionalForm(void)
+void DlgSendMessage::showOptionalFormElements(void)
 {
-	this->optionalWidget->setHidden(
-	    (this->optionalFieldCheckBox->checkState() == Qt::Unchecked) &&
-	    (this->payReplyCheckBox->checkState() == Qt::Unchecked));
+	m_ui->optionalForm->setHidden(
+	    (m_ui->optionalFormCheckBox->checkState() == Qt::Unchecked) &&
+	    (m_ui->payReplyCheckBox->checkState() == Qt::Unchecked));
 
 	checkInputFields();
 
-	if (this->payReplyCheckBox->checkState() == Qt::Unchecked) {
-		this->labeldmSenderRefNumber->setStyleSheet(
+	if (m_ui->payReplyCheckBox->checkState() == Qt::Unchecked) {
+		m_ui->dmSenderRefNumberLabel->setStyleSheet(
 		    "QLabel { color: black }");
-		this->labeldmSenderRefNumber->setText(
+		m_ui->dmSenderRefNumberLabel->setText(
 		    tr("Our reference number:"));
-		disconnect(this->dmSenderRefNumber,SIGNAL(textChanged(QString)),
+		disconnect(m_ui->dmSenderRefNumber, SIGNAL(textChanged(QString)),
 		    this, SLOT(checkInputFields()));
 	} else {
-		this->labeldmSenderRefNumber->setStyleSheet(
+		m_ui->dmSenderRefNumberLabel->setStyleSheet(
 		    "QLabel { color: red }");
-		this->labeldmSenderRefNumber->setText(
+		m_ui->dmSenderRefNumberLabel->setText(
 		    tr("Enter reference number:"));
-		this->dmSenderRefNumber->setFocus();
-		connect(this->dmSenderRefNumber, SIGNAL(textChanged(QString)),
+		m_ui->dmSenderRefNumber->setFocus();
+		connect(m_ui->dmSenderRefNumber, SIGNAL(textChanged(QString)),
 		    this, SLOT(checkInputFields()));
 	}
 }
@@ -289,10 +302,15 @@ void DlgSendMessage::addAttachmentFile(void)
 	}
 
 	foreach (const QString &fileName, fileNames) {
-		int fileSize = m_attachmentModel.insertAttachmentFile(fileName,
-		    m_attachmentModel.rowCount());
+		int fileSize = m_attachModel.insertAttachmentFile(fileName,
+		    m_attachModel.rowCount());
 		if (fileSize <= 0) {
-			/* TODO -- Generate some warning message. */
+			logWarningNL(
+			    "Cannot add empty file '%s' to attachments.",
+			    fileName.toUtf8().constData());
+			QMessageBox::warning(this, tr("Empty file"),
+			    tr("Cannot add empty file '%1' to attachments.").arg(fileName),
+			    QMessageBox::Ok, QMessageBox::Ok);
 			continue;
 		}
 	}
@@ -305,30 +323,108 @@ void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
 	Q_UNUSED(deselected);
 
 	int selectionSize =
-	    attachmentTableView->selectionModel()->selectedRows(0).size();
+	    m_ui->attachTableView->selectionModel()->selectedRows(0).size();
 
-	removeAttachment->setEnabled(selectionSize > 0);
-	openAttachment->setEnabled(selectionSize == 1);
+	m_ui->removeAttachButton->setEnabled(selectionSize > 0);
+	m_ui->openAttachButton->setEnabled(selectionSize == 1);
 }
 
 void DlgSendMessage::deleteSelectedAttachmentFiles(void)
 {
-	removeSelectedEntries(attachmentTableView, &m_attachmentModel);
+	removeSelectedEntries(m_ui->attachTableView, &m_attachModel);
 }
 
 void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
 {
 	debugSlotCall();
 
-	AttachmentInteraction::openAttachment(this, *this->attachmentTableView,
+	AttachmentInteraction::openAttachment(this, *m_ui->attachTableView,
 	    index);
 }
 
 void DlgSendMessage::pingIsdsServer(void) const
 {
 	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		return;
+	}
 	task->setAutoDelete(true);
 	globWorkPool.assignHi(task);
+}
+
+/*!
+ * @brief Checks whether the related account has an active connection to ISDS.
+ *
+ * @param[in] keepAliveTimer Keep-alive timer.
+ * @param[in] mw Pointer to main window.
+ * @param[in] userName User name identifying the account.
+ * @return True if active connection is present.
+ */
+static
+bool isLoggedIn(QTimer &keepAliveTimer, MainWindow *const mw,
+    const QString &userName)
+{
+	if (Q_UNLIKELY(userName.isEmpty())) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	bool loggedIn = false;
+	keepAliveTimer.stop();
+	{
+		TaskKeepAlive *task =
+		    new (std::nothrow) TaskKeepAlive(userName);
+		if (Q_UNLIKELY(task == Q_NULLPTR)) {
+			return false;
+		}
+		task->setAutoDelete(false);
+		globWorkPool.runSingle(task);
+
+		loggedIn = task->m_isAlive;
+
+		delete task;
+	}
+	if (!loggedIn) {
+		if (Q_NULLPTR != mw) {
+			loggedIn = mw->connectToIsds(userName);
+		}
+	}
+	keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
+
+	/* Check the presence of struct isds_ctx . */
+	if (NULL == globIsdsSessions.session(userName)) {
+		logErrorNL("%s", "Missing ISDS session.");
+		loggedIn = false;
+	}
+
+	return loggedIn;
+}
+
+/*!
+ * @brief Find database set relate to account.
+ *
+ * @param[in] acntDescrs Account descriptors.
+ * @param[in] userName User name identifying the account.
+ * @return Pointer related to specified account, Q_NULLPTR on error.
+ */
+static
+MessageDbSet *getDbSet(const QList<Task::AccountDescr> &acntDescrs,
+    const QString &userName)
+{
+	if (Q_UNLIKELY(userName.isEmpty())) {
+		Q_ASSERT(0);
+		return Q_NULLPTR;
+	}
+
+	MessageDbSet *dbSet = Q_NULLPTR;
+	foreach (const Task::AccountDescr &acnt, acntDescrs) {
+		if (acnt.userName == userName) {
+			dbSet = acnt.messageDbSet;
+			break;
+		}
+	}
+
+	return dbSet;
 }
 
 void DlgSendMessage::setAccountInfo(int fromComboIdx)
@@ -337,56 +433,30 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 
 	/* Get user name for selected account. */
 	const QString userName(
-	    this->fromComboBox->itemData(fromComboIdx).toString());
-	if (userName.isEmpty()) {
+	    m_ui->fromComboBox->itemData(fromComboIdx).toString());
+	if (Q_UNLIKELY(userName.isEmpty())) {
 		Q_ASSERT(0);
 		return;
 	}
 
 	/* Remove all recipients if account was changed. */
 	if (m_userName != userName) {
-		m_recipientTableModel.removeRows(0,
-		    m_recipientTableModel.rowCount());
+		m_recipTableModel.removeRows(0, m_recipTableModel.rowCount());
 		m_userName = userName;
 	}
 
+	m_isLoggedIn = isLoggedIn(m_keepAliveTimer, m_mw, m_userName);
 
-	m_isLogged = true;
-	m_keepAliveTimer.stop();
-	{
-		TaskKeepAlive *task =
-		    new (std::nothrow) TaskKeepAlive(m_userName);
-		task->setAutoDelete(false);
-		globWorkPool.runSingle(task);
-
-		m_isLogged = task->m_isAlive;
-
-		delete task;
-	}
-	if (!m_isLogged) {
-		if (Q_NULLPTR != m_mw) {
-			m_isLogged = m_mw->connectToIsds(m_userName);
-		}
-	}
-	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
-
-	/* Check for presence of struct isds_ctx . */
-	if (NULL == globIsdsSessions.session(m_userName)) {
-		logErrorNL("%s", "Missing ISDS session.");
-		m_isLogged = false;
-	}
-
-	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
-		if (acnt.userName == m_userName) {
-			m_dbSet = acnt.messageDbSet;
-			break;
-		}
+	m_dbSet = getDbSet(m_messageDbSetList, m_userName);
+	if (Q_UNLIKELY(Q_NULLPTR == m_dbSet)) {
+		Q_ASSERT(0);
+		return;
 	}
 
 	const AcntSettings &accountInfo(globAccounts[m_userName]);
 	const QString acntDbKey(AccountDb::keyFromLogin(m_userName));
-	m_dbId = globAccountDbPtr->dbId(acntDbKey);
-	Q_ASSERT(!m_dbId.isEmpty());
+	m_boxId = globAccountDbPtr->dbId(acntDbKey);
+	Q_ASSERT(!m_boxId.isEmpty());
 	m_senderName = globAccountDbPtr->senderNameGuess(acntDbKey);
 	const QList<QString> accountData(
 	    globAccountDbPtr->getUserDataboxInfo(acntDbKey));
@@ -402,7 +472,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	}
 
 	if (m_dbOpenAddressing) {
-		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_dbId);
+		m_pdzCredit = getPDZCreditFromISDS(m_userName, m_boxId);
 	}
 
 	QString dbOpenAddressingText;
@@ -417,7 +487,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		}
 	}
 
-	this->fromUser->setText("<strong>" +
+	m_ui->fromUser->setText("<strong>" +
 	    globAccounts[m_userName].accountName() + "</strong>" +
 	    " (" + m_userName + ") - " + m_dbType + dbOpenAddressingText);
 }
@@ -427,8 +497,7 @@ void DlgSendMessage::sendMessage(void)
 	debugSlotCall();
 
 	const QList<BoxContactsModel::PartialEntry> recipEntries(
-	    m_recipientTableModel.partialBoxEntries(BoxContactsModel::ANY));
-
+	    m_recipTableModel.partialBoxEntries(BoxContactsModel::ANY));
 
 	sendMessageISDS(recipEntries);
 }
@@ -502,7 +571,7 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 	}
 	m_sentMsgResultList.clear();
 
-	if (m_recipientTableModel.rowCount() == successfullySentCnt) {
+	if (m_recipTableModel.rowCount() == successfullySentCnt) {
 		DlgMsgBox::message(this, QMessageBox::Information,
 		    tr("Message sent"),
 		    "<b>" + tr("Message was successfully sent to all recipients.") + "</b>",
@@ -527,37 +596,37 @@ void DlgSendMessage::collectSendMessageStatus(const QString &userName,
 void DlgSendMessage::initContent(enum Action action,
     const QList<MessageDb::MsgId> &msgIds)
 {
-	m_recipientTableModel.setHeader();
-	this->recipientTableView->setModel(&m_recipientTableModel);
+	m_recipTableModel.setHeader();
+	m_ui->recipTableView->setModel(&m_recipTableModel);
 
-	this->recipientTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 60);
-	this->recipientTableView->setColumnWidth(BoxContactsModel::BOX_TYPE_COL, 70);
-	this->recipientTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 120);
-	this->recipientTableView->setColumnWidth(BoxContactsModel::ADDRESS_COL, 100);
+	m_ui->recipTableView->setColumnWidth(BoxContactsModel::BOX_ID_COL, 60);
+	m_ui->recipTableView->setColumnWidth(BoxContactsModel::BOX_TYPE_COL, 70);
+	m_ui->recipTableView->setColumnWidth(BoxContactsModel::BOX_NAME_COL, 120);
+	m_ui->recipTableView->setColumnWidth(BoxContactsModel::ADDRESS_COL, 100);
 
-	this->recipientTableView->setColumnHidden(BoxContactsModel::CHECKBOX_COL, true);
-	this->recipientTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL, true);
+	m_ui->recipTableView->setColumnHidden(BoxContactsModel::CHECKBOX_COL, true);
+	m_ui->recipTableView->setColumnHidden(BoxContactsModel::POST_CODE_COL, true);
 
-	m_attachmentModel.setHeader();
-	this->attachmentTableView->setModel(&m_attachmentModel);
+	m_attachModel.setHeader();
+	m_ui->attachTableView->setModel(&m_attachModel);
 
-	this->attachmentTableView->setColumnWidth(DbFlsTblModel::FNAME_COL, 150);
-	this->attachmentTableView->setColumnWidth(DbFlsTblModel::MIME_COL, 120);
+	m_ui->attachTableView->setColumnWidth(DbFlsTblModel::FNAME_COL, 150);
+	m_ui->attachTableView->setColumnWidth(DbFlsTblModel::MIME_COL, 120);
 
-	this->attachmentTableView->setColumnHidden(DbFlsTblModel::ATTACHID_COL, true);
-	this->attachmentTableView->setColumnHidden(DbFlsTblModel::MSGID_COL, true);
-	this->attachmentTableView->setColumnHidden(DbFlsTblModel::CONTENT_COL, true);
+	m_ui->attachTableView->setColumnHidden(DbFlsTblModel::ATTACHID_COL, true);
+	m_ui->attachTableView->setColumnHidden(DbFlsTblModel::MSGID_COL, true);
+	m_ui->attachTableView->setColumnHidden(DbFlsTblModel::CONTENT_COL, true);
 
 	/* Enable drag and drop on attachment table. */
-	this->attachmentTableView->setAcceptDrops(true);
-	this->attachmentTableView->setDragEnabled(true);
-	this->attachmentTableView->setDragDropOverwriteMode(false);
-	this->attachmentTableView->setDropIndicatorShown(true);
-	this->attachmentTableView->setDragDropMode(QAbstractItemView::DragDrop);
-	this->attachmentTableView->setDefaultDropAction(Qt::CopyAction);
+	m_ui->attachTableView->setAcceptDrops(true);
+	m_ui->attachTableView->setDragEnabled(true);
+	m_ui->attachTableView->setDragDropOverwriteMode(false);
+	m_ui->attachTableView->setDropIndicatorShown(true);
+	m_ui->attachTableView->setDragDropMode(QAbstractItemView::DragDrop);
+	m_ui->attachTableView->setDefaultDropAction(Qt::CopyAction);
 
-	this->replyLabel->hide();
-	this->replyLabel->setEnabled(false);
+	m_ui->prepaidReplyLabel->setEnabled(false);
+	m_ui->prepaidReplyLabel->hide();
 
 	Q_ASSERT(!m_userName.isEmpty());
 
@@ -565,83 +634,77 @@ void DlgSendMessage::initContent(enum Action action,
 		const QString accountName =
 		    globAccounts[acnt.userName].accountName() +
 		    " (" + acnt.userName + ")";
-		this->fromComboBox->addItem(accountName, QVariant(acnt.userName));
+		m_ui->fromComboBox->addItem(accountName, QVariant(acnt.userName));
 		if (m_userName == acnt.userName) {
-			int i = this->fromComboBox->count() - 1;
+			int i = m_ui->fromComboBox->count() - 1;
 			Q_ASSERT(0 <= i);
-			this->fromComboBox->setCurrentIndex(i);
+			m_ui->fromComboBox->setCurrentIndex(i);
 			setAccountInfo(i);
 		}
 	}
 
-	connect(this->fromComboBox, SIGNAL(currentIndexChanged(int)),
+	connect(m_ui->fromComboBox, SIGNAL(currentIndexChanged(int)),
 	    this, SLOT(setAccountInfo(int)));
 
-	connect(&m_recipientTableModel,
-	    SIGNAL(rowsInserted(QModelIndex, int, int)),
+	connect(&m_recipTableModel, SIGNAL(rowsInserted(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
-	connect(&m_recipientTableModel,
-	    SIGNAL(rowsRemoved(QModelIndex, int, int)),
+	connect(&m_recipTableModel, SIGNAL(rowsRemoved(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
 
-	this->optionalWidget->setHidden(true);
+	m_ui->optionalForm->setHidden(true);
 
-	connect(this->optionalFieldCheckBox, SIGNAL(stateChanged(int)),
-	    this, SLOT(showOptionalForm()));
-	connect(this->payReplyCheckBox, SIGNAL(stateChanged(int)),
-	    this, SLOT(showOptionalForm()));
+	connect(m_ui->optionalFormCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(showOptionalFormElements()));
+	connect(m_ui->payReplyCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(showOptionalFormElements()));
 
-	connect(this->addRecipient, SIGNAL(clicked()),
+	connect(m_ui->addRecipButton, SIGNAL(clicked()),
 	    this, SLOT(addRecipientFromLocalContact()));
-	connect(this->removeRecipient, SIGNAL(clicked()),
+	connect(m_ui->removeRecipButton, SIGNAL(clicked()),
 	    this, SLOT(deleteRecipientEntries()));
-	connect(this->findRecipient, SIGNAL(clicked()),
+	connect(m_ui->findRecipButton, SIGNAL(clicked()),
 	    this, SLOT(addRecipientFromISDSSearch()));
-	connect(this->enterDbIdpushButton, SIGNAL(clicked()),
+	connect(m_ui->enterBoxIdButton, SIGNAL(clicked()),
 	    this, SLOT(addRecipientManually()));
 
-	connect(this->addAttachment, SIGNAL(clicked()), this,
+	connect(m_ui->addAttachButton, SIGNAL(clicked()), this,
 	    SLOT(addAttachmentFile()));
-	connect(this->removeAttachment, SIGNAL(clicked()), this,
+	connect(m_ui->removeAttachButton, SIGNAL(clicked()), this,
 	    SLOT(deleteSelectedAttachmentFiles()));
-	connect(this->openAttachment, SIGNAL(clicked()), this,
+	connect(m_ui->openAttachButton, SIGNAL(clicked()), this,
 	    SLOT(openSelectedAttachment()));
 
-	connect(this->recipientTableView->selectionModel(),
+	connect(m_ui->recipTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
 	    SLOT(recipientSelectionChanged(QItemSelection, QItemSelection)));
 
-	connect(this->attachmentTableView, SIGNAL(doubleClicked(QModelIndex)),
+	connect(m_ui->attachTableView, SIGNAL(doubleClicked(QModelIndex)),
 	    this, SLOT(openSelectedAttachment(QModelIndex)));
 
-	connect(this->subjectText, SIGNAL(textChanged(QString)),
+	connect(m_ui->subjectLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
-	connect(&m_attachmentModel,
-	    SIGNAL(rowsInserted(QModelIndex, int, int)),
+	connect(&m_attachModel, SIGNAL(rowsInserted(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
-	connect(&m_attachmentModel,
-	    SIGNAL(rowsRemoved(QModelIndex, int, int)),
+	connect(&m_attachModel, SIGNAL(rowsRemoved(QModelIndex, int, int)),
 	    this, SLOT(checkInputFields()));
-	connect(&m_attachmentModel,
+	connect(&m_attachModel,
 	    SIGNAL(dataChanged(QModelIndex, QModelIndex, QVector<int>)),
 	    this, SLOT(checkInputFields()));
-	connect(this->attachmentTableView->selectionModel(),
+	connect(m_ui->attachTableView->selectionModel(),
 	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)), this,
 	    SLOT(attachmentSelectionChanged(QItemSelection, QItemSelection)));
 
-	this->recipientTableView->
-	    setEditTriggers(QAbstractItemView::NoEditTriggers);
-	this->attachmentTableView->
-	    setEditTriggers(QAbstractItemView::NoEditTriggers);
+	m_ui->recipTableView->setEditTriggers(
+	    QAbstractItemView::NoEditTriggers);
+	m_ui->attachTableView->setEditTriggers(
+	    QAbstractItemView::NoEditTriggers);
 
-	this->recipientTableView->installEventFilter(
-	    new TableHomeEndFilter(this));
-	this->attachmentTableView->installEventFilter(
-	    new TableHomeEndFilter(this));
+	m_ui->recipTableView->installEventFilter(new TableHomeEndFilter(this));
+	m_ui->attachTableView->installEventFilter(new TableHomeEndFilter(this));
 
-	connect(this->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
-	connect(this->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
+	connect(m_ui->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
+	connect(m_ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
 	connect(&globMsgProcEmitter,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
 	        QString, QString, bool, qint64)), this,
@@ -652,27 +715,27 @@ void DlgSendMessage::initContent(enum Action action,
 
 	connect(&m_keepAliveTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
 
-	this->attachmentSizeInfo->setText(
+	m_ui->attachmentSizeInfo->setText(
 	    tr("Total size of attachments is %1 B").arg(0));
 
 	if (IsdsConversion::boxTypeStrToInt(m_dbType) > DBTYPE_OVM_REQ) {
-		this->dmAllowSubstDelivery->setEnabled(false);
-		this->dmAllowSubstDelivery->hide();
+		m_ui->dmAllowSubstDelivery->setEnabled(false);
+		m_ui->dmAllowSubstDelivery->hide();
 	}
 
 	if (ACT_REPLY == action) {
 		fillContentAsReply(msgIds);
 	} else {
 		if (m_dbOpenAddressing) {
-			this->payReplyCheckBox->setEnabled(true);
-			this->payReplyCheckBox->show();
+			m_ui->payReplyCheckBox->setEnabled(true);
+			m_ui->payReplyCheckBox->show();
 		} else {
-			this->payReplyCheckBox->setEnabled(false);
-			this->payReplyCheckBox->hide();
+			m_ui->payReplyCheckBox->setEnabled(false);
+			m_ui->payReplyCheckBox->hide();
 		}
 
-		this->payRecipient->setEnabled(false);
-		this->payRecipient->hide();
+		m_ui->payRecipient->setEnabled(false);
+		m_ui->payRecipient->hide();
 		if (ACT_NEW_FROM_TMP == action) {
 			fillContentFromTemplate(msgIds);
 		} else if (ACT_FORWARD == action) {
@@ -707,7 +770,7 @@ void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 			MessageDb::PartialEnvelopeData envData(
 			    messageDb->msgsReplyData(msgId.dmId));
 
-			this->subjectText->setText("Fwd: " + envData.dmAnnotation);
+			m_ui->subjectLine->setText("Fwd: " + envData.dmAnnotation);
 		}
 
 		QByteArray msgBase64(messageDb->msgsMessageBase64(msgId.dmId));
@@ -715,7 +778,7 @@ void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 			continue;
 		}
 
-		m_attachmentModel.appendAttachmentEntry(msgBase64,
+		m_attachModel.appendAttachmentEntry(msgBase64,
 		    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId));
 	}
 }
@@ -731,9 +794,9 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 	}
 	const MessageDb::MsgId &msgId(msgIds.first());
 
-	bool hideOptionalWidget = true;
+	bool hideOptionalForm = true;
 
-	this->fromComboBox->setEnabled(false);
+	m_ui->fromComboBox->setEnabled(false);
 
 	MessageDb *messageDb =
 	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
@@ -744,58 +807,58 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 	m_dmType = envData.dmType;
 	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
-	this->subjectText->setText("Re: " + envData.dmAnnotation);
+	m_ui->subjectLine->setText("Re: " + envData.dmAnnotation);
 
 	if (!envData.dmSenderRefNumber.isEmpty()) {
-		this->dmRecipientRefNumber->setText(envData.dmSenderRefNumber);
-		hideOptionalWidget = false;
+		m_ui->dmRecipientRefNumber->setText(envData.dmSenderRefNumber);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmSenderIdent.isEmpty()) {
-		this->dmRecipientIdent->setText(envData.dmSenderIdent);
-		hideOptionalWidget = false;
+		m_ui->dmRecipientIdent->setText(envData.dmSenderIdent);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmRecipientRefNumber.isEmpty()) {
-		this->dmSenderRefNumber->setText(envData.dmRecipientRefNumber);
-		hideOptionalWidget = false;
+		m_ui->dmSenderRefNumber->setText(envData.dmRecipientRefNumber);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmRecipientIdent.isEmpty()) {
-		this->dmSenderIdent->setText(envData.dmRecipientIdent);
-		hideOptionalWidget = false;
+		m_ui->dmSenderIdent->setText(envData.dmRecipientIdent);
+		hideOptionalForm = false;
 	}
 
-	this->optionalWidget->setHidden(hideOptionalWidget);
-	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
-	this->payRecipient->setEnabled(false);
-	this->payRecipient->setChecked(false);
-	this->payRecipient->hide();
+	m_ui->optionalForm->setHidden(hideOptionalForm);
+	m_ui->optionalFormCheckBox->setChecked(!hideOptionalForm);
+	m_ui->payRecipient->setEnabled(false);
+	m_ui->payRecipient->hide();
+	m_ui->payRecipient->setChecked(false);
 
 	bool pdz;
 	if (!m_dbEffectiveOVM) {
 		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDSender);
-		this->payReplyCheckBox->show();
-		this->payReplyCheckBox->setEnabled(true);
+		m_ui->payReplyCheckBox->setEnabled(true);
+		m_ui->payReplyCheckBox->show();
 	} else {
-		this->payReplyCheckBox->setEnabled(false);
-		this->payReplyCheckBox->hide();
+		m_ui->payReplyCheckBox->setEnabled(false);
+		m_ui->payReplyCheckBox->hide();
 		pdz = false;
 	}
 
 	if (m_dmType == QStringLiteral(DMTYPE_INIT)) {
-		this->addRecipient->setEnabled(false);
-		this->removeRecipient->setEnabled(false);
-		this->findRecipient->setEnabled(false);
-		this->replyLabel->show();
-		this->replyLabel->setEnabled(true);
-		this->payReplyCheckBox->hide();
-		this->payReplyCheckBox->setEnabled(false);
-		this->payRecipient->setEnabled(true);
-		this->payRecipient->setChecked(true);
-		this->payRecipient->show();
+		m_ui->addRecipButton->setEnabled(false);
+		m_ui->removeRecipButton->setEnabled(false);
+		m_ui->findRecipButton->setEnabled(false);
+		m_ui->prepaidReplyLabel->setEnabled(true);
+		m_ui->prepaidReplyLabel->show();
+		m_ui->payReplyCheckBox->setEnabled(false);
+		m_ui->payReplyCheckBox->hide();
+		m_ui->payRecipient->setEnabled(true);
+		m_ui->payRecipient->show();
+		m_ui->payRecipient->setChecked(true);
 		pdz = true;
 	}
 
-	m_recipientTableModel.appendData(envData.dbIDSender, -1,
-	    envData.dmSender, envData.dmSenderAddress, QString(), pdz);
+	m_recipTableModel.appendData(envData.dbIDSender, -1, envData.dmSender,
+	    envData.dmSenderAddress, QString(), pdz);
 }
 
 void DlgSendMessage::fillContentFromTemplate(
@@ -810,7 +873,7 @@ void DlgSendMessage::fillContentFromTemplate(
 	}
 	const MessageDb::MsgId &msgId(msgIds.first());
 
-	bool hideOptionalWidget = true;
+	bool hideOptionalForm = true;
 
 	MessageDb *messageDb =
 	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
@@ -821,71 +884,71 @@ void DlgSendMessage::fillContentFromTemplate(
 	m_dmType = envData.dmType;
 	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
-	this->subjectText->setText(envData.dmAnnotation);
+	m_ui->subjectLine->setText(envData.dmAnnotation);
 
 	/* Fill in optional fields.  */
 	if (!envData.dmSenderRefNumber.isEmpty()) {
-		this->dmSenderRefNumber->setText(envData.dmSenderRefNumber);
-		hideOptionalWidget = false;
+		m_ui->dmSenderRefNumber->setText(envData.dmSenderRefNumber);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmSenderIdent.isEmpty()) {
-		this->dmSenderIdent->setText(envData.dmSenderIdent);
-		hideOptionalWidget = false;
+		m_ui->dmSenderIdent->setText(envData.dmSenderIdent);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmRecipientRefNumber.isEmpty()) {
-		this->dmRecipientRefNumber->setText(envData.dmRecipientRefNumber);
-		hideOptionalWidget = false;
+		m_ui->dmRecipientRefNumber->setText(envData.dmRecipientRefNumber);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmRecipientIdent.isEmpty()) {
-		this->dmRecipientIdent->setText(envData.dmRecipientIdent);
-		hideOptionalWidget = false;
+		m_ui->dmRecipientIdent->setText(envData.dmRecipientIdent);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmToHands.isEmpty()) {
-		this->dmToHands->setText(envData.dmToHands);
-		hideOptionalWidget = false;
+		m_ui->dmToHands->setText(envData.dmToHands);
+		hideOptionalForm = false;
 	}
 	/* set check boxes */
-	this->dmPersonalDelivery->setChecked(envData.dmPersonalDelivery);
-	this->dmAllowSubstDelivery->setChecked(envData.dmAllowSubstDelivery);
+	m_ui->dmPersonalDelivery->setChecked(envData.dmPersonalDelivery);
+	m_ui->dmAllowSubstDelivery->setChecked(envData.dmAllowSubstDelivery);
 	/* fill optional LegalTitle - Law, year, ... */
 	if (!envData.dmLegalTitleLaw.isEmpty()) {
-		this->dmLegalTitleLaw->setText(envData.dmLegalTitleLaw);
-		hideOptionalWidget = false;
+		m_ui->dmLegalTitleLaw->setText(envData.dmLegalTitleLaw);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmLegalTitleYear.isEmpty()) {
-		this->dmLegalTitleYear->setText(envData.dmLegalTitleYear);
-		hideOptionalWidget = false;
+		m_ui->dmLegalTitleYear->setText(envData.dmLegalTitleYear);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmLegalTitleSect.isEmpty()) {
-		this->dmLegalTitleSect->setText(envData.dmLegalTitleSect);
-		hideOptionalWidget = false;
+		m_ui->dmLegalTitleSect->setText(envData.dmLegalTitleSect);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmLegalTitlePar.isEmpty()) {
-		this->dmLegalTitlePar->setText(envData.dmLegalTitlePar);
-		hideOptionalWidget = false;
+		m_ui->dmLegalTitlePar->setText(envData.dmLegalTitlePar);
+		hideOptionalForm = false;
 	}
 	if (!envData.dmLegalTitlePoint.isEmpty()) {
-		this->dmLegalTitlePoint->setText(envData.dmLegalTitlePoint);
-		hideOptionalWidget = false;
+		m_ui->dmLegalTitlePoint->setText(envData.dmLegalTitlePoint);
+		hideOptionalForm = false;
 	}
 
-	this->optionalWidget->setHidden(hideOptionalWidget);
-	this->optionalFieldCheckBox->setChecked(!hideOptionalWidget);
+	m_ui->optionalForm->setHidden(hideOptionalForm);
+	m_ui->optionalFormCheckBox->setChecked(!hideOptionalForm);
 
 	bool pdz;
 	if (!m_dbEffectiveOVM) {
 		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDRecipient);
-		this->payReplyCheckBox->show();
-		this->payReplyCheckBox->setEnabled(true);
+		m_ui->payReplyCheckBox->setEnabled(true);
+		m_ui->payReplyCheckBox->show();
 	} else {
-		this->payReplyCheckBox->setEnabled(false);
-		this->payReplyCheckBox->hide();
+		m_ui->payReplyCheckBox->setEnabled(false);
+		m_ui->payReplyCheckBox->hide();
 		pdz = false;
 	}
 
 	/* message is received -> recipient == sender */
-	if (m_dbId != envData.dbIDRecipient) {
-		m_recipientTableModel.appendData(envData.dbIDRecipient, -1,
+	if (m_boxId != envData.dbIDRecipient) {
+		m_recipTableModel.appendData(envData.dbIDRecipient, -1,
 		    envData.dmRecipient, envData.dmRecipientAddress, QString(),
 		    pdz);
 	}
@@ -895,8 +958,8 @@ void DlgSendMessage::fillContentFromTemplate(
 	    messageDb->getFilesFromMessage(msgId.dmId);
 
 	foreach (const MessageDb::FileData &fileData, msgFileList) {
-		m_attachmentModel.appendAttachmentEntry(
-		    fileData.dmEncodedContent, fileData.dmFileDescr);
+		m_attachModel.appendAttachmentEntry(fileData.dmEncodedContent,
+		    fileData.dmFileDescr);
 	}
 }
 
@@ -931,14 +994,14 @@ int DlgSendMessage::notifyOfPDZ(int pdzCnt)
 
 bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 {
-	int aSize = m_attachmentModel.totalAttachmentSize();
+	int aSize = m_attachModel.totalAttachmentSize();
 
-	this->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
+	m_ui->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
 
-	if (m_attachmentModel.rowCount() > MAX_ATTACHMENT_FILES) {
-		this->attachmentSizeInfo->
+	if (m_attachModel.rowCount() > MAX_ATTACHMENT_FILES) {
+		m_ui->attachmentSizeInfo->
 		     setStyleSheet("QLabel { color: red }");
-		this->attachmentSizeInfo->setText(tr(
+		m_ui->attachmentSizeInfo->setText(tr(
 		    "Warning: The permitted amount (%1) of attachments has been exceeded.")
 		        .arg(QString::number(MAX_ATTACHMENT_FILES)));
 		return false;
@@ -947,24 +1010,24 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 
 	if (aSize > 0) {
 		if (aSize >= 1024) {
-			this->attachmentSizeInfo->setText(
+			m_ui->attachmentSizeInfo->setText(
 			    tr("Total size of attachments is ~%1 KB").
 			    arg(aSize/1024));
 			if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
-				this->attachmentSizeInfo->
+				m_ui->attachmentSizeInfo->
 				     setStyleSheet("QLabel { color: red }");
-				this->attachmentSizeInfo->setText(
+				m_ui->attachmentSizeInfo->setText(
 				    tr("Warning: Total size of attachments is larger than %1 MB!")
 				    .arg(QString::number(
 				        MAX_ATTACHMENT_SIZE_MB)));
 				return false;
 			}
 		} else {
-			this->attachmentSizeInfo->setText(tr(
+			m_ui->attachmentSizeInfo->setText(tr(
 			    "Total size of attachments is ~%1 B").arg(aSize));
 		}
 	} else {
-		this->attachmentSizeInfo->setText(
+		m_ui->attachmentSizeInfo->setText(
 		    tr("Total size of attachments is %1 B").arg(aSize));
 	}
 
@@ -974,7 +1037,7 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 void DlgSendMessage::addRecipientBox(const QString &boxId)
 {
 	/* Ignore existent entry. */
-	if (boxId.isEmpty() || m_recipientTableModel.containsBoxId(boxId)) {
+	if (boxId.isEmpty() || m_recipTableModel.containsBoxId(boxId)) {
 		return;
 	}
 
@@ -1074,8 +1137,8 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 		return;
 	}
 
-	m_recipientTableModel.appendData(boxId, boxType, name, address,
-	    QString(), pdz);
+	m_recipTableModel.appendData(boxId, boxType, name, address, QString(),
+	    pdz);
 }
 
 void DlgSendMessage::addRecipientBoxes(const QStringList &boxIds)
@@ -1138,40 +1201,40 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 
 	/* Set mandatory fields of envelope. */
 	envelope.dmID.clear();
-	envelope.dmAnnotation = this->subjectText->text();
+	envelope.dmAnnotation = m_ui->subjectLine->text();
 
 	/* Set optional fields. */
-	envelope.dmSenderIdent = this->dmSenderIdent->text();
-	envelope.dmRecipientIdent = this->dmRecipientIdent->text();
-	envelope.dmSenderRefNumber = this->dmSenderRefNumber->text();
-	envelope.dmRecipientRefNumber = this->dmRecipientRefNumber->text();
+	envelope.dmSenderIdent = m_ui->dmSenderIdent->text();
+	envelope.dmRecipientIdent = m_ui->dmRecipientIdent->text();
+	envelope.dmSenderRefNumber = m_ui->dmSenderRefNumber->text();
+	envelope.dmRecipientRefNumber = m_ui->dmRecipientRefNumber->text();
 	envelope._using_dmLegalTitleLaw =
-	    !this->dmLegalTitleLaw->text().isEmpty();
+	    !m_ui->dmLegalTitleLaw->text().isEmpty();
 	if (envelope._using_dmLegalTitleLaw) {
 		envelope.dmLegalTitleLaw =
-		    this->dmLegalTitleLaw->text().toLong();
+		    m_ui->dmLegalTitleLaw->text().toLong();
 	}
 	envelope._using_dmLegalTitleYear =
-	    !this->dmLegalTitleYear->text().isEmpty();
+	    !m_ui->dmLegalTitleYear->text().isEmpty();
 	if (envelope._using_dmLegalTitleYear) {
 		envelope.dmLegalTitleYear =
-		    this->dmLegalTitleYear->text().toLong();
+		    m_ui->dmLegalTitleYear->text().toLong();
 	}
-	envelope.dmLegalTitleSect = this->dmLegalTitleSect->text();
-	envelope.dmLegalTitlePar = this->dmLegalTitlePar->text();
-	envelope.dmLegalTitlePoint = this->dmLegalTitlePoint->text();
-	envelope.dmPersonalDelivery = this->dmPersonalDelivery->isChecked();
+	envelope.dmLegalTitleSect = m_ui->dmLegalTitleSect->text();
+	envelope.dmLegalTitlePar = m_ui->dmLegalTitlePar->text();
+	envelope.dmLegalTitlePoint = m_ui->dmLegalTitlePoint->text();
+	envelope.dmPersonalDelivery = m_ui->dmPersonalDelivery->isChecked();
 
 	/* Only OVM can change. */
 	if (IsdsConversion::boxTypeStrToInt(m_dbType) > DBTYPE_OVM_REQ) {
 		envelope.dmAllowSubstDelivery = true;
 	} else {
 		envelope.dmAllowSubstDelivery =
-		    this->dmAllowSubstDelivery->isChecked();
+		    m_ui->dmAllowSubstDelivery->isChecked();
 	}
 
 	if (m_dmType == QStringLiteral(DMTYPE_INIT)) {
-		if (this->payRecipient->isChecked()) {
+		if (m_ui->payRecipient->isChecked()) {
 			dmType = QStringLiteral(DMTYPE_RESP);
 		} else {
 			dmType = QStringLiteral(DMTYPE_COMM);
@@ -1180,7 +1243,7 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 			envelope.dmRecipientRefNumber = m_dmSenderRefNumber;
 		}
 	} else {
-		if (this->payReplyCheckBox->isChecked()) {
+		if (m_ui->payReplyCheckBox->isChecked()) {
 			dmType = QStringLiteral(DMTYPE_INIT);
 		}
 	}
@@ -1189,7 +1252,7 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 
 	envelope.dmOVM = m_dbEffectiveOVM;
 
-	envelope.dmPublishOwnID = this->dmPublishOwnID->isChecked();
+	envelope.dmPublishOwnID = m_ui->dmPublishOwnID->isChecked();
 
 	return true;
 }
@@ -1197,13 +1260,13 @@ bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
 bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
 {
 	/* Load attachments. */
-	for (int row = 0; row < m_attachmentModel.rowCount(); ++row) {
+	for (int row = 0; row < m_attachModel.rowCount(); ++row) {
 		IsdsDocument document;
 		QModelIndex index;
 
 		document.isXml = false;
 
-		index = m_attachmentModel.index(row, DbFlsTblModel::FNAME_COL);
+		index = m_attachModel.index(row, DbFlsTblModel::FNAME_COL);
 		if (!index.isValid()) {
 			Q_ASSERT(0);
 			continue;
@@ -1223,8 +1286,7 @@ bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
 		 */
 		document.dmMimeType = QStringLiteral("");
 
-		index =
-		    m_attachmentModel.index(row, DbFlsTblModel::CONTENT_COL);
+		index = m_attachModel.index(row, DbFlsTblModel::CONTENT_COL);
 		if (!index.isValid()) {
 			Q_ASSERT(0);
 			continue;
@@ -1258,7 +1320,7 @@ void DlgSendMessage::sendMessageISDS(
 
 	if (pdzCnt > 0) {
 		if (m_dmType == QStringLiteral(DMTYPE_INIT)) {
-			if (!this->payRecipient->isChecked()) {
+			if (!m_ui->payRecipient->isChecked()) {
 				if (QMessageBox::No == notifyOfPDZ(pdzCnt)) {
 					return;
 				}
@@ -1306,7 +1368,7 @@ void DlgSendMessage::sendMessageISDS(
 
 		/* Set new recipient. */
 		message.envelope.dbIDRecipient = e.id;
-		message.envelope.dmToHands = this->dmToHands->text();
+		message.envelope.dmToHands = m_ui->dmToHands->text();
 
 		TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
 		    m_userName, m_dbSet, taskIdentifiers.at(i), message,
