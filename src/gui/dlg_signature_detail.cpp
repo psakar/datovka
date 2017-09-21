@@ -174,12 +174,14 @@ void DlgSignatureDetail::showVerificationDetail(int checkState)
 }
 
 #define YES \
-	("<span style=\"color:#008800;\"><b>" + tr("Yes") + "</b></span>")
+	("<span style=\"color:#008800;\"><b>" + \
+	DlgSignatureDetail::tr("Yes") + "</b></span>")
 #define NO \
-	("<span style=\"color:#880000;\"><b>" + tr("No") + "</b></span>")
+	("<span style=\"color:#880000;\"><b>" + \
+	DlgSignatureDetail::tr("No") + "</b></span>")
 #define UNAVAILABLE \
 	("<span style=\"color:#f7910e;\"><b>" + \
-	tr("Information not available") + "</b></span>")
+	DlgSignatureDetail::tr("Information not available") + "</b></span>")
 
 void DlgSignatureDetail::validateMessageSignature(void)
 {
