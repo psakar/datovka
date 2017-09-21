@@ -62,10 +62,6 @@ public:
 	 */
 	~DlgViewZfo(void);
 
-	/*
-	 * TODO -- Signature checking.
-	 */
-
 private slots:
 	/*!
 	 * @brief Generates menu to selected message item.

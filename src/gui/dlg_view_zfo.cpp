@@ -22,9 +22,6 @@
  */
 
 #include <QDateTime>
-#include <QDialog>
-#include <QDir>
-#include <QFileDialog>
 #include <QMenu>
 #include <QMessageBox>
 #include <QTimeZone>
@@ -111,7 +108,11 @@ DlgViewZfo::~DlgViewZfo(void)
 void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 {
 	QModelIndex index(m_ui->attachmentTable->indexAt(point));
-	QMenu *menu = new QMenu(this);
+	QMenu *menu = new (std::nothrow) QMenu(this);
+	if (Q_UNLIKELY(Q_NULLPTR == menu)) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	/* Detects selection of multiple attachments. */
 	QModelIndexList indexes(
@@ -135,6 +136,7 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 		/* Do nothing. */
 	}
 	menu->exec(QCursor::pos());
+	menu->deleteLater();
 }
 
 void DlgViewZfo::saveSelectedAttachmentsToFile(void)
