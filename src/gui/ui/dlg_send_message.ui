@@ -285,7 +285,7 @@
       <item row="1" column="1">
        <widget class="QLineEdit" name="dmSenderRefNumber">
         <property name="toolTip">
-         <string>Enter our reference number</string>
+         <string>Enter reference number</string>
         </property>
        </widget>
       </item>
@@ -299,7 +299,7 @@
       <item row="2" column="1">
        <widget class="QLineEdit" name="dmSenderIdent">
         <property name="toolTip">
-         <string>Enter our file mark</string>
+         <string>Enter file mark</string>
         </property>
        </widget>
       </item>
@@ -313,7 +313,7 @@
       <item row="3" column="1">
        <widget class="QLineEdit" name="dmRecipientRefNumber">
         <property name="toolTip">
-         <string>Enter your reference number</string>
+         <string>Enter reference number</string>
         </property>
        </widget>
       </item>
@@ -327,7 +327,7 @@
       <item row="4" column="1">
        <widget class="QLineEdit" name="dmRecipientIdent">
         <property name="toolTip">
-         <string>Enter our file mark</string>
+         <string>Enter file mark</string>
         </property>
        </widget>
       </item>
@@ -447,7 +447,7 @@
         <bool>true</bool>
        </property>
        <property name="toolTip">
-        <string>Find and add a recipient from Datové schránky server</string>
+        <string>Find and add a recipient from ISDS server</string>
        </property>
        <property name="text">
         <string>Find</string>
@@ -468,7 +468,7 @@
      <item>
       <widget class="QPushButton" name="enterBoxIdButton">
        <property name="toolTip">
-        <string>Allows to enter address of Databox manually</string>
+        <string>Allows to enter a data box identifier manually</string>
        </property>
        <property name="text">
         <string>Enter Box ID</string>
