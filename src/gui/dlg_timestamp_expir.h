@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,36 +21,65 @@
  * the two.
  */
 
-
-#ifndef DLG_TIMESTAMP_EXPIR_H
-#define DLG_TIMESTAMP_EXPIR_H
+#ifndef _DLG_TIMESTAMP_EXPIR_H_
+#define _DLG_TIMESTAMP_EXPIR_H_
 
 #include <QDialog>
-#include "src/common.h"
-#include "ui_dlg_timestamp_expir.h"
 
+namespace Ui {
+	class DlgTimestampExpir;
+}
 
-class TimestampExpirDialog : public QDialog, public Ui::DlgTimestampExpir
-{
+/*!
+ * @brief Shows question about time stamp expiration check.
+ */
+class DlgTimestampExpir : public QDialog {
 	Q_OBJECT
 
 public:
-	enum TSaction {
-		CHECK_TIMESTAMP_CURRENT,
-		CHECK_TIMESTAMP_ALL,
-		CHECK_TIMESTAMP_ZFO,
-		CHECK_TIMESTAMP_ZFO_SUB
+	/*!
+	 * @brief Specifies the selected action.
+	 */
+	enum Action {
+		CHECK_NOTHING, /*!< Nothing to be preformed, action cancelled. */
+		CHECK_SELECTED_ACNT, /*!< Check selected account. */
+		CHECK_ALL_ACNTS, /*!< Check all accounts. */
+		CHECK_DIR, /*!< Check directory. */
+		CHECK_DIR_SUB /*!< Check directory including its subdirectories. */
 	};
 
-public:
-	TimestampExpirDialog(QWidget *parent = 0);
+private:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent widget.
+	 */
+	explicit DlgTimestampExpir(QWidget *parent = Q_NULLPTR);
 
-signals:
-	void returnAction(enum TimestampExpirDialog::TSaction);
+public:
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgTimestampExpir(void);
+
+	static
+	enum Action askAction(QWidget *parent = Q_NULLPTR);
 
 private slots:
-	void setRetValue(void);
-	void ChangeRadioBox(void);
+	/*!
+	 * @brief Fired on radio box selection change.
+	 */
+	void radioSelectionChanged(void);
+
+	/*!
+	 * @brief Converts selection to chosen action.
+	 *
+	 * @return Chosen action.
+	 */
+	enum Action collectAction(void) const;
+
+private:
+	Ui::DlgTimestampExpir *m_ui; /*!< UI generated from UI file. */
 };
 
-#endif // DLG_TIMESTAMP_EXPIR_H
+#endif /* _DLG_TIMESTAMP_EXPIR_H_ */
