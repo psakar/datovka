@@ -6368,9 +6368,7 @@ void MainWindow::showSignatureDetailsDialog(void)
 		return;
 	}
 
-	QDialog *signature_detail = new DlgSignatureDetail(*dbSet, msgId, this);
-	signature_detail->exec();
-	signature_detail->deleteLater();
+	DlgSignatureDetail::detail(*dbSet, msgId, this);
 }
 
 bool MainWindow::logInGUI(IsdsSessions &isdsSessions,

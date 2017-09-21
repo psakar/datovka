@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,105 +21,98 @@
  * the two.
  */
 
-
 #include <QDateTime>
 #include <QSslCertificate>
 #include <QTimeZone>
 
-#include "dlg_signature_detail.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/gui/dlg_signature_detail.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "ui_dlg_signature_detail.h"
 
+DlgSignatureDetail::DlgSignatureDetail(const QByteArray &msgDER,
+    const QByteArray &tstDER, bool constructedFromDb, bool dbIsVerified,
+    QWidget *parent)
+    : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgSignatureDetail),
+    m_msgDER(msgDER),
+    m_tstDER(tstDER),
+    m_constructedFromDb(constructedFromDb),
+    m_dbIsVerified(dbIsVerified),
+    m_dlgSize()
+{
+	m_ui->setupUi(this);
 
-/* ========================================================================= */
-/*
- * Constructor.
- */
-DlgSignatureDetail::DlgSignatureDetail(const MessageDbSet &dbSet,
+	m_ui->verifyWidget->setHidden(true);
+	connect(m_ui->showVerifyDetail, SIGNAL(stateChanged(int)),
+	    this, SLOT(showVerificationDetail(int)));
+	m_ui->certDetailWidget->setHidden(true);
+	connect(m_ui->showCertDetail, SIGNAL(stateChanged(int)),
+	    this, SLOT(showCertificateDetail(int)));
+
+	validateMessageSignature();
+	validateSigningCertificate();
+	validateMessageTimestamp();
+
+	/* Remember the size of the dialogue. */
+	m_dlgSize = this->sizeHint();
+}
+
+DlgSignatureDetail::~DlgSignatureDetail(void)
+{
+	delete m_ui;
+}
+
+void DlgSignatureDetail::detail(const MessageDbSet &dbSet,
     const MessageDb::MsgId &msgId, QWidget *parent)
-/* ========================================================================= */
-    : QDialog(parent),
-    m_msgDER(),
-    m_tstDER(),
-    m_constructedFromDb(true),
-    m_dbIsVerified(),
-    dSize()
 {
-	/* Obtain raw message and time stamp. */
-	Q_ASSERT(msgId.dmId >= 0);
-	Q_ASSERT(msgId.deliveryTime.isValid());
-	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
-	Q_ASSERT(0 != messageDb);
-	if (messageDb->msgsVerificationAttempted(msgId.dmId)) {
-		m_msgDER = messageDb->msgsMessageRaw(msgId.dmId);
+	if (Q_UNLIKELY((msgId.dmId < 0) || !msgId.deliveryTime.isValid())) {
+		Q_ASSERT(0);
+		return;
 	}
-	m_tstDER = messageDb->msgsTimestampRaw(msgId.dmId);
-	m_dbIsVerified = messageDb->msgsVerified(msgId.dmId);
 
-	setupUi(this);
+	/* Obtain raw message and time stamp. */
+	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
+	if (Q_UNLIKELY(Q_NULLPTR == messageDb)) {
+		Q_ASSERT(0);
+		return;
+	}
+	QByteArray msgDER;
+	if (messageDb->msgsVerificationAttempted(msgId.dmId)) {
+		msgDER = messageDb->msgsMessageRaw(msgId.dmId);
+	}
+	QByteArray tstDER(messageDb->msgsTimestampRaw(msgId.dmId));
+	bool dbIsVerified = messageDb->msgsVerified(msgId.dmId);
 
-	this->verifyWidget->setHidden(true);
-	connect(this->showVerifyDetail, SIGNAL(stateChanged(int)),
-	    this, SLOT(showVerificationDetail(int)));
-	this->certDetailWidget->setHidden(true);
-	connect(this->showCertDetail, SIGNAL(stateChanged(int)),
-	    this, SLOT(showCertificateDetail(int)));
-
-	validateMessageSignature();
-	validateSigningCertificate();
-	validateMessageTimestamp();
-
-	/* remember size of dialog */
-	dSize = this->sizeHint();
+	DlgSignatureDetail dlg(msgDER, tstDER, true, dbIsVerified, parent);
+	dlg.exec();
 }
 
-
-/* ========================================================================= */
-/*
- * Constructor.
- */
-DlgSignatureDetail::DlgSignatureDetail(const void *msgDER, size_t msgSize,
+void DlgSignatureDetail::detail(const void *msgDER, size_t msgSize,
     const void *tstDER, size_t tstSize, QWidget *parent)
-/* ========================================================================= */
-    : QDialog(parent),
-    m_msgDER((char *) msgDER, msgSize),
-    m_tstDER((char *) tstDER, tstSize),
-    m_constructedFromDb(false),
-    m_dbIsVerified(false),
-    dSize(QSize())
 {
-	setupUi(this);
-
-	this->verifyWidget->setHidden(true);
-	connect(this->showVerifyDetail, SIGNAL(stateChanged(int)),
-	    this, SLOT(showVerificationDetail(int)));
-	this->certDetailWidget->setHidden(true);
-	connect(this->showCertDetail, SIGNAL(stateChanged(int)),
-	    this, SLOT(showCertificateDetail(int)));
-
-	validateMessageSignature();
-	validateSigningCertificate();
-	validateMessageTimestamp();
-
-	/* Remember the size of the dialog. */
-	dSize = this->sizeHint();
+	DlgSignatureDetail dlg(QByteArray((char *) msgDER, msgSize),
+	    QByteArray((char *) tstDER, tstSize), false, false, parent);
+	dlg.exec();
 }
 
-
-/* ========================================================================= */
-/*
- * Return whether signing certificate is valid.
+/*!
+ * @brief Returns signing certificate inception and expiration date.
+ *
+ * @param[in]  DER Raw message or time stamp data.
+ * @param[out] incTime Inception time.
+ * @param[out] expTime Expiration time.
+ * @return True on success.
  */
-bool DlgSignatureDetail::signingCertValid(const QByteArray &DER,
-    struct crt_verif_outcome &cvo)
-/* ========================================================================= */
+static
+bool signingCertTimes(const QByteArray &DER, QDateTime &incTime,
+    QDateTime &expTime)
 {
-	struct x509_crt *signing_cert = NULL;
-	int ret;
+	struct x509_crt *x509_crt = NULL;
+	time_t incept, expir;
 
 	debugFuncCall();
 
@@ -127,27 +120,113 @@ bool DlgSignatureDetail::signingCertValid(const QByteArray &DER,
 		return false;
 	}
 
-	signing_cert = raw_cms_signing_cert(DER.data(), DER.size());
-	if (NULL == signing_cert) {
+	x509_crt = raw_cms_signing_cert(DER.data(), DER.size());
+	if (NULL == x509_crt) {
 		return false;
 	}
 
-	ret = x509_crt_verify(signing_cert);
+	if (0 != x509_crt_date_info(x509_crt, &incept, &expir)) {
+		x509_crt_destroy(x509_crt); x509_crt = NULL;
+		return false;
+	}
 
-	x509_crt_track_verification(signing_cert, &cvo);
+	x509_crt_destroy(x509_crt); x509_crt = NULL;
 
-	x509_crt_destroy(signing_cert); signing_cert = NULL;
-	return 1 == ret;
+	incTime = QDateTime::fromTime_t(incept);
+	expTime = QDateTime::fromTime_t(expir);
+
+	return true;
 }
 
+bool DlgSignatureDetail::signingCertExpiresBefore(const QByteArray &DER,
+    int days, QDateTime dDate)
+{
+	QDateTime expir;
+	QDateTime now;
+	{
+		QDateTime incep;
+		if (!signingCertTimes(DER, incep, expir)) {
+			return false;
+		}
+	}
 
-/* ========================================================================= */
-/*
- * Returns signing certificate of message.
+	if (dDate.isValid()) {
+		now = dDate;
+	} else {
+		now = QDateTime::currentDateTime();
+	}
+
+	int difference = now.daysTo(expir);
+
+	return difference < days;
+}
+
+void DlgSignatureDetail::showCertificateDetail(int checkState)
+{
+	m_ui->certDetailWidget->setHidden(Qt::Unchecked == checkState);
+	this->setMaximumSize(m_dlgSize);
+}
+
+void DlgSignatureDetail::showVerificationDetail(int checkState)
+{
+	m_ui->verifyWidget->setHidden(Qt::Unchecked == checkState);
+	this->setMaximumSize(m_dlgSize);
+}
+
+#define YES \
+	("<span style=\"color:#008800;\"><b>" + tr("Yes") + "</b></span>")
+#define NO \
+	("<span style=\"color:#880000;\"><b>" + tr("No") + "</b></span>")
+#define UNAVAILABLE \
+	("<span style=\"color:#f7910e;\"><b>" + \
+	tr("Information not available") + "</b></span>")
+
+void DlgSignatureDetail::validateMessageSignature(void)
+{
+	QString iconPath;
+	QString resStr;
+
+	if (m_msgDER.isEmpty()) {
+		iconPath = ICON_3PARTY_PATH "warning_16.png";
+		resStr = tr("Message signature is not present.");
+	} else {
+		bool verified = false;
+
+		if (m_constructedFromDb) {
+			verified = m_dbIsVerified;
+		} else {
+			verified =
+			    1 == raw_msg_verify_signature(m_msgDER.data(),
+			        m_msgDER.size(), 0, 0);
+		}
+
+		if (!verified) {
+			iconPath = ICON_16x16_PATH "datovka-error.png";
+			resStr = "<b>" + tr("Valid") + ": </b>";
+			resStr += NO;
+		} else {
+			iconPath = ICON_16x16_PATH "datovka-ok.png";
+			resStr = "<b>" + tr("Valid") + ": </b>";
+			resStr += YES;
+		}
+	}
+
+	m_ui->mSignatureImage->setIcon(QIcon(iconPath));
+	m_ui->mSignatureStatus->setTextFormat(Qt::RichText);
+	m_ui->mSignatureStatus->setText(resStr);
+}
+
+/*!
+ * @brief Returns signing certificate of message.
+ *
+ * @param[in]  DER Raw message or time stamp data.
+ * @param[out] saId Signature algorithm identifier.
+ * @param[out] saName Signature algorithm name.
+ * @return Null certificate on failure.
  */
-QSslCertificate DlgSignatureDetail::signingCert(const QByteArray &DER,
-     QString &saId, QString &saName)
-/* ========================================================================= */
+static
+QSslCertificate signingCert(const QByteArray &DER,
+    QString &saId, QString &saName)
 {
 	struct x509_crt *x509_crt = NULL;
 	void *der = NULL;
@@ -189,17 +268,17 @@ QSslCertificate DlgSignatureDetail::signingCert(const QByteArray &DER,
 	return QSslCertificate(certRawBytes, QSsl::Der);
 }
 
-
-/* ========================================================================= */
-/*
- * Returns signing certificate inception and expiration date.
+/*!
+ * @brief Return whether signing certificate is valid.
+ *
+ * @param[in] DER Raw message or time stamp data.
+ * @return True is signing certificate was verified successfully.
  */
-bool DlgSignatureDetail::signingCertTimes(const QByteArray &DER,
-    QDateTime &incTime, QDateTime &expTime)
-/* ========================================================================= */
+static
+bool signingCertValid(const QByteArray &DER, struct crt_verif_outcome &cvo)
 {
-	struct x509_crt *x509_crt = NULL;
-	time_t incept, expir;
+	struct x509_crt *signing_cert = NULL;
+	int ret;
 
 	debugFuncCall();
 
@@ -207,61 +286,204 @@ bool DlgSignatureDetail::signingCertTimes(const QByteArray &DER,
 		return false;
 	}
 
-	x509_crt = raw_cms_signing_cert(DER.data(), DER.size());
-	if (NULL == x509_crt) {
+	signing_cert = raw_cms_signing_cert(DER.data(), DER.size());
+	if (NULL == signing_cert) {
 		return false;
 	}
 
-	if (0 != x509_crt_date_info(x509_crt, &incept, &expir)) {
-		x509_crt_destroy(x509_crt); x509_crt = NULL;
-		return false;
-	}
+	ret = x509_crt_verify(signing_cert);
 
-	x509_crt_destroy(x509_crt); x509_crt = NULL;
+	x509_crt_track_verification(signing_cert, &cvo);
 
-	incTime = QDateTime::fromTime_t(incept);
-	expTime = QDateTime::fromTime_t(expir);
-
-	return true;
+	x509_crt_destroy(signing_cert); signing_cert = NULL;
+	return 1 == ret;
 }
 
-
-/* ========================================================================= */
-/*
- * Check whether certificate expires before specified limit.
- */
-bool DlgSignatureDetail::signingCertExpiresBefore(const QByteArray &DER,
-    int days, QDateTime dDate)
-/* ========================================================================= */
+void DlgSignatureDetail::validateSigningCertificate(void)
 {
-	QDateTime expir;
-	QDateTime now;
-	{
-		QDateTime incep;
-		if (!signingCertTimes(DER, incep, expir)) {
-			return false;
-		}
+	QString iconPath;
+	QString resStr;
+
+	m_ui->showCertDetail->setHidden(false);
+	m_ui->showVerifyDetail->setHidden(false);
+
+	if (m_msgDER.isEmpty()) {
+		iconPath = ICON_3PARTY_PATH "warning_16.png";
+		resStr = tr("Message signature is not present.") + "<br/>";
+		resStr += tr("Cannot check signing certificate.");
+		m_ui->showCertDetail->setHidden(true);
+		m_ui->showVerifyDetail->setHidden(true);
+
+		return;
 	}
 
-	if (dDate.isValid()) {
-		now = dDate;
+	struct crt_verif_outcome cvo;
+
+	resStr = "<b>" + tr("Valid") + ": </b>";
+
+	if (!signingCertValid(m_msgDER, cvo)) {
+		iconPath = ICON_16x16_PATH "datovka-error.png";
+		resStr += NO;
 	} else {
-		now = QDateTime::currentDateTime();
+		iconPath = ICON_16x16_PATH "datovka-ok.png";
+		resStr += YES;
 	}
 
-	int difference = now.daysTo(expir);
+	if (!globPref.check_crl) {
+//		iconPath = ICON_3PARTY_PATH "warning_16.png";
+		resStr += " <b>(" +
+		    tr("Certificate revocation check is turned off!") + ")</b>";
+	}
 
-	return difference < days;
+	m_ui->cImage->setIcon(QIcon(iconPath));
+	m_ui->cStatus->setTextFormat(Qt::RichText);
+	m_ui->cStatus->setText(resStr);
+	m_ui->cDetail->setText(QString());
+
+	QString saId, saName;
+	QSslCertificate signingCrt = signingCert(m_msgDER, saId, saName);
+
+	resStr.clear();
+	if (!signingCrt.isNull()) {
+		/* TODO -- Various check results. */
+		QString checkResult;
+
+		checkResult = crypto_certificates_loaded() ? YES : NO;
+		resStr = "<b>" + tr("Trusted certificates were found") +
+		    ": </b>" + checkResult + "<br/>";
+
+#if 0
+		resStr += "<b>" + tr("Signing algorithm supported") +
+		    ": </b>" + "n/a<br/>";
+#endif
+
+		checkResult = cvo.parent_crt_not_found ? NO : YES;
+		resStr += "<b>" + tr("Trusted parent certificate found") +
+		    ": </b>" + checkResult + "<br/>";
+
+		checkResult = cvo.time_validity_fail ? NO : YES;
+		resStr += "<b>" + tr("Certificate time validity is ok") +
+		    ": </b>" + checkResult + "<br/>";
+
+		if (!globPref.check_crl) {
+			checkResult = UNAVAILABLE;
+		} else {
+			checkResult = cvo.crt_revoked ? NO : YES;
+		}
+		resStr += "<b>" + tr("Certificate was not revoked") +
+		    ": </b>" + checkResult + "<br/>";
+		if (!globPref.check_crl) {
+			resStr += "&nbsp;&nbsp;" "<i>" +
+			    tr("Certificate revocation check is turned off!") +
+			    "</i><br/>";
+		}
+
+		checkResult = cvo.crt_signature_invalid ? NO : YES;
+		resStr += "<b>" + tr("Certificate signature verified") +
+		    ": </b>" + checkResult + "<br/>";
+
+		m_ui->vDetail->setTextFormat(Qt::RichText);
+		m_ui->vDetail->setText(resStr);
+	}
+
+	resStr.clear();
+	if (!signingCrt.isNull()) {
+		QStringList strList;
+
+		/* Certificate information. */
+		resStr = "<b>" + tr("Version") + ": </b>" +
+		    QString(signingCrt.version()) + "<br/>";
+		resStr += "<b>" + tr("Serial number") + ": </b>" +
+		    QString(signingCrt.serialNumber()) + " (" +
+		    QString::number( /* Convert do decimal. */
+		        ("0x" + QString(signingCrt.serialNumber()).replace(
+		                    ":", "")).toUInt(0, 16), 10) + ")<br/>";
+		resStr += "<b>" + tr("Signature algorithm") + ": </b>" +
+		    saId + " (" + saName + ")<br/>";
+
+		resStr += "<b>" + tr("Issuer") + ": </b><br/>";
+		strList = signingCrt.issuerInfo(
+		    QSslCertificate::Organization);
+		if (strList.size() > 0) {
+			Q_ASSERT(1 == strList.size());
+			resStr += "&nbsp;&nbsp;" + tr("Organisation") + ": " +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCrt.issuerInfo(
+		    QSslCertificate::CommonName);
+		if (strList.size() > 0) {
+			Q_ASSERT(1 == strList.size());
+			resStr += "&nbsp;&nbsp;" + tr("Name") + ": " +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCrt.issuerInfo(
+		    QSslCertificate::CountryName);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" + tr("Country") + ": " +
+			    strList.first() + "<br/>";
+		}
+
+		resStr += "<b>" + tr("Validity") + ": </b><br/>";
+		/*
+		 * QSslCertificate::effectiveDate() and
+		 * QSslCertificate::expiryDate() tend to wrong time zone
+		 * conversion.
+		 */
+		QDateTime incept, expir;
+		if (signingCertTimes(m_msgDER, incept, expir)) {
+			resStr += "&nbsp;&nbsp;" +
+			    tr("Valid from") + ": " +
+			    incept.toString("dd.MM.yyyy hh:mm:ss") + " " +
+			    incept.timeZone().abbreviation(incept) + "<br/>";
+			resStr += "&nbsp;&nbsp;" + tr("Valid to") + ": " +
+			    expir.toString("dd.MM.yyyy hh:mm:ss") + " " +
+			    expir.timeZone().abbreviation(expir) + "<br/>";
+		}
+
+		resStr += "<b>" + tr("Subject") + ": </b><br/>";
+		strList = signingCrt.subjectInfo(
+		    QSslCertificate::Organization);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" + tr("Organisation") + ": " +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCrt.subjectInfo(
+		    QSslCertificate::CommonName);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" + tr("Name") + ": " +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCrt.subjectInfo(
+		    QSslCertificate::SerialNumber);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" + tr("Serial number") + ": " +
+			    strList.first() + "<br/>";
+		}
+		strList = signingCrt.subjectInfo(
+		    QSslCertificate::CountryName);
+		if (strList.size() > 0) {
+			resStr += "&nbsp;&nbsp;" + tr("Country") + ": " +
+			    strList.first() + "<br/>";
+		}
+
+		m_ui->cDetail->setTextFormat(Qt::RichText);
+		m_ui->cDetail->setText(resStr);
+	}
 }
 
-
-/* ========================================================================= */
-/*
- * Signing certificate issuer information.
+/*!
+ * @brief Signing certificate issuer information.
+ *
+ * @param[in]  DER Raw message or time stamp data.
+ * @param[out] oStr Organisation name.
+ * @param[out] ouStr Organisation unit name.
+ * @param[out] nStr Common name.
+ * @param[out] cStr Country name.
+ * @return False on failure.
  */
-bool DlgSignatureDetail::signingCertIssuerInfo(const QByteArray &DER,
-    QString &oStr, QString &ouStr, QString &nStr, QString &cStr)
-/* ========================================================================= */
+static
+bool signingCertIssuerInfo(const QByteArray &DER, QString &oStr, QString &ouStr,
+    QString &nStr, QString &cStr)
 {
 	struct x509_crt *signing_cert = NULL;
 	struct crt_issuer_info cii;
@@ -313,278 +535,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Show/hide certificate details
- */
-void DlgSignatureDetail::showCertificateDetail(int state)
-/* ========================================================================= */
-{
-	this->certDetailWidget->setHidden(Qt::Unchecked == state);
-	this->setMaximumSize(dSize);
-}
-
-
-/* ========================================================================= */
-/*
- * Show/hide Verification Details
- */
-void DlgSignatureDetail::showVerificationDetail(int state)
-/* ========================================================================= */
-{
-	this->verifyWidget->setHidden(Qt::Unchecked == state);
-	this->setMaximumSize(dSize);
-}
-
-
-#define YES \
-	("<span style=\"color:#008800;\"><b>" + QObject::tr("Yes") + \
-	"</b></span>")
-#define NO \
-	("<span style=\"color:#880000;\"><b>" + QObject::tr("No") + \
-	"</b></span>")
-#define UNAVAILABLE \
-	("<span style=\"color:#f7910e;\"><b>" + \
-	QObject::tr("Information not available") + "</b></span>")
-
-
-/* ========================================================================= */
-/*
- * Check message signature, show result in dialog.
- */
-void DlgSignatureDetail::validateMessageSignature(void)
-/* ========================================================================= */
-{
-	QString iconPath;
-	QString resStr;
-
-	if (m_msgDER.isEmpty()) {
-		iconPath = ICON_3PARTY_PATH "warning_16.png";
-		resStr = QObject::tr("Message signature is not present.");
-	} else {
-		bool verified = false;
-
-		if (m_constructedFromDb) {
-			verified = m_dbIsVerified;
-		} else {
-			verified =
-			    1 == raw_msg_verify_signature(m_msgDER.data(),
-			        m_msgDER.size(), 0, 0);
-		}
-
-		if (!verified) {
-			iconPath = ICON_16x16_PATH "datovka-error.png";
-			resStr = "<b>" + QObject::tr("Valid") + ": </b>";
-			resStr += NO;
-		} else {
-			iconPath = ICON_16x16_PATH "datovka-ok.png";
-			resStr = "<b>" + QObject::tr("Valid") + ": </b>";
-			resStr += YES;
-		}
-	}
-
-	this->mSignatureImage->setIcon(QIcon(iconPath));
-	this->mSignatureStatus->setTextFormat(Qt::RichText);
-	this->mSignatureStatus->setText(resStr);
-}
-
-
-/* ========================================================================= */
-/*
- * Validate signing certificate, show result in dialog.
- */
-void DlgSignatureDetail::validateSigningCertificate(void)
-/* ========================================================================= */
-{
-	QString iconPath;
-	QString resStr;
-
-	this->showCertDetail->setHidden(false);
-	this->showVerifyDetail->setHidden(false);
-
-	if (m_msgDER.isEmpty()) {
-		iconPath = ICON_3PARTY_PATH "warning_16.png";
-		resStr = QObject::tr("Message signature is not present.") +
-		    "<br/>";
-		resStr += QObject::tr("Cannot check signing certificate.");
-		this->showCertDetail->setHidden(true);
-		this->showVerifyDetail->setHidden(true);
-
-		return;
-	}
-
-	struct crt_verif_outcome cvo;
-
-	resStr = "<b>" + QObject::tr("Valid") + ": </b>";
-
-	if (!signingCertValid(m_msgDER, cvo)) {
-		iconPath = ICON_16x16_PATH "datovka-error.png";
-		resStr += NO;
-	} else {
-		iconPath = ICON_16x16_PATH "datovka-ok.png";
-		resStr += YES;
-	}
-
-	if (!globPref.check_crl) {
-//		iconPath = ICON_3PARTY_PATH "warning_16.png";
-		resStr += " <b>(" +
-		    QObject::tr("Certificate revocation check is "
-		        "turned off!") + ")</b>";
-	}
-
-	this->cImage->setIcon(QIcon(iconPath));
-	this->cStatus->setTextFormat(Qt::RichText);
-	this->cStatus->setText(resStr);
-	this->cDetail->setText(QString());
-
-	QString saId, saName;
-	QSslCertificate signingCrt = signingCert(m_msgDER, saId, saName);
-
-	resStr.clear();
-	if (!signingCrt.isNull()) {
-		/* TODO -- Various check results. */
-		QString checkResult;
-
-		checkResult = crypto_certificates_loaded() ? YES : NO;
-		resStr = "<b>" +
-		    QObject::tr("Trusted certificates were found") +
-		    ": </b>" + checkResult + "<br/>";
-
-#if 0
-		resStr += "<b>" +
-		    QObject::tr("Signing algorithm supported") +
-		    ": </b>" + "n/a<br/>";
-#endif
-
-		checkResult = cvo.parent_crt_not_found ? NO : YES;
-		resStr += "<b>" +
-		    QObject::tr("Trusted parent certificate found") +
-		    ": </b>" + checkResult + "<br/>";
-
-		checkResult = cvo.time_validity_fail ? NO : YES;
-		resStr += "<b>" +
-		    QObject::tr("Certificate time validity is ok") +
-		    ": </b>" + checkResult + "<br/>";
-
-		if (!globPref.check_crl) {
-			checkResult = UNAVAILABLE;
-		} else {
-			checkResult = cvo.crt_revoked ? NO : YES;
-		}
-		resStr += "<b>" +
-		    QObject::tr("Certificate was not revoked") +
-		    ": </b>" + checkResult + "<br/>";
-		if (!globPref.check_crl) {
-			resStr += "&nbsp;&nbsp;" "<i>" +
-			    QObject::tr("Certificate revocation check is "
-			        "turned off!") + "</i><br/>";
-		}
-
-		checkResult = cvo.crt_signature_invalid ? NO : YES;
-		resStr += "<b>" +
-		    QObject::tr("Certificate signature verified") +
-		    ": </b>" + checkResult + "<br/>";
-
-		this->vDetail->setTextFormat(Qt::RichText);
-		this->vDetail->setText(resStr);
-	}
-
-	resStr.clear();
-	if (!signingCrt.isNull()) {
-		QStringList strList;
-
-		/* Certificate information. */
-		resStr = "<b>" + QObject::tr("Version") + ": </b>" +
-		    QString(signingCrt.version()) + "<br/>";
-		resStr += "<b>" + QObject::tr("Serial number") + ": </b>" +
-		    QString(signingCrt.serialNumber()) + " (" +
-		    QString::number( /* Convert do decimal. */
-		        ("0x" + QString(signingCrt.serialNumber()).replace(
-		                    ":", "")).toUInt(0, 16), 10) + ")<br/>";
-		resStr += "<b>" + QObject::tr("Signature algorithm") +
-		    ": </b>" + saId + " (" + saName + ")<br/>";
-
-		resStr += "<b>" + QObject::tr("Issuer") + ": </b><br/>";
-		strList = signingCrt.issuerInfo(
-		    QSslCertificate::Organization);
-		if (strList.size() > 0) {
-			Q_ASSERT(1 == strList.size());
-			resStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Organisation") + ": " +
-			    strList.first() + "<br/>";
-		}
-		strList = signingCrt.issuerInfo(
-		    QSslCertificate::CommonName);
-		if (strList.size() > 0) {
-			Q_ASSERT(1 == strList.size());
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Name") + ": " +
-			    strList.first() + "<br/>";
-		}
-		strList = signingCrt.issuerInfo(
-		    QSslCertificate::CountryName);
-		if (strList.size() > 0) {
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Country") +
-			    ": " + strList.first() + "<br/>";
-		}
-
-		resStr += "<b>" + QObject::tr("Validity") + ": </b><br/>";
-		/*
-		 * QSslCertificate::effectiveDate() and
-		 * QSslCertificate::expiryDate() tend to wrong time zone
-		 * conversion.
-		 */
-		QDateTime incept, expir;
-		if (signingCertTimes(m_msgDER, incept, expir)) {
-			resStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Valid from") + ": " +
-			    incept.toString("dd.MM.yyyy hh:mm:ss") + " " +
-			    incept.timeZone().abbreviation(incept) + "<br/>";
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Valid to") +
-			    ": " +expir.toString("dd.MM.yyyy hh:mm:ss") + " " +
-			    expir.timeZone().abbreviation(expir) + "<br/>";
-		}
-
-		resStr += "<b>" + QObject::tr("Subject") + ": </b><br/>";
-		strList = signingCrt.subjectInfo(
-		    QSslCertificate::Organization);
-		if (strList.size() > 0) {
-			resStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Organisation") + ": " +
-			    strList.first() + "<br/>";
-		}
-		strList = signingCrt.subjectInfo(
-		    QSslCertificate::CommonName);
-		if (strList.size() > 0) {
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Name") +
-			    ": " + strList.first() + "<br/>";
-		}
-		strList = signingCrt.subjectInfo(
-		    QSslCertificate::SerialNumber);
-		if (strList.size() > 0) {
-			resStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Serial number") + ": " +
-			    strList.first() + "<br/>";
-		}
-		strList = signingCrt.subjectInfo(
-		    QSslCertificate::CountryName);
-		if (strList.size() > 0) {
-			resStr += "&nbsp;&nbsp;" + QObject::tr("Country") +
-			    ": " + strList.first() + "<br/>";
-		}
-
-		this->cDetail->setTextFormat(Qt::RichText);
-		this->cDetail->setText(resStr);
-	}
-}
-
-
-/* ========================================================================= */
-/*
- * Check time stamp signature, show detail in dialog.
- */
 void DlgSignatureDetail::validateMessageTimestamp(void)
-/* ========================================================================= */
 {
 	QString iconPath;
 	QString resStr;
@@ -593,7 +544,7 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 	QDateTime tst;
 	if (m_tstDER.isEmpty()) {
 		iconPath = ICON_3PARTY_PATH "warning_16.png";
-		resStr = QObject::tr("Time stamp not present.");
+		resStr = tr("Time stamp not present.");
 	} else {
 		time_t utc_time = 0;
 		int ret = raw_tst_verify(m_tstDER.data(), m_tstDER.size(),
@@ -602,7 +553,7 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 		if (-1 != ret) {
 			tst = QDateTime::fromTime_t(utc_time);
 		}
-		resStr = "<b>" + QObject::tr("Valid") + ": </b>";
+		resStr = "<b>" + tr("Valid") + ": </b>";
 		if (1 != ret) {
 			iconPath = ICON_16x16_PATH "datovka-error.png";
 			resStr += NO;
@@ -611,52 +562,48 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 			resStr += YES;
 		}
 
-		detailStr = "<b>" + QObject::tr("Time") + ": </b> " +
+		detailStr = "<b>" + tr("Time") + ": </b> " +
 		    tst.toString("dd.MM.yyyy hh:mm:ss") + " " +
 		    tst.timeZone().abbreviation(tst) + "<br/>";
 
 		QString o, ou, n, c;
 		signingCertIssuerInfo(m_tstDER, o, ou, n, c);
 
-		detailStr += "<b>" + QObject::tr("Issuer") + ": </b><br/>";
+		detailStr += "<b>" + tr("Issuer") + ": </b><br/>";
 		if (!o.isEmpty()) {
-			detailStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Organisation") + ": " + o + "<br/>";
+			detailStr += "&nbsp;&nbsp;" + tr("Organisation") +
+			    ": " + o + "<br/>";
 		}
 		if (!ou.isEmpty()) {
 			detailStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Organisational unit") + ": " + ou +
-			    "<br/>";
+			    tr("Organisational unit") + ": " + ou + "<br/>";
 		}
 		if (!n.isEmpty()) {
-			detailStr += "&nbsp;&nbsp;" + QObject::tr("Name") +
-			    ": " + n + "<br/>";
+			detailStr += "&nbsp;&nbsp;" + tr("Name") + ": " +
+			    n + "<br/>";
 		}
 		if (!c.isEmpty()) {
-			detailStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Country") + ": " + c + "<br/>";
+			detailStr += "&nbsp;&nbsp;" + tr("Country") + ": " +
+			    c + "<br/>";
 		}
 
 		QDateTime incept, expir;
 		if (signingCertTimes(m_tstDER, incept, expir)) {
-			detailStr += "<b>" + QObject::tr("Validity") +
-			    ": </b><br/>";
-			detailStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Valid from") + ": " +
+			detailStr += "<b>" + tr("Validity") + ": </b><br/>";
+			detailStr += "&nbsp;&nbsp;" + tr("Valid from") + ": " +
 			    incept.toString("dd.MM.yyyy hh:mm:ss") + " " +
 			    incept.timeZone().abbreviation(incept) + "<br/>";
-			detailStr += "&nbsp;&nbsp;" +
-			    QObject::tr("Valid to") + ": " +
+			detailStr += "&nbsp;&nbsp;" + tr("Valid to") + ": " +
 			    expir.toString("dd.MM.yyyy hh:mm:ss") + " " +
 			    expir.timeZone().abbreviation(expir) + "<br/>";
 		}
 
-		this->tDetail->setAlignment(Qt::AlignLeft);
-		this->tDetail->setTextFormat(Qt::RichText);
-		this->tDetail->setText(detailStr);
+		m_ui->tDetail->setAlignment(Qt::AlignLeft);
+		m_ui->tDetail->setTextFormat(Qt::RichText);
+		m_ui->tDetail->setText(detailStr);
 	}
 
-	this->tImage->setIcon(QIcon(iconPath));
-	this->tStatus->setTextFormat(Qt::RichText);
-	this->tStatus->setText(resStr);
+	m_ui->tImage->setIcon(QIcon(iconPath));
+	m_ui->tStatus->setTextFormat(Qt::RichText);
+	m_ui->tStatus->setText(resStr);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,58 +24,63 @@
 #ifndef _DLG_SIGNATURE_DETAIL_H_
 #define _DLG_SIGNATURE_DETAIL_H_
 
-
 #include <QByteArray>
 #include <QDialog>
-#include <QSslCertificate>
 
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
-#include "ui_dlg_signature_detail.h"
 
+namespace Ui {
+	class DlgSignatureDetail;
+}
 
-class DlgSignatureDetail : public QDialog, public Ui::SignatureDetail {
-    Q_OBJECT
+/*!
+ * @brief Shows information about message signature.
+ */
+class DlgSignatureDetail : public QDialog {
+	Q_OBJECT
+
+private:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] msgDER Raw message data.
+	 * @param[in] tstDER Raw time-stamp data.
+	 * @param[in] parent Parent widget.
+	 */
+	DlgSignatureDetail(const QByteArray &msgDER, const QByteArray &tstDER,
+	    bool constructedFromDb, bool dbIsVerified,
+	    QWidget *parent = Q_NULLPTR);
 
 public:
-	DlgSignatureDetail(const MessageDbSet &dbSet,
-	    const MessageDb::MsgId &msgId, QWidget *parent = 0);
-	DlgSignatureDetail(const void *msgDER, size_t msgSize,
-	    const void *tstDER, size_t tstSize, QWidget *parent = 0);
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgSignatureDetail(void);
 
 	/*!
-	 * @brief Return whether signing certificate is valid.
+	 * @brief Views a signature detail dialogue.
 	 *
-	 * @param[in] DER Raw message or time stamp data.
-	 * @return True is signing certificate was verified successfully.
+	 * @param[in] dbSet Database set.
+	 * @param[in] msgId Message identifier.
+	 * @param[in] parent Parent widget.
 	 */
 	static
-	bool signingCertValid(const QByteArray &DER,
-	    struct crt_verif_outcome &cvo);
+	void detail(const MessageDbSet &dbSet, const MessageDb::MsgId &msgId,
+	    QWidget *parent = Q_NULLPTR);
 
 	/*!
-	 * @brief Returns signing certificate of message.
+	 * @brief Views a signature detail dialogue.
 	 *
-	 * @param[in]  DER    Raw message or time stamp data.
-	 * @param[out] saId   Signature algorithm identifier.
-	 * @param[out] saName Signature algorithm name.
-	 * @return Null certificate on failure.
+	 * @param[in] msgDER Pointer to raw message data.
+	 * @param[in] msgSize Message size.
+	 * @param[in] tstDER Pointer to rad time-stamp data.
+	 * @param[in] tstSize Time-stamp size.
+	 * @param[in] parent Parent widget.
 	 */
 	static
-	QSslCertificate signingCert(const QByteArray &DER,
-	     QString &saId, QString &saName);
-
-	/*!
-	 * @brief Returns signing certificate inception and expiration date.
-	 *
-	 * @param[in]  DER     Raw message or time stamp data.
-	 * @param[out] incTime Inception time.
-	 * @param[out] expTime Expiration time.
-	 * @return True on success.
-	 */
-	static
-	bool signingCertTimes(const QByteArray &DER,
-	    QDateTime &incTime, QDateTime &expTime);
+	void detail(const void *msgDER, size_t msgSize,
+	    const void *tstDER, size_t tstSize, QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Check whether certificate expires before specified limit.
@@ -90,47 +95,50 @@ public:
 	bool signingCertExpiresBefore(const QByteArray &DER,
 	    int days, QDateTime dDate = QDateTime());
 
-	/*!
-	 * @brief Signing certificate issuer information.
-	 *
-	 * @param[in]  DER   Raw message or time stamp data.
-	 * @param[out] oStr  Organisation name.
-	 * @param[out] ouStr Organisation unit name.
-	 * @param[out] nStr  Common name.
-	 * @param[out] cStr  Country name.
-	 * @return False on failure.
-	 */
-	bool signingCertIssuerInfo(const QByteArray &DER,
-	    QString &oStr, QString &ouStr, QString &nStr, QString &cStr);
-
 private slots:
-	void showCertificateDetail(int);
-	void showVerificationDetail(int);
+	/*!
+	 * @brief Show/hide certificate details
+	 *
+	 * @param[in] checkState State of the checkbox controlling
+	 *                       the visibility.
+	 */
+	void showCertificateDetail(int checkState);
+
+	/*!
+	 * @brief Show/hide verification details.
+	 *
+	 * @param[in] checkState State of the checkbox controlling
+	 *                       the visibility.
+	 */
+	void showVerificationDetail(int checkState);
 
 private:
-	/* TODO -- Construct these members as constants. */
-	QByteArray m_msgDER; /*!< Message CMS. */
-	QByteArray m_tstDER; /*!< Time stamp CMS. */
-	const bool m_constructedFromDb; /*!< True if constructed from db. */
-	bool m_dbIsVerified; /*!< Set if constructed from db. */
-
 	/*!
-	 * @brief Check message signature, show result in dialog.
+	 * @brief Check message signature, show result in the dialogue.
 	 */
 	void validateMessageSignature(void);
 
 	/*!
-	 * @brief Validate signing certificate, show result in dialog.
+	 * @brief Validate signing certificate, show result in the dialogue.
 	 */
 	void validateSigningCertificate(void);
 
 	/*!
-	 * @brief Check time stamp signature, show detail in dialog.
+	 * @brief Check time stamp signature, show detail in the dialogue.
 	 */
 	void validateMessageTimestamp(void);
 
-	QSize dSize;
-};
+	Ui::DlgSignatureDetail *m_ui; /*!< UI generated from UI file. */
 
+	const QByteArray &m_msgDER; /*!< Message CMS. */
+	const QByteArray &m_tstDER; /*!< Time stamp CMS. */
+	const bool m_constructedFromDb; /*!< True if constructed from database. */
+	bool m_dbIsVerified; /*!< Set if constructed from database. */
+
+	QSize m_dlgSize; /*!<
+	                  * Remembered dialogue size. Should help with window
+	                  * resizing.
+	                  */
+};
 
 #endif /* _DLG_SIGNATURE_DETAIL_H_ */
