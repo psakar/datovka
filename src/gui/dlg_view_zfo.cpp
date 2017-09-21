@@ -159,12 +159,9 @@ void DlgViewZfo::showSignatureDetailsDialog(void)
 	Q_ASSERT(NULL != m_message);
 	Q_ASSERT(NULL != m_message->envelope);
 
-	QDialog *signature_detail = new DlgSignatureDetail(
-	    m_message->raw, m_message->raw_length,
+	DlgSignatureDetail::detail(m_message->raw, m_message->raw_length,
 	    m_message->envelope->timestamp,
 	    m_message->envelope->timestamp_length, this);
-	signature_detail->exec();
-	signature_detail->deleteLater();
 }
 
 void DlgViewZfo::parseZfoData(const QByteArray &zfoData)

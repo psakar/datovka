@@ -40,23 +40,47 @@ namespace Ui {
 class DlgSignatureDetail : public QDialog {
 	Q_OBJECT
 
+private:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] msgDER Raw message data.
+	 * @param[in] tstDER Raw time-stamp data.
+	 * @param[in] parent Parent widget.
+	 */
+	DlgSignatureDetail(const QByteArray &msgDER, const QByteArray &tstDER,
+	    bool constructedFromDb, bool dbIsVerified,
+	    QWidget *parent = Q_NULLPTR);
+
 public:
-	/*!
-	 * @brief Constructor.
-	 */
-	DlgSignatureDetail(const MessageDbSet &dbSet,
-	    const MessageDb::MsgId &msgId, QWidget *parent = Q_NULLPTR);
-
-	/*!
-	 * @brief Constructor.
-	 */
-	DlgSignatureDetail(const void *msgDER, size_t msgSize,
-	    const void *tstDER, size_t tstSize, QWidget *parent = Q_NULLPTR);
-
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgSignatureDetail(void);
+
+	/*!
+	 * @brief Views a signature detail dialogue.
+	 *
+	 * @param[in] dbSet Database set.
+	 * @param[in] msgId Message identifier.
+	 * @param[in] parent Parent widget.
+	 */
+	static
+	void detail(const MessageDbSet &dbSet, const MessageDb::MsgId &msgId,
+	    QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Views a signature detail dialogue.
+	 *
+	 * @param[in] msgDER Pointer to raw message data.
+	 * @param[in] msgSize Message size.
+	 * @param[in] tstDER Pointer to rad time-stamp data.
+	 * @param[in] tstSize Time-stamp size.
+	 * @param[in] parent Parent widget.
+	 */
+	static
+	void detail(const void *msgDER, size_t msgSize,
+	    const void *tstDER, size_t tstSize, QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Check whether certificate expires before specified limit.
@@ -106,13 +130,15 @@ private:
 
 	Ui::DlgSignatureDetail *m_ui; /*!< UI generated from UI file. */
 
-	/* TODO -- Construct these members as constants. */
-	QByteArray m_msgDER; /*!< Message CMS. */
-	QByteArray m_tstDER; /*!< Time stamp CMS. */
-	const bool m_constructedFromDb; /*!< True if constructed from db. */
-	bool m_dbIsVerified; /*!< Set if constructed from db. */
+	const QByteArray &m_msgDER; /*!< Message CMS. */
+	const QByteArray &m_tstDER; /*!< Time stamp CMS. */
+	const bool m_constructedFromDb; /*!< True if constructed from database. */
+	bool m_dbIsVerified; /*!< Set if constructed from database. */
 
-	QSize dSize;
+	QSize m_dlgSize; /*!<
+	                  * Remembered dialogue size. Should help with window
+	                  * resizing.
+	                  */
 };
 
 #endif /* _DLG_SIGNATURE_DETAIL_H_ */

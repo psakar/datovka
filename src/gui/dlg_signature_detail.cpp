@@ -33,53 +33,16 @@
 #include "src/settings/preferences.h"
 #include "ui_dlg_signature_detail.h"
 
-DlgSignatureDetail::DlgSignatureDetail(const MessageDbSet &dbSet,
-    const MessageDb::MsgId &msgId, QWidget *parent)
+DlgSignatureDetail::DlgSignatureDetail(const QByteArray &msgDER,
+    const QByteArray &tstDER, bool constructedFromDb, bool dbIsVerified,
+    QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgSignatureDetail),
-    m_msgDER(),
-    m_tstDER(),
-    m_constructedFromDb(true),
-    m_dbIsVerified(),
-    dSize()
-{
-	/* Obtain raw message and time stamp. */
-	Q_ASSERT(msgId.dmId >= 0);
-	Q_ASSERT(msgId.deliveryTime.isValid());
-	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
-	Q_ASSERT(Q_NULLPTR != messageDb);
-	if (messageDb->msgsVerificationAttempted(msgId.dmId)) {
-		m_msgDER = messageDb->msgsMessageRaw(msgId.dmId);
-	}
-	m_tstDER = messageDb->msgsTimestampRaw(msgId.dmId);
-	m_dbIsVerified = messageDb->msgsVerified(msgId.dmId);
-
-	m_ui->setupUi(this);
-
-	m_ui->verifyWidget->setHidden(true);
-	connect(m_ui->showVerifyDetail, SIGNAL(stateChanged(int)),
-	    this, SLOT(showVerificationDetail(int)));
-	m_ui->certDetailWidget->setHidden(true);
-	connect(m_ui->showCertDetail, SIGNAL(stateChanged(int)),
-	    this, SLOT(showCertificateDetail(int)));
-
-	validateMessageSignature();
-	validateSigningCertificate();
-	validateMessageTimestamp();
-
-	/* Remember the size of the dialogue. */
-	dSize = this->sizeHint();
-}
-
-DlgSignatureDetail::DlgSignatureDetail(const void *msgDER, size_t msgSize,
-    const void *tstDER, size_t tstSize, QWidget *parent)
-    : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgSignatureDetail),
-    m_msgDER((char *) msgDER, msgSize),
-    m_tstDER((char *) tstDER, tstSize),
-    m_constructedFromDb(false),
-    m_dbIsVerified(false),
-    dSize(QSize())
+    m_msgDER(msgDER),
+    m_tstDER(tstDER),
+    m_constructedFromDb(constructedFromDb),
+    m_dbIsVerified(dbIsVerified),
+    m_dlgSize()
 {
 	m_ui->setupUi(this);
 
@@ -95,12 +58,45 @@ DlgSignatureDetail::DlgSignatureDetail(const void *msgDER, size_t msgSize,
 	validateMessageTimestamp();
 
 	/* Remember the size of the dialogue. */
-	dSize = this->sizeHint();
+	m_dlgSize = this->sizeHint();
 }
 
 DlgSignatureDetail::~DlgSignatureDetail(void)
 {
 	delete m_ui;
+}
+
+void DlgSignatureDetail::detail(const MessageDbSet &dbSet,
+    const MessageDb::MsgId &msgId, QWidget *parent)
+{
+	if (Q_UNLIKELY((msgId.dmId < 0) || !msgId.deliveryTime.isValid())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Obtain raw message and time stamp. */
+	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
+	if (Q_UNLIKELY(Q_NULLPTR == messageDb)) {
+		Q_ASSERT(0);
+		return;
+	}
+	QByteArray msgDER;
+	if (messageDb->msgsVerificationAttempted(msgId.dmId)) {
+		msgDER = messageDb->msgsMessageRaw(msgId.dmId);
+	}
+	QByteArray tstDER(messageDb->msgsTimestampRaw(msgId.dmId));
+	bool dbIsVerified = messageDb->msgsVerified(msgId.dmId);
+
+	DlgSignatureDetail dlg(msgDER, tstDER, true, dbIsVerified, parent);
+	dlg.exec();
+}
+
+void DlgSignatureDetail::detail(const void *msgDER, size_t msgSize,
+    const void *tstDER, size_t tstSize, QWidget *parent)
+{
+	DlgSignatureDetail dlg(QByteArray((char *) msgDER, msgSize),
+	    QByteArray((char *) tstDER, tstSize), false, false, parent);
+	dlg.exec();
 }
 
 /*!
@@ -168,13 +164,13 @@ bool DlgSignatureDetail::signingCertExpiresBefore(const QByteArray &DER,
 void DlgSignatureDetail::showCertificateDetail(int checkState)
 {
 	m_ui->certDetailWidget->setHidden(Qt::Unchecked == checkState);
-	this->setMaximumSize(dSize);
+	this->setMaximumSize(m_dlgSize);
 }
 
 void DlgSignatureDetail::showVerificationDetail(int checkState)
 {
 	m_ui->verifyWidget->setHidden(Qt::Unchecked == checkState);
-	this->setMaximumSize(dSize);
+	this->setMaximumSize(m_dlgSize);
 }
 
 #define YES \
