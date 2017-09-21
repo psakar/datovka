@@ -27,12 +27,15 @@
 #include <QDialog>
 
 #include "src/models/files_model.h"
-#include "ui_dlg_view_zfo.h"
+
+namespace Ui {
+	class DlgViewZfo;
+}
 
 /*!
- * @brief Dialog for ZFO content viewing.
+ * @brief Dialogue for ZFO content viewing.
  */
-class DlgViewZfo : public QDialog, public Ui::ViewZfo {
+class DlgViewZfo : public QDialog {
 	Q_OBJECT
 
 public:
@@ -163,6 +166,8 @@ private:
 	static
 	bool signatureFooterDescription(QString &html, const void *msgDER,
 	    size_t msgSize, const void *tstDER, size_t tstSize);
+
+	Ui::DlgViewZfo *m_ui; /*!< UI generated from UI file. */
 
 	struct isds_message *m_message; /*!< ISDS message pointer copy. */
 	/*

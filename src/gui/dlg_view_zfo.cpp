@@ -41,28 +41,31 @@
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/settings/preferences.h"
 #include "src/views/table_home_end_filter.h"
+#include "ui_dlg_view_zfo.h"
 
 DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgViewZfo),
     m_message(NULL),
     m_attachmentModel(this)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+
 	/* Set default line height for table views/widgets. */
-	attachmentTable->setNarrowedLineHeight();
+	m_ui->attachmentTable->setNarrowedLineHeight();
 
 	/* Load message ZFO. */
 	parseZfoFile(zfoFileName);
 
 	if (NULL == m_message) {
 		/* Just show error message. */
-		this->attachmentTable->hide();
-		envelopeTextEdit->setHtml(
+		m_ui->attachmentTable->hide();
+		m_ui->envelopeTextEdit->setHtml(
 		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
 		    tr("Cannot parse the content of file '%1'.")
 		        .arg(zfoFileName));
-		envelopeTextEdit->setReadOnly(true);
-		signaturePushButton->setEnabled(false);
+		m_ui->envelopeTextEdit->setReadOnly(true);
+		m_ui->signaturePushButton->setEnabled(false);
 		return;
 	}
 
@@ -71,22 +74,26 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 
 DlgViewZfo::DlgViewZfo(const QByteArray &zfoData, QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgViewZfo),
     m_message(NULL),
     m_attachmentModel(this)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+
+	/* Set default line height for table views/widgets. */
+	m_ui->attachmentTable->setNarrowedLineHeight();
 
 	/* Load raw message. */
 	parseZfoData(zfoData);
 
 	if (NULL == m_message) {
 		/* Just show error message. */
-		this->attachmentTable->hide();
-		envelopeTextEdit->setHtml(
+		m_ui->attachmentTable->hide();
+		m_ui->envelopeTextEdit->setHtml(
 		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
 		    tr("Cannot parse the content of message."));
-		envelopeTextEdit->setReadOnly(true);
-		signaturePushButton->setEnabled(false);
+		m_ui->envelopeTextEdit->setReadOnly(true);
+		m_ui->signaturePushButton->setEnabled(false);
 		return;
 	}
 
@@ -98,16 +105,17 @@ DlgViewZfo::~DlgViewZfo(void)
 	if (NULL != m_message) {
 		isds_message_free(&m_message);
 	}
+	delete m_ui;
 }
 
 void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 {
-	QModelIndex index = attachmentTable->indexAt(point);
+	QModelIndex index(m_ui->attachmentTable->indexAt(point));
 	QMenu *menu = new QMenu(this);
 
 	/* Detects selection of multiple attachments. */
 	QModelIndexList indexes(
-	    AttachmentInteraction::selectedColumnIndexes(*attachmentTable,
+	    AttachmentInteraction::selectedColumnIndexes(*m_ui->attachmentTable,
 	        DbFlsTblModel::FNAME_COL));
 
 	if (index.isValid()) {
@@ -133,7 +141,8 @@ void DlgViewZfo::saveSelectedAttachmentsToFile(void)
 {
 	debugSlotCall();
 
-	AttachmentInteraction::saveAttachmentsToFile(this, *attachmentTable);
+	AttachmentInteraction::saveAttachmentsToFile(this,
+	    *m_ui->attachmentTable);
 }
 
 void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
@@ -141,8 +150,8 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 	debugSlotCall();
 
 	AttachmentInteraction::saveAttachmentsToDirectory(this,
-	    *this->attachmentTable,
-	    AttachmentInteraction::selectedColumnIndexes(*attachmentTable,
+	    *m_ui->attachmentTable,
+	    AttachmentInteraction::selectedColumnIndexes(*m_ui->attachmentTable,
 	        DbFlsTblModel::FNAME_COL));
 }
 
@@ -150,7 +159,7 @@ void DlgViewZfo::openSelectedAttachment(const QModelIndex &index)
 {
 	debugSlotCall();
 
-	AttachmentInteraction::openAttachment(this, *this->attachmentTable,
+	AttachmentInteraction::openAttachment(this, *m_ui->attachmentTable,
 	    index);
 }
 
@@ -224,53 +233,57 @@ void DlgViewZfo::setUpDialogue(void)
 	/* TODO -- Adjust splitter sizes. */
 
 	if (Imports::IMPORT_DELIVERY == m_zfoType) {
-		this->attachmentTable->hide();
-		envelopeTextEdit->setHtml(
+		m_ui->attachmentTable->hide();
+		m_ui->envelopeTextEdit->setHtml(
 		    deliveryDescriptionHtml(
 		        m_message->raw, m_message->raw_length,
 		        m_message->envelope->timestamp,
 		        m_message->envelope->timestamp_length));
-		envelopeTextEdit->setReadOnly(true);
+		m_ui->envelopeTextEdit->setReadOnly(true);
 
 	} else {
-		this->attachmentTable->setEnabled(true);
-		this->attachmentTable->show();
+		m_ui->attachmentTable->setEnabled(true);
+		m_ui->attachmentTable->show();
 		m_attachmentModel.setMessage(m_message);
 		m_attachmentModel.setHeader();
-		envelopeTextEdit->setHtml(
+		m_ui->envelopeTextEdit->setHtml(
 		    messageDescriptionHtml(m_attachmentModel.rowCount(),
 		        m_message->raw, m_message->raw_length,
 		        m_message->envelope->timestamp,
 		        m_message->envelope->timestamp_length));
-		envelopeTextEdit->setReadOnly(true);
+		m_ui->envelopeTextEdit->setReadOnly(true);
 
 		/* Attachment list. */
-		attachmentTable->setModel(&m_attachmentModel);
+		m_ui->attachmentTable->setModel(&m_attachmentModel);
 		/* First three columns contain hidden data. */
-		attachmentTable->setColumnHidden(DbFlsTblModel::ATTACHID_COL,
+		m_ui->attachmentTable->setColumnHidden(
+		    DbFlsTblModel::ATTACHID_COL, true);
+		m_ui->attachmentTable->setColumnHidden(DbFlsTblModel::MSGID_COL,
 		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::MSGID_COL,
+		m_ui->attachmentTable->setColumnHidden(
+		    DbFlsTblModel::CONTENT_COL, true);
+		m_ui->attachmentTable->setColumnHidden(DbFlsTblModel::MIME_COL,
 		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::CONTENT_COL,
+		m_ui->attachmentTable->setColumnHidden(DbFlsTblModel::FPATH_COL,
 		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::MIME_COL,
-		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::FPATH_COL,
-		    true);
-		attachmentTable->resizeColumnToContents(
+		m_ui->attachmentTable->resizeColumnToContents(
 		    DbFlsTblModel::FNAME_COL);
 
-		attachmentTable->setContextMenuPolicy(Qt::CustomContextMenu);
-		connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
+		m_ui->attachmentTable->setContextMenuPolicy(
+		    Qt::CustomContextMenu);
+		connect(m_ui->attachmentTable,
+		    SIGNAL(customContextMenuRequested(QPoint)),
 		    this, SLOT(attachmentItemRightClicked(QPoint)));
-		connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
+		connect(m_ui->attachmentTable,
+		    SIGNAL(doubleClicked(QModelIndex)),
 		    this, SLOT(openSelectedAttachment(QModelIndex)));
 
-		attachmentTable->installEventFilter(new TableHomeEndFilter(this));
+		m_ui->attachmentTable->installEventFilter(
+		    new TableHomeEndFilter(this));
 	}
 
 	/* Signature details. */
-	connect(signaturePushButton, SIGNAL(clicked()), this,
+	connect(m_ui->signaturePushButton, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetailsDialog()));
 }
 
