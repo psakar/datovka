@@ -639,7 +639,7 @@ private slots:
 	/*!
 	 * @brief Prepare message timestamp expiration based on action.
 	 */
-	void prepareMsgTmstmpExpir(enum TimestampExpirDialog::TSaction action);
+	void prepareMsgTmstmpExpir(enum DlgTimestampExpir::TSaction action);
 
 	/*!
 	 * @brief Split message database slot.

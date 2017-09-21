@@ -7102,11 +7102,11 @@ void MainWindow::showMsgTmstmpExpirDialog(void)
 	debugSlotCall();
 
 	/* Generate dialog showing message content. */
-	QDialog *timestampExpirDialog = new TimestampExpirDialog(this);
+	QDialog *timestampExpirDialog = new DlgTimestampExpir(this);
 	connect(timestampExpirDialog,
-	    SIGNAL(returnAction(enum TimestampExpirDialog::TSaction)),
+	    SIGNAL(returnAction(enum DlgTimestampExpir::TSaction)),
 	    this,
-	    SLOT(prepareMsgTmstmpExpir(enum TimestampExpirDialog::TSaction)));
+	    SLOT(prepareMsgTmstmpExpir(enum DlgTimestampExpir::TSaction)));
 	timestampExpirDialog->exec();
 	timestampExpirDialog->deleteLater();
 }
@@ -7117,7 +7117,7 @@ void MainWindow::showMsgTmstmpExpirDialog(void)
  * Prepare message timestamp expiration based on action.
  */
 void MainWindow::prepareMsgTmstmpExpir(
-    enum TimestampExpirDialog::TSaction action)
+    enum DlgTimestampExpir::TSaction action)
 /* ========================================================================= */
 {
 	debugSlotCall();
@@ -7132,7 +7132,7 @@ void MainWindow::prepareMsgTmstmpExpir(
 	filePathList.clear();
 
 	switch (action) {
-	case TimestampExpirDialog::CHECK_TIMESTAMP_CURRENT:
+	case DlgTimestampExpir::CHECK_TIMESTAMP_CURRENT:
 		/* Process the selected account. */
 		userName = m_accountModel.userName(currentAccountModelIndex());
 		Q_ASSERT(!userName.isEmpty());
@@ -7142,7 +7142,7 @@ void MainWindow::prepareMsgTmstmpExpir(
 		checkMsgsTmstmpExpiration(userName, QStringList());
 		break;
 
-	case TimestampExpirDialog::CHECK_TIMESTAMP_ALL:
+	case DlgTimestampExpir::CHECK_TIMESTAMP_ALL:
 		for (int i = 0; i < ui->accountList->model()->rowCount(); ++i) {
 			QModelIndex index = m_accountModel.index(i, 0);
 			userName = m_accountModel.userName(index);
@@ -7154,9 +7154,9 @@ void MainWindow::prepareMsgTmstmpExpir(
 		}
 		break;
 
-	case TimestampExpirDialog::CHECK_TIMESTAMP_ZFO_SUB:
+	case DlgTimestampExpir::CHECK_TIMESTAMP_ZFO_SUB:
 		includeSubdir = true;
-	case TimestampExpirDialog::CHECK_TIMESTAMP_ZFO:
+	case DlgTimestampExpir::CHECK_TIMESTAMP_ZFO:
 		importDir = QFileDialog::getExistingDirectory(this,
 		    tr("Select directory"), m_import_zfo_path,
 		    QFileDialog::ShowDirsOnly |

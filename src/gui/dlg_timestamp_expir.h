@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,19 @@
  * the two.
  */
 
-
-#ifndef DLG_TIMESTAMP_EXPIR_H
-#define DLG_TIMESTAMP_EXPIR_H
+#ifndef _DLG_TIMESTAMP_EXPIR_H_
+#define _DLG_TIMESTAMP_EXPIR_H_
 
 #include <QDialog>
-#include "src/common.h"
-#include "ui_dlg_timestamp_expir.h"
 
+namespace Ui {
+	class DlgTimestampExpir;
+}
 
-class TimestampExpirDialog : public QDialog, public Ui::DlgTimestampExpir
-{
+/*!
+ * @brief Shows question about time stamp expiration check.
+ */
+class DlgTimestampExpir : public QDialog {
 	Q_OBJECT
 
 public:
@@ -43,14 +45,27 @@ public:
 	};
 
 public:
-	TimestampExpirDialog(QWidget *parent = 0);
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] parent Parent widget.
+	 */
+	explicit DlgTimestampExpir(QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief Destructor.
+	 */
+	~DlgTimestampExpir(void);
 
 signals:
-	void returnAction(enum TimestampExpirDialog::TSaction);
+	void returnAction(enum DlgTimestampExpir::TSaction);
 
 private slots:
 	void setRetValue(void);
 	void ChangeRadioBox(void);
+
+private:
+	Ui::DlgTimestampExpir *m_ui; /*!< UI generated from UI file. */
 };
 
-#endif // DLG_TIMESTAMP_EXPIR_H
+#endif /* _DLG_TIMESTAMP_EXPIR_H_ */
