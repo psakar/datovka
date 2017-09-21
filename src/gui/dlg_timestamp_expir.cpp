@@ -31,13 +31,11 @@ DlgTimestampExpir::DlgTimestampExpir(QWidget *parent)
 	m_ui->setupUi(this);
 
 	connect(m_ui->radioFromCurrent, SIGNAL(clicked()),
-	    this, SLOT(ChangeRadioBox()));
+	    this, SLOT(radioSelectionChanged()));
 	connect(m_ui->radioFromAll, SIGNAL(clicked()),
-	    this, SLOT(ChangeRadioBox()));
+	    this, SLOT(radioSelectionChanged()));
 	connect(m_ui->radioFromDir, SIGNAL(clicked()),
-	    this, SLOT(ChangeRadioBox()));
-
-	connect(m_ui->buttonBox, SIGNAL(accepted()), this, SLOT(setRetValue()));
+	    this, SLOT(radioSelectionChanged()));
 }
 
 DlgTimestampExpir::~DlgTimestampExpir(void)
@@ -45,28 +43,34 @@ DlgTimestampExpir::~DlgTimestampExpir(void)
 	delete m_ui;
 }
 
-void DlgTimestampExpir::ChangeRadioBox(void)
+enum DlgTimestampExpir::Action DlgTimestampExpir::askAction(QWidget *parent)
 {
-	if (m_ui->radioFromDir->isChecked()) {
-		m_ui->includeSubDir->setEnabled(true);
+	DlgTimestampExpir dlg(parent);
+	if (QDialog::Accepted == dlg.exec()) {
+		return dlg.collectAction();
 	} else {
-		m_ui->includeSubDir->setEnabled(false);
+		return CHECK_NOTHING;
 	}
 }
 
-void DlgTimestampExpir::setRetValue(void)
+void DlgTimestampExpir::radioSelectionChanged(void)
 {
-	enum TSaction action = CHECK_TIMESTAMP_CURRENT;
+	m_ui->includeSubDir->setEnabled(m_ui->radioFromDir->isChecked());
+}
+
+enum DlgTimestampExpir::Action DlgTimestampExpir::collectAction(void) const
+{
+	enum Action action = CHECK_SELECTED_ACNT;
 
 	if (m_ui->radioFromDir->isChecked()) {
 		if (m_ui->includeSubDir->isChecked()) {
-			action = CHECK_TIMESTAMP_ZFO_SUB;
+			action = CHECK_DIR_SUB;
 		} else {
-			action = CHECK_TIMESTAMP_ZFO;
+			action = CHECK_DIR;
 		}
 	} else if (m_ui->radioFromAll->isChecked()) {
-		action = CHECK_TIMESTAMP_ALL;
+		action = CHECK_ALL_ACNTS;
 	}
 
-	emit returnAction(action);
+	return action;
 }

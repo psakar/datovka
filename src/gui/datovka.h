@@ -637,11 +637,6 @@ private slots:
 	void showMsgTmstmpExpirDialog(void);
 
 	/*!
-	 * @brief Prepare message timestamp expiration based on action.
-	 */
-	void prepareMsgTmstmpExpir(enum DlgTimestampExpir::TSaction action);
-
-	/*!
 	 * @brief Split message database slot.
 	 */
 	void splitMsgDbByYearsSlot(void);
@@ -677,6 +672,11 @@ private:
 
 	QTimer m_timerSyncAccounts;
 	int m_timeoutSyncAccounts;
+
+	/*!
+	 * @brief Prepare message timestamp expiration based on action.
+	 */
+	void prepareMsgTmstmpExpir(enum DlgTimestampExpir::Action action);
 
 	/*!
 	 * @brief Shows tag editing dialogue.
