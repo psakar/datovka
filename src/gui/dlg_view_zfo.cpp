@@ -22,11 +22,8 @@
  */
 
 #include <QDateTime>
-#include <QDialog>
 #include <QDir>
-#include <QFileDialog>
 #include <QMenu>
-#include <QMessageBox>
 #include <QTimeZone>
 
 #include "src/crypto/crypto_funcs.h"
@@ -41,52 +38,29 @@
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/settings/preferences.h"
 #include "src/views/table_home_end_filter.h"
+#include "ui_dlg_view_zfo.h"
 
-DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
+DlgViewZfo::DlgViewZfo(const struct isds_message *message, int zfoType,
+    const QString &errMsg, QWidget *parent)
     : QDialog(parent),
-    m_message(NULL),
+    m_ui(new (std::nothrow) Ui::DlgViewZfo),
+    m_message(message),
+    m_zfoType(zfoType),
     m_attachmentModel(this)
 {
-	setupUi(this);
+	m_ui->setupUi(this);
+
 	/* Set default line height for table views/widgets. */
-	attachmentTable->setNarrowedLineHeight();
-
-	/* Load message ZFO. */
-	parseZfoFile(zfoFileName);
+	m_ui->attachmentTable->setNarrowedLineHeight();
 
 	if (NULL == m_message) {
 		/* Just show error message. */
-		this->attachmentTable->hide();
-		envelopeTextEdit->setHtml(
+		m_ui->attachmentTable->hide();
+		m_ui->envelopeTextEdit->setHtml(
 		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
-		    tr("Cannot parse the content of file '%1'.")
-		        .arg(zfoFileName));
-		envelopeTextEdit->setReadOnly(true);
-		signaturePushButton->setEnabled(false);
-		return;
-	}
-
-	setUpDialogue();
-}
-
-DlgViewZfo::DlgViewZfo(const QByteArray &zfoData, QWidget *parent)
-    : QDialog(parent),
-    m_message(NULL),
-    m_attachmentModel(this)
-{
-	setupUi(this);
-
-	/* Load raw message. */
-	parseZfoData(zfoData);
-
-	if (NULL == m_message) {
-		/* Just show error message. */
-		this->attachmentTable->hide();
-		envelopeTextEdit->setHtml(
-		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
-		    tr("Cannot parse the content of message."));
-		envelopeTextEdit->setReadOnly(true);
-		signaturePushButton->setEnabled(false);
+		    errMsg);
+		m_ui->envelopeTextEdit->setReadOnly(true);
+		m_ui->signaturePushButton->setEnabled(false);
 		return;
 	}
 
@@ -95,19 +69,62 @@ DlgViewZfo::DlgViewZfo(const QByteArray &zfoData, QWidget *parent)
 
 DlgViewZfo::~DlgViewZfo(void)
 {
-	if (NULL != m_message) {
-		isds_message_free(&m_message);
+	delete m_ui;
+}
+
+void DlgViewZfo::view(const QString &zfoFileName, QWidget *parent)
+{
+	if (Q_UNLIKELY(zfoFileName.isEmpty())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	struct isds_message *message = NULL;
+	int zfoType;
+
+	/* Load message ZFO. */
+	parseZfoFile(zfoFileName, &message, &zfoType);
+
+	DlgViewZfo dlg(message, zfoType,
+	    tr("Cannot parse the content of file '%1'.")
+	        .arg(QDir::toNativeSeparators(zfoFileName)),
+	    parent);
+	dlg.exec();
+
+	if (NULL != message) {
+		isds_message_free(&message);
+	}
+}
+
+void DlgViewZfo::view(const QByteArray &zfoData, QWidget *parent)
+{
+	struct isds_message *message = NULL;
+	int zfoType;
+
+	/* Load raw message. */
+	parseZfoData(zfoData, &message, &zfoType);
+
+	DlgViewZfo dlg(message, zfoType,
+	    tr("Cannot parse the content of message."), parent);
+	dlg.exec();
+
+	if (NULL != message) {
+		isds_message_free(&message);
 	}
 }
 
 void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 {
-	QModelIndex index = attachmentTable->indexAt(point);
-	QMenu *menu = new QMenu(this);
+	QModelIndex index(m_ui->attachmentTable->indexAt(point));
+	QMenu *menu = new (std::nothrow) QMenu(this);
+	if (Q_UNLIKELY(Q_NULLPTR == menu)) {
+		Q_ASSERT(0);
+		return;
+	}
 
 	/* Detects selection of multiple attachments. */
 	QModelIndexList indexes(
-	    AttachmentInteraction::selectedColumnIndexes(*attachmentTable,
+	    AttachmentInteraction::selectedColumnIndexes(*m_ui->attachmentTable,
 	        DbFlsTblModel::FNAME_COL));
 
 	if (index.isValid()) {
@@ -127,13 +144,15 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 		/* Do nothing. */
 	}
 	menu->exec(QCursor::pos());
+	menu->deleteLater();
 }
 
 void DlgViewZfo::saveSelectedAttachmentsToFile(void)
 {
 	debugSlotCall();
 
-	AttachmentInteraction::saveAttachmentsToFile(this, *attachmentTable);
+	AttachmentInteraction::saveAttachmentsToFile(this,
+	    *m_ui->attachmentTable);
 }
 
 void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
@@ -141,8 +160,8 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 	debugSlotCall();
 
 	AttachmentInteraction::saveAttachmentsToDirectory(this,
-	    *this->attachmentTable,
-	    AttachmentInteraction::selectedColumnIndexes(*attachmentTable,
+	    *m_ui->attachmentTable,
+	    AttachmentInteraction::selectedColumnIndexes(*m_ui->attachmentTable,
 	        DbFlsTblModel::FNAME_COL));
 }
 
@@ -150,7 +169,7 @@ void DlgViewZfo::openSelectedAttachment(const QModelIndex &index)
 {
 	debugSlotCall();
 
-	AttachmentInteraction::openAttachment(this, *this->attachmentTable,
+	AttachmentInteraction::openAttachment(this, *m_ui->attachmentTable,
 	    index);
 }
 
@@ -164,8 +183,16 @@ void DlgViewZfo::showSignatureDetailsDialog(void)
 	    m_message->envelope->timestamp_length, this);
 }
 
-void DlgViewZfo::parseZfoData(const QByteArray &zfoData)
+bool DlgViewZfo::parseZfoData(const QByteArray &zfoData,
+    struct isds_message **message, int *zfoType)
 {
+	bool success = false;
+
+	if (Q_UNLIKELY((NULL == message) || (Q_NULLPTR == zfoType))) {
+		Q_ASSERT(0);
+		return false;
+	}
+
 	/* Logging purposes. */
 	struct isds_ctx *dummy_session = isds_ctx_create();
 	if (NULL == dummy_session) {
@@ -173,50 +200,42 @@ void DlgViewZfo::parseZfoData(const QByteArray &zfoData)
 		goto fail;
 	}
 
-	m_zfoType = Imports::IMPORT_MESSAGE;
-	Q_ASSERT(NULL == m_message);
-	m_message = loadZfoData(dummy_session, zfoData, m_zfoType);
-	if (NULL == m_message) {
-		m_zfoType = Imports::IMPORT_DELIVERY;
-		m_message = loadZfoData(dummy_session, zfoData, m_zfoType);
-		if (NULL == m_message) {
+	*zfoType = Imports::IMPORT_MESSAGE;
+	Q_ASSERT(NULL == *message);
+	*message = loadZfoData(dummy_session, zfoData, *zfoType);
+	if (NULL == *message) {
+		*zfoType = Imports::IMPORT_DELIVERY;
+		*message = loadZfoData(dummy_session, zfoData, *zfoType);
+		if (NULL == *message) {
 			logError("%s\n", "Cannot parse message data.");
 			goto fail;
 		}
 	}
 
+	success = true;
+
 fail:
 	if (NULL != dummy_session) {
 		isds_ctx_free(&dummy_session);
 	}
+	return success;
 }
 
-void DlgViewZfo::parseZfoFile(const QString &zfoFileName)
+bool DlgViewZfo::parseZfoFile(const QString &zfoFileName,
+    struct isds_message **message, int *zfoType)
 {
-	/* Logging purposes. */
-	struct isds_ctx *dummy_session = isds_ctx_create();
-	if (NULL == dummy_session) {
-		logError("%s\n", "Cannot create dummy ISDS session.");
-		goto fail;
+	QFile file(zfoFileName);
+
+	if (!file.open(QIODevice::ReadOnly)) {
+		logErrorNL("Cannot open file '%s'.",
+		    zfoFileName.toUtf8().constData());
+		return false;
 	}
 
-	m_zfoType = Imports::IMPORT_MESSAGE;
-	Q_ASSERT(NULL == m_message);
-	m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
-	if (NULL == m_message) {
-		m_zfoType = Imports::IMPORT_DELIVERY;
-		m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
-		if (NULL == m_message) {
-			logError("Cannot parse file '%s'.\n",
-			    zfoFileName.toUtf8().constData());
-			goto fail;
-		}
-	}
+	QByteArray zfoContent(file.readAll());
+	file.close();
 
-fail:
-	if (NULL != dummy_session) {
-		isds_ctx_free(&dummy_session);
-	}
+	return parseZfoData(zfoContent, message, zfoType);
 }
 
 void DlgViewZfo::setUpDialogue(void)
@@ -224,53 +243,57 @@ void DlgViewZfo::setUpDialogue(void)
 	/* TODO -- Adjust splitter sizes. */
 
 	if (Imports::IMPORT_DELIVERY == m_zfoType) {
-		this->attachmentTable->hide();
-		envelopeTextEdit->setHtml(
+		m_ui->attachmentTable->hide();
+		m_ui->envelopeTextEdit->setHtml(
 		    deliveryDescriptionHtml(
 		        m_message->raw, m_message->raw_length,
 		        m_message->envelope->timestamp,
 		        m_message->envelope->timestamp_length));
-		envelopeTextEdit->setReadOnly(true);
+		m_ui->envelopeTextEdit->setReadOnly(true);
 
 	} else {
-		this->attachmentTable->setEnabled(true);
-		this->attachmentTable->show();
+		m_ui->attachmentTable->setEnabled(true);
+		m_ui->attachmentTable->show();
 		m_attachmentModel.setMessage(m_message);
 		m_attachmentModel.setHeader();
-		envelopeTextEdit->setHtml(
+		m_ui->envelopeTextEdit->setHtml(
 		    messageDescriptionHtml(m_attachmentModel.rowCount(),
 		        m_message->raw, m_message->raw_length,
 		        m_message->envelope->timestamp,
 		        m_message->envelope->timestamp_length));
-		envelopeTextEdit->setReadOnly(true);
+		m_ui->envelopeTextEdit->setReadOnly(true);
 
 		/* Attachment list. */
-		attachmentTable->setModel(&m_attachmentModel);
+		m_ui->attachmentTable->setModel(&m_attachmentModel);
 		/* First three columns contain hidden data. */
-		attachmentTable->setColumnHidden(DbFlsTblModel::ATTACHID_COL,
+		m_ui->attachmentTable->setColumnHidden(
+		    DbFlsTblModel::ATTACHID_COL, true);
+		m_ui->attachmentTable->setColumnHidden(DbFlsTblModel::MSGID_COL,
 		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::MSGID_COL,
+		m_ui->attachmentTable->setColumnHidden(
+		    DbFlsTblModel::CONTENT_COL, true);
+		m_ui->attachmentTable->setColumnHidden(DbFlsTblModel::MIME_COL,
 		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::CONTENT_COL,
+		m_ui->attachmentTable->setColumnHidden(DbFlsTblModel::FPATH_COL,
 		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::MIME_COL,
-		    true);
-		attachmentTable->setColumnHidden(DbFlsTblModel::FPATH_COL,
-		    true);
-		attachmentTable->resizeColumnToContents(
+		m_ui->attachmentTable->resizeColumnToContents(
 		    DbFlsTblModel::FNAME_COL);
 
-		attachmentTable->setContextMenuPolicy(Qt::CustomContextMenu);
-		connect(attachmentTable, SIGNAL(customContextMenuRequested(QPoint)),
+		m_ui->attachmentTable->setContextMenuPolicy(
+		    Qt::CustomContextMenu);
+		connect(m_ui->attachmentTable,
+		    SIGNAL(customContextMenuRequested(QPoint)),
 		    this, SLOT(attachmentItemRightClicked(QPoint)));
-		connect(attachmentTable, SIGNAL(doubleClicked(QModelIndex)),
+		connect(m_ui->attachmentTable,
+		    SIGNAL(doubleClicked(QModelIndex)),
 		    this, SLOT(openSelectedAttachment(QModelIndex)));
 
-		attachmentTable->installEventFilter(new TableHomeEndFilter(this));
+		m_ui->attachmentTable->installEventFilter(
+		    new TableHomeEndFilter(this));
 	}
 
 	/* Signature details. */
-	connect(signaturePushButton, SIGNAL(clicked()), this,
+	connect(m_ui->signaturePushButton, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetailsDialog()));
 }
 

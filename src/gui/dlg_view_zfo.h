@@ -27,41 +27,52 @@
 #include <QDialog>
 
 #include "src/models/files_model.h"
-#include "ui_dlg_view_zfo.h"
+
+namespace Ui {
+	class DlgViewZfo;
+}
 
 /*!
- * @brief Dialog for ZFO content viewing.
+ * @brief Dialogue for ZFO content viewing.
  */
-class DlgViewZfo : public QDialog, public Ui::ViewZfo {
+class DlgViewZfo : public QDialog {
 	Q_OBJECT
 
+private:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] message Pointer to ISDS message structure.
+	 * @param[in] zfoType Specifies type of data.
+	 * @param[in] errMsg Message to be displayed if NULL pointer passed.
+	 * @param[in] parent Parent widget.
+	 */
+	DlgViewZfo(const struct isds_message *message, int zfoType,
+	    const QString &errMsg, QWidget *parent = Q_NULLPTR);
+
 public:
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] zfoFileName Path to the ZFO file.
-	 * @param[in] parent      Pointer to parent object.
-	 */
-	explicit DlgViewZfo(const QString &zfoFileName,
-	    QWidget *parent = Q_NULLPTR);
-
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] zfoData Raw ZFO data.
-	 * @param[in] parent      Pointer to parent object.
-	 */
-	explicit DlgViewZfo(const QByteArray &zfoData,
-	    QWidget *parent = Q_NULLPTR);
-
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgViewZfo(void);
 
-	/*
-	 * TODO -- Signature checking.
+	/*!
+	 * @brief View content of ZFO file.
+	 *
+	 * @param[in] zfoFileName Name of ZFO file.
+	 * @param[in] parent Parent widget.
 	 */
+	static
+	void view(const QString &zfoFileName, QWidget *parent = Q_NULLPTR);
+
+	/*!
+	 * @brief View content of ZFO.
+	 *
+	 * @param[in] zfoData ZFO content.
+	 * @param[in] parent Parent widget.
+	 */
+	static
+	void view(const QByteArray &zfoData, QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -95,16 +106,26 @@ private:
 	/*!
 	 * @brief Loads ZFO data.
 	 *
-	 * @param[in] zfoData Raw ZFO data.
+	 * @param[in]  zfoData Raw ZFO data.
+	 * @param[out] message Newly allocated message.
+	 * @param[out] zfoType Detected ZFO file type.
+	 * @return True on success, false on failure.
 	 */
-	void parseZfoData(const QByteArray &zfoData);
+	static
+	bool parseZfoData(const QByteArray &zfoData,
+	    struct isds_message **message, int *zfoType);
 
 	/*!
 	 * @brief Loads ZFO file.
 	 *
-	 * @param[in] zfoFileName Path to the ZFO file.
+	 * @param[in]  zfoFileName Path to the ZFO file.
+	 * @param[out] message Newly allocated message.
+	 * @param[out] zfoType Detected ZFO file type.
+	 * @return True on success, false on failure.
 	 */
-	void parseZfoFile(const QString &zfoFileName);
+	static
+	bool parseZfoFile(const QString &zfoFileName,
+	    struct isds_message **message, int *zfoType);
 
 	/*!
 	 * @brief Performs dialogue set-up after the message has been loaded.
@@ -164,7 +185,9 @@ private:
 	bool signatureFooterDescription(QString &html, const void *msgDER,
 	    size_t msgSize, const void *tstDER, size_t tstSize);
 
-	struct isds_message *m_message; /*!< ISDS message pointer copy. */
+	Ui::DlgViewZfo *m_ui; /*!< UI generated from UI file. */
+
+	const struct isds_message *m_message; /*!< ISDS message pointer copy. */
 	/*
 	 * (char *) m_message->raw
 	 *     m_message->raw_length
