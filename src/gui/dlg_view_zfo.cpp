@@ -40,10 +40,12 @@
 #include "src/views/table_home_end_filter.h"
 #include "ui_dlg_view_zfo.h"
 
-DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
+DlgViewZfo::DlgViewZfo(const struct isds_message *message, int zfoType,
+    const QString &errMsg, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgViewZfo),
-    m_message(NULL),
+    m_message(message),
+    m_zfoType(zfoType),
     m_attachmentModel(this)
 {
 	m_ui->setupUi(this);
@@ -51,44 +53,12 @@ DlgViewZfo::DlgViewZfo(const QString &zfoFileName, QWidget *parent)
 	/* Set default line height for table views/widgets. */
 	m_ui->attachmentTable->setNarrowedLineHeight();
 
-	/* Load message ZFO. */
-	parseZfoFile(zfoFileName);
-
 	if (NULL == m_message) {
 		/* Just show error message. */
 		m_ui->attachmentTable->hide();
 		m_ui->envelopeTextEdit->setHtml(
 		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
-		    tr("Cannot parse the content of file '%1'.")
-		        .arg(zfoFileName));
-		m_ui->envelopeTextEdit->setReadOnly(true);
-		m_ui->signaturePushButton->setEnabled(false);
-		return;
-	}
-
-	setUpDialogue();
-}
-
-DlgViewZfo::DlgViewZfo(const QByteArray &zfoData, QWidget *parent)
-    : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgViewZfo),
-    m_message(NULL),
-    m_attachmentModel(this)
-{
-	m_ui->setupUi(this);
-
-	/* Set default line height for table views/widgets. */
-	m_ui->attachmentTable->setNarrowedLineHeight();
-
-	/* Load raw message. */
-	parseZfoData(zfoData);
-
-	if (NULL == m_message) {
-		/* Just show error message. */
-		m_ui->attachmentTable->hide();
-		m_ui->envelopeTextEdit->setHtml(
-		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
-		    tr("Cannot parse the content of message."));
+		    errMsg);
 		m_ui->envelopeTextEdit->setReadOnly(true);
 		m_ui->signaturePushButton->setEnabled(false);
 		return;
@@ -99,10 +69,47 @@ DlgViewZfo::DlgViewZfo(const QByteArray &zfoData, QWidget *parent)
 
 DlgViewZfo::~DlgViewZfo(void)
 {
-	if (NULL != m_message) {
-		isds_message_free(&m_message);
-	}
 	delete m_ui;
+}
+
+void DlgViewZfo::view(const QString &zfoFileName, QWidget *parent)
+{
+	if (Q_UNLIKELY(zfoFileName.isEmpty())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	struct isds_message *message = NULL;
+	int zfoType;
+
+	/* Load message ZFO. */
+	parseZfoFile(zfoFileName, &message, &zfoType);
+
+	DlgViewZfo dlg(message, zfoType,
+	    tr("Cannot parse the content of file '%1'.").arg(zfoFileName),
+	    parent);
+	dlg.exec();
+
+	if (NULL != message) {
+		isds_message_free(&message);
+	}
+}
+
+void DlgViewZfo::view(const QByteArray &zfoData, QWidget *parent)
+{
+	struct isds_message *message = NULL;
+	int zfoType;
+
+	/* Load raw message. */
+	parseZfoData(zfoData, &message, &zfoType);
+
+	DlgViewZfo dlg(message, zfoType,
+	    tr("Cannot parse the content of message."), parent);
+	dlg.exec();
+
+	if (NULL != message) {
+		isds_message_free(&message);
+	}
 }
 
 void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
@@ -175,8 +182,16 @@ void DlgViewZfo::showSignatureDetailsDialog(void)
 	    m_message->envelope->timestamp_length, this);
 }
 
-void DlgViewZfo::parseZfoData(const QByteArray &zfoData)
+bool DlgViewZfo::parseZfoData(const QByteArray &zfoData,
+    struct isds_message **message, int *zfoType)
 {
+	bool success = false;
+
+	if (Q_UNLIKELY((NULL == message) || (Q_NULLPTR == zfoType))) {
+		Q_ASSERT(0);
+		return false;
+	}
+
 	/* Logging purposes. */
 	struct isds_ctx *dummy_session = isds_ctx_create();
 	if (NULL == dummy_session) {
@@ -184,50 +199,42 @@ void DlgViewZfo::parseZfoData(const QByteArray &zfoData)
 		goto fail;
 	}
 
-	m_zfoType = Imports::IMPORT_MESSAGE;
-	Q_ASSERT(NULL == m_message);
-	m_message = loadZfoData(dummy_session, zfoData, m_zfoType);
-	if (NULL == m_message) {
-		m_zfoType = Imports::IMPORT_DELIVERY;
-		m_message = loadZfoData(dummy_session, zfoData, m_zfoType);
-		if (NULL == m_message) {
+	*zfoType = Imports::IMPORT_MESSAGE;
+	Q_ASSERT(NULL == *message);
+	*message = loadZfoData(dummy_session, zfoData, *zfoType);
+	if (NULL == *message) {
+		*zfoType = Imports::IMPORT_DELIVERY;
+		*message = loadZfoData(dummy_session, zfoData, *zfoType);
+		if (NULL == *message) {
 			logError("%s\n", "Cannot parse message data.");
 			goto fail;
 		}
 	}
 
+	success = true;
+
 fail:
 	if (NULL != dummy_session) {
 		isds_ctx_free(&dummy_session);
 	}
+	return success;
 }
 
-void DlgViewZfo::parseZfoFile(const QString &zfoFileName)
+bool DlgViewZfo::parseZfoFile(const QString &zfoFileName,
+    struct isds_message **message, int *zfoType)
 {
-	/* Logging purposes. */
-	struct isds_ctx *dummy_session = isds_ctx_create();
-	if (NULL == dummy_session) {
-		logError("%s\n", "Cannot create dummy ISDS session.");
-		goto fail;
+	QFile file(zfoFileName);
+
+	if (!file.open(QIODevice::ReadOnly)) {
+		logErrorNL("Cannot open file '%s'.",
+		    zfoFileName.toUtf8().constData());
+		return false;
 	}
 
-	m_zfoType = Imports::IMPORT_MESSAGE;
-	Q_ASSERT(NULL == m_message);
-	m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
-	if (NULL == m_message) {
-		m_zfoType = Imports::IMPORT_DELIVERY;
-		m_message = loadZfoFile(dummy_session, zfoFileName, m_zfoType);
-		if (NULL == m_message) {
-			logError("Cannot parse file '%s'.\n",
-			    zfoFileName.toUtf8().constData());
-			goto fail;
-		}
-	}
+	QByteArray zfoContent(file.readAll());
+	file.close();
 
-fail:
-	if (NULL != dummy_session) {
-		isds_ctx_free(&dummy_session);
-	}
+	return parseZfoData(zfoContent, message, zfoType);
 }
 
 void DlgViewZfo::setUpDialogue(void)

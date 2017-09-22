@@ -1513,9 +1513,7 @@ void MainWindow::viewSelectedMessage(void)
 	}
 
 	/* Generate dialog showing message content. */
-	QDialog *dlgViewZfo = new DlgViewZfo(msgRaw, this);
-	dlgViewZfo->exec();
-	dlgViewZfo->deleteLater();
+	DlgViewZfo::view(msgRaw, this);
 }
 
 /* ========================================================================= */
@@ -5503,9 +5501,7 @@ void MainWindow::showViewMessageFromZFODialog(void)
 	    QFileInfo(fileName).absoluteDir().absolutePath();
 
 	/* Generate dialog showing message content. */
-	QDialog *dlgViewZfo = new DlgViewZfo(fileName, this);
-	dlgViewZfo->exec();
-	dlgViewZfo->deleteLater();
+	DlgViewZfo::view(fileName, this);
 }
 
 void MainWindow::showExportCorrespondenceOverviewDialog(void)

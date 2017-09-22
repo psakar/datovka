@@ -66,10 +66,7 @@ int showZfo(const QString &fileName)
 		return -1;
 	}
 
-	QDialog *viewDialog = new DlgViewZfo(fileName, Q_NULLPTR);
-	viewDialog->exec();
-
-	delete viewDialog;
+	DlgViewZfo::view(fileName, Q_NULLPTR);
 
 	return 0;
 }
