@@ -23,7 +23,6 @@
 
 #include <QDateTime>
 #include <QMenu>
-#include <QMessageBox>
 #include <QTimeZone>
 
 #include "src/crypto/crypto_funcs.h"
