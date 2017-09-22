@@ -22,6 +22,7 @@
  */
 
 #include <QDateTime>
+#include <QDir>
 #include <QMenu>
 #include <QTimeZone>
 
@@ -85,7 +86,8 @@ void DlgViewZfo::view(const QString &zfoFileName, QWidget *parent)
 	parseZfoFile(zfoFileName, &message, &zfoType);
 
 	DlgViewZfo dlg(message, zfoType,
-	    tr("Cannot parse the content of file '%1'.").arg(zfoFileName),
+	    tr("Cannot parse the content of file '%1'.")
+	        .arg(QDir::toNativeSeparators(zfoFileName)),
 	    parent);
 	dlg.exec();
 
