@@ -33,6 +33,7 @@
 #include "src/cli/cli_parser.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_threads.h"
+#include "src/crypto/crypto_version.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/initialisation.h"
@@ -142,6 +143,11 @@ int main(int argc, char *argv[])
 
 	/* Create configuration file is file is missing. */
 	GlobPreferences::ensureConfPresence();
+
+	if (0 != crypto_compiled_lib_ver_check()) {
+		logErrorNL("%s", "Cryptographic library mismatch.");
+		return EXIT_FAILURE;
+	}
 
 	if (0 != crypto_init()) {
 		logError("%s\n", "Cannot load cryptographic back-end.");
