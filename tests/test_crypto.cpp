@@ -26,6 +26,7 @@
 
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/crypto/crypto_version.h"
 #include "src/log/log.h"
 #include "tests/helper.h"
 #include "tests/test_crypto.h"
@@ -99,6 +100,8 @@ private slots:
 	void rawTstVerify(void);
 
 	void p12ToPem(void);
+
+	void cryptoLibVerCompatible(void);
 
 private:
 	void verifySignature(void);
@@ -327,6 +330,63 @@ void TestCrypto::p12ToPem(void)
 //	fprintf(stderr, "XXX %s\n", pem);
 
 	free(pem); pem = NULL;
+}
+
+void TestCrypto::cryptoLibVerCompatible(void)
+{
+	int ret;
+	const unsigned long v1_0_1a = 0x1000101fL;
+	const unsigned long v1_0_1b = 0x1000102fL;
+	const unsigned long v1_0_2a = 0x1000201fL;
+	const unsigned long v1_1_0a = 0x1010001fL;
+
+	ret = crypto_lib_ver_compatible(v1_0_1a, v1_0_1a);
+	QVERIFY2(ret == 0, "Expected compatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_1a, v1_0_1b);
+	QVERIFY2(ret == 1, "Expected incompatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_1a, v1_0_2a);
+	QVERIFY2(ret == 1, "Expected incompatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_1a, v1_1_0a);
+	QVERIFY2(ret == 1, "Expected incompatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_1b, v1_0_1a);
+	QVERIFY2(ret == 0, "Expected compatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_1b, v1_0_1b);
+	QVERIFY2(ret == 0, "Expected compatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_1b, v1_0_2a);
+	QVERIFY2(ret == 1, "Expected incompatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_1b, v1_1_0a);
+	QVERIFY2(ret == 1, "Expected incompatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_2a, v1_0_1a);
+	QVERIFY2(ret == 0, "Expected compatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_2a, v1_0_1b);
+	QVERIFY2(ret == 0, "Expected compatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_2a, v1_0_2a);
+	QVERIFY2(ret == 0, "Expected compatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_0_2a, v1_1_0a);
+	QVERIFY2(ret == 1, "Expected incompatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_1_0a, v1_0_1a);
+	QVERIFY2(ret == 1, "Expected incompatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_1_0a, v1_0_1b);
+	QVERIFY2(ret == 1, "Expected incompatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_1_0a, v1_0_2a);
+	QVERIFY2(ret == 1, "Expected incompatible outcome.");
+
+	ret = crypto_lib_ver_compatible(v1_1_0a, v1_1_0a);
+	QVERIFY2(ret == 0, "Expected compatible outcome.");
 }
 
 void TestCrypto::verifySignature(void)
