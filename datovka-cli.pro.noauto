@@ -73,6 +73,7 @@ SOURCES += \
 	src/common.cpp \
 	src/crypto/crypto.c \
 	src/crypto/crypto_threads.cpp \
+	src/crypto/crypto_version.cpp \
 	src/initialisation.cpp \
 	src/io/account_db.cpp \
 	src/io/db_tables.cpp \
@@ -120,6 +121,7 @@ HEADERS += \
 	src/crypto/crypto.h \
 	src/crypto/crypto_funcs.h \
 	src/crypto/crypto_threads.h \
+	src/crypto/crypto_version.h \
 	src/initialisation.h \
 	src/io/account_db.h \
 	src/io/db_tables.h \
