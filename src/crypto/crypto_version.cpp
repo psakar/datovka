@@ -132,7 +132,7 @@ int set_ssl_ver_nums(struct ssl_ver_nums *ver_nums, unsigned long ssl_ver)
  * @retval -1 If an error occurred.
  */
 static
-int version_compatible(const struct ssl_ver_nums *run_ver,
+int crypto_lib_ver_compatible(const struct ssl_ver_nums *run_ver,
     const struct ssl_ver_nums *cmp_ver)
 {
 	if (Q_UNLIKELY((run_ver == NULL) || (cmp_ver == NULL))) {
@@ -159,15 +159,33 @@ int version_compatible(const struct ssl_ver_nums *run_ver,
 
 int crypto_compiled_lib_ver_check(void)
 {
+	unsigned long qt_cmp_ssl_ver =
+	    QSslSocket::sslLibraryBuildVersionNumber();
 	unsigned long run_ssl_ver = _SSLeay();
 
-	logInfoNL("Using OpenSSL version 0x%x.", run_ssl_ver);
-	logInfoNL("Using OpenSSL version 0x%x.", appSslBuildVerNum);
-	logInfoNL("Using OpenSSL version 0x%x.", QSslSocket::sslLibraryBuildVersionNumber());
+	struct ssl_ver_nums qt_cmp_nums, app_cmp_nums, run_nums;
 
-	logInfoNL("%s", _SSLeay_version_str());
-	logInfoNL("%s", appSslBuildVerStr.toUtf8().constData());
-	logInfoNL("%s", QSslSocket::sslLibraryBuildVersionString().toUtf8().constData());
+	logInfoNL("Qt compile-time OpenSSL version 0x%x (%s).", qt_cmp_ssl_ver,
+	    QSslSocket::sslLibraryBuildVersionString().toUtf8().constData());
+	logInfoNL("Application compile-time OpenSSL version 0x%x (%s).",
+	    appSslBuildVerNum, appSslBuildVerStr.toUtf8().constData());
+	logInfoNL("Run-time OpenSSL version 0x%x (%s).",
+	    run_ssl_ver, _SSLeay_version_str());
 
-	return 0;
+	if (0 != set_ssl_ver_nums(&qt_cmp_nums, qt_cmp_ssl_ver)) {
+		return -1;
+	}
+	if (0 != set_ssl_ver_nums(&app_cmp_nums, appSslBuildVerNum)) {
+		return -1;
+	}
+	if (0 != set_ssl_ver_nums(&run_nums, run_ssl_ver)) {
+		return -1;
+	}
+
+	int ret = crypto_lib_ver_compatible(&run_nums, &qt_cmp_nums);
+	if (ret != 0) {
+		return ret;
+	}
+
+	return crypto_lib_ver_compatible(&run_nums, &app_cmp_nums);
 }

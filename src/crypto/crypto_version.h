@@ -32,8 +32,9 @@ extern "C" {
  * @brief Checks whether the version of the SSL library used at compile time
  *     matches the version of libssl (ssleay32.dll).
  *
- * @retval  0 If versions do match.
- * @retval -1 If versions do not match or when some errors occurred.
+ * @retval  1 If versions are expected to be incompatible.
+ * @retval  0 If versions are likely to be compatible.
+ * @retval -1 If an error occurred.
  */
 int crypto_compiled_lib_ver_check(void);
 
