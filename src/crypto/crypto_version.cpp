@@ -56,26 +56,6 @@
 
 #endif /* OPENSSL_VERSION_NUMBER < 0x10100000L */
 
-/*
- * The compatibility check is made on observations published on page:
- * https://abi-laboratory.pro/tracker/timeline/openssl/
- * We expect that the libraries are more or less compatible only if:
- * a) the major and minor version numbers match respectively,
- * and
- * b) the combination fix and patch numbers of the run-time library are
- *    higher than or equal to the combination of the respective number
- *    of the compile-time library.
- *
- * E.g.:
- *          compile-time   1.0.1a   1.0.1b   1.0.2a   1.1.0a
- * run-time              |        |        |        |
- * ----------------------+------------------------------------
- * 1.0.1a                |   ok   |   xx   |   xx   |   xx
- * 1.0.1b                |   ok   |   ok   |   xx   |   xx
- * 1.0.2a                |   ok   |   ok   |   ok   |   xx
- * 1.1.0a                |   xx   |   xx   |   xx   |   ok
- */
-
 /* Version of OpenSSL the application has been compiled against. */
 static
 const unsigned long appSslBuildVerNum = _SSLEAY_VERSION_NUMBER;
@@ -132,7 +112,7 @@ int set_ssl_ver_nums(struct ssl_ver_nums *ver_nums, unsigned long ssl_ver)
  * @retval -1 If an error occurred.
  */
 static
-int crypto_lib_ver_compatible(const struct ssl_ver_nums *run_ver,
+int lib_ver_compatible(const struct ssl_ver_nums *run_ver,
     const struct ssl_ver_nums *cmp_ver)
 {
 	if (Q_UNLIKELY((run_ver == NULL) || (cmp_ver == NULL))) {
@@ -157,6 +137,20 @@ int crypto_lib_ver_compatible(const struct ssl_ver_nums *run_ver,
 	return 0;
 }
 
+int crypto_lib_ver_compatible(unsigned long run_num, unsigned long cmp_num)
+{
+	struct ssl_ver_nums run_ver, cmp_ver;
+
+	if (Q_UNLIKELY(0 != set_ssl_ver_nums(&run_ver, run_num))) {
+		return -1;
+	}
+	if (Q_UNLIKELY(0 != set_ssl_ver_nums(&cmp_ver, cmp_num))) {
+		return -1;
+	}
+
+	return lib_ver_compatible(&run_ver, &cmp_ver);
+}
+
 int crypto_compiled_lib_ver_check(void)
 {
 	unsigned long qt_cmp_ssl_ver =
@@ -172,20 +166,20 @@ int crypto_compiled_lib_ver_check(void)
 	logInfoNL("Run-time OpenSSL version 0x%x (%s).",
 	    run_ssl_ver, _SSLeay_version_str());
 
-	if (0 != set_ssl_ver_nums(&qt_cmp_nums, qt_cmp_ssl_ver)) {
+	if (Q_UNLIKELY(0 != set_ssl_ver_nums(&qt_cmp_nums, qt_cmp_ssl_ver))) {
 		return -1;
 	}
-	if (0 != set_ssl_ver_nums(&app_cmp_nums, appSslBuildVerNum)) {
+	if (Q_UNLIKELY(0 != set_ssl_ver_nums(&app_cmp_nums, appSslBuildVerNum))) {
 		return -1;
 	}
-	if (0 != set_ssl_ver_nums(&run_nums, run_ssl_ver)) {
+	if (Q_UNLIKELY(0 != set_ssl_ver_nums(&run_nums, run_ssl_ver))) {
 		return -1;
 	}
 
-	int ret = crypto_lib_ver_compatible(&run_nums, &qt_cmp_nums);
+	int ret = lib_ver_compatible(&run_nums, &qt_cmp_nums);
 	if (ret != 0) {
 		return ret;
 	}
 
-	return crypto_lib_ver_compatible(&run_nums, &app_cmp_nums);
+	return lib_ver_compatible(&run_nums, &app_cmp_nums);
 }
