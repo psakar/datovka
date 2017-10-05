@@ -114,10 +114,10 @@ int set_ssl_ver_nums(struct ssl_ver_nums *ver_nums, unsigned long ssl_ver)
 
 	/* Ignore status number. */
 	ssl_ver = (ssl_ver >> 4);
-	ver_nums->patch = ssl_ver && 0x0ff; ssl_ver = (ssl_ver >> 8);
-	ver_nums->fix = ssl_ver && 0x0ff; ssl_ver = (ssl_ver >> 8);
-	ver_nums->minor = ssl_ver && 0x0ff; ssl_ver = (ssl_ver >> 8);
-	ver_nums->major = ssl_ver && 0x0ff;
+	ver_nums->patch = ssl_ver & 0x0ff; ssl_ver = (ssl_ver >> 8);
+	ver_nums->fix = ssl_ver & 0x0ff; ssl_ver = (ssl_ver >> 8);
+	ver_nums->minor = ssl_ver & 0x0ff; ssl_ver = (ssl_ver >> 8);
+	ver_nums->major = ssl_ver & 0x0ff;
 
 	return 0;
 }
