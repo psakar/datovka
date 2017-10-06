@@ -28,12 +28,46 @@
 extern "C" {
 #endif
 
+/*
+ * The compatibility check is made on observations published on page:
+ * https://abi-laboratory.pro/tracker/timeline/openssl/
+ * We expect that the libraries are more or less compatible only if:
+ * a) the major and minor version numbers match respectively,
+ * and
+ * b) the combination fix and patch numbers of the run-time library are
+ *    higher than or equal to the combination of the respective number
+ *    of the compile-time library.
+ *
+ * E.g.:
+ *          compile-time   1.0.1a   1.0.1b   1.0.2a   1.1.0a
+ * run-time              |        |        |        |
+ * ----------------------+------------------------------------
+ * 1.0.1a                |   ok   |   xx   |   xx   |   xx
+ * 1.0.1b                |   ok   |   ok   |   xx   |   xx
+ * 1.0.2a                |   ok   |   ok   |   ok   |   xx
+ * 1.1.0a                |   xx   |   xx   |   xx   |   ok
+ */
+
+/*!
+ * @brief Compares the versions for compatibility.
+ *
+ * @note The function is visible only because to make it available for testing.
+ *
+ * @param[in] run_num Run-time version number.
+ * @param[in] cmp_num Compile-time version number.
+ * @retval  1 If versions are expected to be incompatible.
+ * @retval  0 If versions are likely to be compatible.
+ * @retval -1 If an error occurred.
+ */
+int crypto_lib_ver_compatible(unsigned long run_num, unsigned long cmp_num);
+
 /*!
  * @brief Checks whether the version of the SSL library used at compile time
  *     matches the version of libssl (ssleay32.dll).
  *
- * @retval  0 If versions do match.
- * @retval -1 If versions do not match or when some errors occurred.
+ * @retval  1 If versions are expected to be incompatible.
+ * @retval  0 If versions are likely to be compatible.
+ * @retval -1 If an error occurred.
  */
 int crypto_compiled_lib_ver_check(void);
 

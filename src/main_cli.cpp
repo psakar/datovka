@@ -32,6 +32,7 @@
 #include "src/cli/cli_parser.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_threads.h"
+#include "src/crypto/crypto_version.h"
 #include "src/initialisation.h"
 #include "src/io/db_tables.h"
 #include "src/io/filesystem.h"
@@ -99,6 +100,24 @@ int main(int argc, char *argv[])
 
 	/* Create configuration file is file is missing. */
 	GlobPreferences::ensureConfPresence();
+
+	switch (crypto_compiled_lib_ver_check()) {
+	case 1:
+		logErrorNL("%s", "Cryptographic library mismatch.");
+#if defined(Q_OS_WIN)
+		/* Exit only on windows. */
+		return EXIT_FAILURE;
+#endif /* defined(Q_OS_WIN) */
+		break;
+	case 0:
+		break;
+	case -1:
+	default:
+		logErrorNL("%s",
+		    "Error checking the version of the cryptographic library.");
+		return EXIT_FAILURE;
+		break;
+	}
 
 	if (0 != crypto_init()) {
 		logError("%s\n", "Cannot load cryptographic back-end.");
