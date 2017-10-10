@@ -294,7 +294,7 @@ enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(
 {
 	isds_error status = IE_ERROR;
 
-	struct isds_ctx *session = globIsdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return SO_ERROR;

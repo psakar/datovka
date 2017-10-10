@@ -2980,7 +2980,7 @@ bool MainWindow::eraseMessage(const QString &userName,
 	enum MessageDirection msgDirect =
 	    messageDirection(currentAccountModelIndex(), MSG_RECEIVED);
 
-	if (delFromIsds && !globIsdsSessions.isConnectedToIsds(userName) &&
+	if (delFromIsds && !globIsdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		logErrorNL(
 		    "Couldn't connect to ISDS when erasing message '%" PRId64 "'.",
@@ -3116,7 +3116,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		}
 
 		/* Try connecting to ISDS, just to generate log-in dialogue. */
-		if (!globIsdsSessions.isConnectedToIsds(userName) &&
+		if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
 		    !connectToIsds(userName)) {
 			continue;
 		}
@@ -3178,7 +3178,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		ui->actionSync_all_accounts->setEnabled(wasEnabled);
 		ui->actionGet_messages->setEnabled(wasEnabled);
@@ -3240,7 +3240,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		return;
 	}
 
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return;
 	}
@@ -4735,7 +4735,7 @@ void MainWindow::changeAccountPassword(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return;
 	}
@@ -4860,7 +4860,7 @@ void MainWindow::findDatabox(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return;
 	}
@@ -5304,7 +5304,7 @@ int MainWindow::authenticateMessageFromZFO(void)
 		return TaskAuthenticateMessage::AUTH_CANCELLED;
 	}
 
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return TaskAuthenticateMessage::AUTH_ISDS_ERROR;
 	}
@@ -5415,7 +5415,7 @@ void MainWindow::verifySelectedMessage(void)
 		return;
 	}
 
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::critical(this, tr("Verification error"),
@@ -5552,7 +5552,7 @@ void MainWindow::showImportZFOActionDialog(void)
 		Q_ASSERT(!userName.isEmpty());
 
 		if ((!checkZfoOnServer) ||
-		    globIsdsSessions.isConnectedToIsds(userName) ||
+		    globIsdsSessionsPtr->isConnectedToIsds(userName) ||
 		    connectToIsds(userName)) {
 			MessageDbSet *dbSet = accountDbSet(userName);
 			if (Q_NULLPTR == dbSet) {
@@ -5723,7 +5723,7 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 		return false;
 	}
 
-	if (!globIsdsSessions.isConnectedToIsds(userName) &&
+	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return false;
 	}
@@ -6595,7 +6595,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 {
 	AcntSettings settingsCopy(globAccounts[userName]);
 
-	if (!logInGUI(globIsdsSessions, settingsCopy)) {
+	if (!logInGUI(*globIsdsSessionsPtr, settingsCopy)) {
 		return false;
 	}
 
@@ -6663,7 +6663,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 	}
 
 	/* Set longer time-out. */
-	globIsdsSessions.setSessionTimeout(userName,
+	globIsdsSessionsPtr->setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms);
 
 	return true;
@@ -6678,7 +6678,7 @@ bool MainWindow::firstConnectToIsds(AcntSettings &accountInfo)
 {
 	debugFuncCall();
 
-	if (!logInGUI(globIsdsSessions, accountInfo)) {
+	if (!logInGUI(*globIsdsSessionsPtr, accountInfo)) {
 		return false;
 	}
 
@@ -6775,7 +6775,7 @@ void MainWindow::getAccountUserDataboxInfo(AcntSettings accountInfo)
 {
 	debugSlotCall();
 
-	if (!globIsdsSessions.isConnectedToIsds(accountInfo.userName())) {
+	if (!globIsdsSessionsPtr->isConnectedToIsds(accountInfo.userName())) {
 		if (!firstConnectToIsds(accountInfo)) {
 			QString msgBoxTitle = tr("New account error") +
 			    ": " + accountInfo.accountName();

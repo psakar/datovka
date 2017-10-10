@@ -32,7 +32,7 @@
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
 
-IsdsSessions globIsdsSessions;
+IsdsSessions *globIsdsSessionsPtr = Q_NULLPTR;
 
 /*!
  * @brief Returns logging facility name.

@@ -37,11 +37,10 @@
 
 #include "src/settings/account.h"
 
-/* TODO -- Check whether session is active. */
-
-/* Global ISDS context container instance. */
-class IsdsSessions;
-extern IsdsSessions globIsdsSessions;
+/*!
+ * @brief Global container holding libisds sessions.
+ */
+extern class IsdsSessions *globIsdsSessionsPtr;
 
 /*!
  * @brief Container holding context structures of libisds.

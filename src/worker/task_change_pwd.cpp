@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -135,7 +135,7 @@ int TaskChangePwd::changePassword(const QString &userName,
 
 	Q_ASSERT(!userName.isEmpty());
 
-	struct isds_ctx *session = globIsdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return IE_ERROR;
