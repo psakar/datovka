@@ -33,6 +33,7 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/initialisation.h"
 #include "src/io/account_db.h"
+#include "src/io/isds_sessions.h"
 #include "src/io/file_downloader.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
@@ -221,6 +222,12 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 	 * TODO -- Solve the problem of this globally accessible structures.
 	 */
 
+	globIsdsSessionsPtr = new (std::nothrow) IsdsSessions;
+	if (Q_NULLPTR == globIsdsSessionsPtr) {
+		logErrorNL("%s", "Cannot allocate session container.");
+		goto fail;
+	}
+
 	globAccountDbPtr = new (std::nothrow) AccountDb("accountDb");
 	if (Q_NULLPTR == globAccountDbPtr) {
 		logErrorNL("%s", "Cannot allocate account db.");
@@ -291,5 +298,9 @@ void deallocateGlobalObjects(void)
 	if (Q_NULLPTR != globAccountDbPtr) {
 		delete globAccountDbPtr;
 		globAccountDbPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != globIsdsSessionsPtr) {
+		delete globIsdsSessionsPtr;
+		globIsdsSessionsPtr = Q_NULLPTR;
 	}
 }

@@ -35,44 +35,58 @@
 #include <QMap>
 #include <QString>
 
-#include "src/settings/accounts.h"
-
-/* TODO -- Check whether session is active. */
-
-/* Global ISDS context container instance. */
-class IsdsSessions;
-extern IsdsSessions globIsdsSessions;
+#include "src/settings/account.h"
 
 /*!
- * @brief Holds the ISDS context structures.
+ * @brief Global container holding libisds sessions.
+ */
+extern class IsdsSessions *globIsdsSessionsPtr;
+
+/*!
+ * @brief Container holding context structures of libisds.
  */
 class IsdsSessions {
 
 public:
+	/*!
+	 * @brief Constructor.
+	 */
 	IsdsSessions(void);
+
+	/*!
+	 * @brief Destructor.
+	 */
 	~IsdsSessions(void);
 
 	/*!
 	 * @brief Returns true is active session exists.
+	 *
+	 * @param[in] userName Username identifying the account.
 	 */
 	bool holdsSession(const QString &userName) const;
 
 	/*!
 	 * @brief Returns associated session.
+	 *
+	 * @param[in] userName Username identifying the account.
 	 */
 	struct isds_ctx *session(const QString &userName) const;
 
 	/*!
-	 * @brief Ping of ISDS. Test if connection is active.
+	 * @brief Ping ISDS. Test whether connection is active.
+	 *
+	 * @param[in] userName Username identifying the account.
 	 */
 	bool isConnectedToIsds(const QString &userName);
 
 	/*!
 	 * @brief Creates new session.
 	 *
+	 * @param[in] userName Username identifying the newly created account.
+	 * @param[in] connectionTimeoutMs Connection timeout in milliseconds.
 	 * @return Pointer to new session or NULL on failure.
 	 */
-	struct isds_ctx * createCleanSession(const QString &userName,
+	struct isds_ctx *createCleanSession(const QString &userName,
 	    unsigned int connectionTimeoutMs);
 
 	/*!
@@ -81,11 +95,10 @@ public:
 	 *
 	 * @return True on success.
 	 */
-	bool setSessionTimeout(const QString &userName,
-	    unsigned int timeoutMs);
+	bool setSessionTimeout(const QString &userName, unsigned int timeoutMs);
 
 private:
-	QMap<QString, struct isds_ctx *> m_sessions;
+	QMap<QString, struct isds_ctx *> m_sessions; /*!< Holds sessions. */
 };
 
 /*!

@@ -1037,7 +1037,7 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 		}
 
 		struct isds_ctx *session =
-		    globIsdsSessions.session(map["username"].toString());
+		    globIsdsSessionsPtr->session(map["username"].toString());
 		if (NULL == session) {
 			Q_ASSERT(0);
 			ret = CLI_ERROR;
@@ -1688,8 +1688,8 @@ int runService(const QString &lParam,
 			otp = loginMap["otpcode"].toString();
 		}
 
-		if (!globIsdsSessions.isConnectedToIsds(username) &&
-		    !connectToIsdsCLI(globIsdsSessions,
+		if (!globIsdsSessionsPtr->isConnectedToIsds(username) &&
+		    !connectToIsdsCLI(*globIsdsSessionsPtr,
 		        globAccounts[username], pwd, otp)) {
 			errmsg = "Missing session for " + username +
 			   " or connection fails";

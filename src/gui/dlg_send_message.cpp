@@ -392,7 +392,7 @@ bool isLoggedIn(QTimer &keepAliveTimer, MainWindow *const mw,
 	keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
 	/* Check the presence of struct isds_ctx . */
-	if (NULL == globIsdsSessions.session(userName)) {
+	if (NULL == globIsdsSessionsPtr->session(userName)) {
 		logErrorNL("%s", "Missing ISDS session.");
 		loggedIn = false;
 	}

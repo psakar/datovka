@@ -117,7 +117,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadDeliveryInfo(
 
 	isds_error status;
 
-	struct isds_ctx *session = globIsdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;
@@ -184,7 +184,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 
 	isds_error status;
 
-	struct isds_ctx *session = globIsdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;
@@ -199,12 +199,12 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		/* sent or received message? */
 		if (MSG_RECEIVED == msgDirect) {
 			status = isds_get_signed_received_message(
-			    globIsdsSessions.session(userName),
+			    globIsdsSessionsPtr->session(userName),
 			    QString::number(mId.dmId).toUtf8().constData(),
 			    &message);
 		} else {
 			status = isds_get_signed_sent_message(
-			    globIsdsSessions.session(userName),
+			    globIsdsSessionsPtr->session(userName),
 			    QString::number(mId.dmId).toUtf8().constData(),
 			    &message);
 		}
@@ -212,8 +212,8 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		Q_ASSERT(0); /* Only signed messages can be downloaded. */
 		return DM_ERR;
 		/*
-		status = isds_get_received_message(globIsdsSessions.session(
-		    userName),
+		status = isds_get_received_message(
+		    globIsdsSessionsPtr->.session(userName),
 		    QString::number(mId.dmId).toUtf8().constData(),
 		    &message);
 		*/
@@ -320,7 +320,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
 	char * raw_sender_type = NULL;
 	char * sender_name = NULL;
 
-	struct isds_ctx *session = globIsdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;
@@ -358,7 +358,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::markMessageAsDownloaded(
 {
 	debugFuncCall();
 
-	struct isds_ctx *session = globIsdsSessions.session(userName);
+	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;
