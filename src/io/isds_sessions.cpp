@@ -23,9 +23,7 @@
 
 #include <cstdlib> /* malloc(3) */
 #include <cstring> /* memset(3) */
-#include <QDebug>
 #include <QFile>
-#include <QObject>
 
 #include "src/common.h"
 #include "src/io/imports.h"

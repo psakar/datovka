@@ -35,7 +35,7 @@
 #include <QMap>
 #include <QString>
 
-#include "src/settings/accounts.h"
+#include "src/settings/account.h"
 
 /* TODO -- Check whether session is active. */
 
