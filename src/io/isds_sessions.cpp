@@ -34,13 +34,14 @@
 
 IsdsSessions globIsdsSessions;
 
-/* ========================================================================= */
 /*!
- * @brief Logging facility name.
+ * @brief Returns logging facility name.
+ *
+ * @param[in] facility Logging facility identifier.
+ * @return String with facility name.
  */
 static
-const char * logFacilityName(isds_log_facility facility)
-/* ========================================================================= */
+const char *logFacilityName(isds_log_facility facility)
 {
 	const char *str = "libisds unknown";
 
@@ -73,15 +74,18 @@ const char * logFacilityName(isds_log_facility facility)
 	return str;
 }
 
-
-/* ========================================================================= */
 /*!
  * @brief Logging callback used in libisds.
+ *
+ * @param[in] facility Logging facility identifier.
+ * @param[in] level Urgency level.
+ * @param[in] message Null-terminated string.
+ * @param[in] length Passed string length without terminating null character.
+ * @param[in] data Pointer to data passed on every invocation of the callback.
  */
 static
 void logCallback(isds_log_facility facility, isds_log_level level,
     const char *message, int length, void *data)
-/* ========================================================================= */
 {
 	Q_UNUSED(data);
 	Q_UNUSED(length);
@@ -108,10 +112,7 @@ void logCallback(isds_log_facility facility, isds_log_level level,
 	}
 }
 
-
-/* ========================================================================= */
 IsdsSessions::IsdsSessions(void)
-/* ========================================================================= */
     : m_sessions()
 {
 	isds_error status;
@@ -139,50 +140,43 @@ IsdsSessions::IsdsSessions(void)
 #endif /* !defined(Q_OS_WIN) */
 }
 
-
-/* ========================================================================= */
 IsdsSessions::~IsdsSessions(void)
-/* ========================================================================= */
 {
 	isds_error status;
 	struct isds_ctx *isdsSession = NULL;
 
 	/* Free all contexts. */
 	foreach (isdsSession, m_sessions) {
-		Q_ASSERT(0 != isdsSession);
+		Q_ASSERT(NULL != isdsSession);
 
 		status = isds_logout(isdsSession);
 		if (IE_SUCCESS != status) {
-			logWarning("%s\n", "Error in ISDS logout procedure.");
+			logWarningNL("%s", "Error in ISDS logout procedure.");
 		}
 
 		status = isds_ctx_free(&isdsSession);
 		if (IE_SUCCESS != status) {
-			logWarning("%s\n", "Error freeing ISDS session.");
+			logWarningNL("%s", "Error freeing ISDS session.");
 		}
 	}
 
 	status = isds_cleanup();
 	if (IE_SUCCESS != status) {
-		logWarning("%s\n", "Unsuccessful ISDS clean-up.");
+		logWarningNL("%s", "Unsuccessful ISDS clean-up.");
 	}
 }
 
-
-/* ========================================================================= */
 bool IsdsSessions::holdsSession(const QString &userName) const
-/* ========================================================================= */
 {
-	return 0 != m_sessions.value(userName, 0);
+	return NULL != m_sessions.value(userName, NULL);
 }
 
+struct isds_ctx * IsdsSessions::session(const QString &userName) const
+{
+	return m_sessions.value(userName, NULL);
+}
 
-/* ========================================================================= */
-/*
- * Is connect to databox given by account index
- */
 bool IsdsSessions::isConnectedToIsds(const QString &userName)
-/* ========================================================================= */
 {
 	isds_error ping_status;
 
@@ -194,94 +188,64 @@ bool IsdsSessions::isConnectedToIsds(const QString &userName)
 	ping_status = isds_ping(session(userName));
 	setSessionTimeout(userName, globPref.isds_download_timeout_ms);
 
-	if (IE_SUCCESS == ping_status) {
-		return true;
-	}
-	return false;
+	return IE_SUCCESS == ping_status;
 }
 
-
-/* ========================================================================= */
-/*
- * Creates new session.
- */
 struct isds_ctx *IsdsSessions::createCleanSession(const QString &userName,
     unsigned int connectionTimeoutMs)
-/* ========================================================================= */
 {
 	isds_error status;
 	struct isds_ctx *isds_session = NULL;
 
 	/* User name should not exist. */
-	Q_ASSERT(0 == m_sessions.value(userName, 0));
+	Q_ASSERT(!holdsSession(userName));
 
 	isds_session = isds_ctx_create();
 	if (NULL == isds_session) {
-		logError("Error creating ISDS session for user '%s'.\n",
+		logErrorNL("Error creating ISDS session for user '%s'.",
 		    userName.toUtf8().constData());
 		goto fail;
 	}
 
 	status = isds_set_timeout(isds_session, connectionTimeoutMs);
 	if (IE_SUCCESS != status) {
-		logError("Error setting time-out for user '%s'.\n",
+		logErrorNL("Error setting time-out for user '%s'.",
 		    userName.toUtf8().constData());
 		goto fail;
 	}
 
 	m_sessions.insert(userName, isds_session);
-
 	return isds_session;
+
 fail:
 	if (NULL != isds_session) {
 		status = isds_ctx_free(&isds_session);
 		if (IE_SUCCESS != status) {
-			logWarning(
-			    "Error freeing ISDS session for user '%s'.\n",
+			logWarningNL(
+			    "Error freeing ISDS session for user '%s'.",
 			    userName.toUtf8().constData());
 		}
 	}
-	return 0;
+	return NULL;
 }
 
-
-/* ========================================================================= */
-/*
- * Set time-out in milliseconds to session associated to
- *     user name.
- */
 bool IsdsSessions::setSessionTimeout(const QString &userName,
     unsigned int timeoutMs)
-/* ========================================================================= */
 {
-	struct isds_ctx *isds_session;
-	isds_error status;
-
-	isds_session = m_sessions.value(userName, NULL);
+	struct isds_ctx *isds_session = m_sessions.value(userName, NULL);
 	if (NULL == isds_session) {
 		Q_ASSERT(0);
 		return false;
 	}
 
-	status = isds_set_timeout(isds_session, timeoutMs);
+	isds_error status = isds_set_timeout(isds_session, timeoutMs);
 	if (IE_SUCCESS != status) {
-		logError("Error setting time-out for user '%s'.\n",
+		logErrorNL("Error setting time-out for user '%s'.",
 		    userName.toUtf8().constData());
 		return false;
 	}
 
 	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Returns associated session.
- */
-struct isds_ctx * IsdsSessions::session(const QString &userName) const
-/* ========================================================================= */
-{
-	return m_sessions.value(userName, NULL);
 }
 
 
