@@ -233,8 +233,11 @@ SOURCES += \
     src/cli/cli_parser.cpp \
     src/common.cpp \
     src/crypto/crypto.c \
+    src/crypto/crypto_pin.c \
+    src/crypto/crypto_pwd.c \
     src/crypto/crypto_threads.cpp \
     src/crypto/crypto_version.cpp \
+    src/crypto/crypto_wrapped.cpp \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
@@ -356,8 +359,11 @@ HEADERS += \
     src/common.h \
     src/crypto/crypto.h \
     src/crypto/crypto_funcs.h \
+    src/crypto/crypto_pin.h \
+    src/crypto/crypto_pwd.h \
     src/crypto/crypto_threads.h \
     src/crypto/crypto_version.h \
+    src/crypto/crypto_wrapped.h \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
