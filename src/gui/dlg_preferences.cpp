@@ -26,6 +26,7 @@
 
 #include "src/common.h"
 #include "src/dimensions/dimensions.h"
+#include "src/gui/dlg_pin_setup.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/localisation/localisation.h"
 #include "ui_dlg_preferences.h"
@@ -71,7 +72,7 @@ bool DlgPreferences::modify(GlobPreferences &prefs, PinSettings &pinSett,
 {
 	DlgPreferences dlg(prefs, pinSett, parent);
 	if (QDialog::Accepted == dlg.exec()) {
-		dlg.saveSettings(prefs);
+		dlg.saveSettings(prefs, pinSett);
 		return true;
 	} else {
 		return false;
@@ -109,14 +110,35 @@ void DlgPreferences::setAddFilePath(void)
 
 void DlgPreferences::setPin(void)
 {
+	if (Q_UNLIKELY(m_pinSett.pinConfigured())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	DlgPinSetup::change(m_pinSett, this);
+	activatePinButtons(m_pinSett);
 }
 
 void DlgPreferences::changePin(void)
 {
+	if (Q_UNLIKELY(!m_pinSett.pinConfigured())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	DlgPinSetup::change(m_pinSett, this);
+	activatePinButtons(m_pinSett);
 }
 
 void DlgPreferences::clearPin(void)
 {
+	if (Q_UNLIKELY(!m_pinSett.pinConfigured())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	DlgPinSetup::erase(m_pinSett, this);
+	activatePinButtons(m_pinSett);
 }
 
 /*!
@@ -159,7 +181,8 @@ int settingsLangtoIndex(const QString &lang)
 	}
 }
 
-void DlgPreferences::saveSettings(GlobPreferences &prefs) const
+void DlgPreferences::saveSettings(GlobPreferences &prefs,
+    PinSettings &pinSett) const
 {
 	/* downloading */
 	prefs.download_on_background = m_ui->downloadOnBackground->isChecked();
@@ -186,6 +209,7 @@ void DlgPreferences::saveSettings(GlobPreferences &prefs) const
 	prefs.check_crl = m_ui->checkCrl->isChecked();
 	prefs.timestamp_expir_before_days =
 	    m_ui->timestampExpirSpinBox->value();
+	pinSett = m_pinSett;
 
 	/* navigation */
 	if (m_ui->afterStartSelectNewest->isChecked()) {

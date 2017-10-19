@@ -107,8 +107,9 @@ private:
 	 * @brief Save dialogue content to settings.
 	 *
 	 * @param[out] prefs Preferences to be modified.
+	 * @param[out] pinSett PIN settings to be modified.
 	 */
-	void saveSettings(GlobPreferences &prefs) const;
+	void saveSettings(GlobPreferences &prefs, PinSettings &pinSett) const;
 
 	/*!
 	 * @brief Initialises the dialogue according to settings.

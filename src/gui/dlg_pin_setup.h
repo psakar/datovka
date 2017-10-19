@@ -40,11 +40,21 @@ class DlgPinSetup : public QDialog {
 
 private:
 	/*!
+	 * @brief PIN setting operation.
+	 */
+	enum Operation {
+		SET, /*!< Set new value if no previous value is set. */
+		MODIFY, /*!< Modify value if previous value is set. */
+		ERASE /*!< Clear previously set value. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] op Operation to be performed.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgPinSetup(QWidget *parent = Q_NULLPTR);
+	explicit DlgPinSetup(enum Operation op, QWidget *parent = Q_NULLPTR);
 
 public:
 	/*!
@@ -64,7 +74,7 @@ public:
 	bool change(PinSettings &sett, QWidget *parent = Q_NULLPTR);
 
 	/*!
-	 * @brief Clear the pin value.
+	 * @brief Clear the PIN value.
 	 *
 	 * @param[in,out] sett PIN settings to be modified.
 	 * @param[in]     parent Parent widget.
@@ -75,6 +85,19 @@ public:
 	bool erase(PinSettings &sett, QWidget *parent = Q_NULLPTR);
 
 private:
+	/*!
+	 * @brief Update the PIN value.
+	 *
+	 * @param[in]     op Type of operation to be performed.
+	 * @param[in,out] sett PIN settings to be modified.
+	 * @param[in]     parent Parent widget.
+	 * @return True when dialogue has been accepted and settings data
+	 *     have been updated.
+	 */
+	static
+	bool update(enum Operation op, PinSettings &sett,
+	    QWidget *parent = Q_NULLPTR);
+
 	Ui::DlgPinSetup *m_ui; /*!< UI generated from UI file. */
 };
 

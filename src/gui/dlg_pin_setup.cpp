@@ -21,14 +21,23 @@
  * the two.
  */
 
+#include <QMessageBox>
+
 #include "src/gui/dlg_pin_setup.h"
 #include "ui_dlg_pin_setup.h"
 
-DlgPinSetup::DlgPinSetup(QWidget *parent)
+DlgPinSetup::DlgPinSetup(enum Operation op, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgPinSetup)
 {
 	m_ui->setupUi(this);
+
+	m_ui->currentPinLabel->setEnabled(op != SET);
+	m_ui->currentPinLine->setEnabled(op != SET);
+	m_ui->newPinLabel->setEnabled(op != ERASE);
+	m_ui->newPinLine->setEnabled(op != ERASE);
+	m_ui->newPinLabel2->setEnabled(op != ERASE);
+	m_ui->newPinLine2->setEnabled(op != ERASE);
 }
 
 DlgPinSetup::~DlgPinSetup(void)
@@ -38,16 +47,56 @@ DlgPinSetup::~DlgPinSetup(void)
 
 bool DlgPinSetup::change(PinSettings &sett, QWidget *parent)
 {
-	DlgPinSetup dlg(parent);
-	if (QDialog::Accepted == dlg.exec()) {
-//
-		return true;
-	} else {
-		return false;
-	}
+	return update(!sett.pinConfigured() ? SET : MODIFY, sett, parent);
 }
 
 bool DlgPinSetup::erase(PinSettings &sett, QWidget *parent)
 {
-	return false;
+	return update(ERASE, sett, parent);
+}
+
+bool DlgPinSetup::update(enum Operation op, PinSettings &sett, QWidget *parent)
+{
+	if (Q_UNLIKELY((op != SET) && sett._pinVal.isEmpty())) {
+		/* Decrypted PIN value must already be set. */
+		Q_ASSERT(0);
+		return false;
+	}
+
+	bool properlySet = false;
+
+	do {
+		DlgPinSetup dlg(op, parent);
+		if (QDialog::Accepted == dlg.exec()) {
+			if ((op != SET) &&
+			    (sett._pinVal != dlg.m_ui->currentPinLine->text())) {
+				/* Current PIN was not entered properly. */
+				QMessageBox::warning(parent,
+				    tr("Wrong PIN value"),
+				    tr("Entered wrong current PIN."),
+				    QMessageBox::Ok, QMessageBox::Ok);
+				continue;
+			}
+
+			if ((op != ERASE) &&
+			    (dlg.m_ui->newPinLine->text() != dlg.m_ui->newPinLine2->text())) {
+				/* New PIN was not entered properly. */
+				QMessageBox::warning(parent,
+				    tr("Wrong PIN value"),
+				    tr("Entered new PIN values are different."),
+				    QMessageBox::Ok, QMessageBox::Ok);
+				continue;
+			}
+
+			PinSettings::updatePinSettings(sett,
+			    (op != ERASE) ? dlg.m_ui->newPinLine->text() : QString());
+
+			properlySet = true;
+		} else {
+			/* Dialogue cancelled. */
+			return false;
+		}
+	} while (!properlySet);
+
+	return true;
 }

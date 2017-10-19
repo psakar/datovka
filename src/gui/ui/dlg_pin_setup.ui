@@ -23,7 +23,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <item row="0" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="currentPinLabel">
        <property name="text">
         <string>Current PIN</string>
        </property>
@@ -33,7 +33,7 @@
       <widget class="QLineEdit" name="currentPinLine"/>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
+      <widget class="QLabel" name="newPinLabel">
        <property name="text">
         <string>New PIN</string>
        </property>
@@ -43,7 +43,7 @@
       <widget class="QLineEdit" name="newPinLine"/>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label_3">
+      <widget class="QLabel" name="newPinLabel2">
        <property name="text">
         <string>Repeat new PIN</string>
        </property>
