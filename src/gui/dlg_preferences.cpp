@@ -42,9 +42,11 @@ enum LangIndex {
 	LANG_ENGLISH = 2
 };
 
-DlgPreferences::DlgPreferences(const GlobPreferences &prefs, QWidget *parent)
+DlgPreferences::DlgPreferences(const GlobPreferences &prefs,
+    const PinSettings &pinSett, QWidget *parent)
     : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgPreferences)
+    m_ui(new (std::nothrow) Ui::DlgPreferences),
+    m_pinSett(pinSett)
 {
 	m_ui->setupUi(this);
 
@@ -56,6 +58,7 @@ DlgPreferences::DlgPreferences(const GlobPreferences &prefs, QWidget *parent)
 		}
 	}
 	initDialogue(prefs);
+	activatePinButtons(m_pinSett);
 }
 
 DlgPreferences::~DlgPreferences(void)
@@ -63,9 +66,10 @@ DlgPreferences::~DlgPreferences(void)
 	delete m_ui;
 }
 
-bool DlgPreferences::modify(GlobPreferences &prefs, QWidget *parent)
+bool DlgPreferences::modify(GlobPreferences &prefs, PinSettings &pinSett,
+    QWidget *parent)
 {
-	DlgPreferences dlg(prefs, parent);
+	DlgPreferences dlg(prefs, pinSett, parent);
 	if (QDialog::Accepted == dlg.exec()) {
 		dlg.saveSettings(prefs);
 		return true;
@@ -101,6 +105,18 @@ void DlgPreferences::setAddFilePath(void)
 	if (!newDir.isEmpty()) {
 		m_ui->addFilePath->setText(newDir);
 	}
+}
+
+void DlgPreferences::setPin(void)
+{
+}
+
+void DlgPreferences::changePin(void)
+{
+}
+
+void DlgPreferences::clearPin(void)
+{
 }
 
 /*!
@@ -159,7 +175,7 @@ void DlgPreferences::saveSettings(GlobPreferences &prefs) const
 	prefs.send_stats_with_version_checks =
 	    m_ui->sendStatsWithVersionChecks->isChecked();
 
-	/* storage */
+	/* security */
 	prefs.store_messages_on_disk = m_ui->storeMessagesOnDisk->isChecked();
 	prefs.store_additional_data_on_disk =
 	    m_ui->storeAdditionalDataOnDisk->isChecked();
@@ -248,7 +264,7 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 
 	activateBackgroundTimer(m_ui->downloadOnBackground->checkState());
 
-	/* storage */
+	/* security */
 	m_ui->storeMessagesOnDisk->setChecked(prefs.store_messages_on_disk);
 	m_ui->storeAdditionalDataOnDisk->setChecked(
 	    prefs.store_additional_data_on_disk);
@@ -266,6 +282,12 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 	m_ui->checkCrl->setChecked(prefs.check_crl);
 	m_ui->timestampExpirSpinBox->setValue(
 	    prefs.timestamp_expir_before_days);
+
+	connect(m_ui->setPinButton, SIGNAL(clicked()), this, SLOT(setPin()));
+	connect(m_ui->changePinButton, SIGNAL(clicked()),
+	    this, SLOT(changePin()));
+	connect(m_ui->clearPinButton, SIGNAL(clicked()),
+	    this, SLOT(clearPin()));
 
 	/* navigation */
 	if (GlobPreferences::SELECT_NEWEST == prefs.after_start_select) {
@@ -338,4 +360,14 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 	m_ui->langComboBox->addItem(tr("English"));
 	m_ui->langComboBox->setCurrentIndex(
 	    settingsLangtoIndex(prefs.language));
+}
+
+void DlgPreferences::activatePinButtons(const PinSettings &pinSett)
+{
+	m_ui->setPinButton->setEnabled(!pinSett.pinConfigured());
+	m_ui->setPinButton->setVisible(!pinSett.pinConfigured());
+	m_ui->changePinButton->setEnabled(pinSett.pinConfigured());
+	m_ui->changePinButton->setVisible(pinSett.pinConfigured());
+	m_ui->clearPinButton->setEnabled(pinSett.pinConfigured());
+	m_ui->clearPinButton->setVisible(pinSett.pinConfigured());
 }

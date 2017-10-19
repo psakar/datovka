@@ -84,6 +84,8 @@
 #include "src/records_management/gui/dlg_records_management.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
+#include "src/settings/pin.h"
+#include "src/settings/preferences.h"
 #include "src/settings/records_management.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
@@ -633,7 +635,7 @@ void MainWindow::showPreferencesDialog(void)
 {
 	debugSlotCall();
 
-	if (!DlgPreferences::modify(globPref, this)) {
+	if (!DlgPreferences::modify(globPref, globPinSet, this)) {
 		return;
 	}
 

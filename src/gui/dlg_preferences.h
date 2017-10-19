@@ -26,6 +26,7 @@
 
 #include <QDialog>
 
+#include "src/settings/pin.h"
 #include "src/settings/preferences.h"
 
 namespace Ui {
@@ -43,10 +44,11 @@ private:
 	 * @brief Constructor.
 	 *
 	 * @param[in] prefs Preferences according to which to set the dialogue.
+	 * @param[in] pinSett PIN settings to use to set dialogue.
 	 * @param[in] parent Parent widget.
 	 */
 	explicit DlgPreferences(const GlobPreferences &prefs,
-	    QWidget *parent = Q_NULLPTR);
+	    const PinSettings &pinSett, QWidget *parent = Q_NULLPTR);
 
 public:
 	/*!
@@ -58,12 +60,14 @@ public:
 	 * @brief Modifies global preferences.
 	 *
 	 * @param[in,out] prefs Preferences to be modified.
+	 * @param[in,out] pinSett PIN settings to be modified.
 	 * @param[in]     parent Parent widget.
 	 * @return True when dialogue has been accepted and preference data
 	 *     have been updated.
 	 */
 	static
-	bool modify(GlobPreferences &prefs, QWidget *parent = Q_NULLPTR);
+	bool modify(GlobPreferences &prefs, PinSettings &pinSett,
+	    QWidget *parent = Q_NULLPTR);
 
 private slots:
 	/*!
@@ -83,6 +87,21 @@ private slots:
 	 */
 	void setAddFilePath(void);
 
+	/*!
+	 * @brief Set PIN value.
+	 */
+	void setPin(void);
+
+	/*!
+	 * @brief Change PIN value.
+	 */
+	void changePin(void);
+
+	/*!
+	 * @brief Clear PIN value.
+	 */
+	void clearPin(void);
+
 private:
 	/*!
 	 * @brief Save dialogue content to settings.
@@ -98,7 +117,16 @@ private:
 	 */
 	void initDialogue(const GlobPreferences &prefs);
 
+	/*!
+	 * @brief Set PIN button activity.
+	 *
+	 * @param[in] pinSett PIN settings.
+	 */
+	void activatePinButtons(const PinSettings &pinSett);
+
 	Ui::DlgPreferences *m_ui; /*!< UI generated from UI file. */
+
+	PinSettings m_pinSett; /*!< PIN settings copy. */
 };
 
 #endif /* _DLG_PREFERENCES_H_ */

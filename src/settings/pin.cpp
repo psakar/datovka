@@ -21,6 +21,9 @@
  * the two.
  */
 
+#include "src/crypto/crypto_pin.h"
+#include "src/crypto/crypto_wrapped.h"
+#include "src/log/log.h"
 #include "src/settings/pin.h"
 
 #define SETTINGS_SECURITY_GROUP "security"
@@ -29,6 +32,8 @@
 #define SETTINGS_PIN_ALG "pin_alg"
 #define SETTINGS_PIN_SALT "pin_salt"
 #define SETTINGS_PIN_CODE "pin_code"
+
+PinSettings globPinSet;
 
 PinSettings::PinSettings(void)
     : _pinVal(),
@@ -77,4 +82,53 @@ void PinSettings::saveToSettings(QSettings &settings) const
 	}
 
 	settings.endGroup();
+}
+
+bool PinSettings::pinConfigured(void) const
+{
+	return !pinAlg.isEmpty() && !pinSalt.isEmpty() && !pinCode.isEmpty();
+}
+
+void PinSettings::updatePinSettings(PinSettings &sett, const QString &pinValue)
+{
+	QByteArray pinSalt;
+	QByteArray pinCode;
+
+	if (!pinValue.isEmpty()) {
+		/* Generate random salt. */
+		pinSalt = randomSalt(pbkdf2_sha256.out_len);
+
+		pinCode = computePinCode(pinValue, pbkdf2_sha256.name, pinSalt,
+		    pbkdf2_sha256.out_len);
+	}
+
+	if (!pinCode.isEmpty()) {
+		sett._pinVal = pinValue;
+		sett.pinAlg = pbkdf2_sha256.name;
+		sett.pinSalt = pinSalt;
+		sett.pinCode = pinCode;
+	} else {
+		sett._pinVal.clear();
+		sett.pinAlg.clear();
+		sett.pinSalt.clear();
+		sett.pinCode.clear();
+	}
+}
+
+void PinSettings::verifyPin(PinSettings &sett, const QString &pinValue)
+{
+	if (sett.pinAlg.isEmpty() || sett.pinSalt.isEmpty() ||
+	    sett.pinCode.isEmpty()) {
+		logErrorNL("%s",
+		    "PIN algorithm, PIN salt or encoded PIN are missing.");
+		return;
+	}
+
+	bool verResult = sett.pinCode == computePinCode(pinValue,
+	    sett.pinAlg, sett.pinSalt, pbkdf2_sha256.out_len);
+	if (verResult) {
+		/* Remember entered correct PIN. */
+		sett._pinVal = pinValue;
+		logDebugLv0NL("%s", "Remembering entered PIN value.");
+	}
 }

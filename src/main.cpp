@@ -42,6 +42,7 @@
 #include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
+#include "src/settings/pin.h"
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
 #include "src/worker/pool.h"
@@ -212,6 +213,15 @@ int main(int argc, char *argv[])
 	    app.applicationDirPath().toUtf8().constData());
 
 	loadLocalisation(globPref);
+
+	/* Ask for PIN. */
+	{
+		QSettings settings(globPref.loadConfPath(),
+		    QSettings::IniFormat);
+		settings.setIniCodec("UTF-8");
+		globPinSet.loadFromSettings(settings);
+		/* TODO */
+	}
 
 	/* set splash action text */
 	if (runMode == RM_GUI) {

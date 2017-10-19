@@ -52,10 +52,43 @@ public:
 	 */
 	void saveToSettings(QSettings &settings) const;
 
+	/*!
+	 * @brief Check whether PIN value is configured.
+	 *
+	 * @return True if algorithm, salt and encoded PIN are set.
+	 */
+	bool pinConfigured(void) const;
+
+	/*!
+	 * @brief Update PIN settings.
+	 *
+	 * @param[in,out] sett Settings to be modified.
+	 * @param[in]     pinValue New pin value.
+	 */
+	static
+	void updatePinSettings(PinSettings &sett, const QString &pinValue);
+
+	/*!
+	 * @brief Verifies the PIN.
+	 *
+	 * @note PIN value is stored within setting structure if ented PIN is
+	 *     valid.
+	 *
+	 * @param[in,out] sett PIN settings to be verified.
+	 * @param[in]     pinValue PIN to be verified.
+	 */
+	static
+	void verifyPin(PinSettings &sett, const QString &pinValue);
+
 	QString _pinVal; /*! PIN value is not read from the configuration file, nor it is stored to the configuration file. */
 	QString pinAlg; /*!< PIN algorithm identifier. */
 	QByteArray pinSalt; /*!< Salt value used to generate PIN hash. */
 	QByteArray pinCode; /*!< Hashed PIN code. */
 };
+
+/*!
+ * @brief Global instance of the structure.
+ */
+extern PinSettings globPinSet;
 
 #endif /* _PIN_H_ */
