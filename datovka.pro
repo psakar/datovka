@@ -255,6 +255,7 @@ SOURCES += \
     src/gui/dlg_import_zfo_result.cpp \
     src/gui/dlg_msg_box_informative.cpp \
     src/gui/dlg_msg_search.cpp \
+    src/gui/dlg_pin_input.cpp \
     src/gui/dlg_pin_setup.cpp \
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
@@ -381,6 +382,7 @@ HEADERS += \
     src/gui/dlg_import_zfo_result.h \
     src/gui/dlg_msg_box_informative.h \
     src/gui/dlg_msg_search.h \
+    src/gui/dlg_pin_input.h \
     src/gui/dlg_pin_setup.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
@@ -489,6 +491,7 @@ FORMS += \
     src/gui/ui/dlg_import_zfo_result.ui \
     src/gui/ui/dlg_import_zfo.ui \
     src/gui/ui/dlg_msg_search.ui \
+    src/gui/ui/dlg_pin_input.ui \
     src/gui/ui/dlg_pin_setup.ui \
     src/gui/ui/dlg_preferences.ui \
     src/gui/ui/dlg_proxysets.ui \
