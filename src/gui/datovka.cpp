@@ -4173,7 +4173,6 @@ void MainWindow::loadSettings(void)
 	QSettings settings(globPref.loadConfPath(), QSettings::IniFormat);
 	settings.setIniCodec("UTF-8");
 
-
 	/* Load last directory paths */
 	loadLastDirectoryPaths(settings);
 
@@ -4191,6 +4190,8 @@ void MainWindow::loadSettings(void)
 
 	/* Records management settings. */
 	globRecordsManagementSet.loadFromSettings(settings);
+
+	/* PIN should already be set because main window is running. */
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
@@ -4458,6 +4459,9 @@ void MainWindow::saveSettings(void) const
 
 	/* Store application ID and config format */
 	saveAppIdConfigFormat(settings);
+
+	/* PIN settings. */
+	globPinSet.saveToSettings(settings);
 
 	/* Accounts. */
 	m_accountModel.saveToSettings(settings);

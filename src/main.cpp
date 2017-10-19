@@ -35,6 +35,7 @@
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
 #include "src/gui/datovka.h"
+#include "src/gui/dlg_pin_input.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/initialisation.h"
 #include "src/io/db_tables.h"
@@ -220,7 +221,12 @@ int main(int argc, char *argv[])
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
 		globPinSet.loadFromSettings(settings);
-		/* TODO */
+		if (globPinSet.pinConfigured()) {
+			if (!DlgPinInput::queryPin(globPinSet, splash)) {
+				delete splash;
+				return EXIT_FAILURE;
+			}
+		}
 	}
 
 	/* set splash action text */

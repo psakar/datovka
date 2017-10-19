@@ -63,7 +63,7 @@ public:
 	 * @brief Update PIN settings.
 	 *
 	 * @param[in,out] sett Settings to be modified.
-	 * @param[in]     pinValue New pin value.
+	 * @param[in]     pinValue New PIN value.
 	 */
 	static
 	void updatePinSettings(PinSettings &sett, const QString &pinValue);
@@ -76,9 +76,10 @@ public:
 	 *
 	 * @param[in,out] sett PIN settings to be verified.
 	 * @param[in]     pinValue PIN to be verified.
+	 * @return True if PIN value was successfully verified.
 	 */
 	static
-	void verifyPin(PinSettings &sett, const QString &pinValue);
+	bool verifyPin(PinSettings &sett, const QString &pinValue);
 
 	QString _pinVal; /*! PIN value is not read from the configuration file, nor it is stored to the configuration file. */
 	QString pinAlg; /*!< PIN algorithm identifier. */

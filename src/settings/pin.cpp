@@ -115,13 +115,13 @@ void PinSettings::updatePinSettings(PinSettings &sett, const QString &pinValue)
 	}
 }
 
-void PinSettings::verifyPin(PinSettings &sett, const QString &pinValue)
+bool PinSettings::verifyPin(PinSettings &sett, const QString &pinValue)
 {
 	if (sett.pinAlg.isEmpty() || sett.pinSalt.isEmpty() ||
 	    sett.pinCode.isEmpty()) {
 		logErrorNL("%s",
 		    "PIN algorithm, PIN salt or encoded PIN are missing.");
-		return;
+		return false;
 	}
 
 	bool verResult = sett.pinCode == computePinCode(pinValue,
@@ -131,4 +131,5 @@ void PinSettings::verifyPin(PinSettings &sett, const QString &pinValue)
 		sett._pinVal = pinValue;
 		logDebugLv0NL("%s", "Remembering entered PIN value.");
 	}
+	return verResult;
 }

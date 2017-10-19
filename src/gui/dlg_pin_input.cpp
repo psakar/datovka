@@ -25,6 +25,7 @@
 
 #include "src/common.h"
 #include "src/gui/dlg_pin_input.h"
+#include "src/log/log.h"
 #include "ui_dlg_pin_input.h"
 
 DlgPinInput::DlgPinInput(QWidget *parent)
@@ -36,8 +37,9 @@ DlgPinInput::DlgPinInput(QWidget *parent)
 	m_ui->logoLabel->setPixmap(QPixmap(ICON_128x128_PATH "datovka.png"));
 
 	m_ui->versionLabel->setTextFormat(Qt::RichText);
-	m_ui->versionLabel->setText(
-	    QLatin1String("<b>") + tr("Version") + QLatin1String(": ") + VERSION + QLatin1String("</b>"));
+	m_ui->versionLabel->setText(QLatin1String("<b>") +
+	    tr("Version") + QLatin1String(": ") + VERSION +
+	    QLatin1String("</b>"));
 
 	m_ui->pinLine->setPlaceholderText(tr("Enter PIN code"));
 	m_ui->pinLine->setEchoMode(QLineEdit::Password);
@@ -50,11 +52,33 @@ DlgPinInput::~DlgPinInput(void)
 
 bool DlgPinInput::queryPin(PinSettings &sett, QWidget *parent)
 {
-	DlgPinInput dlg(parent);
-	if (QDialog::Accepted == dlg.exec()) {
-		/* TODO */
-		return true;
-	} else {
+	if (Q_UNLIKELY(!sett.pinConfigured())) {
+		Q_ASSERT(0);
 		return false;
 	}
+
+	bool properlySet = false;
+
+	do {
+		DlgPinInput dlg(parent);
+		if (QDialog::Accepted == dlg.exec()) {
+			if (dlg.m_ui->pinLine->text().isEmpty()) {
+				logWarningNL("%s", "Entered empty PIN value.");
+				continue;
+			}
+
+			if (!PinSettings::verifyPin(sett,
+			        dlg.m_ui->pinLine->text())) {
+				logWarningNL("%s",
+				    "Could not verify entered PIN value.");
+				continue;
+			}
+
+			properlySet = true;
+		} else {
+			return false;
+		}
+	} while (!properlySet);
+
+	return true;
 }
