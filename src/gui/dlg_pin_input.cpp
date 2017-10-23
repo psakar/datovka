@@ -35,6 +35,8 @@ DlgPinInput::DlgPinInput(QWidget *parent)
 	m_ui->setupUi(this);
 
 	m_ui->logoLabel->setPixmap(QPixmap(ICON_128x128_PATH "datovka.png"));
+	m_ui->logoLabel->setAlignment(Qt::AlignHCenter);
+	m_ui->horizontalLayout->setStretch(1, 10);
 
 	m_ui->versionLabel->setTextFormat(Qt::RichText);
 	m_ui->versionLabel->setText(QLatin1String("<b>") +
