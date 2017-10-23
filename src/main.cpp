@@ -248,10 +248,12 @@ int main(int argc, char *argv[])
 
 	/* Parse account information. */
 	{
+		/* TODO -- Is it really needed here? */
 		QSettings settings(globPref.loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
 		globAccounts.loadFromSettings(settings);
+		globAccounts.decryptAllPwds(globPinSet._pinVal);
 	}
 
 	/* Start worker threads. */

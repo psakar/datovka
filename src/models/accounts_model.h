@@ -192,10 +192,11 @@ public:
 	/*!
 	 * @brief Store data to settings structure.
 	 *
+	 * @param[in]  pinVal PIN value to be used for password encryption.
 	 * @param[out] settings Setting structure to store the model content
 	 *     into.
 	 */
-	void saveToSettings(QSettings &settings) const;
+	void saveToSettings(const QString &pinVal, QSettings &settings) const;
 
 	/*!
 	 * @brief Add account.

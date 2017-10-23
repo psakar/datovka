@@ -126,6 +126,13 @@ public:
 	void _setPwdExpirDlgShown(bool pwdExpirDlgShown);
 
 	/*!
+	 * @brief Used to decrypt the password.
+	 *
+	 * @param[in] oldPin PIN value used to decrypt old passwords.
+	 */
+	void decryptPassword(const QString &oldPin);
+
+	/*!
 	 * @brief Load content from settings group.
 	 *
 	 * @note Content is not erased before new settings is loaded.
@@ -138,11 +145,13 @@ public:
 	/*!
 	 * @brief Save content to settings.
 	 *
+	 * @param[in]  pinVal PIN value to be used for password encryption.
 	 * @param[out] settings Settings structure to write/append data into.
 	 * @param[in]  group Name of group to write to, group is create only
 	 *                   when non-empty string supplied.
 	 */
-	void saveToSettings(QSettings &settings, const QString &group) const;
+	void saveToSettings(const QString &pinVal, QSettings &settings,
+	    const QString &group) const;
 
 	/*!
 	 * @brief Used for sorting credentials.

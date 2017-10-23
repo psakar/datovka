@@ -466,6 +466,40 @@ void readPwdData(AcntSettings &aData, const QSettings &settings,
 	}
 }
 
+void AcntSettings::decryptPassword(const QString &oldPin)
+{
+	if (!password().isEmpty()) {
+		/* Password already stored in decrypted form. */
+		return;
+	}
+
+	if (oldPin.isEmpty()) {
+		/*
+		 * Old PIN not given, password already should be in plain
+		 * format.
+		 */
+		return;
+	}
+
+	if (!pwdAlg().isEmpty() && !pwdSalt().isEmpty() &&
+	    !pwdCode().isEmpty()) {
+		logDebugLv0NL("Decrypting password for user name '%s'.",
+		    userName().toUtf8().constData());
+		QString decrypted(decryptPwd(pwdCode(), oldPin, pwdAlg(),
+		    pwdSalt(), pwdIv()));
+		if (decrypted.isEmpty()) {
+			logWarningNL(
+			    "Failed decrypting password for user name '%s'.",
+			    userName().toUtf8().constData());
+		}
+
+		/* Store password. */
+		if (!decrypted.isEmpty()) {
+			setPassword(decrypted);
+		}
+	}
+}
+
 void AcntSettings::loadFromSettings(const QSettings &settings,
     const QString &group)
 {
@@ -553,14 +587,12 @@ bool storeEncryptedPwd(const QString &pinVal, QSettings &settings,
 	return true;
 }
 
-void AcntSettings::saveToSettings(QSettings &settings,
+void AcntSettings::saveToSettings(const QString &pinVal, QSettings &settings,
     const QString &group) const
 {
 	if (!group.isEmpty()) {
 		settings.beginGroup(group);
 	}
-
-	const QString pinVal;
 
 	settings.setValue(CredNames::acntName, accountName());
 	settings.setValue(CredNames::userName, userName());

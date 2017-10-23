@@ -479,7 +479,8 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 	endResetModel();
 }
 
-void AccountModel::saveToSettings(QSettings &settings) const
+void AccountModel::saveToSettings(const QString &pinVal,
+    QSettings &settings) const
 {
 	QString groupName;
 
@@ -496,7 +497,7 @@ void AccountModel::saveToSettings(QSettings &settings) const
 			groupName.append(QString::number(row + 1));
 		}
 
-		itemSettings.saveToSettings(settings, groupName);
+		itemSettings.saveToSettings(pinVal, settings, groupName);
 	}
 }
 

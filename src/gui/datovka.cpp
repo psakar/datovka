@@ -4196,6 +4196,7 @@ void MainWindow::loadSettings(void)
 	/* Accounts. */
 	m_accountModel.loadFromSettings(settings);
 	ui->accountList->setModel(&m_accountModel);
+	globAccounts.decryptAllPwds(globPinSet._pinVal);
 
 	/* Select last-used account. */
 	setDefaultAccount(settings);
@@ -4464,7 +4465,7 @@ void MainWindow::saveSettings(void) const
 	globPinSet.saveToSettings(settings);
 
 	/* Accounts. */
-	m_accountModel.saveToSettings(settings);
+	m_accountModel.saveToSettings(globPinSet._pinVal, settings);
 
 	/* Store last-used account. */
 	saveAccountIndex(settings);

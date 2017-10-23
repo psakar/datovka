@@ -45,6 +45,13 @@ public:
 	 */
 	void loadFromSettings(const QSettings &settings);
 
+	/*!
+	 * @brief Decrypts all encrypted passwords.
+	 *
+	 * @param[in] pinVal Pin value.
+	 */
+	void decryptAllPwds(const QString &pinVal);
+
 signals:
 	/*!
 	 * @brief Notifies that account data have changed.

@@ -58,3 +58,11 @@ void AccountsMap::loadFromSettings(const QSettings &settings)
 		this->operator[](itemSettings.userName()) = itemSettings;
 	}
 }
+
+void AccountsMap::decryptAllPwds(const QString &pinVal)
+{
+	for (AccountsMap::iterator it = globAccounts.begin();
+	     it != globAccounts.end(); ++it) {
+		it->decryptPassword(pinVal);
+	}
+}
