@@ -32,6 +32,10 @@ DlgPinSetup::DlgPinSetup(enum Operation op, QWidget *parent)
 {
 	m_ui->setupUi(this);
 
+	m_ui->currentPinLine->setEchoMode(QLineEdit::Password);
+	m_ui->newPinLine->setEchoMode(QLineEdit::Password);
+	m_ui->newPinLine2->setEchoMode(QLineEdit::Password);
+
 	m_ui->currentPinLabel->setEnabled(op != SET);
 	m_ui->currentPinLine->setEnabled(op != SET);
 	m_ui->newPinLabel->setEnabled(op != ERASE);
