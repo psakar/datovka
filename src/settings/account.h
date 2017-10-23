@@ -39,6 +39,10 @@ namespace CredNames {
 	extern const QString userName;
 	extern const QString lMethod;
 	extern const QString pwd;
+	extern const QString pwdAlg;
+	extern const QString pwdSalt;
+	extern const QString pwdIv;
+	extern const QString pwdCode;
 	extern const QString testAcnt;
 	extern const QString rememberPwd;
 	extern const QString dbDir;
@@ -83,6 +87,14 @@ public:
 	void setLoginMethod(enum LogInMethod method);
 	QString password(void) const;
 	void setPassword(const QString &pwd);
+	QString pwdAlg(void) const;
+	void setPwdAlg(const QString &pwdAlg);
+	QByteArray pwdSalt(void) const;
+	void setPwdSalt(const QByteArray &pwdSalt);
+	QByteArray pwdIv(void) const;
+	void setPwdIv(const QByteArray &pwdIv);
+	QByteArray pwdCode(void) const;
+	void setPwdCode(const QByteArray &pwdCode);
 	bool isTestAccount(void) const;
 	void setTestAccount(bool isTesting);
 	bool rememberPwd(void) const;
