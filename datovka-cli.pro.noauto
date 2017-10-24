@@ -72,8 +72,11 @@ SOURCES += \
 	src/cli/cli_parser.cpp \
 	src/common.cpp \
 	src/crypto/crypto.c \
+	src/crypto/crypto_pin.c \
+	src/crypto/crypto_pwd.c \
 	src/crypto/crypto_threads.cpp \
 	src/crypto/crypto_version.cpp \
+	src/crypto/crypto_wrapped.cpp \
 	src/initialisation.cpp \
 	src/io/account_db.cpp \
 	src/io/db_tables.cpp \
@@ -99,6 +102,7 @@ SOURCES += \
 	src/main_cli.cpp \
 	src/settings/account.cpp \
 	src/settings/accounts.cpp \
+	src/settings/pin.cpp \
 	src/settings/preferences.cpp \
 	src/settings/proxy.cpp \
 	src/single/single_instance.cpp \
@@ -120,8 +124,11 @@ HEADERS += \
 	src/common.h \
 	src/crypto/crypto.h \
 	src/crypto/crypto_funcs.h \
+	src/crypto/crypto_pin.h \
+	src/crypto/crypto_pwd.h \
 	src/crypto/crypto_threads.h \
 	src/crypto/crypto_version.h \
+	src/crypto/crypto_wrapped.h \
 	src/initialisation.h \
 	src/io/account_db.h \
 	src/io/db_tables.h \
@@ -146,6 +153,7 @@ HEADERS += \
 	src/log/log.h \
 	src/settings/account.h \
 	src/settings/accounts.h \
+	src/settings/pin.h \
 	src/settings/preferences.h \
 	src/settings/proxy.h \
 	src/single/single_instance.h \

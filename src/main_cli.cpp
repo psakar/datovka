@@ -39,6 +39,7 @@
 #include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
+#include "src/settings/pin.h"
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
 #include "src/worker/pool.h"
@@ -169,6 +170,18 @@ int main(int argc, char *argv[])
 
 	loadLocalisation(globPref);
 
+	/* Ask for PIN. */
+	{
+		QSettings settings(globPref.loadConfPath(),
+		    QSettings::IniFormat);
+		settings.setIniCodec("UTF-8");
+		globPinSet.loadFromSettings(settings);
+		if (globPinSet.pinConfigured()) {
+			/* TODO -- Ask for PIN from command line. */
+			return EXIT_FAILURE;
+		}
+	}
+
 	/* Localise description in tables. */
 	localiseTableDescriptions();
 
@@ -178,17 +191,18 @@ int main(int argc, char *argv[])
 
 	int ret = EXIT_SUCCESS;
 
+	/* Start worker threads. */
+	globWorkPool.start();
+	logInfo("%s\n", "Worker pool started.");
+
 	/* Parse account information. */
 	{
 		QSettings settings(globPref.loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
 		globAccounts.loadFromSettings(settings);
+		globAccounts.decryptAllPwds(globPinSet._pinVal);
 	}
-
-	/* Start worker threads. */
-	globWorkPool.start();
-	logInfo("%s\n", "Worker pool started.");
 
 	ret = CLIParser::runCLIService(srvcArgs, parser);
 
