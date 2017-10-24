@@ -116,6 +116,7 @@ bool CLIPin::queryPin(PinSettings &sett, int repeatNum)
 	do {
 		fprintf(STDOUT, "%s: ",
 		    tr("Enter PIN code").toUtf8().constData());
+		fflush(STDOUT);
 
 		enableStdinEcho(false);
 		const char *ret = fgets(pin_buf, PIN_BUF_LEN, STDIN);
