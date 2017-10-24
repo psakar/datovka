@@ -70,6 +70,7 @@ SOURCES += \
 	src/cli/cli.cpp \
 	src/cli/cli_login.cpp \
 	src/cli/cli_parser.cpp \
+	src/cli/cli_pin.cpp \
 	src/common.cpp \
 	src/crypto/crypto.c \
 	src/crypto/crypto_pin.c \
@@ -121,6 +122,7 @@ HEADERS += \
 	src/cli/cli.h \
 	src/cli/cli_login.h \
 	src/cli/cli_parser.h \
+	src/cli/cli_pin.h \
 	src/common.h \
 	src/crypto/crypto.h \
 	src/crypto/crypto_funcs.h \

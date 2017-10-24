@@ -21,51 +21,38 @@
  * the two.
  */
 
-#ifndef _DLG_PIN_INPUT_H_
-#define _DLG_PIN_INPUT_H_
+#ifndef _CLI_PIN_H_
+#define _CLI_PIN_H_
 
-#include <QDialog>
+#include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 
 #include "src/settings/pin.h"
-
-namespace Ui {
-	class DlgPinInput;
-}
 
 /*!
  * @brief Asks the user for the current PIN.
  */
-class DlgPinInput : public QDialog {
-	Q_OBJECT
+class CLIPin {
+	Q_DECLARE_TR_FUNCTIONS(CLIPin)
 
 private:
 	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] parent Parent widget.
+	 * @brief Private constructor.
 	 */
-	explicit DlgPinInput(QWidget *parent = Q_NULLPTR);
+	CLIPin(void);
 
 public:
-	/*!
-	 * @brief Destructor.
-	 */
-	~DlgPinInput(void);
-
 	/*!
 	 * @brief Asks the user for PIN value.
 	 *
 	 * @note Stores PIN in unencrypted form into settings structure.
 	 *
 	 * @param[in,out] sett PIN settings to be modified.
-	 * @param[in] parent Parent widget.
+	 * @param[in]     repeatNum How many times to repeat question on wrong
+	 *                input.
 	 * @return True if correct PIN has been entered.
 	 */
 	static
-	bool queryPin(PinSettings &sett, QWidget *parent = Q_NULLPTR);
-
-private:
-	Ui::DlgPinInput *m_ui; /*!< UI generated from UI file. */
+	bool queryPin(PinSettings &sett, int repeatNum);
 };
 
-#endif /* _DLG_PIN_INPUT_H_ */
+#endif /* _CLI_PIN_H_ */
