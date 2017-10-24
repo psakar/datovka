@@ -123,6 +123,9 @@ bool CLIPin::queryPin(PinSettings &sett, int repeatNum)
 		enableStdinEcho(true);
 		remove_trailing_newline(pin_buf);
 
+		fputc('\n', STDOUT);
+		fflush(STDOUT);
+
 		if (NULL != ret) {
 			/* Conversion to const char * is necessary. */
 			QString pinVal((const char *)pin_buf);
