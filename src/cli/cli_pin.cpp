@@ -38,8 +38,9 @@
 #include "src/log/log.h"
 
 /*
- * Some code is based on
- * https://stackoverflow.com/questions/1413445/reading-a-password-from-stdcin .
+ * Some code is based on:
+ * https://stackoverflow.com/questions/1413445/reading-a-password-from-stdcin
+ * https://stackoverflow.com/questions/6856635/hide-password-input-on-terminal
  */
 
 /*!
