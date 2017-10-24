@@ -31,6 +31,7 @@
 
 #include "src/about.h"
 #include "src/cli/cli_parser.h"
+#include "src/cli/cli_pin.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
@@ -114,13 +115,14 @@ int main(int argc, char *argv[])
 	    CLIParser::CLIServiceArgs(parser.optionNames()));
 
 	enum RunMode runMode = RM_GUI;
-	QSplashScreen *splash = new QSplashScreen;
+	QSplashScreen *splash = Q_NULLPTR; /* Used only in GUI mode. */
 
 	if (!srvcArgs.isEmpty()) {
 		runMode = RM_CLI;
 	} else if (!cmdLineFileNames.isEmpty()) {
 		runMode = RM_ZFO;
 	} else {
+		splash = new QSplashScreen;
 		splash->setPixmap(QPixmap(":/splash/datovka-splash.png"));
 		splash->show();
 	}
@@ -222,7 +224,15 @@ int main(int argc, char *argv[])
 		settings.setIniCodec("UTF-8");
 		globPinSet.loadFromSettings(settings);
 		if (globPinSet.pinConfigured()) {
-			if (!DlgPinInput::queryPin(globPinSet, splash)) {
+			bool pinOk = false;
+			if (RM_GUI == runMode) {
+				pinOk =
+				    DlgPinInput::queryPin(globPinSet, splash);
+			} else if (RM_CLI == runMode) {
+				pinOk = CLIPin::queryPin(globPinSet, 2);
+			}
+
+			if (!pinOk) {
 				delete splash;
 				return EXIT_FAILURE;
 			}
