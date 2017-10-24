@@ -52,6 +52,12 @@ static
 void enableStdinEcho(bool enable)
 {
 #if defined(Q_OS_WIN)
+	/*
+	 * This solution works when application is run from
+	 * command line (cmd.exe) or from PowerShell.
+	 * It does not work when the application is run from emulated terminals
+	 * on Windows such as Git Bash or MinGW.
+	 */
 
 	HANDLE hStdin = GetStdHandle(STD_INPUT_HANDLE);
 	DWORD mode;
