@@ -30,6 +30,7 @@
 
 #include "src/about.h"
 #include "src/cli/cli_parser.h"
+#include "src/cli/cli_pin.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
@@ -177,8 +178,9 @@ int main(int argc, char *argv[])
 		settings.setIniCodec("UTF-8");
 		globPinSet.loadFromSettings(settings);
 		if (globPinSet.pinConfigured()) {
-			/* TODO -- Ask for PIN from command line. */
-			return EXIT_FAILURE;
+			if (!CLIPin::queryPin(globPinSet, 2)) {
+				return EXIT_FAILURE;
+			}
 		}
 	}
 
