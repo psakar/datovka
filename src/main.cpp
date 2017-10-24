@@ -246,16 +246,6 @@ int main(int argc, char *argv[])
 
 	int ret = EXIT_SUCCESS;
 
-	/* Parse account information. */
-	{
-		/* TODO -- Is it really needed here? */
-		QSettings settings(globPref.loadConfPath(),
-		    QSettings::IniFormat);
-		settings.setIniCodec("UTF-8");
-		globAccounts.loadFromSettings(settings);
-		globAccounts.decryptAllPwds(globPinSet._pinVal);
-	}
-
 	/* Start worker threads. */
 	globWorkPool.start();
 	logInfo("%s\n", "Worker pool started.");
@@ -267,6 +257,14 @@ int main(int argc, char *argv[])
 #endif /* >= Qt-5.6 */
 
 	if (runMode == RM_CLI) {
+		/* Parse account information. */
+		{
+			QSettings settings(globPref.loadConfPath(),
+			    QSettings::IniFormat);
+			settings.setIniCodec("UTF-8");
+			globAccounts.loadFromSettings(settings);
+			globAccounts.decryptAllPwds(globPinSet._pinVal);
+		}
 		delete splash;
 		ret = CLIParser::runCLIService(srvcArgs, parser);
 	} else if (runMode == RM_ZFO) {
