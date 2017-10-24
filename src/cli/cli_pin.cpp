@@ -27,8 +27,7 @@
 
 #if defined(Q_OS_WIN)
 #  include <windows.h>
-#elif defined(Q_OS_MACOS)
-#elif defined(Q_OS_UNIX) || defined(Q_OS_LINUX)
+#elif defined(Q_OS_MACOS) || defined(Q_OS_UNIX) || defined(Q_OS_LINUX)
 #  include <termios.h>
 #  include <unistd.h>
 #else
@@ -71,7 +70,7 @@ void enableStdinEcho(bool enable)
 
 	SetConsoleMode(hStdin, mode );
 
-#elif defined(Q_OS_UNIX) || defined(Q_OS_LINUX)
+#elif defined(Q_OS_MACOS) || defined(Q_OS_UNIX) || defined(Q_OS_LINUX)
 
 	struct termios tty;
 	tcgetattr(STDIN_FILENO, &tty);
