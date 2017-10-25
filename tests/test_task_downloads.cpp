@@ -154,12 +154,21 @@ void TestTaskDownloads::initTestCase(void)
 	}
 	QVERIFY(ret);
 
+	/* Create ISDS session container. */
+	QVERIFY(globIsdsSessionsPtr == Q_NULLPTR);
+	globIsdsSessionsPtr = new (std::nothrow) IsdsSessions;
+	if (globIsdsSessionsPtr == Q_NULLPTR) {
+		QSKIP("Cannot create session container.");
+	}
+	QVERIFY(globIsdsSessionsPtr != Q_NULLPTR);
+
 	/* Log into ISDS. */
-	struct isds_ctx *ctx = globIsdsSessions.session(m_recipient.userName);
-	if (!globIsdsSessions.holdsSession(m_recipient.userName)) {
+	struct isds_ctx *ctx = globIsdsSessionsPtr->session(
+	    m_recipient.userName);
+	if (!globIsdsSessionsPtr->holdsSession(m_recipient.userName)) {
 		QVERIFY(ctx == NULL);
-		ctx = globIsdsSessions.createCleanSession(m_recipient.userName,
-		    globPref.isds_download_timeout_ms);
+		ctx = globIsdsSessionsPtr->createCleanSession(
+		    m_recipient.userName, globPref.isds_download_timeout_ms);
 	}
 	if (ctx == NULL) {
 		QSKIP("Cannot obtain communication context.");
@@ -176,6 +185,9 @@ void TestTaskDownloads::initTestCase(void)
 void TestTaskDownloads::cleanupTestCase(void)
 {
 	delete m_recipientDbSet; m_recipientDbSet = NULL;
+
+	/* Destroy ISDS session container. */
+	delete globIsdsSessionsPtr; globIsdsSessionsPtr = Q_NULLPTR;
 
 	/* Delete account database. */
 	delete globAccountDbPtr; globAccountDbPtr = NULL;
@@ -196,10 +208,11 @@ void TestTaskDownloads::downloadMessageList(void)
 
 	QVERIFY(m_recipientDbSet != NULL);
 
-	QVERIFY(globIsdsSessions.isConnectedToIsds(m_recipient.userName));
-	struct isds_ctx *ctx = globIsdsSessions.session(m_recipient.userName);
+	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
+	struct isds_ctx *ctx = globIsdsSessionsPtr->session(
+	    m_recipient.userName);
 	QVERIFY(ctx != NULL);
-	QVERIFY(globIsdsSessions.isConnectedToIsds(m_recipient.userName));
+	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
 
 	task = new (::std::nothrow) TaskDownloadMessageList(
 	    m_recipient.userName, m_recipientDbSet, MSG_RECEIVED, false,
@@ -245,10 +258,11 @@ void TestTaskDownloads::downloadMessage(void)
 
 	QVERIFY(m_recipientDbSet != NULL);
 
-	QVERIFY(globIsdsSessions.isConnectedToIsds(m_recipient.userName));
-	struct isds_ctx *ctx = globIsdsSessions.session(m_recipient.userName);
+	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
+	struct isds_ctx *ctx = globIsdsSessionsPtr->session(
+	    m_recipient.userName);
 	QVERIFY(ctx != NULL);
-	QVERIFY(globIsdsSessions.isConnectedToIsds(m_recipient.userName));
+	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
 
 	/* Should fail, is a received message. */
 	task = new (::std::nothrow) TaskDownloadMessage(m_recipient.userName,
