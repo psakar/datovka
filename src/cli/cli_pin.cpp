@@ -120,6 +120,10 @@ QString readInputNoEcho(void)
 {
 	char pin_buf[PIN_BUF_LEN];
 
+	/*
+	 * Using getch() or _getch() causes troubles inside MinGW terminal.
+	 */
+
 	enableStdinEcho(false);
 	const char *ret = fgets(pin_buf, PIN_BUF_LEN, STDIN);
 	enableStdinEcho(true);
