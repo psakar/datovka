@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #include "src/crypto/crypto_version.h"
 #include "src/log/log.h"
 #include "tests/helper.h"
-#include "tests/test_crypto.h"
+#include "tests/test_crypto_message.h"
 
 class DerFileContent {
 public:
@@ -72,11 +72,11 @@ void DerFileContent::unloadContent(void)
 	}
 }
 
-class TestCrypto : public QObject {
+class TestCryptoMessage : public QObject {
 	Q_OBJECT
 
 public:
-	TestCrypto(void);
+	TestCryptoMessage(void);
 
 private slots:
 	void initTestCase(void);
@@ -120,7 +120,7 @@ private:
 	const QString crl2FilePath; /*!< Path to certificate revocation list. */
 };
 
-TestCrypto::TestCrypto(void)
+TestCryptoMessage::TestCryptoMessage(void)
     : ddz("data/DDZ_3401761.zfo"),
     bin("data/message_binary.dat"),
     tst("data/timestamp_binary.dat"),
@@ -132,7 +132,7 @@ TestCrypto::TestCrypto(void)
 {
 }
 
-void TestCrypto::initTestCase(void)
+void TestCryptoMessage::initTestCase(void)
 {
 	/* Initialise cryptographic context. */
 	int ret = crypto_init();
@@ -151,14 +151,14 @@ void TestCrypto::initTestCase(void)
 	QVERIFY(tst.x509_crt != NULL);
 }
 
-void TestCrypto::cleanupTestCase(void)
+void TestCryptoMessage::cleanupTestCase(void)
 {
 	ddz.unloadContent();
 	bin.unloadContent();
 	tst.unloadContent();
 }
 
-void TestCrypto::x509CrtVerify(void)
+void TestCryptoMessage::x509CrtVerify(void)
 {
 	int ret;
 
@@ -190,27 +190,27 @@ void TestCrypto::x509CrtVerify(void)
 	QVERIFY2(ret == 1, "Got invalid result at 9th attempt. Expected 1.");
 }
 
-void TestCrypto::verifySignature01(void)
+void TestCryptoMessage::verifySignature01(void)
 {
 	verifySignature();
 }
 
-void TestCrypto::cryptoAddCrl01(void)
+void TestCryptoMessage::cryptoAddCrl01(void)
 {
 	cryptoAddCrl(false);
 }
 
-void TestCrypto::verifySignature02(void)
+void TestCryptoMessage::verifySignature02(void)
 {
 	verifySignature();
 }
 
-void TestCrypto::cryptoAddCrl02(void)
+void TestCryptoMessage::cryptoAddCrl02(void)
 {
 	cryptoAddCrl(true);
 }
 
-void TestCrypto::crtAlgorithmInfo(void)
+void TestCryptoMessage::crtAlgorithmInfo(void)
 {
 	char *sa_id = NULL, *sa_name = NULL;
 	int ret;
@@ -251,7 +251,7 @@ void TestCrypto::crtAlgorithmInfo(void)
 	free(sa_name); sa_name = NULL;
 }
 
-void TestCrypto::crtDateInfo(void)
+void TestCryptoMessage::crtDateInfo(void)
 {
 	time_t inception = 0, expiration = 0;
 	int ret;
@@ -272,7 +272,7 @@ void TestCrypto::crtDateInfo(void)
 	QVERIFY2(expiration == 1570183700, "Got wrong expiration time.");
 }
 
-void TestCrypto::rawTstVerify(void)
+void TestCryptoMessage::rawTstVerify(void)
 {
 	time_t timestamp;
 	int ret;
@@ -281,7 +281,7 @@ void TestCrypto::rawTstVerify(void)
 	QVERIFY2(ret == 1, "Time stamp signature verification failed.");
 }
 
-void TestCrypto::p12ToPem(void)
+void TestCryptoMessage::p12ToPem(void)
 {
 	void *p12_enc = NULL;
 	size_t p12_enc_size = 0;
@@ -332,7 +332,7 @@ void TestCrypto::p12ToPem(void)
 	free(pem); pem = NULL;
 }
 
-void TestCrypto::cryptoLibVerCompatible(void)
+void TestCryptoMessage::cryptoLibVerCompatible(void)
 {
 	int ret;
 	const unsigned long v1_0_1a = 0x1000101fL;
@@ -389,7 +389,7 @@ void TestCrypto::cryptoLibVerCompatible(void)
 	QVERIFY2(ret == 0, "Expected compatible outcome.");
 }
 
-void TestCrypto::verifySignature(void)
+void TestCryptoMessage::verifySignature(void)
 {
 	int ret;
 
@@ -430,7 +430,7 @@ void TestCrypto::verifySignature(void)
 	QVERIFY2(ret == 0, "Expected invalid signature result.");
 }
 
-void TestCrypto::cryptoAddCrl(bool expectFail)
+void TestCryptoMessage::cryptoAddCrl(bool expectFail)
 {
 	char *der = NULL;
 	size_t der_size = 0;
@@ -461,10 +461,10 @@ void TestCrypto::cryptoAddCrl(bool expectFail)
 	free(der); der = NULL;
 }
 
-QObject *newTestCrypto(void)
+QObject *newTestCryptoMessage(void)
 {
-	return new (std::nothrow) TestCrypto();
+	return new (std::nothrow) TestCryptoMessage();
 }
 
-//QTEST_MAIN(TestCrypto)
-#include "test_crypto.moc"
+//QTEST_MAIN(TestCryptoMessage)
+#include "test_crypto_message.moc"
