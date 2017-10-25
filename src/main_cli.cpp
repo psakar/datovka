@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
 		QSettings settings(globPref.loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
-		globAccounts.loadFromSettings(settings);
+		globAccounts.loadFromSettings(globPref.confDir(), settings);
 		globAccounts.decryptAllPwds(globPinSet._pinVal);
 	}
 
