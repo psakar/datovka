@@ -24,6 +24,7 @@
 #include <QTest>
 
 #include "tests/test_crypto_message.h"
+#include "tests/test_crypto_pin.h"
 #include "tests/test_db_container.h"
 #include "tests/test_isds_login.h"
 #include "tests/test_message_db_set.h"
@@ -35,7 +36,7 @@ int testThisClassAndDelete(QObject *testClassObj, int argc, char *argv[])
 {
 	int status;
 
-	if (testClassObj == NULL) {
+	if (testClassObj == Q_NULLPTR) {
 		return 1;
 	}
 
@@ -54,6 +55,10 @@ int main(int argc, char *argv[])
 #if defined (TEST_CRYPTO_MESSAGE)
 	status |= testThisClassAndDelete(newTestCryptoMessage(), argc, argv);
 #endif /* defined (TEST_CRYPTO_MESSAGE) */
+
+#if defined (TEST_CRYPTO_PIN)
+	status |= testThisClassAndDelete(newTestCryptoPin(), argc, argv);
+#endif /* defined (TEST_CRYPTO_PIN) */
 
 #if defined (TEST_DB_CONTAINER)
 	status |= testThisClassAndDelete(newTestDbContainer(), argc, argv);
