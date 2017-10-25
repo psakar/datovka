@@ -185,18 +185,22 @@ public:
 	/*!
 	 * @brief Load data from supplied settings.
 	 *
+	 * @param[in] confDir Configuration directory path.
 	 * @param[in] settings Settings structure to be read.
 	 */
-	void loadFromSettings(const QSettings &settings);
+	void loadFromSettings(const QString &confDir,
+	    const QSettings &settings);
 
 	/*!
 	 * @brief Store data to settings structure.
 	 *
 	 * @param[in]  pinVal PIN value to be used for password encryption.
+	 * @param[in]  confDir Configuration directory path.
 	 * @param[out] settings Setting structure to store the model content
 	 *     into.
 	 */
-	void saveToSettings(const QString &pinVal, QSettings &settings) const;
+	void saveToSettings(const QString &pinVal, const QString &confDir,
+	    QSettings &settings) const;
 
 	/*!
 	 * @brief Add account.

@@ -100,7 +100,7 @@ public:
 	bool rememberPwd(void) const;
 	void setRememberPwd(bool remember);
 	QString dbDir(void) const;
-	void setDbDir(const QString &path);
+	void setDbDir(const QString &path, const QString &confDir);
 	bool syncWithAll(void) const;
 	void setSyncWithAll(bool sync);
 	QString p12File(void) const;
@@ -137,21 +137,24 @@ public:
 	 *
 	 * @note Content is not erased before new settings is loaded.
 	 *
+	 * @param[in] confDir Configuration directory path.
 	 * @param[in] settings Settings structure to load data from.
 	 * @param[in] group Name of group to work with.
 	 */
-	void loadFromSettings(const QSettings &settings, const QString &group);
+	void loadFromSettings(const QString &confDir,
+	    const QSettings &settings, const QString &group);
 
 	/*!
 	 * @brief Save content to settings.
 	 *
 	 * @param[in]  pinVal PIN value to be used for password encryption.
+	 * @param[in]  confDir Configuration directory path.
 	 * @param[out] settings Settings structure to write/append data into.
 	 * @param[in]  group Name of group to write to, group is create only
 	 *                   when non-empty string supplied.
 	 */
-	void saveToSettings(const QString &pinVal, QSettings &settings,
-	    const QString &group) const;
+	void saveToSettings(const QString &pinVal, const QString &confDir,
+	    QSettings &settings, const QString &group) const;
 
 	/*!
 	 * @brief Used for sorting credentials.

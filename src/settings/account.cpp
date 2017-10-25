@@ -28,7 +28,6 @@
 #include "src/crypto/crypto_wrapped.h"
 #include "src/log/log.h"
 #include "src/settings/account.h"
-#include "src/settings/preferences.h"
 
 namespace CredNames {
 	const QString creds(QLatin1String("credentials"));
@@ -288,9 +287,9 @@ QString AcntSettings::dbDir(void) const
 	return m_parentType::operator[](CredNames::dbDir).toString();
 }
 
-void AcntSettings::setDbDir(const QString &path)
+void AcntSettings::setDbDir(const QString &path, const QString &confDir)
 {
-	if (path == globPref.confDir()) {
+	if (path == confDir) {
 		/* Default path is empty. */
 		m_parentType::operator[](CredNames::dbDir) = QString();
 	} else {
@@ -500,8 +499,8 @@ void AcntSettings::decryptPassword(const QString &oldPin)
 	}
 }
 
-void AcntSettings::loadFromSettings(const QSettings &settings,
-    const QString &group)
+void AcntSettings::loadFromSettings(const QString &confDir,
+    const QSettings &settings, const QString &group)
 {
 	QString prefix;
 	if (!group.isEmpty()) {
@@ -524,8 +523,9 @@ void AcntSettings::loadFromSettings(const QSettings &settings,
 	    QString()).toBool());
 	setRememberPwd(settings.value(prefix + CredNames::rememberPwd,
 	    QString()).toBool());
-	setDbDir(settings.value(prefix + CredNames::dbDir,
-	    QString()).toString());
+	setDbDir(
+	    settings.value(prefix + CredNames::dbDir, QString()).toString(),
+	    confDir);
 	setSyncWithAll(settings.value(prefix + CredNames::syncWithAll,
 	    QString()).toBool());
 	setP12File(settings.value(prefix + CredNames::p12File,
@@ -587,8 +587,8 @@ bool storeEncryptedPwd(const QString &pinVal, QSettings &settings,
 	return true;
 }
 
-void AcntSettings::saveToSettings(const QString &pinVal, QSettings &settings,
-    const QString &group) const
+void AcntSettings::saveToSettings(const QString &pinVal, const QString &confDir,
+    QSettings &settings, const QString &group) const
 {
 	if (!group.isEmpty()) {
 		settings.beginGroup(group);
@@ -613,7 +613,7 @@ void AcntSettings::saveToSettings(const QString &pinVal, QSettings &settings,
 	}
 
 	if (!dbDir().isEmpty()) {
-		if (QDir(dbDir()) != QDir(globPref.confDir())) {
+		if (QDir(dbDir()) != QDir(confDir)) {
 			settings.setValue(CredNames::dbDir, dbDir());
 		}
 	}

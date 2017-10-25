@@ -4194,7 +4194,7 @@ void MainWindow::loadSettings(void)
 	/* PIN should already be set because main window is running. */
 
 	/* Accounts. */
-	m_accountModel.loadFromSettings(settings);
+	m_accountModel.loadFromSettings(globPref.confDir(), settings);
 	ui->accountList->setModel(&m_accountModel);
 	globAccounts.decryptAllPwds(globPinSet._pinVal);
 
@@ -4465,7 +4465,8 @@ void MainWindow::saveSettings(void) const
 	globPinSet.saveToSettings(settings);
 
 	/* Accounts. */
-	m_accountModel.saveToSettings(globPinSet._pinVal, settings);
+	m_accountModel.saveToSettings(globPinSet._pinVal, globPref.confDir(),
+	   settings);
 
 	/* Store last-used account. */
 	saveAccountIndex(settings);

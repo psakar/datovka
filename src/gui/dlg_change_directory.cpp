@@ -149,7 +149,7 @@ bool DlgChangeDirectory::relocateDatabase(const QString &userName,
 	case ACT_MOVE:
 		/* Move account database into new directory. */
 		if (dbSet->moveToLocation(newDir)) {
-			itemSettings.setDbDir(newDir);
+			itemSettings.setDbDir(newDir, globPref.confDir());
 
 			logInfo("Database files for '%s' have been moved from '%s' to '%s'.\n",
 			    userName.toUtf8().constData(),
@@ -174,7 +174,7 @@ bool DlgChangeDirectory::relocateDatabase(const QString &userName,
 	case ACT_COPY:
 		/* Copy account database into new directory. */
 		if (dbSet->copyToLocation(newDir)) {
-			itemSettings.setDbDir(newDir);
+			itemSettings.setDbDir(newDir, globPref.confDir());
 
 			logInfo("Database files for '%s' have been copied from '%s' to '%s'.\n",
 			    userName.toUtf8().constData(),
@@ -200,7 +200,7 @@ bool DlgChangeDirectory::relocateDatabase(const QString &userName,
 		/* Create a new account database into new directory. */
 		if (dbSet->reopenLocation(newDir, MessageDbSet::DO_YEARLY,
 		        MessageDbSet::CM_CREATE_EMPTY_CURRENT)) {
-			itemSettings.setDbDir(newDir);
+			itemSettings.setDbDir(newDir, globPref.confDir());
 
 			logInfo("Database files for '%s' have been created in '%s'.\n",
 			    userName.toUtf8().constData(),

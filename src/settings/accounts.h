@@ -42,8 +42,12 @@ class AccountsMap : public QObject, public QMap<QString, AcntSettings> {
 public:
 	/*!
 	 * @brief Load data from supplied settings.
+	 *
+	 * @param[in] confDir Configuration directory path.
+	 * @param[in] settings Settings structure to load data from.
 	 */
-	void loadFromSettings(const QSettings &settings);
+	void loadFromSettings(const QString &confDir,
+	    const QSettings &settings);
 
 	/*!
 	 * @brief Decrypts all encrypted passwords.
