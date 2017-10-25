@@ -23,6 +23,12 @@
 
 #include <QSettings>
 #include <QString>
+#include <QtTest/QtTest>
+
+#include "src/settings/account.h"
+#include "src/settings/accounts.h"
+#include "src/settings/pin.h"
+#include "tests/test_crypto_pin.h"
 
 class TestCryptoPin : public QObject {
 	Q_OBJECT
@@ -35,19 +41,33 @@ private slots:
 
 	void cleanupTestCase(void);
 
+	void loadConfigPinDisabled(void);
+
+	void loadConfigPinEnabled(void);
+
 private:
-//	static
-//	void loadSettings(const QString &confPath, PinSettings &pinSet,
-//	    AccountsMap &accounts);
+	static
+	void loadSettings(const QString &confPath, PinSettings &pinSet,
+	    AccountsMap &accounts);
 
 	const QString configPinDisabledPath;
 	const QString configPinEnabledPath;
+	const QString correctPin;
+	const QString incorrectPin;
+	const QString expectedAcntName;
+	const QString expectedUsername;
+	const QString expectedPwd;
 };
 
 TestCryptoPin::TestCryptoPin(void)
     : QObject(Q_NULLPTR),
     configPinDisabledPath("data/config_pin_disabled.conf"),
-    configPinEnabledPath("data/config_pin_enabled.conf")
+    configPinEnabledPath("data/config_pin_enabled.conf"),
+    correctPin("1234"),
+    incorrectPin("123"),
+    expectedAcntName("account_abcdef"),
+    expectedUsername("abcdef"),
+    expectedPwd("password01")
 {
 }
 
@@ -58,6 +78,90 @@ void TestCryptoPin::initTestCase(void)
 
 void TestCryptoPin::cleanupTestCase(void)
 {
+}
+
+void TestCryptoPin::loadConfigPinDisabled(void)
+{
+	PinSettings pinSet;
+	AccountsMap accounts;
+
+	loadSettings(configPinDisabledPath, pinSet, accounts);
+
+	QVERIFY2(!pinSet.pinConfigured(), "Expected PIN to be not configured.");
+
+	QVERIFY(accounts.find(expectedUsername) != accounts.end());
+
+	AcntSettings acntSet(accounts[expectedUsername]);
+	QVERIFY(acntSet.accountName() == expectedAcntName);
+	QVERIFY(acntSet.userName() == expectedUsername);
+
+	QVERIFY(acntSet.password() == expectedPwd);
+	QVERIFY(acntSet.pwdAlg().isEmpty());
+	QVERIFY(acntSet.pwdSalt().isEmpty());
+	QVERIFY(acntSet.pwdIv().isEmpty());
+	QVERIFY(acntSet.pwdCode().isEmpty());
+}
+
+void TestCryptoPin::loadConfigPinEnabled(void)
+{
+	PinSettings pinSet;
+	AccountsMap accounts;
+
+	loadSettings(configPinEnabledPath, pinSet, accounts);
+
+	QVERIFY2(pinSet.pinConfigured(), "Expected PIN to be configured.");
+
+	bool ret = PinSettings::verifyPin(pinSet, QString());
+	QVERIFY2(!ret, "Expected PIN check to fail.");
+	QVERIFY(pinSet._pinVal.isEmpty());
+
+	ret = PinSettings::verifyPin(pinSet, incorrectPin);
+	QVERIFY2(!ret, "Expected PIN check to fail.");
+	QVERIFY(pinSet._pinVal.isEmpty());
+
+	ret = PinSettings::verifyPin(pinSet, correctPin);
+	QVERIFY2(ret, "Expected PIN check to succeed.");
+	QVERIFY(!pinSet._pinVal.isEmpty());
+	QVERIFY(pinSet._pinVal == correctPin);
+
+	QVERIFY(accounts.find(expectedUsername) != accounts.end());
+
+	AcntSettings acntSet(accounts[expectedUsername]);
+	QVERIFY(acntSet.accountName() == expectedAcntName);
+	QVERIFY(acntSet.userName() == expectedUsername);
+
+	QVERIFY(acntSet.password().isEmpty());
+	QVERIFY(!acntSet.pwdAlg().isEmpty());
+	QVERIFY(!acntSet.pwdSalt().isEmpty());
+	QVERIFY(!acntSet.pwdIv().isEmpty());
+	QVERIFY(!acntSet.pwdCode().isEmpty());
+
+	acntSet.decryptPassword(QString());
+	QVERIFY(acntSet.password().isEmpty());
+
+	acntSet.decryptPassword(incorrectPin);
+	QVERIFY(!acntSet.password().isEmpty());
+	QVERIFY(acntSet.password() != expectedPwd);
+
+	acntSet.decryptPassword(correctPin);
+	QVERIFY(!acntSet.password().isEmpty());
+	/* Password already stored in decrypted form. */
+	QVERIFY(acntSet.password() != expectedPwd);
+
+	acntSet.setPassword(QString());
+	acntSet.decryptPassword(correctPin);
+	QVERIFY(!acntSet.password().isEmpty());
+	QVERIFY(acntSet.password() == expectedPwd);
+}
+
+void TestCryptoPin::loadSettings(const QString &confPath, PinSettings &pinSet,
+    AccountsMap &accounts)
+{
+	QSettings settings(confPath, QSettings::IniFormat);
+	settings.setIniCodec("UTF-8");
+
+	pinSet.loadFromSettings(settings);
+	accounts.loadFromSettings(QString(), settings);
 }
 
 QObject *newTestCryptoPin(void)
