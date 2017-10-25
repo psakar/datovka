@@ -45,10 +45,23 @@ private slots:
 
 	void loadConfigPinEnabled(void);
 
+	void enablePin(void);
+
 private:
+	void checkConfigPinDisabled(QSettings &settings) const;
+
+	void checkConfigPinEnabled(QSettings &settings) const;
+
 	static
-	void loadSettings(const QString &confPath, PinSettings &pinSet,
+	void setPin(QSettings &setIn, QSettings &setOut, const QString &pinVal);
+
+	static
+	void loadSettings(QSettings &settings, PinSettings &pinSet,
 	    AccountsMap &accounts);
+
+	static
+	void saveSettings(QSettings &settings, const PinSettings &pinSet,
+	    const AccountsMap &accounts);
 
 	const QString configPinDisabledPath;
 	const QString configPinEnabledPath;
@@ -82,10 +95,37 @@ void TestCryptoPin::cleanupTestCase(void)
 
 void TestCryptoPin::loadConfigPinDisabled(void)
 {
+	QSettings settings(configPinDisabledPath, QSettings::IniFormat);
+
+	checkConfigPinDisabled(settings);
+}
+
+void TestCryptoPin::loadConfigPinEnabled(void)
+{
+	QSettings settings(configPinEnabledPath, QSettings::IniFormat);
+
+	checkConfigPinEnabled(settings);
+}
+
+void TestCryptoPin::enablePin(void)
+{
+	QSettings settings01(configPinDisabledPath, QSettings::IniFormat);
+	QSettings::setDefaultFormat(QSettings::IniFormat);
+	QSettings settings02;
+
+	checkConfigPinDisabled(settings01);
+
+	setPin(settings01, settings02, correctPin);
+
+	checkConfigPinEnabled(settings02);
+}
+
+void TestCryptoPin::checkConfigPinDisabled(QSettings &settings) const
+{
 	PinSettings pinSet;
 	AccountsMap accounts;
 
-	loadSettings(configPinDisabledPath, pinSet, accounts);
+	loadSettings(settings, pinSet, accounts);
 
 	QVERIFY2(!pinSet.pinConfigured(), "Expected PIN to be not configured.");
 
@@ -102,12 +142,12 @@ void TestCryptoPin::loadConfigPinDisabled(void)
 	QVERIFY(acntSet.pwdCode().isEmpty());
 }
 
-void TestCryptoPin::loadConfigPinEnabled(void)
+void TestCryptoPin::checkConfigPinEnabled(QSettings &settings) const
 {
 	PinSettings pinSet;
 	AccountsMap accounts;
 
-	loadSettings(configPinEnabledPath, pinSet, accounts);
+	loadSettings(settings, pinSet, accounts);
 
 	QVERIFY2(pinSet.pinConfigured(), "Expected PIN to be configured.");
 
@@ -154,14 +194,50 @@ void TestCryptoPin::loadConfigPinEnabled(void)
 	QVERIFY(acntSet.password() == expectedPwd);
 }
 
-void TestCryptoPin::loadSettings(const QString &confPath, PinSettings &pinSet,
+void TestCryptoPin::setPin(QSettings &setIn, QSettings &setOut,
+    const QString &pinVal)
+{
+	PinSettings pinSet;
+	AccountsMap accounts;
+
+	loadSettings(setIn, pinSet, accounts);
+
+	PinSettings::updatePinSettings(pinSet, pinVal);
+
+	setOut.clear();
+	saveSettings(setOut, pinSet, accounts);
+}
+
+void TestCryptoPin::loadSettings(QSettings &settings, PinSettings &pinSet,
     AccountsMap &accounts)
 {
-	QSettings settings(confPath, QSettings::IniFormat);
 	settings.setIniCodec("UTF-8");
 
 	pinSet.loadFromSettings(settings);
 	accounts.loadFromSettings(QString(), settings);
+}
+
+void TestCryptoPin::saveSettings(QSettings &settings, const PinSettings &pinSet,
+    const AccountsMap &accounts)
+{
+	settings.setIniCodec("UTF-8");
+
+	pinSet.saveToSettings(settings);
+
+	QString groupName;
+	int row = 0;
+
+	foreach (const QString &key, accounts.keys()) {
+		groupName = CredNames::creds;
+		if (row > 0) {
+			groupName.append(QString::number(row + 1));
+		}
+
+		accounts[key].saveToSettings(pinSet._pinVal, QString(),
+		    settings, groupName);
+
+		++row;
+	}
 }
 
 QObject *newTestCryptoPin(void)
