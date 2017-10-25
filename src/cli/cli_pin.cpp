@@ -86,6 +86,11 @@ void enableStdinEcho(bool enable)
 #endif
 }
 
+/*!
+ * @brief Remove trailing newline character.
+ *
+ * @param[in,out] buf Null-terminated string buffer.
+ */
 static
 void remove_trailing_newline(char *buf)
 {
@@ -105,6 +110,28 @@ void remove_trailing_newline(char *buf)
 #define STDOUT stdout
 #define PIN_BUF_LEN 256
 
+/*!
+ * @brief Read terminal/console input without echoing characters.
+ *
+ * @brief Returns null string on error.
+ */
+static
+QString readInputNoEcho(void)
+{
+	char pin_buf[PIN_BUF_LEN];
+
+	enableStdinEcho(false);
+	const char *ret = fgets(pin_buf, PIN_BUF_LEN, STDIN);
+	enableStdinEcho(true);
+	remove_trailing_newline(pin_buf);
+
+	if (NULL != ret) {
+		return QString((const char *)pin_buf);
+	} else {
+		return QString();
+	}
+}
+
 bool CLIPin::queryPin(PinSettings &sett, int repeatNum)
 {
 	if (Q_UNLIKELY(!sett.pinConfigured())) {
@@ -117,31 +144,22 @@ bool CLIPin::queryPin(PinSettings &sett, int repeatNum)
 	}
 
 	bool properlySet = false;
-	char pin_buf[PIN_BUF_LEN];
 
 	do {
 		fprintf(STDOUT, "%s: ",
 		    tr("Enter PIN code").toUtf8().constData());
 		fflush(STDOUT);
 
-		enableStdinEcho(false);
-		const char *ret = fgets(pin_buf, PIN_BUF_LEN, STDIN);
-		enableStdinEcho(true);
-		remove_trailing_newline(pin_buf);
+		QString pinVal(readInputNoEcho());
 
 		fputc('\n', STDOUT);
 		fflush(STDOUT);
 
-		if (NULL != ret) {
-			/* Conversion to const char * is necessary. */
-			QString pinVal((const char *)pin_buf);
-
-			if (!PinSettings::verifyPin(sett, pinVal)) {
-				logWarningNL("%s",
-				    "Could not verify entered PIN value.");
-			} else {
-				properlySet = true;
-			}
+		if (!PinSettings::verifyPin(sett, pinVal)) {
+			logWarningNL("%s",
+			    "Could not verify entered PIN value.");
+		} else {
+			properlySet = true;
 		}
 
 		--repeatNum;
