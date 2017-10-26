@@ -153,22 +153,31 @@ int crypto_lib_ver_compatible(unsigned long run_num, unsigned long cmp_num)
 
 int crypto_compiled_lib_ver_check(void)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 	unsigned long qt_cmp_ssl_ver =
 	    QSslSocket::sslLibraryBuildVersionNumber();
+	struct ssl_ver_nums qt_cmp_nums;
+#else /* < Qt-5.4 */
+#  warning "Compiling against version < Qt-5.4 which does not provide version number of the SSL library in use at Qt compile time."
+#endif /* >= Qt-5.4 */
+
 	unsigned long run_ssl_ver = _SSLeay();
+	struct ssl_ver_nums app_cmp_nums, run_nums;
 
-	struct ssl_ver_nums qt_cmp_nums, app_cmp_nums, run_nums;
-
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 	logInfoNL("Qt compile-time OpenSSL version 0x%x (%s).", qt_cmp_ssl_ver,
 	    QSslSocket::sslLibraryBuildVersionString().toUtf8().constData());
+#endif /* >= Qt-5.4 */
 	logInfoNL("Application compile-time OpenSSL version 0x%x (%s).",
 	    appSslBuildVerNum, appSslBuildVerStr.toUtf8().constData());
 	logInfoNL("Run-time OpenSSL version 0x%x (%s).",
 	    run_ssl_ver, _SSLeay_version_str());
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 	if (Q_UNLIKELY(0 != set_ssl_ver_nums(&qt_cmp_nums, qt_cmp_ssl_ver))) {
 		return -1;
 	}
+#endif /* >= Qt-5.4 */
 	if (Q_UNLIKELY(0 != set_ssl_ver_nums(&app_cmp_nums, appSslBuildVerNum))) {
 		return -1;
 	}
@@ -176,10 +185,12 @@ int crypto_compiled_lib_ver_check(void)
 		return -1;
 	}
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 	int ret = lib_ver_compatible(&run_nums, &qt_cmp_nums);
 	if (ret != 0) {
 		return ret;
 	}
+#endif /* >= Qt-5.4 */
 
 	return lib_ver_compatible(&run_nums, &app_cmp_nums);
 }
