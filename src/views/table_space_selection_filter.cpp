@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,11 +53,11 @@ TableSpaceSelectionFilter::~TableSpaceSelectionFilter(void)
 static
 bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 {
-	if (0 == tw) {
+	if (Q_NULLPTR == tw) {
 		Q_ASSERT(0);
 		return false;
 	}
-	if (0 == ke) {
+	if (Q_NULLPTR == ke) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -75,7 +75,7 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 			QTableWidgetItem *frstItem = tw->item(
 			    selectedItems.first()->row(), CHECK_COL);
 
-			if (0 == frstItem) {
+			if (Q_NULLPTR == frstItem) {
 				Q_ASSERT(0);
 				return false;
 			}
@@ -83,13 +83,13 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 			bool checked = frstItem->checkState() == Qt::Checked;
 
 			foreach (QTableWidgetItem *const item, selectedItems) {
-				if (0 == item) {
+				if (Q_NULLPTR == item) {
 					continue;
 				}
 				QTableWidgetItem *checkItem =
 				    tw->item(item->row(), 0);
 
-				if (0 == checkItem) {
+				if (Q_NULLPTR == checkItem) {
 					Q_ASSERT(0);
 					continue;
 				}
@@ -108,17 +108,17 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 
 bool TableSpaceSelectionFilter::eventFilter(QObject *object, QEvent *event)
 {
-	const QKeyEvent *ke = 0;
-	QTableWidget *tw = 0;
+	const QKeyEvent *ke = Q_NULLPTR;
+	QTableWidget *tw = Q_NULLPTR;
 	if (event->type() == QEvent::KeyPress) {
-		ke = (QKeyEvent *) event;
+		ke = (QKeyEvent *)event;
 	}
 
-	if (0 != ke) {
+	if (Q_NULLPTR != ke) {
 		tw = dynamic_cast<QTableWidget *>(object);
 	}
 
-	if (0 != tw) {
+	if (Q_NULLPTR != tw) {
 		if (widgetFilter(tw, ke)) {
 			return true;
 		}

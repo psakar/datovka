@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	TableSpaceSelectionFilter(QObject *parent = 0);
+	TableSpaceSelectionFilter(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
