@@ -43,7 +43,6 @@ typedef int (*encr_func_t)(const unsigned char *in, int in_len,
     const unsigned char *key, const unsigned char *iv, unsigned char *out,
     int out_max);
 
-
 /*!
  * @brief Decryption function prototype.
  *

@@ -98,11 +98,13 @@ void remove_trailing_newline(char *buf)
 		return;
 	}
 
+	/*
+	 * If there's not newline character then the input was probably
+	 * too long for buffer.
+	 */
 	char *pos = strchr(buf, '\n');
 	if (pos != NULL) {
 		*pos = '\0';
-	} else {
-		/* Input too long for buffer? */
 	}
 }
 
