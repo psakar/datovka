@@ -226,8 +226,10 @@ int main(int argc, char *argv[])
 		if (globPinSet.pinConfigured()) {
 			bool pinOk = false;
 			if (RM_GUI == runMode) {
+				splash->hide();
 				pinOk =
 				    DlgPinInput::queryPin(globPinSet, splash);
+				splash->show();
 			} else if (RM_CLI == runMode) {
 				pinOk = CLIPin::queryPin(globPinSet, 2);
 			}
