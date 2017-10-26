@@ -31,10 +31,12 @@
 
 #include "src/about.h"
 #include "src/cli/cli_parser.h"
+#include "src/cli/cli_pin.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
 #include "src/gui/datovka.h"
+#include "src/gui/dlg_pin_input.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/initialisation.h"
 #include "src/io/db_tables.h"
@@ -42,6 +44,7 @@
 #include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
+#include "src/settings/pin.h"
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
 #include "src/worker/pool.h"
@@ -112,13 +115,14 @@ int main(int argc, char *argv[])
 	    CLIParser::CLIServiceArgs(parser.optionNames()));
 
 	enum RunMode runMode = RM_GUI;
-	QSplashScreen *splash = new QSplashScreen;
+	QSplashScreen *splash = Q_NULLPTR; /* Used only in GUI mode. */
 
 	if (!srvcArgs.isEmpty()) {
 		runMode = RM_CLI;
 	} else if (!cmdLineFileNames.isEmpty()) {
 		runMode = RM_ZFO;
 	} else {
+		splash = new QSplashScreen;
 		splash->setPixmap(QPixmap(":/splash/datovka-splash.png"));
 		splash->show();
 	}
@@ -213,6 +217,30 @@ int main(int argc, char *argv[])
 
 	loadLocalisation(globPref);
 
+	/* Ask for PIN. */
+	{
+		QSettings settings(globPref.loadConfPath(),
+		    QSettings::IniFormat);
+		settings.setIniCodec("UTF-8");
+		globPinSet.loadFromSettings(settings);
+		if (globPinSet.pinConfigured()) {
+			bool pinOk = false;
+			if (RM_GUI == runMode) {
+				splash->hide();
+				pinOk =
+				    DlgPinInput::queryPin(globPinSet, splash);
+				splash->show();
+			} else if (RM_CLI == runMode) {
+				pinOk = CLIPin::queryPin(globPinSet, 2);
+			}
+
+			if (!pinOk) {
+				delete splash;
+				return EXIT_FAILURE;
+			}
+		}
+	}
+
 	/* set splash action text */
 	if (runMode == RM_GUI) {
 		Qt::Alignment align = Qt::AlignCenter;
@@ -230,14 +258,6 @@ int main(int argc, char *argv[])
 
 	int ret = EXIT_SUCCESS;
 
-	/* Parse account information. */
-	{
-		QSettings settings(globPref.loadConfPath(),
-		    QSettings::IniFormat);
-		settings.setIniCodec("UTF-8");
-		globAccounts.loadFromSettings(settings);
-	}
-
 	/* Start worker threads. */
 	globWorkPool.start();
 	logInfo("%s\n", "Worker pool started.");
@@ -249,6 +269,15 @@ int main(int argc, char *argv[])
 #endif /* >= Qt-5.6 */
 
 	if (runMode == RM_CLI) {
+		/* Parse account information. */
+		{
+			QSettings settings(globPref.loadConfPath(),
+			    QSettings::IniFormat);
+			settings.setIniCodec("UTF-8");
+			globAccounts.loadFromSettings(globPref.confDir(),
+			    settings);
+			globAccounts.decryptAllPwds(globPinSet._pinVal);
+		}
 		delete splash;
 		ret = CLIParser::runCLIService(srvcArgs, parser);
 	} else if (runMode == RM_ZFO) {

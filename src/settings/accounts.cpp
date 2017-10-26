@@ -25,7 +25,8 @@
 
 AccountsMap globAccounts;
 
-void AccountsMap::loadFromSettings(const QSettings &settings)
+void AccountsMap::loadFromSettings(const QString &confDir,
+    const QSettings &settings)
 {
 	QStringList groups = settings.childGroups();
 	QRegExp credRe(CredNames::creds + ".*");
@@ -51,10 +52,18 @@ void AccountsMap::loadFromSettings(const QSettings &settings)
 	foreach(const QString &group, credetialList) {
 		itemSettings.clear();
 
-		itemSettings.loadFromSettings(settings, group);
+		itemSettings.loadFromSettings(confDir, settings, group);
 
 		/* Associate map with item node. */
 		Q_ASSERT(!itemSettings.userName().isEmpty());
 		this->operator[](itemSettings.userName()) = itemSettings;
+	}
+}
+
+void AccountsMap::decryptAllPwds(const QString &pinVal)
+{
+	for (AccountsMap::iterator it = globAccounts.begin();
+	     it != globAccounts.end(); ++it) {
+		it->decryptPassword(pinVal);
 	}
 }

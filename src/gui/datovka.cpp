@@ -84,6 +84,8 @@
 #include "src/records_management/gui/dlg_records_management.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
+#include "src/settings/pin.h"
+#include "src/settings/preferences.h"
 #include "src/settings/records_management.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
@@ -633,7 +635,7 @@ void MainWindow::showPreferencesDialog(void)
 {
 	debugSlotCall();
 
-	if (!DlgPreferences::modify(globPref, this)) {
+	if (!DlgPreferences::modify(globPref, globPinSet, this)) {
 		return;
 	}
 
@@ -4171,7 +4173,6 @@ void MainWindow::loadSettings(void)
 	QSettings settings(globPref.loadConfPath(), QSettings::IniFormat);
 	settings.setIniCodec("UTF-8");
 
-
 	/* Load last directory paths */
 	loadLastDirectoryPaths(settings);
 
@@ -4190,9 +4191,12 @@ void MainWindow::loadSettings(void)
 	/* Records management settings. */
 	globRecordsManagementSet.loadFromSettings(settings);
 
+	/* PIN should already be set because main window is running. */
+
 	/* Accounts. */
-	m_accountModel.loadFromSettings(settings);
+	m_accountModel.loadFromSettings(globPref.confDir(), settings);
 	ui->accountList->setModel(&m_accountModel);
+	globAccounts.decryptAllPwds(globPinSet._pinVal);
 
 	/* Select last-used account. */
 	setDefaultAccount(settings);
@@ -4457,8 +4461,12 @@ void MainWindow::saveSettings(void) const
 	/* Store application ID and config format */
 	saveAppIdConfigFormat(settings);
 
+	/* PIN settings. */
+	globPinSet.saveToSettings(settings);
+
 	/* Accounts. */
-	m_accountModel.saveToSettings(settings);
+	m_accountModel.saveToSettings(globPinSet._pinVal, globPref.confDir(),
+	   settings);
 
 	/* Store last-used account. */
 	saveAccountIndex(settings);

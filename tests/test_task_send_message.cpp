@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -155,11 +155,19 @@ void TestTaskSendMessage::initTestCase(void)
 	}
 	QVERIFY(ret);
 
+	/* Create ISDS session container. */
+	QVERIFY(globIsdsSessionsPtr == Q_NULLPTR);
+	globIsdsSessionsPtr = new (std::nothrow) IsdsSessions;
+	if (globIsdsSessionsPtr == Q_NULLPTR) {
+		QSKIP("Cannot create session container.");
+	}
+	QVERIFY(globIsdsSessionsPtr != Q_NULLPTR);
+
 	/* Log into ISDS. */
-	struct isds_ctx *ctx = globIsdsSessions.session(m_sender.userName);
-	if (!globIsdsSessions.holdsSession(m_sender.userName)) {
+	struct isds_ctx *ctx = globIsdsSessionsPtr->session(m_sender.userName);
+	if (!globIsdsSessionsPtr->holdsSession(m_sender.userName)) {
 		QVERIFY(ctx == NULL);
-		ctx = globIsdsSessions.createCleanSession(m_sender.userName,
+		ctx = globIsdsSessionsPtr->createCleanSession(m_sender.userName,
 		    globPref.isds_download_timeout_ms);
 	}
 	if (ctx == NULL) {
@@ -177,6 +185,9 @@ void TestTaskSendMessage::initTestCase(void)
 void TestTaskSendMessage::cleanupTestCase(void)
 {
 	delete m_senderDbSet; m_senderDbSet = NULL;
+
+	/* Destroy ISDS session container. */
+	delete globIsdsSessionsPtr; globIsdsSessionsPtr = Q_NULLPTR;
 
 	/* Delete account database. */
 	delete globAccountDbPtr; globAccountDbPtr = NULL;
@@ -197,10 +208,10 @@ void TestTaskSendMessage::sendMessage(void)
 
 	QVERIFY(m_senderDbSet != NULL);
 
-	QVERIFY(globIsdsSessions.isConnectedToIsds(m_sender.userName));
-	struct isds_ctx *ctx = globIsdsSessions.session(m_sender.userName);
+	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_sender.userName));
+	struct isds_ctx *ctx = globIsdsSessionsPtr->session(m_sender.userName);
 	QVERIFY(ctx != NULL);
-	QVERIFY(globIsdsSessions.isConnectedToIsds(m_sender.userName));
+	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_sender.userName));
 
 	QString transactionId(QLatin1String("some_id"));
 	QString recipientName(QLatin1String("recipient name"));

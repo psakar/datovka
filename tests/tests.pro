@@ -54,7 +54,8 @@ HEADERS = \
 	$${top_srcdir}tests/helper.h \
 	$${top_srcdir}tests/helper_qt.h
 
-include(test_crypto.pri)
+include(test_crypto_message.pri)
+include(test_crypto_pin.pri)
 include(test_db_container.pri)
 include(test_message_db_set.pri)
 include(test_isds_login.pri)

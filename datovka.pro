@@ -231,10 +231,14 @@ SOURCES += \
     src/cli/cli.cpp \
     src/cli/cli_login.cpp \
     src/cli/cli_parser.cpp \
+    src/cli/cli_pin.cpp \
     src/common.cpp \
     src/crypto/crypto.c \
+    src/crypto/crypto_pin.c \
+    src/crypto/crypto_pwd.c \
     src/crypto/crypto_threads.cpp \
     src/crypto/crypto_version.cpp \
+    src/crypto/crypto_wrapped.cpp \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
@@ -252,6 +256,8 @@ SOURCES += \
     src/gui/dlg_import_zfo_result.cpp \
     src/gui/dlg_msg_box_informative.cpp \
     src/gui/dlg_msg_search.cpp \
+    src/gui/dlg_pin_input.cpp \
+    src/gui/dlg_pin_setup.cpp \
     src/gui/dlg_preferences.cpp \
     src/gui/dlg_proxysets.cpp \
     src/gui/dlg_send_message.cpp \
@@ -312,6 +318,7 @@ SOURCES += \
     src/records_management/widgets/svg_view.cpp \
     src/settings/account.cpp \
     src/settings/accounts.cpp \
+    src/settings/pin.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
     src/settings/records_management.cpp \
@@ -351,11 +358,15 @@ HEADERS += \
     src/cli/cli.h \
     src/cli/cli_login.h \
     src/cli/cli_parser.h \
+    src/cli/cli_pin.h \
     src/common.h \
     src/crypto/crypto.h \
     src/crypto/crypto_funcs.h \
+    src/crypto/crypto_pin.h \
+    src/crypto/crypto_pwd.h \
     src/crypto/crypto_threads.h \
     src/crypto/crypto_version.h \
+    src/crypto/crypto_wrapped.h \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
@@ -373,6 +384,8 @@ HEADERS += \
     src/gui/dlg_import_zfo_result.h \
     src/gui/dlg_msg_box_informative.h \
     src/gui/dlg_msg_search.h \
+    src/gui/dlg_pin_input.h \
+    src/gui/dlg_pin_setup.h \
     src/gui/dlg_preferences.h \
     src/gui/dlg_proxysets.h \
     src/gui/dlg_send_message.h \
@@ -432,6 +445,7 @@ HEADERS += \
     src/records_management/widgets/svg_view.h \
     src/settings/account.h \
     src/settings/accounts.h \
+    src/settings/pin.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
     src/settings/records_management.h \
@@ -479,6 +493,8 @@ FORMS += \
     src/gui/ui/dlg_import_zfo_result.ui \
     src/gui/ui/dlg_import_zfo.ui \
     src/gui/ui/dlg_msg_search.ui \
+    src/gui/ui/dlg_pin_input.ui \
+    src/gui/ui/dlg_pin_setup.ui \
     src/gui/ui/dlg_preferences.ui \
     src/gui/ui/dlg_proxysets.ui \
     src/gui/ui/dlg_send_message.ui \

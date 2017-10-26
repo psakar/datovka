@@ -27,6 +27,8 @@
 #include "src/common.h"
 #include "src/gui/dlg_account_from_db.h"
 #include "src/log/log.h"
+#include "src/settings/account.h"
+#include "src/settings/preferences.h"
 #include "ui_dlg_account_from_db.h"
 
 DlgCreateAccountFromDb::DlgCreateAccountFromDb(QWidget *parent)
@@ -190,7 +192,8 @@ QStringList createAccountsFromDatabaseFiles(AccountModel &accountModel,
 		itemSettings.setPassword("");
 		itemSettings.setRememberPwd(false);
 		itemSettings.setSyncWithAll(false);
-		itemSettings.setDbDir(absoluteDirPath(filePath));
+		itemSettings.setDbDir(absoluteDirPath(filePath),
+		    globPref.confDir());
 		accountModel.addAccount(itemSettings);
 		errMsg = DlgCreateAccountFromDb::tr(
 		        "Account with name '%1' has been created (user name '%1').")

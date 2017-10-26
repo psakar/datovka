@@ -39,6 +39,10 @@ namespace CredNames {
 	extern const QString userName;
 	extern const QString lMethod;
 	extern const QString pwd;
+	extern const QString pwdAlg;
+	extern const QString pwdSalt;
+	extern const QString pwdIv;
+	extern const QString pwdCode;
 	extern const QString testAcnt;
 	extern const QString rememberPwd;
 	extern const QString dbDir;
@@ -83,12 +87,20 @@ public:
 	void setLoginMethod(enum LogInMethod method);
 	QString password(void) const;
 	void setPassword(const QString &pwd);
+	QString pwdAlg(void) const;
+	void setPwdAlg(const QString &pwdAlg);
+	QByteArray pwdSalt(void) const;
+	void setPwdSalt(const QByteArray &pwdSalt);
+	QByteArray pwdIv(void) const;
+	void setPwdIv(const QByteArray &pwdIv);
+	QByteArray pwdCode(void) const;
+	void setPwdCode(const QByteArray &pwdCode);
 	bool isTestAccount(void) const;
 	void setTestAccount(bool isTesting);
 	bool rememberPwd(void) const;
 	void setRememberPwd(bool remember);
 	QString dbDir(void) const;
-	void setDbDir(const QString &path);
+	void setDbDir(const QString &path, const QString &confDir);
 	bool syncWithAll(void) const;
 	void setSyncWithAll(bool sync);
 	QString p12File(void) const;
@@ -114,23 +126,35 @@ public:
 	void _setPwdExpirDlgShown(bool pwdExpirDlgShown);
 
 	/*!
+	 * @brief Used to decrypt the password.
+	 *
+	 * @param[in] oldPin PIN value used to decrypt old passwords.
+	 */
+	void decryptPassword(const QString &oldPin);
+
+	/*!
 	 * @brief Load content from settings group.
 	 *
 	 * @note Content is not erased before new settings is loaded.
 	 *
+	 * @param[in] confDir Configuration directory path.
 	 * @param[in] settings Settings structure to load data from.
 	 * @param[in] group Name of group to work with.
 	 */
-	void loadFromSettings(const QSettings &settings, const QString &group);
+	void loadFromSettings(const QString &confDir,
+	    const QSettings &settings, const QString &group);
 
 	/*!
 	 * @brief Save content to settings.
 	 *
+	 * @param[in]  pinVal PIN value to be used for password encryption.
+	 * @param[in]  confDir Configuration directory path.
 	 * @param[out] settings Settings structure to write/append data into.
 	 * @param[in]  group Name of group to write to, group is create only
 	 *                   when non-empty string supplied.
 	 */
-	void saveToSettings(QSettings &settings, const QString &group) const;
+	void saveToSettings(const QString &pinVal, const QString &confDir,
+	    QSettings &settings, const QString &group) const;
 
 	/*!
 	 * @brief Used for sorting credentials.

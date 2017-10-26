@@ -24,8 +24,10 @@
 #include <QDir>
 
 #include "src/common.h"
+#include "src/crypto/crypto_pwd.h"
+#include "src/crypto/crypto_wrapped.h"
+#include "src/log/log.h"
 #include "src/settings/account.h"
-#include "src/settings/preferences.h"
 
 namespace CredNames {
 	const QString creds(QLatin1String("credentials"));
@@ -34,6 +36,10 @@ namespace CredNames {
 	const QString userName(QLatin1String("username"));
 	const QString lMethod(QLatin1String("login_method"));
 	const QString pwd(QLatin1String("password"));
+	const QString pwdAlg(QLatin1String("password_alg"));
+	const QString pwdSalt(QLatin1String("password_salt"));
+	const QString pwdIv(QLatin1String("password_iv"));
+	const QString pwdCode(QLatin1String("password_code"));
 	const QString testAcnt(QLatin1String("test_account"));
 	const QString rememberPwd(QLatin1String("remember_password"));
 	const QString dbDir(QLatin1String("database_dir"));
@@ -216,6 +222,46 @@ void AcntSettings::setPassword(const QString &pwd)
 	m_parentType::operator[](CredNames::pwd) = pwd;
 }
 
+QString AcntSettings::pwdAlg(void) const
+{
+	return m_parentType::operator[](CredNames::pwdAlg).toString();
+}
+
+void AcntSettings::setPwdAlg(const QString &pwdAlg)
+{
+	m_parentType::operator[](CredNames::pwdAlg) = pwdAlg;
+}
+
+QByteArray AcntSettings::pwdSalt(void) const
+{
+	return m_parentType::operator[](CredNames::pwdSalt).toByteArray();
+}
+
+void AcntSettings::setPwdSalt(const QByteArray &pwdSalt)
+{
+	m_parentType::operator[](CredNames::pwdSalt) = pwdSalt;
+}
+
+QByteArray AcntSettings::pwdIv(void) const
+{
+	return m_parentType::operator[](CredNames::pwdIv).toByteArray();
+}
+
+void AcntSettings::setPwdIv(const QByteArray &pwdIv)
+{
+	m_parentType::operator[](CredNames::pwdIv) = pwdIv;
+}
+
+QByteArray AcntSettings::pwdCode(void) const
+{
+	return m_parentType::operator[](CredNames::pwdCode).toByteArray();
+}
+
+void AcntSettings::setPwdCode(const QByteArray &pwdCode)
+{
+	m_parentType::operator[](CredNames::pwdCode) = pwdCode;
+}
+
 bool AcntSettings::isTestAccount(void) const
 {
 	return m_parentType::operator[](CredNames::testAcnt).toBool();
@@ -241,9 +287,9 @@ QString AcntSettings::dbDir(void) const
 	return m_parentType::operator[](CredNames::dbDir).toString();
 }
 
-void AcntSettings::setDbDir(const QString &path)
+void AcntSettings::setDbDir(const QString &path, const QString &confDir)
 {
-	if (path == globPref.confDir()) {
+	if (path == confDir) {
 		/* Default path is empty. */
 		m_parentType::operator[](CredNames::dbDir) = QString();
 	} else {
@@ -369,8 +415,92 @@ void AcntSettings::_setPwdExpirDlgShown(bool pwdExpirDlgShown)
 	m_parentType::insert(_PWD_EXPIR_DLG_SHOWN, pwdExpirDlgShown);
 }
 
-void AcntSettings::loadFromSettings(const QSettings &settings,
-    const QString &group)
+/*!
+ * @brief Restores password value,
+ *
+ * @note The PIN value may not be known when the settings are read. Therefore
+ *     password decryption is performed somewhere else.
+ * @todo Modify the programme to ensure that pin is known at the time when
+ *     account data is read.
+ *
+ * @param[in,out] aData Account data to store password into.
+ * @param[in]     settings Settings structure.
+ * @param[in]     groupName Settings group name.
+ */
+static
+void readPwdData(AcntSettings &aData, const QSettings &settings,
+    const QString &groupName)
+{
+	QString prefix;
+	if (!groupName.isEmpty()) {
+		prefix = groupName + QLatin1String("/");
+	}
+
+	{
+		QString pwd(settings.value(prefix + CredNames::pwd,
+		    QString()).toString());
+		aData.setPassword(
+		    QString::fromUtf8(QByteArray::fromBase64(pwd.toUtf8())));
+	}
+
+	aData.setPwdAlg(settings.value(prefix + CredNames::pwdAlg,
+	    QString()).toString());
+
+	aData.setPwdSalt(QByteArray::fromBase64(
+	    settings.value(prefix + CredNames::pwdSalt,
+	        QString()).toString().toUtf8()));
+
+	aData.setPwdIv(QByteArray::fromBase64(
+	    settings.value(prefix + CredNames::pwdIv,
+	        QString()).toString().toUtf8()));
+
+	aData.setPwdCode(QByteArray::fromBase64(
+	    settings.value(prefix + CredNames::pwdCode,
+	        QString()).toString().toUtf8()));
+
+	if (!aData.password().isEmpty() && !aData.pwdCode().isEmpty()) {
+		logWarningNL(
+		    "Account with user name '%s' has both encrypted and unencrypted password set.",
+		    aData.userName().toUtf8().constData());
+	}
+}
+
+void AcntSettings::decryptPassword(const QString &oldPin)
+{
+	if (!password().isEmpty()) {
+		/* Password already stored in decrypted form. */
+		return;
+	}
+
+	if (oldPin.isEmpty()) {
+		/*
+		 * Old PIN not given, password already should be in plain
+		 * format.
+		 */
+		return;
+	}
+
+	if (!pwdAlg().isEmpty() && !pwdSalt().isEmpty() &&
+	    !pwdCode().isEmpty()) {
+		logDebugLv0NL("Decrypting password for user name '%s'.",
+		    userName().toUtf8().constData());
+		QString decrypted(decryptPwd(pwdCode(), oldPin, pwdAlg(),
+		    pwdSalt(), pwdIv()));
+		if (decrypted.isEmpty()) {
+			logWarningNL(
+			    "Failed decrypting password for user name '%s'.",
+			    userName().toUtf8().constData());
+		}
+
+		/* Store password. */
+		if (!decrypted.isEmpty()) {
+			setPassword(decrypted);
+		}
+	}
+}
+
+void AcntSettings::loadFromSettings(const QString &confDir,
+    const QSettings &settings, const QString &group)
 {
 	QString prefix;
 	if (!group.isEmpty()) {
@@ -383,37 +513,82 @@ void AcntSettings::loadFromSettings(const QSettings &settings,
 	 * FIXME -- Any white-space characters trailing the comma are lost.
 	 */
 	setAccountName(settings.value(prefix + CredNames::acntName,
-	    "").toStringList().join(", "));
+	    QString()).toStringList().join(", "));
 	setUserName(settings.value(prefix + CredNames::userName,
-	    "").toString());
+	    QString()).toString());
 	setLoginMethod(methodStrToEnum(
-	    settings.value(prefix + CredNames::lMethod, "").toString()));
-	setPassword(fromBase64(settings.value(prefix + CredNames::pwd,
-	    "").toString()));
+	    settings.value(prefix + CredNames::lMethod, QString()).toString()));
+	readPwdData(*this, settings, group);
 	setTestAccount(settings.value(prefix + CredNames::testAcnt,
-	    "").toBool());
+	    QString()).toBool());
 	setRememberPwd(settings.value(prefix + CredNames::rememberPwd,
-	    "").toBool());
-	setDbDir(settings.value(prefix + CredNames::dbDir,
-	    "").toString());
+	    QString()).toBool());
+	setDbDir(
+	    settings.value(prefix + CredNames::dbDir, QString()).toString(),
+	    confDir);
 	setSyncWithAll(settings.value(prefix + CredNames::syncWithAll,
-	    "").toBool());
+	    QString()).toBool());
 	setP12File(settings.value(prefix + CredNames::p12File,
-	    "").toString());
+	    QString()).toString());
 	setLastMsg(settings.value(prefix + CredNames::lstMsgId,
-	    "").toLongLong());
+	    QString()).toLongLong());
 	setLastAttachSavePath(settings.value(prefix + CredNames::lstSaveAtchPath,
-	    "").toString());
+	    QString()).toString());
 	setLastAttachAddPath(settings.value(prefix + CredNames::lstAddAtchPath,
-	    "").toString());
+	    QString()).toString());
 	setLastCorrespPath(settings.value(prefix + CredNames::lstCorrspPath,
-	    "").toString());
+	    QString()).toString());
 	setLastZFOExportPath(settings.value(prefix + CredNames::lstZfoPath,
-	    "").toString());
+	    QString()).toString());
 }
 
-void AcntSettings::saveToSettings(QSettings &settings,
-    const QString &group) const
+/*!
+ * @brief Stores encrypted password into settings.
+ *
+ * @param[in]     pinVal PIN value to be used for password encryption.
+ * @param[in,out] settings Settings structure.
+ * @param[in]     aData Account data to be stored.
+ * @param[in]     password Password to be stored.
+ */
+static
+bool storeEncryptedPwd(const QString &pinVal, QSettings &settings,
+    const AcntSettings &aData, const QString &password)
+{
+	/* Currently only one cryptographic algorithm is supported. */
+	const struct pwd_alg *pwdAlgDesc = &aes256_cbc;
+
+	/* Ignore the algorithm settings. */
+	const QString pwdAlg(aes256_cbc.name);
+	QByteArray pwdSalt(aData.pwdSalt());
+	QByteArray pwdIV(aData.pwdIv());
+
+	if (pwdSalt.size() < pwdAlgDesc->key_len) {
+		pwdSalt = randomSalt(pwdAlgDesc->key_len);
+	}
+
+	if (pwdIV.size() < pwdAlgDesc->iv_len) {
+		pwdIV = randomSalt(pwdAlgDesc->iv_len);
+	}
+
+	QByteArray pwdCode = encryptPwd(password, pinVal, pwdAlgDesc->name,
+	    pwdSalt, pwdIV);
+	if (pwdCode.isEmpty()) {
+		return false;
+	}
+
+	settings.setValue(CredNames::pwdAlg, pwdAlg);
+	settings.setValue(CredNames::pwdSalt,
+	    QString::fromUtf8(pwdSalt.toBase64()));
+	settings.setValue(CredNames::pwdIv,
+	    QString::fromUtf8(pwdIV.toBase64()));
+	settings.setValue(CredNames::pwdCode,
+	    QString::fromUtf8(pwdCode.toBase64()));
+
+	return true;
+}
+
+void AcntSettings::saveToSettings(const QString &pinVal, const QString &confDir,
+    QSettings &settings, const QString &group) const
 {
 	if (!group.isEmpty()) {
 		settings.beginGroup(group);
@@ -424,14 +599,21 @@ void AcntSettings::saveToSettings(QSettings &settings,
 	settings.setValue(CredNames::lMethod, methodEnumToStr(loginMethod()));
 	settings.setValue(CredNames::testAcnt, isTestAccount());
 	settings.setValue(CredNames::rememberPwd, rememberPwd());
-	if (rememberPwd()) {
-		if (!password().isEmpty()) {
+	if (rememberPwd() && !password().isEmpty()) {
+		bool writePlainPwd = pinVal.isEmpty();
+		if (!writePlainPwd) {
+			writePlainPwd = !storeEncryptedPwd(pinVal, settings,
+			    *this, password());
+		}
+
+		if (writePlainPwd) { /* Only when plain or encryption fails. */
+			/* Store unencrypted password. */
 			settings.setValue(CredNames::pwd, toBase64(password()));
 		}
 	}
 
 	if (!dbDir().isEmpty()) {
-		if (QDir(dbDir()) != QDir(globPref.confDir())) {
+		if (QDir(dbDir()) != QDir(confDir)) {
 			settings.setValue(CredNames::dbDir, dbDir());
 		}
 	}

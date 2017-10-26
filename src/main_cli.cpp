@@ -30,6 +30,7 @@
 
 #include "src/about.h"
 #include "src/cli/cli_parser.h"
+#include "src/cli/cli_pin.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
@@ -39,6 +40,7 @@
 #include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
+#include "src/settings/pin.h"
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
 #include "src/worker/pool.h"
@@ -169,6 +171,19 @@ int main(int argc, char *argv[])
 
 	loadLocalisation(globPref);
 
+	/* Ask for PIN. */
+	{
+		QSettings settings(globPref.loadConfPath(),
+		    QSettings::IniFormat);
+		settings.setIniCodec("UTF-8");
+		globPinSet.loadFromSettings(settings);
+		if (globPinSet.pinConfigured()) {
+			if (!CLIPin::queryPin(globPinSet, 2)) {
+				return EXIT_FAILURE;
+			}
+		}
+	}
+
 	/* Localise description in tables. */
 	localiseTableDescriptions();
 
@@ -178,17 +193,18 @@ int main(int argc, char *argv[])
 
 	int ret = EXIT_SUCCESS;
 
+	/* Start worker threads. */
+	globWorkPool.start();
+	logInfo("%s\n", "Worker pool started.");
+
 	/* Parse account information. */
 	{
 		QSettings settings(globPref.loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
-		globAccounts.loadFromSettings(settings);
+		globAccounts.loadFromSettings(globPref.confDir(), settings);
+		globAccounts.decryptAllPwds(globPinSet._pinVal);
 	}
-
-	/* Start worker threads. */
-	globWorkPool.start();
-	logInfo("%s\n", "Worker pool started.");
 
 	ret = CLIParser::runCLIService(srvcArgs, parser);
 

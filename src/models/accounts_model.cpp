@@ -434,10 +434,11 @@ Qt::ItemFlags AccountModel::flags(const QModelIndex &index) const
 	return QAbstractItemModel::flags(index) & ~Qt::ItemIsEditable;
 }
 
-void AccountModel::loadFromSettings(const QSettings &settings)
+void AccountModel::loadFromSettings(const QString &confDir,
+    const QSettings &settings)
 {
 	/* Load into global account settings. */
-	globAccounts.loadFromSettings(settings);
+	globAccounts.loadFromSettings(confDir, settings);
 
 	QStringList groups = settings.childGroups();
 	QRegExp credRe(CredNames::creds + ".*");
@@ -479,7 +480,8 @@ void AccountModel::loadFromSettings(const QSettings &settings)
 	endResetModel();
 }
 
-void AccountModel::saveToSettings(QSettings &settings) const
+void AccountModel::saveToSettings(const QString &pinVal, const QString &confDir,
+    QSettings &settings) const
 {
 	QString groupName;
 
@@ -496,7 +498,8 @@ void AccountModel::saveToSettings(QSettings &settings) const
 			groupName.append(QString::number(row + 1));
 		}
 
-		itemSettings.saveToSettings(settings, groupName);
+		itemSettings.saveToSettings(pinVal, confDir, settings,
+		    groupName);
 	}
 }
 

@@ -16,6 +16,9 @@ LIBS += \
 SOURCES += \
 	$${top_srcdir}src/common.cpp \
 	$${top_srcdir}src/crypto/crypto.c \
+	$${top_srcdir}src/crypto/crypto_pin.c \
+	$${top_srcdir}src/crypto/crypto_pwd.c \
+	$${top_srcdir}src/crypto/crypto_wrapped.cpp \
 	$${top_srcdir}src/io/filesystem.cpp \
 	$${top_srcdir}src/io/isds_login.cpp \
 	$${top_srcdir}src/io/isds_sessions.cpp \
@@ -28,6 +31,9 @@ HEADERS += \
 	$${top_srcdir}src/common.h \
 	$${top_srcdir}src/crypto/crypto.h \
 	$${top_srcdir}src/crypto/crypto_funcs.h \
+	$${top_srcdir}src/crypto/crypto_pin.h \
+	$${top_srcdir}src/crypto/crypto_pwd.h \
+	$${top_srcdir}src/crypto/crypto_wrapped.h \
 	$${top_srcdir}src/io/filesystem.h \
 	$${top_srcdir}src/io/isds_login.h \
 	$${top_srcdir}src/io/isds_sessions.h \

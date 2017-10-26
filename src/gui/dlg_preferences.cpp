@@ -26,6 +26,7 @@
 
 #include "src/common.h"
 #include "src/dimensions/dimensions.h"
+#include "src/gui/dlg_pin_setup.h"
 #include "src/gui/dlg_preferences.h"
 #include "src/localisation/localisation.h"
 #include "ui_dlg_preferences.h"
@@ -42,9 +43,11 @@ enum LangIndex {
 	LANG_ENGLISH = 2
 };
 
-DlgPreferences::DlgPreferences(const GlobPreferences &prefs, QWidget *parent)
+DlgPreferences::DlgPreferences(const GlobPreferences &prefs,
+    const PinSettings &pinSett, QWidget *parent)
     : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgPreferences)
+    m_ui(new (std::nothrow) Ui::DlgPreferences),
+    m_pinSett(pinSett)
 {
 	m_ui->setupUi(this);
 
@@ -56,6 +59,7 @@ DlgPreferences::DlgPreferences(const GlobPreferences &prefs, QWidget *parent)
 		}
 	}
 	initDialogue(prefs);
+	activatePinButtons(m_pinSett);
 }
 
 DlgPreferences::~DlgPreferences(void)
@@ -63,11 +67,12 @@ DlgPreferences::~DlgPreferences(void)
 	delete m_ui;
 }
 
-bool DlgPreferences::modify(GlobPreferences &prefs, QWidget *parent)
+bool DlgPreferences::modify(GlobPreferences &prefs, PinSettings &pinSett,
+    QWidget *parent)
 {
-	DlgPreferences dlg(prefs, parent);
+	DlgPreferences dlg(prefs, pinSett, parent);
 	if (QDialog::Accepted == dlg.exec()) {
-		dlg.saveSettings(prefs);
+		dlg.saveSettings(prefs, pinSett);
 		return true;
 	} else {
 		return false;
@@ -101,6 +106,39 @@ void DlgPreferences::setAddFilePath(void)
 	if (!newDir.isEmpty()) {
 		m_ui->addFilePath->setText(newDir);
 	}
+}
+
+void DlgPreferences::setPin(void)
+{
+	if (Q_UNLIKELY(m_pinSett.pinConfigured())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	DlgPinSetup::change(m_pinSett, this);
+	activatePinButtons(m_pinSett);
+}
+
+void DlgPreferences::changePin(void)
+{
+	if (Q_UNLIKELY(!m_pinSett.pinConfigured())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	DlgPinSetup::change(m_pinSett, this);
+	activatePinButtons(m_pinSett);
+}
+
+void DlgPreferences::clearPin(void)
+{
+	if (Q_UNLIKELY(!m_pinSett.pinConfigured())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	DlgPinSetup::erase(m_pinSett, this);
+	activatePinButtons(m_pinSett);
 }
 
 /*!
@@ -143,7 +181,8 @@ int settingsLangtoIndex(const QString &lang)
 	}
 }
 
-void DlgPreferences::saveSettings(GlobPreferences &prefs) const
+void DlgPreferences::saveSettings(GlobPreferences &prefs,
+    PinSettings &pinSett) const
 {
 	/* downloading */
 	prefs.download_on_background = m_ui->downloadOnBackground->isChecked();
@@ -159,7 +198,7 @@ void DlgPreferences::saveSettings(GlobPreferences &prefs) const
 	prefs.send_stats_with_version_checks =
 	    m_ui->sendStatsWithVersionChecks->isChecked();
 
-	/* storage */
+	/* security */
 	prefs.store_messages_on_disk = m_ui->storeMessagesOnDisk->isChecked();
 	prefs.store_additional_data_on_disk =
 	    m_ui->storeAdditionalDataOnDisk->isChecked();
@@ -170,6 +209,7 @@ void DlgPreferences::saveSettings(GlobPreferences &prefs) const
 	prefs.check_crl = m_ui->checkCrl->isChecked();
 	prefs.timestamp_expir_before_days =
 	    m_ui->timestampExpirSpinBox->value();
+	pinSett = m_pinSett;
 
 	/* navigation */
 	if (m_ui->afterStartSelectNewest->isChecked()) {
@@ -248,7 +288,7 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 
 	activateBackgroundTimer(m_ui->downloadOnBackground->checkState());
 
-	/* storage */
+	/* security */
 	m_ui->storeMessagesOnDisk->setChecked(prefs.store_messages_on_disk);
 	m_ui->storeAdditionalDataOnDisk->setChecked(
 	    prefs.store_additional_data_on_disk);
@@ -266,6 +306,12 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 	m_ui->checkCrl->setChecked(prefs.check_crl);
 	m_ui->timestampExpirSpinBox->setValue(
 	    prefs.timestamp_expir_before_days);
+
+	connect(m_ui->setPinButton, SIGNAL(clicked()), this, SLOT(setPin()));
+	connect(m_ui->changePinButton, SIGNAL(clicked()),
+	    this, SLOT(changePin()));
+	connect(m_ui->clearPinButton, SIGNAL(clicked()),
+	    this, SLOT(clearPin()));
 
 	/* navigation */
 	if (GlobPreferences::SELECT_NEWEST == prefs.after_start_select) {
@@ -338,4 +384,14 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 	m_ui->langComboBox->addItem(tr("English"));
 	m_ui->langComboBox->setCurrentIndex(
 	    settingsLangtoIndex(prefs.language));
+}
+
+void DlgPreferences::activatePinButtons(const PinSettings &pinSett)
+{
+	m_ui->setPinButton->setEnabled(!pinSett.pinConfigured());
+	m_ui->setPinButton->setVisible(!pinSett.pinConfigured());
+	m_ui->changePinButton->setEnabled(pinSett.pinConfigured());
+	m_ui->changePinButton->setVisible(pinSett.pinConfigured());
+	m_ui->clearPinButton->setEnabled(pinSett.pinConfigured());
+	m_ui->clearPinButton->setVisible(pinSett.pinConfigured());
 }
