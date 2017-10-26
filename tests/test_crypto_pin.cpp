@@ -47,6 +47,8 @@ private slots:
 
 	void enablePin(void);
 
+	void disablePin(void);
+
 private:
 	void checkConfigPinDisabled(QSettings &settings) const;
 
@@ -54,6 +56,10 @@ private:
 
 	static
 	void setPin(QSettings &setIn, QSettings &setOut, const QString &pinVal);
+
+	static
+	void clearPin(QSettings &setIn, QSettings &setOut,
+	    const QString &username, const QString &pinVal);
 
 	static
 	void loadSettings(QSettings &settings, PinSettings &pinSet,
@@ -120,6 +126,19 @@ void TestCryptoPin::enablePin(void)
 	checkConfigPinEnabled(settings02);
 }
 
+void TestCryptoPin::disablePin(void)
+{
+	QSettings settings01(configPinEnabledPath, QSettings::IniFormat);
+	QSettings::setDefaultFormat(QSettings::IniFormat);
+	QSettings settings02;
+
+	checkConfigPinEnabled(settings01);
+
+	clearPin(settings01, settings02, expectedUsername, correctPin);
+
+	checkConfigPinDisabled(settings02);
+}
+
 void TestCryptoPin::checkConfigPinDisabled(QSettings &settings) const
 {
 	PinSettings pinSet;
@@ -127,7 +146,7 @@ void TestCryptoPin::checkConfigPinDisabled(QSettings &settings) const
 
 	loadSettings(settings, pinSet, accounts);
 
-	QVERIFY2(!pinSet.pinConfigured(), "Expected PIN to be not configured.");
+	QVERIFY2(!pinSet.pinConfigured(), "Expected PIN not to be configured.");
 
 	QVERIFY(accounts.find(expectedUsername) != accounts.end());
 
@@ -203,6 +222,24 @@ void TestCryptoPin::setPin(QSettings &setIn, QSettings &setOut,
 	loadSettings(setIn, pinSet, accounts);
 
 	PinSettings::updatePinSettings(pinSet, pinVal);
+
+	setOut.clear();
+	saveSettings(setOut, pinSet, accounts);
+}
+
+void TestCryptoPin::clearPin(QSettings &setIn, QSettings &setOut,
+    const QString &username, const QString &pinVal)
+{
+	PinSettings pinSet;
+	AccountsMap accounts;
+
+	loadSettings(setIn, pinSet, accounts);
+
+	PinSettings::updatePinSettings(pinSet, QString());
+	/* Decrypt password. */
+	AcntSettings acntSet(accounts[username]);
+	acntSet.decryptPassword(pinVal);
+	accounts[username] = acntSet;
 
 	setOut.clear();
 	saveSettings(setOut, pinSet, accounts);
