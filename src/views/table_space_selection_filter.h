@@ -27,8 +27,8 @@
 #include <QObject>
 
 /*!
- * @brief This object is used as to tweak the behaviour of the QTableWidget
- *    when selecting data boxes via pressing space bar.
+ * @brief This object is used as to tweak the behaviour of the QTableView
+ *     and QTableWidget when selecting data boxes via pressing space bar.
  */
 class TableSpaceSelectionFilter : public QObject {
     Q_OBJECT
@@ -50,7 +50,7 @@ public:
 	 * @brief Event filter function.
 	 *
 	 * @note The function catches the Space key and performs selection.
-	 *     It only applies to QTableWidget objects.
+	 *     It applies to QTableView and QTableWidget objects.
 	 *
 	 * @param[in,out] object View object.
 	 * @param[in]     event Caught event.

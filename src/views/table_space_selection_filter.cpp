@@ -23,6 +23,7 @@
 
 #include <QEvent>
 #include <QKeyEvent>
+#include <QTableView>
 #include <QTableWidget>
 
 #include "src/views/table_space_selection_filter.h"
@@ -41,6 +42,53 @@ TableSpaceSelectionFilter::TableSpaceSelectionFilter(QObject *parent)
 
 TableSpaceSelectionFilter::~TableSpaceSelectionFilter(void)
 {
+}
+
+/*!
+ * @brief Performs space bar selection on a QTableView.
+ *
+ * @param[in,out] tv Non-null pointer to table view.
+ * @param[in]     ke Non-null pointer to key event.
+ * @return True when filter applied.
+ */
+static
+bool widgetFilter(QTableView *tv, const QKeyEvent *ke)
+{
+	if (Q_UNLIKELY(Q_NULLPTR == tv)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (Q_UNLIKELY(Q_NULLPTR == ke)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	switch (ke->key()) {
+	case Qt::Key_Space:
+		{
+			QModelIndexList checkColIdxs(
+			    tv->selectionModel()->selectedRows(CHECK_COL));
+
+			if (checkColIdxs.isEmpty()) {
+				return false;
+			}
+
+			bool checked =
+			    checkColIdxs.first().data(Qt::CheckStateRole) == Qt::Checked;
+
+			foreach (const QModelIndex &idx, checkColIdxs) {
+				tv->model()->setData(idx,
+				    checked ? Qt::Unchecked : Qt::Checked,
+				    Qt::CheckStateRole);
+			}
+		}
+		return true;
+		break;
+	default:
+		break;
+	}
+
+	return false;
 }
 
 /*!
@@ -109,16 +157,22 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 bool TableSpaceSelectionFilter::eventFilter(QObject *object, QEvent *event)
 {
 	const QKeyEvent *ke = Q_NULLPTR;
+	QTableView *tv = Q_NULLPTR;
 	QTableWidget *tw = Q_NULLPTR;
 	if (event->type() == QEvent::KeyPress) {
 		ke = (QKeyEvent *)event;
 	}
 
 	if (Q_NULLPTR != ke) {
-		tw = dynamic_cast<QTableWidget *>(object);
+		tv = qobject_cast<QTableView *>(object);
+		tw = qobject_cast<QTableWidget *>(object);
 	}
 
-	if (Q_NULLPTR != tw) {
+	if (Q_NULLPTR != tv) {
+		if (widgetFilter(tv, ke)) {
+			return true;
+		}
+	} else if (Q_NULLPTR != tw) {
 		if (widgetFilter(tw, ke)) {
 			return true;
 		}
