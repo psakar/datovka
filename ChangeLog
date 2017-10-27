@@ -1,4 +1,8 @@
 4.x.y /
+ * Stored account passwords can be protected by using a master password (PIN).
+ * Fixed potential source of crashes. Session container is created and
+   destroyed from within the main function.
+ * Checking for version of bundled SSL libraries on start-up.
  * Fixed memory leak inside view ZFO dialogue.
  * Fixed error when address line was counted twice in message search dialogue.
  * Fixed error when import was performed when the import dialogue was cancelled.
