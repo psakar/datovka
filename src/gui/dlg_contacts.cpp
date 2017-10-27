@@ -40,6 +40,8 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, QStringList *dbIdList,
 	m_ui->setupUi(this);
 	/* Set default line height for table views/widgets. */
 	m_ui->contactTableView->setNarrowedLineHeight();
+	m_ui->contactTableView->setSelectionMode(
+	    QAbstractItemView::ExtendedSelection);
 	m_ui->contactTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 

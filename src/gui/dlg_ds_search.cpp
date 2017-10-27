@@ -82,6 +82,8 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 
 	/* Set default line height for table views/widgets. */
 	m_ui->contactTableView->setNarrowedLineHeight();
+	m_ui->contactTableView->setSelectionMode(
+	    QAbstractItemView::ExtendedSelection);
 	m_ui->contactTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
