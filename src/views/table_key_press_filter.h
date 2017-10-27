@@ -45,12 +45,12 @@ public:
 	/*!
 	 * @brief Event filter function.
 	 *
-	 * @note The function catches the Space key and performs selection.
-	 *     It only applies to  QTableWidget objects.
+	 * @note The function catches the given keys and calls given action
+	 *     functions.
 	 *
 	 * @param[in,out] object View object.
-	 * @param[in]     event  Caught event.
-	 * @return True when filter applied.
+	 * @param[in]     event Caught event.
+	 * @return True if further processing of event should be blocked.
 	 */
 	virtual
 	bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;
@@ -64,7 +64,7 @@ public:
 	 * @param[in] func Action function.
 	 * @param[in] obj Action function parameter.
 	 * @param[in] stop Set true if related event should be prevented
-		 *         from further processing.
+	 *                 from further processing.
 	 */
 	void registerAction(int key, void (*func)(QObject *), QObject *obj,
 	    bool stop);
@@ -82,7 +82,7 @@ private:
 		 * @brief Constructor.
 		 *
 		 * @param[in] func Action function.
-		 * @param[in] obj  Action function parameter.
+		 * @param[in] obj Action function parameter.
 		 * @param[in] stop Set true if related event should be prevented
 		 *                 from further processing.
 		 */

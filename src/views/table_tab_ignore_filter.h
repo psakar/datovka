@@ -21,16 +21,16 @@
  * the two.
  */
 
-#ifndef _TABLE_HOME_END_FILTER_H_
-#define _TABLE_HOME_END_FILTER_H_
+#ifndef _TABLE_TAB_IGNORE_FILTER_H_
+#define _TABLE_TAB_IGNORE_FILTER_H_
 
 #include <QObject>
 
 /*!
  * @brief This object is used as to tweak the behaviour of a QTableView and
- *    QTableWidget when Hone and End keys are pressed.
+ *    QTableWidget when Tab key is pressed.
  */
-class TableHomeEndFilter : public QObject {
+class TableTabIgnoreFilter : public QObject {
 	Q_OBJECT
 
 public:
@@ -39,26 +39,24 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	explicit TableHomeEndFilter(QObject *parent = Q_NULLPTR);
+	TableTabIgnoreFilter(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
 	 */
-	virtual ~TableHomeEndFilter(void);
+	~TableTabIgnoreFilter(void);
 
 	/*!
 	 * @brief Event filter function.
 	 *
-	 * @note The function catches Home and End keys and performs cursor
-	 *     navigation according to those keys. It only applies to
-	 *     QTableView and QTableWidget objects.
+	 * @note The function catches the Tab key and ignores the event.
 	 *
 	 * @param[in,out] object View object.
 	 * @param[in]     event Caught event.
-	 * @return True when filter applied.
+	 * @return What would QObject::eventFilter() return.
 	 */
 	virtual
 	bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;
 };
 
-#endif /* _TABLE_HOME_END_FILTER_H_ */
+#endif /* _TABLE_TAB_IGNORE_FILTER_H_ */

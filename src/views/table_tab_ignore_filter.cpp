@@ -21,44 +21,39 @@
  * the two.
  */
 
-#ifndef _TABLE_HOME_END_FILTER_H_
-#define _TABLE_HOME_END_FILTER_H_
+#include <QEvent>
+#include <QKeyEvent>
 
-#include <QObject>
+#include "src/views/table_tab_ignore_filter.h"
 
-/*!
- * @brief This object is used as to tweak the behaviour of a QTableView and
- *    QTableWidget when Hone and End keys are pressed.
- */
-class TableHomeEndFilter : public QObject {
-	Q_OBJECT
+TableTabIgnoreFilter::TableTabIgnoreFilter(QObject *parent)
+    : QObject(parent)
+{
+}
 
-public:
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] parent Parent object.
-	 */
-	explicit TableHomeEndFilter(QObject *parent = Q_NULLPTR);
+TableTabIgnoreFilter::~TableTabIgnoreFilter(void)
+{
+}
 
-	/*!
-	 * @brief Destructor.
-	 */
-	virtual ~TableHomeEndFilter(void);
+bool TableTabIgnoreFilter::eventFilter(QObject *object, QEvent *event)
+{
+	Q_UNUSED(object);
 
-	/*!
-	 * @brief Event filter function.
-	 *
-	 * @note The function catches Home and End keys and performs cursor
-	 *     navigation according to those keys. It only applies to
-	 *     QTableView and QTableWidget objects.
-	 *
-	 * @param[in,out] object View object.
-	 * @param[in]     event Caught event.
-	 * @return True when filter applied.
-	 */
-	virtual
-	bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;
-};
+	QKeyEvent *ke = Q_NULLPTR;
 
-#endif /* _TABLE_HOME_END_FILTER_H_ */
+	if (event->type() == QEvent::KeyPress) {
+		ke = (QKeyEvent *)event;
+	}
+
+	if (Q_NULLPTR != ke) {
+		switch (ke->key()) {
+		case Qt::Key_Tab:
+			ke->ignore();
+			break;
+		default:
+			break;
+		}
+	}
+
+	return QObject::eventFilter(object, event);
+}

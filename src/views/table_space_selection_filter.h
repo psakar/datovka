@@ -50,10 +50,10 @@ public:
 	 * @brief Event filter function.
 	 *
 	 * @note The function catches the Space key and performs selection.
-	 *     It only applies to  QTableWidget objects.
+	 *     It only applies to QTableWidget objects.
 	 *
 	 * @param[in,out] object View object.
-	 * @param[in]     event  Caught event.
+	 * @param[in]     event Caught event.
 	 * @return True when filter applied.
 	 */
 	virtual
