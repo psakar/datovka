@@ -53,7 +53,7 @@ public:
 	 *
 	 * @param[in,out] object View object.
 	 * @param[in]     event Caught event.
-	 * @return What would QObject::eventFilter() return.
+	 * @return True if event vas caught and ignored.
 	 */
 	virtual
 	bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;

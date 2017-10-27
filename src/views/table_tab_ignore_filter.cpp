@@ -49,6 +49,11 @@ bool TableTabIgnoreFilter::eventFilter(QObject *object, QEvent *event)
 		switch (ke->key()) {
 		case Qt::Key_Tab:
 			ke->ignore();
+			/*
+			 * Returning false here causes the Tab event to select
+			 * the next cell.
+			 */
+			return true;
 			break;
 		default:
 			break;
