@@ -749,7 +749,7 @@ signature check results.</string>
              </font>
             </property>
             <property name="text">
-             <string>When PIN is set then the application cannot be started without entering a valid PIN value. The PIN is also used to protect the stored account passwords. If an attacker gains the access to the application configuration he cannot easily recover the stored passwords as they are encrypted using the PIN value. The PIN does not protect any stored messages.
+             <string>When PIN (master password) is set then the application cannot be started without entering a valid PIN value. The PIN is also used to protect the stored account passwords. If an attacker gains the access to the application configuration he cannot easily recover the stored passwords as they are encrypted using the PIN value. The PIN does not protect any stored messages.
 Note: If you forget the PIN then you'll loose all stored passwords. Other stored data won't be affected.</string>
             </property>
             <property name="wordWrap">
