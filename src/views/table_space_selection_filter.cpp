@@ -28,15 +28,10 @@
 
 #include "src/views/table_space_selection_filter.h"
 
-/*
- * Check box column.
- *
- * TODO -- The position should be defined somewhere nearer the widget.
- */
-#define CHECK_COL 0
-
-TableSpaceSelectionFilter::TableSpaceSelectionFilter(QObject *parent)
-    : QObject(parent)
+TableSpaceSelectionFilter::TableSpaceSelectionFilter(int checkCol,
+    QObject *parent)
+    : QObject(parent),
+    m_checkCol(checkCol)
 {
 }
 
@@ -49,10 +44,11 @@ TableSpaceSelectionFilter::~TableSpaceSelectionFilter(void)
  *
  * @param[in,out] tv Non-null pointer to table view.
  * @param[in]     ke Non-null pointer to key event.
+ * @param[in]     checkCol Checkable column.
  * @return True when filter applied.
  */
 static
-bool viewFilter(QTableView *tv, const QKeyEvent *ke)
+bool viewFilter(QTableView *tv, const QKeyEvent *ke, int checkCol)
 {
 	if (Q_UNLIKELY(Q_NULLPTR == tv)) {
 		Q_ASSERT(0);
@@ -67,7 +63,7 @@ bool viewFilter(QTableView *tv, const QKeyEvent *ke)
 	case Qt::Key_Space:
 		{
 			QModelIndexList checkColIdxs(
-			    tv->selectionModel()->selectedRows(CHECK_COL));
+			    tv->selectionModel()->selectedRows(checkCol));
 
 			if (checkColIdxs.isEmpty()) {
 				return false;
@@ -96,10 +92,11 @@ bool viewFilter(QTableView *tv, const QKeyEvent *ke)
  *
  * @param[in,out] tw Non-null pointer to table widget.
  * @param[in]     ke Non-null pointer to key event.
+ * @param[in]     checkCol Checkable column.
  * @return True when filter applied.
  */
 static
-bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
+bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke, int checkCol)
 {
 	if (Q_UNLIKELY(Q_NULLPTR == tw)) {
 		Q_ASSERT(0);
@@ -121,7 +118,7 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 			}
 
 			QTableWidgetItem *frstItem = tw->item(
-			    selectedItems.first()->row(), CHECK_COL);
+			    selectedItems.first()->row(), checkCol);
 
 			if (Q_UNLIKELY(Q_NULLPTR == frstItem)) {
 				Q_ASSERT(0);
@@ -135,7 +132,7 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 					continue;
 				}
 				QTableWidgetItem *checkItem =
-				    tw->item(item->row(), CHECK_COL);
+				    tw->item(item->row(), checkCol);
 
 				if (Q_UNLIKELY(Q_NULLPTR == checkItem)) {
 					Q_ASSERT(0);
@@ -169,11 +166,11 @@ bool TableSpaceSelectionFilter::eventFilter(QObject *object, QEvent *event)
 	}
 
 	if (Q_NULLPTR != tv) {
-		if (viewFilter(tv, ke)) {
+		if (viewFilter(tv, ke, m_checkCol)) {
 			return true;
 		}
 	} else if (Q_NULLPTR != tw) {
-		if (widgetFilter(tw, ke)) {
+		if (widgetFilter(tw, ke, m_checkCol)) {
 			return true;
 		}
 	}

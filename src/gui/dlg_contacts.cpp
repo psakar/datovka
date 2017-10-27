@@ -92,7 +92,8 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, QStringList *dbIdList,
 	m_ui->contactTableView->installEventFilter(
 	    new TableHomeEndFilter(m_ui->contactTableView));
 	m_ui->contactTableView->installEventFilter(
-	    new TableSpaceSelectionFilter(m_ui->contactTableView));
+	    new TableSpaceSelectionFilter(
+	        BoxContactsModel::CHECKBOX_COL, m_ui->contactTableView));
 	m_ui->contactTableView->installEventFilter(
 	    new TableTabIgnoreFilter(m_ui->contactTableView));
 }

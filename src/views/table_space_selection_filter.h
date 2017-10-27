@@ -37,9 +37,10 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] checkCol Column which should be treated as checkable.
 	 * @param[in] parent Parent object.
 	 */
-	TableSpaceSelectionFilter(QObject *parent = Q_NULLPTR);
+	TableSpaceSelectionFilter(int checkCol, QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
@@ -58,6 +59,9 @@ public:
 	 */
 	virtual
 	bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;
+
+private:
+	const int m_checkCol; /*!< Column that should be treated as checkable. */
 };
 
 #endif /* _TABLE_SPACE_SELECTION_FILTER_H_ */
