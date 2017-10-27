@@ -26,6 +26,7 @@
 #include "src/gui/dlg_contacts.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
+#include "src/views/table_tab_ignore_filter.h"
 #include "ui_dlg_contacts.h"
 
 DlgContacts::DlgContacts(const MessageDbSet &dbSet, QStringList *dbIdList,
@@ -89,9 +90,11 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, QStringList *dbIdList,
 	    QAbstractItemView::NoEditTriggers);
 
 	m_ui->contactTableView->installEventFilter(
-	    new TableHomeEndFilter(this));
+	    new TableHomeEndFilter(m_ui->contactTableView));
 	m_ui->contactTableView->installEventFilter(
-	    new TableSpaceSelectionFilter(this));
+	    new TableSpaceSelectionFilter(m_ui->contactTableView));
+	m_ui->contactTableView->installEventFilter(
+	    new TableTabIgnoreFilter(m_ui->contactTableView));
 }
 
 DlgContacts::~DlgContacts(void)

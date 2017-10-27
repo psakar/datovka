@@ -48,6 +48,7 @@
 #include "src/settings/preferences.h"
 #include "src/views/attachment_table_view.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/views/table_tab_ignore_filter.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_download_credit_info.h"
@@ -700,8 +701,14 @@ void DlgSendMessage::initContent(enum Action action,
 	m_ui->attachTableView->setEditTriggers(
 	    QAbstractItemView::NoEditTriggers);
 
-	m_ui->recipTableView->installEventFilter(new TableHomeEndFilter(this));
-	m_ui->attachTableView->installEventFilter(new TableHomeEndFilter(this));
+	m_ui->recipTableView->installEventFilter(
+	    new TableHomeEndFilter(m_ui->recipTableView));
+	m_ui->recipTableView->installEventFilter(
+	    new TableTabIgnoreFilter(m_ui->recipTableView));
+	m_ui->attachTableView->installEventFilter(
+	    new TableHomeEndFilter(m_ui->attachTableView));
+	m_ui->attachTableView->installEventFilter(
+	    new TableTabIgnoreFilter(m_ui->attachTableView));
 
 	connect(m_ui->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));

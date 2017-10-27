@@ -89,6 +89,7 @@
 #include "src/settings/records_management.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
+#include "src/views/table_tab_ignore_filter.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/pool.h"
 #include "src/worker/task_authenticate_message.h"
@@ -383,15 +384,19 @@ MainWindow::MainWindow(QWidget *parent)
 	ui->messageList->setFocusPolicy(Qt::StrongFocus);
 	connect(ui->messageList, SIGNAL(doubleClicked(QModelIndex)), this,
 	    SLOT(viewSelectedMessage()));
-	ui->messageList->installEventFilter(new TableHomeEndFilter(this));
+	ui->messageList->installEventFilter(
+	    new TableHomeEndFilter(ui->messageList));
 	{
-		TableKeyPressFilter *filter = new TableKeyPressFilter(this);
+		TableKeyPressFilter *filter =
+		    new TableKeyPressFilter(ui->messageList);
 		filter->registerAction(Qt::Key_Return,
 		    &viewSelectedMessageViaFilter, this, true);
 		filter->registerAction(Qt::Key_Enter, /* On keypad. */
 		    &viewSelectedMessageViaFilter, this, true);
 		ui->messageList->installEventFilter(filter);
 	}
+	ui->messageList->installEventFilter(
+	    new TableTabIgnoreFilter(ui->messageList));
 	ui->messageList->setItemDelegate(new TagsDelegate(this));
 
 	/* Load configuration file. */
@@ -438,7 +443,10 @@ MainWindow::MainWindow(QWidget *parent)
 	connect(ui->messageAttachmentList,
 	    SIGNAL(doubleClicked(QModelIndex)), this,
 	    SLOT(openSelectedAttachment(QModelIndex)));
-	ui->messageAttachmentList->installEventFilter(new TableHomeEndFilter(this));
+	ui->messageAttachmentList->installEventFilter(
+	    new TableHomeEndFilter(ui->messageAttachmentList));
+	ui->messageAttachmentList->installEventFilter(
+	    new TableTabIgnoreFilter(ui->messageAttachmentList));
 
 	/* It fires when any column was resized. */
 	connect(ui->messageList->horizontalHeader(),

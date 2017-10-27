@@ -38,6 +38,7 @@
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/settings/preferences.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/views/table_tab_ignore_filter.h"
 #include "ui_dlg_view_zfo.h"
 
 DlgViewZfo::DlgViewZfo(const struct isds_message *message, int zfoType,
@@ -289,7 +290,9 @@ void DlgViewZfo::setUpDialogue(void)
 		    this, SLOT(openSelectedAttachment(QModelIndex)));
 
 		m_ui->attachmentTable->installEventFilter(
-		    new TableHomeEndFilter(this));
+		    new TableHomeEndFilter(m_ui->attachmentTable));
+		m_ui->attachmentTable->installEventFilter(
+		    new TableTabIgnoreFilter(m_ui->attachmentTable));
 	}
 
 	/* Signature details. */
