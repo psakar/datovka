@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,14 +35,14 @@ bool TableKeyPressFilter::eventFilter(QObject *object, QEvent *event)
 {
 	Q_UNUSED(object);
 
-	const QKeyEvent *ke = 0;
+	const QKeyEvent *ke = Q_NULLPTR;
 	QMap<int, ActionToDo>::const_iterator cIt = m_keyActions.constEnd();
 
 	if (event->type() == QEvent::KeyPress) {
-		ke = (QKeyEvent *) event;
+		ke = (QKeyEvent *)event;
 	}
 
-	if (0 != ke) {
+	if (Q_NULLPTR != ke) {
 		int key = ke->key();
 
 		cIt = m_keyActions.constFind(key);
@@ -52,20 +52,22 @@ bool TableKeyPressFilter::eventFilter(QObject *object, QEvent *event)
 		void (*actionFuncPtr)(QObject *) = cIt->actionFuncPtr;
 		QObject *actionObj = cIt->actionObj;
 
-		Q_ASSERT(0 != actionFuncPtr);
+		Q_ASSERT(Q_NULLPTR != actionFuncPtr);
 
 		actionFuncPtr(actionObj);
-		return false;
+		if (cIt->blockEvent) {
+			return true;
+		}
 	}
 
 	return QObject::eventFilter(object, event);
 }
 
 void TableKeyPressFilter::registerAction(int key, void (*func)(QObject *),
-    QObject *obj)
+    QObject *obj, bool stop)
 {
-	if (0 != func) {
-		m_keyActions.insert(key, ActionToDo(func, obj));
+	if (Q_NULLPTR != func) {
+		m_keyActions.insert(key, ActionToDo(func, obj, stop));
 	} else {
 		/* Delete antry for given key. */
 		m_keyActions.remove(key);

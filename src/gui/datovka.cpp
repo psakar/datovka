@@ -387,9 +387,9 @@ MainWindow::MainWindow(QWidget *parent)
 	{
 		TableKeyPressFilter *filter = new TableKeyPressFilter(this);
 		filter->registerAction(Qt::Key_Return,
-		    &viewSelectedMessageViaFilter, this);
+		    &viewSelectedMessageViaFilter, this, true);
 		filter->registerAction(Qt::Key_Enter, /* On keypad. */
-		    &viewSelectedMessageViaFilter, this);
+		    &viewSelectedMessageViaFilter, this, true);
 		ui->messageList->installEventFilter(filter);
 	}
 	ui->messageList->setItemDelegate(new TagsDelegate(this));

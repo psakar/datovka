@@ -53,11 +53,11 @@ TableSpaceSelectionFilter::~TableSpaceSelectionFilter(void)
 static
 bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 {
-	if (Q_NULLPTR == tw) {
+	if (Q_UNLIKELY(Q_NULLPTR == tw)) {
 		Q_ASSERT(0);
 		return false;
 	}
-	if (Q_NULLPTR == ke) {
+	if (Q_UNLIKELY(Q_NULLPTR == ke)) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -75,7 +75,7 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 			QTableWidgetItem *frstItem = tw->item(
 			    selectedItems.first()->row(), CHECK_COL);
 
-			if (Q_NULLPTR == frstItem) {
+			if (Q_UNLIKELY(Q_NULLPTR == frstItem)) {
 				Q_ASSERT(0);
 				return false;
 			}
@@ -83,13 +83,13 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 			bool checked = frstItem->checkState() == Qt::Checked;
 
 			foreach (QTableWidgetItem *const item, selectedItems) {
-				if (Q_NULLPTR == item) {
+				if (Q_UNLIKELY(Q_NULLPTR == item)) {
 					continue;
 				}
 				QTableWidgetItem *checkItem =
-				    tw->item(item->row(), 0);
+				    tw->item(item->row(), CHECK_COL);
 
-				if (Q_NULLPTR == checkItem) {
+				if (Q_UNLIKELY(Q_NULLPTR == checkItem)) {
 					Q_ASSERT(0);
 					continue;
 				}
