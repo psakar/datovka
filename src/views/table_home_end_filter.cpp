@@ -115,8 +115,8 @@ bool TableHomeEndFilter::eventFilter(QObject *object, QEvent *event)
 	}
 
 	if (Q_NULLPTR != ke) {
-		tv = dynamic_cast<QTableView *>(object);
-		tw = dynamic_cast<QTableWidget *>(object);
+		tv = qobject_cast<QTableView *>(object);
+		tw = qobject_cast<QTableWidget *>(object);
 	}
 
 	if (Q_NULLPTR != tv) {

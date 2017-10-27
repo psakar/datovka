@@ -52,7 +52,7 @@ TableSpaceSelectionFilter::~TableSpaceSelectionFilter(void)
  * @return True when filter applied.
  */
 static
-bool widgetFilter(QTableView *tv, const QKeyEvent *ke)
+bool viewFilter(QTableView *tv, const QKeyEvent *ke)
 {
 	if (Q_UNLIKELY(Q_NULLPTR == tv)) {
 		Q_ASSERT(0);
@@ -169,7 +169,7 @@ bool TableSpaceSelectionFilter::eventFilter(QObject *object, QEvent *event)
 	}
 
 	if (Q_NULLPTR != tv) {
-		if (widgetFilter(tv, ke)) {
+		if (viewFilter(tv, ke)) {
 			return true;
 		}
 	} else if (Q_NULLPTR != tw) {
