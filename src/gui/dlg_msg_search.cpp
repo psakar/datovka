@@ -27,6 +27,7 @@
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/views/table_home_end_filter.h"
+#include "src/views/table_tab_ignore_filter.h"
 #include "ui_dlg_msg_search.h"
 
 #define COL_USER_NAME 0
@@ -393,7 +394,9 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	    setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	m_ui->resultsTableWidget->installEventFilter(
-	    new TableHomeEndFilter(this));
+	    new TableHomeEndFilter(m_ui->resultsTableWidget));
+	m_ui->resultsTableWidget->installEventFilter(
+	    new TableTabIgnoreFilter(m_ui->resultsTableWidget));
 }
 
 int DlgMsgSearch::filledInExceptTags(void) const

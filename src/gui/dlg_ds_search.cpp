@@ -28,6 +28,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
+#include "src/views/table_tab_ignore_filter.h"
 #include "src/worker/pool.h"
 #include "ui_dlg_ds_search.h"
 
@@ -81,6 +82,8 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 
 	/* Set default line height for table views/widgets. */
 	m_ui->contactTableView->setNarrowedLineHeight();
+	m_ui->contactTableView->setSelectionMode(
+	    QAbstractItemView::ExtendedSelection);
 	m_ui->contactTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
@@ -165,9 +168,12 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	m_ui->useFulltextCheckBox->setCheckState(Qt::Checked);
 
 	m_ui->contactTableView->installEventFilter(
-	    new TableHomeEndFilter(this));
+	    new TableHomeEndFilter(m_ui->contactTableView));
 	m_ui->contactTableView->installEventFilter(
-	    new TableSpaceSelectionFilter(this));
+	    new TableSpaceSelectionFilter(
+	        BoxContactsModel::CHECKBOX_COL, m_ui->contactTableView));
+	m_ui->contactTableView->installEventFilter(
+	    new TableTabIgnoreFilter(m_ui->contactTableView));
 
 	m_ui->filterLine->setFixedWidth(200);
 	m_ui->filterLine->setToolTip(tr("Enter sought expression"));

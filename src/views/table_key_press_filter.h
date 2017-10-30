@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,17 +40,17 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	explicit TableKeyPressFilter(QObject *parent = 0);
+	explicit TableKeyPressFilter(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Event filter function.
 	 *
-	 * @note The function catches the Space key and performs selection.
-	 *     It only applies to  QTableWidget objects.
+	 * @note The function catches the given keys and calls given action
+	 *     functions.
 	 *
 	 * @param[in,out] object View object.
-	 * @param[in]     event  Caught event.
-	 * @return True when filter applied.
+	 * @param[in]     event Caught event.
+	 * @return True if further processing of event should be blocked.
 	 */
 	virtual
 	bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;
@@ -60,11 +60,14 @@ public:
 	 *
 	 * @note Should \p func be 0 then the action is deleted.
 	 *
-	 * @param[in] key  Code of the key (Qt::Key) to register the action for.
+	 * @param[in] key Code of the key (Qt::Key) to register the action for.
 	 * @param[in] func Action function.
-	 * @param[in] obj  Action function parameter.
+	 * @param[in] obj Action function parameter.
+	 * @param[in] stop Set true if related event should be prevented
+	 *                 from further processing.
 	 */
-	void registerAction(int key, void (*func)(QObject *), QObject *obj);
+	void registerAction(int key, void (*func)(QObject *), QObject *obj,
+	    bool stop);
 
 private:
 	/*!
@@ -79,10 +82,12 @@ private:
 		 * @brief Constructor.
 		 *
 		 * @param[in] func Action function.
-		 * @param[in] obj  Action function parameter.
+		 * @param[in] obj Action function parameter.
+		 * @param[in] stop Set true if related event should be prevented
+		 *                 from further processing.
 		 */
-		ActionToDo(void (*func)(QObject *), QObject *obj)
-		    : actionFuncPtr(func), actionObj(obj)
+		ActionToDo(void (*func)(QObject *), QObject *obj, bool stop)
+		    : actionFuncPtr(func), actionObj(obj), blockEvent(stop)
 		{ }
 
 		/*!
@@ -91,11 +96,14 @@ private:
 		 * @param[in] act Action description.
 		 */
 		ActionToDo(const ActionToDo &act)
-		    : actionFuncPtr(act.actionFuncPtr), actionObj(act.actionObj)
+		    : actionFuncPtr(act.actionFuncPtr),
+		    actionObj(act.actionObj),
+		    blockEvent(act.blockEvent)
 		{ }
 
 		void (*actionFuncPtr)(QObject *); /*!< Pointer to a function. */
 		QObject *actionObj; /*!< Parameter of the action function. */
+		bool blockEvent; /*!< Set true to stop the key event being handled further. */
 	};
 
 	QMap<int, ActionToDo> m_keyActions; /*!< Registered actions. */

@@ -21,47 +21,42 @@
  * the two.
  */
 
-#ifndef _TABLE_SPACE_SELECTION_FILTER_H_
-#define _TABLE_SPACE_SELECTION_FILTER_H_
+#ifndef _TABLE_TAB_IGNORE_FILTER_H_
+#define _TABLE_TAB_IGNORE_FILTER_H_
 
 #include <QObject>
 
 /*!
- * @brief This object is used as to tweak the behaviour of the QTableView
- *     and QTableWidget when selecting data boxes via pressing space bar.
+ * @brief This object is used as to tweak the behaviour of a QTableView and
+ *    QTableWidget when Tab key is pressed.
  */
-class TableSpaceSelectionFilter : public QObject {
-    Q_OBJECT
+class TableTabIgnoreFilter : public QObject {
+	Q_OBJECT
 
 public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] checkCol Column which should be treated as checkable.
 	 * @param[in] parent Parent object.
 	 */
-	TableSpaceSelectionFilter(int checkCol, QObject *parent = Q_NULLPTR);
+	TableTabIgnoreFilter(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
 	 */
-	~TableSpaceSelectionFilter(void);
+	~TableTabIgnoreFilter(void);
 
 	/*!
 	 * @brief Event filter function.
 	 *
-	 * @note The function catches the Space key and performs selection.
-	 *     It applies to QTableView and QTableWidget objects.
+	 * @note The function catches the Tab key and ignores the event.
 	 *
 	 * @param[in,out] object View object.
 	 * @param[in]     event Caught event.
-	 * @return True when filter applied.
+	 * @return True if event vas caught and ignored.
 	 */
 	virtual
 	bool eventFilter(QObject *object, QEvent *event) Q_DECL_OVERRIDE;
-
-private:
-	const int m_checkCol; /*!< Column that should be treated as checkable. */
 };
 
-#endif /* _TABLE_SPACE_SELECTION_FILTER_H_ */
+#endif /* _TABLE_TAB_IGNORE_FILTER_H_ */

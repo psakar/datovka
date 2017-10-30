@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,29 +40,34 @@ TableHomeEndFilter::~TableHomeEndFilter(void)
  *
  * @param[in,out] tv Non-null pointer to table view.
  * @param[in]     ke Non-null pointer to key event.
+ * @return True when filter applied.
  */
 static
-void viewFilter(QTableView *tv, const QKeyEvent *ke)
+bool viewFilter(QTableView *tv, const QKeyEvent *ke)
 {
-	if (0 == tv) {
+	if (Q_UNLIKELY(Q_NULLPTR == tv)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
-	if (0 == ke) {
+	if (Q_UNLIKELY(Q_NULLPTR == ke)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 
 	switch (ke->key()) {
 	case Qt::Key_Home:
 		tv->selectRow(0);
+		return true;
 		break;
 	case Qt::Key_End:
 		tv->selectRow(tv->model()->rowCount() - 1);
+		return true;
 		break;
 	default:
 		break;
 	}
+
+	return false;
 }
 
 /*!
@@ -70,51 +75,58 @@ void viewFilter(QTableView *tv, const QKeyEvent *ke)
  *
  * @param[in,out] tw Non-null pointer to table widget.
  * @param[in]     ke Non-null pointer to key event.
+ * @return True when filter applied.
  */
 static
-void widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
+bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 {
-	if (0 == tw) {
+	if (Q_UNLIKELY(Q_NULLPTR == tw)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
-	if (0 == ke) {
+	if (Q_UNLIKELY(Q_NULLPTR == ke)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 
 	switch (ke->key()) {
 	case Qt::Key_Home:
 		tw->selectRow(0);
+		return true;
 		break;
 	case Qt::Key_End:
 		tw->selectRow(tw->rowCount() - 1);
+		return true;
 		break;
 	default:
 		break;
 	}
+
+	return false;
 }
 
 bool TableHomeEndFilter::eventFilter(QObject *object, QEvent *event)
 {
-	const QKeyEvent *ke = 0;
-	QTableView *tv = 0;
-	QTableWidget *tw = 0;
+	const QKeyEvent *ke = Q_NULLPTR;
+	QTableView *tv = Q_NULLPTR;
+	QTableWidget *tw = Q_NULLPTR;
 	if (event->type() == QEvent::KeyPress) {
-		ke = (QKeyEvent *) event;
+		ke = (QKeyEvent *)event;
 	}
 
-	if (0 != ke) {
-		tv = dynamic_cast<QTableView *>(object);
-		tw = dynamic_cast<QTableWidget *>(object);
+	if (Q_NULLPTR != ke) {
+		tv = qobject_cast<QTableView *>(object);
+		tw = qobject_cast<QTableWidget *>(object);
 	}
 
-	if (0 != tv) {
-		viewFilter(tv, ke);
-		return false;
-	} else if (0 != tw) {
-		widgetFilter(tw, ke);
-		return false;
+	if (Q_NULLPTR != tv) {
+		if (viewFilter(tv, ke)) {
+			return true;
+		}
+	} else if (Q_NULLPTR != tw) {
+		if (widgetFilter(tw, ke)) {
+			return true;
+		}
 	}
 
 	return QObject::eventFilter(object, event);

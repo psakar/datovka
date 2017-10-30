@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,19 +23,15 @@
 
 #include <QEvent>
 #include <QKeyEvent>
+#include <QTableView>
 #include <QTableWidget>
 
 #include "src/views/table_space_selection_filter.h"
 
-/*
- * Check box column.
- *
- * TODO -- The position should be defined somewhere nearer the widget.
- */
-#define CHECK_COL 0
-
-TableSpaceSelectionFilter::TableSpaceSelectionFilter(QObject *parent)
-    : QObject(parent)
+TableSpaceSelectionFilter::TableSpaceSelectionFilter(int checkCol,
+    QObject *parent)
+    : QObject(parent),
+    m_checkCol(checkCol)
 {
 }
 
@@ -44,20 +40,69 @@ TableSpaceSelectionFilter::~TableSpaceSelectionFilter(void)
 }
 
 /*!
+ * @brief Performs space bar selection on a QTableView.
+ *
+ * @param[in,out] tv Non-null pointer to table view.
+ * @param[in]     ke Non-null pointer to key event.
+ * @param[in]     checkCol Checkable column.
+ * @return True when filter applied.
+ */
+static
+bool viewFilter(QTableView *tv, const QKeyEvent *ke, int checkCol)
+{
+	if (Q_UNLIKELY(Q_NULLPTR == tv)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (Q_UNLIKELY(Q_NULLPTR == ke)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	switch (ke->key()) {
+	case Qt::Key_Space:
+		{
+			QModelIndexList checkColIdxs(
+			    tv->selectionModel()->selectedRows(checkCol));
+
+			if (checkColIdxs.isEmpty()) {
+				return false;
+			}
+
+			bool checked =
+			    checkColIdxs.first().data(Qt::CheckStateRole) == Qt::Checked;
+
+			foreach (const QModelIndex &idx, checkColIdxs) {
+				tv->model()->setData(idx,
+				    checked ? Qt::Unchecked : Qt::Checked,
+				    Qt::CheckStateRole);
+			}
+		}
+		return true;
+		break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+/*!
  * @brief Performs space bar selection on a QTableWidget.
  *
  * @param[in,out] tw Non-null pointer to table widget.
  * @param[in]     ke Non-null pointer to key event.
+ * @param[in]     checkCol Checkable column.
  * @return True when filter applied.
  */
 static
-bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
+bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke, int checkCol)
 {
-	if (0 == tw) {
+	if (Q_UNLIKELY(Q_NULLPTR == tw)) {
 		Q_ASSERT(0);
 		return false;
 	}
-	if (0 == ke) {
+	if (Q_UNLIKELY(Q_NULLPTR == ke)) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -73,9 +118,9 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 			}
 
 			QTableWidgetItem *frstItem = tw->item(
-			    selectedItems.first()->row(), CHECK_COL);
+			    selectedItems.first()->row(), checkCol);
 
-			if (0 == frstItem) {
+			if (Q_UNLIKELY(Q_NULLPTR == frstItem)) {
 				Q_ASSERT(0);
 				return false;
 			}
@@ -83,13 +128,13 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 			bool checked = frstItem->checkState() == Qt::Checked;
 
 			foreach (QTableWidgetItem *const item, selectedItems) {
-				if (0 == item) {
+				if (Q_UNLIKELY(Q_NULLPTR == item)) {
 					continue;
 				}
 				QTableWidgetItem *checkItem =
-				    tw->item(item->row(), 0);
+				    tw->item(item->row(), checkCol);
 
-				if (0 == checkItem) {
+				if (Q_UNLIKELY(Q_NULLPTR == checkItem)) {
 					Q_ASSERT(0);
 					continue;
 				}
@@ -108,18 +153,24 @@ bool widgetFilter(QTableWidget *tw, const QKeyEvent *ke)
 
 bool TableSpaceSelectionFilter::eventFilter(QObject *object, QEvent *event)
 {
-	const QKeyEvent *ke = 0;
-	QTableWidget *tw = 0;
+	const QKeyEvent *ke = Q_NULLPTR;
+	QTableView *tv = Q_NULLPTR;
+	QTableWidget *tw = Q_NULLPTR;
 	if (event->type() == QEvent::KeyPress) {
-		ke = (QKeyEvent *) event;
+		ke = (QKeyEvent *)event;
 	}
 
-	if (0 != ke) {
-		tw = dynamic_cast<QTableWidget *>(object);
+	if (Q_NULLPTR != ke) {
+		tv = qobject_cast<QTableView *>(object);
+		tw = qobject_cast<QTableWidget *>(object);
 	}
 
-	if (0 != tw) {
-		if (widgetFilter(tw, ke)) {
+	if (Q_NULLPTR != tv) {
+		if (viewFilter(tv, ke, m_checkCol)) {
+			return true;
+		}
+	} else if (Q_NULLPTR != tw) {
+		if (widgetFilter(tw, ke, m_checkCol)) {
 			return true;
 		}
 	}
