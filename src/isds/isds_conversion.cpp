@@ -171,7 +171,7 @@ int IsdsConversion::boxTypeStrToInt(const QString &val)
 QString IsdsConversion::senderBoxTypeToText(int val)
 {
 	switch (val) {
-	case DBTYPE_OVM_MAIN: return tr("public authority - main box"); break; /* organ verejne moci - hlavni schranka */
+//	case DBTYPE_OVM_MAIN: return tr("public authority - main box"); break; /* organ verejne moci - hlavni schranka */
 	case DBTYPE_SYSTEM: return tr("system box"); break; /* systemova schranka */
 	case DBTYPE_OVM: return tr("public authority"); break; /* organ verejne moci */
 	case DBTYPE_OVM_NOTAR: return tr("public authority - notary"); break; /* organ verejne moci - notar */
