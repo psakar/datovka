@@ -93,6 +93,24 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 			break;
 		}
 		break;
+	case Qt::AccessibleDescriptionRole:
+		switch (index.column()) {
+		/* case CHECKBOX_COL: */
+		case BOX_ID_COL:
+			return tr("box identifier");
+			break;
+		case BOX_TYPE_COL:
+		case BOX_NAME_COL:
+		case ADDRESS_COL:
+		case POST_CODE_COL:
+		case PDZ_COL:
+			_headerData(index.column(), Qt::Horizontal);
+			break;
+		default:
+			return QVariant();
+			break;
+		}
+		break;
 	default:
 		return _data(index, role);
 		break;
