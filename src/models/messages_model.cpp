@@ -199,6 +199,54 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		return _data(index, role);
 		break;
 
+	case Qt::AccessibleTextRole:
+		dataType = _headerData(index.column(), Qt::Horizontal,
+		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (dataType) {
+		case DB_DATETIME:
+			/* Convert date on display. */
+			return dateTimeStrFromDbFormat(
+			    _data(index, role).toString(),
+			    dateTimeDisplayFormat);
+			break;
+		case DB_BOOL_READ_LOCALLY: /* 'read locally' */
+			if (_data(index).toBool()) {
+				return tr("marked as read");
+			} else {
+				return tr("marked as unread");
+			}
+			break;
+		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded' */
+			/* Show icon for 'is downloaded'. */
+			if (_data(index).toBool()) {
+				return tr("attachments downloaded");
+			} else {
+				return tr("attachments not downloaded");
+			}
+			break;
+		case DB_INT_PROCESSING_STATE: /* 'process status' */
+			/* Show icon for 'process status'. */
+			switch (_data(index).toInt()) {
+			case UNSETTLED:
+				return tr("unsettled");
+				break;
+			case IN_PROGRESS:
+				return tr("in progress");
+				break;
+			case SETTLED:
+				return tr("settled");
+				break;
+			default:
+				Q_ASSERT(0);
+				break;
+			}
+			return QVariant();
+			break;
+		default:
+			return _data(index, role);
+			break;
+		}
+		break;
 	case ROLE_PLAIN_DISPLAY:
 		return _data(index, Qt::DisplayRole);
 		break;
