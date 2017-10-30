@@ -33,9 +33,6 @@
 #include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/models/messages_model.h"
 
-const int DbMsgsTblModel::rcvdMsgsColCnt(8);
-const int DbMsgsTblModel::sntMsgsColCnt(7);
-
 /*
  * Specifies number of bits to be used for message id when combining with other
  * data.

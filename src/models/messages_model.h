@@ -249,17 +249,6 @@ private:
 	                   * Whether this is a model dummy or contains data.
 	                   */
 
-	static
-	const int rcvdMsgsColCnt; /*<
-	                           * Number of columns when displaying received
-	                           * messages (without added columns).
-	                           */
-	static
-	const int sntMsgsColCnt; /*!<
-	                          * Number of columns when displaying sent
-	                          * messages (without added columns).
-	                          */
-
 	QIcon m_dsIco; /*!< Records management icon. */
 };
 
