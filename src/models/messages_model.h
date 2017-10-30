@@ -51,10 +51,10 @@ public:
 	enum ColumnNumbers {
 		DMID_COL = 0, /* Message identifier. */
 		ANNOT_COL = 1, /* Annotation column. */
-		/* 2 stands for sender or recipient name. */
+		SENDER_RECIP_COL = 2, /* Sender or recipient name column. */
 		DELIVERY_COL = 3, /* Delivery time column. */
 		ACCEPT_COL = 4, /* Acceptance time column. */
-		READLOC_COL = 5, /* Read locally. */
+		READLOC_STATUS_COL = 5, /* Read locally or message status. */
 		ATTDOWN_COL = 6, /* Attachments downloaded. */
 		PROCSNG_COL = 7, /* Processing state. */
 		REC_MGMT_NEG_COL = -2, /* Records management service. */

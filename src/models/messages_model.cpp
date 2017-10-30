@@ -184,11 +184,11 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::FontRole:
-		if (DB_BOOL_READ_LOCALLY == _headerData(READLOC_COL,
+		if (DB_BOOL_READ_LOCALLY == _headerData(READLOC_STATUS_COL,
 		        Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
 			/* In read messages. */
 			if (!_data(index.sibling(index.row(),
-			        READLOC_COL)).toBool()) {
+			        READLOC_STATUS_COL)).toBool()) {
 				/* Unread messages are shown bold. */
 				QFont boldFont;
 				boldFont.setBold(true);
@@ -271,7 +271,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 
 	switch (role) {
 	case Qt::DisplayRole:
-		if (section < READLOC_COL) {
+		if (section < READLOC_STATUS_COL) {
 			return _headerData(section, orientation, role);
 		}
 
@@ -291,7 +291,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		break;
 
 	case Qt::DecorationRole:
-		if (section < READLOC_COL) {
+		if (section < READLOC_STATUS_COL) {
 			return _headerData(section, orientation, role);
 		}
 
@@ -316,7 +316,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		break;
 
 	case Qt::ToolTipRole:
-		if (section < READLOC_COL) {
+		if (section < READLOC_STATUS_COL) {
 			return QVariant();
 		}
 
@@ -383,10 +383,10 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 
 		row[DMID_COL] = entry.dmId;
 		row[ANNOT_COL] = entry.dmAnnotation;
-		row[2] = entry.dmSender;
+		row[SENDER_RECIP_COL] = entry.dmSender;
 		row[DELIVERY_COL] = entry.dmDeliveryTime;
 		row[ACCEPT_COL] = entry.dmAcceptanceTime;
-		row[READLOC_COL] = entry.readLocally;
+		row[READLOC_STATUS_COL] = entry.readLocally;
 		row[ATTDOWN_COL] = entry.isDownloaded;
 		row[PROCSNG_COL] = entry.processStatus;
 
@@ -438,10 +438,10 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 
 		row[DMID_COL] = entry.dmId;
 		row[ANNOT_COL] = entry.dmAnnotation;
-		row[2] = entry.dmRecipient;
+		row[SENDER_RECIP_COL] = entry.dmRecipient;
 		row[DELIVERY_COL] = entry.dmDeliveryTime;
 		row[ACCEPT_COL] = entry.dmAcceptanceTime;
-		row[5] = entry.dmMessageStatus;
+		row[READLOC_STATUS_COL] = entry.dmMessageStatus;
 		row[ATTDOWN_COL] = entry.isDownloaded;
 
 		m_data[m_rowCount++] = row;
@@ -571,7 +571,7 @@ bool DbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
 	for (int row = 0; row < rowCount(); ++row) {
 		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() ==
 		    dmId) {
-			m_data[row][READLOC_COL] = QVariant(forceRead);
+			m_data[row][READLOC_STATUS_COL] = QVariant(forceRead);
 
 			emit dataChanged(TblModel::index(row, 0),
 			    TblModel::index(row, columnCount() - 1));
