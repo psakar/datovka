@@ -415,20 +415,21 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 				const AccountCounters &cntrs(
 				    m_countersMap[uName]);
 				Q_ASSERT(row < cntrs.receivedGroups.size());
-				if (cntrs.receivedGroups[row] == "inv") {
+				const QString &year(cntrs.receivedGroups[row]);
+				if (year == "inv") {
 					return tr("invalid received messages");
 				}
 				QString label(
 				    tr("messages received in year %1")
-				        .arg(cntrs.receivedGroups[row]));
+				        .arg(year));
 				Q_ASSERT(!label.isEmpty());
 				Q_ASSERT(
-				    cntrs.unreadReceivedGroups.find(label) !=
+				    cntrs.unreadReceivedGroups.find(year) !=
 				    cntrs.unreadReceivedGroups.constEnd());
-				if (cntrs.unreadReceivedGroups[label] > 0) {
+				if (cntrs.unreadReceivedGroups[year] > 0) {
 					label += QLatin1String(" - ") +
 					    tr("contains %1 unread")
-					        .arg(cntrs.unreadReceivedGroups[label]);
+					        .arg(cntrs.unreadReceivedGroups[year]);
 				}
 				return label;
 			}
