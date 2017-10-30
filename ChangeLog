@@ -1,4 +1,7 @@
 4.x.y /
+ * Table widgets and table views don't cycle between cells when tabulator is
+   pressed.
+ * Fixed space-bar selection of message recipients in table views.
  * Stored account passwords can be protected by using a master password (PIN).
  * Fixed potential source of crashes. Session container is created and
    destroyed from within the main function.
