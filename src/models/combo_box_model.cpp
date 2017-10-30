@@ -49,6 +49,7 @@ QVariant CBoxModel::data(const QModelIndex &index, int role) const
 
 	switch (role) {
 	case Qt::DisplayRole:
+	case Qt::AccessibleTextRole:
 		return m_entries.at(row).label;
 		break;
 	case valueRole:

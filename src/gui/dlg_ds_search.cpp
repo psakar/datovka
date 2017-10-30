@@ -91,16 +91,16 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	    tr("All") + QStringLiteral(" - ") + tr("All types"),
 	    CBOX_TYPE_ALL);
 	m_boxTypeCBoxModel.appendRow(
-	    tr("OVM") + QStringLiteral(" - ") + tr("Orgán veřejné moci"),
+	    tr("OVM") + QStringLiteral(" - ") + tr("Public authority"), /* organ verejne moci */
 	    CBOX_TYPE_OVM);
 	m_boxTypeCBoxModel.appendRow(
-	    tr("PO") + QStringLiteral(" - ") + tr("Právnická osoba"),
+	    tr("PO") + QStringLiteral(" - ") + tr("Legal person"), /* pravnicka osoba */
 	    CBOX_TYPE_PO);
 	m_boxTypeCBoxModel.appendRow(
-	    tr("PFO") + QStringLiteral(" - ") + tr("Podnikající fyzická osoba"),
+	    tr("PFO") + QStringLiteral(" - ") + tr("Self-employed person"), /* podnikajici fyzicka osoba */
 	    CBOX_TYPE_PFO);
 	m_boxTypeCBoxModel.appendRow(
-	    tr("FO") + QStringLiteral(" - ") + tr("Fyzická osoba"),
+	    tr("FO") + QStringLiteral(" - ") + tr("Natural person"), /* fyzicka osoba */
 	    CBOX_TYPE_FO);
 	m_ui->dataBoxTypeCBox->setModel(&m_boxTypeCBoxModel);
 
