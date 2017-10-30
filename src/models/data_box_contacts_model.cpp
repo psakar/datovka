@@ -66,6 +66,19 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 			break;
 		}
 		break;
+	case Qt::ToolTipRole:
+		if (index.column() == BOX_TYPE_COL) {
+			QVariant entry(_data(index, Qt::DisplayRole));
+
+			if (!entry.isNull()) {
+				return IsdsConversion::senderBoxTypeToText(entry.toInt());
+			} else {
+				return entry;
+			}
+		} else {
+			return QVariant();
+		}
+		break;
 	case Qt::CheckStateRole:
 		if (index.column() == CHECKBOX_COL) {
 			return _data(index, Qt::DisplayRole).toBool() ?
@@ -80,8 +93,10 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 			return _data(index, Qt::DisplayRole).toBool() ?
 			    tr("selected") : tr("not selected");
 			break;
-		case BOX_ID_COL:
 		case BOX_TYPE_COL:
+			return data(index, Qt::ToolTipRole);
+			break;
+		case BOX_ID_COL:
 		case BOX_NAME_COL:
 		case ADDRESS_COL:
 		case POST_CODE_COL:
@@ -104,7 +119,7 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 		case ADDRESS_COL:
 		case POST_CODE_COL:
 		case PDZ_COL:
-			_headerData(index.column(), Qt::Horizontal);
+			return _headerData(index.column(), Qt::Horizontal);
 			break;
 		default:
 			return QVariant();
