@@ -164,13 +164,11 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 		switch (index.column()) {
 		case FNAME_COL:
 		case MIME_COL:
-			return _data(index);
+		case FPATH_COL:
+			return data(index);
 			break;
 		case FSIZE_COL:
 			return data(index).toString() + QLatin1String(" ") + tr("bytes");
-			break;
-		case FPATH_COL:
-			return data(index);
 			break;
 		default:
 			return QVariant();
