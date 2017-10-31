@@ -64,7 +64,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				return locations.isEmpty() ? QVariant() : m_dsIco;
 				break;
 			case Qt::ToolTipRole:
-				return locations.join("\n");
+				return locations.join(QLatin1String("\n"));
 				break;
 			case Qt::AccessibleTextRole:
 				if (!locations.isEmpty()) {
@@ -73,7 +73,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 					        Qt::Horizontal,
 					        Qt::ToolTipRole).toString() +
 					    QLatin1String(": ") +
-					    locations.join(", ");
+					    locations.join(QLatin1String(", "));
 				}
 				return QVariant();
 				break;
@@ -92,7 +92,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				return locations.isEmpty() ? QVariant() : m_dsIco;
 				break;
 			case Qt::ToolTipRole:
-				return locations.join("\n");
+				return locations.join(QLatin1String("\n"));
 				break;
 			case Qt::AccessibleTextRole:
 				if (!locations.isEmpty()) {
@@ -101,7 +101,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 					        Qt::Horizontal,
 					        Qt::ToolTipRole).toString() +
 					    QLatin1String(": ") +
-					    locations.join(", ");
+					    locations.join(QLatin1String(", "));
 				}
 				return QVariant();
 				break;
@@ -121,7 +121,33 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 	switch (m_type) {
 	case WORKING_RCVD:
 		if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
-			return _data(index, role);
+			switch (role) {
+			case Qt::AccessibleTextRole:
+				{
+					QVariant val(_data(index));
+					if (val.canConvert<TagItemList>()) {
+						TagItemList tagList(qvariant_cast<TagItemList>(val));
+						if (!tagList.isEmpty()) {
+							QString descr(
+							    headerData(index.column(),
+							        Qt::Horizontal).toString());
+							descr += QLatin1String(": ");
+							for (int i = 0; i < tagList.size(); ++i) {
+								if (i > 0) {
+									descr += QLatin1String(", ");
+								}
+								descr += tagList.at(i).name;
+							}
+							return descr;
+						}
+					}
+				}
+				return QVariant();
+				break;
+			default:
+				return _data(index, role);
+				break;
+			}
 		}
 		break;
 	case WORKING_SNT:
