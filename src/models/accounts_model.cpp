@@ -377,7 +377,8 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 	case Qt::AccessibleTextRole:
 		switch (type) {
 		case nodeAccountTop:
-			return accountInfo.accountName();
+			return tr("account") + QLatin1String(" ") +
+			    accountInfo.accountName();
 			break;
 		case nodeRecentReceived:
 			{
