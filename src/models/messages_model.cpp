@@ -204,10 +204,11 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
 		switch (dataType) {
 		case DB_DATETIME:
-			/* Convert date on display. */
-			return dateTimeStrFromDbFormat(
-			    _data(index, role).toString(),
-			    dateTimeDisplayFormat);
+			return headerData(index.column(), Qt::Horizontal).toString() +
+			    QLatin1String(" ") +
+			    dateTimeStrFromDbFormat(
+			        _data(index, Qt::DisplayRole).toString(),
+			        dateTimeDisplayFormat);
 			break;
 		case DB_BOOL_READ_LOCALLY: /* 'read locally' */
 			if (_data(index).toBool()) {
@@ -217,7 +218,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			}
 			break;
 		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded' */
-			/* Show icon for 'is downloaded'. */
 			if (_data(index).toBool()) {
 				return tr("attachments downloaded");
 			} else {
@@ -225,28 +225,36 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			}
 			break;
 		case DB_INT_PROCESSING_STATE: /* 'process status' */
-			/* Show icon for 'process status'. */
-			switch (_data(index).toInt()) {
-			case UNSETTLED:
-				return tr("unsettled");
-				break;
-			case IN_PROGRESS:
-				return tr("in progress");
-				break;
-			case SETTLED:
-				return tr("settled");
-				break;
-			default:
-				Q_ASSERT(0);
-				break;
+			{
+				QString headerPref(headerData(index.column(),
+				     Qt::Horizontal, Qt::ToolTipRole).toString());
+				headerPref += QLatin1String(" ");
+
+				switch (_data(index).toInt()) {
+				case UNSETTLED:
+					return headerPref + tr("unsettled");
+					break;
+				case IN_PROGRESS:
+					return headerPref + tr("in progress");
+					break;
+				case SETTLED:
+					return headerPref + tr("settled");
+					break;
+				default:
+					Q_ASSERT(0);
+					break;
+				}
 			}
 			return QVariant();
 			break;
 		default:
-			return _data(index, role);
+			return headerData(index.column(), Qt::Horizontal).toString() +
+			    QLatin1String(" ") +
+			    _data(index, Qt::DisplayRole).toString();
 			break;
 		}
 		break;
+
 	case ROLE_PLAIN_DISPLAY:
 		return _data(index, Qt::DisplayRole);
 		break;
