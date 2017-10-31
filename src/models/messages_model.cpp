@@ -200,6 +200,10 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::AccessibleTextRole:
+		if (index.column() == DMID_COL) {
+			return tr("message identifier") + QLatin1String(" ") +
+			    _data(index, Qt::DisplayRole).toString();
+		}
 		dataType = _headerData(index.column(), Qt::Horizontal,
 		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
 		switch (dataType) {
