@@ -97,7 +97,7 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 			break;
 		case BOX_ID_COL:
 			return tr("box identifier") + QLatin1String(" ") +
-			    data(index, Qt::DisplayRole).toString();
+			    data(index).toString();
 			break;
 		case BOX_TYPE_COL:
 			return headerData(index.column(), Qt::Horizontal).toString() +
@@ -110,7 +110,7 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 		case PDZ_COL:
 			return headerData(index.column(), Qt::Horizontal).toString() +
 			    QLatin1String(" ") +
-			    data(index, Qt::DisplayRole).toString();
+			    data(index).toString();
 			break;
 		default:
 			return QVariant();
