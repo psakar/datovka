@@ -42,7 +42,6 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 		case BOX_TYPE_COL:
 			{
 				QVariant entry(_data(index, role));
-
 				if (!entry.isNull()) {
 					return IsdsConversion::boxTypeToStr(entry.toInt());
 				} else {
@@ -53,7 +52,6 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 		case PDZ_COL:
 			{
 				QVariant entry(_data(index, role));
-
 				if (!entry.isNull()) {
 					return entry.toBool() ? tr("yes") : tr("no");
 				} else {
@@ -88,38 +86,31 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 		}
 		break;
 	case Qt::AccessibleTextRole:
+		/*
+		 * Most of the accessibility data are constructed using
+		 * the header data followed by the cell content.
+		 */
 		switch (index.column()) {
 		case CHECKBOX_COL:
 			return _data(index, Qt::DisplayRole).toBool() ?
 			    tr("selected") : tr("not selected");
 			break;
-		case BOX_TYPE_COL:
-			return data(index, Qt::ToolTipRole);
-			break;
 		case BOX_ID_COL:
+			return tr("box identifier") + QLatin1String(" ") +
+			    data(index, Qt::DisplayRole).toString();
+			break;
+		case BOX_TYPE_COL:
+			return headerData(index.column(), Qt::Horizontal).toString() +
+			    QLatin1String(" ") +
+			    data(index, Qt::ToolTipRole).toString();
+			break;
 		case BOX_NAME_COL:
 		case ADDRESS_COL:
 		case POST_CODE_COL:
 		case PDZ_COL:
-			return data(index);
-			break;
-		default:
-			return QVariant();
-			break;
-		}
-		break;
-	case Qt::AccessibleDescriptionRole:
-		switch (index.column()) {
-		/* case CHECKBOX_COL: */
-		case BOX_ID_COL:
-			return tr("box identifier");
-			break;
-		case BOX_TYPE_COL:
-		case BOX_NAME_COL:
-		case ADDRESS_COL:
-		case POST_CODE_COL:
-		case PDZ_COL:
-			return _headerData(index.column(), Qt::Horizontal);
+			return headerData(index.column(), Qt::Horizontal).toString() +
+			    QLatin1String(" ") +
+			    data(index, Qt::DisplayRole).toString();
 			break;
 		default:
 			return QVariant();
