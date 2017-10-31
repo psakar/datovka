@@ -66,6 +66,17 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			case Qt::ToolTipRole:
 				return locations.join("\n");
 				break;
+			case Qt::AccessibleTextRole:
+				if (!locations.isEmpty()) {
+					return
+					    headerData(index.column(),
+					        Qt::Horizontal,
+					        Qt::ToolTipRole).toString() +
+					    QLatin1String(": ") +
+					    locations.join(", ");
+				}
+				return QVariant();
+				break;
 			default:
 				return QVariant();
 				break;
@@ -82,6 +93,17 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				break;
 			case Qt::ToolTipRole:
 				return locations.join("\n");
+				break;
+			case Qt::AccessibleTextRole:
+				if (!locations.isEmpty()) {
+					return
+					    headerData(index.column(),
+					        Qt::Horizontal,
+					        Qt::ToolTipRole).toString() +
+					    QLatin1String(": ") +
+					    locations.join(", ");
+				}
+				return QVariant();
 				break;
 			default:
 				return QVariant();
