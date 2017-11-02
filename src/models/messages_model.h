@@ -103,7 +103,7 @@ public:
 	 * @brief Returns the data stored under the given role.
 	 *
 	 * @param[in] index Position.
-	 * @param[in] role  Role if the position.
+	 * @param[in] role  Role of the position.
 	 * @return Data or invalid QVariant if no matching data found.
 	 */
 	virtual
@@ -245,6 +245,24 @@ public:
 	bool refillRecordsManagementColumn(const QList<qint64> &dmIds, int col);
 
 private:
+	/*!
+	 * @brief Return records management model data.
+	 *
+	 * @param[in] index Position.
+	 * @param[in] role Role of the position.
+	 * @return Data to be displayed.
+	 */
+	QVariant recMgmtData(const QModelIndex &index, int role) const;
+
+	/*!
+	 * @brief Return tags model data.
+	 *
+	 * @param[in] index Position.
+	 * @param[in] role Role of the position.
+	 * @return Data to be displayed.
+	 */
+	QVariant tagsData(const QModelIndex &index, int role) const;
+
 	enum Type m_type; /*!<
 	                   * Whether this is a model dummy or contains data.
 	                   */

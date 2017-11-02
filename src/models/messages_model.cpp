@@ -46,46 +46,6 @@ DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
 {
 }
 
-/*!
- * @brief Return records management model data.
- *
- * @param[in] rawData Internal model data.
- * @param[in] role Display role.
- * @param[in] ico Icon to be shown if present in records management service.
- * @param[in] accessibleName Data to be prepended in form of accessible text.
- * @return Data to be displayed.
- */
-static
-QVariant recordsManagementData(const QVariant &rawData, int role,
-    const QIcon &ico, const QString &accessibleName = QString())
-{
-	if (Q_UNLIKELY(!rawData.canConvert<QStringList>())) {
-		Q_ASSERT(0);
-		return QVariant();
-	}
-
-	const QStringList locations(rawData.toStringList());
-	switch (role) {
-	case Qt::DecorationRole:
-		return locations.isEmpty() ? QVariant() : ico;
-		break;
-	case Qt::ToolTipRole:
-		return locations.join(QLatin1String("\n"));
-		break;
-	case Qt::AccessibleTextRole:
-		if (!locations.isEmpty()) {
-			QString prefix(accessibleName.isEmpty() ? QString() :
-			    accessibleName + QLatin1String(": "));
-			return prefix + locations.join(QLatin1String(", "));
-		}
-		return QVariant();
-		break;
-	default:
-		return QVariant();
-		break;
-	}
-}
-
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 {
 	int dataType;
@@ -97,18 +57,12 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 	switch (m_type) {
 	case WORKING_RCVD:
 		if (index.column() == (PROCSNG_COL + TAGS_OFFS)) {
-			return recordsManagementData(
-			    _data(index, Qt::DisplayRole), role, m_dsIco,
-			    headerData(index.column(), Qt::Horizontal,
-			        Qt::ToolTipRole).toString());
+			return recMgmtData(index, role);
 		}
 		break;
 	case WORKING_SNT:
 		if (index.column() == (ATTDOWN_COL + TAGS_OFFS)) {
-			return recordsManagementData(
-			    _data(index, Qt::DisplayRole), role, m_dsIco,
-			    headerData(index.column(), Qt::Horizontal,
-			        Qt::ToolTipRole).toString());
+			return recMgmtData(index, role);
 		}
 		break;
 	default:
@@ -117,42 +71,16 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 	}
 
-	/* Leave additional tags to delegates. */
+	/* Draw tag information. */
 	switch (m_type) {
 	case WORKING_RCVD:
 		if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
-			switch (role) {
-			case Qt::AccessibleTextRole:
-				{
-					QVariant val(_data(index));
-					if (val.canConvert<TagItemList>()) {
-						TagItemList tagList(qvariant_cast<TagItemList>(val));
-						if (!tagList.isEmpty()) {
-							QString descr(
-							    headerData(index.column(),
-							        Qt::Horizontal).toString());
-							descr += QLatin1String(": ");
-							for (int i = 0; i < tagList.size(); ++i) {
-								if (i > 0) {
-									descr += QLatin1String(", ");
-								}
-								descr += tagList.at(i).name;
-							}
-							return descr;
-						}
-					}
-				}
-				return QVariant();
-				break;
-			default:
-				return _data(index, role);
-				break;
-			}
+			return tagsData(index, role);
 		}
 		break;
 	case WORKING_SNT:
 		if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
-			return _data(index, role);
+			return tagsData(index, role);
 		}
 		break;
 	default:
@@ -889,4 +817,72 @@ bool DbMsgsTblModel::refillRecordsManagementColumn(const QList<qint64> &dmIds,
 	}
 
 	return true;
+}
+
+QVariant DbMsgsTblModel::recMgmtData(const QModelIndex &index, int role) const
+{
+	QStringList locations;
+	{
+		QVariant rawData(_data(index, Qt::DisplayRole));
+		if (Q_UNLIKELY(!rawData.canConvert<QStringList>())) {
+			Q_ASSERT(0);
+			return QVariant();
+		}
+		locations = rawData.toStringList();
+	}
+
+	switch (role) {
+	case Qt::DecorationRole:
+		return locations.isEmpty() ? QVariant() : m_dsIco;
+		break;
+	case Qt::ToolTipRole:
+		return locations.join(QLatin1String("\n"));
+		break;
+	case Qt::AccessibleTextRole:
+		if (!locations.isEmpty()) {
+			return headerData(index.column(), Qt::Horizontal, Qt::ToolTipRole).toString() +
+			    QLatin1String(": ") +
+			    locations.join(QLatin1String(", "));
+		}
+		return QVariant();
+		break;
+	default:
+		return QVariant();
+		break;
+	}
+}
+
+QVariant DbMsgsTblModel::tagsData(const QModelIndex &index, int role) const
+{
+	switch (role) {
+	case Qt::AccessibleTextRole:
+		{
+			QVariant val(_data(index, Qt::DisplayRole));
+			if (Q_UNLIKELY(!val.canConvert<TagItemList>())) {
+				Q_ASSERT(0);
+				return QVariant();
+			}
+
+			const TagItemList tagList(
+			    qvariant_cast<TagItemList>(val));
+			if (!tagList.isEmpty()) {
+				QString descr(
+				    headerData(index.column(), Qt::Horizontal).toString() +
+				    QLatin1String(": "));
+				for (int i = 0; i < tagList.size(); ++i) {
+					if (i > 0) {
+						descr += QLatin1String(", ");
+					}
+					descr += tagList.at(i).name;
+				}
+				return descr;
+			}
+		}
+		return QVariant();
+		break;
+	default:
+		/* Leave additional tags to delegates. */
+		return _data(index, role);
+		break;
+	}
 }
