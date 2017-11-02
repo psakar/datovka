@@ -52,34 +52,20 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 
 #define TAGS_OFFS 1 /* Tags are located behind upload information. */
 
-	/* Draw upload information. */
+	/* Draw records management and tag information. */
 	/* TODO -- This is only a temporal solution. */
 	switch (m_type) {
 	case WORKING_RCVD:
 		if (index.column() == (PROCSNG_COL + TAGS_OFFS)) {
 			return recMgmtData(index, role);
+		} else if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
+			return tagsData(index, role);
 		}
 		break;
 	case WORKING_SNT:
 		if (index.column() == (ATTDOWN_COL + TAGS_OFFS)) {
 			return recMgmtData(index, role);
-		}
-		break;
-	default:
-		Q_ASSERT(0);
-		return QVariant();
-		break;
-	}
-
-	/* Draw tag information. */
-	switch (m_type) {
-	case WORKING_RCVD:
-		if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
-			return tagsData(index, role);
-		}
-		break;
-	case WORKING_SNT:
-		if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
+		} else if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
 			return tagsData(index, role);
 		}
 		break;
