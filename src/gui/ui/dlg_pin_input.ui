@@ -110,7 +110,14 @@
         </spacer>
        </item>
        <item>
-        <widget class="QLineEdit" name="pinLine"/>
+        <widget class="QLineEdit" name="pinLine">
+         <property name="toolTip">
+          <string>Enter the PIN value.</string>
+         </property>
+         <property name="placeholderText">
+          <string>Enter PIN code</string>
+         </property>
+        </widget>
        </item>
        <item>
         <spacer name="verticalSpacer_4">

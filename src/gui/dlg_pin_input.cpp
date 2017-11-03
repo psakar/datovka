@@ -43,7 +43,6 @@ DlgPinInput::DlgPinInput(QWidget *parent)
 	    tr("Version") + QLatin1String(": ") + VERSION +
 	    QLatin1String("</b>"));
 
-	m_ui->pinLine->setPlaceholderText(tr("Enter PIN code"));
 	m_ui->pinLine->setEchoMode(QLineEdit::Password);
 }
 
