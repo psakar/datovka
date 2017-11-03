@@ -227,8 +227,12 @@ int main(int argc, char *argv[])
 			bool pinOk = false;
 			if (RM_GUI == runMode) {
 				splash->hide();
-				pinOk =
-				    DlgPinInput::queryPin(globPinSet, splash);
+				/*
+				 * PIN query dialogue cannot be the child of
+				 * the splash screen as this window cannot be
+				 * focused using Alt+Tab on Windows.
+				 */
+				pinOk = DlgPinInput::queryPin(globPinSet);
 				splash->show();
 			} else if (RM_CLI == runMode) {
 				pinOk = CLIPin::queryPin(globPinSet, 2);
