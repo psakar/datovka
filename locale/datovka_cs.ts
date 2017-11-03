@@ -4,7 +4,7 @@
 <context>
     <name>AccountModel</name>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="422"/>
+        <location filename="../src/models/accounts_model.cpp" line="505"/>
         <source>Accounts</source>
         <translation>Účty</translation>
     </message>
@@ -32,6 +32,62 @@
         <location filename="../src/models/accounts_model.cpp" line="262"/>
         <source>Sent</source>
         <translation>Odeslané</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="380"/>
+        <source>account</source>
+        <translation>účet</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="385"/>
+        <source>recently received messages</source>
+        <translation>nedávno přijaté zprávy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="392"/>
+        <location filename="../src/models/accounts_model.cpp" line="432"/>
+        <source>contains %1 unread</source>
+        <translation>obsahuje %1 nepřečtených</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="399"/>
+        <source>recently sent messages</source>
+        <translation>nedávno odeslané zprávy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="402"/>
+        <source>all messages</source>
+        <translation>všechny zprávy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="405"/>
+        <source>all received messages</source>
+        <translation>všechny přijaté zprávy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="408"/>
+        <source>all sent messages</source>
+        <translation>všechny odeslané zprávy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="421"/>
+        <source>invalid received messages</source>
+        <translation>nevalidní přijaté zprávy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="424"/>
+        <source>messages received in year %1</source>
+        <translation>zprávy přijaté v roce %1</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="448"/>
+        <source>invalid sent messages</source>
+        <translation>nevalidní odeslané zprávy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="450"/>
+        <source>messages sent in year %1</source>
+        <translation>zprávy odeslané v roce %1</translation>
     </message>
 </context>
 <context>
@@ -92,42 +148,57 @@
 <context>
     <name>BoxContactsModel</name>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="73"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="56"/>
         <source>yes</source>
         <translation>ano</translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="73"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="56"/>
         <source>no</source>
         <translation>ne</translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="124"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="96"/>
+        <source>selected</source>
+        <translation>vybráno</translation>
+    </message>
+    <message>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="96"/>
+        <source>not selected</source>
+        <translation>nevybráno</translation>
+    </message>
+    <message>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="99"/>
+        <source>box identifier</source>
+        <translation>identifikátor schránky</translation>
+    </message>
+    <message>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="165"/>
         <source>ID</source>
         <translation>ID</translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="125"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="166"/>
         <source>Type</source>
         <translation>Typ</translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="127"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="168"/>
         <source>Name</source>
         <translation>Název</translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="129"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="170"/>
         <source>Address</source>
         <translation>Adresa</translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="131"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="172"/>
         <source>Postal Code</source>
         <translation>PSČ</translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="133"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="174"/>
         <source>PDZ</source>
         <translation>PDZ</translation>
     </message>
@@ -282,22 +353,27 @@
 <context>
     <name>DbFlsTblModel</name>
     <message>
-        <location filename="../src/models/files_model.cpp" line="180"/>
+        <location filename="../src/models/files_model.cpp" line="155"/>
         <source>local database</source>
         <translation>místní databáze</translation>
     </message>
     <message>
-        <location filename="../src/models/files_model.cpp" line="355"/>
+        <location filename="../src/models/files_model.cpp" line="174"/>
+        <source>bytes</source>
+        <translation>bajtů</translation>
+    </message>
+    <message>
+        <location filename="../src/models/files_model.cpp" line="371"/>
         <source>File size</source>
         <translation>Velikost souboru</translation>
     </message>
     <message>
-        <location filename="../src/models/files_model.cpp" line="357"/>
+        <location filename="../src/models/files_model.cpp" line="373"/>
         <source>File path</source>
         <translation>Cesta k souboru</translation>
     </message>
     <message>
-        <location filename="../src/models/files_model.cpp" line="477"/>
+        <location filename="../src/models/files_model.cpp" line="493"/>
         <source>unknown</source>
         <translation>neznámý</translation>
     </message>
@@ -305,13 +381,53 @@
 <context>
     <name>DbMsgsTblModel</name>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="513"/>
-        <location filename="../src/models/messages_model.cpp" line="552"/>
+        <location filename="../src/models/messages_model.cpp" line="166"/>
+        <source>message identifier</source>
+        <translation>identifikátor zprávy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="181"/>
+        <source>marked as read</source>
+        <translation>označeno jako přečtené</translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="183"/>
+        <source>marked as unread</source>
+        <translation>označeno jako nepřečtené</translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="188"/>
+        <source>attachments downloaded</source>
+        <translation>přílohy staženy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="190"/>
+        <source>attachments not downloaded</source>
+        <translation>přílohy nestaženy</translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="201"/>
+        <source>unsettled</source>
+        <translation>nevyřízeno</translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="204"/>
+        <source>in progress</source>
+        <translation>vyřizuje se</translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="207"/>
+        <source>settled</source>
+        <translation>vyřízeno</translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="532"/>
+        <location filename="../src/models/messages_model.cpp" line="571"/>
         <source>Attachments downloaded</source>
         <translation>Přílohy staženy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="521"/>
+        <location filename="../src/models/messages_model.cpp" line="540"/>
         <source>Processing state</source>
         <translation>Stav vyřizování</translation>
     </message>
@@ -1279,19 +1395,9 @@ zabezpečením svého uživatelského účtu.</translation>
         <translation>OVM</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="94"/>
-        <source>Orgán veřejné moci</source>
-        <translation>Orgán veřejné moci</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="97"/>
         <source>PO</source>
         <translation>PO</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="97"/>
-        <source>Právnická osoba</source>
-        <translation>Právnická osoba</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="100"/>
@@ -1299,19 +1405,9 @@ zabezpečením svého uživatelského účtu.</translation>
         <translation>PFO</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="100"/>
-        <source>Podnikající fyzická osoba</source>
-        <translation>Podnikající fyzická osoba</translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="103"/>
         <source>FO</source>
         <translation>FO</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="103"/>
-        <source>Fyzická osoba</source>
-        <translation>Fyzická osoba</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="108"/>
@@ -1424,6 +1520,26 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <location filename="../src/gui/dlg_ds_search.cpp" line="791"/>
         <source>It was not possible find any data box because</source>
         <translation>Nebylo možné najít žádnou datovou schránku protože</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="94"/>
+        <source>Public authority</source>
+        <translation>Orgán veřejné moci</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="97"/>
+        <source>Legal person</source>
+        <translation>Právnická osoba</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="100"/>
+        <source>Self-employed person</source>
+        <translation>Podnikající fyzická osoba</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="103"/>
+        <source>Natural person</source>
+        <translation>Fyzická osoba</translation>
     </message>
     <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="694"/>
@@ -1833,12 +1949,17 @@ zanést neplatná data.</translation>
         <translation>n/a</translation>
     </message>
     <message>
+        <location filename="../src/gui/ui/dlg_pin_input.ui" line="115"/>
+        <source>Enter the PIN value.</source>
+        <translation>Zadejte PIN.</translation>
+    </message>
+    <message>
         <location filename="../src/gui/dlg_pin_input.cpp" line="43"/>
         <source>Version</source>
         <translation>Verze</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_pin_input.cpp" line="46"/>
+        <location filename="../src/gui/ui/dlg_pin_input.ui" line="118"/>
         <source>Enter PIN code</source>
         <translation>Zadejte PIN kód</translation>
     </message>
@@ -3906,197 +4027,257 @@ neumožňuje zasílání poštovních datových zpráv.</translation>
         <translation>Došlo k chybě při zjišťování stavu.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="174"/>
-        <source>System ISDS</source>
-        <translation>Systém ISDS</translation>
-    </message>
-    <message>
         <location filename="../src/isds/isds_conversion.cpp" line="175"/>
-        <source>Public authority</source>
-        <translation>Orgán veřejné moci (OVM)</translation>
+        <source>system box</source>
+        <translation>systémová schránka</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="176"/>
-        <source>Legal person</source>
-        <translation>Právnická osoba (PO)</translation>
+        <source>public authority</source>
+        <translation>orgán veřejné moci</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="177"/>
-        <source>Self-employed person</source>
-        <translation>Podnikající fyzická osoba (OSVČ)</translation>
+        <source>public authority - notary</source>
+        <translation>orgán veřejné moci - notář</translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="178"/>
-        <source>Natural person</source>
-        <translation>Fyzická osoba (FO)</translation>
+        <source>public authority - bailiff</source>
+        <translation>orgán veřejné moci - exekutor</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="196"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="179"/>
+        <source>public authority - at request</source>
+        <translation>orgán veřejné moci - na žádost</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="180"/>
+        <source>public authority - natural person</source>
+        <translation>orgán veřejné moci - fyzická osoba</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="181"/>
+        <source>public authority - self-employed person</source>
+        <translation>orgán veřejné moci - podnikající fyzická osoba</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="182"/>
+        <source>public authority - legal person</source>
+        <translation>orgán veřejné moci - právnická osoba</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="183"/>
+        <source>legal person</source>
+        <translation>právnická osoba</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="184"/>
+        <source>legal person - founded by an act</source>
+        <translation>právnická osoba - ze zákona</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="185"/>
+        <source>legal person - at request</source>
+        <translation>právnická osoba - na žádost</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="186"/>
+        <source>self-employed person</source>
+        <translation>podnikající fyzická osoba</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="187"/>
+        <source>self-employed person - advocate</source>
+        <translation>podnikající fyzická osoba - advokát</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="188"/>
+        <source>self-employed person - tax advisor</source>
+        <translation>podnikající fyzická osoba - daňový poradce</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="189"/>
+        <source>self-employed person - insolvency administrator</source>
+        <translation>podnikající fyzická osoba - insolvenční správce</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="190"/>
+        <source>self-employed person - statutory auditor</source>
+        <translation>podnikající fyzická osoba - auditor</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="191"/>
+        <source>natural person</source>
+        <translation>fyzická osoba</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="209"/>
         <source>Postal data message</source>
         <translation>Poštovní datová zpráva</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="199"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="212"/>
         <source>Initialising postal data message</source>
         <translation>Inicializační poštovní datová zpráva</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="202"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="215"/>
         <source>Reply postal data message</source>
         <translation>Odpovědní poštovní datová zpráva</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="205"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="218"/>
         <source>Initialising postal data message - expired</source>
         <translation>Inicializační poštovní datová zpráva - propadlá</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="208"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="221"/>
         <source>Initialising postal data message - used</source>
         <translation>Inicializační poštovní datová zpráva - použitá</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="309"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="322"/>
         <source>Message has been submitted (has been created in ISDS)</source>
         <translation>Zpráva byla podána (vznikla v ISDS)</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="315"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="328"/>
         <source>Data message including its attachments signed with time-stamp.</source>
         <translation>Datová zpráva včetně písemností podepsána časovým razítkem.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="322"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="335"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
         <translation>Zpráva neprošla AV kontrolou; nakažená písemnost je smazána; konečný stav zprávy před smazáním.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="327"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="340"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
         <translation>Zpráva dodána do ISDS (zapsán čas dodání).</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="335"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="348"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of acceptance through fiction in non-OVM DS); this state cannot occur for commercial messages.</source>
         <translation>Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u ne-OVM DS); tento stav nemůže nastat v případě poštovních datových zpráv.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="345"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="358"/>
         <source>A person authorised to read this message has logged in -- delivered message has been accepted.</source>
         <translation>Osoba oprávněná číst tuto zprávu se přihlásila -- dodaná zpráva byla doručena.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="350"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="363"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation>Zpráva byla přečtena (na portále nebo akcí ESS).</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="357"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="370"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
         <translation>Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="365"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="378"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
         <translation>Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="370"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="383"/>
         <source>Message resides in data vault.</source>
         <translation>Zpráva je v Datovém trezoru.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="418"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="431"/>
         <source>Primary user</source>
         <translation>Oprávněná osoba</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="421"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="434"/>
         <source>Entrusted user</source>
         <translation>Pověřená osoba</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="424"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="437"/>
         <source>Administrator</source>
         <translation>Administrátor</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="427"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="440"/>
         <source>Official</source>
         <translation>Oficiální</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="430"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="443"/>
         <source>Virtual</source>
         <translation>Virtuální</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="432"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="445"/>
         <source>???</source>
         <translation>???</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="434"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="447"/>
         <source>Liquidator</source>
         <translation>Likvidátor</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="436"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="449"/>
         <source>Receiver</source>
         <translation>Nucený správce</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="438"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="451"/>
         <source>Guardian</source>
         <translation>Opatrovník</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="475"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="488"/>
         <source>Full control</source>
         <translation>Plný přístup</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="477"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="490"/>
         <source>Restricted control</source>
         <translation>Omezený přístup</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="482"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="495"/>
         <source>download and read incoming DM</source>
         <translation>stahovat a číst došlé DZ</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="488"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="501"/>
         <source>download and read DM sent into own hands</source>
         <translation>stahovat a číst DZ určené do vlastních rukou</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="493"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="506"/>
         <source>create and send DM, download sent DM</source>
         <translation>vytvářet a odesílat DZ, stahovat odeslané DZ</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="498"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="511"/>
         <source>retrieve DM lists, delivery and acceptance reports</source>
         <translation>načítat seznamy DZ, dodejky a doručenky</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="503"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="516"/>
         <source>search for data boxes</source>
         <translation>vyhledávat DS</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="507"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="520"/>
         <source>manage the data box</source>
         <translation>spravovat DS</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="511"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="524"/>
         <source>read message in data vault</source>
         <translation>číst zprávy v datovém trezoru</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="515"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="528"/>
         <source>erase messages from data vault</source>
         <translation>mazat zprávy v datovém trezoru</translation>
     </message>
@@ -6630,7 +6811,7 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
         <translation>Přečteno lokálně</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="247"/>
+        <location filename="../src/main.cpp" line="251"/>
         <source>Application is loading...</source>
         <translation>Aplikace se načítá...</translation>
     </message>
@@ -7364,7 +7545,7 @@ do původního umístění
 <context>
     <name>UploadHierarchyModel</name>
     <message>
-        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="160"/>
+        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="163"/>
         <source>Records Management Hierarchy</source>
         <translation>Hierarchie spisové služby</translation>
     </message>

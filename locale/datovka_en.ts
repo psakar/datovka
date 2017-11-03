@@ -29,7 +29,63 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="422"/>
+        <location filename="../src/models/accounts_model.cpp" line="380"/>
+        <source>account</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="385"/>
+        <source>recently received messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="392"/>
+        <location filename="../src/models/accounts_model.cpp" line="432"/>
+        <source>contains %1 unread</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="399"/>
+        <source>recently sent messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="402"/>
+        <source>all messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="405"/>
+        <source>all received messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="408"/>
+        <source>all sent messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="421"/>
+        <source>invalid received messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="424"/>
+        <source>messages received in year %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="448"/>
+        <source>invalid sent messages</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="450"/>
+        <source>messages sent in year %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/accounts_model.cpp" line="505"/>
         <source>Accounts</source>
         <translation type="unfinished"></translation>
     </message>
@@ -92,42 +148,57 @@
 <context>
     <name>BoxContactsModel</name>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="73"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="56"/>
         <source>yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="73"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="56"/>
         <source>no</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="124"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="96"/>
+        <source>selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="96"/>
+        <source>not selected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="99"/>
+        <source>box identifier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="165"/>
         <source>ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="125"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="166"/>
         <source>Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="127"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="168"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="129"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="170"/>
         <source>Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="131"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="172"/>
         <source>Postal Code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/data_box_contacts_model.cpp" line="133"/>
+        <location filename="../src/models/data_box_contacts_model.cpp" line="174"/>
         <source>PDZ</source>
         <translation type="unfinished"></translation>
     </message>
@@ -282,22 +353,27 @@
 <context>
     <name>DbFlsTblModel</name>
     <message>
-        <location filename="../src/models/files_model.cpp" line="180"/>
+        <location filename="../src/models/files_model.cpp" line="155"/>
         <source>local database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/files_model.cpp" line="355"/>
+        <location filename="../src/models/files_model.cpp" line="174"/>
+        <source>bytes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/files_model.cpp" line="371"/>
         <source>File size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/files_model.cpp" line="357"/>
+        <location filename="../src/models/files_model.cpp" line="373"/>
         <source>File path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/files_model.cpp" line="477"/>
+        <location filename="../src/models/files_model.cpp" line="493"/>
         <source>unknown</source>
         <translation type="unfinished"></translation>
     </message>
@@ -305,13 +381,53 @@
 <context>
     <name>DbMsgsTblModel</name>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="513"/>
-        <location filename="../src/models/messages_model.cpp" line="552"/>
+        <location filename="../src/models/messages_model.cpp" line="166"/>
+        <source>message identifier</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="181"/>
+        <source>marked as read</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="183"/>
+        <source>marked as unread</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="188"/>
+        <source>attachments downloaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="190"/>
+        <source>attachments not downloaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="201"/>
+        <source>unsettled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="204"/>
+        <source>in progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="207"/>
+        <source>settled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/messages_model.cpp" line="532"/>
+        <location filename="../src/models/messages_model.cpp" line="571"/>
         <source>Attachments downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="521"/>
+        <location filename="../src/models/messages_model.cpp" line="540"/>
         <source>Processing state</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1258,18 +1374,8 @@ about the security of your account.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="94"/>
-        <source>Orgán veřejné moci</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="97"/>
         <source>PO</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="97"/>
-        <source>Právnická osoba</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1278,18 +1384,8 @@ about the security of your account.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="100"/>
-        <source>Podnikající fyzická osoba</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/gui/dlg_ds_search.cpp" line="103"/>
         <source>FO</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="103"/>
-        <source>Fyzická osoba</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1391,6 +1487,26 @@ The current search settings will thus probably yield no result.</source>
         <location filename="../src/gui/dlg_ds_search.cpp" line="685"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="791"/>
         <source>It was not possible find any data box because</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="94"/>
+        <source>Public authority</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="97"/>
+        <source>Legal person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="100"/>
+        <source>Self-employed person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="103"/>
+        <source>Natural person</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1800,12 +1916,17 @@ into your local database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../src/gui/ui/dlg_pin_input.ui" line="115"/>
+        <source>Enter the PIN value.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/gui/dlg_pin_input.cpp" line="43"/>
         <source>Version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_pin_input.cpp" line="46"/>
+        <location filename="../src/gui/ui/dlg_pin_input.ui" line="118"/>
         <source>Enter PIN code</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3817,197 +3938,257 @@ of postal data messages active.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="174"/>
-        <source>System ISDS</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../src/isds/isds_conversion.cpp" line="175"/>
-        <source>Public authority</source>
+        <source>system box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="176"/>
-        <source>Legal person</source>
+        <source>public authority</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="177"/>
-        <source>Self-employed person</source>
+        <source>public authority - notary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/isds/isds_conversion.cpp" line="178"/>
-        <source>Natural person</source>
+        <source>public authority - bailiff</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="196"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="179"/>
+        <source>public authority - at request</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="180"/>
+        <source>public authority - natural person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="181"/>
+        <source>public authority - self-employed person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="182"/>
+        <source>public authority - legal person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="183"/>
+        <source>legal person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="184"/>
+        <source>legal person - founded by an act</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="185"/>
+        <source>legal person - at request</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="186"/>
+        <source>self-employed person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="187"/>
+        <source>self-employed person - advocate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="188"/>
+        <source>self-employed person - tax advisor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="189"/>
+        <source>self-employed person - insolvency administrator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="190"/>
+        <source>self-employed person - statutory auditor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="191"/>
+        <source>natural person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="209"/>
         <source>Postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="199"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="212"/>
         <source>Initialising postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="202"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="215"/>
         <source>Reply postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="205"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="218"/>
         <source>Initialising postal data message - expired</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="208"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="221"/>
         <source>Initialising postal data message - used</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="309"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="322"/>
         <source>Message has been submitted (has been created in ISDS)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="315"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="328"/>
         <source>Data message including its attachments signed with time-stamp.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="322"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="335"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="327"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="340"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="335"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="348"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of acceptance through fiction in non-OVM DS); this state cannot occur for commercial messages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="345"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="358"/>
         <source>A person authorised to read this message has logged in -- delivered message has been accepted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="350"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="363"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="357"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="370"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="365"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="378"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="370"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="383"/>
         <source>Message resides in data vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="418"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="431"/>
         <source>Primary user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="421"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="434"/>
         <source>Entrusted user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="424"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="437"/>
         <source>Administrator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="427"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="440"/>
         <source>Official</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="430"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="443"/>
         <source>Virtual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="432"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="445"/>
         <source>???</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="434"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="447"/>
         <source>Liquidator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="436"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="449"/>
         <source>Receiver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="438"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="451"/>
         <source>Guardian</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="475"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="488"/>
         <source>Full control</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="477"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="490"/>
         <source>Restricted control</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="482"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="495"/>
         <source>download and read incoming DM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="488"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="501"/>
         <source>download and read DM sent into own hands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="493"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="506"/>
         <source>create and send DM, download sent DM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="498"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="511"/>
         <source>retrieve DM lists, delivery and acceptance reports</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="503"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="516"/>
         <source>search for data boxes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="507"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="520"/>
         <source>manage the data box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="511"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="524"/>
         <source>read message in data vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="515"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="528"/>
         <source>erase messages from data vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6529,7 +6710,7 @@ sent reply on this message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="247"/>
+        <location filename="../src/main.cpp" line="251"/>
         <source>Application is loading...</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7258,7 +7439,7 @@ to origin path
 <context>
     <name>UploadHierarchyModel</name>
     <message>
-        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="160"/>
+        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="163"/>
         <source>Records Management Hierarchy</source>
         <translation type="unfinished"></translation>
     </message>
