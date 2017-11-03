@@ -105,7 +105,78 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 {
 	switch (role) {
 	case Qt::DisplayRole:
-		/* Continue with code. */
+		switch (index.column()) {
+		case CONTENT_COL:
+			{
+				const QString fPath(_data(index.row(), FPATH_COL,
+				    role).toString());
+
+				if (fPath == LOCAL_DATABASE_STR) {
+					/* Data should be in the model. */
+					return _data(index, role);
+				} else if (fileReadable(fPath)) {
+					/* Read file. */
+					return getFileBase64(fPath);
+				} else {
+					/*
+					 * This fallback is used when filling model
+					 * with zfo content.
+					 */
+					return _data(index, role);
+				}
+			}
+			break;
+		case FSIZE_COL:
+			{
+				const QString fPath(_data(index.row(), FPATH_COL,
+				    role).toString());
+				QByteArray b64(_data(index.row(), CONTENT_COL,
+				    role).toByteArray());
+
+				if (fPath == LOCAL_DATABASE_STR) {
+					/* Get attachment size from base64 length. */
+					return base64RealSize(b64);
+				} else if (fileReadable(fPath)) {
+					/* File size. */
+					return getFileSize(fPath);
+				} else {
+					/*
+					 * This fallback is used when filling model
+					 * with zfo content.
+					 */
+					return base64RealSize(b64);
+				}
+			}
+			break;
+		case FPATH_COL:
+			{
+				const QString fPath(_data(index).toString());
+				return (fPath == LOCAL_DATABASE_STR) ?
+				    tr("local database") : fPath;
+			}
+			break;
+		default:
+			return _data(index, role);
+			break;
+		}
+		break;
+	case Qt::AccessibleTextRole:
+		switch (index.column()) {
+		case FNAME_COL:
+		case MIME_COL:
+		case FPATH_COL:
+			return headerData(index.column(), Qt::Horizontal).toString() +
+			    QLatin1String(" ") + data(index).toString();
+			break;
+		case FSIZE_COL:
+			return headerData(index.column(), Qt::Horizontal).toString() +
+			    QLatin1String(" ") + data(index).toString() +
+			    QLatin1String(" ") + tr("bytes");
+			break;
+		default:
+			return QVariant();
+			break;
+		}
 		break;
 	case ROLE_PLAIN_DISPLAY:
 		/* Explicitly asking associated file path. */
@@ -124,61 +195,6 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 			}
 		}
 		return QVariant();
-		break;
-	default:
-		return _data(index, role);
-		break;
-	}
-
-	switch (index.column()) {
-	case CONTENT_COL:
-		{
-			const QString fPath(_data(index.row(), FPATH_COL,
-			    role).toString());
-
-			if (fPath == LOCAL_DATABASE_STR) {
-				/* Data should be in the model. */
-				return _data(index, role);
-			} else if (fileReadable(fPath)) {
-				/* Read file. */
-				return getFileBase64(fPath);
-			} else {
-				/*
-				 * This fallback is used when filling model
-				 * with zfo content.
-				 */
-				return _data(index, role);
-			}
-		}
-		break;
-	case FSIZE_COL:
-		{
-			const QString fPath(_data(index.row(), FPATH_COL,
-			    role).toString());
-			QByteArray b64(_data(index.row(), CONTENT_COL,
-			    role).toByteArray());
-
-			if (fPath == LOCAL_DATABASE_STR) {
-				/* Get attachment size from base64 length. */
-				return base64RealSize(b64);
-			} else if (fileReadable(fPath)) {
-				/* File size. */
-				return getFileSize(fPath);
-			} else {
-				/*
-				 * This fallback is used when filling model
-				 * with zfo content.
-				 */
-				return base64RealSize(b64);
-			}
-		}
-		break;
-	case FPATH_COL:
-		{
-			const QString fPath(_data(index).toString());
-			return (fPath == LOCAL_DATABASE_STR) ?
-			    tr("local database") : fPath;
-		}
 		break;
 	default:
 		return _data(index, role);

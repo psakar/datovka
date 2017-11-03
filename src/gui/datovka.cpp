@@ -1315,7 +1315,7 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 {
 	debugSlotCall();
 
-	if (DbMsgsTblModel::READLOC_COL != index.column()) {
+	if (DbMsgsTblModel::READLOC_STATUS_COL != index.column()) {
 		qDebug() << "Not clicked read locally.";
 		return;
 	}

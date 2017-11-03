@@ -51,10 +51,10 @@ public:
 	enum ColumnNumbers {
 		DMID_COL = 0, /* Message identifier. */
 		ANNOT_COL = 1, /* Annotation column. */
-		/* 2 stands for sender or recipient name. */
+		SENDER_RECIP_COL = 2, /* Sender or recipient name column. */
 		DELIVERY_COL = 3, /* Delivery time column. */
 		ACCEPT_COL = 4, /* Acceptance time column. */
-		READLOC_COL = 5, /* Read locally. */
+		READLOC_STATUS_COL = 5, /* Read locally or message status. */
 		ATTDOWN_COL = 6, /* Attachments downloaded. */
 		PROCSNG_COL = 7, /* Processing state. */
 		REC_MGMT_NEG_COL = -2, /* Records management service. */
@@ -103,7 +103,7 @@ public:
 	 * @brief Returns the data stored under the given role.
 	 *
 	 * @param[in] index Position.
-	 * @param[in] role  Role if the position.
+	 * @param[in] role  Role of the position.
 	 * @return Data or invalid QVariant if no matching data found.
 	 */
 	virtual
@@ -245,20 +245,27 @@ public:
 	bool refillRecordsManagementColumn(const QList<qint64> &dmIds, int col);
 
 private:
+	/*!
+	 * @brief Return records management model data.
+	 *
+	 * @param[in] index Position.
+	 * @param[in] role Role of the position.
+	 * @return Data to be displayed.
+	 */
+	QVariant recMgmtData(const QModelIndex &index, int role) const;
+
+	/*!
+	 * @brief Return tags model data.
+	 *
+	 * @param[in] index Position.
+	 * @param[in] role Role of the position.
+	 * @return Data to be displayed.
+	 */
+	QVariant tagsData(const QModelIndex &index, int role) const;
+
 	enum Type m_type; /*!<
 	                   * Whether this is a model dummy or contains data.
 	                   */
-
-	static
-	const int rcvdMsgsColCnt; /*<
-	                           * Number of columns when displaying received
-	                           * messages (without added columns).
-	                           */
-	static
-	const int sntMsgsColCnt; /*!<
-	                          * Number of columns when displaying sent
-	                          * messages (without added columns).
-	                          */
 
 	QIcon m_dsIco; /*!< Records management icon. */
 };

@@ -33,9 +33,6 @@
 #include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/models/messages_model.h"
 
-const int DbMsgsTblModel::rcvdMsgsColCnt(8);
-const int DbMsgsTblModel::sntMsgsColCnt(7);
-
 /*
  * Specifies number of bits to be used for message id when combining with other
  * data.
@@ -55,59 +52,21 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 
 #define TAGS_OFFS 1 /* Tags are located behind upload information. */
 
-	/* Draw upload information. */
+	/* Draw records management and tag information. */
 	/* TODO -- This is only a temporal solution. */
 	switch (m_type) {
 	case WORKING_RCVD:
 		if (index.column() == (PROCSNG_COL + TAGS_OFFS)) {
-			QStringList locations(
-			    _data(index, Qt::DisplayRole).toStringList());
-			switch (role) {
-			case Qt::DecorationRole:
-				return locations.isEmpty() ? QVariant() : m_dsIco;
-				break;
-			case Qt::ToolTipRole:
-				return locations.join("\n");
-				break;
-			default:
-				return QVariant();
-				break;
-			}
+			return recMgmtData(index, role);
+		} else if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
+			return tagsData(index, role);
 		}
 		break;
 	case WORKING_SNT:
 		if (index.column() == (ATTDOWN_COL + TAGS_OFFS)) {
-			QStringList locations(
-			    _data(index, Qt::DisplayRole).toStringList());
-			switch (role) {
-			case Qt::DecorationRole:
-				return locations.isEmpty() ? QVariant() : m_dsIco;
-				break;
-			case Qt::ToolTipRole:
-				return locations.join("\n");
-				break;
-			default:
-				return QVariant();
-				break;
-			}
-		}
-		break;
-	default:
-		Q_ASSERT(0);
-		return QVariant();
-		break;
-	}
-
-	/* Leave additional tags to delegates. */
-	switch (m_type) {
-	case WORKING_RCVD:
-		if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
-			return _data(index, role);
-		}
-		break;
-	case WORKING_SNT:
-		if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
-			return _data(index, role);
+			return recMgmtData(index, role);
+		} else if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
+			return tagsData(index, role);
 		}
 		break;
 	default:
@@ -187,11 +146,11 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::FontRole:
-		if (DB_BOOL_READ_LOCALLY == _headerData(READLOC_COL,
+		if (DB_BOOL_READ_LOCALLY == _headerData(READLOC_STATUS_COL,
 		        Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
 			/* In read messages. */
 			if (!_data(index.sibling(index.row(),
-			        READLOC_COL)).toBool()) {
+			        READLOC_STATUS_COL)).toBool()) {
 				/* Unread messages are shown bold. */
 				QFont boldFont;
 				boldFont.setBold(true);
@@ -200,6 +159,66 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		}
 
 		return _data(index, role);
+		break;
+
+	case Qt::AccessibleTextRole:
+		if (index.column() == DMID_COL) {
+			return tr("message identifier") + QLatin1String(" ") +
+			    _data(index, Qt::DisplayRole).toString();
+		}
+		dataType = _headerData(index.column(), Qt::Horizontal,
+		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (dataType) {
+		case DB_DATETIME:
+			return headerData(index.column(), Qt::Horizontal).toString() +
+			    QLatin1String(" ") +
+			    dateTimeStrFromDbFormat(
+			        _data(index, Qt::DisplayRole).toString(),
+			        dateTimeDisplayFormat);
+			break;
+		case DB_BOOL_READ_LOCALLY: /* 'read locally' */
+			if (_data(index).toBool()) {
+				return tr("marked as read");
+			} else {
+				return tr("marked as unread");
+			}
+			break;
+		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded' */
+			if (_data(index).toBool()) {
+				return tr("attachments downloaded");
+			} else {
+				return tr("attachments not downloaded");
+			}
+			break;
+		case DB_INT_PROCESSING_STATE: /* 'process status' */
+			{
+				QString headerPref(headerData(index.column(),
+				     Qt::Horizontal, Qt::ToolTipRole).toString());
+				headerPref += QLatin1String(" ");
+
+				switch (_data(index).toInt()) {
+				case UNSETTLED:
+					return headerPref + tr("unsettled");
+					break;
+				case IN_PROGRESS:
+					return headerPref + tr("in progress");
+					break;
+				case SETTLED:
+					return headerPref + tr("settled");
+					break;
+				default:
+					Q_ASSERT(0);
+					break;
+				}
+			}
+			return QVariant();
+			break;
+		default:
+			return headerData(index.column(), Qt::Horizontal).toString() +
+			    QLatin1String(" ") +
+			    _data(index, Qt::DisplayRole).toString();
+			break;
+		}
 		break;
 
 	case ROLE_PLAIN_DISPLAY:
@@ -274,7 +293,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 
 	switch (role) {
 	case Qt::DisplayRole:
-		if (section < READLOC_COL) {
+		if (section < READLOC_STATUS_COL) {
 			return _headerData(section, orientation, role);
 		}
 
@@ -294,7 +313,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		break;
 
 	case Qt::DecorationRole:
-		if (section < READLOC_COL) {
+		if (section < READLOC_STATUS_COL) {
 			return _headerData(section, orientation, role);
 		}
 
@@ -319,7 +338,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		break;
 
 	case Qt::ToolTipRole:
-		if (section < READLOC_COL) {
+		if (section < READLOC_STATUS_COL) {
 			return QVariant();
 		}
 
@@ -386,10 +405,10 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 
 		row[DMID_COL] = entry.dmId;
 		row[ANNOT_COL] = entry.dmAnnotation;
-		row[2] = entry.dmSender;
+		row[SENDER_RECIP_COL] = entry.dmSender;
 		row[DELIVERY_COL] = entry.dmDeliveryTime;
 		row[ACCEPT_COL] = entry.dmAcceptanceTime;
-		row[READLOC_COL] = entry.readLocally;
+		row[READLOC_STATUS_COL] = entry.readLocally;
 		row[ATTDOWN_COL] = entry.isDownloaded;
 		row[PROCSNG_COL] = entry.processStatus;
 
@@ -441,10 +460,10 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 
 		row[DMID_COL] = entry.dmId;
 		row[ANNOT_COL] = entry.dmAnnotation;
-		row[2] = entry.dmRecipient;
+		row[SENDER_RECIP_COL] = entry.dmRecipient;
 		row[DELIVERY_COL] = entry.dmDeliveryTime;
 		row[ACCEPT_COL] = entry.dmAcceptanceTime;
-		row[5] = entry.dmMessageStatus;
+		row[READLOC_STATUS_COL] = entry.dmMessageStatus;
 		row[ATTDOWN_COL] = entry.isDownloaded;
 
 		m_data[m_rowCount++] = row;
@@ -574,7 +593,7 @@ bool DbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
 	for (int row = 0; row < rowCount(); ++row) {
 		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() ==
 		    dmId) {
-			m_data[row][READLOC_COL] = QVariant(forceRead);
+			m_data[row][READLOC_STATUS_COL] = QVariant(forceRead);
 
 			emit dataChanged(TblModel::index(row, 0),
 			    TblModel::index(row, columnCount() - 1));
@@ -784,4 +803,72 @@ bool DbMsgsTblModel::refillRecordsManagementColumn(const QList<qint64> &dmIds,
 	}
 
 	return true;
+}
+
+QVariant DbMsgsTblModel::recMgmtData(const QModelIndex &index, int role) const
+{
+	QStringList locations;
+	{
+		QVariant rawData(_data(index, Qt::DisplayRole));
+		if (Q_UNLIKELY(!rawData.canConvert<QStringList>())) {
+			Q_ASSERT(0);
+			return QVariant();
+		}
+		locations = rawData.toStringList();
+	}
+
+	switch (role) {
+	case Qt::DecorationRole:
+		return locations.isEmpty() ? QVariant() : m_dsIco;
+		break;
+	case Qt::ToolTipRole:
+		return locations.join(QLatin1String("\n"));
+		break;
+	case Qt::AccessibleTextRole:
+		if (!locations.isEmpty()) {
+			return headerData(index.column(), Qt::Horizontal, Qt::ToolTipRole).toString() +
+			    QLatin1String(": ") +
+			    locations.join(QLatin1String(", "));
+		}
+		return QVariant();
+		break;
+	default:
+		return QVariant();
+		break;
+	}
+}
+
+QVariant DbMsgsTblModel::tagsData(const QModelIndex &index, int role) const
+{
+	switch (role) {
+	case Qt::AccessibleTextRole:
+		{
+			QVariant val(_data(index, Qt::DisplayRole));
+			if (Q_UNLIKELY(!val.canConvert<TagItemList>())) {
+				Q_ASSERT(0);
+				return QVariant();
+			}
+
+			const TagItemList tagList(
+			    qvariant_cast<TagItemList>(val));
+			if (!tagList.isEmpty()) {
+				QString descr(
+				    headerData(index.column(), Qt::Horizontal).toString() +
+				    QLatin1String(": "));
+				for (int i = 0; i < tagList.size(); ++i) {
+					if (i > 0) {
+						descr += QLatin1String(", ");
+					}
+					descr += tagList.at(i).name;
+				}
+				return descr;
+			}
+		}
+		return QVariant();
+		break;
+	default:
+		/* Leave additional tags to delegates. */
+		return _data(index, role);
+		break;
+	}
 }

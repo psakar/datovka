@@ -374,6 +374,89 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 		}
 		break;
 
+	case Qt::AccessibleTextRole:
+		switch (type) {
+		case nodeAccountTop:
+			return tr("account") + QLatin1String(" ") +
+			    accountInfo.accountName();
+			break;
+		case nodeRecentReceived:
+			{
+				QString label(tr("recently received messages"));
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				if (cntrs.unreadRecentReceived > 0) {
+					label += QLatin1String(" - ") +
+					    tr("contains %1 unread")
+					        .arg(cntrs.unreadRecentReceived);
+				}
+				return label;
+			}
+			break;
+		case nodeRecentSent:
+			return tr("recently sent messages");
+			break;
+		case nodeAll:
+			return tr("all messages");
+			break;
+		case nodeReceived:
+			return tr("all received messages");
+			break;
+		case nodeSent:
+			return tr("all sent messages");
+			break;
+		case nodeReceivedYear:
+			{
+				int row = index.row();
+				Q_ASSERT(row >= 0);
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				Q_ASSERT(row < cntrs.receivedGroups.size());
+				const QString &year(cntrs.receivedGroups[row]);
+				if (year == "inv") {
+					return tr("invalid received messages");
+				}
+				QString label(
+				    tr("messages received in year %1")
+				        .arg(year));
+				Q_ASSERT(!label.isEmpty());
+				Q_ASSERT(
+				    cntrs.unreadReceivedGroups.find(year) !=
+				    cntrs.unreadReceivedGroups.constEnd());
+				if (cntrs.unreadReceivedGroups[year] > 0) {
+					label += QLatin1String(" - ") +
+					    tr("contains %1 unread")
+					        .arg(cntrs.unreadReceivedGroups[year]);
+				}
+				return label;
+			}
+			break;
+		case nodeSentYear:
+			{
+				int row = index.row();
+				Q_ASSERT(row >= 0);
+				Q_ASSERT(m_countersMap.find(uName) !=
+				    m_countersMap.constEnd());
+				const AccountCounters &cntrs(
+				    m_countersMap[uName]);
+				Q_ASSERT(row < cntrs.sentGroups.size());
+				if (cntrs.sentGroups[row] == "inv") {
+					return tr("invalid sent messages");
+				}
+				return tr("messages sent in year %1")
+				    .arg(cntrs.sentGroups[row]);
+			}
+			break;
+		default:
+			return QVariant();
+			break;
+		}
+		break;
+
 	case ROLE_PLAIN_DISPLAY:
 		switch (type) {
 		case nodeReceivedYear:

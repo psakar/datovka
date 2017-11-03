@@ -140,6 +140,9 @@ QVariant UploadHierarchyModel::data(const QModelIndex &index, int role) const
 	case Qt::ToolTipRole:
 		return filterData(entry).join(QStringLiteral("\n"));
 		break;
+	case Qt::AccessibleTextRole:
+		return entry->name();
+		break;
 	case ROLE_FILTER:
 		return filterDataRecursive(entry, true);
 		break;
