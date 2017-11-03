@@ -1,4 +1,5 @@
 4.x.y /
+ * Added support for accessibility text output into data models.
  * Table widgets and table views don't cycle between cells when tabulator is
    pressed.
  * Fixed space-bar selection of message recipients in table views.
