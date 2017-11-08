@@ -25,9 +25,13 @@
 
 #include "src/settings/records_management.h"
 
-#define RM_GROUP QLatin1String("records_management")
-#define RM_URL QLatin1String("location_url")
-#define RM_TOKEN QLatin1String("access_token")
+/* Records management configuration entry names. */
+namespace RMnames {
+	const QLatin1String rmGroup("records_management");
+
+	const QLatin1String url("location_url");
+	const QLatin1String token("access_token");
+}
 
 RecordsManagementSettings globRecordsManagementSet;
 
@@ -39,10 +43,11 @@ RecordsManagementSettings::RecordsManagementSettings(void)
 
 void RecordsManagementSettings::loadFromSettings(const QSettings &settings)
 {
-	m_url = settings.value(RM_GROUP + QLatin1String("/") + RM_URL,
-	    QString()).toString();
+	const QString prefix(RMnames::rmGroup + QLatin1String("/"));
+
+	m_url = settings.value(prefix + RMnames::url, QString()).toString();
 	m_token = QByteArray::fromBase64(
-	    settings.value(RM_GROUP + QLatin1String("/") + RM_TOKEN,
+	    settings.value(prefix + RMnames::token,
 	        QByteArray()).toString().toUtf8());
 
 	if (m_url.isEmpty() || m_token.isEmpty()) {
@@ -54,10 +59,10 @@ void RecordsManagementSettings::loadFromSettings(const QSettings &settings)
 void RecordsManagementSettings::saveToSettings(QSettings &settings) const
 {
 	if (!m_url.isEmpty() && !m_token.isEmpty()) {
-		settings.beginGroup(RM_GROUP);
+		settings.beginGroup(RMnames::rmGroup);
 
-		settings.setValue(RM_URL, m_url);
-		settings.setValue(RM_TOKEN,
+		settings.setValue(RMnames::url, m_url);
+		settings.setValue(RMnames::token,
 		    QString(m_token.toUtf8().toBase64()));
 
 		settings.endGroup();
