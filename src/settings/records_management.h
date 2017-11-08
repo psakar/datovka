@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,12 +54,43 @@ public:
 	/*!
 	 * @brief Test whether records management service is set.
 	 *
+	 * @note This method does not actually check the service availability.
+	 *
 	 * @return True is URL and token are set.
 	 */
 	bool isSet(void) const;
 
-	QString url; /*!< Service URL. */
-	QString token; /*!< Service access token. */
+	/*!
+	 * @brief Return service URL.
+	 *
+	 * @return Service URL.
+	 */
+	const QString &url(void) const;
+
+	/*!
+	 * @brief Set service URL.
+	 *
+	 * @param[in] url Service URL.
+	 */
+	void setUrl(const QString &url);
+
+	/*!
+	 * @brief Return service token.
+	 *
+	 * @return Service token.
+	 */
+	const QString &token(void) const;
+
+	/*!
+	 * @brief Set service token.
+	 *
+	 * @param[in] token Service token.
+	 */
+	void setToken(const QString &token);
+
+private:
+	QString m_url; /*!< Service URL. */
+	QString m_token; /*!< Service access token. */
 };
 
 /*!

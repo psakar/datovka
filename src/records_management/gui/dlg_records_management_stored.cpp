@@ -91,8 +91,8 @@ bool DlgRecordsManagementStored::updateStoredInformation(
 		return false;
 	}
 
-	DlgRecordsManagementStored dlg(recMgmtSettings.url,
-	    recMgmtSettings.token, accounts, parent);
+	DlgRecordsManagementStored dlg(recMgmtSettings.url(),
+	    recMgmtSettings.token(), accounts, parent);
 	dlg.exec();
 
 	return true;

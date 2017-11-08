@@ -98,7 +98,7 @@ bool DlgRecordsManagement::updateSettings(
 		return false;
 	}
 
-	DlgRecordsManagement dlg(recMgmtSettings.url, recMgmtSettings.token,
+	DlgRecordsManagement dlg(recMgmtSettings.url(), recMgmtSettings.token(),
 	    parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return false;
@@ -115,7 +115,7 @@ bool DlgRecordsManagement::updateSettings(
 		entry.logoSvg = dlg.m_logoSvg;
 		globRecordsManagementDbPtr->updateServiceInfo(entry);
 
-		if (recMgmtSettings.url != dlg.m_ui->urlLine->text()) {
+		if (recMgmtSettings.url() != dlg.m_ui->urlLine->text()) {
 			/* Erase all message-related data as URL has changed. */
 			globRecordsManagementDbPtr->deleteAllStoredMsg();
 		}
@@ -124,8 +124,8 @@ bool DlgRecordsManagement::updateSettings(
 	}
 
 	/* Save changes to settings. */
-	recMgmtSettings.url = dlg.m_ui->urlLine->text().trimmed();
-	recMgmtSettings.token = dlg.m_ui->tokenLine->text().trimmed();
+	recMgmtSettings.setUrl(dlg.m_ui->urlLine->text().trimmed());
+	recMgmtSettings.setToken(dlg.m_ui->tokenLine->text().trimmed());
 
 	return true;
 }

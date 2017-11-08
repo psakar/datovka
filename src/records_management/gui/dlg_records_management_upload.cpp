@@ -102,8 +102,8 @@ bool DlgRecordsManagementUpload::uploadMessage(
 		return false;
 	}
 
-	DlgRecordsManagementUpload dlg(recMgmtSettings.url,
-	    recMgmtSettings.token, dmId, parent);
+	DlgRecordsManagementUpload dlg(recMgmtSettings.url(),
+	    recMgmtSettings.token(), dmId, parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return false;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,32 +32,33 @@
 RecordsManagementSettings globRecordsManagementSet;
 
 RecordsManagementSettings::RecordsManagementSettings(void)
-    : url(),
-    token()
+    : m_url(),
+    m_token()
 {
 }
 
 void RecordsManagementSettings::loadFromSettings(const QSettings &settings)
 {
-	url = settings.value(RM_GROUP + QLatin1String("/") + RM_URL,
+	m_url = settings.value(RM_GROUP + QLatin1String("/") + RM_URL,
 	    QString()).toString();
-	token = QByteArray::fromBase64(
+	m_token = QByteArray::fromBase64(
 	    settings.value(RM_GROUP + QLatin1String("/") + RM_TOKEN,
 	        QByteArray()).toString().toUtf8());
 
-	if (url.isEmpty() || token.isEmpty()) {
-		url.clear();
-		token.clear();
+	if (m_url.isEmpty() || m_token.isEmpty()) {
+		m_url.clear();
+		m_token.clear();
 	}
 }
 
 void RecordsManagementSettings::saveToSettings(QSettings &settings) const
 {
-	if (!url.isEmpty() && !token.isEmpty()) {
+	if (!m_url.isEmpty() && !m_token.isEmpty()) {
 		settings.beginGroup(RM_GROUP);
 
-		settings.setValue(RM_URL, url);
-		settings.setValue(RM_TOKEN, QString(token.toUtf8().toBase64()));
+		settings.setValue(RM_URL, m_url);
+		settings.setValue(RM_TOKEN,
+		    QString(m_token.toUtf8().toBase64()));
 
 		settings.endGroup();
 	}
@@ -65,5 +66,25 @@ void RecordsManagementSettings::saveToSettings(QSettings &settings) const
 
 bool RecordsManagementSettings::isSet(void) const
 {
-	return !url.isEmpty() && !token.isEmpty();
+	return !m_url.isEmpty() && !m_token.isEmpty();
+}
+
+const QString &RecordsManagementSettings::url(void) const
+{
+	return m_url;
+}
+
+void RecordsManagementSettings::setUrl(const QString &url)
+{
+	m_url = url;
+}
+
+const QString &RecordsManagementSettings::token(void) const
+{
+	return m_token;
+}
+
+void RecordsManagementSettings::setToken(const QString &token)
+{
+	m_token = token;
 }
