@@ -28,13 +28,13 @@
 #include "src/settings/account.h"
 #include "src/settings/accounts.h"
 #include "src/settings/pin.h"
-#include "tests/test_crypto_pin.h"
+#include "tests/test_crypto_pin_pwd.h"
 
-class TestCryptoPin : public QObject {
+class TestCryptoPinPwd : public QObject {
 	Q_OBJECT
 
 public:
-	TestCryptoPin(void);
+	TestCryptoPinPwd(void);
 
 private slots:
 	void initTestCase(void);
@@ -78,10 +78,10 @@ private:
 	const QString expectedPwd;
 };
 
-TestCryptoPin::TestCryptoPin(void)
+TestCryptoPinPwd::TestCryptoPinPwd(void)
     : QObject(Q_NULLPTR),
-    configPinDisabledPath("data/config_pin_disabled.conf"),
-    configPinEnabledPath("data/config_pin_enabled.conf"),
+    configPinDisabledPath("data/config_pin_pwd_disabled.conf"),
+    configPinEnabledPath("data/config_pin_pwd_enabled.conf"),
     correctPin("1234"),
     incorrectPin("123"),
     expectedAcntName("account_abcdef"),
@@ -90,30 +90,30 @@ TestCryptoPin::TestCryptoPin(void)
 {
 }
 
-void TestCryptoPin::initTestCase(void)
+void TestCryptoPinPwd::initTestCase(void)
 {
 	/* No initialisation is needed. */
 }
 
-void TestCryptoPin::cleanupTestCase(void)
+void TestCryptoPinPwd::cleanupTestCase(void)
 {
 }
 
-void TestCryptoPin::loadConfigPinDisabled(void)
+void TestCryptoPinPwd::loadConfigPinDisabled(void)
 {
 	QSettings settings(configPinDisabledPath, QSettings::IniFormat);
 
 	checkConfigPinDisabled(settings);
 }
 
-void TestCryptoPin::loadConfigPinEnabled(void)
+void TestCryptoPinPwd::loadConfigPinEnabled(void)
 {
 	QSettings settings(configPinEnabledPath, QSettings::IniFormat);
 
 	checkConfigPinEnabled(settings);
 }
 
-void TestCryptoPin::enablePin(void)
+void TestCryptoPinPwd::enablePin(void)
 {
 	QSettings settings01(configPinDisabledPath, QSettings::IniFormat);
 	QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -126,7 +126,7 @@ void TestCryptoPin::enablePin(void)
 	checkConfigPinEnabled(settings02);
 }
 
-void TestCryptoPin::disablePin(void)
+void TestCryptoPinPwd::disablePin(void)
 {
 	QSettings settings01(configPinEnabledPath, QSettings::IniFormat);
 	QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -139,7 +139,7 @@ void TestCryptoPin::disablePin(void)
 	checkConfigPinDisabled(settings02);
 }
 
-void TestCryptoPin::checkConfigPinDisabled(QSettings &settings) const
+void TestCryptoPinPwd::checkConfigPinDisabled(QSettings &settings) const
 {
 	PinSettings pinSet;
 	AccountsMap accounts;
@@ -161,7 +161,7 @@ void TestCryptoPin::checkConfigPinDisabled(QSettings &settings) const
 	QVERIFY(acntSet.pwdCode().isEmpty());
 }
 
-void TestCryptoPin::checkConfigPinEnabled(QSettings &settings) const
+void TestCryptoPinPwd::checkConfigPinEnabled(QSettings &settings) const
 {
 	PinSettings pinSet;
 	AccountsMap accounts;
@@ -213,7 +213,7 @@ void TestCryptoPin::checkConfigPinEnabled(QSettings &settings) const
 	QVERIFY(acntSet.password() == expectedPwd);
 }
 
-void TestCryptoPin::setPin(QSettings &setIn, QSettings &setOut,
+void TestCryptoPinPwd::setPin(QSettings &setIn, QSettings &setOut,
     const QString &pinVal)
 {
 	PinSettings pinSet;
@@ -227,7 +227,7 @@ void TestCryptoPin::setPin(QSettings &setIn, QSettings &setOut,
 	saveSettings(setOut, pinSet, accounts);
 }
 
-void TestCryptoPin::clearPin(QSettings &setIn, QSettings &setOut,
+void TestCryptoPinPwd::clearPin(QSettings &setIn, QSettings &setOut,
     const QString &username, const QString &pinVal)
 {
 	PinSettings pinSet;
@@ -245,7 +245,7 @@ void TestCryptoPin::clearPin(QSettings &setIn, QSettings &setOut,
 	saveSettings(setOut, pinSet, accounts);
 }
 
-void TestCryptoPin::loadSettings(QSettings &settings, PinSettings &pinSet,
+void TestCryptoPinPwd::loadSettings(QSettings &settings, PinSettings &pinSet,
     AccountsMap &accounts)
 {
 	settings.setIniCodec("UTF-8");
@@ -254,7 +254,7 @@ void TestCryptoPin::loadSettings(QSettings &settings, PinSettings &pinSet,
 	accounts.loadFromSettings(QString(), settings);
 }
 
-void TestCryptoPin::saveSettings(QSettings &settings, const PinSettings &pinSet,
+void TestCryptoPinPwd::saveSettings(QSettings &settings, const PinSettings &pinSet,
     const AccountsMap &accounts)
 {
 	settings.setIniCodec("UTF-8");
@@ -277,10 +277,10 @@ void TestCryptoPin::saveSettings(QSettings &settings, const PinSettings &pinSet,
 	}
 }
 
-QObject *newTestCryptoPin(void)
+QObject *newTestCryptoPinPwd(void)
 {
-	return new (std::nothrow) TestCryptoPin();
+	return new (std::nothrow) TestCryptoPinPwd();
 }
 
-//QTEST_MAIN(TestCryptoPin)
-#include "test_crypto_pin.moc"
+//QTEST_MAIN(TestCryptoPinPwd)
+#include "test_crypto_pin_pwd.moc"

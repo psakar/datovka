@@ -25,4 +25,4 @@
 
 #include <QObject>
 
-QObject *newTestCryptoPin(void);
+QObject *newTestCryptoPinPwd(void);

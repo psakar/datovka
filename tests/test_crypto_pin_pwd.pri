@@ -1,6 +1,6 @@
 
 DEFINES += \
-	TEST_CRYPTO_PIN=1
+	TEST_CRYPTO_PIN_PWD=1
 
 LIBS += \
 	-lcrypto
@@ -13,7 +13,7 @@ SOURCES += \
 	$${top_srcdir}src/settings/account.cpp \
 	$${top_srcdir}src/settings/accounts.cpp \
 	$${top_srcdir}src/settings/pin.cpp \
-	$${top_srcdir}tests/test_crypto_pin.cpp
+	$${top_srcdir}tests/test_crypto_pin_pwd.cpp
 
 HEADERS += \
 	$${top_srcdir}src/common.h \
@@ -23,4 +23,4 @@ HEADERS += \
 	$${top_srcdir}src/settings/account.h \
 	$${top_srcdir}src/settings/accounts.h \
 	$${top_srcdir}src/settings/pin.h \
-	$${top_srcdir}tests/test_crypto_pin.h
+	$${top_srcdir}tests/test_crypto_pin_pwd.h
