@@ -210,7 +210,6 @@ void RecordsManagementSettings::loadFromSettings(const QSettings &settings)
 	m_url = settings.value(prefix + RMNames::url, QString()).toString();
 	readTokenData(*this, settings, RMNames::rmGroup);
 
-	/* TODO -- The following check cannot be performed as it is. */
 	if (!isValid()) {
 		m_url.clear();
 		m_token.clear();
