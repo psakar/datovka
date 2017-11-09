@@ -92,7 +92,7 @@ bool DlgRecordsManagementUpload::uploadMessage(
     const RecordsManagementSettings &recMgmtSettings, qint64 dmId,
     const QString &msgFileName, const QByteArray &msgData, QWidget *parent)
 {
-	if (!recMgmtSettings.isSet()) {
+	if (!recMgmtSettings.isValid()) {
 		Q_ASSERT(0);
 		return false;
 	}

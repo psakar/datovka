@@ -38,30 +38,16 @@ public:
 	RecordsManagementSettings(void);
 
 	/*!
-	 * @brief Load data from supplied settings.
-	 *
-	 * @param[in] settings Settings structure.
-	 */
-	void loadFromSettings(const QSettings &settings);
-
-	/*!
-	 * @brief Store data to settings structure.
-	 *
-	 * @param[out] settings Settings structure.
-	 */
-	void saveToSettings(QSettings &settings) const;
-
-	/*!
 	 * @brief Test whether records management service is set.
 	 *
 	 * @note This method does not actually check the service availability.
 	 *
 	 * @return True is URL and token are set.
 	 */
-	bool isSet(void) const;
+	bool isValid(void) const;
 
 	/*!
-	 * @brief Return service URL.
+	 * @brief Get service URL.
 	 *
 	 * @return Service URL.
 	 */
@@ -75,7 +61,7 @@ public:
 	void setUrl(const QString &url);
 
 	/*!
-	 * @brief Return service token.
+	 * @brief Get service token.
 	 *
 	 * @return Service token.
 	 */
@@ -88,9 +74,91 @@ public:
 	 */
 	void setToken(const QString &token);
 
+	/*!
+	 * @brief Get token encryption algorithm name.
+	 *
+	 * @return Algorithm name.
+	 */
+	const QString &tokenAlg(void) const;
+
+	/*!
+	 * @brief Set token encryption algorithm name.
+	 *
+	 * @param[in] tokenAlg Algorithm name.
+	 */
+	void setTokenAlg(const QString &tokenAlg);
+
+	/*!
+	 * @brief Get salt data.
+	 *
+	 * @return Salt.
+	 */
+	const QByteArray &tokenSalt(void) const;
+
+	/*!
+	 * @brief Set salt data.
+	 *
+	 * @param[in] tokenSalt data.
+	 */
+	void setTokenSalt(const QByteArray &tokenSalt);
+
+	/*!
+	 * @brief Get initialisation vector data.
+	 *
+	 * @return Initialisation vector.
+	 */
+	const QByteArray &tokenIv(void) const;
+
+	/*!
+	 * @brief Set initialisation vector data.
+	 *
+	 * @param[in] tokenIv Initialisation vector.
+	 */
+	void setTokenIv(const QByteArray &tokenIv);
+
+	/*!
+	 * @brief Get encrypted token data.
+	 *
+	 * @return Encrypted token.
+	 */
+	const QByteArray &tokenCode(void) const;
+
+	/*!
+	 * @brief Set encrypted token data.
+	 *
+	 * @param[in] tokenCode Encrypted token.
+	 */
+	void setTokenCode(const QByteArray &tokenCode);
+
+	/*!
+	 * @brief Used to decrypt the token.
+	 *
+	 * @param[in] oldPin PIN value used to decrypt old tokens.
+	 */
+	void decryptToken(const QString &oldPin);
+
+	/*!
+	 * @brief Load data from supplied settings.
+	 *
+	 * @param[in] settings Settings structure.
+	 */
+	void loadFromSettings(const QSettings &settings);
+
+	/*!
+	 * @brief Store data to settings structure.
+	 *
+	 * @param[in]  pinVal PIN value to be used for password encryption.
+	 * @param[out] settings Settings structure.
+	 */
+	void saveToSettings(const QString &pinVal, QSettings &settings) const;
+
 private:
 	QString m_url; /*!< Service URL. */
 	QString m_token; /*!< Service access token. */
+	QString m_tokenAlg; /*!< Cryptographic algorithm used to encrypt the token. */
+	QByteArray m_tokenSalt; /*!< Salt data. */
+	QByteArray m_tokenIv; /*!< Initialisation vector data. */
+	QByteArray m_tokenCode; /*!< Encrypted token. */
 };
 
 /*!

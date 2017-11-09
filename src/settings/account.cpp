@@ -460,7 +460,7 @@ void readPwdData(AcntSettings &aData, const QSettings &settings,
 
 	if (!aData.password().isEmpty() && !aData.pwdCode().isEmpty()) {
 		logWarningNL(
-		    "Account with user name '%s' has both encrypted and unencrypted password set.",
+		    "Account with username '%s' has both encrypted and unencrypted password set.",
 		    aData.userName().toUtf8().constData());
 	}
 }
@@ -469,6 +469,9 @@ void AcntSettings::decryptPassword(const QString &oldPin)
 {
 	if (!password().isEmpty()) {
 		/* Password already stored in decrypted form. */
+		logDebugLv0NL(
+		    "Password for username '%s' already held in decrypted form.",
+		    userName().toUtf8().constData());
 		return;
 	}
 
@@ -477,18 +480,21 @@ void AcntSettings::decryptPassword(const QString &oldPin)
 		 * Old PIN not given, password already should be in plain
 		 * format.
 		 */
+		logDebugLv0NL(
+		    "No PIN supplied to decrypt password for username '%s'.",
+		    userName().toUtf8().constData());
 		return;
 	}
 
 	if (!pwdAlg().isEmpty() && !pwdSalt().isEmpty() &&
 	    !pwdCode().isEmpty()) {
-		logDebugLv0NL("Decrypting password for user name '%s'.",
+		logDebugLv0NL("Decrypting password for username '%s'.",
 		    userName().toUtf8().constData());
 		QString decrypted(decryptPwd(pwdCode(), oldPin, pwdAlg(),
 		    pwdSalt(), pwdIv()));
 		if (decrypted.isEmpty()) {
 			logWarningNL(
-			    "Failed decrypting password for user name '%s'.",
+			    "Failed decrypting password for username '%s'.",
 			    userName().toUtf8().constData());
 		}
 
@@ -605,7 +611,6 @@ void AcntSettings::saveToSettings(const QString &pinVal, const QString &confDir,
 			writePlainPwd = !storeEncryptedPwd(pinVal, settings,
 			    *this, password());
 		}
-
 		if (writePlainPwd) { /* Only when plain or encryption fails. */
 			/* Store unencrypted password. */
 			settings.setValue(CredNames::pwd, toBase64(password()));

@@ -87,7 +87,7 @@ bool DlgRecordsManagementStored::updateStoredInformation(
 		return false;
 	}
 
-	if (!recMgmtSettings.isSet()) {
+	if (!recMgmtSettings.isValid()) {
 		return false;
 	}
 
