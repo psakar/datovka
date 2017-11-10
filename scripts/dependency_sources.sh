@@ -33,8 +33,12 @@ adjust_sources () {
 		echo "Using ${_GETTEXT_ARCHIVE}."
 		;;
 	osx)
-		# Latest libxml2 fails to compile on OS X.
-		_LIBXML2_ARCHIVE="libxml2-2.9.2.tar.gz"
+		# libxml2 past version 2.9.2, which does compile, fail
+		# to compile on OS X with the error:
+		# xmlIO.c:1357:52: error: use of undeclared identifier 'LZMA_OK'
+		#     ret =  (__libxml2_xzclose((xzFile) context) == LZMA_OK ) ? 0 : -1;
+		# Possible solition of to disable lzma support.
+		_LIBXML2_ARCHIVE="libxml2-2.9.7.tar.gz"
 		echo "Using ${_LIBXML2_ARCHIVE}"
 		;;
 	*)
