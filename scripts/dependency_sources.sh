@@ -37,7 +37,8 @@ adjust_sources () {
 		# to compile on OS X with the error:
 		# xmlIO.c:1357:52: error: use of undeclared identifier 'LZMA_OK'
 		#     ret =  (__libxml2_xzclose((xzFile) context) == LZMA_OK ) ? 0 : -1;
-		# Possible solition of to disable lzma support.
+		# Possible solution of to disable lzma support.
+		# See also https://github.com/sparklemotion/nokogiri/issues/1445
 		_LIBXML2_ARCHIVE="libxml2-2.9.7.tar.gz"
 		echo "Using ${_LIBXML2_ARCHIVE}"
 		;;
