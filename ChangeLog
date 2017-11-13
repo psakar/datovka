@@ -4,6 +4,7 @@
    pressed.
  * Fixed space-bar selection of message recipients in table views.
  * Stored account passwords can be protected by using a master password (PIN).
+   Records management service tokens are also encrypted.
  * Fixed potential source of crashes. Session container is created and
    destroyed from within the main function.
  * Checking for version of bundled SSL libraries on start-up.
