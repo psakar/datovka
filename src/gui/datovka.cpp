@@ -500,7 +500,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* TODO -- This is only a temporary solution. */
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globRecordsManagementSet.isSet());
+	    globRecordsManagementSet.isValid());
 }
 
 void MainWindow::setWindowsAfterInit(void)
@@ -715,7 +715,7 @@ void showColumnsAccordingToFunctionality(QTableView *view)
 {
 	QList<int> negCols;
 
-	if (!globRecordsManagementSet.isSet()) {
+	if (!globRecordsManagementSet.isValid()) {
 		negCols.append(DbMsgsTblModel::REC_MGMT_NEG_COL);
 	}
 
@@ -732,7 +732,7 @@ void MainWindow::showRecordsManagementDialogue(void)
 	}
 
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globRecordsManagementSet.isSet());
+	    globRecordsManagementSet.isValid());
 
 	m_messageTableModel.setRecordsManagementIcon();
 	m_messageTableModel.fillRecordsManagementColumn(
@@ -4034,7 +4034,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globRecordsManagementSet.isSet());
+	    globRecordsManagementSet.isValid());
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
@@ -4076,7 +4076,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
 	    /* Separator. */
 	ui->actionSend_to_records_management->setEnabled(
-	    (numSelected == 1) && globRecordsManagementSet.isSet());
+	    (numSelected == 1) && globRecordsManagementSet.isValid());
 	    /* Separator. */
 	ui->actionExport_as_ZFO->setEnabled(numSelected > 0);
 	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
@@ -4196,10 +4196,11 @@ void MainWindow::loadSettings(void)
 	/* Proxy settings. */
 	globProxSet.loadFromSettings(settings);
 
+	/* PIN should already be set because main window is running. */
+
 	/* Records management settings. */
 	globRecordsManagementSet.loadFromSettings(settings);
-
-	/* PIN should already be set because main window is running. */
+	globRecordsManagementSet.decryptToken(globPinSet._pinVal);
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(globPref.confDir(), settings);
@@ -4492,7 +4493,7 @@ void MainWindow::saveSettings(void) const
 	globProxSet.saveToSettings(settings);
 
 	/* Records management settings. */
-	globRecordsManagementSet.saveToSettings(settings);
+	globRecordsManagementSet.saveToSettings(globPinSet._pinVal, settings);
 
 	/* Global preferences. */
 	globPref.saveToSettings(settings);
@@ -4959,7 +4960,7 @@ void MainWindow::setReceivedColumnWidths(void)
 	}
 	/* Last three columns display icons. */
 	int max = MessageDb::rcvdItemIds.size();
-	if (globRecordsManagementSet.isSet()) {
+	if (globRecordsManagementSet.isValid()) {
 		/* Add one column if records management service is activated. */
 		++max;
 	}
@@ -4994,7 +4995,7 @@ void MainWindow::setSentColumnWidths(void)
 	}
 	/* Last column displays an icon. */
 	int max = MessageDb::rcvdItemIds.size();
-	if (globRecordsManagementSet.isSet()) {
+	if (globRecordsManagementSet.isValid()) {
 		/* Add one column if records management service is activated. */
 		++max;
 	}

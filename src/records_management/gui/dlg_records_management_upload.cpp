@@ -92,7 +92,7 @@ bool DlgRecordsManagementUpload::uploadMessage(
     const RecordsManagementSettings &recMgmtSettings, qint64 dmId,
     const QString &msgFileName, const QByteArray &msgData, QWidget *parent)
 {
-	if (!recMgmtSettings.isSet()) {
+	if (!recMgmtSettings.isValid()) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -102,8 +102,8 @@ bool DlgRecordsManagementUpload::uploadMessage(
 		return false;
 	}
 
-	DlgRecordsManagementUpload dlg(recMgmtSettings.url,
-	    recMgmtSettings.token, dmId, parent);
+	DlgRecordsManagementUpload dlg(recMgmtSettings.url(),
+	    recMgmtSettings.token(), dmId, parent);
 	if (QDialog::Accepted != dlg.exec()) {
 		return false;
 	}

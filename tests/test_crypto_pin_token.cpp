@@ -25,16 +25,15 @@
 #include <QString>
 #include <QtTest/QtTest>
 
-#include "src/settings/account.h"
-#include "src/settings/accounts.h"
 #include "src/settings/pin.h"
-#include "tests/test_crypto_pin.h"
+#include "src/settings/records_management.h"
+#include "tests/test_crypto_pin_token.h"
 
-class TestCryptoPin : public QObject {
+class TestCryptoPinToken : public QObject {
 	Q_OBJECT
 
 public:
-	TestCryptoPin(void);
+	TestCryptoPinToken(void);
 
 private slots:
 	void initTestCase(void);
@@ -59,61 +58,59 @@ private:
 
 	static
 	void clearPin(QSettings &setIn, QSettings &setOut,
-	    const QString &username, const QString &pinVal);
+	    const QString &pinVal);
 
 	static
 	void loadSettings(QSettings &settings, PinSettings &pinSet,
-	    AccountsMap &accounts);
+	    RecordsManagementSettings &rmSet);
 
 	static
 	void saveSettings(QSettings &settings, const PinSettings &pinSet,
-	    const AccountsMap &accounts);
+	    const RecordsManagementSettings &rmSet);
 
 	const QString configPinDisabledPath;
 	const QString configPinEnabledPath;
 	const QString correctPin;
 	const QString incorrectPin;
-	const QString expectedAcntName;
-	const QString expectedUsername;
-	const QString expectedPwd;
+	const QString expectedUrl;
+	const QString expectedToken;
 };
 
-TestCryptoPin::TestCryptoPin(void)
+TestCryptoPinToken::TestCryptoPinToken(void)
     : QObject(Q_NULLPTR),
-    configPinDisabledPath("data/config_pin_disabled.conf"),
-    configPinEnabledPath("data/config_pin_enabled.conf"),
+    configPinDisabledPath("data/config_pin_token_disabled.conf"),
+    configPinEnabledPath("data/config_pin_token_enabled.conf"),
     correctPin("1234"),
     incorrectPin("123"),
-    expectedAcntName("account_abcdef"),
-    expectedUsername("abcdef"),
-    expectedPwd("password01")
+    expectedUrl("https://records-management.service.cz/api/"),
+    expectedToken("jfsah40akv,za[2=40ta;fa32-=gfakg/;as-iqtgfag\\ak-4itagmaga4ag4jgaI)_#@FJWLSAB)*#HRFAS>Ckjha3;faj-354ga6333agfa4")
 {
 }
 
-void TestCryptoPin::initTestCase(void)
+void TestCryptoPinToken::initTestCase(void)
 {
 	/* No initialisation is needed. */
 }
 
-void TestCryptoPin::cleanupTestCase(void)
+void TestCryptoPinToken::cleanupTestCase(void)
 {
 }
 
-void TestCryptoPin::loadConfigPinDisabled(void)
+void TestCryptoPinToken::loadConfigPinDisabled(void)
 {
 	QSettings settings(configPinDisabledPath, QSettings::IniFormat);
 
 	checkConfigPinDisabled(settings);
 }
 
-void TestCryptoPin::loadConfigPinEnabled(void)
+void TestCryptoPinToken::loadConfigPinEnabled(void)
 {
 	QSettings settings(configPinEnabledPath, QSettings::IniFormat);
 
 	checkConfigPinEnabled(settings);
 }
 
-void TestCryptoPin::enablePin(void)
+void TestCryptoPinToken::enablePin(void)
 {
 	QSettings settings01(configPinDisabledPath, QSettings::IniFormat);
 	QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -126,7 +123,7 @@ void TestCryptoPin::enablePin(void)
 	checkConfigPinEnabled(settings02);
 }
 
-void TestCryptoPin::disablePin(void)
+void TestCryptoPinToken::disablePin(void)
 {
 	QSettings settings01(configPinEnabledPath, QSettings::IniFormat);
 	QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -134,39 +131,35 @@ void TestCryptoPin::disablePin(void)
 
 	checkConfigPinEnabled(settings01);
 
-	clearPin(settings01, settings02, expectedUsername, correctPin);
+	clearPin(settings01, settings02, correctPin);
 
 	checkConfigPinDisabled(settings02);
 }
 
-void TestCryptoPin::checkConfigPinDisabled(QSettings &settings) const
+void TestCryptoPinToken::checkConfigPinDisabled(QSettings &settings) const
 {
 	PinSettings pinSet;
-	AccountsMap accounts;
+	RecordsManagementSettings rmSet;
 
-	loadSettings(settings, pinSet, accounts);
+	loadSettings(settings, pinSet, rmSet);
 
 	QVERIFY2(!pinSet.pinConfigured(), "Expected PIN not to be configured.");
 
-	QVERIFY(accounts.find(expectedUsername) != accounts.end());
+	QVERIFY(rmSet.url() == expectedUrl);
 
-	AcntSettings acntSet(accounts[expectedUsername]);
-	QVERIFY(acntSet.accountName() == expectedAcntName);
-	QVERIFY(acntSet.userName() == expectedUsername);
-
-	QVERIFY(acntSet.password() == expectedPwd);
-	QVERIFY(acntSet.pwdAlg().isEmpty());
-	QVERIFY(acntSet.pwdSalt().isEmpty());
-	QVERIFY(acntSet.pwdIv().isEmpty());
-	QVERIFY(acntSet.pwdCode().isEmpty());
+	QVERIFY(rmSet.token() == expectedToken);
+	QVERIFY(rmSet.tokenAlg().isEmpty());
+	QVERIFY(rmSet.tokenSalt().isEmpty());
+	QVERIFY(rmSet.tokenIv().isEmpty());
+	QVERIFY(rmSet.tokenCode().isEmpty());
 }
 
-void TestCryptoPin::checkConfigPinEnabled(QSettings &settings) const
+void TestCryptoPinToken::checkConfigPinEnabled(QSettings &settings) const
 {
 	PinSettings pinSet;
-	AccountsMap accounts;
+	RecordsManagementSettings rmSet;
 
-	loadSettings(settings, pinSet, accounts);
+	loadSettings(settings, pinSet, rmSet);
 
 	QVERIFY2(pinSet.pinConfigured(), "Expected PIN to be configured.");
 
@@ -183,104 +176,84 @@ void TestCryptoPin::checkConfigPinEnabled(QSettings &settings) const
 	QVERIFY(!pinSet._pinVal.isEmpty());
 	QVERIFY(pinSet._pinVal == correctPin);
 
-	QVERIFY(accounts.find(expectedUsername) != accounts.end());
+	QVERIFY(rmSet.url() == expectedUrl);
 
-	AcntSettings acntSet(accounts[expectedUsername]);
-	QVERIFY(acntSet.accountName() == expectedAcntName);
-	QVERIFY(acntSet.userName() == expectedUsername);
+	QVERIFY(rmSet.token().isEmpty());
+	QVERIFY(!rmSet.tokenAlg().isEmpty());
+	QVERIFY(!rmSet.tokenSalt().isEmpty());
+	QVERIFY(!rmSet.tokenIv().isEmpty());
+	QVERIFY(!rmSet.tokenCode().isEmpty());
 
-	QVERIFY(acntSet.password().isEmpty());
-	QVERIFY(!acntSet.pwdAlg().isEmpty());
-	QVERIFY(!acntSet.pwdSalt().isEmpty());
-	QVERIFY(!acntSet.pwdIv().isEmpty());
-	QVERIFY(!acntSet.pwdCode().isEmpty());
+	rmSet.decryptToken(QString());
+	QVERIFY(rmSet.token().isEmpty());
 
-	acntSet.decryptPassword(QString());
-	QVERIFY(acntSet.password().isEmpty());
+	rmSet.decryptToken(incorrectPin);
+	QVERIFY(!rmSet.token().isEmpty());
+	QVERIFY(rmSet.token() != expectedToken);
 
-	acntSet.decryptPassword(incorrectPin);
-	QVERIFY(!acntSet.password().isEmpty());
-	QVERIFY(acntSet.password() != expectedPwd);
-
-	acntSet.decryptPassword(correctPin);
-	QVERIFY(!acntSet.password().isEmpty());
+	rmSet.decryptToken(correctPin);
+	QVERIFY(!rmSet.token().isEmpty());
 	/* Password already stored in decrypted form. */
-	QVERIFY(acntSet.password() != expectedPwd);
+	QVERIFY(rmSet.token() != expectedToken);
 
-	acntSet.setPassword(QString());
-	acntSet.decryptPassword(correctPin);
-	QVERIFY(!acntSet.password().isEmpty());
-	QVERIFY(acntSet.password() == expectedPwd);
+	rmSet.setToken(QString());
+	rmSet.decryptToken(correctPin);
+	QVERIFY(!rmSet.token().isEmpty());
+	QVERIFY(rmSet.token() == expectedToken);
 }
 
-void TestCryptoPin::setPin(QSettings &setIn, QSettings &setOut,
+void TestCryptoPinToken::setPin(QSettings &setIn, QSettings &setOut,
     const QString &pinVal)
 {
 	PinSettings pinSet;
-	AccountsMap accounts;
+	RecordsManagementSettings rmSet;
 
-	loadSettings(setIn, pinSet, accounts);
+	loadSettings(setIn, pinSet, rmSet);
 
 	PinSettings::updatePinSettings(pinSet, pinVal);
 
 	setOut.clear();
-	saveSettings(setOut, pinSet, accounts);
+	saveSettings(setOut, pinSet, rmSet);
 }
 
-void TestCryptoPin::clearPin(QSettings &setIn, QSettings &setOut,
-    const QString &username, const QString &pinVal)
+void TestCryptoPinToken::clearPin(QSettings &setIn, QSettings &setOut,
+    const QString &pinVal)
 {
 	PinSettings pinSet;
-	AccountsMap accounts;
+	RecordsManagementSettings rmSet;
 
-	loadSettings(setIn, pinSet, accounts);
+	loadSettings(setIn, pinSet, rmSet);
 
 	PinSettings::updatePinSettings(pinSet, QString());
-	/* Decrypt password. */
-	AcntSettings acntSet(accounts[username]);
-	acntSet.decryptPassword(pinVal);
-	accounts[username] = acntSet;
+	/* Decrypt token. */
+	rmSet.decryptToken(pinVal);
 
 	setOut.clear();
-	saveSettings(setOut, pinSet, accounts);
+	saveSettings(setOut, pinSet, rmSet);
 }
 
-void TestCryptoPin::loadSettings(QSettings &settings, PinSettings &pinSet,
-    AccountsMap &accounts)
+void TestCryptoPinToken::loadSettings(QSettings &settings, PinSettings &pinSet,
+    RecordsManagementSettings &rmSet)
 {
 	settings.setIniCodec("UTF-8");
 
 	pinSet.loadFromSettings(settings);
-	accounts.loadFromSettings(QString(), settings);
+	rmSet.loadFromSettings(settings);
 }
 
-void TestCryptoPin::saveSettings(QSettings &settings, const PinSettings &pinSet,
-    const AccountsMap &accounts)
+void TestCryptoPinToken::saveSettings(QSettings &settings,
+    const PinSettings &pinSet, const RecordsManagementSettings &rmSet)
 {
 	settings.setIniCodec("UTF-8");
 
 	pinSet.saveToSettings(settings);
-
-	QString groupName;
-	int row = 0;
-
-	foreach (const QString &key, accounts.keys()) {
-		groupName = CredNames::creds;
-		if (row > 0) {
-			groupName.append(QString::number(row + 1));
-		}
-
-		accounts[key].saveToSettings(pinSet._pinVal, QString(),
-		    settings, groupName);
-
-		++row;
-	}
+	rmSet.saveToSettings(pinSet._pinVal, settings);
 }
 
-QObject *newTestCryptoPin(void)
+QObject *newTestCryptoPinToken(void)
 {
-	return new (std::nothrow) TestCryptoPin();
+	return new (std::nothrow) TestCryptoPinToken();
 }
 
-//QTEST_MAIN(TestCryptoPin)
-#include "test_crypto_pin.moc"
+//QTEST_MAIN(TestCryptoPinToken)
+#include "test_crypto_pin_token.moc"

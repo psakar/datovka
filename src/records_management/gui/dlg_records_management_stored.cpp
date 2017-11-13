@@ -87,12 +87,12 @@ bool DlgRecordsManagementStored::updateStoredInformation(
 		return false;
 	}
 
-	if (!recMgmtSettings.isSet()) {
+	if (!recMgmtSettings.isValid()) {
 		return false;
 	}
 
-	DlgRecordsManagementStored dlg(recMgmtSettings.url,
-	    recMgmtSettings.token, accounts, parent);
+	DlgRecordsManagementStored dlg(recMgmtSettings.url(),
+	    recMgmtSettings.token(), accounts, parent);
 	dlg.exec();
 
 	return true;

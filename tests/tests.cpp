@@ -24,7 +24,8 @@
 #include <QTest>
 
 #include "tests/test_crypto_message.h"
-#include "tests/test_crypto_pin.h"
+#include "tests/test_crypto_pin_pwd.h"
+#include "tests/test_crypto_pin_token.h"
 #include "tests/test_db_container.h"
 #include "tests/test_isds_login.h"
 #include "tests/test_message_db_set.h"
@@ -56,9 +57,13 @@ int main(int argc, char *argv[])
 	status |= testThisClassAndDelete(newTestCryptoMessage(), argc, argv);
 #endif /* defined (TEST_CRYPTO_MESSAGE) */
 
-#if defined (TEST_CRYPTO_PIN)
-	status |= testThisClassAndDelete(newTestCryptoPin(), argc, argv);
-#endif /* defined (TEST_CRYPTO_PIN) */
+#if defined (TEST_CRYPTO_PIN_PWD)
+	status |= testThisClassAndDelete(newTestCryptoPinPwd(), argc, argv);
+#endif /* defined (TEST_CRYPTO_PIN_PWD) */
+
+#if defined (TEST_CRYPTO_PIN_TOKEN)
+	status |= testThisClassAndDelete(newTestCryptoPinToken(), argc, argv);
+#endif /* defined (TEST_CRYPTO_PIN_TOKEN) */
 
 #if defined (TEST_DB_CONTAINER)
 	status |= testThisClassAndDelete(newTestDbContainer(), argc, argv);
