@@ -177,6 +177,7 @@ if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --without-lzma"
 	CONFOPTS="${CONFOPTS} --without-python"
 	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR}"
 
