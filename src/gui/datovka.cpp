@@ -417,6 +417,14 @@ MainWindow::MainWindow(QWidget *parent)
 	    SIGNAL(currentChanged(QModelIndex, QModelIndex)), this,
 	    SLOT(accountItemCurrentChanged(QModelIndex, QModelIndex)));
 
+	/* Enable drag and drop on account list. */
+	ui->accountList->setAcceptDrops(true);
+	ui->accountList->setDragEnabled(true);
+	ui->accountList->setDragDropOverwriteMode(false);
+	ui->accountList->setDropIndicatorShown(true);
+	ui->accountList->setDragDropMode(QAbstractItemView::InternalMove);
+	ui->accountList->setDefaultDropAction(Qt::MoveAction);
+
 	/* Enable sorting of message table items. */
 	ui->messageList->setSortingEnabled(true);
 

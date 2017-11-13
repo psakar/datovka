@@ -23,6 +23,7 @@
 
 #include <QFont>
 #include <QIcon>
+#include <QMimeData>
 
 #include "src/common.h"
 #include "src/log/log.h"
@@ -508,13 +509,98 @@ QVariant AccountModel::headerData(int section, Qt::Orientation orientation,
 	return QVariant();
 }
 
+bool AccountModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
+    int count, const QModelIndex &destinationParent, int destinationChild)
+{
+	qDebug("%s()", __func__);
+
+	return false;
+}
+
+bool AccountModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+	qDebug("%s()", __func__);
+
+	return false;
+}
+
+Qt::DropActions AccountModel::supportedDropActions(void) const
+{
+	/* The model must provide removeRows() to be able to use move action. */
+	return Qt::MoveAction;
+}
+
 Qt::ItemFlags AccountModel::flags(const QModelIndex &index) const
 {
-	if (!index.isValid()) {
-		return 0;
+	Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
+
+	if (index.isValid()) {
+		defaultFlags &= ~Qt::ItemIsEditable;
+		if (nodeAccountTop == nodeType(index)) {
+			/* Allow drags on account top entries. */
+			defaultFlags |= Qt::ItemIsDragEnabled;
+		}
+	} else {
+		defaultFlags |= Qt::ItemIsDropEnabled;
 	}
 
-	return QAbstractItemModel::flags(index) & ~Qt::ItemIsEditable;
+	return defaultFlags;
+}
+
+#define itemDataListMimeName \
+	QLatin1String("application/x-qabstractitemmodeldatalist")
+
+QStringList AccountModel::mimeTypes(void) const
+{
+	/* application/x-qabstractitemmodeldatalist */
+	return QAbstractItemModel::mimeTypes();
+}
+
+QMimeData *AccountModel::mimeData(const QModelIndexList &indexes) const
+{
+	if (indexes.isEmpty()) {
+		return Q_NULLPTR;
+	}
+
+	/*
+	 * TODO -- conversion to Qvariant
+	 * See QMimeData::setData() documentation.
+	 */
+
+	QMimeData *mimeData = new (std::nothrow) QMimeData;
+	if (Q_NULLPTR == mimeData) {
+		return Q_NULLPTR;
+	}
+
+	mimeData->setData(itemDataListMimeName, QByteArray());
+
+	return mimeData;
+}
+
+bool AccountModel::canDropMimeData(const QMimeData *data, Qt::DropAction action,
+    int row, int column, const QModelIndex &parent) const
+{
+	Q_UNUSED(action);
+	Q_UNUSED(row);
+	Q_UNUSED(column);
+	Q_UNUSED(parent);
+
+	if (Q_NULLPTR == data) {
+		return false;
+	}
+
+	/* TODO */
+	qDebug("MIME has format '%s' %d.",
+	    itemDataListMimeName.data(), data->hasFormat(itemDataListMimeName));
+	return data->hasFormat(itemDataListMimeName);
+}
+
+bool AccountModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
+    int row, int column, const QModelIndex &parent)
+{
+	qDebug("%s()", __func__);
+
+	return true;
 }
 
 void AccountModel::loadFromSettings(const QString &confDir,
