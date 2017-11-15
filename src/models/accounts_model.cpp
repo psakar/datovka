@@ -514,6 +514,53 @@ bool AccountModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
 {
 	qDebug("%s()", __func__);
 
+	if (sourceParent.isValid() || destinationParent.isValid()) {
+		/* Only moves within root node are allowed. */
+		return false;
+	}
+
+	if ((sourceRow < 0) || (sourceRow >= rowCount()) ||
+	    (count < 0) || ((sourceRow + count) > rowCount()) ||
+	    (destinationChild < 0) || (destinationChild > rowCount())) {
+		/* Boundaries or location outside limits. */
+		return false;
+	}
+
+	if (count == 0) {
+		return true;
+	}
+
+	if ((sourceRow <= destinationChild) &&
+	    (destinationChild <= (sourceRow + count))) {
+		/* Destination lies within source. */
+		return true;
+	}
+
+	int newPosition; /* Position after removal. */
+	if (destinationChild < sourceRow) {
+		newPosition = destinationChild;
+	} else if (destinationChild > (sourceRow + count)) {
+		newPosition = destinationChild - count;
+	} else {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1,
+	    destinationParent, destinationChild);
+
+	QList<int> movedData;
+	for (int row = sourceRow; row < (sourceRow + count); ++row) {
+		movedData.append(m_row2UserNameIdx.takeAt(sourceRow));
+	}
+
+	for (int i = 0; i < count; ++i) {
+		m_row2UserNameIdx.insert(newPosition + i, movedData.takeAt(0));
+	}
+	Q_ASSERT(movedData.isEmpty());
+
+	endMoveRows();
+
 	return false;
 }
 
@@ -550,6 +597,10 @@ Qt::ItemFlags AccountModel::flags(const QModelIndex &index) const
 #define itemDataListMimeName \
 	QLatin1String("application/x-qabstractitemmodeldatalist")
 
+/* Custom mime type. */
+#define itemIndexRowListMimeName \
+	QLatin1String("application/x-qitemindexrowlist")
+
 QStringList AccountModel::mimeTypes(void) const
 {
 	/* application/x-qabstractitemmodeldatalist */
@@ -568,11 +619,20 @@ QMimeData *AccountModel::mimeData(const QModelIndexList &indexes) const
 	 */
 
 	QMimeData *mimeData = new (std::nothrow) QMimeData;
-	if (Q_NULLPTR == mimeData) {
+	if (Q_UNLIKELY(Q_NULLPTR == mimeData)) {
 		return Q_NULLPTR;
 	}
 
-	mimeData->setData(itemDataListMimeName, QByteArray());
+	/* Convert row numbers into mime data. */
+	QByteArray data;
+	foreach (const QModelIndex &idx, indexes) {
+		if (idx.isValid()) {
+			qint64 row = idx.row();
+			data.append((const char *)&row, sizeof(row));
+		}
+	}
+
+	mimeData->setData(itemIndexRowListMimeName, data);
 
 	return mimeData;
 }
@@ -580,27 +640,64 @@ QMimeData *AccountModel::mimeData(const QModelIndexList &indexes) const
 bool AccountModel::canDropMimeData(const QMimeData *data, Qt::DropAction action,
     int row, int column, const QModelIndex &parent) const
 {
-	Q_UNUSED(action);
 	Q_UNUSED(row);
 	Q_UNUSED(column);
-	Q_UNUSED(parent);
 
-	if (Q_NULLPTR == data) {
+	if ((Q_NULLPTR == data) || (Qt::MoveAction != action) ||
+	    parent.isValid()) {
 		return false;
 	}
 
 	/* TODO */
 	qDebug("MIME has format '%s' %d.",
-	    itemDataListMimeName.data(), data->hasFormat(itemDataListMimeName));
-	return data->hasFormat(itemDataListMimeName);
+	    itemIndexRowListMimeName.data(), data->hasFormat(itemIndexRowListMimeName));
+	return data->hasFormat(itemIndexRowListMimeName);
 }
 
 bool AccountModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
     int row, int column, const QModelIndex &parent)
 {
+	if (!canDropMimeData(data, action, row, column, parent)) {
+		return false;
+	}
 	qDebug("%s()", __func__);
 
-	return true;
+	if (row < 0) {
+		/*
+		 * Dropping onto root node. This usually occurs when dropping
+		 * on empty space behind last entry. Treat as dropping past
+		 * last element.
+		 */
+		row = rowCount();
+	}
+
+	QList<int> droppedRows;
+	{
+		/* Convert mime data into row numbers. */
+		QByteArray bytes(data->data(itemIndexRowListMimeName));
+		qint64 row;
+		const char *constBytes = bytes.constData();
+		for (int offs = 0; offs < bytes.size(); offs += sizeof(row)) {
+			row = *(qint64 *)(constBytes + offs);
+			droppedRows.append(row);
+		}
+	}
+
+	if (Q_UNLIKELY(droppedRows.isEmpty())) {
+		logErrorNL("%s", "Got drop with no entries.");
+		Q_ASSERT(0);
+		return false;
+	}
+
+	if (droppedRows.size() > 1) {
+		logWarningNL("%s",
+		    "Cannot process drops of multiple entries at once.");
+		return false;
+	}
+
+	moveRows(QModelIndex(), droppedRows.at(0), 1, parent, row);
+
+	return false; /* If false is returned then removeRows() won't be triggered. */
 }
 
 void AccountModel::loadFromSettings(const QString &confDir,
