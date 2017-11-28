@@ -1,3 +1,3 @@
 
 # VERSION must contain only three dot-separated numbers because of OS X deployment.
-VERSION = 4.9.3
+VERSION = 4.10.0

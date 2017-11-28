@@ -1,4 +1,4 @@
-4.x.y /
+4.10.0 / 2017-11-28
  * Added support for accessibility text output into data models.
  * Table widgets and table views don't cycle between cells when tabulator is
    pressed.
