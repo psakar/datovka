@@ -44,6 +44,7 @@
 #include <QUrl>
 
 #include "datovka.h"
+#include "src/about.h"
 #include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/delegates/tags_delegate.h"
@@ -559,7 +560,8 @@ void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
 		QByteArray bytes = reply->readAll();
 		QString vstr = QString::fromUtf8(bytes.data(), bytes.size());
 		vstr.remove(QRegExp("[\n\t\r]"));
-		if (vstr > QCoreApplication::applicationVersion()) {
+		if (1 == compareVersionStrings(vstr,
+		             QCoreApplication::applicationVersion())) {
 			showStatusTextWithTimeout(
 			    tr("New version of Datovka is available:") +
 			    " " + vstr);

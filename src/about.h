@@ -34,4 +34,17 @@
  */
 QStringList libraryDependencies(void);
 
+/*!
+ * @brief Compare newest available version and application version.
+ *
+ * @param[in] vStr1 Version string.
+ * @param[in] vStr2 Version string.
+ * @retval -2 if vStr1 does not contain a suitable version string
+ * @retval -1 if vStr1 is less than vStr2
+ * @retval  0 if vStr1 is equal to vStr2
+ * @retval  1 if vStr1 is greater than vStr2
+ * @retval  2 if vStr2 does not contain a suitable version string
+ */
+int compareVersionStrings(const QString &vStr1, const QString &vStr2);
+
 #endif /* _ABOUT_H_ */
