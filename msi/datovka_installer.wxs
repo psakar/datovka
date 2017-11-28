@@ -1,0 +1,148 @@
+<?xml version="1.0"?>
+
+<!-- 
+******************************************************************************
+* Project: Datovka
+* Author: CZ.NIC, z.s.p.o. 2017
+* FileInfo: Datovka MSI installer source XML for Windows.
+* Description: The XML file describes structure of MSI installer (*.msi)
+*              for application Datovka.
+******************************************************************************
+-->
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+<!--Define some constants and strings. Do not change ProductUpgradeCode GUID!-->
+<?define ProductName = "Datovka"?>
+<?define ProductNameVersion = "$(var.ProductName) $(var.ProductVersion)"?>
+<?define ProductManufacturer = "CZ.NIC, z.s.p.o."?>
+<?define ProductUpgradeCode = "C1B3CE89-4773-4FF3-BFF7-12144DEF2F15"?>
+<?define ProductDescription = "Datovka - klient pro Datove Schranky"?>
+<?define ProductParentDir = "CZ.NIC"?>
+
+<Product Id="*"
+    UpgradeCode="$(var.ProductUpgradeCode)"
+    Name="$(var.ProductNameVersion)"
+    Version="$(var.ProductVersion)"
+    Manufacturer="$(var.ProductManufacturer)"
+    Language="1029"
+    Codepage="1250">
+
+    <!--Define msi package info-->
+    <Package InstallerVersion="200"
+        Compressed="yes"
+        Manufacturer="$(var.ProductManufacturer)"
+        Comments="Datovka Windows Installer Package"
+        Description="$(var.ProductDescription)"
+        Keywords="Datovka"
+        InstallPrivileges="elevated"
+        InstallScope="perMachine"
+        ReadOnly="no"
+        AdminImage="no"
+        SummaryCodepage="1250"
+    />
+
+    <!--Define the installer UI and dialogs-->
+    <UIRef Id="WixUI_InstallDir"/>
+    <UIRef Id="WixUI_ErrorProgressText"/>
+
+    <!--Define cab properties of msi-->
+    <Media Id="1" Cabinet="datovka.cab" EmbedCab="yes" CompressionLevel="mszip"/>
+    <!--Define icons (ID should not be longer than 18 chars and must end with ".exe")-->
+    <Icon Id="ProductIcon.exe" SourceFile="SourceDir\datovka.ico"/>
+    <!--Define properties of msi package-->
+    <Property Id="ARPPRODUCTICON" Value="ProductIcon.exe"/>
+    <Property Id="ARPHELPLINK" Value="http://www.datovka.cz"/>
+    <Property Id="ARPURLINFOABOUT" Value="http://www.nic.cz"/>
+    <Property Id="WIXUI_INSTALLDIR" Value="FileInstallPath"/>
+    <Property Id='ARPCOMMENTS'>"$(var.ProductDescription)"</Property>
+    <Property Id="ARPNOREPAIR" Value="yes" Secure="yes"/>
+    <Property Id="NSISBUNDLE">
+        <RegistrySearch Id="NsisProductVersion" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Datovka" Name="DisplayVersion" Type="raw" />
+    </Property>
+
+
+    <!--License agreement-->
+    <WixVariable Id="WixUILicenseRtf" Value="eula\eula_cs.rtf"/>
+    <!--UI customization and banners-->
+    <WixVariable Id="WixUIBannerBmp" Value="banners\banner_top.bmp"/>
+    <WixVariable Id="WixUIDialogBmp" Value="banners\banner_main.bmp"/>
+    <!--Launch conditions. Check minimum OS version. If not, the installation is aborted-->
+    <Condition Message="Aplikace Datovka nepodporuje Windows Vista nebo starší.">
+        <![CDATA[Installed OR (VersionNT > 600)]]>
+    </Condition>
+    <Condition Message="V počítači byla detekována Datovka ve verzi [NSISBUNDLE], která byla instalovaná přes instalační balíček *.exe. Před použitím tohoto instalátoru musíte předchozí instalaci ručné odinstalovat.">
+        <![CDATA[Installed OR NOT NSISBUNDLE]]>
+    </Condition>
+
+    <!--Update/remove previous version-->
+    <Upgrade Id="$(var.ProductUpgradeCode)">
+        <UpgradeVersion Minimum="$(var.ProductVersion)" IncludeMinimum="no" OnlyDetect="yes" Property="NEWERVERSIONDETECTED" />
+        <UpgradeVersion Minimum="0.0.0" Maximum="$(var.ProductVersion)" IncludeMinimum="yes" IncludeMaximum="yes" Property="OLDERVERSIONBEINGUPGRADED" />
+    </Upgrade>
+    <InstallExecuteSequence>
+        <RemoveExistingProducts After="InstallInitialize" />
+        <Custom Action="NewerVersion" After="FindRelatedProducts">NEWERVERSIONDETECTED</Custom>
+    </InstallExecuteSequence>
+    <CustomAction Id="NewerVersion" Error="A later version of [ProductName] is already installed." />
+
+    <!--Features section-->
+    <Feature Id="ProductFeature" Level="1" Title="$(var.ProductName)">
+        <ComponentGroupRef Id="FileList"/>
+        <ComponentRef Id="ApplicationShortcut"/>
+        <ComponentRef Id="ApplicationShortcutDesktop"/>
+    </Feature>
+
+</Product>
+
+<Fragment>
+    <!--Shortcut ApplicationProgramsFolder (start button)-->
+    <DirectoryRef Id="ApplicationProgramsFolder">
+        <Component Id="ApplicationShortcut" Guid="C1B3CE89-4773-4FF3-BFF7-12144DEF2F10">
+            <Shortcut Id="ApplicationStartMenuShortcut"
+                Name="$(var.ProductName)"
+                Description="$(var.ProductDescription)"
+                Target="[FileInstallPath]datovka.exe"
+                WorkingDirectory="FileInstallPath"
+                Icon="ProductIcon.exe"
+                IconIndex="0"/>
+            <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall"/>
+            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+        </Component>
+    </DirectoryRef>
+    <!--Desktop Shortcut-->
+    <DirectoryRef Id="DesktopFolder">
+        <Component Id="ApplicationShortcutDesktop" Guid="C1B3CE89-4773-4FF3-BFF7-12144DEF2F11">
+            <Shortcut Id="ApplicationDesktopShortcut"
+                Name="$(var.ProductName)"
+                Description="$(var.ProductDescription)"
+                Target="[FileInstallPath]datovka.exe"
+                WorkingDirectory="FileInstallPath"
+                Icon="ProductIcon.exe"
+                IconIndex="0"/>
+            <RemoveFolder Id="RemoveDesktopFolder" Directory="DesktopFolder" On="uninstall"/>
+            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+        </Component>
+    </DirectoryRef>
+</Fragment>
+
+<Fragment>
+    <!--File section-->
+    <Directory Id="TARGETDIR" Name="SourceDir">
+        <!--Directory structure (install path) and application file list-->
+        <Directory Id="ProgramFilesFolder">
+            <Directory Id="CZNICDir" Name="$(var.ProductParentDir)">
+                <Directory Id="FileInstallPath" Name="$(var.ProductName)">
+                    <Directory Id="FileList"/>
+                </Directory>
+            </Directory>
+        </Directory>
+        <!--Shortcut install path (start button, desktop)-->
+        <Directory Id="ProgramMenuFolder">
+            <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductParentDir)"/>
+            <Directory Id="DesktopFolder" Name="Desktop"/>
+        </Directory>
+    </Directory>
+</Fragment>
+
+</Wix>

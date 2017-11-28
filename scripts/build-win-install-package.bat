@@ -94,6 +94,7 @@ copy "AUTHORS" %DATOVKAPATH%
 copy "copyING" %DATOVKAPATH%
 copy "Changelog" %DATOVKAPATH%
 copy "scripts\datovka-log.bat" %DATOVKAPATH%
+copy "nsis\datovka-install\datovka.ico" %DATOVKAPATH%
 copy "locale\datovka_cs.qm" "%DATOVKAPATH%\locale"
 for /R "mingw32built\bin\" %%x in (*.dll) do copy "%%x" %DATOVKAPATH% /Y
 windeployqt --release "%DATOVKAPATH%\datovka.exe"
