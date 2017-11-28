@@ -57,6 +57,10 @@
     <Property Id="WIXUI_INSTALLDIR" Value="FileInstallPath"/>
     <Property Id='ARPCOMMENTS'>"$(var.ProductDescription)"</Property>
     <Property Id="ARPNOREPAIR" Value="yes" Secure="yes"/>
+    <Property Id="NSISBUNDLE">
+        <RegistrySearch Id="NsisProductVersion" Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Uninstall\Datovka" Name="DisplayVersion" Type="raw" />
+    </Property>
+
 
     <!--License agreement-->
     <WixVariable Id="WixUILicenseRtf" Value="eula\eula_cs.rtf"/>
@@ -64,8 +68,11 @@
     <WixVariable Id="WixUIBannerBmp" Value="banners\banner_top.bmp"/>
     <WixVariable Id="WixUIDialogBmp" Value="banners\banner_main.bmp"/>
     <!--Launch conditions. Check minimum OS version. If not, the installation is aborted-->
-    <Condition Message="Aplikace Datovka nepodporuje Windows Vista nebo starsi.">
+    <Condition Message="Aplikace Datovka nepodporuje Windows Vista nebo starší.">
         <![CDATA[Installed OR (VersionNT > 600)]]>
+    </Condition>
+    <Condition Message="V počítači byla detekována Datovka ve verzi [NSISBUNDLE], která byla instalovaná přes instalační balíček *.exe. Před použitím tohoto instalátoru musíte předchozí instalaci ručné odinstalovat.">
+        <![CDATA[Installed OR NOT NSISBUNDLE]]>
     </Condition>
 
     <!--Update/remove previous version-->
