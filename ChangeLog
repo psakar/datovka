@@ -16,6 +16,7 @@
    password dialogue.
  * Fixed memory leak inside change password dialogue.
  * Distributing *.qm files in source package.
+ * Added code needed for MSI package building.
 
 4.9.3 / 2017-09-06
  * Fixed a problem when message list was not updated after account
