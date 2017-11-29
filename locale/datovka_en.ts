@@ -1940,22 +1940,21 @@ into your local database.</source>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_pin_setup.ui" line="25"/>
-        <source>The PIN (master password) may consist of any character. It isn&apos;t restricted to digits only.
-Easy passwords provide less protection.</source>
+        <source>The PIN (master password) may consist of any character. It isn&apos;t restricted to digits only. Easy passwords provide less protection.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="44"/>
+        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="43"/>
         <source>Current PIN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="54"/>
+        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="53"/>
         <source>New PIN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="64"/>
+        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="63"/>
         <source>Repeat new PIN</source>
         <translation type="unfinished"></translation>
     </message>
