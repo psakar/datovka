@@ -1972,24 +1972,28 @@ zanést neplatná data.</translation>
         <translation>Nastavení PINu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="25"/>
         <source>The PIN (master password) may consist of any character. It isn&apos;t restricted to digits only.
 Easy passwords provide less protection.</source>
-        <translation>PIN (hlavní heslo) může sestávat z jakýchkoli znaků. Není omezen pouze na číslice.
+        <translation type="vanished">PIN (hlavní heslo) může sestávat z jakýchkoli znaků. Není omezen pouze na číslice.
 Jednoduchá hesla poskytují slabší ochranu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="44"/>
+        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="25"/>
+        <source>The PIN (master password) may consist of any character. It isn&apos;t restricted to digits only. Easy passwords provide less protection.</source>
+        <translation>PIN (hlavní heslo) může sestávat z jakýchkoli znaků. Není omezen pouze na číslice. Jednoduchá hesla poskytují slabší ochranu.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="43"/>
         <source>Current PIN</source>
         <translation>Současný PIN</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="54"/>
+        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="53"/>
         <source>New PIN</source>
         <translation>Nový PIN</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="64"/>
+        <location filename="../src/gui/ui/dlg_pin_setup.ui" line="63"/>
         <source>Repeat new PIN</source>
         <translation>Potvrdit nový PIN</translation>
     </message>

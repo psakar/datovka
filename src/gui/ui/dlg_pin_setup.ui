@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>200</height>
+    <height>231</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,8 +22,7 @@
       </font>
      </property>
      <property name="text">
-      <string>The PIN (master password) may consist of any character. It isn't restricted to digits only.
-Easy passwords provide less protection.</string>
+      <string>The PIN (master password) may consist of any character. It isn't restricted to digits only. Easy passwords provide less protection.</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>
