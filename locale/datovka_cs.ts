@@ -1972,12 +1972,6 @@ zanést neplatná data.</translation>
         <translation>Nastavení PINu</translation>
     </message>
     <message>
-        <source>The PIN (master password) may consist of any character. It isn&apos;t restricted to digits only.
-Easy passwords provide less protection.</source>
-        <translation type="vanished">PIN (hlavní heslo) může sestávat z jakýchkoli znaků. Není omezen pouze na číslice.
-Jednoduchá hesla poskytují slabší ochranu.</translation>
-    </message>
-    <message>
         <location filename="../src/gui/ui/dlg_pin_setup.ui" line="25"/>
         <source>The PIN (master password) may consist of any character. It isn&apos;t restricted to digits only. Easy passwords provide less protection.</source>
         <translation>PIN (hlavní heslo) může sestávat z jakýchkoli znaků. Není omezen pouze na číslice. Jednoduchá hesla poskytují slabší ochranu.</translation>
