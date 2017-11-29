@@ -32,7 +32,11 @@
 #include <isds.h>
 #include <openssl/crypto.h> /* SSLeay_version(3) */
 #include <QRegularExpression>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
 #include <QVersionNumber>
+#else /* < Qt-5.6 */
+#include <QVector>
+#endif /* >= Qt-5.6 */
 
 #include "src/about.h"
 #include "src/log/log.h"
@@ -73,6 +77,76 @@ bool stripVersionString(QString &vStr)
 
 	return match.hasMatch() && (match.capturedLength() == vStr.length());
 }
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 6, 0))
+#warning "Compiling against version < Qt-5.6 which does not have QVersionNumber."
+
+/*!
+ * @brief Replacement for QVersionNumber which is not presnet in Qt before 5.6.
+ */
+class QVersionNumber {
+public:
+	QVersionNumber(void) : m_major(-1), m_micro(-1), m_minor(-1)
+	{
+	}
+
+	bool isNull(void) const
+	{
+		return (m_major < 0) || (m_micro < 0) || (m_minor < 0);
+	}
+
+	static
+	int compare(const QVersionNumber &v1, const QVersionNumber &v2)
+	{
+		if (v1.m_major < v2.m_major) {
+			return -1;
+		} else if (v1.m_major > v2.m_major) {
+			return 1;
+		} else if (v1.m_micro < v2.m_micro) {
+			return -1;
+		} else if (v1.m_micro > v2.m_micro) {
+			return 1;
+		} else if (v1.m_minor < v2.m_minor) {
+			return -1;
+		} else if (v1.m_minor > v2.m_minor) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	static
+	QVersionNumber fromString(const QString &str)
+	{
+		QVersionNumber verNum;
+
+		const int elemNum = 3;
+		QStringList elemList(str.split(QChar('.')));
+		if (elemList.size() != elemNum) {
+			return verNum;
+		}
+
+		QVector<int> elemVect(3, -1);
+		for (int i = 0; i < elemNum; ++i) {
+			bool ok = false;
+			elemVect[i] = elemList[i].toInt(&ok);
+			if (!ok) {
+				elemVect[i] = -1;
+			}
+		}
+
+		verNum.m_major = elemVect[0];
+		verNum.m_micro = elemVect[1];
+		verNum.m_minor = elemVect[2];
+		return verNum;
+	}
+
+private:
+	int m_major;
+	int m_micro;
+	int m_minor;
+};
+#endif
 
 int compareVersionStrings(const QString &vStr1, const QString &vStr2)
 {
@@ -116,6 +190,4 @@ int compareVersionStrings(const QString &vStr1, const QString &vStr2)
 	} else {
 		return 1;
 	}
-
-	return cmp;
 }
