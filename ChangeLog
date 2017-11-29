@@ -1,4 +1,4 @@
-4.10.0 / 2017-11-28
+4.10.0 / 2017-11-29
  * Added support for accessibility text output into data models.
  * Table widgets and table views don't cycle between cells when tabulator is
    pressed.
@@ -17,6 +17,8 @@
  * Fixed memory leak inside change password dialogue.
  * Distributing *.qm files in source package.
  * Added code needed for MSI package building.
+ * Fixed code responsible for the comparison of the current and the newest
+   available version.
 
 4.9.3 / 2017-09-06
  * Fixed a problem when message list was not updated after account
