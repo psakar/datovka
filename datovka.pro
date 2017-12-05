@@ -27,7 +27,8 @@ win32 {
 }
 
 # Qt 5.2.1 contains a bug causing the application to crash on some drop events.
-# Version 5.3.2 should be fine.
+# Qt prior to version 5.4.1 may not behave correctly on some drop events.
+# Version 5.4.1 should be fine.
 sufficientQtVersion(5, 3, 4, 1)
 
 DEFINES += \
