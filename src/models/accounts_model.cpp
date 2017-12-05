@@ -582,7 +582,6 @@ Qt::ItemFlags AccountModel::flags(const QModelIndex &index) const
 	Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
 
 	if (index.isValid()) {
-		defaultFlags &= ~Qt::ItemIsEditable;
 		if (nodeAccountTop == nodeType(index)) {
 			/* Allow drags on account top entries. */
 			defaultFlags |= Qt::ItemIsDragEnabled;
@@ -603,8 +602,7 @@ Qt::ItemFlags AccountModel::flags(const QModelIndex &index) const
 
 QStringList AccountModel::mimeTypes(void) const
 {
-	/* application/x-qabstractitemmodeldatalist */
-	return QAbstractItemModel::mimeTypes();
+	return QStringList(itemIndexRowListMimeName);
 }
 
 QMimeData *AccountModel::mimeData(const QModelIndexList &indexes) const
