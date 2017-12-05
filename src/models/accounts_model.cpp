@@ -512,8 +512,6 @@ QVariant AccountModel::headerData(int section, Qt::Orientation orientation,
 bool AccountModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
     int count, const QModelIndex &destinationParent, int destinationChild)
 {
-	qDebug("%s()", __func__);
-
 	if (sourceParent.isValid() || destinationParent.isValid()) {
 		/* Only moves within root node are allowed. */
 		return false;
@@ -566,8 +564,6 @@ bool AccountModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
 
 bool AccountModel::removeRows(int row, int count, const QModelIndex &parent)
 {
-	qDebug("%s()", __func__);
-
 	return false;
 }
 
@@ -611,15 +607,16 @@ QMimeData *AccountModel::mimeData(const QModelIndexList &indexes) const
 		return Q_NULLPTR;
 	}
 
-	/*
-	 * TODO -- conversion to Qvariant
-	 * See QMimeData::setData() documentation.
-	 */
-
 	QMimeData *mimeData = new (std::nothrow) QMimeData;
 	if (Q_UNLIKELY(Q_NULLPTR == mimeData)) {
 		return Q_NULLPTR;
 	}
+
+	/*
+	 * TODO -- In order to encompass full account description then
+	 * conversion to QVariant is needed.
+	 * See QMimeData::setData() documentation.
+	 */
 
 	/* Convert row numbers into mime data. */
 	QByteArray data;
@@ -635,6 +632,15 @@ QMimeData *AccountModel::mimeData(const QModelIndexList &indexes) const
 	return mimeData;
 }
 
+#if (QT_VERSION < QT_VERSION_CHECK(5, 4, 1))
+/*
+ * There are documented bugs with regard to
+ * QAbstractItemModel::canDropMimeData() in Qt prior to version 5.4.1.
+ * See QTBUG-32362 and QTBUG-30534.
+ */
+#warning "Compiling against version < Qt-5.4.1 which has bugs around QAbstractItemModel::dropMimeData()."
+#endif /* < Qt-5.4.1 */
+
 bool AccountModel::canDropMimeData(const QMimeData *data, Qt::DropAction action,
     int row, int column, const QModelIndex &parent) const
 {
@@ -646,9 +652,6 @@ bool AccountModel::canDropMimeData(const QMimeData *data, Qt::DropAction action,
 		return false;
 	}
 
-	/* TODO */
-	qDebug("MIME has format '%s' %d.",
-	    itemIndexRowListMimeName.data(), data->hasFormat(itemIndexRowListMimeName));
 	return data->hasFormat(itemIndexRowListMimeName);
 }
 
@@ -658,7 +661,6 @@ bool AccountModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
 	if (!canDropMimeData(data, action, row, column, parent)) {
 		return false;
 	}
-	qDebug("%s()", __func__);
 
 	if (row < 0) {
 		/*
