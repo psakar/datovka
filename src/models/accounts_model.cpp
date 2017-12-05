@@ -564,6 +564,10 @@ bool AccountModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
 
 bool AccountModel::removeRows(int row, int count, const QModelIndex &parent)
 {
+	Q_UNUSED(row);
+	Q_UNUSED(count);
+	Q_UNUSED(parent);
+
 	return false;
 }
 
@@ -638,7 +642,7 @@ QMimeData *AccountModel::mimeData(const QModelIndexList &indexes) const
  * QAbstractItemModel::canDropMimeData() in Qt prior to version 5.4.1.
  * See QTBUG-32362 and QTBUG-30534.
  */
-#warning "Compiling against version < Qt-5.4.1 which has bugs around QAbstractItemModel::dropMimeData()."
+#warning "Compiling against version < Qt-5.4.1 which may have bugs around QAbstractItemModel::dropMimeData()."
 #endif /* < Qt-5.4.1 */
 
 bool AccountModel::canDropMimeData(const QMimeData *data, Qt::DropAction action,
