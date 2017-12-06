@@ -108,7 +108,7 @@ public:
 	 *
 	 * @param[in] parent Pointer to parent object.
 	 */
-	explicit AccountModel(QObject *parent = 0);
+	explicit AccountModel(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Return index specified by supplied parameters.
@@ -174,6 +174,41 @@ public:
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
+	 * @brief Move rows.
+	 *
+	 * @param[in] sourceParent Source parent.
+	 * @param[in] sourceRow Source row.
+	 * @param[in] count Number of rows to be moved.
+	 * @param[in] destinationParent Destination parent.
+	 * @param[in] destinationChild Row to move data into.
+	 * @return If move performed.
+	 */
+	virtual
+	bool moveRows(const QModelIndex &sourceParent, int sourceRow,
+	    int count, const QModelIndex &destinationParent,
+	    int destinationChild) Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Remove rows.
+	 *
+	 * @param[in] row Starting row.
+	 * @param[in] count Number of rows to be removed.
+	 * @param[in] parent Parent item the row is relative to.
+	 * @return True if the rows were successfully removed.
+	 */
+	virtual
+	bool removeRows(int row, int count,
+	    const QModelIndex &parent = QModelIndex()) Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Returns the drop actions supported by this model.
+	 *
+	 * @return Supported drop actions.
+	 */
+	virtual
+	Qt::DropActions supportedDropActions(void) const Q_DECL_OVERRIDE;
+
+	/*!
 	 * @brief Returns item flags for given index.
 	 *
 	 * @brief[in] index Index specifying the item.
@@ -181,6 +216,54 @@ public:
 	 */
 	virtual
 	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Returns the list of allowed MIME types.
+	 *
+	 * @return List of MIME types.
+	 */
+	virtual
+	QStringList mimeTypes(void) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Returns object containing serialised attachment data.
+	 *
+	 * @param[in] indexes List of indexes.
+	 * @return Pointer to newly allocated mime data object, Q_NULLPTR on error.
+	 */
+	virtual
+	QMimeData *mimeData(
+	    const QModelIndexList &indexes) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Returns whether the model accepts drops of given mime data.
+	 *
+	 * @param[in] data Data to be dropped.
+	 * @param[in] action Type of drop action.
+	 * @param[in] row Target row.
+	 * @param[in] column Target column.
+	 * @param[in] parent Parent index.
+	 * @return True if drop is accepted.
+	 */
+	virtual
+	bool canDropMimeData(const QMimeData *data, Qt::DropAction action,
+	    int row, int column,
+	    const QModelIndex &parent) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Handles data supplied by drop operation.
+	 *
+	 * @param[in] data Data to be dropped.
+	 * @param[in] action Type of drop action.
+	 * @param[in] row Target row.
+	 * @param[in] column Target column.
+	 * @param[in] parent Parent index.
+	 * @return True if data are handled by the model.
+	 */
+	virtual
+	bool dropMimeData(const QMimeData *data, Qt::DropAction action,
+	    int row, int column,
+	    const QModelIndex &parent) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Load data from supplied settings.

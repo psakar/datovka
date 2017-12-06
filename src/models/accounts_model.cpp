@@ -23,6 +23,7 @@
 
 #include <QFont>
 #include <QIcon>
+#include <QMimeData>
 
 #include "src/common.h"
 #include "src/log/log.h"
@@ -508,13 +509,199 @@ QVariant AccountModel::headerData(int section, Qt::Orientation orientation,
 	return QVariant();
 }
 
-Qt::ItemFlags AccountModel::flags(const QModelIndex &index) const
+bool AccountModel::moveRows(const QModelIndex &sourceParent, int sourceRow,
+    int count, const QModelIndex &destinationParent, int destinationChild)
 {
-	if (!index.isValid()) {
-		return 0;
+	if (sourceParent.isValid() || destinationParent.isValid()) {
+		/* Only moves within root node are allowed. */
+		return false;
 	}
 
-	return QAbstractItemModel::flags(index) & ~Qt::ItemIsEditable;
+	if ((sourceRow < 0) || (sourceRow >= rowCount()) ||
+	    (count < 0) || ((sourceRow + count) > rowCount()) ||
+	    (destinationChild < 0) || (destinationChild > rowCount())) {
+		/* Boundaries or location outside limits. */
+		return false;
+	}
+
+	if (count == 0) {
+		return true;
+	}
+
+	if ((sourceRow <= destinationChild) &&
+	    (destinationChild <= (sourceRow + count))) {
+		/* Destination lies within source. */
+		return true;
+	}
+
+	int newPosition; /* Position after removal. */
+	if (destinationChild < sourceRow) {
+		newPosition = destinationChild;
+	} else if (destinationChild > (sourceRow + count)) {
+		newPosition = destinationChild - count;
+	} else {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1,
+	    destinationParent, destinationChild);
+
+	QList<int> movedData;
+	for (int row = sourceRow; row < (sourceRow + count); ++row) {
+		movedData.append(m_row2UserNameIdx.takeAt(sourceRow));
+	}
+
+	for (int i = 0; i < count; ++i) {
+		m_row2UserNameIdx.insert(newPosition + i, movedData.takeAt(0));
+	}
+	Q_ASSERT(movedData.isEmpty());
+
+	endMoveRows();
+
+	return false;
+}
+
+bool AccountModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+	Q_UNUSED(row);
+	Q_UNUSED(count);
+	Q_UNUSED(parent);
+
+	return false;
+}
+
+Qt::DropActions AccountModel::supportedDropActions(void) const
+{
+	/* The model must provide removeRows() to be able to use move action. */
+	return Qt::MoveAction;
+}
+
+Qt::ItemFlags AccountModel::flags(const QModelIndex &index) const
+{
+	Qt::ItemFlags defaultFlags = QAbstractItemModel::flags(index);
+
+	if (index.isValid()) {
+		if (nodeAccountTop == nodeType(index)) {
+			/* Allow drags on account top entries. */
+			defaultFlags |= Qt::ItemIsDragEnabled;
+		}
+	} else {
+		defaultFlags |= Qt::ItemIsDropEnabled;
+	}
+
+	return defaultFlags;
+}
+
+#define itemDataListMimeName \
+	QLatin1String("application/x-qabstractitemmodeldatalist")
+
+/* Custom mime type. */
+#define itemIndexRowListMimeName \
+	QLatin1String("application/x-qitemindexrowlist")
+
+QStringList AccountModel::mimeTypes(void) const
+{
+	return QStringList(itemIndexRowListMimeName);
+}
+
+QMimeData *AccountModel::mimeData(const QModelIndexList &indexes) const
+{
+	if (indexes.isEmpty()) {
+		return Q_NULLPTR;
+	}
+
+	QMimeData *mimeData = new (std::nothrow) QMimeData;
+	if (Q_UNLIKELY(Q_NULLPTR == mimeData)) {
+		return Q_NULLPTR;
+	}
+
+	/*
+	 * TODO -- In order to encompass full account description then
+	 * conversion to QVariant is needed.
+	 * See QMimeData::setData() documentation.
+	 */
+
+	/* Convert row numbers into mime data. */
+	QByteArray data;
+	foreach (const QModelIndex &idx, indexes) {
+		if (idx.isValid()) {
+			qint64 row = idx.row();
+			data.append((const char *)&row, sizeof(row));
+		}
+	}
+
+	mimeData->setData(itemIndexRowListMimeName, data);
+
+	return mimeData;
+}
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 4, 1))
+/*
+ * There are documented bugs with regard to
+ * QAbstractItemModel::canDropMimeData() in Qt prior to version 5.4.1.
+ * See QTBUG-32362 and QTBUG-30534.
+ */
+#warning "Compiling against version < Qt-5.4.1 which may have bugs around QAbstractItemModel::dropMimeData()."
+#endif /* < Qt-5.4.1 */
+
+bool AccountModel::canDropMimeData(const QMimeData *data, Qt::DropAction action,
+    int row, int column, const QModelIndex &parent) const
+{
+	Q_UNUSED(row);
+	Q_UNUSED(column);
+
+	if ((Q_NULLPTR == data) || (Qt::MoveAction != action) ||
+	    parent.isValid()) {
+		return false;
+	}
+
+	return data->hasFormat(itemIndexRowListMimeName);
+}
+
+bool AccountModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
+    int row, int column, const QModelIndex &parent)
+{
+	if (!canDropMimeData(data, action, row, column, parent)) {
+		return false;
+	}
+
+	if (row < 0) {
+		/*
+		 * Dropping onto root node. This usually occurs when dropping
+		 * on empty space behind last entry. Treat as dropping past
+		 * last element.
+		 */
+		row = rowCount();
+	}
+
+	QList<int> droppedRows;
+	{
+		/* Convert mime data into row numbers. */
+		QByteArray bytes(data->data(itemIndexRowListMimeName));
+		qint64 row;
+		const char *constBytes = bytes.constData();
+		for (int offs = 0; offs < bytes.size(); offs += sizeof(row)) {
+			row = *(qint64 *)(constBytes + offs);
+			droppedRows.append(row);
+		}
+	}
+
+	if (Q_UNLIKELY(droppedRows.isEmpty())) {
+		logErrorNL("%s", "Got drop with no entries.");
+		Q_ASSERT(0);
+		return false;
+	}
+
+	if (droppedRows.size() > 1) {
+		logWarningNL("%s",
+		    "Cannot process drops of multiple entries at once.");
+		return false;
+	}
+
+	moveRows(QModelIndex(), droppedRows.at(0), 1, parent, row);
+
+	return false; /* If false is returned then removeRows() won't be triggered. */
 }
 
 void AccountModel::loadFromSettings(const QString &confDir,

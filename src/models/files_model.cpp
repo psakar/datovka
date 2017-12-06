@@ -224,7 +224,7 @@ Qt::ItemFlags DbFlsTblModel::flags(const QModelIndex &index) const
 
 QStringList DbFlsTblModel::mimeTypes(void) const
 {
-	return QStringList(QStringLiteral("text/uri-list"));
+	return QStringList(QLatin1String("text/uri-list"));
 }
 
 /*!
