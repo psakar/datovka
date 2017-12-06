@@ -14,9 +14,14 @@ SRC_ROOT="${SCRIPT_LOCATION}/.."
 
 cd "${SRC_ROOT}"
 
-ALL_TAGS=$(git tag | sort -fr)
+ALL_TAGS=$(git tag -l --sort=-version:refname)
 LATEST_TAG=$(echo "${ALL_TAGS}" | head -n 1)
 LATEST_VERSION=$(echo "${LATEST_TAG}" | sed -e 's/^v//g')
+
+if [ "x${LATEST_VERSION}" = "x" ]; then
+	echo "Cannot determine latest version tag." >&2
+	exit 1
+fi
 
 if [ "x${DESIRED_VERSION}" = "x" ]; then
 	DESIRED_VERSION="${LATEST_VERSION}"
