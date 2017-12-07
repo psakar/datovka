@@ -170,13 +170,13 @@ Function .onInit
 	${If} $R0 != ""
 		${If} $LANGUAGE == ${LANG_ENGLISH}
 			MessageBox MB_OK|MB_ICONEXCLAMATION \
-			"${PROGRAM_NAME} is already installed on your computer. $\n$\nClick OK to remove the currently installed Datovka and start installation of version ${VERSION}." \
+			"Application ${PROGRAM_NAME} is already installed on your computer. $\n$\nClick OK to uninstall the application from the system and to start the installation of the version ${VERSION}." \
 			IDOK uninst
 		${EndIf}
 
 		${If} $LANGUAGE == ${LANG_CZECH}
 			MessageBox MB_OK|MB_ICONEXCLAMATION \
-			"${PROGRAM_NAME} už je na Vašem poèítaèi nainstalována. $\n$\nStisknìte OK pro její odinstalování a nahrání nové verze ${VERSION}." \
+			"Aplikace ${PROGRAM_NAME} je již na Vašem poèítaèi nainstalována. $\n$\nStisknìte OK pro odinstalování aplikace ze systému a zahájení instalace nové verze ${VERSION}." \
 			IDOK uninst
 		${EndIf}
 
@@ -188,13 +188,13 @@ Function .onInit
 	${If} $R1 != ""
 		${If} $LANGUAGE == ${LANG_ENGLISH}
 			MessageBox MB_OK|MB_ICONEXCLAMATION \
-			"In the computer has been detected $R1 that was installed through the MSI installation package. Prior to using this installer, you must manually uninstall the previous installation." \
+			"The application $R1, which has been installed using the MSI installation package, has been detected. Before using this installer, you must manually uninstall the currently installed version." \
 			IDOK exit
 		${EndIf}
 
 		${If} $LANGUAGE == ${LANG_CZECH}
 			MessageBox MB_OK|MB_ICONEXCLAMATION \
-			"V poèítaèi byla detekována $R1, která byla instalovaná pøes instalaèní balíèek MSI. Pøed použitím tohoto instalátoru musíte pøedchozí instalaci ruèné odinstalovat." \
+			"Byla detekována aplikace $R1, která byla nainstalována pomocí MSI instalaèního balíèku. Pøed použitím tohoto instalátoru musíte suèasnì nainstalovanou verzi ruèné odinstalovat." \
 			IDOK exit
 		${EndIf}
 
