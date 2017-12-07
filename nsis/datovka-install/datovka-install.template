@@ -96,9 +96,9 @@ SetShellVarContext all
 
 	# copy files
 	setOutPath $INSTDIR
-  File /r ".\..\..\packages\datovka-${VERSION}\*"  
+	File /r ".\..\..\packages\datovka-${VERSION}\*"  
 	File ".\datovka.ico"
-  
+
 	# store installation folder
 	WriteRegStr HKLM "Software\${PROGRAM_NAME}" "InstallLocation" "$INSTDIR"
 	# register uninstaller
@@ -122,10 +122,10 @@ SetShellVarContext all
 	!insertmacro MUI_STARTMENU_WRITE_BEGIN DatovkaStartMenu
 	CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
 	CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\uninst.exe" "" "" "" "" "" "Uninstall ${PROGRAM_NAME}"
-  CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Datovka.lnk" "$INSTDIR\datovka.exe" "" "" "" "" "" "Run ${PROGRAM_NAME}"
+	CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Datovka.lnk" "$INSTDIR\datovka.exe" "" "" "" "" "" "Run ${PROGRAM_NAME}"
 	!insertmacro MUI_STARTMENU_WRITE_END
-  
-  CreateShortCut "$DESKTOP\${PROGRAM_NAME}.lnk" "$INSTDIR\${PROGRAM_NAME}.exe" "" "$INSTDIR\datovka.ico" 0
+
+	CreateShortCut "$DESKTOP\${PROGRAM_NAME}.lnk" "$INSTDIR\${PROGRAM_NAME}.exe" "" "$INSTDIR\datovka.ico" 0
 
 sectionEnd
 
@@ -140,10 +140,10 @@ section "un.Unbound"
 
 SetShellVarContext all
 
-  	# deregister uninstall
+	# deregister uninstall
 	DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}"
 	RMDir /r "$INSTDIR\*" 
-  Delete "$DESKTOP\${PROGRAM_NAME}.lnk"
+	Delete "$DESKTOP\${PROGRAM_NAME}.lnk"
 	Delete "$INSTDIR\uninst.exe"   # delete self
 	RMDir "$PROGRAMFILES\CZ.NIC\${PROGRAM_NAME}"
 	RMDir "$PROGRAMFILES\CZ.NIC"
@@ -157,45 +157,66 @@ SetShellVarContext all
 	RMDir "$SMPROGRAMS\CZ.NIC\"
 	RMDir "$SMPROGRAMS\$StartMenuFolder"
 	DeleteRegKey HKLM "Software\${PROGRAM_NAME}"
-   
+
 sectionEnd
 
 Function .onInit
 
+	;Detect previous version of Datovka
 	ReadRegStr $R0 HKLM \
 	"Software\Microsoft\Windows\CurrentVersion\Uninstall\${PROGRAM_NAME}" \
 	"UninstallString"
 
-	${If} $R0 != ""		
+	${If} $R0 != ""
 		${If} $LANGUAGE == ${LANG_ENGLISH}
-		MessageBox MB_OK|MB_ICONEXCLAMATION \
-		"${PROGRAM_NAME} is already installed on your computer. $\n$\nClick OK to remove the \
-	  	currently installed Datovka and start installation of version ${VERSION}." \
-		IDOK uninst
-		Abort
+			MessageBox MB_OK|MB_ICONEXCLAMATION \
+			"Application ${PROGRAM_NAME} is already installed on your computer. $\n$\nClick OK to uninstall the application from the system and to start the installation of the version ${VERSION}." \
+			IDOK uninst
 		${EndIf}
 
 		${If} $LANGUAGE == ${LANG_CZECH}
-		MessageBox MB_OK|MB_ICONEXCLAMATION \
-		"${PROGRAM_NAME} už je na Vašem poèítaèi nainstalována. $\n$\nStisknìte OK pro její odinstalování \
-	  	a nahrání nové verze ${VERSION}." \
-		IDOK uninst
-		Abort
+			MessageBox MB_OK|MB_ICONEXCLAMATION \
+			"Aplikace ${PROGRAM_NAME} je již na Vašem poèítaèi nainstalována. $\n$\nStisknìte OK pro odinstalování aplikace ze systému a zahájení instalace nové verze ${VERSION}." \
+			IDOK uninst
 		${EndIf}
-    
-  ${EndIf}    
-    
+
+	${EndIf}
+
+	;Detect if MSI version exists
+	EnumRegKey $R1 HKLM "Software\WOW6432Node\CZ.NIC, z.s.p.o." 0
+
+	${If} $R1 != ""
+		${If} $LANGUAGE == ${LANG_ENGLISH}
+			MessageBox MB_OK|MB_ICONEXCLAMATION \
+			"The application $R1, which has been installed using the MSI installation package, has been detected. Before using this installer, you must manually uninstall the currently installed version." \
+			IDOK exit
+		${EndIf}
+
+		${If} $LANGUAGE == ${LANG_CZECH}
+			MessageBox MB_OK|MB_ICONEXCLAMATION \
+			"Byla detekována aplikace $R1, která byla nainstalována pomocí MSI instalaèního balíèku. Pøed použitím tohoto instalátoru musíte souèasnì nainstalovanou verzi ruènì odinstalovat." \
+			IDOK exit
+		${EndIf}
+
+	${EndIf}
+
 	;Run the uninstaller
 	uninst:
 		ClearErrors
-		${If} $R0 != "" 
+		${If} $R0 != ""
 			ExecWait '$R0 _?=$INSTDIR' ;Do not copy the uninstaller to a temp file
-		${EndIf}	
+		${EndIf}
 		
 		IfErrors no_remove_uninstaller done
 	
 	no_remove_uninstaller:
 	
 	done:
+
+	;Quit installer
+	exit:
+		${If} $R1 != ""
+			Abort
+		${EndIf}
 
 FunctionEnd
