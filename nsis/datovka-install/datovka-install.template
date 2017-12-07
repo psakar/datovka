@@ -194,7 +194,7 @@ Function .onInit
 
 		${If} $LANGUAGE == ${LANG_CZECH}
 			MessageBox MB_OK|MB_ICONEXCLAMATION \
-			"Byla detekována aplikace $R1, která byla nainstalována pomocí MSI instalaèního balíèku. Pøed použitím tohoto instalátoru musíte suèasnì nainstalovanou verzi ruèné odinstalovat." \
+			"Byla detekována aplikace $R1, která byla nainstalována pomocí MSI instalaèního balíèku. Pøed použitím tohoto instalátoru musíte souèasnì nainstalovanou verzi ruènì odinstalovat." \
 			IDOK exit
 		${EndIf}
 
