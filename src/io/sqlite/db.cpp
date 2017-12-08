@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@
 #include <QSqlQuery>
 #include <QVariant>
 
+#include "src/datovka_shared/io/sqlite/table.h"
 #include "src/io/sqlite/db.h"
-#include "src/io/sqlite/table.h"
 #include "src/log/log.h"
 
 const QString SQLiteDb::memoryLocation(":memory:");

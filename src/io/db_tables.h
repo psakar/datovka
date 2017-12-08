@@ -24,7 +24,7 @@
 #ifndef _DB_TABLES_H_
 #define _DB_TABLES_H_
 
-#include "src/io/sqlite/table.h"
+#include "src/datovka_shared/io/sqlite/table.h"
 
 /*!
  * @brief Localised table descriptions.
