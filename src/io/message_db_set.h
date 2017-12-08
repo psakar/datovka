@@ -586,8 +586,6 @@ private:
 
 	inline QList<MessageDb::RcvdEntry> _sf_msgsRcvdEntriesWithin90Days(void) const;
 	static
-	inline QList<MessageDb::RcvdEntry> _yrly_2dbs_attach_msgsRcvdEntriesWithin90Days(MessageDb &db, const QString &attachFileName);
-	static
 	inline QList<MessageDb::RcvdEntry> _yrly_2dbs_msgsRcvdEntriesWithin90Days(MessageDb &db0, MessageDb &db1);
 	inline QList<MessageDb::RcvdEntry> _yrly_msgsRcvdEntriesWithin90Days(void) const;
 
@@ -610,8 +608,6 @@ private:
 	inline QList<MessageDb::SntEntry> _yrly_msgsSntEntries(void) const;
 
 	inline QList<MessageDb::SntEntry> _sf_msgsSntEntriesWithin90Days(void) const;
-	static
-	inline QList<MessageDb::SntEntry> _yrly_2dbs_attach_msgsSntEntriesWithin90Days(MessageDb &db, const QString &attachFileName);
 	static
 	inline QList<MessageDb::SntEntry> _yrly_2dbs_msgsSntEntriesWithin90Days(MessageDb &db0, MessageDb &db1);
 	inline QList<MessageDb::SntEntry> _yrly_msgsSntEntriesWithin90Days(void) const;

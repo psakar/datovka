@@ -29,11 +29,6 @@
 #include "src/io/message_db_set.h"
 #include "src/log/log.h"
 
-/*
- * If defined then no attaching of databases will be performed.
- */
-#define DISABLE_DB_ATTACHING 1
-
 bool MessageDbSet::vacuum(void)
 {
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
@@ -126,77 +121,6 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_sf_msgsRcvdEntriesWithin90Days(void) 
 	return this->first()->msgsRcvdEntriesWithin90Days();
 }
 
-QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_attach_msgsRcvdEntriesWithin90Days(
-    MessageDb &db, const QString &attachFileName)
-{
-	QList<MessageDb::RcvdEntry> entryList;
-	QSqlQuery query(db.m_db);
-	bool attached = false;
-	QString queryStr;
-
-	attached = MessageDb::attachDb2(query, attachFileName);
-	if (!attached) {
-		goto fail;
-	}
-
-	queryStr = "SELECT ";
-	for (int i = 0; i < (MessageDb::rcvdItemIds.size() - 2); ++i) {
-		queryStr += MessageDb::rcvdItemIds[i] + ", ";
-	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
-	queryStr += "ifnull(p.state, 0) AS process_status";
-	queryStr += " FROM messages AS m "
-	    "LEFT JOIN supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "LEFT JOIN raw_message_data AS r "
-	    "ON (m.dmId = r.message_id) "
-	    "LEFT JOIN process_state AS p "
-	    "ON (m.dmId = p.message_id) "
-	    "WHERE "
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "(m.dmDeliveryTime >= date('now','-90 day'))"
-	    " UNION "
-	    "SELECT ";
-	for (int i = 0; i < (MessageDb::rcvdItemIds.size() - 2); ++i) {
-		queryStr += MessageDb::rcvdItemIds[i] + ", ";
-	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded" ", ";
-	queryStr += "ifnull(p.state, 0) AS process_status";
-	queryStr += " FROM " DB2 ".messages AS m "
-	    "LEFT JOIN " DB2 ".supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "LEFT JOIN " DB2 ".raw_message_data AS r "
-	    "ON (m.dmId = r.message_id) "
-	    "LEFT JOIN " DB2 ".process_state AS p "
-	    "ON (m.dmId = p.message_id) "
-	    "WHERE "
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "(m.dmDeliveryTime >= date('now','-90 day'))";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":message_type", MessageDb::TYPE_RECEIVED);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	MessageDb::appendRcvdEntryList(entryList, query);
-
-fail:
-	/* Query must be finished before detaching. */
-	query.finish();
-	if (attached) {
-		MessageDb::detachDb2(query);
-	}
-	return entryList;
-}
-
 QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_msgsRcvdEntriesWithin90Days(
     MessageDb &db0, MessageDb &db1)
 {
@@ -252,12 +176,7 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_msgsRcvdEntriesWithin90Days(void
 			return QList<MessageDb::RcvdEntry>();
 		}
 
-#if defined DISABLE_DB_ATTACHING
 		return _yrly_2dbs_msgsRcvdEntriesWithin90Days(*db0, *db1);
-#else /* !DISABLE_DB_ATTACHING */
-		return _yrly_2dbs_attach_msgsRcvdEntriesWithin90Days(*db0,
-		    db1->fileName());
-#endif /* DISABLE_DB_ATTACHING */
 	}
 }
 
@@ -625,73 +544,6 @@ QList<MessageDb::SntEntry> MessageDbSet::_sf_msgsSntEntriesWithin90Days(void) co
 	return this->first()->msgsSntEntriesWithin90Days();
 }
 
-QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_attach_msgsSntEntriesWithin90Days(
-    MessageDb &db, const QString &attachFileName)
-{
-	QList<MessageDb::SntEntry> entryList;
-	QSqlQuery query(db.m_db);
-	bool attached = false;
-	QString queryStr;
-
-	attached = MessageDb::attachDb2(query, attachFileName);
-	if (!attached) {
-		goto fail;
-	}
-
-	queryStr = "SELECT ";
-	for (int i = 0; i < (MessageDb::sntItemIds.size() - 1); ++i) {
-		queryStr += MessageDb::sntItemIds[i] + ", ";
-	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	queryStr += " FROM messages AS m "
-	    "LEFT JOIN supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "LEFT JOIN raw_message_data AS r "
-	    "ON (m.dmId = r.message_id) "
-	    "WHERE "
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
-	    " (m.dmDeliveryTime IS NULL))"
-	    " UNION "
-	    "SELECT ";
-	for (int i = 0; i < (MessageDb::sntItemIds.size() - 1); ++i) {
-		queryStr += MessageDb::sntItemIds[i] + ", ";
-	}
-	queryStr += "(ifnull(r.message_id, 0) != 0) AS is_downloaded";
-	queryStr += " FROM " DB2 ".messages AS m "
-	    "LEFT JOIN " DB2 ".supplementary_message_data AS s "
-	    "ON (m.dmID = s.message_id) "
-	    "LEFT JOIN " DB2 ".raw_message_data AS r "
-	    "ON (m.dmId = r.message_id) "
-	    "WHERE "
-	    "(s.message_type = :message_type)"
-	    " and "
-	    "((m.dmDeliveryTime >= date('now','-90 day')) or "
-	    " (m.dmDeliveryTime IS NULL))";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":message_type", MessageDb::TYPE_SENT);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	MessageDb::appendSntEntryList(entryList, query);
-
-fail:
-	/* Query must be finished before detaching. */
-	query.finish();
-	if (attached) {
-		MessageDb::detachDb2(query);
-	}
-	return entryList;
-}
-
 QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_msgsSntEntriesWithin90Days(
     MessageDb &db0, MessageDb &db1)
 {
@@ -746,12 +598,7 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_msgsSntEntriesWithin90Days(void) 
 			return QList<MessageDb::SntEntry>();
 		}
 
-#if defined DISABLE_DB_ATTACHING
 		return _yrly_2dbs_msgsSntEntriesWithin90Days(*db0, *db1);
-#else /* !DISABLE_DB_ATTACHING */
-		return _yrly_2dbs_attach_msgsSntEntriesWithin90Days(*db0,
-		    db1->fileName());
-#endif /* DISABLE_DB_ATTACHING */
 	}
 }
 
