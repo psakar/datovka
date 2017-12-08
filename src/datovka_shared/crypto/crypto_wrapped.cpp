@@ -21,9 +21,9 @@
  * the two.
  */
 
-#include "src/crypto/crypto_wrapped.h"
 #include "src/datovka_shared/crypto/crypto_pin.h"
 #include "src/datovka_shared/crypto/crypto_pwd.h"
+#include "src/datovka_shared/crypto/crypto_wrapped.h"
 
 QByteArray randomSalt(unsigned int len)
 {
