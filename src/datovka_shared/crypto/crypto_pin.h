@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _CRYPTO_PIN_H_
-#define _CRYPTO_PIN_H_
+#pragma once
 
 #include <stdlib.h> /* size_t */
 
@@ -68,5 +67,3 @@ extern const struct pin_alg pbkdf2_sha256;
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-
-#endif /* _CRYPTO_PIN_H_ */

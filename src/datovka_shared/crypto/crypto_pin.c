@@ -25,7 +25,7 @@
 #include <limits.h>
 #include <openssl/evp.h>
 
-#include "src/crypto/crypto_pin.h"
+#include "src/datovka_shared/crypto/crypto_pin.h"
 
 /* Do not change these value as it will break PIN checking. */
 #define PBKDF2_SHA256_NAME "PBKDF2-HMAC-SHA-256-64"

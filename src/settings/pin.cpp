@@ -21,8 +21,8 @@
  * the two.
  */
 
-#include "src/crypto/crypto_pin.h"
 #include "src/crypto/crypto_wrapped.h"
+#include "src/datovka_shared/crypto/crypto_pin.h"
 #include "src/log/log.h"
 #include "src/settings/pin.h"
 
