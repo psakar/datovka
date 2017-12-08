@@ -25,8 +25,9 @@
 #include <openssl/evp.h>
 #include <openssl/err.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "src/crypto/crypto_pwd.h"
+#include "src/datovka_shared/crypto/crypto_pwd.h"
 
 //EVP_MAX_KEY_LENGTH
 //EVP_MAX_IV_LENGTH;

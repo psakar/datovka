@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _CRYPTO_WRAPPED_H_
-#define _CRYPTO_WRAPPED_H_
+#pragma once
 
 #include <QByteArray>
 #include <QString>
@@ -72,5 +71,3 @@ QByteArray encryptPwd(const QString &plainPwd, const QString &pinVal,
  */
 QString decryptPwd(const QByteArray &encrPwd, const QString &pinVal,
     const QString &pwdAlg, const QByteArray &pwdSalt, const QByteArray &pwdIV);
-
-#endif /* _CRYPTO_WRAPPED_H_ */

@@ -23,8 +23,8 @@
 
 #include <QByteArray>
 
-#include "src/crypto/crypto_pwd.h"
-#include "src/crypto/crypto_wrapped.h"
+#include "src/datovka_shared/crypto/crypto_pwd.h"
+#include "src/datovka_shared/crypto/crypto_wrapped.h"
 #include "src/log/log.h"
 #include "src/settings/records_management.h"
 

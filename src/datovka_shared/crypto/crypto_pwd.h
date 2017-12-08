@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _CRYPTO_PWD_H_
-#define _CRYPTO_PWD_H_
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -86,5 +85,3 @@ extern const struct pwd_alg aes256_cbc;
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-
-#endif /* _CRYPTO_PWD_H_ */

@@ -16,9 +16,9 @@ LIBS += \
 SOURCES += \
 	$${top_srcdir}src/common.cpp \
 	$${top_srcdir}src/crypto/crypto.c \
-	$${top_srcdir}src/crypto/crypto_pin.c \
-	$${top_srcdir}src/crypto/crypto_pwd.c \
-	$${top_srcdir}src/crypto/crypto_wrapped.cpp \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.c \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.c \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.cpp \
 	$${top_srcdir}src/delegates/tag_item.cpp \
 	$${top_srcdir}src/dimensions/dimensions.cpp \
 	$${top_srcdir}src/graphics/graphics.cpp \
@@ -51,9 +51,9 @@ HEADERS += \
 	$${top_srcdir}src/common.h \
 	$${top_srcdir}src/crypto/crypto.h \
 	$${top_srcdir}src/crypto/crypto_funcs.h \
-	$${top_srcdir}src/crypto/crypto_pin.h \
-	$${top_srcdir}src/crypto/crypto_pwd.h \
-	$${top_srcdir}src/crypto/crypto_wrapped.h \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.h \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.h \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.h \
 	$${top_srcdir}src/delegates/tag_item.h \
 	$${top_srcdir}src/dimensions/dimensions.h \
 	$${top_srcdir}src/graphics/graphics.h \

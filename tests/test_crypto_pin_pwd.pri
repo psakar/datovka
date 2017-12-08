@@ -7,9 +7,9 @@ LIBS += \
 
 SOURCES += \
 	$${top_srcdir}src/common.cpp \
-	$${top_srcdir}src/crypto/crypto_pin.c \
-	$${top_srcdir}src/crypto/crypto_pwd.c \
-	$${top_srcdir}src/crypto/crypto_wrapped.cpp \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.c \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.c \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.cpp \
 	$${top_srcdir}src/settings/account.cpp \
 	$${top_srcdir}src/settings/accounts.cpp \
 	$${top_srcdir}src/settings/pin.cpp \
@@ -17,9 +17,9 @@ SOURCES += \
 
 HEADERS += \
 	$${top_srcdir}src/common.h \
-	$${top_srcdir}src/crypto/crypto_pin.h \
-	$${top_srcdir}src/crypto/crypto_pwd.h \
-	$${top_srcdir}src/crypto/crypto_wrapped.h \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.h \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.h \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.h \
 	$${top_srcdir}src/settings/account.h \
 	$${top_srcdir}src/settings/accounts.h \
 	$${top_srcdir}src/settings/pin.h \
