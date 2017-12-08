@@ -48,35 +48,6 @@ QString SQLiteDb::fileName(void) const
 	return m_db.databaseName();
 }
 
-bool SQLiteDb::openDb(const QString &fileName, bool forceInMemory,
-    const QList<class SQLiteTbl *> &tables)
-{
-	bool ret;
-
-	if (m_db.isOpen()) {
-		m_db.close();
-	}
-
-	if (!forceInMemory) {
-		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
-	} else {
-		m_db.setDatabaseName(memoryLocation);
-	}
-
-	ret = m_db.open();
-
-	if (ret) {
-		/* Ensure database contains all tables. */
-		ret = createEmptyMissingTables(tables);
-	}
-
-	if (!ret) {
-		m_db.close();
-	}
-
-	return ret;
-}
-
 bool SQLiteDb::beginTransaction(void)
 {
 	QSqlQuery query(m_db);
@@ -202,7 +173,6 @@ bool SQLiteDb::rollbackTransaction(const QString &savePointName)
 bool SQLiteDb::dbDriverSupport(void)
 {
 	QStringList driversList = QSqlDatabase::drivers();
-
 	return driversList.contains(dbDriverType, Qt::CaseSensitive);
 }
 
@@ -266,6 +236,35 @@ bool SQLiteDb::vacuum(void)
 
 fail:
 	return false;
+}
+
+bool SQLiteDb::openDb(const QString &fileName, bool forceInMemory,
+    const QList<class SQLiteTbl *> &tables)
+{
+	bool ret;
+
+	if (m_db.isOpen()) {
+		m_db.close();
+	}
+
+	if (!forceInMemory) {
+		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
+	} else {
+		m_db.setDatabaseName(memoryLocation);
+	}
+
+	ret = m_db.open();
+
+	if (ret) {
+		/* Ensure database contains all tables. */
+		ret = createEmptyMissingTables(tables);
+	}
+
+	if (!ret) {
+		m_db.close();
+	}
+
+	return ret;
 }
 
 bool SQLiteDb::attachDb2(QSqlQuery &query, const QString &attachFileName)

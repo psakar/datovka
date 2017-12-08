@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _SQLITE_DB_H_
-#define _SQLITE_DB_H_
+#pragma once
 
 #include <QList>
 #include <QSqlDatabase>
@@ -54,19 +53,6 @@ public:
 	 * @return File name holding the database.
 	 */
 	QString fileName(void) const;
-
-	/*!
-	 * @brief Open database file.
-	 *
-	 * @param[in] fileName      File name.
-	 * @param[in] forceInMemory True if the message should be stored in
-	 *                          memory only.
-	 * @param[in] tables        List of table prototypes that should be
-	 *                          created if missing.
-	 * @return True on success, false on any error.
-	 */
-	bool openDb(const QString &fileName, bool forceInMemory,
-	    const QList<class SQLiteTbl *> &tables);
 
 	/*!
 	 * @brief Begin a transaction.
@@ -141,6 +127,19 @@ protected:
 	bool vacuum(void);
 
 	/*!
+	 * @brief Open database file.
+	 *
+	 * @param[in] fileName      File name.
+	 * @param[in] forceInMemory True if the message should be stored in
+	 *                          memory only.
+	 * @param[in] tables        List of table prototypes that should be
+	 *                          created if missing.
+	 * @return True on success, false on any error.
+	 */
+	bool openDb(const QString &fileName, bool forceInMemory,
+	    const QList<class SQLiteTbl *> &tables);
+
+	/*!
 	 * @brief Attaches a database file to opened database.
 	 *
 	 * @param[in,out] query          Query to work with.
@@ -172,5 +171,3 @@ private:
 	 */
 	bool createEmptyMissingTables(const QList<class SQLiteTbl *> &tables);
 };
-
-#endif /* _SQLITE_DB_H_ */
