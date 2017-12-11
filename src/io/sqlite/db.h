@@ -140,6 +140,19 @@ protected:
 	    const QList<class SQLiteTbl *> &tables);
 
 	/*!
+	 * @brief Open a new empty database file.
+	 *
+	 * @param[in] newFileName New file path.
+	 * @param[in] tables List of table prototypes that should be created
+	 *                   if missing.
+	 * @return True on success.
+	 *
+	 * @note The old database file is left untouched.
+	 */
+	bool reopenDb(const QString &newFileName,
+	    const QList<class SQLiteTbl *> &tables);
+
+	/*!
 	 * @brief Move db.
 	 *
 	 * @param[in] newFileName New file path.
