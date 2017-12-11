@@ -238,6 +238,57 @@ fail:
 	return false;
 }
 
+bool SQLiteDb::copyDb(const QString &newFileName,
+    const QList<class SQLiteTbl *> &tables)
+{
+	if (fileName() == memoryLocation) {
+		logErrorNL("%s",
+		    "Trying to copy database that resides i memory.");
+		Q_ASSERT(0);
+		return false;
+	}
+
+	bool copy_ret, open_ret;
+
+	/* Close database. */
+	m_db.close();
+
+	/* Backup old file name. */
+	QString oldFileName = fileName();
+	logInfoNL("Copying database file '%s' to location '%s'.",
+	    oldFileName.toUtf8().constData(),
+	    newFileName.toUtf8().constData());
+
+	/* Fail if target equals the source. */
+	/* TODO -- Perform a more reliable check than string comparison. */
+	if (oldFileName == newFileName) {
+		logWarningNL(
+		    "Copying of database file '%s' aborted. Target and source are equal.",
+		    oldFileName.toUtf8().constData());
+		return false;
+	}
+
+	/* Erase target if exists. */
+	QFile::remove(newFileName);
+
+	/* Copy database file. */
+	copy_ret = QFile::copy(oldFileName, newFileName);
+
+	/* Open database. */
+	open_ret = openDb(copy_ret ? newFileName : oldFileName, false, tables);
+	if (!open_ret) {
+		Q_ASSERT(0);
+		logErrorNL("File '%s' could not be opened.",
+		    copy_ret ?
+		        newFileName.toUtf8().constData() :
+		        oldFileName.toUtf8().constData());
+		/* TODO -- qFatal() ? */
+		return false;
+	}
+
+	return copy_ret;
+}
+
 bool SQLiteDb::openDb(const QString &fileName, bool forceInMemory,
     const QList<class SQLiteTbl *> &tables)
 {

@@ -77,7 +77,7 @@ public:
 	/*!
 	 * @brief End named transaction.
 	 *
-	 * @param[in] savePointName  Name of the save point.
+	 * @param[in] savePointName Name of the save point.
 	 * @return True on success.
 	 */
 	bool releaseSavePoint(const QString &savePointName);
@@ -85,7 +85,7 @@ public:
 	/*!
 	 * @brief Roll back transaction.
 	 *
-	 * @param[in] savePointName  Name of the save point.
+	 * @param[in] savePointName Name of the save point.
 	 * @return True on success.
 	 *
 	 * @note If no save-point name is supplied then a complete roll-back is
@@ -127,13 +127,26 @@ protected:
 	bool vacuum(void);
 
 	/*!
+	 * @brief Copy db.
+	 *
+	 * @param[in] newFileName New file path.
+	 * @param[in] tables List of table prototypes that should be created
+	 *                   if missing.
+	 * @return True on success.
+	 *
+	 * @note The copy is continued to be used. Original is closed.
+	 */
+	bool copyDb(const QString &newFileName,
+	    const QList<class SQLiteTbl *> &tables);
+
+	/*!
 	 * @brief Open database file.
 	 *
-	 * @param[in] fileName      File name.
+	 * @param[in] fileName File name.
 	 * @param[in] forceInMemory True if the message should be stored in
 	 *                          memory only.
-	 * @param[in] tables        List of table prototypes that should be
-	 *                          created if missing.
+	 * @param[in] tables List of table prototypes that should be created
+	 *                   if missing.
 	 * @return True on success, false on any error.
 	 */
 	bool openDb(const QString &fileName, bool forceInMemory,
