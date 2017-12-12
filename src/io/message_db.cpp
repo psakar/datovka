@@ -4248,68 +4248,17 @@ fail:
 
 bool MessageDb::openDb(const QString &fileName, bool createMissing)
 {
-	bool ret;
-
 	SQLiteDb::OpenFlags flags = createMissing ?
 	    SQLiteDb::CREATE_MISSING : SQLiteDb::NO_OPTIONS;
 	flags |= globPref.store_messages_on_disk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
 
-	ret = SQLiteDb::openDb(fileName, flags);
-
-	if (!ret) {
-		m_db.close();
-	}
-
-	return ret;
+	return SQLiteDb::openDb(fileName, flags);
 }
 
-/* ========================================================================= */
-/*
- * Copy db.
- */
 bool MessageDb::copyDb(const QString &newFileName)
-/* ========================================================================= */
 {
-	bool copy_ret, open_ret;
-
-	/* Close database. */
-	m_db.close();
-
-	/* Backup old file name. */
-	QString oldFileName = fileName();
-	logInfo("Copying database file '%s' to location '%s'.\n",
-	    oldFileName.toUtf8().constData(),
-	    newFileName.toUtf8().constData());
-
-	/* Fail if target equals the source. */
-	/* TODO -- Perform a more reliable check than string comparison. */
-	if (oldFileName == newFileName) {
-		logWarning("Copying of database file '%s' aborted. "
-		    "Target and source are equal.\n",
-		    oldFileName.toUtf8().constData());
-		return false;
-	}
-
-	/* Erase target if exists. */
-	QFile::remove(newFileName);
-
-	/* Copy database file. */
-	copy_ret = QFile::copy(oldFileName, newFileName);
-
-	/* Open database. */
-	open_ret = openDb(copy_ret ? newFileName : oldFileName);
-	if (!open_ret) {
-		Q_ASSERT(0);
-		logErrorNL("File '%s' could not be opened.",
-		    copy_ret ?
-		        newFileName.toUtf8().constData() :
-		        oldFileName.toUtf8().constData());
-		/* TODO -- qFatal() ? */
-		return false;
-	}
-
-	return copy_ret;
+	return SQLiteDb::copyDb(newFileName, SQLiteDb::CREATE_MISSING);
 }
 
 bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
