@@ -69,7 +69,7 @@ public:
 	/*!
 	 * @brief Begin named transaction.
 	 *
-	 * @param[in] savePointName  Name of the save point.
+	 * @param[in] savePointName Name of the save point.
 	 * @return True on success.
 	 */
 	bool savePoint(const QString &savePointName);
@@ -179,7 +179,7 @@ protected:
 	/*!
 	 * @brief Attaches a database file to opened database.
 	 *
-	 * @param[in,out] query          Query to work with.
+	 * @param[in,out] query Query to work with.
 	 * @param[in]     attachFileName File containing database to be
 	 *                               attached.
 	 * @return False on error.
