@@ -177,7 +177,6 @@ bool TagDb::deleteTag(int id)
 	return true;
 }
 
-
 bool TagDb::deleteAllTags(void)
 {
 	QSqlQuery query(m_db);
@@ -196,7 +195,6 @@ bool TagDb::deleteAllTags(void)
 
 	return true;
 }
-
 
 TagDb::TagEntry TagDb::getTagData(int id) const
 {

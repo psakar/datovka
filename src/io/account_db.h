@@ -227,11 +227,9 @@ protected:
 	QList<class SQLiteTbl *> listOfTables(void) const Q_DECL_OVERRIDE;
 };
 
-
 /*!
  * @brief Global account database.
  */
 extern AccountDb *globAccountDbPtr;
-
 
 #endif /* _ACCOUNT_DB_H_ */

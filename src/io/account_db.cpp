@@ -161,15 +161,8 @@ fail:
 	return DbEntry();
 }
 
-
-
-/* ========================================================================= */
-/*
- * Return data box identifier.
- */
 const QString AccountDb::dbId(const QString &key,
     const QString &defaultValue) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
