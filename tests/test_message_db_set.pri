@@ -15,6 +15,8 @@ LIBS += \
 SOURCES += \
 	$${top_srcdir}src/common.cpp \
 	$${top_srcdir}src/crypto/crypto.c \
+	$${top_srcdir}src/datovka_shared/io/sqlite/db.cpp \
+	$${top_srcdir}src/datovka_shared/io/sqlite/table.cpp \
 	$${top_srcdir}src/delegates/tag_item.cpp \
 	$${top_srcdir}src/dimensions/dimensions.cpp \
 	$${top_srcdir}src/graphics/graphics.cpp \
@@ -24,8 +26,6 @@ SOURCES += \
 	$${top_srcdir}src/io/message_db.cpp \
 	$${top_srcdir}src/io/message_db_set.cpp \
 	$${top_srcdir}src/io/records_management_db.cpp \
-	$${top_srcdir}src/io/sqlite/db.cpp \
-	$${top_srcdir}src/io/sqlite/table.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
 	$${top_srcdir}src/isds/isds_conversion.cpp \
 	$${top_srcdir}src/localisation/localisation.cpp \
@@ -39,6 +39,8 @@ HEADERS += \
 	$${top_srcdir}src/common.h \
 	$${top_srcdir}src/crypto/crypto.h \
 	$${top_srcdir}src/crypto/crypto_funcs.h \
+	$${top_srcdir}src/datovka_shared/io/sqlite/db.h \
+	$${top_srcdir}src/datovka_shared/io/sqlite/table.h \
 	$${top_srcdir}src/delegates/tag_item.h \
 	$${top_srcdir}src/dimensions/dimensions.h \
 	$${top_srcdir}src/graphics/graphics.h \
@@ -48,8 +50,6 @@ HEADERS += \
 	$${top_srcdir}src/io/message_db.h \
 	$${top_srcdir}src/io/message_db_set.h \
 	$${top_srcdir}src/io/records_management_db.h \
-	$${top_srcdir}src/io/sqlite/db.h \
-	$${top_srcdir}src/io/sqlite/table.h \
 	$${top_srcdir}src/io/tag_db.h \
 	$${top_srcdir}src/isds/isds_conversion.h \
 	$${top_srcdir}src/localisation/localisation.h \
