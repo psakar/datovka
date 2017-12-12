@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -217,14 +217,14 @@ public:
 	static
 	QString keyFromLogin(const QString &login);
 
-private:
+protected:
 	/*!
 	 * @brief Returns list of tables.
 	 *
 	 * @return List of pointers to tables.
 	 */
-	static
-	QList<class SQLiteTbl *> listOfTables(void);
+	virtual
+	QList<class SQLiteTbl *> listOfTables(void) const Q_DECL_OVERRIDE;
 };
 
 

@@ -210,14 +210,14 @@ public:
 	 */
 	QList<qint64> getMsgIdsContainSearchTagText(const QString &text) const;
 
-private:
+protected:
 	/*!
 	 * @brief Returns list of tables.
 	 *
 	 * @return List of pointers to tables.
 	 */
-	static
-	QList<class SQLiteTbl *> listOfTables(void);
+	virtual
+	QList<class SQLiteTbl *> listOfTables(void) const Q_DECL_OVERRIDE;
 };
 
 /*!

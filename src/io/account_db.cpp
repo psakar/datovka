@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,8 +64,11 @@ AccountDb::AccountDb(const QString &connectionName)
 
 bool AccountDb::openDb(const QString &fileName)
 {
-	return SQLiteDb::openDb(fileName,
-	    !globPref.store_additional_data_on_disk, listOfTables());
+	SQLiteDb::OpenFlags flags = SQLiteDb::CREATE_MISSING;
+	flags |= globPref.store_additional_data_on_disk ?
+	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
+
+	return SQLiteDb::openDb(fileName, flags);
 }
 
 DbEntry AccountDb::accountEntry(const QString &key) const
@@ -692,15 +695,13 @@ QString AccountDb::keyFromLogin(const QString &login)
 	return login + QStringLiteral("___True");
 }
 
-QList<class SQLiteTbl *> AccountDb::listOfTables(void)
+QList<class SQLiteTbl *> AccountDb::listOfTables(void) const
 {
-	static QList<class SQLiteTbl *> tables;
-	if (tables.isEmpty()) {
-		tables.append(&accntinfTbl);
-		tables.append(&userinfTbl);
-		tables.append(&pwdexpdtTbl);
-	}
+	QList<class SQLiteTbl *> tables;
+	tables.append(&accntinfTbl);
+	tables.append(&userinfTbl);
+	tables.append(&pwdexpdtTbl);
 	return tables;
 }
 
-AccountDb *globAccountDbPtr = 0;
+AccountDb *globAccountDbPtr = Q_NULLPTR;

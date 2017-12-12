@@ -73,7 +73,7 @@ TagDb::TagDb(const QString &connectionName)
 
 bool TagDb::openDb(const QString &fileName)
 {
-	return SQLiteDb::openDb(fileName, false, listOfTables());
+	return SQLiteDb::openDb(fileName, SQLiteDb::CREATE_MISSING);
 }
 
 bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
@@ -443,18 +443,15 @@ fail:
 	return QList<qint64>();
 }
 
-
-QList<class SQLiteTbl *> TagDb::listOfTables(void)
+QList<class SQLiteTbl *> TagDb::listOfTables(void) const
 {
-	static QList<class SQLiteTbl *> tables;
-	if (tables.isEmpty()) {
-		tables.append(&tagTbl);
-		tables.append(&msgtagsTbl);
-	}
+	QList<class SQLiteTbl *> tables;
+	tables.append(&tagTbl);
+	tables.append(&msgtagsTbl);
 	return tables;
 }
 
-TagDb *globTagDbPtr = 0;
+TagDb *globTagDbPtr = Q_NULLPTR;
 
 uint qHash(const TagDb::TagEntry &entry, uint seed)
 {

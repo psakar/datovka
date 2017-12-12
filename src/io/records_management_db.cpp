@@ -38,7 +38,7 @@ RecordsManagementDb::RecordsManagementDb(const QString &connectionName)
 
 bool RecordsManagementDb::openDb(const QString &fileName)
 {
-	return SQLiteDb::openDb(fileName, false, listOfTables());
+	return SQLiteDb::openDb(fileName, SQLiteDb::CREATE_MISSING);
 }
 
 /*!
@@ -290,13 +290,11 @@ QStringList RecordsManagementDb::storedMsgLocations(qint64 dmId) const
 	}
 }
 
-QList<class SQLiteTbl *> RecordsManagementDb::listOfTables(void)
+QList<class SQLiteTbl *> RecordsManagementDb::listOfTables(void) const
 {
-	static QList<class SQLiteTbl *> tables;
-	if (tables.isEmpty()) {
-		tables.append(&srvcInfTbl);
-		tables.append(&strdFlsMsgsTbl);
-	}
+	QList<class SQLiteTbl *> tables;
+	tables.append(&srvcInfTbl);
+	tables.append(&strdFlsMsgsTbl);
 	return tables;
 }
 

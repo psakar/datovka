@@ -238,8 +238,14 @@ fail:
 	return false;
 }
 
-bool SQLiteDb::copyDb(const QString &newFileName,
-    const QList<class SQLiteTbl *> &tables)
+bool SQLiteDb::assureConsistency(void)
+{
+	logInfoNL("No consistency checks performed in database '%s'.",
+	    fileName().toUtf8().constData());
+	return true;
+}
+
+bool SQLiteDb::copyDb(const QString &newFileName, enum OpenFlag flag)
 {
 	if (Q_UNLIKELY(newFileName.isEmpty())) {
 		Q_ASSERT(0);
@@ -253,6 +259,11 @@ bool SQLiteDb::copyDb(const QString &newFileName,
 	}
 	if (newFileName == memoryLocation) {
 		/* TODO -- handle this situation. */
+		Q_ASSERT(0);
+		return false;
+	}
+	if (Q_UNLIKELY(flag & ~CREATE_MISSING)) {
+		logErrorNL("Unsupported flag '%d'.", flag);
 		Q_ASSERT(0);
 		return false;
 	}
@@ -284,7 +295,7 @@ bool SQLiteDb::copyDb(const QString &newFileName,
 	copy_ret = QFile::copy(oldFileName, newFileName);
 
 	/* Open database. */
-	open_ret = openDb(copy_ret ? newFileName : oldFileName, false, tables);
+	open_ret = openDb(copy_ret ? newFileName : oldFileName, flag);
 	if (!open_ret) {
 		Q_ASSERT(0);
 		logErrorNL("File '%s' could not be opened.",
@@ -298,8 +309,7 @@ bool SQLiteDb::copyDb(const QString &newFileName,
 	return copy_ret;
 }
 
-bool SQLiteDb::reopenDb(const QString &newFileName,
-    const QList<class SQLiteTbl *> &tables)
+bool SQLiteDb::reopenDb(const QString &newFileName, enum OpenFlag flag)
 {
 	if (Q_UNLIKELY(newFileName.isEmpty())) {
 		Q_ASSERT(0);
@@ -313,6 +323,11 @@ bool SQLiteDb::reopenDb(const QString &newFileName,
 	}
 	if (newFileName == memoryLocation) {
 		/* TODO -- handle this situation. */
+		Q_ASSERT(0);
+		return false;
+	}
+	if (Q_UNLIKELY(flag & ~CREATE_MISSING)) {
+		logErrorNL("Unsupported flag '%d'.", flag);
 		Q_ASSERT(0);
 		return false;
 	}
@@ -341,11 +356,11 @@ bool SQLiteDb::reopenDb(const QString &newFileName,
 	QFile::remove(newFileName);
 
 	/* Open new database file. */
-	reopen_ret = openDb(newFileName, false, tables);
+	reopen_ret = openDb(newFileName, flag);
 
 	/* Open database. */
 	if (!reopen_ret) {
-		open_ret = openDb(oldFileName, false, tables);
+		open_ret = openDb(oldFileName, flag);
 		if (!open_ret) {
 			logErrorNL("File '%s' could not be opened.",
 			    oldFileName.toUtf8().constData());
@@ -357,8 +372,7 @@ bool SQLiteDb::reopenDb(const QString &newFileName,
 	return reopen_ret;
 }
 
-bool SQLiteDb::moveDb(const QString &newFileName,
-    const QList<class SQLiteTbl *> &tables)
+bool SQLiteDb::moveDb(const QString &newFileName, enum OpenFlag flag)
 {
 	if (Q_UNLIKELY(newFileName.isEmpty())) {
 		Q_ASSERT(0);
@@ -372,6 +386,11 @@ bool SQLiteDb::moveDb(const QString &newFileName,
 	}
 	if (newFileName == memoryLocation) {
 		/* TODO -- handle this situation. */
+		Q_ASSERT(0);
+		return false;
+	}
+	if (Q_UNLIKELY(flag & ~CREATE_MISSING)) {
+		logErrorNL("Unsupported flag '%d'.", flag);
 		Q_ASSERT(0);
 		return false;
 	}
@@ -403,7 +422,7 @@ bool SQLiteDb::moveDb(const QString &newFileName,
 	move_ret = QFile::rename(oldFileName, newFileName);
 
 	/* Open database. */
-	open_ret = openDb(move_ret ? newFileName : oldFileName, false, tables);
+	open_ret = openDb(move_ret ? newFileName : oldFileName, flag);
 	if (!open_ret) {
 		Q_ASSERT(0);
 		logErrorNL("File '%s' could not be opened.",
@@ -417,26 +436,38 @@ bool SQLiteDb::moveDb(const QString &newFileName,
 	return move_ret;
 }
 
-bool SQLiteDb::openDb(const QString &fileName, bool forceInMemory,
-    const QList<class SQLiteTbl *> &tables)
+bool SQLiteDb::openDb(const QString &fileName, OpenFlags flags)
 {
-	bool ret;
+	if (Q_UNLIKELY((!(flags & FORCE_IN_MEMORY)) && fileName.isEmpty())) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (Q_UNLIKELY((!(flags & FORCE_IN_MEMORY)) && (fileName == memoryLocation))) {
+		Q_ASSERT(0);
+		return false;
+	}
 
 	if (m_db.isOpen()) {
 		m_db.close();
 	}
 
-	if (!forceInMemory) {
+	if (!(flags & FORCE_IN_MEMORY)) {
 		m_db.setDatabaseName(QDir::toNativeSeparators(fileName));
 	} else {
 		m_db.setDatabaseName(memoryLocation);
 	}
 
-	ret = m_db.open();
+	bool ret = m_db.open();
 
-	if (ret) {
-		/* Ensure database contains all tables. */
-		ret = createEmptyMissingTables(tables);
+	if (flags & CREATE_MISSING) {
+		if (ret) {
+			/* Ensure database contains all tables. */
+			ret = createEmptyMissingTables(listOfTables());
+		}
+
+		if (ret) {
+			ret = assureConsistency();
+		}
 	}
 
 	if (!ret) {
@@ -490,7 +521,10 @@ fail:
 bool SQLiteDb::createEmptyMissingTables(const QList<class SQLiteTbl *> &tables)
 {
 	foreach (const SQLiteTbl *tblPtr, tables) {
-		Q_ASSERT(0 != tblPtr);
+		if (Q_UNLIKELY(Q_NULLPTR == tblPtr)) {
+			Q_ASSERT(0);
+			continue;
+		}
 		if (!tblPtr->createEmpty(m_db)) {
 			goto fail; /* TODO -- Proper recovery? */
 		}

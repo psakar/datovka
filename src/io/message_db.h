@@ -1070,6 +1070,23 @@ protected: /* These function are used from within a database container. */
 	static
 	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
 
+	/*!
+	 * @brief Returns list of tables.
+	 *
+	 * @return List of pointers to tables.
+	 */
+	virtual
+	QList<class SQLiteTbl *> listOfTables(void) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Fixes some database states that may have been cased by buggy
+	 *     application versions.
+	 *
+	 * @return True on success.
+	 */
+	virtual
+	bool assureConsistency(void) Q_DECL_OVERRIDE;
+
 public:
 	/*
 	 * TODO -- Use static methods returning reference to static constant
@@ -1099,26 +1116,6 @@ private:
 	 * versions.
 	 */
 	bool addDmtypeColumn(void);
-
-	/*!
-	 * @brief Returns list of tables.
-	 *
-	 * @return List of pointers to tables.
-	 */
-	static
-	QList<class SQLiteTbl *> listOfTables(void);
-
-	/*!
-	 * @brief This method ensures that the process_state table
-	 *     contains a PRIMARY KEY. This table might be created without any
-	 *     primary key reference due to a bug in a previous version.
-	 *
-	 * @return True on success.
-	 *
-	 * TODO -- This method may be removed in some future version
-	 *     of the programme.
-	 */
-	bool ensurePrimaryKeyInProcessStateTable(void);
 
 	/*!
 	 * @brief Returns verification date (in local time).

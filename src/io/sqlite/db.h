@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <QFlags>
 #include <QList>
 #include <QSqlDatabase>
 #include <QString>
@@ -36,6 +37,16 @@ class SQLiteDb {
 
 public:
 	/*!
+	 * @brief Database opening flags.
+	 */
+	enum OpenFlag {
+		NO_OPTIONS = 0x00, /*!< No option specified. */
+		CREATE_MISSING = 0x01, /*!< Missing tables and entries are going to be created. */
+		FORCE_IN_MEMORY = 0x02 /*!< Database is going to be opened in memory. */
+	};
+	Q_DECLARE_FLAGS(OpenFlags, OpenFlag)
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] connectionName Connection name.
@@ -45,6 +56,7 @@ public:
 	/*!
 	 * @brief Destructor.
 	 */
+	virtual
 	~SQLiteDb(void);
 
 	/*!
@@ -127,54 +139,66 @@ protected:
 	bool vacuum(void);
 
 	/*!
+	 * @brief Returns list of tables encompassed in the database.
+	 *
+	 * @return List of pointers to tables.
+	 *
+	 * @note Override this method in derived classes. This method is
+	 *     used to create missing database tables.
+	 */
+	virtual
+	QList<class SQLiteTbl *> listOfTables(void) const = 0;
+
+	/*!
+	 * @brief This function is used to make database content consistent
+	 *     (e.g. adding missing columns or entries).
+	 *
+	 * @return True on success. If this method returns false, then the
+	 *     open procedure must fail. Override this method to implement
+	 *     custom checks. This method just returns true.
+	 */
+	virtual
+	bool assureConsistency(void);
+
+	/*!
 	 * @brief Copy db.
 	 *
 	 * @param[in] newFileName New file path.
-	 * @param[in] tables List of table prototypes that should be created
-	 *                   if missing.
+	 * @param[in] flag Can be NO_OPTIONS or CREATE_MISSING.
 	 * @return True on success.
 	 *
 	 * @note The copy is continued to be used. Original is closed.
 	 */
-	bool copyDb(const QString &newFileName,
-	    const QList<class SQLiteTbl *> &tables);
+	bool copyDb(const QString &newFileName, enum OpenFlag flag);
 
 	/*!
 	 * @brief Open a new empty database file.
 	 *
 	 * @param[in] newFileName New file path.
-	 * @param[in] tables List of table prototypes that should be created
-	 *                   if missing.
+	 * @param[in] flag Can be NO_OPTIONS or CREATE_MISSING.
 	 * @return True on success.
 	 *
 	 * @note The old database file is left untouched.
 	 */
-	bool reopenDb(const QString &newFileName,
-	    const QList<class SQLiteTbl *> &tables);
+	bool reopenDb(const QString &newFileName, enum OpenFlag flag);
 
 	/*!
 	 * @brief Move db.
 	 *
 	 * @param[in] newFileName New file path.
-	 * @param[in] tables List of table prototypes that should be created
-	 *                   if missing.
+	 * @param[in] flag Can be NO_OPTIONS or CREATE_MISSING.
 	 * @return True on success.
 	 */
-	bool moveDb(const QString &newFileName,
-	    const QList<class SQLiteTbl *> &tables);
+	bool moveDb(const QString &newFileName, enum OpenFlag flag);
 
 	/*!
 	 * @brief Open database file.
 	 *
 	 * @param[in] fileName File name.
-	 * @param[in] forceInMemory True if the message should be stored in
-	 *                          memory only.
-	 * @param[in] tables List of table prototypes that should be created
-	 *                   if missing.
+	 * @param[in] flags Database opening flags.
 	 * @return True on success, false on any error.
 	 */
-	bool openDb(const QString &fileName, bool forceInMemory,
-	    const QList<class SQLiteTbl *> &tables);
+	bool openDb(const QString &fileName, OpenFlags flags);
 
 	/*!
 	 * @brief Attaches a database file to opened database.
@@ -208,3 +232,5 @@ private:
 	 */
 	bool createEmptyMissingTables(const QList<class SQLiteTbl *> &tables);
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(SQLiteDb::OpenFlags)
