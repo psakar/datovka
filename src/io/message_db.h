@@ -1108,16 +1108,6 @@ private:
 	const QVector<QString> msgStatus;
 
 	/*!
-	 * @brief Adds _dmType column.
-	 *
-	 * @return True on success.
-	 *
-	 * @note This code may be needed to update database between different
-	 * versions.
-	 */
-	bool addDmtypeColumn(void);
-
-	/*!
 	 * @brief Returns verification date (in local time).
 	 *
 	 * @param[in] dmId  Message identifier.

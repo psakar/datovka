@@ -4246,53 +4246,6 @@ fail:
 	return QByteArray();
 }
 
-
-/* ========================================================================= */
-/*
- * Adds _dmType column.
- */
-bool MessageDb::addDmtypeColumn(void)
-/* ========================================================================= */
-{
-	if (false == m_db.isOpen()) {
-		return false;
-	}
-
-	/*
-	 * Create _dmType column if it does not exist.
-	 */
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT _dmType FROM messages LIMIT 1";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (false == query.exec()) {
-		query.clear();
-		queryStr = "ALTER TABLE messages ADD COLUMN _dmType TEXT";
-		if (!query.prepare(queryStr)) {
-			logErrorNL("Cannot prepare SQL query: %s.",
-			    query.lastError().text().toUtf8().constData());
-			goto fail;
-		}
-		if (query.exec()) {
-			return true;
-		} else {
-			logErrorNL("Cannot execute SQL query: %s.",
-			    query.lastError().text().toUtf8().constData());
-			goto fail;
-		}
-	}
-
-	return true;
-
-fail:
-	return false;
-}
-
 bool MessageDb::openDb(const QString &fileName, bool createMissing)
 {
 	bool ret;
@@ -4543,6 +4496,58 @@ QList<class SQLiteTbl *> MessageDb::listOfTables(void) const
 	tables.append(&crtdtTbl);
 	tables.append(&msgcrtdtTbl);
 	return tables;
+}
+
+/*!
+ * @brief Adds _dmType column.
+ *
+ * @return True on success.
+ *
+ * @note This code may be needed to update database between different
+ * versions.
+ *
+ * TODO -- this function is unused. Check whether it can be deleted.
+ */
+static
+bool addDmtypeColumn(QSqlDatabase &db)
+{
+	if (false == db.isOpen()) {
+		return false;
+	}
+
+	/*
+	 * Create _dmType column if it does not exist.
+	 */
+	QSqlQuery query(db);
+	QString queryStr;
+
+	queryStr = "SELECT _dmType FROM messages LIMIT 1";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (false == query.exec()) {
+		query.clear();
+		queryStr = "ALTER TABLE messages ADD COLUMN _dmType TEXT";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec()) {
+			return true;
+		} else {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+	}
+
+	return true;
+
+fail:
+	return false;
 }
 
 /*!
