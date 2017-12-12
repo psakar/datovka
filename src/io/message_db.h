@@ -1038,14 +1038,6 @@ protected: /* These function are used from within a database container. */
 	bool copyDb(const QString &newFileName);
 
 	/*!
-	 * @brief Move db.
-	 *
-	 * @param[in] newFileName  New location name.
-	 * @return True on success.
-	 */
-	bool moveDb(const QString &newFileName);
-
-	/*!
 	 * @brief Open a new empty database file.
 	 *
 	 * @note The old database file is left untouched.

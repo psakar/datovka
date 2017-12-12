@@ -4312,56 +4312,6 @@ bool MessageDb::copyDb(const QString &newFileName)
 	return copy_ret;
 }
 
-
-/* ========================================================================= */
-/*
- * Move db.
- */
-bool MessageDb::moveDb(const QString &newFileName)
-/* ========================================================================= */
-{
-	bool move_ret, open_ret;
-
-	/* Close database. */
-	m_db.close();
-
-	/* Backup old file name. */
-	QString oldFileName = fileName();
-	logInfo("Moving database file '%s' to location '%s'.\n",
-	    oldFileName.toUtf8().constData(),
-	    newFileName.toUtf8().constData());
-
-	/* Fail if target equals the source. */
-	/* TODO -- Perform a more reliable check than string comparison. */
-	if (oldFileName == newFileName) {
-		logWarning("Moving of database file '%s' aborted. "
-		    "Target and source are equal.\n",
-		    oldFileName.toUtf8().constData());
-		return false;
-	}
-
-	/* Erase target if exists. */
-	QFile::remove(newFileName);
-
-	/* Move database file. */
-	move_ret = QFile::rename(oldFileName, newFileName);
-
-	/* Open database. */
-	open_ret = openDb(move_ret ? newFileName : oldFileName);
-	if (!open_ret) {
-		Q_ASSERT(0);
-		logErrorNL("File '%s' could not be opened.",
-		    move_ret ?
-		        newFileName.toUtf8().constData() :
-		        oldFileName.toUtf8().constData());
-		/* TODO -- qFatal() ? */
-		return false;
-	}
-
-	return move_ret;
-}
-
-
 /* ========================================================================= */
 /*
  * Open a new empty database file.
