@@ -27,7 +27,7 @@
 #include <QList>
 #include <QString>
 
-#include "src/io/sqlite/db.h"
+#include "src/datovka_shared/io/sqlite/db.h"
 
 /*!
  * @brief Encapsulates tag database.

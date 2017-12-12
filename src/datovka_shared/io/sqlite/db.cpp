@@ -26,8 +26,8 @@
 #include <QSqlQuery>
 #include <QVariant>
 
+#include "src/datovka_shared/io/sqlite/db.h"
 #include "src/datovka_shared/io/sqlite/table.h"
-#include "src/io/sqlite/db.h"
 #include "src/log/log.h"
 
 const QString SQLiteDb::memoryLocation(":memory:");

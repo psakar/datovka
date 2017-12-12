@@ -240,6 +240,7 @@ SOURCES += \
     src/datovka_shared/crypto/crypto_pin.c \
     src/datovka_shared/crypto/crypto_pwd.c \
     src/datovka_shared/crypto/crypto_wrapped.cpp \
+    src/datovka_shared/io/sqlite/db.cpp \
     src/datovka_shared/io/sqlite/table.cpp \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
@@ -286,7 +287,6 @@ SOURCES += \
     src/io/message_db_set_delegated.cpp \
     src/io/message_db_single.cpp \
     src/io/records_management_db.cpp \
-    src/io/sqlite/db.cpp \
     src/io/tag_db.cpp \
     src/isds/isds_conversion.cpp \
     src/localisation/localisation.cpp \
@@ -369,6 +369,7 @@ HEADERS += \
     src/datovka_shared/crypto/crypto_pin.h \
     src/datovka_shared/crypto/crypto_pwd.h \
     src/datovka_shared/crypto/crypto_wrapped.h \
+    src/datovka_shared/io/sqlite/db.h \
     src/datovka_shared/io/sqlite/table.h \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
@@ -414,7 +415,6 @@ HEADERS += \
     src/io/message_db_set_container.h \
     src/io/message_db_single.h \
     src/io/records_management_db.h \
-    src/io/sqlite/db.h \
     src/io/tag_db.h \
     src/isds/isds_conversion.h \
     src/localisation/localisation.h \

@@ -34,7 +34,7 @@
 #include <QVector>
 
 #include "src/common.h"
-#include "src/io/sqlite/db.h"
+#include "src/datovka_shared/io/sqlite/db.h"
 
 #define INVALID_YEAR "inv"
 #define DB2 "db2"

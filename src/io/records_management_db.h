@@ -28,7 +28,7 @@
 #include <QString>
 #include <QStringList>
 
-#include "src/io/sqlite/db.h"
+#include "src/datovka_shared/io/sqlite/db.h"
 
 /*!
  * @brief Encapsulates records management database.

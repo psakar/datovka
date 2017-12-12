@@ -28,7 +28,7 @@
 #include <QString>
 #include <QVariant>
 
-#include "src/io/sqlite/db.h"
+#include "src/datovka_shared/io/sqlite/db.h"
 
 /*!
  * @brief Information obtained from database. It is structured only by the
