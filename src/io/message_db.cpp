@@ -4312,53 +4312,6 @@ bool MessageDb::copyDb(const QString &newFileName)
 	return copy_ret;
 }
 
-/* ========================================================================= */
-/*
- * Open a new empty database file.
- */
-bool MessageDb::reopenDb(const QString &newFileName)
-/* ========================================================================= */
-{
-	bool reopen_ret, open_ret;
-
-	/* Close database. */
-	m_db.close();
-
-	/* Backup old file name. */
-	QString oldFileName = fileName();
-	logInfo("Closing database file '%s' re-opening file '%s'.\n",
-	    oldFileName.toUtf8().constData(),
-	    newFileName.toUtf8().constData());
-
-	/* Fail if target equals the source. */
-	/* TODO -- Perform a more reliable check than string comparison. */
-	if (oldFileName == newFileName) {
-		logWarning("Re-opening of database file '%s' aborted. "
-		    "Target and source are equal.\n",
-		    oldFileName.toUtf8().constData());
-		return false;
-	}
-
-	/* Erase target if exists. */
-	QFile::remove(newFileName);
-
-	/* Open new database file. */
-	reopen_ret = openDb(newFileName);
-
-	/* Open database. */
-	if (!reopen_ret) {
-		open_ret = openDb(oldFileName);
-		if (!open_ret) {
-			logErrorNL("File '%s' could not be opened.",
-			    oldFileName.toUtf8().constData());
-			/* TODO -- qFatal() ? */
-			return false;
-		}
-	}
-
-	return reopen_ret;
-}
-
 bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
 {
 	QString queryStr = "SELECT ";

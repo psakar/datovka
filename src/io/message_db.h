@@ -1038,13 +1038,6 @@ protected: /* These function are used from within a database container. */
 	bool copyDb(const QString &newFileName);
 
 	/*!
-	 * @brief Open a new empty database file.
-	 *
-	 * @note The old database file is left untouched.
-	 */
-	bool reopenDb(const QString &newFileName);
-
-	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
 	 * @param[in,out] query Query already assigned to a database.
