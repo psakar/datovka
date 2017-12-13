@@ -1,3 +1,10 @@
+4.10.1 /
+ * Sharing PIN-related cryptographic code with mobile application.
+ * Added WiX code for generating MSI installers.
+ * Fixed wrong tag sorting in build_git_archive.sh script.
+ * Added support for account entry reordering using drag&drop in account
+   entries.
+
 4.10.0 / 2017-11-29
  * Added support for accessibility text output into data models.
  * Table widgets and table views don't cycle between cells when tabulator is
