@@ -81,3 +81,37 @@ decompress_archive () {
 
 	${DECOMPRESS_CMD} "${ARCHIVE}" || exit 1
 }
+
+# First erase any potential targets, then decompress.
+erase_and_decompress () {
+	SRC_DIR="$1"
+	ARCHIVE_FILE="$2"
+	WORK_DIR="$3"
+	ARCHIVE_NAME="$4"
+
+	if [ "x${SRC_DIR}" = "x" ]; then
+		echo "No source directory specified." >&2
+		exit 1
+	fi
+	if [ "x${ARCHIVE_FILE}" = "x" ]; then
+		echo "No archive file specified." >&2
+		exit 1
+	fi
+	if [ "x${WORK_DIR}" = "x" ]; then
+		echo "No working directory specified." >&2
+		exit 1
+	fi
+	if [ "x${ARCHIVE_NAME}" = "x" ]; then
+		echo "No archive name specified." >&2
+		exit 1
+	fi
+
+	ARCHIVE="${SRC_DIR}/${ARCHIVE_FILE}"
+	if [ ! -f "${ARCHIVE}" ]; then
+		echo "Missing file '${ARCHIVE}'." >&2
+		exit 1
+	fi
+	rm -rf "${WORK_DIR}"/"${ARCHIVE_NAME}"*
+	cd "${WORK_DIR}"
+	decompress_archive "${ARCHIVE}"
+}
