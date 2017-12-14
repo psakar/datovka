@@ -1,6 +1,7 @@
-4.10.1 /
+4.10.1 / 2017-12-14
  * Sharing PIN-related cryptographic code with mobile application.
- * Added WiX code for generating MSI installers.
+ * Fixed NSIS-generated installer to detect the application if it was installed
+   using the MSI package.
  * Fixed wrong tag sorting in build_git_archive.sh script.
  * Added support for account entry reordering using drag&drop in account
    entries.
