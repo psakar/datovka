@@ -229,7 +229,7 @@ if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	# libcurl
 	rm -rf "${WORKDIR}"/curl*
 	cd "${WORKDIR}"
-	tar -xjf "${ARCHIVE}"
+	tar -xJf "${ARCHIVE}"
 	cd "${WORKDIR}"/curl*
 
 	CONFOPTS=""
