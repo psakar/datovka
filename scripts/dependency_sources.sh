@@ -64,10 +64,10 @@ decompress_archive () {
 	*.tar.gz)
 		DECOMPRESS_CMD="tar -xzf"
 		;;
-	.tar.bz2)
+	*.tar.bz2)
 		DECOMPRESS_CMD="tar -xjf"
 		;;
-	.tar.xz)
+	*.tar.xz)
 		DECOMPRESS_CMD="tar -xJf"
 		;;
 	*)
