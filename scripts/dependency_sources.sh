@@ -26,7 +26,7 @@ adjust_sources () {
 		exit 1
 	fi
 
-	case "$1" in
+	case "${PARAM}" in
 	mingw)
 		# Latest gettext fails to compile with Mingw.
 		_GETTEXT_ARCHIVE="gettext-0.19.7.tar.xz"
@@ -49,4 +49,35 @@ adjust_sources () {
 
 	# Make the warning more distinct.
 	sleep 3
+}
+
+# Decompress compressed archive.
+decompress_archive () {
+	ARCHIVE="$1"
+	if [ "x${ARCHIVE}" = "x" ]; then
+		echo "Use parameter for '$0'" >&2
+		exit 1
+	fi
+
+	DECOMPRESS_CMD=""
+	case "${ARCHIVE}" in
+	*.tar.gz)
+		DECOMPRESS_CMD="tar -xzf"
+		;;
+	.tar.bz2)
+		DECOMPRESS_CMD="tar -xjf"
+		;;
+	.tar.xz)
+		DECOMPRESS_CMD="tar -xJf"
+		;;
+	*)
+		;;
+	esac
+
+	if [ "x${DECOMPRESS_CMD}" = "x" ]; then
+		echo "Don't know how to decompress '${ARCHIVE}'." >&2
+		exit 1
+	fi
+
+	${DECOMPRESS_CMD} "${ARCHIVE}" || exit 1
 }
