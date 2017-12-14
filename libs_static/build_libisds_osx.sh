@@ -62,15 +62,7 @@ LIBISDS_ARCHIVE_PATCHES="${_LIBISDS_ARCHIVE_PATCHES}"
 
 
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
-	ARCHIVE="${SRCDIR}/${ZLIB_ARCHIVE}"
-	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}" >&2
-		exit 1
-	fi
-	# zlib
-	rm -rf "${WORKDIR}"/zlib*
-	cd "${WORKDIR}"
-	tar -xJf "${ARCHIVE}"
+	erase_and_decompress "${SRCDIR}" "${ZLIB_ARCHIVE}" "${WORKDIR}" zlib
 	cd "${WORKDIR}"/zlib*
 
 	CONFOPTS=""
@@ -85,15 +77,7 @@ fi
 
 
 if [ ! -z "${EXPAT_ARCHIVE}" ]; then
-	ARCHIVE="${SRCDIR}/${EXPAT_ARCHIVE}"
-	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}" >&2
-		exit 1
-	fi
-	# expat
-	rm -rf "${WORKDIR}"/expat*
-	cd "${WORKDIR}"
-	tar -xjf "${ARCHIVE}"
+	erase_and_decompress "${SRCDIR}" "${EXPAT_ARCHIVE}" "${WORKDIR}" expat
 	cd "${WORKDIR}"/expat*
 
 	CONFOPTS=""
@@ -111,15 +95,7 @@ fi
 
 
 if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
-	ARCHIVE="${SRCDIR}/${LIBTOOL_ARCHIVE}"
-	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}" >&2
-		exit 1
-	fi
-	# libtool
-	rm -rf "${WORKDIR}"/libtool*
-	cd "${WORKDIR}"
-	tar -xJf "${ARCHIVE}"
+	erase_and_decompress "${SRCDIR}" "${LIBTOOL_ARCHIVE}" "${WORKDIR}" libtool
 	cd "${WORKDIR}"/libtool*
 
 	CONFOPTS=""
@@ -137,15 +113,7 @@ fi
 
 
 if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
-	ARCHIVE="${SRCDIR}/${LIBICONV_ARCHIVE}"
-	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}" >&2
-		exit 1
-	fi
-	# libiconv
-	rm -rf "${WORKDIR}"/libiconv*
-	cd "${WORKDIR}"
-	tar -xzf "${ARCHIVE}"
+	erase_and_decompress "${SRCDIR}" "${LIBICONV_ARCHIVE}" "${WORKDIR}" libiconv
 	cd "${WORKDIR}"/libiconv*
 
 	CONFOPTS=""
@@ -163,15 +131,7 @@ fi
 
 
 if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
-	ARCHIVE="${SRCDIR}/${LIBXML2_ARCHIVE}"
-	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}" >&2
-		exit 1
-	fi
-	# libxml2
-	rm -rf "${WORKDIR}"/libxml2*
-	cd "${WORKDIR}"
-	tar -xzf "${ARCHIVE}"
+	erase_and_decompress "${SRCDIR}" "${LIBXML2_ARCHIVE}" "${WORKDIR}" libxml2
 	cd "${WORKDIR}"/libxml2*
 
 	CONFOPTS=""
@@ -192,15 +152,7 @@ fi
 
 
 if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
-	ARCHIVE="${SRCDIR}/${GETTEXT_ARCHIVE}"
-	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}" >&2
-		exit 1
-	fi
-	# gettext
-	rm -rf "${WORKDIR}"/gettext*
-	cd "${WORKDIR}"
-	tar -xJf "${ARCHIVE}"
+	erase_and_decompress "${SRCDIR}" "${GETTEXT_ARCHIVE}" "${WORKDIR}" gettext
 	cd "${WORKDIR}"/gettext*
 
 	CONFOPTS=""
@@ -221,15 +173,7 @@ fi
 
 
 if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
-	ARCHIVE="${SRCDIR}/${LIBCURL_ARCHIVE}"
-	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}" >&2
-		exit 1
-	fi
-	# libcurl
-	rm -rf "${WORKDIR}"/curl*
-	cd "${WORKDIR}"
-	tar -xJf "${ARCHIVE}"
+	erase_and_decompress "${SRCDIR}" "${LIBCURL_ARCHIVE}" "${WORKDIR}" curl
 	cd "${WORKDIR}"/curl*
 
 	CONFOPTS=""
@@ -251,15 +195,7 @@ fi
 
 
 if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
-	ARCHIVE="${SRCDIR}/${OPENSSL_ARCHIVE}"
-	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}" >&2
-		exit 1
-	fi
-	# OpenSSL
-	rm -rf "${WORKDIR}"/openssl*
-	cd "${WORKDIR}"
-	tar -xzf "${ARCHIVE}"
+	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR}" openssl
 	cd "${WORKDIR}"/openssl*
 
 	# no-asm
@@ -276,16 +212,7 @@ if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
 	echo "Select libisds archive or git repository." >&2
 	exit 1
 elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
-	# libisds with OpenSSL back-end
-	ARCHIVE="${SRCDIR}/${LIBISDS_ARCHIVE}"
-	if [ ! -f "${ARCHIVE}" ]; then
-		echo "Missing ${ARCHIVE}" >&2
-		exit 1
-	fi
-	# libisds
-	rm -rf "${WORKDIR}"/libisds*
-	cd "${WORKDIR}"
-	tar -xJf "${ARCHIVE}"
+	erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR}" libisds
 	cd "${WORKDIR}"/libisds*
 
 	if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
