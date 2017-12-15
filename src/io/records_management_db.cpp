@@ -31,16 +31,6 @@
 #include "src/io/records_management_db.h"
 #include "src/log/log.h"
 
-RecordsManagementDb::RecordsManagementDb(const QString &connectionName)
-    : SQLiteDb(connectionName)
-{
-}
-
-bool RecordsManagementDb::openDb(const QString &fileName)
-{
-	return SQLiteDb::openDb(fileName, SQLiteDb::CREATE_MISSING);
-}
-
 /*!
  * @brief Delete all entries from table.
  *

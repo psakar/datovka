@@ -265,14 +265,16 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 		goto fail;
 	}
 
-	globRecordsManagementDbPtr =
-	    new (std::nothrow) RecordsManagementDb("recordsManagementDb");
+	globRecordsManagementDbPtr = new (std::nothrow)
+	    RecordsManagementDb("recordsManagementDb", false);
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		logErrorNL("%s", "Cannot allocate records management db.");
 		goto fail;
 	}
 	/* Open records management database. */
-	if (!globRecordsManagementDbPtr->openDb(prefs.recordsManagementDbPath())) {
+	flags = SQLiteDb::CREATE_MISSING;
+	if (!globRecordsManagementDbPtr->openDb(
+	        prefs.recordsManagementDbPath(), flags)) {
 		logErrorNL("Error opening records management db '%s'.",
 		    prefs.recordsManagementDbPath().toUtf8().constData());
 		goto fail;

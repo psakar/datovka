@@ -28,12 +28,12 @@
 #include <QString>
 #include <QStringList>
 
-#include "src/datovka_shared/io/sqlite/db.h"
+#include "src/datovka_shared/io/sqlite/db_single.h"
 
 /*!
  * @brief Encapsulates records management database.
  */
-class RecordsManagementDb : public SQLiteDb {
+class RecordsManagementDb : public SQLiteDbSingle {
 
 public:
 	class ServiceInfoEntry {
@@ -60,20 +60,8 @@ public:
 		QByteArray logoSvg; /*!< Raw SVG data. */
 	};
 
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] connectionName Connection name.
-	 */
-	explicit RecordsManagementDb(const QString &connectionName);
-
-	/*!
-	 * @brief Open database file.
-	 *
-	 * @param[in] fileName File name.
-	 * @return True on success, false on any error.
-	 */
-	bool openDb(const QString &fileName);
+	/* Use parent class constructor. */
+	using SQLiteDbSingle::SQLiteDbSingle;
 
 	/*!
 	 * @brief Erases all database entries.
