@@ -66,16 +66,6 @@ bool TagDb::TagEntry::operator==(const TagEntry &other) const
 	    (colour == other.colour);
 }
 
-TagDb::TagDb(const QString &connectionName)
-    : SQLiteDb(connectionName)
-{
-}
-
-bool TagDb::openDb(const QString &fileName)
-{
-	return SQLiteDb::openDb(fileName, SQLiteDb::CREATE_MISSING);
-}
-
 bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
 {
 	QSqlQuery query(m_db);

@@ -252,13 +252,14 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 		goto fail;
 	}
 
-	globTagDbPtr = new (std::nothrow) TagDb("tagDb");
+	globTagDbPtr = new (std::nothrow) TagDb("tagDb", false);
 	if (Q_NULLPTR == globTagDbPtr) {
 		logErrorNL("%s", "Cannot allocate tag db.");
 		goto fail;
 	}
 	/* Open tags database. */
-	if (!globTagDbPtr->openDb(prefs.tagDbPath())) {
+	flags = SQLiteDb::CREATE_MISSING;
+	if (!globTagDbPtr->openDb(prefs.tagDbPath(), flags)) {
 		logErrorNL("Error opening tag db '%s'.",
 		    prefs.tagDbPath().toUtf8().constData());
 		goto fail;
