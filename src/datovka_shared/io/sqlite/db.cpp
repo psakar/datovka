@@ -268,16 +268,8 @@ bool SQLiteDb::copyDb(const QString &newFileName, enum OpenFlag flag)
 		return false;
 	}
 
-	bool copy_ret, open_ret;
-
-	/* Close database. */
-	m_db.close();
-
-	/* Backup old file name. */
+	/* Back up old file name. */
 	QString oldFileName = fileName();
-	logInfoNL("Copying database file '%s' to location '%s'.",
-	    oldFileName.toUtf8().constData(),
-	    newFileName.toUtf8().constData());
 
 	/* Fail if target equals the source. */
 	/* TODO -- Perform a more reliable check than string comparison. */
@@ -287,6 +279,15 @@ bool SQLiteDb::copyDb(const QString &newFileName, enum OpenFlag flag)
 		    oldFileName.toUtf8().constData());
 		return false;
 	}
+
+	bool copy_ret, open_ret;
+
+	/* Close database. */
+	m_db.close();
+
+	logInfoNL("Copying database file '%s' to location '%s'.",
+	    oldFileName.toUtf8().constData(),
+	    newFileName.toUtf8().constData());
 
 	/* Erase target if exists. */
 	QFile::remove(newFileName);
@@ -332,16 +333,8 @@ bool SQLiteDb::reopenDb(const QString &newFileName, enum OpenFlag flag)
 		return false;
 	}
 
-	bool reopen_ret, open_ret;
-
-	/* Close database. */
-	m_db.close();
-
-	/* Backup old file name. */
+	/* Back up old file name. */
 	QString oldFileName = fileName();
-	logInfoNL("Closing database file '%s' re-opening file '%s'.",
-	    oldFileName.toUtf8().constData(),
-	    newFileName.toUtf8().constData());
 
 	/* Fail if target equals the source. */
 	/* TODO -- Perform a more reliable check than string comparison. */
@@ -351,6 +344,15 @@ bool SQLiteDb::reopenDb(const QString &newFileName, enum OpenFlag flag)
 		    oldFileName.toUtf8().constData());
 		return false;
 	}
+
+	bool reopen_ret, open_ret;
+
+	/* Close database. */
+	m_db.close();
+
+	logInfoNL("Closing database file '%s' re-opening file '%s'.",
+	    oldFileName.toUtf8().constData(),
+	    newFileName.toUtf8().constData());
 
 	/* Erase target if exists. */
 	QFile::remove(newFileName);
@@ -395,16 +397,8 @@ bool SQLiteDb::moveDb(const QString &newFileName, enum OpenFlag flag)
 		return false;
 	}
 
-	bool move_ret, open_ret;
-
-	/* Close database. */
-	m_db.close();
-
-	/* Backup old file name. */
+	/* Back up old file name. */
 	QString oldFileName = fileName();
-	logInfoNL("Moving database file '%s' to location '%s'.",
-	    oldFileName.toUtf8().constData(),
-	    newFileName.toUtf8().constData());
 
 	/* Fail if target equals the source. */
 	/* TODO -- Perform a more reliable check than string comparison. */
@@ -414,6 +408,15 @@ bool SQLiteDb::moveDb(const QString &newFileName, enum OpenFlag flag)
 		    oldFileName.toUtf8().constData());
 		return false;
 	}
+
+	bool move_ret, open_ret;
+
+	/* Close database. */
+	m_db.close();
+
+	logInfoNL("Moving database file '%s' to location '%s'.",
+	    oldFileName.toUtf8().constData(),
+	    newFileName.toUtf8().constData());
 
 	/* Erase target if exists. */
 	QFile::remove(newFileName);
