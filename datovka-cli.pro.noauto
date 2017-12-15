@@ -79,6 +79,7 @@ SOURCES += \
 	src/datovka_shared/crypto/crypto_pwd.c \
 	src/datovka_shared/crypto/crypto_wrapped.cpp \
 	src/datovka_shared/io/sqlite/db.cpp \
+	src/datovka_shared/io/sqlite/db_single.cpp \
 	src/datovka_shared/io/sqlite/table.cpp \
 	src/initialisation.cpp \
 	src/io/account_db.cpp \
@@ -132,6 +133,7 @@ HEADERS += \
 	src/datovka_shared/crypto/crypto_pwd.h \
 	src/datovka_shared/crypto/crypto_wrapped.h \
 	src/datovka_shared/io/sqlite/db.h \
+	src/datovka_shared/io/sqlite/db_single.h \
 	src/datovka_shared/io/sqlite/table.h \
 	src/initialisation.h \
 	src/io/account_db.h \
