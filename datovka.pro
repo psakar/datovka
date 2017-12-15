@@ -241,6 +241,7 @@ SOURCES += \
     src/datovka_shared/crypto/crypto_pwd.c \
     src/datovka_shared/crypto/crypto_wrapped.cpp \
     src/datovka_shared/io/sqlite/db.cpp \
+    src/datovka_shared/io/sqlite/db_single.cpp \
     src/datovka_shared/io/sqlite/table.cpp \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
@@ -370,6 +371,7 @@ HEADERS += \
     src/datovka_shared/crypto/crypto_pwd.h \
     src/datovka_shared/crypto/crypto_wrapped.h \
     src/datovka_shared/io/sqlite/db.h \
+    src/datovka_shared/io/sqlite/db_single.h \
     src/datovka_shared/io/sqlite/table.h \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \

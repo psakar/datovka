@@ -28,7 +28,7 @@
 #include <QString>
 #include <QVariant>
 
-#include "src/datovka_shared/io/sqlite/db.h"
+#include "src/datovka_shared/io/sqlite/db_single.h"
 
 /*!
  * @brief Information obtained from database. It is structured only by the
@@ -76,23 +76,11 @@ private:
 /*!
  * @brief Encapsulates account database.
  */
-class AccountDb : public SQLiteDb {
+class AccountDb : public SQLiteDbSingle {
 
 public:
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] connectionName Connection name.
-	 */
-	explicit AccountDb(const QString &connectionName);
-
-	/*!
-	 * @brief Open database file.
-	 *
-	 * @param[in] fileName      File name.
-	 * @return True on success, false on any error.
-	 */
-	bool openDb(const QString &fileName);
+	/* Use parent class constructor. */
+	using SQLiteDbSingle::SQLiteDbSingle;
 
 	/*!
 	 * @brief Return account entry.

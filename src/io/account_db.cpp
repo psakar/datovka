@@ -57,20 +57,6 @@ const QVariant DbEntry::value(const QString &key,
 	return m_parentType::value(key, defaultValue);
 }
 
-AccountDb::AccountDb(const QString &connectionName)
-    : SQLiteDb(connectionName)
-{
-}
-
-bool AccountDb::openDb(const QString &fileName)
-{
-	SQLiteDb::OpenFlags flags = SQLiteDb::CREATE_MISSING;
-	flags |= globPref.store_additional_data_on_disk ?
-	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
-
-	return SQLiteDb::openDb(fileName, flags);
-}
-
 DbEntry AccountDb::accountEntry(const QString &key) const
 {
 	QSqlQuery query(m_db);
