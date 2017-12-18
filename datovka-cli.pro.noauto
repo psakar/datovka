@@ -78,6 +78,9 @@ SOURCES += \
 	src/datovka_shared/crypto/crypto_pin.c \
 	src/datovka_shared/crypto/crypto_pwd.c \
 	src/datovka_shared/crypto/crypto_wrapped.cpp \
+	src/datovka_shared/io/sqlite/db.cpp \
+	src/datovka_shared/io/sqlite/db_single.cpp \
+	src/datovka_shared/io/sqlite/table.cpp \
 	src/initialisation.cpp \
 	src/io/account_db.cpp \
 	src/io/db_tables.cpp \
@@ -92,8 +95,6 @@ SOURCES += \
 	src/io/message_db_set_container.cpp \
 	src/io/message_db_set_delegated.cpp \
 	src/io/records_management_db.cpp \
-	src/io/sqlite/db.cpp \
-	src/io/sqlite/table.cpp \
 	src/io/tag_db.cpp \
 	src/isds/isds_conversion.cpp \
 	src/model_interaction/account_interaction.cpp \
@@ -131,6 +132,9 @@ HEADERS += \
 	src/datovka_shared/crypto/crypto_pin.h \
 	src/datovka_shared/crypto/crypto_pwd.h \
 	src/datovka_shared/crypto/crypto_wrapped.h \
+	src/datovka_shared/io/sqlite/db.h \
+	src/datovka_shared/io/sqlite/db_single.h \
+	src/datovka_shared/io/sqlite/table.h \
 	src/initialisation.h \
 	src/io/account_db.h \
 	src/io/db_tables.h \
@@ -144,8 +148,6 @@ HEADERS += \
 	src/io/message_db_set.h \
 	src/io/message_db_set_container.h \
 	src/io/records_management_db.h \
-	src/io/sqlite/db.h \
-	src/io/sqlite/table.h \
 	src/io/tag_db.h \
 	src/isds/isds_conversion.h \
 	src/model_interaction/account_interaction.h \

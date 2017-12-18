@@ -353,6 +353,10 @@ bool MessageDbSet::deleteLocation(void)
 		logInfo("Deleting database file '%s'.\n",
 		    fileName.toUtf8().constData());
 
+		if (fileName == SQLiteDb::memoryLocation) {
+			continue;
+		}
+
 		if (!QFile::remove(fileName)) {
 			logErrorNL("Failed to delete database file '%s'.",
 			    fileName.toUtf8().constData());

@@ -34,7 +34,7 @@
 #include <QVector>
 
 #include "src/common.h"
-#include "src/io/sqlite/db.h"
+#include "src/datovka_shared/io/sqlite/db.h"
 
 #define INVALID_YEAR "inv"
 #define DB2 "db2"
@@ -1038,21 +1038,6 @@ protected: /* These function are used from within a database container. */
 	bool copyDb(const QString &newFileName);
 
 	/*!
-	 * @brief Move db.
-	 *
-	 * @param[in] newFileName  New location name.
-	 * @return True on success.
-	 */
-	bool moveDb(const QString &newFileName);
-
-	/*!
-	 * @brief Open a new empty database file.
-	 *
-	 * @note The old database file is left untouched.
-	 */
-	bool reopenDb(const QString &newFileName);
-
-	/*!
 	 * @brief Query received messages within past 90 days.
 	 *
 	 * @param[in,out] query Query already assigned to a database.
@@ -1069,6 +1054,23 @@ protected: /* These function are used from within a database container. */
 	 */
 	static
 	bool msgsSntWithin90DaysQuery(QSqlQuery &query);
+
+	/*!
+	 * @brief Returns list of tables.
+	 *
+	 * @return List of pointers to tables.
+	 */
+	virtual
+	QList<class SQLiteTbl *> listOfTables(void) const Q_DECL_OVERRIDE;
+
+	/*!
+	 * @brief Fixes some database states that may have been cased by buggy
+	 *     application versions.
+	 *
+	 * @return True on success.
+	 */
+	virtual
+	bool assureConsistency(void) Q_DECL_OVERRIDE;
 
 public:
 	/*
@@ -1089,36 +1091,6 @@ private:
 	const QVector<QString> msgDeliveryBoolAttribs;
 	static
 	const QVector<QString> msgStatus;
-
-	/*!
-	 * @brief Adds _dmType column.
-	 *
-	 * @return True on success.
-	 *
-	 * @note This code may be needed to update database between different
-	 * versions.
-	 */
-	bool addDmtypeColumn(void);
-
-	/*!
-	 * @brief Returns list of tables.
-	 *
-	 * @return List of pointers to tables.
-	 */
-	static
-	QList<class SQLiteTbl *> listOfTables(void);
-
-	/*!
-	 * @brief This method ensures that the process_state table
-	 *     contains a PRIMARY KEY. This table might be created without any
-	 *     primary key reference due to a bug in a previous version.
-	 *
-	 * @return True on success.
-	 *
-	 * TODO -- This method may be removed in some future version
-	 *     of the programme.
-	 */
-	bool ensurePrimaryKeyInProcessStateTable(void);
 
 	/*!
 	 * @brief Returns verification date (in local time).

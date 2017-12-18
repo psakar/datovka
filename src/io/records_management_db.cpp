@@ -31,16 +31,6 @@
 #include "src/io/records_management_db.h"
 #include "src/log/log.h"
 
-RecordsManagementDb::RecordsManagementDb(const QString &connectionName)
-    : SQLiteDb(connectionName)
-{
-}
-
-bool RecordsManagementDb::openDb(const QString &fileName)
-{
-	return SQLiteDb::openDb(fileName, false, listOfTables());
-}
-
 /*!
  * @brief Delete all entries from table.
  *
@@ -290,13 +280,11 @@ QStringList RecordsManagementDb::storedMsgLocations(qint64 dmId) const
 	}
 }
 
-QList<class SQLiteTbl *> RecordsManagementDb::listOfTables(void)
+QList<class SQLiteTbl *> RecordsManagementDb::listOfTables(void) const
 {
-	static QList<class SQLiteTbl *> tables;
-	if (tables.isEmpty()) {
-		tables.append(&srvcInfTbl);
-		tables.append(&strdFlsMsgsTbl);
-	}
+	QList<class SQLiteTbl *> tables;
+	tables.append(&srvcInfTbl);
+	tables.append(&strdFlsMsgsTbl);
 	return tables;
 }
 

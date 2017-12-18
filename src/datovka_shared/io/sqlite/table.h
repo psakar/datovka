@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _SQLITE_TABLE_H_
-#define _SQLITE_TABLE_H_
+#pragma once
 
 #include <QMap>
 #include <QPair>
@@ -124,5 +123,3 @@ private:
 	static
 	const QString emptyTblConstraint;
 };
-
-#endif /* _SQLITE_TABLE_H_ */

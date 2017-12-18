@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include <QString>
 #include <QVariant>
 
-#include "src/io/sqlite/db.h"
+#include "src/datovka_shared/io/sqlite/db_single.h"
 
 /*!
  * @brief Information obtained from database. It is structured only by the
@@ -76,23 +76,11 @@ private:
 /*!
  * @brief Encapsulates account database.
  */
-class AccountDb : public SQLiteDb {
+class AccountDb : public SQLiteDbSingle {
 
 public:
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] connectionName Connection name.
-	 */
-	explicit AccountDb(const QString &connectionName);
-
-	/*!
-	 * @brief Open database file.
-	 *
-	 * @param[in] fileName      File name.
-	 * @return True on success, false on any error.
-	 */
-	bool openDb(const QString &fileName);
+	/* Use parent class constructor. */
+	using SQLiteDbSingle::SQLiteDbSingle;
 
 	/*!
 	 * @brief Return account entry.
@@ -217,21 +205,19 @@ public:
 	static
 	QString keyFromLogin(const QString &login);
 
-private:
+protected:
 	/*!
 	 * @brief Returns list of tables.
 	 *
 	 * @return List of pointers to tables.
 	 */
-	static
-	QList<class SQLiteTbl *> listOfTables(void);
+	virtual
+	QList<class SQLiteTbl *> listOfTables(void) const Q_DECL_OVERRIDE;
 };
-
 
 /*!
  * @brief Global account database.
  */
 extern AccountDb *globAccountDbPtr;
-
 
 #endif /* _ACCOUNT_DB_H_ */

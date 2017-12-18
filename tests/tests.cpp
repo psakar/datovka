@@ -27,6 +27,7 @@
 #include "tests/test_crypto_pin_pwd.h"
 #include "tests/test_crypto_pin_token.h"
 #include "tests/test_db_container.h"
+#include "tests/test_db_single.h"
 #include "tests/test_isds_login.h"
 #include "tests/test_message_db_set.h"
 #include "tests/test_task_downloads.h"
@@ -69,6 +70,10 @@ int main(int argc, char *argv[])
 #if defined (TEST_DB_CONTAINER)
 	status |= testThisClassAndDelete(newTestDbContainer(), argc, argv);
 #endif /* defined (TEST_DB_CONTAINER) */
+
+#if defined (TEST_DB_SINGLE)
+	status |= testThisClassAndDelete(newTestDbSingle(), argc, argv);
+#endif
 
 #if defined (TEST_MESSAGE_DB_SET)
 	status |= testThisClassAndDelete(newTestMessageDbSet(), argc, argv);

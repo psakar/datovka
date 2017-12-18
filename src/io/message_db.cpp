@@ -4246,214 +4246,19 @@ fail:
 	return QByteArray();
 }
 
-
-/* ========================================================================= */
-/*
- * Adds _dmType column.
- */
-bool MessageDb::addDmtypeColumn(void)
-/* ========================================================================= */
-{
-	if (false == m_db.isOpen()) {
-		return false;
-	}
-
-	/*
-	 * Create _dmType column if it does not exist.
-	 */
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT _dmType FROM messages LIMIT 1";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (false == query.exec()) {
-		query.clear();
-		queryStr = "ALTER TABLE messages ADD COLUMN _dmType TEXT";
-		if (!query.prepare(queryStr)) {
-			logErrorNL("Cannot prepare SQL query: %s.",
-			    query.lastError().text().toUtf8().constData());
-			goto fail;
-		}
-		if (query.exec()) {
-			return true;
-		} else {
-			logErrorNL("Cannot execute SQL query: %s.",
-			    query.lastError().text().toUtf8().constData());
-			goto fail;
-		}
-	}
-
-	return true;
-
-fail:
-	return false;
-}
-
 bool MessageDb::openDb(const QString &fileName, bool createMissing)
 {
-	bool ret;
+	SQLiteDb::OpenFlags flags = createMissing ?
+	    SQLiteDb::CREATE_MISSING : SQLiteDb::NO_OPTIONS;
+	flags |= globPref.store_messages_on_disk ?
+	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
 
-	ret = SQLiteDb::openDb(fileName, !globPref.store_messages_on_disk,
-	    createMissing ? listOfTables() : QList<class SQLiteTbl *>());
-
-	if (ret && createMissing) {
-		ret = ensurePrimaryKeyInProcessStateTable();
-	}
-
-	if (!ret) {
-		m_db.close();
-	}
-
-	return ret;
+	return SQLiteDb::openDb(fileName, flags);
 }
 
-/* ========================================================================= */
-/*
- * Copy db.
- */
 bool MessageDb::copyDb(const QString &newFileName)
-/* ========================================================================= */
 {
-	bool copy_ret, open_ret;
-
-	/* Close database. */
-	m_db.close();
-
-	/* Backup old file name. */
-	QString oldFileName = fileName();
-	logInfo("Copying database file '%s' to location '%s'.\n",
-	    oldFileName.toUtf8().constData(),
-	    newFileName.toUtf8().constData());
-
-	/* Fail if target equals the source. */
-	/* TODO -- Perform a more reliable check than string comparison. */
-	if (oldFileName == newFileName) {
-		logWarning("Copying of database file '%s' aborted. "
-		    "Target and source are equal.\n",
-		    oldFileName.toUtf8().constData());
-		return false;
-	}
-
-	/* Erase target if exists. */
-	QFile::remove(newFileName);
-
-	/* Copy database file. */
-	copy_ret = QFile::copy(oldFileName, newFileName);
-
-	/* Open database. */
-	open_ret = openDb(copy_ret ? newFileName : oldFileName);
-	if (!open_ret) {
-		Q_ASSERT(0);
-		logErrorNL("File '%s' could not be opened.",
-		    copy_ret ?
-		        newFileName.toUtf8().constData() :
-		        oldFileName.toUtf8().constData());
-		/* TODO -- qFatal() ? */
-		return false;
-	}
-
-	return copy_ret;
-}
-
-
-/* ========================================================================= */
-/*
- * Move db.
- */
-bool MessageDb::moveDb(const QString &newFileName)
-/* ========================================================================= */
-{
-	bool move_ret, open_ret;
-
-	/* Close database. */
-	m_db.close();
-
-	/* Backup old file name. */
-	QString oldFileName = fileName();
-	logInfo("Moving database file '%s' to location '%s'.\n",
-	    oldFileName.toUtf8().constData(),
-	    newFileName.toUtf8().constData());
-
-	/* Fail if target equals the source. */
-	/* TODO -- Perform a more reliable check than string comparison. */
-	if (oldFileName == newFileName) {
-		logWarning("Moving of database file '%s' aborted. "
-		    "Target and source are equal.\n",
-		    oldFileName.toUtf8().constData());
-		return false;
-	}
-
-	/* Erase target if exists. */
-	QFile::remove(newFileName);
-
-	/* Move database file. */
-	move_ret = QFile::rename(oldFileName, newFileName);
-
-	/* Open database. */
-	open_ret = openDb(move_ret ? newFileName : oldFileName);
-	if (!open_ret) {
-		Q_ASSERT(0);
-		logErrorNL("File '%s' could not be opened.",
-		    move_ret ?
-		        newFileName.toUtf8().constData() :
-		        oldFileName.toUtf8().constData());
-		/* TODO -- qFatal() ? */
-		return false;
-	}
-
-	return move_ret;
-}
-
-
-/* ========================================================================= */
-/*
- * Open a new empty database file.
- */
-bool MessageDb::reopenDb(const QString &newFileName)
-/* ========================================================================= */
-{
-	bool reopen_ret, open_ret;
-
-	/* Close database. */
-	m_db.close();
-
-	/* Backup old file name. */
-	QString oldFileName = fileName();
-	logInfo("Closing database file '%s' re-opening file '%s'.\n",
-	    oldFileName.toUtf8().constData(),
-	    newFileName.toUtf8().constData());
-
-	/* Fail if target equals the source. */
-	/* TODO -- Perform a more reliable check than string comparison. */
-	if (oldFileName == newFileName) {
-		logWarning("Re-opening of database file '%s' aborted. "
-		    "Target and source are equal.\n",
-		    oldFileName.toUtf8().constData());
-		return false;
-	}
-
-	/* Erase target if exists. */
-	QFile::remove(newFileName);
-
-	/* Open new database file. */
-	reopen_ret = openDb(newFileName);
-
-	/* Open database. */
-	if (!reopen_ret) {
-		open_ret = openDb(oldFileName);
-		if (!open_ret) {
-			logErrorNL("File '%s' could not be opened.",
-			    oldFileName.toUtf8().constData());
-			/* TODO -- qFatal() ? */
-			return false;
-		}
-	}
-
-	return reopen_ret;
+	return SQLiteDb::copyDb(newFileName, SQLiteDb::CREATE_MISSING);
 }
 
 bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
@@ -4527,6 +4332,187 @@ bool MessageDb::msgsSntWithin90DaysQuery(QSqlQuery &query)
 
 fail:
 	return false;
+}
+
+QList<class SQLiteTbl *> MessageDb::listOfTables(void) const
+{
+	QList<class SQLiteTbl *> tables;
+	tables.append(&msgsTbl);
+	tables.append(&flsTbl);
+	tables.append(&hshsTbl);
+	tables.append(&evntsTbl);
+	tables.append(&prcstTbl);
+	tables.append(&rwmsgdtTbl);
+	tables.append(&rwdlvrinfdtTbl);
+	tables.append(&smsgdtTbl);
+	tables.append(&crtdtTbl);
+	tables.append(&msgcrtdtTbl);
+	return tables;
+}
+
+/*!
+ * @brief Adds _dmType column.
+ *
+ * @return True on success.
+ *
+ * @note This code may be needed to update database between different
+ * versions.
+ *
+ * TODO -- this function is unused. Check whether it can be deleted.
+ */
+static
+bool addDmtypeColumn(QSqlDatabase &db)
+{
+	if (false == db.isOpen()) {
+		return false;
+	}
+
+	/*
+	 * Create _dmType column if it does not exist.
+	 */
+	QSqlQuery query(db);
+	QString queryStr;
+
+	queryStr = "SELECT _dmType FROM messages LIMIT 1";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (false == query.exec()) {
+		query.clear();
+		queryStr = "ALTER TABLE messages ADD COLUMN _dmType TEXT";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+		if (query.exec()) {
+			return true;
+		} else {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			goto fail;
+		}
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+/*!
+ * @brief This method ensures that the process_state table
+ *     contains a PRIMARY KEY. This table might be created without any
+ *     primary key reference due to a bug in a previous version.
+ *
+ * @return True on success.
+ *
+ * TODO -- This method may be removed in some future version
+ *     of the programme.
+ */
+static
+bool ensurePrimaryKeyInProcessStateTable(QSqlDatabase &db)
+{
+	QSqlQuery query(db);
+	QString queryStr;
+	QString createTableSql;
+
+	queryStr = "SELECT sql FROM sqlite_master "
+	    "WHERE (type = :type) and (name = :name)";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":type", QString("table"));
+	query.bindValue(":name", QString("process_state"));
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		createTableSql = query.value(0).toString();
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (createTableSql.isEmpty()) {
+		goto fail;
+	}
+
+
+	if (createTableSql.contains("PRIMARY", Qt::CaseSensitive)) {
+		return true;
+	}
+
+	/* Table does not contain primary key. */
+
+	/* Rename existing table. */
+	queryStr = "ALTER TABLE process_state RENAME TO _process_state";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	if (!prcstTbl.createEmpty(db)) {
+		goto fail;
+	}
+
+	/* Copy table content. */
+	queryStr = "INSERT OR REPLACE INTO process_state (message_id, state) "
+	    "SELECT message_id, state FROM _process_state";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	/* Delete old table. */
+	queryStr = "DROP TABLE _process_state";
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	if (!query.exec()) {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: "
+		    "%s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+
+	return true;
+
+fail:
+	return false;
+}
+
+bool MessageDb::assureConsistency(void)
+{
+	logInfoNL(
+	    "Assuring primary key in process_state table in database '%s'.",
+	    fileName().toUtf8().constData());
+
+	return ensurePrimaryKeyInProcessStateTable(m_db);
 }
 
 /* ========================================================================= */
@@ -4667,125 +4653,6 @@ bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
 fail:
 	return false;
 }
-
-QList<class SQLiteTbl *> MessageDb::listOfTables(void)
-{
-	static QList<class SQLiteTbl *> tables;
-	if (tables.isEmpty()) {
-		tables.append(&msgsTbl);
-		tables.append(&flsTbl);
-		tables.append(&hshsTbl);
-		tables.append(&evntsTbl);
-		tables.append(&prcstTbl);
-		tables.append(&rwmsgdtTbl);
-		tables.append(&rwdlvrinfdtTbl);
-		tables.append(&smsgdtTbl);
-		tables.append(&crtdtTbl);
-		tables.append(&msgcrtdtTbl);
-	}
-	return tables;
-}
-
-/* ========================================================================= */
-/*
- * This method ensures that the process_state table
- *     contains a PRIMARY KEY. This table might be created without any
- *     primary key reference due to a bug in a previous version.
- */
-bool MessageDb::ensurePrimaryKeyInProcessStateTable(void)
-/* ========================================================================= */
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-	QString createTableSql;
-
-	queryStr = "SELECT sql FROM sqlite_master "
-	    "WHERE (type = :type) and (name = :name)";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":type", QString("table"));
-	query.bindValue(":name", QString("process_state"));
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		createTableSql = query.value(0).toString();
-	} else {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: "
-		    "%s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	if (createTableSql.isEmpty()) {
-		goto fail;
-	}
-
-
-	if (createTableSql.contains("PRIMARY", Qt::CaseSensitive)) {
-		return true;
-	}
-
-	/* Table does not contain primary key. */
-
-	/* Rename existing table. */
-	queryStr = "ALTER TABLE process_state RENAME TO _process_state";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (!query.exec()) {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: "
-		    "%s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	if (!prcstTbl.createEmpty(m_db)) {
-		goto fail;
-	}
-
-	/* Copy table content. */
-	queryStr = "INSERT OR REPLACE INTO process_state (message_id, state) "
-	    "SELECT message_id, state FROM _process_state";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (!query.exec()) {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: "
-		    "%s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	/* Delete old table. */
-	queryStr = "DROP TABLE _process_state";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	if (!query.exec()) {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: "
-		    "%s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	return true;
-
-fail:
-	return false;
-}
-
 
 /* ========================================================================= */
 /*

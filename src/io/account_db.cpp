@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,17 +55,6 @@ const QVariant DbEntry::value(const QString &key,
     const QVariant &defaultValue) const
 {
 	return m_parentType::value(key, defaultValue);
-}
-
-AccountDb::AccountDb(const QString &connectionName)
-    : SQLiteDb(connectionName)
-{
-}
-
-bool AccountDb::openDb(const QString &fileName)
-{
-	return SQLiteDb::openDb(fileName,
-	    !globPref.store_additional_data_on_disk, listOfTables());
 }
 
 DbEntry AccountDb::accountEntry(const QString &key) const
@@ -158,15 +147,8 @@ fail:
 	return DbEntry();
 }
 
-
-
-/* ========================================================================= */
-/*
- * Return data box identifier.
- */
 const QString AccountDb::dbId(const QString &key,
     const QString &defaultValue) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -692,15 +674,13 @@ QString AccountDb::keyFromLogin(const QString &login)
 	return login + QStringLiteral("___True");
 }
 
-QList<class SQLiteTbl *> AccountDb::listOfTables(void)
+QList<class SQLiteTbl *> AccountDb::listOfTables(void) const
 {
-	static QList<class SQLiteTbl *> tables;
-	if (tables.isEmpty()) {
-		tables.append(&accntinfTbl);
-		tables.append(&userinfTbl);
-		tables.append(&pwdexpdtTbl);
-	}
+	QList<class SQLiteTbl *> tables;
+	tables.append(&accntinfTbl);
+	tables.append(&userinfTbl);
+	tables.append(&pwdexpdtTbl);
 	return tables;
 }
 
-AccountDb *globAccountDbPtr = 0;
+AccountDb *globAccountDbPtr = Q_NULLPTR;

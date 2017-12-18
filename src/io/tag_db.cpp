@@ -66,16 +66,6 @@ bool TagDb::TagEntry::operator==(const TagEntry &other) const
 	    (colour == other.colour);
 }
 
-TagDb::TagDb(const QString &connectionName)
-    : SQLiteDb(connectionName)
-{
-}
-
-bool TagDb::openDb(const QString &fileName)
-{
-	return SQLiteDb::openDb(fileName, false, listOfTables());
-}
-
 bool TagDb::insertTag(const QString &tagName, const QString &tagColor)
 {
 	QSqlQuery query(m_db);
@@ -177,7 +167,6 @@ bool TagDb::deleteTag(int id)
 	return true;
 }
 
-
 bool TagDb::deleteAllTags(void)
 {
 	QSqlQuery query(m_db);
@@ -196,7 +185,6 @@ bool TagDb::deleteAllTags(void)
 
 	return true;
 }
-
 
 TagDb::TagEntry TagDb::getTagData(int id) const
 {
@@ -443,18 +431,15 @@ fail:
 	return QList<qint64>();
 }
 
-
-QList<class SQLiteTbl *> TagDb::listOfTables(void)
+QList<class SQLiteTbl *> TagDb::listOfTables(void) const
 {
-	static QList<class SQLiteTbl *> tables;
-	if (tables.isEmpty()) {
-		tables.append(&tagTbl);
-		tables.append(&msgtagsTbl);
-	}
+	QList<class SQLiteTbl *> tables;
+	tables.append(&tagTbl);
+	tables.append(&msgtagsTbl);
 	return tables;
 }
 
-TagDb *globTagDbPtr = 0;
+TagDb *globTagDbPtr = Q_NULLPTR;
 
 uint qHash(const TagDb::TagEntry &entry, uint seed)
 {

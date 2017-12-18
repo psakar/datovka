@@ -143,12 +143,14 @@ void TestTaskDownloads::initTestCase(void)
 	 * Create accounts database and open it. It is required by the task.
 	 */
 	QVERIFY(globAccountDbPtr == NULL);
-	globAccountDbPtr = new (::std::nothrow) AccountDb("accountDb");
+	globAccountDbPtr = new (::std::nothrow) AccountDb("accountDb", false);
 	if (globAccountDbPtr == NULL) {
 		QSKIP("Cannot create accounts database.");
 	}
 	QVERIFY(globAccountDbPtr != NULL);
-	ret = globAccountDbPtr->openDb(m_testPath + QDir::separator() + "messages.shelf.db");
+	ret = globAccountDbPtr->openDb(
+	    m_testPath + QDir::separator() + "messages.shelf.db",
+	    SQLiteDb::CREATE_MISSING);
 	if (!ret) {
 		QSKIP("Cannot open account database.");
 	}

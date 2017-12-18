@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2017 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@
  * the two.
  */
 
-#ifndef _SQLITE_DB_H_
-#define _SQLITE_DB_H_
+#pragma once
 
+#include <QFlags>
 #include <QList>
 #include <QSqlDatabase>
 #include <QString>
@@ -37,6 +37,16 @@ class SQLiteDb {
 
 public:
 	/*!
+	 * @brief Database opening flags.
+	 */
+	enum OpenFlag {
+		NO_OPTIONS = 0x00, /*!< No option specified. */
+		CREATE_MISSING = 0x01, /*!< Missing tables and entries are going to be created. */
+		FORCE_IN_MEMORY = 0x02 /*!< Database is going to be opened in memory. */
+	};
+	Q_DECLARE_FLAGS(OpenFlags, OpenFlag)
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] connectionName Connection name.
@@ -46,6 +56,7 @@ public:
 	/*!
 	 * @brief Destructor.
 	 */
+	virtual
 	~SQLiteDb(void);
 
 	/*!
@@ -54,19 +65,6 @@ public:
 	 * @return File name holding the database.
 	 */
 	QString fileName(void) const;
-
-	/*!
-	 * @brief Open database file.
-	 *
-	 * @param[in] fileName      File name.
-	 * @param[in] forceInMemory True if the message should be stored in
-	 *                          memory only.
-	 * @param[in] tables        List of table prototypes that should be
-	 *                          created if missing.
-	 * @return True on success, false on any error.
-	 */
-	bool openDb(const QString &fileName, bool forceInMemory,
-	    const QList<class SQLiteTbl *> &tables);
 
 	/*!
 	 * @brief Begin a transaction.
@@ -83,7 +81,7 @@ public:
 	/*!
 	 * @brief Begin named transaction.
 	 *
-	 * @param[in] savePointName  Name of the save point.
+	 * @param[in] savePointName Name of the save point.
 	 * @return True on success.
 	 */
 	bool savePoint(const QString &savePointName);
@@ -91,7 +89,7 @@ public:
 	/*!
 	 * @brief End named transaction.
 	 *
-	 * @param[in] savePointName  Name of the save point.
+	 * @param[in] savePointName Name of the save point.
 	 * @return True on success.
 	 */
 	bool releaseSavePoint(const QString &savePointName);
@@ -99,7 +97,7 @@ public:
 	/*!
 	 * @brief Roll back transaction.
 	 *
-	 * @param[in] savePointName  Name of the save point.
+	 * @param[in] savePointName Name of the save point.
 	 * @return True on success.
 	 *
 	 * @note If no save-point name is supplied then a complete roll-back is
@@ -141,9 +139,71 @@ protected:
 	bool vacuum(void);
 
 	/*!
+	 * @brief Returns list of tables encompassed in the database.
+	 *
+	 * @return List of pointers to tables.
+	 *
+	 * @note Override this method in derived classes. This method is
+	 *     used to create missing database tables.
+	 */
+	virtual
+	QList<class SQLiteTbl *> listOfTables(void) const = 0;
+
+	/*!
+	 * @brief This function is used to make database content consistent
+	 *     (e.g. adding missing columns or entries).
+	 *
+	 * @return True on success. If this method returns false, then the
+	 *     open procedure must fail. Override this method to implement
+	 *     custom checks. This method just returns true.
+	 */
+	virtual
+	bool assureConsistency(void);
+
+	/*!
+	 * @brief Copy db.
+	 *
+	 * @param[in] newFileName New file path.
+	 * @param[in] flag Can be NO_OPTIONS or CREATE_MISSING.
+	 * @return True on success.
+	 *
+	 * @note The copy is continued to be used. Original is closed.
+	 */
+	bool copyDb(const QString &newFileName, enum OpenFlag flag);
+
+	/*!
+	 * @brief Open a new empty database file.
+	 *
+	 * @param[in] newFileName New file path.
+	 * @param[in] flag Can be NO_OPTIONS or CREATE_MISSING.
+	 * @return True on success.
+	 *
+	 * @note The old database file is left untouched.
+	 */
+	bool reopenDb(const QString &newFileName, enum OpenFlag flag);
+
+	/*!
+	 * @brief Move db.
+	 *
+	 * @param[in] newFileName New file path.
+	 * @param[in] flag Can be NO_OPTIONS or CREATE_MISSING.
+	 * @return True on success.
+	 */
+	bool moveDb(const QString &newFileName, enum OpenFlag flag);
+
+	/*!
+	 * @brief Open database file.
+	 *
+	 * @param[in] fileName File name.
+	 * @param[in] flags Database opening flags.
+	 * @return True on success, false on any error.
+	 */
+	bool openDb(const QString &fileName, OpenFlags flags);
+
+	/*!
 	 * @brief Attaches a database file to opened database.
 	 *
-	 * @param[in,out] query          Query to work with.
+	 * @param[in,out] query Query to work with.
 	 * @param[in]     attachFileName File containing database to be
 	 *                               attached.
 	 * @return False on error.
@@ -173,4 +233,4 @@ private:
 	bool createEmptyMissingTables(const QList<class SQLiteTbl *> &tables);
 };
 
-#endif /* _SQLITE_DB_H_ */
+Q_DECLARE_OPERATORS_FOR_FLAGS(SQLiteDb::OpenFlags)

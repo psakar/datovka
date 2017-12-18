@@ -214,6 +214,8 @@ void loadLocalisation(const GlobPreferences &prefs)
 
 int allocateGlobalObjects(const GlobPreferences &prefs)
 {
+	SQLiteDb::OpenFlags flags = SQLiteDb::NO_OPTIONS;
+
 	/*
 	 * These objects cannot be globally accessible static objects.
 	 * The unpredictable order of constructing and destructing these
@@ -228,13 +230,16 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 		goto fail;
 	}
 
-	globAccountDbPtr = new (std::nothrow) AccountDb("accountDb");
+	globAccountDbPtr = new (std::nothrow) AccountDb("accountDb", false);
 	if (Q_NULLPTR == globAccountDbPtr) {
 		logErrorNL("%s", "Cannot allocate account db.");
 		goto fail;
 	}
 	/* Open accounts database. */
-	if (!globAccountDbPtr->openDb(prefs.accountDbPath())) {
+	flags = SQLiteDb::CREATE_MISSING;
+	flags |= globPref.store_additional_data_on_disk ?
+	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
+	if (!globAccountDbPtr->openDb(prefs.accountDbPath(), flags)) {
 		logErrorNL("Error opening account db '%s'.",
 		    prefs.accountDbPath().toUtf8().constData());
 		goto fail;
@@ -247,26 +252,29 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 		goto fail;
 	}
 
-	globTagDbPtr = new (std::nothrow) TagDb("tagDb");
+	globTagDbPtr = new (std::nothrow) TagDb("tagDb", false);
 	if (Q_NULLPTR == globTagDbPtr) {
 		logErrorNL("%s", "Cannot allocate tag db.");
 		goto fail;
 	}
 	/* Open tags database. */
-	if (!globTagDbPtr->openDb(prefs.tagDbPath())) {
+	flags = SQLiteDb::CREATE_MISSING;
+	if (!globTagDbPtr->openDb(prefs.tagDbPath(), flags)) {
 		logErrorNL("Error opening tag db '%s'.",
 		    prefs.tagDbPath().toUtf8().constData());
 		goto fail;
 	}
 
-	globRecordsManagementDbPtr =
-	    new (std::nothrow) RecordsManagementDb("recordsManagementDb");
+	globRecordsManagementDbPtr = new (std::nothrow)
+	    RecordsManagementDb("recordsManagementDb", false);
 	if (Q_NULLPTR == globRecordsManagementDbPtr) {
 		logErrorNL("%s", "Cannot allocate records management db.");
 		goto fail;
 	}
 	/* Open records management database. */
-	if (!globRecordsManagementDbPtr->openDb(prefs.recordsManagementDbPath())) {
+	flags = SQLiteDb::CREATE_MISSING;
+	if (!globRecordsManagementDbPtr->openDb(
+	        prefs.recordsManagementDbPath(), flags)) {
 		logErrorNL("Error opening records management db '%s'.",
 		    prefs.recordsManagementDbPath().toUtf8().constData());
 		goto fail;
