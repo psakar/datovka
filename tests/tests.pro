@@ -11,6 +11,11 @@ TARGET = tests
 
 include($${top_srcdir}pri/version.pri)
 
+isEmpty(OBJECTS_DIR) {
+	OBJECTS_DIR = objects
+}
+CONFIG += object_parallel_to_source
+
 DEFINES += \
 	DEBUG=1 \
 	VERSION=\\\"$${VERSION}\\\"

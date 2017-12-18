@@ -10,6 +10,11 @@ include(pri/check_qt_version.pri)
 
 sufficientQtVersion(5, 2, 3, 2)
 
+isEmpty(OBJECTS_DIR) {
+	OBJECTS_DIR = objects
+}
+CONFIG += object_parallel_to_source
+
 DEFINES += \
 	DEBUG=1 \
 	VERSION=\\\"$${VERSION}\\\"
@@ -81,6 +86,7 @@ SOURCES += \
 	src/datovka_shared/io/sqlite/db.cpp \
 	src/datovka_shared/io/sqlite/db_single.cpp \
 	src/datovka_shared/io/sqlite/table.cpp \
+	src/datovka_shared/worker/pool.cpp \
 	src/initialisation.cpp \
 	src/io/account_db.cpp \
 	src/io/db_tables.cpp \
@@ -135,6 +141,7 @@ HEADERS += \
 	src/datovka_shared/io/sqlite/db.h \
 	src/datovka_shared/io/sqlite/db_single.h \
 	src/datovka_shared/io/sqlite/table.h \
+	src/datovka_shared/worker/pool.h \
 	src/initialisation.h \
 	src/io/account_db.h \
 	src/io/db_tables.h \
