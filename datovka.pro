@@ -31,6 +31,11 @@ win32 {
 # Version 5.4.1 should be fine.
 sufficientQtVersion(5, 3, 4, 1)
 
+isEmpty(OBJECTS_DIR) {
+	OBJECTS_DIR = objects
+}
+CONFIG += object_parallel_to_source
+
 DEFINES += \
 	DEBUG=1 \
 	VERSION=\\\"$${VERSION}\\\"
