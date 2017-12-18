@@ -22,6 +22,7 @@ SOURCES += \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db.cpp \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db_single.cpp \
 	$${top_srcdir}src/datovka_shared/io/sqlite/table.cpp \
+	$${top_srcdir}src/datovka_shared/worker/pool.cpp \
 	$${top_srcdir}src/delegates/tag_item.cpp \
 	$${top_srcdir}src/dimensions/dimensions.cpp \
 	$${top_srcdir}src/graphics/graphics.cpp \
@@ -61,6 +62,7 @@ HEADERS += \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db.h \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db_single.h \
 	$${top_srcdir}src/datovka_shared/io/sqlite/table.h \
+	$${top_srcdir}src/datovka_shared/worker/pool.h \
 	$${top_srcdir}src/delegates/tag_item.h \
 	$${top_srcdir}src/dimensions/dimensions.h \
 	$${top_srcdir}src/graphics/graphics.h \
