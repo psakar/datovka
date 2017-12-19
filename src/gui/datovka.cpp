@@ -47,7 +47,7 @@
 #include "src/about.h"
 #include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
-#include "src/datovka_shared/utility/string.h"
+#include "src/datovka_shared/utility/strings.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
 #include "src/gui/dlg_about.h"

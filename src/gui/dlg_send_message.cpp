@@ -29,7 +29,7 @@
 #include <QDir>
 #include <QMimeDatabase>
 
-#include "src/datovka_shared/utility/string.h"
+#include "src/datovka_shared/utility/strings.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"

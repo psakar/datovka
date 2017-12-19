@@ -21,19 +21,24 @@
  * the two.
  */
 
-#pragma once
+#include <QtGlobal> /* qrand() */
 
-#include <QString>
+#include "src/datovka_shared/utility/strings.h"
 
-namespace Utility {
+QString Utility::generateRandomString(int length)
+{
+	static const QString possibleCharacters(
+	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	    "abcdefghijklmnopqrstuvwxyz"
+	    "0123456789"
+	    "!#$%&()*+,-.:=?@[]_{|}~");
 
-	/*!
-	 * @brief Returns Randomly generated string composed of predefined
-	 *     characters.
-	 *
-	 * @param[in] length String length.
-	 * @return Randomly generated string.
-	 */
-	QString generateRandomString(int length);
+	QString randomString;
 
+	for (int i = 0; i < length; ++i) {
+		int index = qrand() % possibleCharacters.length();
+		QChar nextChar = possibleCharacters.at(index);
+		randomString.append(nextChar);
+	}
+	return randomString;
 }

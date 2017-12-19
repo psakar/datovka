@@ -23,7 +23,7 @@
 
 #include <QMessageBox>
 
-#include "src/datovka_shared/utility/string.h"
+#include "src/datovka_shared/utility/strings.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/io/isds_sessions.h"
 #include "src/settings/accounts.h"

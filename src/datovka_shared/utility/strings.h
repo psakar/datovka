@@ -21,24 +21,25 @@
  * the two.
  */
 
-#include <QtGlobal> /* qrand() */
+#pragma once
 
-#include "src/datovka_shared/utility/string.h"
+/*
+ * This header file cannot be named 'string.h'. Including <string.h> then
+ * causes problems when compiling with XCode for iOS. This is clearly a compiler
+ * issue.
+ */
 
-QString Utility::generateRandomString(int length)
-{
-	static const QString possibleCharacters(
-	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	    "abcdefghijklmnopqrstuvwxyz"
-	    "0123456789"
-	    "!#$%&()*+,-.:=?@[]_{|}~");
+#include <QString>
 
-	QString randomString;
+namespace Utility {
 
-	for (int i = 0; i < length; ++i) {
-		int index = qrand() % possibleCharacters.length();
-		QChar nextChar = possibleCharacters.at(index);
-		randomString.append(nextChar);
-	}
-	return randomString;
+	/*!
+	 * @brief Returns Randomly generated string composed of predefined
+	 *     characters.
+	 *
+	 * @param[in] length String length.
+	 * @return Randomly generated string.
+	 */
+	QString generateRandomString(int length);
+
 }
