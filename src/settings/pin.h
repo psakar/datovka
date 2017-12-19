@@ -24,71 +24,10 @@
 #ifndef _PIN_H_
 #define _PIN_H_
 
-#include <QByteArray>
-#include <QSettings>
-#include <QString>
+#include "src/datovka_shared/settings/pin.h"
 
 /*!
- * @brief Encapsulates code needed for storing PIN code.
- */
-class PinSettings {
-public:
-	/*!
-	 * @brief Constructor.
-	 */
-	PinSettings(void);
-
-	/*!
-	 * @brief Load data from supplied settings.
-	 *
-	 * @param[in] settings Settings structure.
-	 */
-	void loadFromSettings(const QSettings &settings);
-
-	/*!
-	 * @brief Store data to settings structure.
-	 *
-	 * @param[out] settings Settings structure.
-	 */
-	void saveToSettings(QSettings &settings) const;
-
-	/*!
-	 * @brief Check whether PIN value is configured.
-	 *
-	 * @return True if algorithm, salt and encoded PIN are set.
-	 */
-	bool pinConfigured(void) const;
-
-	/*!
-	 * @brief Update PIN settings.
-	 *
-	 * @param[in,out] sett Settings to be modified.
-	 * @param[in]     pinValue New PIN value.
-	 */
-	static
-	void updatePinSettings(PinSettings &sett, const QString &pinValue);
-
-	/*!
-	 * @brief Verifies the PIN.
-	 *
-	 * @note PIN value is stored within setting structure if ented PIN is
-	 *     valid.
-	 *
-	 * @param[in,out] sett PIN settings to be verified.
-	 * @param[in]     pinValue PIN to be verified.
-	 * @return True if PIN value was successfully verified.
-	 */
-	static
-	bool verifyPin(PinSettings &sett, const QString &pinValue);
-
-	QString _pinVal; /*! PIN value is not read from the configuration file, nor it is stored to the configuration file. */
-	QString pinAlg; /*!< PIN algorithm identifier. */
-	QByteArray pinSalt; /*!< Salt value used to generate PIN hash. */
-	QByteArray pinCode; /*!< Hashed PIN code. */
-};
-
-/*!
- * @brief Global instance of the structure.
+ * @brief Global instance of the PIN settings structure.
  */
 extern PinSettings globPinSet;
 
