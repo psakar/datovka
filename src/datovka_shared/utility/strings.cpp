@@ -21,14 +21,24 @@
  * the two.
  */
 
-#ifndef _PIN_H_
-#define _PIN_H_
+#include <QtGlobal> /* qrand() */
 
-#include "src/datovka_shared/settings/pin.h"
+#include "src/datovka_shared/utility/strings.h"
 
-/*!
- * @brief Global instance of the PIN settings structure.
- */
-extern PinSettings globPinSet;
+QString Utility::generateRandomString(int length)
+{
+	static const QString possibleCharacters(
+	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	    "abcdefghijklmnopqrstuvwxyz"
+	    "0123456789"
+	    "!#$%&()*+,-.:=?@[]_{|}~");
 
-#endif /* _PIN_H_ */
+	QString randomString;
+
+	for (int i = 0; i < length; ++i) {
+		int index = qrand() % possibleCharacters.length();
+		QChar nextChar = possibleCharacters.at(index);
+		randomString.append(nextChar);
+	}
+	return randomString;
+}

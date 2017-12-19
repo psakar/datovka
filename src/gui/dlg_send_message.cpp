@@ -29,8 +29,8 @@
 #include <QDir>
 #include <QMimeDatabase>
 
+#include "src/datovka_shared/utility/strings.h"
 #include "src/gui/datovka.h"
-#include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/gui/dlg_msg_box_informative.h"
@@ -1361,7 +1361,7 @@ void DlgSendMessage::sendMessageISDS(
 	foreach (const BoxContactsModel::PartialEntry &e, recipEntries) {
 		taskIdentifiers.append(m_userName + "_" + e.id + "_" +
 		    currentTime.toString() + "_" +
-		    DlgChangePwd::generateRandomString(6));
+		    Utility::generateRandomString(6));
 	}
 	m_transactIds = taskIdentifiers.toSet();
 	m_sentMsgResultList.clear();

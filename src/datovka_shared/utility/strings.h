@@ -21,14 +21,25 @@
  * the two.
  */
 
-#ifndef _PIN_H_
-#define _PIN_H_
+#pragma once
 
-#include "src/datovka_shared/settings/pin.h"
-
-/*!
- * @brief Global instance of the PIN settings structure.
+/*
+ * This header file cannot be named 'string.h'. Including <string.h> then
+ * causes problems when compiling with XCode for iOS. This is clearly a compiler
+ * issue.
  */
-extern PinSettings globPinSet;
 
-#endif /* _PIN_H_ */
+#include <QString>
+
+namespace Utility {
+
+	/*!
+	 * @brief Returns Randomly generated string composed of predefined
+	 *     characters.
+	 *
+	 * @param[in] length String length.
+	 * @return Randomly generated string.
+	 */
+	QString generateRandomString(int length);
+
+}
