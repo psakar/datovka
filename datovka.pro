@@ -249,6 +249,7 @@ SOURCES += \
     src/datovka_shared/io/sqlite/db_single.cpp \
     src/datovka_shared/io/sqlite/table.cpp \
     src/datovka_shared/settings/pin.cpp \
+    src/datovka_shared/utility/string.cpp \
     src/datovka_shared/worker/pool.cpp \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
@@ -381,6 +382,7 @@ HEADERS += \
     src/datovka_shared/io/sqlite/db_single.h \
     src/datovka_shared/io/sqlite/table.h \
     src/datovka_shared/settings/pin.h \
+    src/datovka_shared/utility/string.h \
     src/datovka_shared/worker/pool.h \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \

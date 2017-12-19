@@ -47,6 +47,7 @@
 #include "src/about.h"
 #include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/utility/string.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
 #include "src/gui/dlg_about.h"
@@ -5888,7 +5889,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 
 	QString emailMessage;
 	const QString boundary("-----" +
-	    DlgChangePwd::generateRandomString(16) + "_" +
+	    Utility::generateRandomString(16) + "_" +
 	    QDateTime::currentDateTimeUtc().toString(
 	        "dd.MM.yyyy-HH:mm:ss.zzz"));
 
@@ -5983,7 +5984,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 
 	QString emailMessage;
 	const QString boundary("-----" +
-	    DlgChangePwd::generateRandomString(16) + "_" +
+	    Utility::generateRandomString(16) + "_" +
 	    QDateTime::currentDateTimeUtc().toString(
 	        "dd.MM.yyyy-HH:mm:ss.zzz"));
 
@@ -6084,7 +6085,7 @@ void MainWindow::sendAttachmentsEmail(void)
 
 	QString emailMessage;
 	const QString boundary("-----" +
-	    DlgChangePwd::generateRandomString(16) + "_" +
+	    Utility::generateRandomString(16) + "_" +
 	    QDateTime::currentDateTimeUtc().toString(
 	        "dd.MM.yyyy-HH:mm:ss.zzz"));
 

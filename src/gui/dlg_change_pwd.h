@@ -63,16 +63,6 @@ public:
 	bool changePassword(const QString &boxId, const QString &userName,
 	    QWidget *parent = Q_NULLPTR);
 
-	/*!
-	 * @brief Returns Randomly generated string composed of predefined
-	 *     characters.
-	 *
-	 * @param[in] length String length.
-	 * @return Randomly generated string.
-	 */
-	static
-	QString generateRandomString(int length);
-
 private slots:
 	/*!
 	 * @brief Show/hide text representation of password in the text lines.

@@ -23,6 +23,7 @@
 
 #include <QMessageBox>
 
+#include "src/datovka_shared/utility/string.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/io/isds_sessions.h"
 #include "src/settings/accounts.h"
@@ -187,24 +188,6 @@ bool DlgChangePwd::changePassword(const QString &boxId, const QString &userName,
 	}
 }
 
-QString DlgChangePwd::generateRandomString(int length)
-{
-	static const QString possibleCharacters(
-	    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	    "abcdefghijklmnopqrstuvwxyz"
-	    "0123456789"
-	    "!#$%&()*+,-.:=?@[]_{|}~");
-
-	QString randomString;
-
-	for(int i = 0; i < length; ++i) {
-		int index = qrand() % possibleCharacters.length();
-		QChar nextChar = possibleCharacters.at(index);
-		randomString.append(nextChar);
-	}
-	return randomString;
-}
-
 void DlgChangePwd::togglePwdVisibility(void)
 {
 	enum QLineEdit::EchoMode echoMode =
@@ -223,7 +206,7 @@ void DlgChangePwd::togglePwdVisibility(void)
 void DlgChangePwd::generatePassword(void)
 {
 	/* Set one digit as last character. */
-	const QString pwd(generateRandomString(PWD_MIN_LENGTH) + "0");
+	const QString pwd(Utility::generateRandomString(PWD_MIN_LENGTH) + "0");
 	m_ui->newPwdLine->setText(pwd);
 	m_ui->newPwdLine2->setText(pwd);
 }
