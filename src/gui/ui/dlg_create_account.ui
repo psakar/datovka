@@ -58,14 +58,15 @@
      <item row="0" column="0">
       <widget class="QLabel" name="acntNameLabel">
        <property name="text">
-        <string>Custom account name:</string>
+        <string>Account title:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
       <widget class="QLineEdit" name="acntNameLine">
        <property name="toolTip">
-        <string>You can give a descriptive name for your account.</string>
+        <string>Enter a descriptive name for your account.
+This name serves for easier account identification in the application.</string>
        </property>
       </widget>
      </item>
@@ -86,7 +87,7 @@
      <item row="2" column="1">
       <widget class="QLineEdit" name="usernameLine">
        <property name="toolTip">
-        <string>Enter the username for this account.</string>
+        <string>Enter the login name for this account.</string>
        </property>
       </widget>
      </item>
