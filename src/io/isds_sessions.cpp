@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -133,10 +133,17 @@ IsdsSessions::IsdsSessions(void)
 #else /* defined(Q_OS_WIN) */
 	/*
 	 * There is a issue related to logging when using libisds compiled
-	 * with MinGW. See https://gitlab.labs.nic.cz/labs/qdatovka/issues/233
+	 * with MinGW. See https://gitlab.labs.nic.cz/datovka/datovka/issues/233
 	 * for more details.
 	 */
-	isds_set_logging(ILF_ALL, ILL_INFO);
+	if (globLog.logVerbosity() < 3) {
+		/* Don't write transferred data into log. */
+		isds_set_logging(ILF_ALL, ILL_INFO);
+	} else {
+		logInfoNL("%s",
+		    "Allowing unrestricted logging from inside libisds.");
+		isds_set_logging(ILF_ALL, ILL_ALL);
+	}
 #endif /* !defined(Q_OS_WIN) */
 }
 
