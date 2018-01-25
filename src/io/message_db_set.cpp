@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -425,7 +425,7 @@ MessageDb *MessageDbSet::accessMessageDb(const QDateTime &deliveryTime,
 	QString secondary = secondaryKey(deliveryTime);
 
 	if (secondary.isNull()) {
-		return 0;
+		return Q_NULLPTR;
 	}
 
 	return _accessMessageDb(secondary, writeNew);
@@ -500,7 +500,7 @@ QString MessageDbSet::yearFromDateTime(const QDateTime &time)
 	if (time.isValid()) {
 		return time.toString("yyyy");
 	} else {
-		return YEARLY_SEC_KEY_INVALID;
+		return QLatin1String(YEARLY_SEC_KEY_INVALID);
 	}
 }
 
@@ -706,7 +706,7 @@ QString fileNameSecondaryKeyYearly(const QString &fileName)
 	    "_" YEARLY_SEC_KEY_INVALID "___" "[01]" DB_SUFFIX "$");
 
 	if (reInv.indexIn(fileName) > -1) {
-		return YEARLY_SEC_KEY_INVALID;
+		return QLatin1String(YEARLY_SEC_KEY_INVALID);
 	}
 
 	static const QRegExp reValid(QString("^") + PRIMARY_KEY_RE
