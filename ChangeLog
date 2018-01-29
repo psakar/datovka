@@ -1,4 +1,6 @@
 4.10.2 /
+ * Fixed issue causing the application to crash on macOS when switching
+   between accounts and having some text in the message filter field.
  * Fixed issue causing the application to crash on macOS when updating
    information about messages without a valid delivery time.
  * Re-enabled logging of transferred message on Windows data when setting
