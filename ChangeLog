@@ -1,3 +1,11 @@
+4.10.2 /
+ * Fixed issue causing the application to crash on macOS when updating
+   information about messages without a valid delivery time.
+ * Re-enabled logging of transferred message on Windows data when setting
+   debug verbosity to 3.
+ * Code shared with mobile application has been placed into separate
+   directory.
+
 4.10.1 / 2017-12-14
  * Sharing PIN-related cryptographic code with mobile application.
  * Fixed NSIS-generated installer to detect the application if it was installed
