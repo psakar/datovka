@@ -415,10 +415,24 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 			return DL_ERR;
 		}
 	}
-	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
-	Q_ASSERT(deliveryTime.isValid());
+
+	QDateTime deliveryTime;
+	if (NULL != envel->dmDeliveryTime) {
+		deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	}
+	/* Delivery time does not have to be valid. */
+	if (Q_UNLIKELY(!deliveryTime.isValid())) {
+		logWarningNL(
+		    "Updating state of message '%" PRId64 "' with invalid delivery time.",
+		    dmID);
+	}
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
-	Q_ASSERT(0 != messageDb);
+	if (Q_UNLIKELY(Q_NULLPTR == messageDb)) {
+		logErrorNL("Cannot access message database for message '%" PRId64 "'.",
+		    dmID);
+		Q_ASSERT(0);
+		return DL_ERR;
+	}
 
 	QString dmDeliveryTime;
 	if (NULL != envel->dmDeliveryTime) {
