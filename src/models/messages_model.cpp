@@ -31,6 +31,7 @@
 #include "src/io/message_db.h"
 #include "src/io/records_management_db.h"
 #include "src/io/tag_db.h" /* Direct access to tag database, */
+#include "src/log/log.h"
 #include "src/models/messages_model.h"
 
 /*
@@ -811,7 +812,12 @@ QVariant DbMsgsTblModel::recMgmtData(const QModelIndex &index, int role) const
 	{
 		QVariant rawData(_data(index, Qt::DisplayRole));
 		if (Q_UNLIKELY(!rawData.canConvert<QStringList>())) {
-			Q_ASSERT(0);
+			/*
+			 * Cannot call Q_ASSERT(0) here as this method
+			 * may get called on invalid data occasionally.
+			 */
+			logWarningNL("%s",
+			    "Did not get records management data.");
 			return QVariant();
 		}
 		locations = rawData.toStringList();
@@ -845,7 +851,11 @@ QVariant DbMsgsTblModel::tagsData(const QModelIndex &index, int role) const
 		{
 			QVariant val(_data(index, Qt::DisplayRole));
 			if (Q_UNLIKELY(!val.canConvert<TagItemList>())) {
-				Q_ASSERT(0);
+				/*
+				 * Cannot call Q_ASSERT(0) here as this method
+				 * may get called on invalid data occasionally.
+				 */
+				logWarningNL("%s", "Did not get tag data.");
 				return QVariant();
 			}
 
