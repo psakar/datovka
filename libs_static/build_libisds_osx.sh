@@ -36,20 +36,76 @@ cd "${LIB_ROOT}"
 
 SRCDIR="${LIB_ROOT}/srcs"
 PATCHDIR="${SRC_ROOT}/scripts/patches"
+WORKDIR_PREFIX="${LIB_ROOT}/work_macos_sdk${SDK_VER}"
 WORKDIR_i386_STATIC="${LIB_ROOT}/work_macos_sdk${SDK_VER}_i386_static"
+BUILTDIR_PREFIX="${LIB_ROOT}/built_macos_sdk${SDK_VER}"
 BUILTDIR_i386_STATIC="${LIB_ROOT}/built_macos_sdk${SDK_VER}_i386_static"
 
 if [ ! -d "${SRCDIR}" ]; then
 	mkdir "${SRCDIR}"
 fi
 
-if [ ! -d "${WORKDIR_i386_STATIC}" ]; then
-	mkdir "${WORKDIR_i386_STATIC}"
-fi
+# Specifies which targets to build.
+TARGETS=""
+TARGETS="${TARGETS} i386_static"
+#TARGETS="${TARGETS} i386_dynamic"
+#TARGETS="${TARGETS} x86_64_static"
+#TARGETS="${TARGETS} x86_64_dynamic"
 
-if [ ! -d "${BUILTDIR_i386_STATIC}" ]; then
-	mkdir "${BUILTDIR_i386_STATIC}"
-fi
+# Return 0 if targets are OK.
+check_params () {
+	ARCH=$1
+	TYPE=$2
+	if [ "x${ARCH}" != "xi386" -a "x${ARCH}" != "xx86_64" ]; then
+		echo "Unknown architecture '${ARCH}'." >&2
+		return 1
+	fi
+	if [ "x${TYPE}" != "xstatic" -a "x${TYPE}" != "xdynamic" ]; then
+		echo "Unknown type '${TYPE}'." >&2
+		return 1
+	fi
+	return 0
+}
+
+# Return 0 if target is scheduled for build.
+target_scheduled () {
+	ARCH=$1
+	TYPE=$2
+	check_params "${ARCH}" "${TYPE}" || return 1
+	RES=$(echo "${TARGETS}" | grep "${ARCH}" | grep "${TYPE}")
+	if [ "x${RES}" != "x" ]; then
+		return 0
+	else
+		return 1
+	fi
+}
+
+workdir_name () {
+	ARCH=$1
+	TYPE=$2
+	echo "${WORKDIR_PREFIX}_${ARCH}_${TYPE}"
+}
+
+builtdir_name () {
+	ARCH=$1
+	TYPE=$2
+	echo "${BUILTDIR_PREFIX}_${ARCH}_${TYPE}"
+}
+
+ensure_dir_presence () {
+	mkdir -p "$1"
+}
+
+# Create missing directories.
+target_scheduled i386 static && ensure_dir_presence $(workdir_name i386 static)
+target_scheduled i386 static && ensure_dir_presence $(builtdir_name i386 static)
+target_scheduled i386 dynamic && ensure_dir_presence $(workdir_name i386 dynamic)
+target_scheduled i386 dynamic && ensure_dir_presence $(builtdir_name i386 dynamic)
+target_scheduled x86_64 static && ensure_dir_presence $(workdir_name x86_64 static)
+target_scheduled x86_64 static && ensure_dir_presence $(builtdir_name x86_64 static)
+target_scheduled x86_64 dynamic && ensure_dir_presence $(workdir_name x86_64 dynamic)
+target_scheduled x86_64 dynamic && ensure_dir_presence $(builtdir_name x86_64 dynamic)
+
 
 ZLIB_ARCHIVE="${_ZLIB_ARCHIVE}"
 EXPAT_ARCHIVE="${_EXPAT_ARCHIVE}"
@@ -69,115 +125,228 @@ LIBISDS_ARCHIVE_PATCHES="${_LIBISDS_ARCHIVE_PATCHES}"
 #LIBISDS_GIT="https://gitlab.labs.nic.cz/kslany/libisds.git"
 #LIBISDS_BRANCH="feature-openssl" # Use master.
 
+# lipo -info
+# otool -L
+
+build_zlib () {
+	ARCH=$1
+	TYPE=$2
+	check_params ${ARCH} ${TYPE} || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${ZLIB_ARCHIVE}" "${WORKDIR}" zlib
+	cd "${WORKDIR}"/zlib*
+
+	CONFOPTS=""
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} --static"
+	fi
+
+	CFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" LDFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" ./configure ${CONFOPTS} #--archs="-arch ${ARCH}"
+	make ${MAKEOPTS} && make install || exit 1
+
+	unset CONFOPTS
+}
 
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${ZLIB_ARCHIVE}" "${WORKDIR_i386_STATIC}" zlib
-	cd "${WORKDIR_i386_STATIC}"/zlib*
+	echo "Building zlib."
+	target_scheduled i386 static && build_zlib i386 static
+	target_scheduled i386 dynamic && build_zlib i386 dynamic
+	target_scheduled x86_64 static && build_zlib x86_64 static
+	target_scheduled x86_64 dynamic && build_zlib x86_64 dynamic
+fi
+
+
+build_expat () {
+	ARCH=$1
+	TYPE=$2
+	check_params ${ARCH} ${TYPE} || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${EXPAT_ARCHIVE}" "${WORKDIR}" expat
+	cd "${WORKDIR}"/expat*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --static"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-shared"
+	fi
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-static"
+	fi
 
-	CFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" LDFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" ./configure ${CONFOPTS} --archs="-arch i386"
+	./configure ${CONFOPTS} \
+	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    LDFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
-fi
-
+}
 
 if [ ! -z "${EXPAT_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${EXPAT_ARCHIVE}" "${WORKDIR_i386_STATIC}" expat
-	cd "${WORKDIR_i386_STATIC}"/expat*
+	echo "Building expat."
+	target_scheduled i386 static && build_expat i386 static
+	target_scheduled i386 dynamic && build_expat i386 dynamic
+	target_scheduled x86_64 static && build_expat x86_64 static
+	target_scheduled x86_64 dynamic && build_expat x86_64 dynamic
+fi
+
+
+build_libtool () {
+	ARCH=$1
+	TYPE=$2
+	check_params ${ARCH} ${TYPE} || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${LIBTOOL_ARCHIVE}" "${WORKDIR}" libtool
+	cd "${WORKDIR}"/libtool*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-shared"
+	fi
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-static"
+	fi
 
 	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    LDFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
-fi
-
+}
 
 if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBTOOL_ARCHIVE}" "${WORKDIR_i386_STATIC}" libtool
-	cd "${WORKDIR_i386_STATIC}"/libtool*
+	echo "Building libtool."
+	target_scheduled i386 static && build_libtool i386 static
+	target_scheduled i386 dynamic && build_libtool i386 dynamic
+	target_scheduled x86_64 static && build_libtool x86_64 static
+	target_scheduled x86_64 dynamic && build_libtool x86_64 dynamic
+fi
+
+
+build_libiconv () {
+	ARCH=$1
+	TYPE=$2
+	check_params ${ARCH} ${TYPE} || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${LIBICONV_ARCHIVE}" "${WORKDIR}" libiconv
+	cd "${WORKDIR}"/libiconv*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-shared"
+	fi
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-static"
+	fi
 
 	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    LDFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
-fi
-
+}
 
 if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBICONV_ARCHIVE}" "${WORKDIR_i386_STATIC}" libiconv
-	cd "${WORKDIR_i386_STATIC}"/libiconv*
-
-	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --disable-shared"
-
-	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
-	make ${MAKEOPTS} && make install || exit 1
-
-	unset CONFOPTS
+	echo "Building libiconv."
+	target_scheduled i386 static && build_libiconv i386 static
+	target_scheduled i386 dynamic && build_libiconv i386 dynamic
+	target_scheduled x86_64 static && build_libiconv x86_64 static
+	target_scheduled x86_64 dynamic && build_libiconv x86_64 dynamic
 fi
 
 
-if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBXML2_ARCHIVE}" "${WORKDIR_i386_STATIC}" libxml2
-	cd "${WORKDIR_i386_STATIC}"/libxml2*
+build_libxml2 () {
+	ARCH=$1
+	TYPE=$2
+	check_params ${ARCH} ${TYPE} || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${LIBXML2_ARCHIVE}" "${WORKDIR}" libxml2
+	cd "${WORKDIR}"/libxml2*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-shared"
+	fi
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-static"
+	fi
 	CONFOPTS="${CONFOPTS} --without-lzma"
 	CONFOPTS="${CONFOPTS} --without-python"
-	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR_i386_STATIC}"
+	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR}"
 
 	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    LDFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+}
+
+if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
+	echo "Bulding libxml2."
+	target_scheduled i386 static && build_libxml2 i386 static
+	target_scheduled i386 dynamic && build_libxml2 i386 dynamic
+	target_scheduled x86_64 static && build_libxml2 x86_64 static
+	target_scheduled x86_64 dynamic && build_libxml2 x86_64 dynamic
 fi
 
 
-if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${GETTEXT_ARCHIVE}" "${WORKDIR_i386_STATIC}" gettext
-	cd "${WORKDIR_i386_STATIC}"/gettext*
+build_gettext () {
+	ARCH=$1
+	TYPE=$2
+	check_params ${ARCH} ${TYPE} || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${GETTEXT_ARCHIVE}" "${WORKDIR}" gettext
+	cd "${WORKDIR}"/gettext*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --disable-shared"
-	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR_i386_STATIC}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-shared"
+	fi
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-static"
+	fi
+	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
 
 	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    CPPFLAGS="-I${BUILTDIR_i386_STATIC}/include" \
-	    LDFLAGS="-L${BUILTDIR_i386_STATIC}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CXXFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
+	    CPPFLAGS="-I${BUILTDIR}/include" \
+	    LDFLAGS="-L${BUILTDIR}/lib -arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+}
+
+if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
+	echo "Building gettext."
+	target_scheduled i386 static && build_gettext i386 static
+	target_scheduled i386 dynamic && build_gettext i386 dynamic
+	target_scheduled x86_64 static && build_gettext x86_64 static
+	target_scheduled x86_64 dynamic && build_gettext x86_64 dynamic
 fi
 
 
@@ -203,26 +372,65 @@ if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 fi
 
 
-if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR_i386_STATIC}" openssl
-	cd "${WORKDIR_i386_STATIC}"/openssl*
+build_openssl () {
+	ARCH=$1
+	TYPE=$2
+	check_params ${ARCH} ${TYPE} || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
-	# no-asm
-	# darwin-i386-cc
-	./Configure darwin-i386-cc enable-static-engine no-shared no-krb5 \
-	    --prefix="${BUILTDIR_i386_STATIC}"
+	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR}" openssl
+	cd "${WORKDIR}"/openssl*
+
+	CONFOPTS=""
+	#CONFOPTS="${CONFOPTS} no-asm"
+	if [ "x${ARCH}" = "xi386" ]; then
+		CONFOPTS="${CONFOPTS} darwin-i386-cc"
+	fi
+	if [ "x${ARCH}" = "xx86_64" ]; then
+		CONFOPTS="${CONFOPTS} darwin64-x86_64-cc"
+	fi
+	CONFOPTS="${CONFOPTS} enable-static-engine"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} no-shared"
+	fi
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		CONFOPTS="${CONFOPTS} shared"
+	fi
+	CONFOPTS="${CONFOPTS} no-krb5"
+
+	./Configure ${CONFOPTS} --prefix="${BUILTDIR}"
 	# Patch Makefile
 	sed -ie "s/^CFLAG= -/CFLAG=  -mmacosx-version-min=${OSX_MIN_VER} -/" Makefile
+	make ${MAKEOPTS} depend || exit 1
 	make ${MAKEOPTS} && make install_sw || exit 1
+
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		rm -rf "${BUILTDIR}"/lib/libcrypto.a
+		rm -rf "${BUILTDIR}"/lib/libssl.a
+	fi
+
+	unset CONFOPTS
+}
+
+if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
+	echo "Building openssl."
+	target_scheduled i386 static && build_openssl i386 static
+	target_scheduled i386 dynamic && build_openssl i386 dynamic
+	target_scheduled x86_64 static && build_openssl x86_64 static
+	target_scheduled x86_64 dynamic && build_openssl x86_64 dynamic
 fi
 
 
-if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
-	echo "Select libisds archive or git repository." >&2
-	exit 1
-elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR_i386_STATIC}" libisds
-	cd "${WORKDIR_i386_STATIC}"/libisds*
+build_libisds () {
+	ARCH=$1
+	TYPE=$2
+	check_params ${ARCH} ${TYPE} || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR}" libisds
+	cd "${WORKDIR}"/libisds*
 
 	if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
 		# Apply patches.
@@ -238,14 +446,19 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	fi
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-shared"
+	fi
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-static"
+	fi
 	CONFOPTS="${CONFOPTS} --enable-debug"
 	CONFOPTS="${CONFOPTS} --enable-openssl-backend"
 	CONFOPTS="${CONFOPTS} --disable-fatalwarnings"
-	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR_i386_STATIC}"
+	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
 
 	NLS="--disable-nls"
 	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
@@ -254,17 +467,28 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	CONFOPTS="${CONFOPTS} ${NLS}"
 
 	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
-	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
-	    CPPFLAGS="-I${BUILTDIR_i386_STATIC}/include -I${BUILTDIR_i386_STATIC}/include/libxml2" \
-	    LDFLAGS="-L${BUILTDIR_i386_STATIC}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
+	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
+	    CXXFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
+	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
+	    LDFLAGS="-L${BUILTDIR}/lib -arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 
-	if [ -f "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib" ]; then
-		mv "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib" "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib_x"
+	if [ "x${TYPE}" = "xstatic" -a -f "${BUILTDIR}/lib/libcurl.dylib" ]; then
+		mv "${BUILTDIR}/lib/libcurl.dylib" "${BUILTDIR}/lib/libcurl.dylib_x"
 	fi
+}
+
+if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
+	echo "Select libisds archive or git repository." >&2
+	exit 1
+elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
+	echo "Building libisds."
+	target_scheduled i386 static && build_libisds i386 static
+	target_scheduled i386 dynamic && build_libisds i386 dynamic
+	target_scheduled x86_64 static && build_libisds x86_64 static
+	target_scheduled x86_64 dynamic && build_libisds x86_64 dynamic
 elif [ ! -z "${LIBISDS_GIT}" ]; then
 	# libisds with OpenSSL back-end
 	rm -rf "${WORKDIR_i386_STATIC}"/libisds*
