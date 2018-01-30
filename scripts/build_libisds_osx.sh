@@ -144,10 +144,14 @@ build_zlib () {
 		CONFOPTS="${CONFOPTS} --static"
 	fi
 
-	CFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" LDFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" ./configure ${CONFOPTS} #--archs="-arch ${ARCH}"
+	CFLAGS="-mmacosx-version-min=${OSX_MIN_VER} -arch ${ARCH}" LDFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" ./configure ${CONFOPTS} --archs="-arch ${ARCH}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		rm -rf "${BUILTDIR}"/lib/libz.a
+	fi
 }
 
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
