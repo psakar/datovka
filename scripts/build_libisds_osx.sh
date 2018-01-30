@@ -354,25 +354,47 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 fi
 
 
-if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBCURL_ARCHIVE}" "${WORKDIR_i386_STATIC}" curl
-	cd "${WORKDIR_i386_STATIC}"/curl*
+build_libcurl () {
+	ARCH=$1
+	TYPE=$2
+	check_params ${ARCH} ${TYPE} || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${LIBCURL_ARCHIVE}" "${WORKDIR}" curl
+	cd "${WORKDIR}"/curl*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
-	#CONFOPTS="${CONFOPTS} --disable-shared"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	# Leave shared version as this is required to configure libisds.
+	#if [ "x${TYPE}" = "xstatic" ]; then
+	#	CONFOPTS="${CONFOPTS} --disable-shared"
+	#fi
+	if [ "x${TYPE}" = "xdynamic" ]; then
+		CONFOPTS="${CONFOPTS} --disable-static"
+	fi
 	CONFOPTS="${CONFOPTS} --enable-ipv6"
 	CONFOPTS="${CONFOPTS} --with-darwinssl"
 	CONFOPTS="${CONFOPTS} --without-axtls"
 	CONFOPTS="${CONFOPTS} --disable-ldap"
 
+	# Recent libcurl may require OSX_MIN_VER 10.8 or later.
+
 	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
-	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
-	    LDFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
+	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
+	    CXXFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
+	    LDFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+}
+
+if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
+	echo "Building libcurl."
+	target_scheduled i386 static && build_libcurl i386 static
+	target_scheduled i386 dynamic && build_libcurl i386 dynamic
+	target_scheduled x86_64 static && build_libcurl x86_64 static
+	target_scheduled x86_64 dynamic && build_libcurl x86_64 dynamic
 fi
 
 
