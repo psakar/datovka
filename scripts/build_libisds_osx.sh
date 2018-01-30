@@ -152,14 +152,16 @@ build_zlib () {
 	if [ "x${TYPE}" = "xdynamic" ]; then
 		rm -rf "${BUILTDIR}"/lib/libz.a
 	fi
+
+	return 0
 }
 
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	echo "Building zlib."
-	target_scheduled i386 static && build_zlib i386 static
-	target_scheduled i386 dynamic && build_zlib i386 dynamic
-	target_scheduled x86_64 static && build_zlib x86_64 static
-	target_scheduled x86_64 dynamic && build_zlib x86_64 dynamic
+	target_scheduled i386 static && build_zlib i386 static || exit 1
+	target_scheduled i386 dynamic && build_zlib i386 dynamic || exit 1
+	target_scheduled x86_64 static && build_zlib x86_64 static || exit 1
+	target_scheduled x86_64 dynamic && build_zlib x86_64 dynamic || exit 1
 fi
 
 
@@ -189,14 +191,16 @@ build_expat () {
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+
+	return 0
 }
 
 if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	echo "Building expat."
-	target_scheduled i386 static && build_expat i386 static
-	target_scheduled i386 dynamic && build_expat i386 dynamic
-	target_scheduled x86_64 static && build_expat x86_64 static
-	target_scheduled x86_64 dynamic && build_expat x86_64 dynamic
+	target_scheduled i386 static && build_expat i386 static || exit 1
+	target_scheduled i386 dynamic && build_expat i386 dynamic || exit 1
+	target_scheduled x86_64 static && build_expat x86_64 static || exit 1
+	target_scheduled x86_64 dynamic && build_expat x86_64 dynamic || exit 1
 fi
 
 
@@ -226,14 +230,16 @@ build_libtool () {
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+
+	return 0
 }
 
 if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	echo "Building libtool."
-	target_scheduled i386 static && build_libtool i386 static
-	target_scheduled i386 dynamic && build_libtool i386 dynamic
-	target_scheduled x86_64 static && build_libtool x86_64 static
-	target_scheduled x86_64 dynamic && build_libtool x86_64 dynamic
+	target_scheduled i386 static && build_libtool i386 static || exit 1
+	target_scheduled i386 dynamic && build_libtool i386 dynamic || exit 1
+	target_scheduled x86_64 static && build_libtool x86_64 static || exit 1
+	target_scheduled x86_64 dynamic && build_libtool x86_64 dynamic || exit 1
 fi
 
 
@@ -263,14 +269,16 @@ build_libiconv () {
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+
+	return 0
 }
 
 if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	echo "Building libiconv."
-	target_scheduled i386 static && build_libiconv i386 static
-	target_scheduled i386 dynamic && build_libiconv i386 dynamic
-	target_scheduled x86_64 static && build_libiconv x86_64 static
-	target_scheduled x86_64 dynamic && build_libiconv x86_64 dynamic
+	target_scheduled i386 static && build_libiconv i386 static || exit 1
+	target_scheduled i386 dynamic && build_libiconv i386 dynamic || exit 1
+	target_scheduled x86_64 static && build_libiconv x86_64 static || exit 1
+	target_scheduled x86_64 dynamic && build_libiconv x86_64 dynamic || exit 1
 fi
 
 
@@ -303,14 +311,16 @@ build_libxml2 () {
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+
+	return 0
 }
 
 if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	echo "Bulding libxml2."
-	target_scheduled i386 static && build_libxml2 i386 static
-	target_scheduled i386 dynamic && build_libxml2 i386 dynamic
-	target_scheduled x86_64 static && build_libxml2 x86_64 static
-	target_scheduled x86_64 dynamic && build_libxml2 x86_64 dynamic
+	target_scheduled i386 static && build_libxml2 i386 static || exit 1
+	target_scheduled i386 dynamic && build_libxml2 i386 dynamic || exit 1
+	target_scheduled x86_64 static && build_libxml2 x86_64 static || exit 1
+	target_scheduled x86_64 dynamic && build_libxml2 x86_64 dynamic || exit 1
 fi
 
 
@@ -343,14 +353,16 @@ build_gettext () {
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+
+	return 0
 }
 
 if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	echo "Building gettext."
-	target_scheduled i386 static && build_gettext i386 static
-	target_scheduled i386 dynamic && build_gettext i386 dynamic
-	target_scheduled x86_64 static && build_gettext x86_64 static
-	target_scheduled x86_64 dynamic && build_gettext x86_64 dynamic
+	target_scheduled i386 static && build_gettext i386 static || exit 1
+	target_scheduled i386 dynamic && build_gettext i386 dynamic || exit 1
+	target_scheduled x86_64 static && build_gettext x86_64 static || exit 1
+	target_scheduled x86_64 dynamic && build_gettext x86_64 dynamic || exit 1
 fi
 
 
@@ -387,14 +399,16 @@ build_libcurl () {
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
+
+	return 0
 }
 
 if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	echo "Building libcurl."
-	target_scheduled i386 static && build_libcurl i386 static
-	target_scheduled i386 dynamic && build_libcurl i386 dynamic
-	target_scheduled x86_64 static && build_libcurl x86_64 static
-	target_scheduled x86_64 dynamic && build_libcurl x86_64 dynamic
+	target_scheduled i386 static && build_libcurl i386 static || exit 1
+	target_scheduled i386 dynamic && build_libcurl i386 dynamic || exit 1
+	target_scheduled x86_64 static && build_libcurl x86_64 static || exit 1
+	target_scheduled x86_64 dynamic && build_libcurl x86_64 dynamic || exit 1
 fi
 
 
@@ -437,14 +451,16 @@ build_openssl () {
 	fi
 
 	unset CONFOPTS
+
+	return 0
 }
 
 if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	echo "Building openssl."
-	target_scheduled i386 static && build_openssl i386 static
-	target_scheduled i386 dynamic && build_openssl i386 dynamic
-	target_scheduled x86_64 static && build_openssl x86_64 static
-	target_scheduled x86_64 dynamic && build_openssl x86_64 dynamic
+	target_scheduled i386 static && build_openssl i386 static || exit 1
+	target_scheduled i386 dynamic && build_openssl i386 dynamic || exit 1
+	target_scheduled x86_64 static && build_openssl x86_64 static || exit 1
+	target_scheduled x86_64 dynamic && build_openssl x86_64 dynamic || exit 1
 fi
 
 
@@ -455,8 +471,22 @@ build_libisds () {
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
-	erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR}" libisds
-	cd "${WORKDIR}"/libisds*
+	if [ ! -z "${LIBISDS_ARCHIVE}" ]; then
+		erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR}" libisds
+		cd "${WORKDIR}"/libisds*
+	elif [ ! -z "${LIBISDS_GIT}" ]; then
+		# libisds with OpenSSL back-end
+		rm -rf "${WORKDIR}"/libisds*
+		cd "${WORKDIR}"
+		git clone "${LIBISDS_GIT}" libisds-git
+		cd "${WORKDIR}"/libisds*
+		if [ ! -z "${LIBISDS_BRANCH}" ]; then
+			git checkout "${LIBISDS_BRANCH}"
+		fi
+	else
+		echo "Cannot prepare libisds sources." >&2
+		exit 1
+	fi
 
 	if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
 		# Apply patches.
@@ -492,6 +522,9 @@ build_libisds () {
 	fi
 	CONFOPTS="${CONFOPTS} ${NLS}"
 
+	if [ -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
+		autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
+	fi
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
 	    CXXFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
@@ -504,54 +537,17 @@ build_libisds () {
 	if [ "x${TYPE}" = "xstatic" -a -f "${BUILTDIR}/lib/libcurl.dylib" ]; then
 		mv "${BUILTDIR}/lib/libcurl.dylib" "${BUILTDIR}/lib/libcurl.dylib_x"
 	fi
+
+	return 0
 }
 
 if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
 	echo "Select libisds archive or git repository." >&2
 	exit 1
-elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
+elif [ ! -z "${LIBISDS_ARCHIVE}" -o ! -z "${LIBISDS_GIT}" ]; then
 	echo "Building libisds."
-	target_scheduled i386 static && build_libisds i386 static
-	target_scheduled i386 dynamic && build_libisds i386 dynamic
-	target_scheduled x86_64 static && build_libisds x86_64 static
-	target_scheduled x86_64 dynamic && build_libisds x86_64 dynamic
-elif [ ! -z "${LIBISDS_GIT}" ]; then
-	# libisds with OpenSSL back-end
-	rm -rf "${WORKDIR_i386_STATIC}"/libisds*
-	cd "${WORKDIR_i386_STATIC}"
-	git clone "${LIBISDS_GIT}" libisds-git
-	cd "${WORKDIR_i386_STATIC}"/libisds*
-	if [ ! -z "${LIBISDS_BRANCH}" ]; then
-		git checkout "${LIBISDS_BRANCH}"
-	fi
-
-	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --disable-shared"
-	CONFOPTS="${CONFOPTS} --enable-debug"
-	CONFOPTS="${CONFOPTS} --enable-openssl-backend"
-	CONFOPTS="${CONFOPTS} --disable-fatalwarnings"
-	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR_i386_STATIC}"
-	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR_i386_STATIC}"
-
-	NLS="--disable-nls"
-	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
-		NLS=""
-	fi
-	CONFOPTS="${CONFOPTS} ${NLS}"
-
-	autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
-	./configure ${CONFOPTS} \
-	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
-	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
-	    CPPFLAGS="-I${BUILTDIR_i386_STATIC}/include -I${BUILTDIR_i386_STATIC}/include/libxml2" \
-	    LDFLAGS="-L${BUILTDIR_i386_STATIC}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
-	make ${MAKEOPTS} && make install || exit 1
-
-	unset CONFOPTS
-
-	if [ -f "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib" ]; then
-		mv "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib" "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib_x"
-	fi
+	target_scheduled i386 static && build_libisds i386 static || exit 1
+	target_scheduled i386 dynamic && build_libisds i386 dynamic || exit 1
+	target_scheduled x86_64 static && build_libisds x86_64 static || exit 1
+	target_scheduled x86_64 dynamic && build_libisds x86_64 dynamic || exit 1
 fi
