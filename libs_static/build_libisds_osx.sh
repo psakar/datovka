@@ -1,8 +1,11 @@
 #!/usr/bin/env sh
 
 SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
+SRC_ROOT=$(cd "${SCRIPT_LOCATION}"/..; pwd)
 
-. "${SCRIPT_LOCATION}"/../scripts/dependency_sources.sh
+cd "${SRC_ROOT}"
+
+. "${SRC_ROOT}"/scripts/dependency_sources.sh
 
 adjust_sources "osx"
 
@@ -24,22 +27,28 @@ if [ ! -d "${ISYSROOT}" ]; then
 	exit 1
 fi
 
+LIB_ROOT="${SRC_ROOT}"/libs
+if [ ! -d "${LIB_ROOT}" ]; then
+	echo "Cannot find directory '${LIB_ROOT}'" >&2
+	exit 1
+fi
+cd "${LIB_ROOT}"
 
-SRCDIR="${SCRIPT_LOCATION}/srcs"
-PATCHDIR="${SCRIPT_LOCATION}/../scripts/patches"
-WORKDIR="${SCRIPT_LOCATION}/work"
-BUILTDIR="${SCRIPT_LOCATION}/built_osx${SDK_VER}"
+SRCDIR="${LIB_ROOT}/srcs"
+PATCHDIR="${SRC_ROOT}/scripts/patches"
+WORKDIR_i386_STATIC="${LIB_ROOT}/work_macos_sdk${SDK_VER}_i386_static"
+BUILTDIR_i386_STATIC="${LIB_ROOT}/built_macos_sdk${SDK_VER}_i386_static"
 
 if [ ! -d "${SRCDIR}" ]; then
 	mkdir "${SRCDIR}"
 fi
 
-if [ ! -d "${WORKDIR}" ]; then
-	mkdir "${WORKDIR}"
+if [ ! -d "${WORKDIR_i386_STATIC}" ]; then
+	mkdir "${WORKDIR_i386_STATIC}"
 fi
 
-if [ ! -d "${BUILTDIR}" ]; then
-	mkdir "${BUILTDIR}"
+if [ ! -d "${BUILTDIR_i386_STATIC}" ]; then
+	mkdir "${BUILTDIR_i386_STATIC}"
 fi
 
 ZLIB_ARCHIVE="${_ZLIB_ARCHIVE}"
@@ -62,11 +71,11 @@ LIBISDS_ARCHIVE_PATCHES="${_LIBISDS_ARCHIVE_PATCHES}"
 
 
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${ZLIB_ARCHIVE}" "${WORKDIR}" zlib
-	cd "${WORKDIR}"/zlib*
+	erase_and_decompress "${SRCDIR}" "${ZLIB_ARCHIVE}" "${WORKDIR_i386_STATIC}" zlib
+	cd "${WORKDIR_i386_STATIC}"/zlib*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
 	CONFOPTS="${CONFOPTS} --static"
 
 	CFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" LDFLAGS="-mmacosx-version-min=${OSX_MIN_VER}" ./configure ${CONFOPTS} --archs="-arch i386"
@@ -77,11 +86,11 @@ fi
 
 
 if [ ! -z "${EXPAT_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${EXPAT_ARCHIVE}" "${WORKDIR}" expat
-	cd "${WORKDIR}"/expat*
+	erase_and_decompress "${SRCDIR}" "${EXPAT_ARCHIVE}" "${WORKDIR_i386_STATIC}" expat
+	cd "${WORKDIR_i386_STATIC}"/expat*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
 
 	./configure ${CONFOPTS} \
@@ -95,11 +104,11 @@ fi
 
 
 if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBTOOL_ARCHIVE}" "${WORKDIR}" libtool
-	cd "${WORKDIR}"/libtool*
+	erase_and_decompress "${SRCDIR}" "${LIBTOOL_ARCHIVE}" "${WORKDIR_i386_STATIC}" libtool
+	cd "${WORKDIR_i386_STATIC}"/libtool*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
 
 	./configure ${CONFOPTS} \
@@ -113,11 +122,11 @@ fi
 
 
 if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBICONV_ARCHIVE}" "${WORKDIR}" libiconv
-	cd "${WORKDIR}"/libiconv*
+	erase_and_decompress "${SRCDIR}" "${LIBICONV_ARCHIVE}" "${WORKDIR_i386_STATIC}" libiconv
+	cd "${WORKDIR_i386_STATIC}"/libiconv*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
 
 	./configure ${CONFOPTS} \
@@ -131,15 +140,15 @@ fi
 
 
 if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBXML2_ARCHIVE}" "${WORKDIR}" libxml2
-	cd "${WORKDIR}"/libxml2*
+	erase_and_decompress "${SRCDIR}" "${LIBXML2_ARCHIVE}" "${WORKDIR_i386_STATIC}" libxml2
+	cd "${WORKDIR_i386_STATIC}"/libxml2*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
 	CONFOPTS="${CONFOPTS} --without-lzma"
 	CONFOPTS="${CONFOPTS} --without-python"
-	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR_i386_STATIC}"
 
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
@@ -152,20 +161,20 @@ fi
 
 
 if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${GETTEXT_ARCHIVE}" "${WORKDIR}" gettext
-	cd "${WORKDIR}"/gettext*
+	erase_and_decompress "${SRCDIR}" "${GETTEXT_ARCHIVE}" "${WORKDIR_i386_STATIC}" gettext
+	cd "${WORKDIR_i386_STATIC}"/gettext*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
-	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
-	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR_i386_STATIC}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR_i386_STATIC}"
 
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
 	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER}" \
-	    CPPFLAGS="-I${BUILTDIR}/include" \
-	    LDFLAGS="-L${BUILTDIR}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
+	    CPPFLAGS="-I${BUILTDIR_i386_STATIC}/include" \
+	    LDFLAGS="-L${BUILTDIR_i386_STATIC}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
@@ -173,11 +182,11 @@ fi
 
 
 if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBCURL_ARCHIVE}" "${WORKDIR}" curl
-	cd "${WORKDIR}"/curl*
+	erase_and_decompress "${SRCDIR}" "${LIBCURL_ARCHIVE}" "${WORKDIR_i386_STATIC}" curl
+	cd "${WORKDIR_i386_STATIC}"/curl*
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
 	#CONFOPTS="${CONFOPTS} --disable-shared"
 	CONFOPTS="${CONFOPTS} --enable-ipv6"
 	CONFOPTS="${CONFOPTS} --with-darwinssl"
@@ -195,13 +204,13 @@ fi
 
 
 if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR}" openssl
-	cd "${WORKDIR}"/openssl*
+	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR_i386_STATIC}" openssl
+	cd "${WORKDIR_i386_STATIC}"/openssl*
 
 	# no-asm
 	# darwin-i386-cc
 	./Configure darwin-i386-cc enable-static-engine no-shared no-krb5 \
-	    --prefix="${BUILTDIR}"
+	    --prefix="${BUILTDIR_i386_STATIC}"
 	# Patch Makefile
 	sed -ie "s/^CFLAG= -/CFLAG=  -mmacosx-version-min=${OSX_MIN_VER} -/" Makefile
 	make ${MAKEOPTS} && make install_sw || exit 1
@@ -212,8 +221,8 @@ if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
 	echo "Select libisds archive or git repository." >&2
 	exit 1
 elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
-	erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR}" libisds
-	cd "${WORKDIR}"/libisds*
+	erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR_i386_STATIC}" libisds
+	cd "${WORKDIR_i386_STATIC}"/libisds*
 
 	if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
 		# Apply patches.
@@ -229,14 +238,14 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	fi
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
 	CONFOPTS="${CONFOPTS} --enable-debug"
 	CONFOPTS="${CONFOPTS} --enable-openssl-backend"
 	CONFOPTS="${CONFOPTS} --disable-fatalwarnings"
-	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
-	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
-	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR_i386_STATIC}"
+	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR_i386_STATIC}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR_i386_STATIC}"
 
 	NLS="--disable-nls"
 	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
@@ -247,34 +256,34 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
 	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
-	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
-	    LDFLAGS="-L${BUILTDIR}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
+	    CPPFLAGS="-I${BUILTDIR_i386_STATIC}/include -I${BUILTDIR_i386_STATIC}/include/libxml2" \
+	    LDFLAGS="-L${BUILTDIR_i386_STATIC}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 
-	if [ -f "${BUILTDIR}/lib/libcurl.dylib" ]; then
-		mv "${BUILTDIR}/lib/libcurl.dylib" "${BUILTDIR}/lib/libcurl.dylib_x"
+	if [ -f "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib" ]; then
+		mv "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib" "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib_x"
 	fi
 elif [ ! -z "${LIBISDS_GIT}" ]; then
 	# libisds with OpenSSL back-end
-	rm -rf "${WORKDIR}"/libisds*
-	cd "${WORKDIR}"
+	rm -rf "${WORKDIR_i386_STATIC}"/libisds*
+	cd "${WORKDIR_i386_STATIC}"
 	git clone "${LIBISDS_GIT}" libisds-git
-	cd "${WORKDIR}"/libisds*
+	cd "${WORKDIR_i386_STATIC}"/libisds*
 	if [ ! -z "${LIBISDS_BRANCH}" ]; then
 		git checkout "${LIBISDS_BRANCH}"
 	fi
 
 	CONFOPTS=""
-	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR_i386_STATIC}"
 	CONFOPTS="${CONFOPTS} --disable-shared"
 	CONFOPTS="${CONFOPTS} --enable-debug"
 	CONFOPTS="${CONFOPTS} --enable-openssl-backend"
 	CONFOPTS="${CONFOPTS} --disable-fatalwarnings"
-	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR}"
-	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
-	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --with-xml-prefix=${BUILTDIR_i386_STATIC}"
+	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR_i386_STATIC}"
+	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR_i386_STATIC}"
 
 	NLS="--disable-nls"
 	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
@@ -286,13 +295,13 @@ elif [ ! -z "${LIBISDS_GIT}" ]; then
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
 	    CXXFLAGS="-arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
-	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2" \
-	    LDFLAGS="-L${BUILTDIR}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
+	    CPPFLAGS="-I${BUILTDIR_i386_STATIC}/include -I${BUILTDIR_i386_STATIC}/include/libxml2" \
+	    LDFLAGS="-L${BUILTDIR_i386_STATIC}/lib -arch i386 -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}"
 	make ${MAKEOPTS} && make install || exit 1
 
 	unset CONFOPTS
 
-	if [ -f "${BUILTDIR}/lib/libcurl.dylib" ]; then
-		mv "${BUILTDIR}/lib/libcurl.dylib" "${BUILTDIR}/lib/libcurl.dylib_x"
+	if [ -f "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib" ]; then
+		mv "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib" "${BUILTDIR_i386_STATIC}/lib/libcurl.dylib_x"
 	fi
 fi
