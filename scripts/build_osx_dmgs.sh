@@ -112,7 +112,7 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	done
 
 	LIBS_DIR="built_macos_sdk${SDK_VER}_i386_static"
-	LIBS_PATH="libs_static/${LIBS_DIR}"
+	LIBS_PATH="libs/${LIBS_DIR}"
 	LIBS_LINK="libs/static_built"
 	# Test the presence of build libraries.
 	if [ ! -d "${SRC_ROOT}/$LIBS_PATH" ]; then
