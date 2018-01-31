@@ -156,10 +156,10 @@ build_zlib () {
 
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	echo "Building zlib."
-	target_scheduled i386 static && build_zlib i386 static || exit 1
-	target_scheduled i386 dynamic && build_zlib i386 dynamic || exit 1
-	target_scheduled x86_64 static && build_zlib x86_64 static || exit 1
-	target_scheduled x86_64 dynamic && build_zlib x86_64 dynamic || exit 1
+	if target_scheduled i386 static; then build_zlib i386 static || exit 1; fi
+	if target_scheduled i386 dynamic; then build_zlib i386 dynamic || exit 1; fi
+	if target_scheduled x86_64 static; then build_zlib x86_64 static || exit 1; fi
+	if target_scheduled x86_64 dynamic; then build_zlib x86_64 dynamic || exit 1; fi
 fi
 
 
@@ -195,10 +195,10 @@ build_expat () {
 
 if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	echo "Building expat."
-	target_scheduled i386 static && build_expat i386 static || exit 1
-	target_scheduled i386 dynamic && build_expat i386 dynamic || exit 1
-	target_scheduled x86_64 static && build_expat x86_64 static || exit 1
-	target_scheduled x86_64 dynamic && build_expat x86_64 dynamic || exit 1
+	if target_scheduled i386 static; then build_expat i386 static || exit 1; fi
+	if target_scheduled i386 dynamic; then build_expat i386 dynamic || exit 1; fi
+	if target_scheduled x86_64 static; then build_expat x86_64 static || exit 1; fi
+	if target_scheduled x86_64 dynamic; then build_expat x86_64 dynamic || exit 1; fi
 fi
 
 
@@ -234,10 +234,10 @@ build_libtool () {
 
 if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	echo "Building libtool."
-	target_scheduled i386 static && build_libtool i386 static || exit 1
-	target_scheduled i386 dynamic && build_libtool i386 dynamic || exit 1
-	target_scheduled x86_64 static && build_libtool x86_64 static || exit 1
-	target_scheduled x86_64 dynamic && build_libtool x86_64 dynamic || exit 1
+	if target_scheduled i386 static; then build_libtool i386 static || exit 1; fi
+	if target_scheduled i386 dynamic; then build_libtool i386 dynamic || exit 1; fi
+	if target_scheduled x86_64 static; then build_libtool x86_64 static || exit 1; fi
+	if target_scheduled x86_64 dynamic; then build_libtool x86_64 dynamic || exit 1; fi
 fi
 
 
@@ -273,10 +273,10 @@ build_libiconv () {
 
 if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	echo "Building libiconv."
-	target_scheduled i386 static && build_libiconv i386 static || exit 1
-	target_scheduled i386 dynamic && build_libiconv i386 dynamic || exit 1
-	target_scheduled x86_64 static && build_libiconv x86_64 static || exit 1
-	target_scheduled x86_64 dynamic && build_libiconv x86_64 dynamic || exit 1
+	if target_scheduled i386 static; then build_libiconv i386 static || exit 1; fi
+	if target_scheduled i386 dynamic; then build_libiconv i386 dynamic || exit 1; fi
+	if target_scheduled x86_64 static; then build_libiconv x86_64 static || exit 1; fi
+	if target_scheduled x86_64 dynamic; then build_libiconv x86_64 dynamic || exit 1; fi
 fi
 
 
@@ -315,10 +315,10 @@ build_libxml2 () {
 
 if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	echo "Bulding libxml2."
-	target_scheduled i386 static && build_libxml2 i386 static || exit 1
-	target_scheduled i386 dynamic && build_libxml2 i386 dynamic || exit 1
-	target_scheduled x86_64 static && build_libxml2 x86_64 static || exit 1
-	target_scheduled x86_64 dynamic && build_libxml2 x86_64 dynamic || exit 1
+	if target_scheduled i386 static; then build_libxml2 i386 static || exit 1; fi
+	if target_scheduled i386 dynamic; then build_libxml2 i386 dynamic || exit 1; fi
+	if target_scheduled x86_64 static; then build_libxml2 x86_64 static || exit 1; fi
+	if target_scheduled x86_64 dynamic; then build_libxml2 x86_64 dynamic || exit 1; fi
 fi
 
 
@@ -357,10 +357,10 @@ build_gettext () {
 
 if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	echo "Building gettext."
-	target_scheduled i386 static && build_gettext i386 static || exit 1
-	target_scheduled i386 dynamic && build_gettext i386 dynamic || exit 1
-	target_scheduled x86_64 static && build_gettext x86_64 static || exit 1
-	target_scheduled x86_64 dynamic && build_gettext x86_64 dynamic || exit 1
+	if target_scheduled i386 static; then build_gettext i386 static || exit 1; fi
+	if target_scheduled i386 dynamic; then build_gettext i386 dynamic || exit 1; fi
+	if target_scheduled x86_64 static; then build_gettext x86_64 static || exit 1; fi
+	if target_scheduled x86_64 dynamic; then build_gettext x86_64 dynamic || exit 1; fi
 fi
 
 
@@ -403,10 +403,10 @@ build_libcurl () {
 
 if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	echo "Building libcurl."
-	target_scheduled i386 static && build_libcurl i386 static || exit 1
-	target_scheduled i386 dynamic && build_libcurl i386 dynamic || exit 1
-	target_scheduled x86_64 static && build_libcurl x86_64 static || exit 1
-	target_scheduled x86_64 dynamic && build_libcurl x86_64 dynamic || exit 1
+	if target_scheduled i386 static; then build_libcurl i386 static || exit 1; fi
+	if target_scheduled i386 dynamic; then build_libcurl i386 dynamic || exit 1; fi
+	if target_scheduled x86_64 static; then build_libcurl x86_64 static || exit 1; fi
+	if target_scheduled x86_64 dynamic; then build_libcurl x86_64 dynamic || exit 1; fi
 fi
 
 
@@ -455,10 +455,10 @@ build_openssl () {
 
 if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	echo "Building openssl."
-	target_scheduled i386 static && build_openssl i386 static || exit 1
-	target_scheduled i386 dynamic && build_openssl i386 dynamic || exit 1
-	target_scheduled x86_64 static && build_openssl x86_64 static || exit 1
-	target_scheduled x86_64 dynamic && build_openssl x86_64 dynamic || exit 1
+	if target_scheduled i386 static; then build_openssl i386 static || exit 1; fi
+	if target_scheduled i386 dynamic; then build_openssl i386 dynamic || exit 1; fi
+	if target_scheduled x86_64 static; then build_openssl x86_64 static || exit 1; fi
+	if target_scheduled x86_64 dynamic; then build_openssl x86_64 dynamic || exit 1; fi
 fi
 
 
@@ -544,8 +544,8 @@ if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
 	exit 1
 elif [ ! -z "${LIBISDS_ARCHIVE}" -o ! -z "${LIBISDS_GIT}" ]; then
 	echo "Building libisds."
-	target_scheduled i386 static && build_libisds i386 static || exit 1
-	target_scheduled i386 dynamic && build_libisds i386 dynamic || exit 1
-	target_scheduled x86_64 static && build_libisds x86_64 static || exit 1
-	target_scheduled x86_64 dynamic && build_libisds x86_64 dynamic || exit 1
+	if target_scheduled i386 static; then build_libisds i386 static || exit 1; fi
+	if target_scheduled i386 dynamic; then build_libisds i386 dynamic || exit 1; fi
+	if target_scheduled x86_64 static; then build_libisds x86_64 static || exit 1; fi
+	if target_scheduled x86_64 dynamic; then build_libisds x86_64 dynamic || exit 1; fi
 fi

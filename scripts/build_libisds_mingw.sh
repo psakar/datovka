@@ -154,8 +154,8 @@ build_zlib () {
 
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	echo "Building zlib."
-	target_scheduled static && build_zlib static || exit 1
-	target_scheduled dynamic && build_zlib dynamic || exit 1
+	if target_scheduled static; then build_zlib static || exit 1; fi
+	if target_scheduled dynamic; then build_zlib dynamic || exit 1; fi
 fi
 
 
@@ -187,8 +187,8 @@ build_expat () {
 
 if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	echo "Building expat."
-	target_scheduled static && build_expat static || exit 1
-	target_scheduled dynamic && build_expat dynamic || exit 1
+	if target_scheduled static; then build_expat static || exit 1; fi
+	if target_scheduled dynamic; then build_expat dynamic || exit 1; fi
 fi
 
 
@@ -220,8 +220,8 @@ build_libtool () {
 
 if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	echo "Building libtool."
-	target_scheduled static && build_libtool static || exit 1
-	target_scheduled dynamic && build_libtool dynamic || exit 1
+	if target_scheduled static; then build_libtool static || exit 1; fi
+	if target_scheduled dynamic; then build_libtool dynamic || exit 1; fi
 fi
 
 
@@ -253,8 +253,8 @@ build_libiconv () {
 
 if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	echo "Building libiconv."
-	target_scheduled static && build_libiconv static || exit 1
-	target_scheduled dynamic && build_libiconv dynamic || exit 1
+	if target_scheduled static; then build_libiconv static || exit 1; fi
+	if target_scheduled dynamic; then build_libiconv dynamic || exit 1; fi
 fi
 
 
@@ -288,8 +288,8 @@ build_libxml2 () {
 
 if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	echo "Bulding libxml2."
-	target_scheduled static && build_libxml2 static || exit 1
-	target_scheduled dynamic && build_libxml2 dynamic || exit 1
+	if target_scheduled static; then build_libxml2 static || exit 1; fi
+	if target_scheduled dynamic; then build_libxml2 dynamic || exit 1; fi
 fi
 
 
@@ -333,8 +333,8 @@ build_gettext () {
 
 if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	echo "Building gettext."
-	target_scheduled static && build_gettext static || exit 1
-	target_scheduled dynamic && build_gettext dynamic || exit 1
+	if target_scheduled static; then build_gettext static || exit 1; fi
+	if target_scheduled dynamic; then build_gettext dynamic || exit 1; fi
 fi
 
 
@@ -375,8 +375,8 @@ build_libcurl () {
 
 if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	echo "Building libcurl."
-	target_scheduled static && build_libcurl static || exit 1
-	target_scheduled dynamic && build_libcurl dynamic || exit 1
+	if target_scheduled static; then build_libcurl static || exit 1; fi
+	if target_scheduled dynamic; then build_libcurl dynamic || exit 1; fi
 fi
 
 
@@ -417,8 +417,8 @@ build_openssl () {
 
 if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	echo "Building openssl."
-	target_scheduled static && build_openssl static || exit 1
-	target_scheduled dynamic && build_openssl dynamic || exit 1
+	if target_scheduled static; then build_openssl static || exit 1; fi
+	if target_scheduled dynamic; then build_openssl dynamic || exit 1; fi
 fi
 
 
@@ -522,6 +522,6 @@ if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
 	exit 1
 elif [ ! -z "${LIBISDS_ARCHIVE}" -o ! -z "${LIBISDS_GIT}" ]; then
 	echo "Building libisds."
-	target_scheduled static && build_libisds static || exit 1
-	target_scheduled dynamic && build_libisds dynamic || exit 1
+	if target_scheduled static; then build_libisds static || exit 1; fi
+	if target_scheduled dynamic; then build_libisds dynamic || exit 1; fi
 fi
