@@ -37,9 +37,7 @@ cd "${LIB_ROOT}"
 SRCDIR="${LIB_ROOT}/srcs"
 PATCHDIR="${SRC_ROOT}/scripts/patches"
 WORKDIR_PREFIX="${LIB_ROOT}/work_macos_sdk${SDK_VER}"
-WORKDIR_i386_STATIC="${LIB_ROOT}/work_macos_sdk${SDK_VER}_i386_static"
 BUILTDIR_PREFIX="${LIB_ROOT}/built_macos_sdk${SDK_VER}"
-BUILTDIR_i386_STATIC="${LIB_ROOT}/built_macos_sdk${SDK_VER}_i386_static"
 
 if [ ! -d "${SRCDIR}" ]; then
 	mkdir "${SRCDIR}"
@@ -131,7 +129,7 @@ LIBISDS_ARCHIVE_PATCHES="${_LIBISDS_ARCHIVE_PATCHES}"
 build_zlib () {
 	ARCH=$1
 	TYPE=$2
-	check_params ${ARCH} ${TYPE} || exit 1
+	check_params "${ARCH}" "${TYPE}" || exit 1
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
@@ -168,7 +166,7 @@ fi
 build_expat () {
 	ARCH=$1
 	TYPE=$2
-	check_params ${ARCH} ${TYPE} || exit 1
+	check_params "${ARCH}" "${TYPE}" || exit 1
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
@@ -207,7 +205,7 @@ fi
 build_libtool () {
 	ARCH=$1
 	TYPE=$2
-	check_params ${ARCH} ${TYPE} || exit 1
+	check_params "${ARCH}" "${TYPE}" || exit 1
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
@@ -246,7 +244,7 @@ fi
 build_libiconv () {
 	ARCH=$1
 	TYPE=$2
-	check_params ${ARCH} ${TYPE} || exit 1
+	check_params "${ARCH}" "${TYPE}" || exit 1
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
@@ -285,7 +283,7 @@ fi
 build_libxml2 () {
 	ARCH=$1
 	TYPE=$2
-	check_params ${ARCH} ${TYPE} || exit 1
+	check_params "${ARCH}" "${TYPE}" || exit 1
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
@@ -327,7 +325,7 @@ fi
 build_gettext () {
 	ARCH=$1
 	TYPE=$2
-	check_params ${ARCH} ${TYPE} || exit 1
+	check_params "${ARCH}" "${TYPE}" || exit 1
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
@@ -369,7 +367,7 @@ fi
 build_libcurl () {
 	ARCH=$1
 	TYPE=$2
-	check_params ${ARCH} ${TYPE} || exit 1
+	check_params "${ARCH}" "${TYPE}" || exit 1
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
@@ -415,7 +413,7 @@ fi
 build_openssl () {
 	ARCH=$1
 	TYPE=$2
-	check_params ${ARCH} ${TYPE} || exit 1
+	check_params "${ARCH}" "${TYPE}" || exit 1
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
@@ -442,7 +440,7 @@ build_openssl () {
 	./Configure ${CONFOPTS} --prefix="${BUILTDIR}"
 	# Patch Makefile
 	sed -ie "s/^CFLAG= -/CFLAG=  -mmacosx-version-min=${OSX_MIN_VER} -/" Makefile
-	make ${MAKEOPTS} depend || exit 1
+	make depend || exit 1
 	make ${MAKEOPTS} && make install_sw || exit 1
 
 	if [ "x${TYPE}" = "xdynamic" ]; then
@@ -467,13 +465,26 @@ fi
 build_libisds () {
 	ARCH=$1
 	TYPE=$2
-	check_params ${ARCH} ${TYPE} || exit 1
+	check_params "${ARCH}" "${TYPE}" || exit 1
 	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
 	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	if [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 		erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR}" libisds
 		cd "${WORKDIR}"/libisds*
+
+		if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
+			# Apply patches.
+			for f in ${LIBISDS_ARCHIVE_PATCHES}; do
+				PATCHFILE="${PATCHDIR}/${f}"
+				if [ ! -f "${PATCHFILE}" ]; then
+					echo "Missing ${PATCHFILE}" >&2
+					exit 1
+				fi
+				cp "${PATCHFILE}" ./
+				patch -p1 < ${f}
+			done
+		fi
 	elif [ ! -z "${LIBISDS_GIT}" ]; then
 		# libisds with OpenSSL back-end
 		rm -rf "${WORKDIR}"/libisds*
@@ -486,19 +497,6 @@ build_libisds () {
 	else
 		echo "Cannot prepare libisds sources." >&2
 		exit 1
-	fi
-
-	if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
-		# Apply patches.
-		for f in ${LIBISDS_ARCHIVE_PATCHES}; do
-			PATCHFILE="${PATCHDIR}/${f}"
-			if [ ! -f "${PATCHFILE}" ]; then
-				echo "Missing ${PATCHFILE}" >&2
-				exit 1
-			fi
-			cp "${PATCHFILE}" ./
-			patch -p1 < ${f}
-		done
 	fi
 
 	CONFOPTS=""
@@ -523,7 +521,7 @@ build_libisds () {
 	CONFOPTS="${CONFOPTS} ${NLS}"
 
 	if [ -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
-		autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo configure build ok
+		autoheader && glibtoolize -c --install && aclocal -I m4 && automake --add-missing --copy && autoconf && echo "configure build ok"
 	fi
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER} -isysroot ${ISYSROOT}" \
