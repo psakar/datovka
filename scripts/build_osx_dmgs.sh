@@ -111,9 +111,9 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 		fi
 	done
 
-	LIBS_DIR="built_osx${SDK_VER}"
-	LIBS_PATH="libs_static/${LIBS_DIR}"
-	LIBS_LINK="libs_static/built"
+	LIBS_DIR="built_macos_sdk${SDK_VER}_i386_static"
+	LIBS_PATH="libs/${LIBS_DIR}"
+	LIBS_LINK="libs/static_built"
 	# Test the presence of build libraries.
 	if [ ! -d "${SRC_ROOT}/$LIBS_PATH" ]; then
 		echo "Directory '${SRC_ROOT}/$LIBS_PATH' does not exist." >&2

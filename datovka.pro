@@ -177,10 +177,10 @@ macx {
 		QMAKE_CXXFLAGS += -arch i386
 
 		INCLUDEPATH += \
-			libs_static/built/include \
-			libs_static/built/include/libxml2
+			libs/static_built/include \
+			libs/static_built/include/libxml2
 		LIBPATH += \
-			libs_static/built/lib
+			libs/static_built/lib
 
 		LIBS += \
 			-lexpat \
