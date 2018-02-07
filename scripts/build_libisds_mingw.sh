@@ -275,6 +275,8 @@ build_libxml2 () {
 	if [ "x${TYPE}" = "xdynamic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
+	CONFOPTS="${CONFOPTS} --without-lzma"
+	CONFOPTS="${CONFOPTS} --without-zlib"
 	CONFOPTS="${CONFOPTS} --without-python"
 	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR}"
 

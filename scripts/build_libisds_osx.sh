@@ -299,6 +299,7 @@ build_libxml2 () {
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --without-lzma"
+	CONFOPTS="${CONFOPTS} --without-zlib"
 	CONFOPTS="${CONFOPTS} --without-python"
 	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR}"
 
