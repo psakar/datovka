@@ -299,6 +299,7 @@ build_libxml2 () {
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --without-lzma"
+	CONFOPTS="${CONFOPTS} --without-zlib"
 	CONFOPTS="${CONFOPTS} --without-python"
 	CONFOPTS="${CONFOPTS} --with-iconv=${BUILTDIR}"
 
@@ -342,6 +343,7 @@ build_gettext () {
 	fi
 	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --enable-relocatable"
 
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
@@ -383,10 +385,26 @@ build_libcurl () {
 	if [ "x${TYPE}" = "xdynamic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
+	CONFOPTS="${CONFOPTS} --enable-http"
 	CONFOPTS="${CONFOPTS} --enable-ipv6"
-	CONFOPTS="${CONFOPTS} --with-darwinssl"
-	CONFOPTS="${CONFOPTS} --without-axtls"
+	CONFOPTS="${CONFOPTS} --enable-proxy"
+	CONFOPTS="${CONFOPTS} --disable-file"
+	CONFOPTS="${CONFOPTS} --disable-ftp"
+	CONFOPTS="${CONFOPTS} --disable-gopher"
+	CONFOPTS="${CONFOPTS} --disable-imap"
 	CONFOPTS="${CONFOPTS} --disable-ldap"
+	CONFOPTS="${CONFOPTS} --disable-ldaps"
+	CONFOPTS="${CONFOPTS} --disable-manual"
+	CONFOPTS="${CONFOPTS} --disable-pop3"
+	CONFOPTS="${CONFOPTS} --disable-rtsp"
+	CONFOPTS="${CONFOPTS} --disable-smb"
+	CONFOPTS="${CONFOPTS} --disable-smtp"
+	#CONFOPTS="${CONFOPTS} --disable-sspi"
+	CONFOPTS="${CONFOPTS} --disable-telnet"
+	CONFOPTS="${CONFOPTS} --disable-tftp"
+	CONFOPTS="${CONFOPTS} --without-axtls"
+	CONFOPTS="${CONFOPTS} --without-zsh-functions-dir"
+	CONFOPTS="${CONFOPTS} --with-darwinssl"
 
 	# Recent libcurl may require OSX_MIN_VER 10.8 or later.
 
@@ -482,6 +500,7 @@ build_libisds () {
 					exit 1
 				fi
 				cp "${PATCHFILE}" ./
+				echo "Applying ${f}"
 				patch -p1 < ${f}
 			done
 		fi
