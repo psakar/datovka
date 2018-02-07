@@ -314,8 +314,8 @@ build_gettext () {
 	fi
 	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
-	CONFOPTS="${CONFOPTS} --enable-threads=win32"
 	CONFOPTS="${CONFOPTS} --enable-relocatable"
+	CONFOPTS="${CONFOPTS} --enable-threads=win32"
 
 	DEFINES=""
 	if [ "x${TYPE}" = "xstatic" ]; then

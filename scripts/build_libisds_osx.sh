@@ -343,6 +343,7 @@ build_gettext () {
 	fi
 	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
+	CONFOPTS="${CONFOPTS} --enable-relocatable"
 
 	./configure ${CONFOPTS} \
 	    CFLAGS="-arch ${ARCH} -mmacosx-version-min=${OSX_MIN_VER}" \
@@ -483,6 +484,7 @@ build_libisds () {
 					exit 1
 				fi
 				cp "${PATCHFILE}" ./
+				echo "Applying ${f}"
 				patch -p1 < ${f}
 			done
 		fi
