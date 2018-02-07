@@ -93,8 +93,8 @@ bool SortFilterProxyModel::filterAcceptsRow(int sourceRow,
 bool SortFilterProxyModel::lessThan(const QModelIndex &sourceLeft,
     const QModelIndex &sourceRight) const
 {
-	QVariant leftData(sourceModel()->data(sourceLeft, filterRole()));
-	QVariant rightData(sourceModel()->data(sourceRight, filterRole()));
+	QVariant leftData(sourceModel()->data(sourceLeft, sortRole()));
+	QVariant rightData(sourceModel()->data(sourceRight, sortRole()));
 
 	if (leftData.canConvert<TagItem>()) {
 		Q_ASSERT(rightData.canConvert<TagItem>());

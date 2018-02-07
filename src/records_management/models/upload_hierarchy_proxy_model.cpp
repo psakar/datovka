@@ -49,8 +49,8 @@ bool UploadHierarchyProxyModel::filterAcceptsRow(int sourceRow,
 bool UploadHierarchyProxyModel::lessThan(const QModelIndex &sourceLeft,
     const QModelIndex &sourceRight) const
 {
-	QVariant leftData(sourceModel()->data(sourceLeft, filterRole()));
-	QVariant rightData(sourceModel()->data(sourceRight, filterRole()));
+	QVariant leftData(sourceModel()->data(sourceLeft, sortRole()));
+	QVariant rightData(sourceModel()->data(sourceRight, sortRole()));
 
 	if (Q_LIKELY(leftData.canConvert<QString>())) {
 		Q_ASSERT(rightData.canConvert<QString>());
