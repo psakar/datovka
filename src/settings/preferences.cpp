@@ -25,6 +25,7 @@
 
 #include "src/common.h"
 #include "src/io/filesystem.h"
+#include "src/localisation/localisation.h"
 #include "src/settings/preferences.h"
 
 GlobPreferences globPref;
@@ -67,7 +68,7 @@ GlobPreferences::GlobPreferences(void)
     timer_value(10),
     download_at_start(false),
     date_format(DATE_FORMAT_DEFAULT),
-    language("system"), /* Use local settings. */
+    language(Localisation::langSystem), /* Use local settings. */
     after_start_select(SELECT_NOTHING),
     message_mark_as_read_timeout(TIMER_MARK_MSG_READ_MS),
     use_global_paths(false),
