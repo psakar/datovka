@@ -127,11 +127,15 @@ INCLUDEPATH += \
 LIBS = \
 	-lisds
 
-isEqual(STATIC, 1) {
-	warning(Linking statically.)
+isEqual(WITH_BUILT_LIBS, 1) {
+	warning(Linking with locally built libraries.)
 } else {
 	INCLUDEPATH += \
 		/usr/include/libxml2
+}
+
+isEqual(STATIC, 1) {
+	warning(Linking statically.)
 }
 
 !isEmpty(PORTABLE_APPLICATION) {
@@ -155,6 +159,31 @@ macx {
 		}
 	}
 
+	contains(QT_ARCH, x86_64):contains(QT_ARCH, i386) {
+		error(Both architectures i386 and x86_64 specified.)
+	} else:contains(QT_ARCH, x86_64) {
+		QMAKE_CXXFLAGS += -arch x86_64
+		message(Building for x86_64.)
+	} else:contains(QT_ARCH, i386) {
+		message(Building for i386.)
+		QMAKE_CXXFLAGS += -arch i386
+	} else {
+		error(Unknown architecture.)
+	}
+
+	LIB_LOCATION=""
+	isEqual(WITH_BUILT_LIBS, 1) {
+		isEqual(STATIC, 1):contains(QT_ARCH, x86_64):!contains(QT_ARCH, i386) {
+			LIB_LOCATION=libs/static_built_x86_64
+		} else:isEqual(STATIC, 1):!contains(QT_ARCH, x86_64):contains(QT_ARCH, i386) {
+			LIB_LOCATION=libs/static_built_i386
+		} else:!isEqual(STATIC, 1):contains(QT_ARCH, x86_64):!contains(QT_ARCH, i386) {
+			LIB_LOCATION=libs/shared_built_x86_64
+		} else:!isEqual(STATIC, 1):!contains(QT_ARCH, x86_64):contains(QT_ARCH, i386) {
+			LIB_LOCATION=libs/shared_built_i386
+		}
+	}
+
 	# See https://bugreports.qt.io/browse/QTBUG-28097
 	# for further details.
 	QMAKE_CXXFLAGS += -mmacosx-version-min=$$OSX_MIN
@@ -173,14 +202,12 @@ macx {
 	QMAKE_POST_LINK += sed -i "$${SED_EXT}" "s/@VERSION@/$${VERSION}/g" "./$${TARGET}.app/Contents/Info.plist";
 	QMAKE_POST_LINK += rm -f "./$${TARGET}.app/Contents/Info.plist$${SED_EXT}";
 
-	isEqual(STATIC, 1) {
-		QMAKE_CXXFLAGS += -arch i386
-
+	!equals(LIB_LOCATION, "") {
 		INCLUDEPATH += \
-			libs/static_built/include \
-			libs/static_built/include/libxml2
+			$${LIB_LOCATION}/include \
+			$${LIB_LOCATION}/include/libxml2
 		LIBPATH += \
-			libs/static_built/lib
+			$${LIB_LOCATION}/lib
 
 		LIBS += \
 			-lexpat \

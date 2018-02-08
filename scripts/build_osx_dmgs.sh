@@ -113,7 +113,7 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 
 	LIBS_DIR="built_macos_sdk${SDK_VER}_i386_static"
 	LIBS_PATH="libs/${LIBS_DIR}"
-	LIBS_LINK="libs/static_built"
+	LIBS_LINK="libs/static_built_i386"
 	# Test the presence of build libraries.
 	if [ ! -d "${SRC_ROOT}/$LIBS_PATH" ]; then
 		echo "Directory '${SRC_ROOT}/$LIBS_PATH' does not exist." >&2
@@ -125,7 +125,7 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	fi
 
 	${LRELEASE} datovka.pro
-	${QMAKE} SDK_VER="${SDK_VER}" STATIC=1 datovka.pro
+	${QMAKE} SDK_VER="${SDK_VER}" WITH_BUILT_LIBS=1 STATIC=1 datovka.pro
 	rm -rf "${APP}"
 	make clean
 	make
