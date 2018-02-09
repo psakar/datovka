@@ -115,11 +115,8 @@ while [ $# -gt 0 ]; do
 		shift
 		break
 		;;
-	-*)
-		echo ${USAGE} >&2
-		exit 1
-		;;
-	*)
+	-*|*)
+		echo "Unknown option '${PARAM}'." >&
 		echo ${USAGE} >&2
 		exit 1
 		;;
