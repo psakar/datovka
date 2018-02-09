@@ -120,6 +120,10 @@ int UploadHierarchyModel::columnCount(const QModelIndex &parent) const
 	return 1;
 }
 
+/* Return true if entry is selectable. */
+#define isSelectable(entry) \
+	(!(entry)->id().isEmpty())
+
 QVariant UploadHierarchyModel::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid()) {
@@ -177,7 +181,7 @@ Qt::ItemFlags UploadHierarchyModel::flags(const QModelIndex &index) const
 
 	const UploadHierarchyResp::NodeEntry *entry =
 	    (UploadHierarchyResp::NodeEntry *)index.internalId();
-	if (entry->id().isEmpty()) {
+	if (!isSelectable(entry)) {
 		flags &= ~Qt::ItemIsSelectable;
 	}
 
