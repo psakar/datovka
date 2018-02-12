@@ -349,6 +349,63 @@ qt_frameworks_copy () {
 	return 0
 }
 
+# Update linker reference to shared library.
+update_dylib () {
+	DYLIB="$1"
+	DL_NAMES="$2"
+	OLD_PATH="$3"
+	NEW_PATH="$4"
+	if [ "x${DYLIB}" = "x" -o "x${DL_NAMES}" = "x" -o "x${OLD_PATH}" = "x" -o "x${NEW_PATH}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	for D in ${DL_NAMES}; do
+		# Sed expression contains '\t'.
+		OLD=$(otool -L "${DYLIB}" | grep "${OLD_PATH}" | grep "${D}" | sed -e 's/^[ 	]*//g' -e 's/[ ](.*$//g')
+		if [ "x${OLD}" = "x" ]; then
+			continue
+		fi
+		NEW=$(echo "${OLD}" | sed -e 's/^.*[/]//g') # Strip path.
+		NEW="${NEW_PATH}/${NEW}"
+		MATCH_NAME=$(echo ${DYLIB} | grep "${D}")
+		if [ "x${MATCH_NAME}" = "x" ]; then
+			install_name_tool -change "${OLD}" "${NEW}" "${DYLIB}"
+		else
+			install_name_tool -id "${NEW}" "${DYLIB}"
+		fi
+		if [ "$?" != "0" ]; then
+			return 1
+		fi
+	done
+
+	return 0
+}
+
+# Update linker references to shared libraries.
+recursive_update_dylibs () {
+	FW_DIR="$1"
+	DLS_STRIPPED="$2"
+	OLD_PATH="$3"
+	NEW_PATH="$4"
+	if [ "x${FW_DIR}" = "x" -o "x${DLS_STRIPPED}" = "x" -o "x${OLD_PATH}" = "x" -o "x${NEW_PATH}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	DL_NAMES=$(dylibs_name "${DLS_STRIPPED}")
+	for D in ${DL_NAMES}; do
+		FILES=$(ls "${FW_DIR}/${D}"*.dylib)
+		for F in ${FILES}; do
+			if [ -f "${F}" -a ! -L "${F}" ]; then
+				update_dylib "${F}" "${DL_NAMES}" "${OLD_PATH}" "${NEW_PATH}" || return 1
+			fi
+		done
+	done
+
+	return 0
+}
+
 # Update linker paths to shared libraries in application.
 app_update_dylibs () {
 	APP="$1"
@@ -537,11 +594,16 @@ QT_FRAMEWORKS=$(qt_frameworks_all "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}")
 dylibs_copy "${DIR_FRAMEWORKS}" "${DYLIBS_LOC}" "${DYLIBS}" || exit 0
 qt_frameworks_copy "${DIR_FRAMEWORKS}" "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}" || exit 1
 
-# Update path leading from main application.
 #NEW_SEARCH_PATH="@executable_path/../Frameworks"
 NEW_SEARCH_PATH="@rpath"
+
+# Update references leading from the shared libraries.
+recursive_update_dylibs "${DIR_FRAMEWORKS}" "${DYLIBS}" "${DYLIBS_LOC}" "${NEW_SEARCH_PATH}" || exit 1
+
+# Update references leading from main application.
 app_update_dylibs "${FILE_APP}" "${DYLIBS}" "${DYLIBS_LOC}" "${NEW_SEARCH_PATH}" || exit 1
 app_update_frameworks "${FILE_APP}" "${QT_FRAMEWORKS}" "${NEW_SEARCH_PATH}" || exit 1
+
 NEW_RPATH="@executable_path/../Frameworks"
 app_update_rpath "${FILE_APP}" "${QT_FRAMEWORK_LOC}" "${NEW_RPATH}" || exit 1
 
