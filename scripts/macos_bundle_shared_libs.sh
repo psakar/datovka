@@ -12,6 +12,9 @@ USAGE="${USAGE}Supported options:\n"
 USAGE="${USAGE}\t-b NAME, --bundle NAME\n\t\tSupply bundle name. Default is '${DFLT_BUNDLE}'.\n"
 USAGE="${USAGE}\t-h, --help\n\t\tPrints help message.\n"
 
+# otool -L
+# otool -l
+
 cd "${SRC_ROOT}"
 
 # Return 0 if param is a directory.
@@ -185,6 +188,38 @@ dylibs_all () {
 	echo "${DYLIBS}"
 }
 
+# Return just the name of the library.
+dylibs_name () {
+	DYLIBS="$1"
+	echo "${DYLIBS}" | sed -e 's/[.].*dylib//g'
+}
+
+# Copy shared libraries into bundle.
+dylibs_copy () {
+	TGT_LOC="$1"
+	SRC_LOC="$2"
+	DLS="$3"
+	if [ "x${TGT_LOC}" = "x" -o "x${SRC_LOC}" = "x" -o "x${DLS}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	# Copy shared libraries files and links.
+	DL_NAMES=$(dylibs_name "${DLS}")
+	for D in ${DL_NAMES}; do
+		FILES=$(ls "${SRC_LOC}/${D}"*.dylib)
+		for F in ${FILES}; do
+			cp -R "${F}" "${TGT_LOC}/"
+			if [ "$?" != "0" ]; then
+				rm -rf "${TGT_LOC}/"
+				return 1
+			fi
+		done
+	done
+
+	return 0
+}
+
 # Return list of Qt frameworks.
 qt_frameworks () {
 	APP="$1"
@@ -281,6 +316,109 @@ qt_frameworks_all () {
 	return 0
 }
 
+# Return just the name of the QT framework.
+qt_frameworks_name () {
+	FRAMEWORKS="$1"
+	echo "${FRAMEWORKS}" | sed -e 's/[/].*$//g'
+}
+
+# Copy frameworks into bundle.
+qt_frameworks_copy () {
+	TGT_LOC="$1"
+	SRC_LOC="$2"
+	FWS="$3"
+	if [ "x${TGT_LOC}" = "x" -o "x${SRC_LOC}" = "x" -o "x${FWS}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	# Copy frameworks.
+	for F in ${FWS}; do
+		F=$(qt_frameworks_name "${F}")
+		SRC="${SRC_LOC}/${F}"
+		if [ ! -d "${SRC}" ]; then
+			continue
+		fi
+		cp -R "${SRC}" "${TGT_LOC}/"
+		if [ "$?" != "0" ]; then
+			rm -rf "${TGT_LOC}/"
+			return 1
+		fi
+	done
+
+	return 0
+}
+
+# Update linker paths to shared libraries in application.
+app_update_dylibs () {
+	APP="$1"
+	DLS_STRIPPED="$2"
+	OLD_PATH="$3"
+	NEW_PATH="$4"
+	if [ "x${APP}" = "x" -o "x${DLS_STRIPPED}" = "x" -o "x${OLD_PATH}" = "x" -o "x${NEW_PATH}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	DL_NAMES=$(dylibs_name "${DLS_STRIPPED}")
+	for D in ${DL_NAMES}; do
+		# Sed expression contains '\t'.
+		OLD=$(otool -L "${APP}" | grep "${OLD_PATH}" | grep "${D}" | sed -e 's/^[ 	]*//g' -e 's/[ ](.*$//g')
+		if [ "x${OLD}" = "x" ]; then
+			continue
+		fi
+		NEW=$(echo "${OLD}" | sed -e 's/^.*[/]//g') # Strip path.
+		NEW="${NEW_PATH}/${NEW}"
+		install_name_tool -change "${OLD}" "${NEW}" "${APP}"
+		if [ "$?" != "0" ]; then
+			return 1
+		fi
+	done
+
+	return 0
+}
+
+# Update linker paths to frameworks in application.
+app_update_frameworks () {
+	APP="$1"
+	FWS_STRIPPED="$2"
+	NEW_PATH="$3"
+	if [ "x${APP}" = "x" -o "x${FWS_STRIPPED}" = "x" -o "x${NEW_PATH}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	for F in ${FWS_STRIPPED}; do
+		# Sed expression contains '\t'.
+		OLD=$(otool -L "${APP}" | grep "${F}" | sed -e 's/^[ 	]*//g' -e 's/[ ](.*$//g')
+		NEW="${NEW_PATH}/${F}"
+		install_name_tool -change "${OLD}" "${NEW}" "${APP}"
+		if [ "$?" != "0" ]; then
+			return 1
+		fi
+	done
+
+	return 0
+}
+
+# Update linker rpath.
+app_update_rpath () {
+	APP="$1"
+	OLD_PATH="$2"
+	NEW_PATH="$3"
+	if [ "x${APP}" = "x" -o "x${OLD_PATH}" = "x" -o "x${NEW_PATH}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	install_name_tool -rpath "${OLD_PATH}" "${NEW_PATH}" "${APP}"
+	if [ "$?" != "0" ]; then
+		return 1
+	fi
+
+	return 0
+}
+
 # Parse rest of command line
 set -- `getopt -l bundle:,help -u -o b:h -- "$@"`
 if [ $# -lt 1 ]; then
@@ -330,14 +468,9 @@ fi
 DIR_LIBS="${SRC_ROOT}/libs"
 DIR_BUNDLE="${SRC_ROOT}/${BUNDLE}"
 DIR_CONTENTS="${DIR_BUNDLE}/Contents"
+DIR_FRAMEWORKS="${DIR_CONTENTS}/Frameworks"
 DIR_MACOS="${DIR_CONTENTS}/MacOs"
 FILE_APP="${DIR_MACOS}/${APP}"
-
-directory_exists "${DIR_LIBS}" || exit 1
-directory_exists "${DIR_BUNDLE}" || exit 1
-directory_exists "${DIR_CONTENTS}" || exit 1
-directory_exists "${DIR_MACOS}" || exit 1
-executable_exists "${FILE_APP}" || exit 1
 
 # See Qt for macOS - Deployment document.
 # https://stackoverflow.com/a/38291080
@@ -361,6 +494,17 @@ if [ "x${DYLIBS_LOC}" = "x" ]; then
 	echo "Could not locate built shared libraries." >&2
 	exit 1
 fi
+
+directory_exists "${DIR_LIBS}" || exit 1
+directory_exists "${DIR_BUNDLE}" || exit 1
+directory_exists "${DIR_CONTENTS}" || exit 1
+if directory_exists "${DIR_FRAMEWORKS}"; then
+	rm -rf "${DIR_FRAMEWORKS}"
+fi
+mkdir -p "${DIR_FRAMEWORKS}"
+directory_exists "${DIR_FRAMEWORKS}" || exit 1
+directory_exists "${DIR_MACOS}" || exit 1
+executable_exists "${FILE_APP}" || exit 1
 
 DYLIBS=$(dylibs_strip "${DYLIBS}")
 
@@ -389,3 +533,16 @@ fi
 
 # Get all Qt frameworks including those which other depend on.
 QT_FRAMEWORKS=$(qt_frameworks_all "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}")
+
+dylibs_copy "${DIR_FRAMEWORKS}" "${DYLIBS_LOC}" "${DYLIBS}" || exit 0
+qt_frameworks_copy "${DIR_FRAMEWORKS}" "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}" || exit 1
+
+# Update path leading from main application.
+#NEW_SEARCH_PATH="@executable_path/../Frameworks"
+NEW_SEARCH_PATH="@rpath"
+app_update_dylibs "${FILE_APP}" "${DYLIBS}" "${DYLIBS_LOC}" "${NEW_SEARCH_PATH}" || exit 1
+app_update_frameworks "${FILE_APP}" "${QT_FRAMEWORKS}" "${NEW_SEARCH_PATH}" || exit 1
+NEW_RPATH="@executable_path/../Frameworks"
+app_update_rpath "${FILE_APP}" "${QT_FRAMEWORK_LOC}" "${NEW_RPATH}" || exit 1
+
+echo "Ok"
