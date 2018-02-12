@@ -54,6 +54,23 @@ executable_exists () {
 	return 0
 }
 
+# Returns 0 if number of held lines is equal in both variables.
+line_number_match () {
+	VAR1="$1"
+	VAR2="$2"
+	if [ "x${VAR1}" = "x" -o "x${VAR2}" = "x" ]; then
+		echo "Received empty paramater." >&2
+		return 1
+	fi
+	LINENUM1=$(echo "${VAR1}" | wc -l)
+	LINENUM2=$(echo "${VAR2}" | wc -l)
+	if [ "x${LINENUM1}" != "x${LINENUM2}" ]; then
+		echo "Line number does not match." >&2
+		return 1
+	fi
+	return 0
+}
+
 # Return list of dynamic libraries.
 dylibs () {
 	APP="$1"
@@ -64,6 +81,108 @@ dylibs () {
 
 	# First sed expression contains a '\t' character.
 	otool -L "${APP}" | grep '^[ 	]' | grep "${DIR_LIBS}" | sed -e 's/^[ 	]*//g' -e 's/\(^.*dylib\)\(.*\)$/\1/g'
+}
+
+# Return non-empty location of dynamic libraries.
+dylibs_location () {
+	DYLIBS="$1"
+	if [ "x${DYLIBS}" = "x" ]; then
+		echo ""
+		echo "No shared libraries passed." >&2
+		return 1
+	fi
+
+	# Only one line must remain.
+	LOCATION=$(echo "${DYLIBS}" | sed -e 's/[/][^/]*\.dylib//g' | sort -u)
+	LOCATION_NUM=$(echo "${LOCATION}" | wc -l)
+	if [ "${LOCATION_NUM}" -ne "1" -o "x${LOCATION}" = "x" ]; then
+		echo ""
+		echo "Could not determine unique location of locally built libraries." >&2
+		return 1
+	fi
+
+	echo "${LOCATION}"
+	return 0
+}
+
+# Return list of libraries without leading path.
+dylibs_strip () {
+	DYLIBS="$1"
+	echo "${DYLIBS}" | sed -e 's/^.*[/]//g'
+}
+
+# Add libssl to the list of libraries.
+dylib_add_ssl () {
+	LOC="$1"
+	DYLIBS="$2"
+	if [ "x${LOC}" = "x" -o "x${DYLIBS}" = "x" ]; then
+		echo ""
+		return 1
+	fi
+
+	SSL_LIBS=$(ls "${LOC}/" | grep libssl)
+	FOUND=""
+	for S in ${SSL_LIBS}; do
+		# Ignore symbolic links.
+		if [ ! -L "${LOC}/${S}" ]; then
+			if [ "x${FOUND}" = "x" ]; then
+				FOUND="${S}"
+			else
+				FOUND="${FOUND}\n${S}"
+			fi
+		fi
+	done
+
+	if [ "x${FOUND}" = "x" ]; then
+		echo ""
+		return 1
+	fi
+
+	echo "${FOUND}\n${DYLIBS}"
+	return 0
+}
+
+# Get all Qt frameworks including those that are dependencies of other frameworks.
+dylibs_all () {
+	LOC="$1"
+	DYLIBS="$2"
+	if [ "x${LOC}" = "x" -o "x${DYLIBS}" = "x" ]; then
+		echo ""
+		return 1
+	fi
+
+	DYLIBS=$(echo "${DYLIBS}" | sort -u)
+	OUT_DYLIBS=""
+
+	while [ "x${DYLIBS}" != "x${OUT_DYLIBS}" ]; do
+		if [ "x${OUT_DYLIBS}" != "x" ]; then
+			DYLIBS=$(echo "${OUT_DYLIBS}" | sort -u)
+		fi
+		OUT_DYLIBS=""
+
+		for D in ${DYLIBS}; do
+			FOUND_DLS=$(dylibs "${LOC}/${D}")
+			if [ "x${FOUND_DLS}" = "x" ]; then
+				# Something must be present.
+				echo ""
+				return 1
+			fi
+			STRIPPED_DLS=$(dylibs_strip "${FOUND_DLS}")
+			if [ "x${STRIPPED_DLS}" = "x" ]; then
+				echo ""
+				return 1
+			fi
+			if [ "x${OUT_DYLIBS}" = "x" ]; then
+				OUT_DYLIBS="${STRIPPED_DLS}"
+			else
+				OUT_DYLIBS="${OUT_DYLIBS}\n${STRIPPED_DLS}"
+			fi
+		done
+
+		OUT_DYLIBS=$(echo "${OUT_DYLIBS}" | sort -u)
+	done
+
+	echo "${DYLIBS}"
 }
 
 # Return list of Qt frameworks.
@@ -132,7 +251,7 @@ qt_frameworks_all () {
 
 	while [ "x${FRAMEWORKS}" != "x${OUT_FRAMEWORKS}" ]; do
 		if [ "x${OUT_FRAMEWORKS}" != "x" ]; then
-			FRAMEWORKS=$(echo "${OUT_FRAMEWORKS}" | sed -u)
+			FRAMEWORKS=$(echo "${OUT_FRAMEWORKS}" | sort -u)
 		fi
 		OUT_FRAMEWORKS=""
 
@@ -224,16 +343,37 @@ executable_exists "${FILE_APP}" || exit 1
 # https://stackoverflow.com/a/38291080
 # http://thecourtsofchaos.com/2013/09/16/how-to-copy-and-relink-binaries-on-osx/
 
+# Get Qt frameworks which the application directly depened on.
 DYLIBS=$(dylibs "${FILE_APP}")
+DYLIBS_BUILT=$(echo "${DYLIBS}" | grep "${SRC_ROOT}")
 QT_FRAMEWORKS=$(qt_frameworks "${FILE_APP}")
 QT_FRAMEWORKS_WITH_RPATH=$(echo "${QT_FRAMEWORKS}" | grep @rpath)
+
+
+# Double check whether local libraries are present.
+if ! line_number_match "${DYLIBS}" "${DYLIBS_BUILT}"; then
+	echo "Something is wrong with locally built libraries."
+	exit 1
+fi
+
+DYLIBS_LOC=$(dylibs_location "${DYLIBS}")
+if [ "x${DYLIBS_LOC}" = "x" ]; then
+	echo "Could not locate built shared libraries." >&2
+	exit 1
+fi
+
+DYLIBS=$(dylibs_strip "${DYLIBS}")
+
+DYLIBS=$(dylib_add_ssl "${DYLIBS_LOC}" "${DYLIBS}")
+
+# Get all shared libraries including those which other depend on.
+DYLIBS=$(dylibs_all "${DYLIBS_LOC}" "${DYLIBS}")
+
 
 # Test whether path to qt framework is set using an @rpath.
 TEST_RPATH="yes"
 if [ "x${TEST_RPATH}" = "xyes" ]; then
-	FW_NUM=$(echo "${QT_FRAMEWORKS}" | wc -l)
-	RPATH_FW_NUM=$(echo "${QT_FRAMEWORKS_WITH_RPATH}" | wc -l)
-	if [ "x${FW_NUM}" != "x${RPATH_FW_NUM}" ]; then
+	if ! line_number_match "${QT_FRAMEWORKS}" "${QT_FRAMEWORKS_WITH_RPATH}"; then
 		echo "Path to Qt framework is not set using @rpath."
 		exit 1
 	fi
@@ -243,7 +383,9 @@ QT_FRAMEWORKS=$(qt_frameworks_strip "${QT_FRAMEWORKS}")
 
 QT_FRAMEWORK_LOC=$(qt_frameworks_location "${FILE_APP}" "${QT_FRAMEWORKS}")
 if [ "x${QT_FRAMEWORK_LOC}" = "x" ]; then
-	echo "Could not locate Qt framework."
+	echo "Could not locate Qt framework." >&2
+	exit 1
 fi
 
-qt_frameworks_all "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}"
+# Get all Qt frameworks including those which other depend on.
+QT_FRAMEWORKS=$(qt_frameworks_all "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}")
