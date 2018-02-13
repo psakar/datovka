@@ -6,11 +6,13 @@ SRC_ROOT=$(cd "${SCRIPT_LOCATION}"/..; pwd)
 APP="datovka"
 BUNDLE=""
 DFLT_BUNDLE="${APP}.app"
+NO_DEBUG="no"
 
 USAGE="Usage:\n\t$0\n\n"
 USAGE="${USAGE}Supported options:\n"
 USAGE="${USAGE}\t-b NAME, --bundle NAME\n\t\tSupply bundle name. Default is '${DFLT_BUNDLE}'.\n"
 USAGE="${USAGE}\t-h, --help\n\t\tPrints help message.\n"
+USAGE="${USAGE}\t-n, --no-debug\n\t\tRemoves Qt debug libraries from the bundle.\n"
 
 # otool -L
 # otool -l
@@ -627,8 +629,29 @@ app_update_rpath () {
 	return 0
 }
 
+# Remove all debug libraries from given location.
+remove_debug () {
+	local LOC="$1"
+	if [ "x${LOC}" = "x" ]; then
+		echo "No paramater given." >&2
+		return 1
+	fi
+
+	if [ ! -d "${LOC}" ]; then
+		echo "'${LOC}' is not a directory." >&2
+		return 1
+	fi
+
+	local FOUND=$(find "${LOC}/" | grep "_debug")
+	if [ "x${FOUND}" != "x" ]; then
+		rm ${FOUND} || return 1
+	fi
+
+	return 0
+}
+
 # Parse rest of command line
-set -- `getopt -l bundle:,help -u -o b:h -- "$@"`
+set -- `getopt -l bundle:,help,no-debug -u -o b:hn -- "$@"`
 if [ $# -lt 1 ]; then
 	echo ${USAGE} >&2
 	exit 1
@@ -648,6 +671,14 @@ while [ $# -gt 0 ]; do
 	-h|--help)
 		echo ${USAGE}
 		exit 0
+		;;
+	-n|--no-debug)
+		if [ "x${NO_DEBUG}" != "xyes" ]; then
+			NO_DEBUG="yes"
+		else
+			echo "No debug is already set." >&2
+			exit 1
+		fi
 		;;
 	--)
 		shift
@@ -769,5 +800,10 @@ app_update_frameworks "${FILE_APP}" "${QT_FRAMEWORKS}" "${NEW_SEARCH_PATH}" || e
 
 NEW_RPATH="@executable_path/../Frameworks"
 app_update_rpath "${FILE_APP}" "${QT_FRAMEWORK_LOC}" "${NEW_RPATH}" || exit 1
+
+if [ "x${NO_DEBUG}" = "xyes" ]; then
+	remove_debug "${DIR_FRAMEWORKS}" || exit 1
+	remove_debug "${DIR_PLUGINS}" || exit 1
+fi
 
 echo "Bundling OK"
