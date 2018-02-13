@@ -193,7 +193,12 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	fi
 
 	${LRELEASE} datovka.pro
-	${QMAKE} SDK_VER="${SDK_VER}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" datovka.pro
+	DEBUG_INFO_OPT=""
+	if [ "x${BUILD_TYPE}" = "x${BUILD_SHARED}" ]; then
+		# https://stackoverflow.com/a/35704181
+		DEBUG_INFO_OPT="CONFIG+=force_debug_info"
+	fi
+	${QMAKE} SDK_VER="${SDK_VER}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${DEBUG_INFO_OPT} datovka.pro
 	rm -rf "${APP}"
 	make clean
 	make ${MAKE_OPTS}
