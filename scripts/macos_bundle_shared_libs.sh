@@ -473,6 +473,33 @@ qt_plugins_copy () {
 	return 0
 }
 
+# Copy Qt configuration file.
+qt_conf_copy () {
+	local RES_DIR="$1"
+	local CONF_SRC="$2"
+	if [ "x${RES_DIR}" = "x" -o "x${CONF_SRC}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	if [ ! -f "${CONF_SRC}" ]; then
+		echo "'${CONF_SRC}' is not a file." >&2
+		return 1
+	fi
+
+	if [ ! -d "${RES_DIR}" ]; then
+		echo "'${RES_DIR}' is not a directory." >&2
+		return 1
+	fi
+
+	cp "${CONF_SRC}" "${RES_DIR}/qt.conf"
+	if [ "$?" != "0" ]; then
+		return 1
+	fi
+
+	return 0
+}
+
 # Update linker reference to shared library.
 update_dylib () {
 	local DYLIB="$1"
@@ -652,6 +679,7 @@ DIR_CONTENTS="${DIR_BUNDLE}/Contents"
 DIR_FRAMEWORKS="${DIR_CONTENTS}/Frameworks"
 DIR_MACOS="${DIR_CONTENTS}/MacOs"
 DIR_PLUGINS="${DIR_CONTENTS}/PlugIns"
+DIR_RESOURCES="${DIR_CONTENTS}/Resources"
 FILE_APP="${DIR_MACOS}/${APP}"
 
 # See Qt for macOS - Deployment document.
@@ -685,12 +713,13 @@ if directory_exists "${DIR_FRAMEWORKS}"; then
 fi
 mkdir -p "${DIR_FRAMEWORKS}"
 directory_exists "${DIR_FRAMEWORKS}" || exit 1
+directory_exists "${DIR_MACOS}" || exit 1
 if directory_exists "${DIR_PLUGINS}"; then
 	rm -rf "${DIR_PLUGINS}"
 fi
 mkdir -p "${DIR_PLUGINS}"
 directory_exists "${DIR_PLUGINS}" || exit 1
-directory_exists "${DIR_MACOS}" || exit 1
+directory_exists "${DIR_RESOURCES}" || exit 1
 executable_exists "${FILE_APP}" || exit 1
 
 DYLIBS=$(dylibs_strip "${DYLIBS}")
@@ -726,6 +755,7 @@ QT_PLUGINS_LOC=$(qt_plugins_loc "${QT_FRAMEWORK_LOC}")
 dylibs_copy "${DIR_FRAMEWORKS}" "${DYLIBS_LOC}" "${DYLIBS}" || exit 0
 qt_frameworks_copy "${DIR_FRAMEWORKS}" "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}" || exit 1
 qt_plugins_copy "${DIR_PLUGINS}" "${QT_PLUGINS_LOC}"
+qt_conf_copy "${DIR_RESOURCES}" "${SRC_ROOT}/res/qt.conf_macos"
 
 #NEW_SEARCH_PATH="@executable_path/../Frameworks"
 NEW_SEARCH_PATH="@rpath"
@@ -740,4 +770,4 @@ app_update_frameworks "${FILE_APP}" "${QT_FRAMEWORKS}" "${NEW_SEARCH_PATH}" || e
 NEW_RPATH="@executable_path/../Frameworks"
 app_update_rpath "${FILE_APP}" "${QT_FRAMEWORK_LOC}" "${NEW_RPATH}" || exit 1
 
-echo "Ok"
+echo "Bundling OK"
