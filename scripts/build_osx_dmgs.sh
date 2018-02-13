@@ -5,6 +5,8 @@ SRC_ROOT="${SCRIPT_LOCATION}/.."
 
 DFLT_QT_VER="5.4.2"
 
+MAKE_OPTS="-j 2"
+
 if [ "x${QT_VER}" = "x" ]; then
 	QT_VER=${DFLT_QT_VER}
 fi
@@ -13,8 +15,8 @@ USAGE="Usage:\n\t$0 -s SDK_VERSION_NUMBER [options]\n\n"
 USAGE="${USAGE}Supported options:\n"
 USAGE="${USAGE}\t-d\n\t\tAlso builds DMG file.\n"
 USAGE="${USAGE}\t-D\n\t\tDon't compile, just build the package. This implies -d.\n"
-USAGE="${USAGE}\t-h\n\t\tPrints help message.\n"
-USAGE="${USAGE}\t-s SDK_VERSION_NUMBER\n\t\tSupply SDK version name (e.g. 10.7).\n"
+USAGE="${USAGE}\t-h, --help\n\t\tPrints help message.\n"
+USAGE="${USAGE}\t-s SDK_VERSION_NUMBER, --sdk SDK_VERSION_NUMBER\n\t\tSupply SDK version name (e.g. 10.7).\n"
 USAGE="${USAGE}\t--shared\n\t\tCompile with shared libraries.\n"
 USAGE="${USAGE}\t--static (default)\n\t\tCompile with static libraries.\n"
 USAGE="${USAGE}\t--i386 (default)\n\t\tCompile for i386 architecture.\n"
@@ -38,7 +40,7 @@ ARCH_I386="i386"
 ARCH_X86_64="x86_64"
 
 # Parse rest of command line
-set -- `getopt -l shared -l static -l i386 -l x86_64 -u -o dDhs: -- "$@"`
+set -- `getopt -l help -l sdk: -l shared -l static -l i386 -l x86_64 -u -o dDhs: -- "$@"`
 if [ $# -lt 1 ]; then
 	echo ${USAGE} >&2
 	exit 1
@@ -62,11 +64,11 @@ while [ $# -gt 0 ]; do
 			exit 1
 		fi
 		;;
-	-h)
+	-h|--help)
 		echo ${USAGE}
 		exit 0
 		;;
-	-s)
+	-s|--sdk)
 		if [ "x${SDK_VER}" = "x" ]; then
 			SDK_VER=$(echo $2 | grep '^[0-9][0-9]*\.[0-9][0-9]*$')
 			if [ "x${SDK_VER}" = "x" ]; then
@@ -116,7 +118,7 @@ while [ $# -gt 0 ]; do
 		break
 		;;
 	-*|*)
-		echo "Unknown option '${PARAM}'." >&
+		echo "Unknown option '${PARAM}'." >&2
 		echo ${USAGE} >&2
 		exit 1
 		;;
@@ -194,7 +196,11 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	${QMAKE} SDK_VER="${SDK_VER}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" datovka.pro
 	rm -rf "${APP}"
 	make clean
-	make
+	make ${MAKE_OPTS}
+
+	if [ "x${BUILD_TYPE}" = "x${BUILD_SHARED}" ]; then
+		${SCRIPT_LOCATION}/macos_bundle_shared_libs.sh -b "${APP}" -n
+	fi
 fi
 
 if [ "x${BUILD_DMG}" != "xno" ]; then
