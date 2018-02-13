@@ -644,7 +644,18 @@ remove_debug () {
 
 	local FOUND=$(find "${LOC}/" | grep "_debug")
 	if [ "x${FOUND}" != "x" ]; then
-		rm ${FOUND} || return 1
+		for F in ${FOUND}; do
+			if [ -f "${F}" ]; then
+				rm ${F} || return 1
+			elif [ -d "${F}" ]; then
+				rm -r ${F} || return 1
+			elif [ ! -e "${F}" ]; then
+				echo "'${F}' likely already deleted." >&2
+			else
+				echo "Unknown location '${F}'." >&2
+				return 1
+			fi
+		done
 	fi
 
 	return 0
