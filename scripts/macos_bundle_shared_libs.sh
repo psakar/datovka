@@ -19,7 +19,7 @@ cd "${SRC_ROOT}"
 
 # Return 0 if param is a directory.
 directory_exists () {
-	DIR=$1
+	local DIR=$1
 	if [ "x${DIR}" = "x" ]; then
 		echo "Missing parameter." >&2
 		return 1
@@ -37,7 +37,7 @@ directory_exists () {
 
 # Return 0 if param is an executable file.
 executable_exists () {
-	EXE=$1
+	local EXE=$1
 	if [ "x${EXE}" = "x" ]; then
 		echo "Missing parameter." >&2
 		return 1
@@ -59,14 +59,14 @@ executable_exists () {
 
 # Returns 0 if number of held lines is equal in both variables.
 line_number_match () {
-	VAR1="$1"
-	VAR2="$2"
+	local VAR1="$1"
+	local VAR2="$2"
 	if [ "x${VAR1}" = "x" -o "x${VAR2}" = "x" ]; then
 		echo "Received empty paramater." >&2
 		return 1
 	fi
-	LINENUM1=$(echo "${VAR1}" | wc -l)
-	LINENUM2=$(echo "${VAR2}" | wc -l)
+	local LINENUM1=$(echo "${VAR1}" | wc -l)
+	local LINENUM2=$(echo "${VAR2}" | wc -l)
 	if [ "x${LINENUM1}" != "x${LINENUM2}" ]; then
 		echo "Line number does not match." >&2
 		return 1
@@ -76,7 +76,7 @@ line_number_match () {
 
 # Return list of dynamic libraries.
 dylibs () {
-	APP="$1"
+	local APP="$1"
 	if [ "x${APP}" = "x" ]; then
 		echo ""
 		return 1
@@ -88,7 +88,7 @@ dylibs () {
 
 # Return non-empty location of dynamic libraries.
 dylibs_location () {
-	DYLIBS="$1"
+	local DYLIBS="$1"
 	if [ "x${DYLIBS}" = "x" ]; then
 		echo ""
 		echo "No shared libraries passed." >&2
@@ -96,8 +96,8 @@ dylibs_location () {
 	fi
 
 	# Only one line must remain.
-	LOCATION=$(echo "${DYLIBS}" | sed -e 's/[/][^/]*\.dylib//g' | sort -u)
-	LOCATION_NUM=$(echo "${LOCATION}" | wc -l)
+	local LOCATION=$(echo "${DYLIBS}" | sed -e 's/[/][^/]*\.dylib//g' | sort -u)
+	local LOCATION_NUM=$(echo "${LOCATION}" | wc -l)
 	if [ "${LOCATION_NUM}" -ne "1" -o "x${LOCATION}" = "x" ]; then
 		echo ""
 		echo "Could not determine unique location of locally built libraries." >&2
@@ -110,21 +110,21 @@ dylibs_location () {
 
 # Return list of libraries without leading path.
 dylibs_strip () {
-	DYLIBS="$1"
+	local DYLIBS="$1"
 	echo "${DYLIBS}" | sed -e 's/^.*[/]//g'
 }
 
 # Add libssl to the list of libraries.
 dylib_add_ssl () {
-	LOC="$1"
-	DYLIBS="$2"
+	local LOC="$1"
+	local DYLIBS="$2"
 	if [ "x${LOC}" = "x" -o "x${DYLIBS}" = "x" ]; then
 		echo ""
 		return 1
 	fi
 
-	SSL_LIBS=$(ls "${LOC}/" | grep libssl)
-	FOUND=""
+	local SSL_LIBS=$(ls "${LOC}/" | grep libssl)
+	local FOUND=""
 	for S in ${SSL_LIBS}; do
 		# Ignore symbolic links.
 		if [ ! -L "${LOC}/${S}" ]; then
@@ -147,15 +147,15 @@ dylib_add_ssl () {
 
 # Get all Qt frameworks including those that are dependencies of other frameworks.
 dylibs_all () {
-	LOC="$1"
-	DYLIBS="$2"
+	local LOC="$1"
+	local DYLIBS="$2"
 	if [ "x${LOC}" = "x" -o "x${DYLIBS}" = "x" ]; then
 		echo ""
 		return 1
 	fi
 
 	DYLIBS=$(echo "${DYLIBS}" | sort -u)
-	OUT_DYLIBS=""
+	local OUT_DYLIBS=""
 
 	while [ "x${DYLIBS}" != "x${OUT_DYLIBS}" ]; do
 		if [ "x${OUT_DYLIBS}" != "x" ]; then
@@ -190,24 +190,24 @@ dylibs_all () {
 
 # Return just the name of the library.
 dylibs_name () {
-	DYLIBS="$1"
+	local DYLIBS="$1"
 	echo "${DYLIBS}" | sed -e 's/[.].*dylib//g'
 }
 
 # Copy shared libraries into bundle.
 dylibs_copy () {
-	TGT_LOC="$1"
-	SRC_LOC="$2"
-	DLS="$3"
+	local TGT_LOC="$1"
+	local SRC_LOC="$2"
+	local DLS="$3"
 	if [ "x${TGT_LOC}" = "x" -o "x${SRC_LOC}" = "x" -o "x${DLS}" = "x" ]; then
 		echo "Invalid input." >&2
 		return 1
 	fi
 
 	# Copy shared libraries files and links.
-	DL_NAMES=$(dylibs_name "${DLS}")
+	local DL_NAMES=$(dylibs_name "${DLS}")
 	for D in ${DL_NAMES}; do
-		FILES=$(ls "${SRC_LOC}/${D}"*.dylib)
+		local FILES=$(ls "${SRC_LOC}/${D}"*.dylib)
 		for F in ${FILES}; do
 			cp -R "${F}" "${TGT_LOC}/"
 			if [ "$?" != "0" ]; then
@@ -222,7 +222,7 @@ dylibs_copy () {
 
 # Return list of Qt frameworks.
 qt_frameworks () {
-	APP="$1"
+	local APP="$1"
 	if [ "x${APP}" = "x" ]; then
 		echo ""
 		return 1
@@ -234,14 +234,14 @@ qt_frameworks () {
 
 # Return list of frameworks without leading @rpath.
 qt_frameworks_strip () {
-	FRAMEWORKS="$1"
+	local FRAMEWORKS="$1"
 	echo "${FRAMEWORKS}" | sed -e 's/@rpath[/]//g'
 }
 
 # Return non-empty location of the Qt frameworks.
 qt_frameworks_location () {
-	EXE="$1"
-	FRAMEWORKS="$2"
+	local EXE="$1"
+	local FRAMEWORKS="$2"
 	if [ "x${EXE}" = "x" -o "x${FRAMEWORKS}" = "x" ]; then
 		echo ""
 		return 1
@@ -251,7 +251,7 @@ qt_frameworks_location () {
 		return 1
 	fi
 
-	PATHS=$(otool -l "${EXE}" | grep path | grep -v rpath | sed -e 's/\(^[^/]*path[^/]*\)//g' -e 's/[ ](.*$//g')
+	local PATHS=$(otool -l "${EXE}" | grep path | grep -v rpath | sed -e 's/\(^[^/]*path[^/]*\)//g' -e 's/[ ](.*$//g')
 
 	for P in ${PATHS}; do
 		for F in ${FRAMEWORKS}; do
@@ -274,15 +274,15 @@ qt_frameworks_location () {
 
 # Get all Qt frameworks including those that are dependencies of other frameworks.
 qt_frameworks_all () {
-	LOC="$1"
-	FRAMEWORKS="$2"
+	local LOC="$1"
+	local FRAMEWORKS="$2"
 	if [ "x${LOC}" = "x" -o "x${FRAMEWORKS}" = "x" ]; then
 		echo ""
 		return 1
 	fi
 
 	FRAMEWORKS=$(echo "${FRAMEWORKS}" | sort -u)
-	OUT_FRAMEWORKS=""
+	local OUT_FRAMEWORKS=""
 
 	while [ "x${FRAMEWORKS}" != "x${OUT_FRAMEWORKS}" ]; do
 		if [ "x${OUT_FRAMEWORKS}" != "x" ]; then
@@ -291,13 +291,13 @@ qt_frameworks_all () {
 		OUT_FRAMEWORKS=""
 
 		for F in ${FRAMEWORKS}; do
-			FOUND_FWS=$(qt_frameworks "$LOC/${F}")
+			local FOUND_FWS=$(qt_frameworks "$LOC/${F}")
 			if [ "x${FOUND_FWS}" = "x" ]; then
 				# Something must be resent.
 				echo ""
 				return 1
 			fi
-			STRIPPED_FWS=$(qt_frameworks_strip "${FOUND_FWS}")
+			local STRIPPED_FWS=$(qt_frameworks_strip "${FOUND_FWS}")
 			if [ "x${STRIPPED_FWS}" = "x" ]; then
 				echo ""
 				return 1
@@ -318,15 +318,15 @@ qt_frameworks_all () {
 
 # Return just the name of the QT framework.
 qt_frameworks_name () {
-	FRAMEWORKS="$1"
+	local FRAMEWORKS="$1"
 	echo "${FRAMEWORKS}" | sed -e 's/[/].*$//g'
 }
 
 # Copy frameworks into bundle.
 qt_frameworks_copy () {
-	TGT_LOC="$1"
-	SRC_LOC="$2"
-	FWS="$3"
+	local TGT_LOC="$1"
+	local SRC_LOC="$2"
+	local FWS="$3"
 	if [ "x${TGT_LOC}" = "x" -o "x${SRC_LOC}" = "x" -o "x${FWS}" = "x" ]; then
 		echo "Invalid input." >&2
 		return 1
@@ -335,7 +335,7 @@ qt_frameworks_copy () {
 	# Copy frameworks.
 	for F in ${FWS}; do
 		F=$(qt_frameworks_name "${F}")
-		SRC="${SRC_LOC}/${F}"
+		local SRC="${SRC_LOC}/${F}"
 		if [ ! -d "${SRC}" ]; then
 			continue
 		fi
@@ -349,12 +349,136 @@ qt_frameworks_copy () {
 	return 0
 }
 
+# Get location of Qt plugins.
+qt_plugins_loc () {
+	local FW_LOC="$1"
+	if [ "x${FW_LOC}" = "x" ]; then
+		echo ""
+		echo "Missing parameter." >&2
+		return 1
+	fi
+
+	if [ ! -d "${FW_LOC}" ]; then
+		echo ""
+		echo "Supplied parameter if not a directory." >&2
+		return 1
+	fi
+
+	local PLUG_LOC=$(echo "$FW_LOC" | sed -e 's/[/][^/]*[/]*$//g')
+	PLUG_LOC="${PLUG_LOC}/plugins"
+	if [ ! -d "$PLUG_LOC" ]; then
+		echo ""
+		echo "Could not determine Qt plugins directory." >&2
+		return 1
+	fi
+
+	echo "$PLUG_LOC"
+	return 0
+}
+
+# Copy matching content.
+qt_plugins_copy_matching () {
+	local TGT_LOC="$1"
+	local SRC_LOC="$2"
+	local PLUG_SUBDIR="$3"
+	if [ "x${TGT_LOC}" = "x" -o "x${SRC_LOC}" = "x" -o "x${PLUG_SUBDIR}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	if [ ! -d "${TGT_LOC}" -o ! -d "${SRC_LOC}" ]; then
+		echo "Supplied parameters are not directories." >&2
+		return 1
+	fi
+
+	shift
+	shift
+	shift
+
+	SRC_LOC="${SRC_LOC}/${PLUG_SUBDIR}"
+	if [ ! -d "${SRC_LOC}" ]; then
+		echo "'${SRC_LOC}' is not a directory." >&2
+		return 1
+	fi
+
+	if [ "$#" -le "0" ]; then
+		echo "Missing at least one parameter." >&2
+		return 1
+	fi
+
+	TGT_LOC="${TGT_LOC}/${PLUG_SUBDIR}"
+	if [ ! -d "${TGT_LOC}" ]; then
+		mkdir -p "${TGT_LOC}"
+	fi
+
+	while [ "$#" -gt "0" ]; do
+		local NAME_STUB="$1"
+		# Find files matching the stub and copy them into target.
+		local MATCHES=$(ls "${SRC_LOC}/" | grep "${NAME_STUB}" | grep "dylib$")
+		if [ "x${MATCHES}" = "x" ]; then
+			echo "No mathes for '${NAME_STUB}' found in '${SRC_LOC}'." >&2
+			return 1
+		fi
+		for M in ${MATCHES}; do
+			local FNAME="${SRC_LOC}/${M}"
+			if [ ! -f "${FNAME}" -o -L "${FNAME}" ]; then
+				echo "'${FNAME}' is not a file." >&2
+				return 1
+			fi
+			cp "${FNAME}" "${TGT_LOC}/"
+			if [ "$?" != "0" ]; then
+				return 1
+			fi
+		done
+
+		shift
+	done
+}
+
+# Copy Qt plugins into bundle.
+qt_plugins_copy () {
+	local TGT_LOC="$1"
+	local SRC_LOC="$2"
+	if [ "x${TGT_LOC}" = "x" -o "x${SRC_LOC}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	if [ ! -d "${TGT_LOC}" -o ! -d "${SRC_LOC}" ]; then
+		echo "Supplied parameters are not directories." >&2
+		return 1
+	fi
+
+	# See content of eg. Wireshark package.
+
+	# Whole directories:
+	# accessible ?
+	cp -R "${SRC_LOC}/bearer" "${TGT_LOC}/" && \
+	cp -R "${SRC_LOC}/iconengines" "${TGT_LOC}/" && \
+	cp -R "${SRC_LOC}/printsupport" "${TGT_LOC}/"
+	if [ "$?" != "0" ]; then
+		rm -rf "${TGT_LOC}/"
+		return 1
+	fi
+
+	# Only partial content:
+	qt_plugins_copy_matching "${TGT_LOC}" "${SRC_LOC}" "imageformats" "gif" "icns" "ico" "jpeg" "svg" "tiff" && \
+	qt_plugins_copy_matching "${TGT_LOC}" "${SRC_LOC}" "platforms" "cocoa" && \
+	qt_plugins_copy_matching "${TGT_LOC}" "${SRC_LOC}" "sqldrivers" "sqlite"
+	if [ "$?" != "0" ]; then
+		rm -rf "${TGT_LOC}/"
+		return 1
+	fi
+
+	return 0
+}
+
 # Update linker reference to shared library.
 update_dylib () {
-	DYLIB="$1"
-	DL_NAMES="$2"
-	OLD_PATH="$3"
-	NEW_PATH="$4"
+	local DYLIB="$1"
+	local DL_NAMES="$2"
+	local OLD_PATH="$3"
+	local NEW_PATH="$4"
 	if [ "x${DYLIB}" = "x" -o "x${DL_NAMES}" = "x" -o "x${OLD_PATH}" = "x" -o "x${NEW_PATH}" = "x" ]; then
 		echo "Invalid input." >&2
 		return 1
@@ -362,13 +486,13 @@ update_dylib () {
 
 	for D in ${DL_NAMES}; do
 		# Sed expression contains '\t'.
-		OLD=$(otool -L "${DYLIB}" | grep "${OLD_PATH}" | grep "${D}" | sed -e 's/^[ 	]*//g' -e 's/[ ](.*$//g')
+		local OLD=$(otool -L "${DYLIB}" | grep "${OLD_PATH}" | grep "${D}" | sed -e 's/^[ 	]*//g' -e 's/[ ](.*$//g')
 		if [ "x${OLD}" = "x" ]; then
 			continue
 		fi
-		NEW=$(echo "${OLD}" | sed -e 's/^.*[/]//g') # Strip path.
+		local NEW=$(echo "${OLD}" | sed -e 's/^.*[/]//g') # Strip path.
 		NEW="${NEW_PATH}/${NEW}"
-		MATCH_NAME=$(echo ${DYLIB} | grep "${D}")
+		local MATCH_NAME=$(echo ${DYLIB} | grep "${D}")
 		if [ "x${MATCH_NAME}" = "x" ]; then
 			install_name_tool -change "${OLD}" "${NEW}" "${DYLIB}"
 		else
@@ -384,18 +508,18 @@ update_dylib () {
 
 # Update linker references to shared libraries.
 recursive_update_dylibs () {
-	FW_DIR="$1"
-	DLS_STRIPPED="$2"
-	OLD_PATH="$3"
-	NEW_PATH="$4"
+	local FW_DIR="$1"
+	local DLS_STRIPPED="$2"
+	local OLD_PATH="$3"
+	local NEW_PATH="$4"
 	if [ "x${FW_DIR}" = "x" -o "x${DLS_STRIPPED}" = "x" -o "x${OLD_PATH}" = "x" -o "x${NEW_PATH}" = "x" ]; then
 		echo "Invalid input." >&2
 		return 1
 	fi
 
-	DL_NAMES=$(dylibs_name "${DLS_STRIPPED}")
+	local DL_NAMES=$(dylibs_name "${DLS_STRIPPED}")
 	for D in ${DL_NAMES}; do
-		FILES=$(ls "${FW_DIR}/${D}"*.dylib)
+		local FILES=$(ls "${FW_DIR}/${D}"*.dylib)
 		for F in ${FILES}; do
 			if [ -f "${F}" -a ! -L "${F}" ]; then
 				update_dylib "${F}" "${DL_NAMES}" "${OLD_PATH}" "${NEW_PATH}" || return 1
@@ -408,23 +532,23 @@ recursive_update_dylibs () {
 
 # Update linker paths to shared libraries in application.
 app_update_dylibs () {
-	APP="$1"
-	DLS_STRIPPED="$2"
-	OLD_PATH="$3"
-	NEW_PATH="$4"
+	local APP="$1"
+	local DLS_STRIPPED="$2"
+	local OLD_PATH="$3"
+	local NEW_PATH="$4"
 	if [ "x${APP}" = "x" -o "x${DLS_STRIPPED}" = "x" -o "x${OLD_PATH}" = "x" -o "x${NEW_PATH}" = "x" ]; then
 		echo "Invalid input." >&2
 		return 1
 	fi
 
-	DL_NAMES=$(dylibs_name "${DLS_STRIPPED}")
+	local DL_NAMES=$(dylibs_name "${DLS_STRIPPED}")
 	for D in ${DL_NAMES}; do
 		# Sed expression contains '\t'.
-		OLD=$(otool -L "${APP}" | grep "${OLD_PATH}" | grep "${D}" | sed -e 's/^[ 	]*//g' -e 's/[ ](.*$//g')
+		local OLD=$(otool -L "${APP}" | grep "${OLD_PATH}" | grep "${D}" | sed -e 's/^[ 	]*//g' -e 's/[ ](.*$//g')
 		if [ "x${OLD}" = "x" ]; then
 			continue
 		fi
-		NEW=$(echo "${OLD}" | sed -e 's/^.*[/]//g') # Strip path.
+		local NEW=$(echo "${OLD}" | sed -e 's/^.*[/]//g') # Strip path.
 		NEW="${NEW_PATH}/${NEW}"
 		install_name_tool -change "${OLD}" "${NEW}" "${APP}"
 		if [ "$?" != "0" ]; then
@@ -437,9 +561,9 @@ app_update_dylibs () {
 
 # Update linker paths to frameworks in application.
 app_update_frameworks () {
-	APP="$1"
-	FWS_STRIPPED="$2"
-	NEW_PATH="$3"
+	local APP="$1"
+	local FWS_STRIPPED="$2"
+	local NEW_PATH="$3"
 	if [ "x${APP}" = "x" -o "x${FWS_STRIPPED}" = "x" -o "x${NEW_PATH}" = "x" ]; then
 		echo "Invalid input." >&2
 		return 1
@@ -447,8 +571,8 @@ app_update_frameworks () {
 
 	for F in ${FWS_STRIPPED}; do
 		# Sed expression contains '\t'.
-		OLD=$(otool -L "${APP}" | grep "${F}" | sed -e 's/^[ 	]*//g' -e 's/[ ](.*$//g')
-		NEW="${NEW_PATH}/${F}"
+		local OLD=$(otool -L "${APP}" | grep "${F}" | sed -e 's/^[ 	]*//g' -e 's/[ ](.*$//g')
+		local NEW="${NEW_PATH}/${F}"
 		install_name_tool -change "${OLD}" "${NEW}" "${APP}"
 		if [ "$?" != "0" ]; then
 			return 1
@@ -460,9 +584,9 @@ app_update_frameworks () {
 
 # Update linker rpath.
 app_update_rpath () {
-	APP="$1"
-	OLD_PATH="$2"
-	NEW_PATH="$3"
+	local APP="$1"
+	local OLD_PATH="$2"
+	local NEW_PATH="$3"
 	if [ "x${APP}" = "x" -o "x${OLD_PATH}" = "x" -o "x${NEW_PATH}" = "x" ]; then
 		echo "Invalid input." >&2
 		return 1
@@ -527,6 +651,7 @@ DIR_BUNDLE="${SRC_ROOT}/${BUNDLE}"
 DIR_CONTENTS="${DIR_BUNDLE}/Contents"
 DIR_FRAMEWORKS="${DIR_CONTENTS}/Frameworks"
 DIR_MACOS="${DIR_CONTENTS}/MacOs"
+DIR_PLUGINS="${DIR_CONTENTS}/PlugIns"
 FILE_APP="${DIR_MACOS}/${APP}"
 
 # See Qt for macOS - Deployment document.
@@ -560,6 +685,11 @@ if directory_exists "${DIR_FRAMEWORKS}"; then
 fi
 mkdir -p "${DIR_FRAMEWORKS}"
 directory_exists "${DIR_FRAMEWORKS}" || exit 1
+if directory_exists "${DIR_PLUGINS}"; then
+	rm -rf "${DIR_PLUGINS}"
+fi
+mkdir -p "${DIR_PLUGINS}"
+directory_exists "${DIR_PLUGINS}" || exit 1
 directory_exists "${DIR_MACOS}" || exit 1
 executable_exists "${FILE_APP}" || exit 1
 
@@ -591,8 +721,11 @@ fi
 # Get all Qt frameworks including those which other depend on.
 QT_FRAMEWORKS=$(qt_frameworks_all "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}")
 
+QT_PLUGINS_LOC=$(qt_plugins_loc "${QT_FRAMEWORK_LOC}")
+
 dylibs_copy "${DIR_FRAMEWORKS}" "${DYLIBS_LOC}" "${DYLIBS}" || exit 0
 qt_frameworks_copy "${DIR_FRAMEWORKS}" "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}" || exit 1
+qt_plugins_copy "${DIR_PLUGINS}" "${QT_PLUGINS_LOC}"
 
 #NEW_SEARCH_PATH="@executable_path/../Frameworks"
 NEW_SEARCH_PATH="@rpath"
