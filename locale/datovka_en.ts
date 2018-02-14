@@ -381,53 +381,53 @@
 <context>
     <name>DbMsgsTblModel</name>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="166"/>
+        <location filename="../src/models/messages_model.cpp" line="167"/>
         <source>message identifier</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="181"/>
+        <location filename="../src/models/messages_model.cpp" line="182"/>
         <source>marked as read</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="183"/>
+        <location filename="../src/models/messages_model.cpp" line="184"/>
         <source>marked as unread</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="188"/>
+        <location filename="../src/models/messages_model.cpp" line="189"/>
         <source>attachments downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="190"/>
+        <location filename="../src/models/messages_model.cpp" line="191"/>
         <source>attachments not downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="201"/>
+        <location filename="../src/models/messages_model.cpp" line="202"/>
         <source>unsettled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="204"/>
+        <location filename="../src/models/messages_model.cpp" line="205"/>
         <source>in progress</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="207"/>
+        <location filename="../src/models/messages_model.cpp" line="208"/>
         <source>settled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="532"/>
-        <location filename="../src/models/messages_model.cpp" line="571"/>
+        <location filename="../src/models/messages_model.cpp" line="533"/>
+        <location filename="../src/models/messages_model.cpp" line="572"/>
         <source>Attachments downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="540"/>
+        <location filename="../src/models/messages_model.cpp" line="541"/>
         <source>Processing state</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4023,172 +4023,202 @@ of postal data messages active.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="209"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="215"/>
+        <source>Subsidised postal data message, initiating reply postal data message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="219"/>
+        <source>Subsidised postal data message, initiating reply postal data message - used for sending reply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="223"/>
+        <source>Subsidised postal data message, initiating reply postal data message - unused for sending reply, expired</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="227"/>
+        <source>Postal data message sent using a subscription (prepaid credit)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="231"/>
+        <source>Postal data message sent in endowment mode by another data box to the benefactor account</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="235"/>
         <source>Postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="212"/>
-        <source>Initialising postal data message</source>
+        <location filename="../src/isds/isds_conversion.cpp" line="238"/>
+        <source>Initiating postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="215"/>
-        <source>Reply postal data message</source>
+        <location filename="../src/isds/isds_conversion.cpp" line="241"/>
+        <source>Reply postal data message; sent at the expense of the sender of the initiating postal data message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="218"/>
-        <source>Initialising postal data message - expired</source>
+        <location filename="../src/isds/isds_conversion.cpp" line="245"/>
+        <source>Public message (recipient or sender is a public authority)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="221"/>
-        <source>Initialising postal data message - used</source>
+        <location filename="../src/isds/isds_conversion.cpp" line="248"/>
+        <source>Initiating postal data message - unused for sending reply, expired</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="322"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="251"/>
+        <source>Initiating postal data message - used for sending reply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="352"/>
         <source>Message has been submitted (has been created in ISDS)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="328"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="358"/>
         <source>Data message including its attachments signed with time-stamp.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="335"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="365"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="340"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="370"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="348"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="378"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of acceptance through fiction in non-OVM DS); this state cannot occur for commercial messages.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="358"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="388"/>
         <source>A person authorised to read this message has logged in -- delivered message has been accepted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="363"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="393"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="370"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="400"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="378"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="408"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="383"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="413"/>
         <source>Message resides in data vault.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="431"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="461"/>
         <source>Primary user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="434"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="464"/>
         <source>Entrusted user</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="437"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="467"/>
         <source>Administrator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="440"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="470"/>
         <source>Official</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="443"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="473"/>
         <source>Virtual</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="445"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="475"/>
         <source>???</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="447"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="477"/>
         <source>Liquidator</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="449"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="479"/>
         <source>Receiver</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="451"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="481"/>
         <source>Guardian</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="488"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="518"/>
         <source>Full control</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="490"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="520"/>
         <source>Restricted control</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="495"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="525"/>
         <source>download and read incoming DM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="501"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="531"/>
         <source>download and read DM sent into own hands</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="506"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="536"/>
         <source>create and send DM, download sent DM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="511"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="541"/>
         <source>retrieve DM lists, delivery and acceptance reports</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="516"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="546"/>
         <source>search for data boxes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="520"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="550"/>
         <source>manage the data box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="524"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="554"/>
         <source>read message in data vault</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="528"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="558"/>
         <source>erase messages from data vault</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7439,7 +7469,7 @@ to origin path
 <context>
     <name>UploadHierarchyModel</name>
     <message>
-        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="163"/>
+        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="167"/>
         <source>Records Management Hierarchy</source>
         <translation type="unfinished"></translation>
     </message>
