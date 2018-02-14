@@ -46,9 +46,9 @@ fi
 # Specifies which targets to build.
 TARGETS=""
 TARGETS="${TARGETS} i386_static"
-#TARGETS="${TARGETS} i386_dynamic"
-#TARGETS="${TARGETS} x86_64_static"
-#TARGETS="${TARGETS} x86_64_dynamic"
+TARGETS="${TARGETS} i386_shared"
+TARGETS="${TARGETS} x86_64_static"
+TARGETS="${TARGETS} x86_64_shared"
 
 # Return 0 if targets are OK.
 check_params () {
@@ -58,7 +58,7 @@ check_params () {
 		echo "Unknown architecture '${ARCH}'." >&2
 		return 1
 	fi
-	if [ "x${TYPE}" != "xstatic" -a "x${TYPE}" != "xdynamic" ]; then
+	if [ "x${TYPE}" != "xstatic" -a "x${TYPE}" != "xshared" ]; then
 		echo "Unknown type '${TYPE}'." >&2
 		return 1
 	fi
@@ -97,12 +97,12 @@ ensure_dir_presence () {
 # Create missing directories.
 target_scheduled i386 static && ensure_dir_presence $(workdir_name i386 static)
 target_scheduled i386 static && ensure_dir_presence $(builtdir_name i386 static)
-target_scheduled i386 dynamic && ensure_dir_presence $(workdir_name i386 dynamic)
-target_scheduled i386 dynamic && ensure_dir_presence $(builtdir_name i386 dynamic)
+target_scheduled i386 shared && ensure_dir_presence $(workdir_name i386 shared)
+target_scheduled i386 shared && ensure_dir_presence $(builtdir_name i386 shared)
 target_scheduled x86_64 static && ensure_dir_presence $(workdir_name x86_64 static)
 target_scheduled x86_64 static && ensure_dir_presence $(builtdir_name x86_64 static)
-target_scheduled x86_64 dynamic && ensure_dir_presence $(workdir_name x86_64 dynamic)
-target_scheduled x86_64 dynamic && ensure_dir_presence $(builtdir_name x86_64 dynamic)
+target_scheduled x86_64 shared && ensure_dir_presence $(workdir_name x86_64 shared)
+target_scheduled x86_64 shared && ensure_dir_presence $(builtdir_name x86_64 shared)
 
 
 ZLIB_ARCHIVE="${_ZLIB_ARCHIVE}"
@@ -147,7 +147,7 @@ build_zlib () {
 
 	unset CONFOPTS
 
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		rm -rf "${BUILTDIR}"/lib/libz.a
 	fi
 
@@ -157,9 +157,9 @@ build_zlib () {
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	echo "Building zlib."
 	if target_scheduled i386 static; then build_zlib i386 static || exit 1; fi
-	if target_scheduled i386 dynamic; then build_zlib i386 dynamic || exit 1; fi
+	if target_scheduled i386 shared; then build_zlib i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_zlib x86_64 static || exit 1; fi
-	if target_scheduled x86_64 dynamic; then build_zlib x86_64 dynamic || exit 1; fi
+	if target_scheduled x86_64 shared; then build_zlib x86_64 shared || exit 1; fi
 fi
 
 
@@ -178,7 +178,7 @@ build_expat () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 
@@ -196,9 +196,9 @@ build_expat () {
 if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	echo "Building expat."
 	if target_scheduled i386 static; then build_expat i386 static || exit 1; fi
-	if target_scheduled i386 dynamic; then build_expat i386 dynamic || exit 1; fi
+	if target_scheduled i386 shared; then build_expat i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_expat x86_64 static || exit 1; fi
-	if target_scheduled x86_64 dynamic; then build_expat x86_64 dynamic || exit 1; fi
+	if target_scheduled x86_64 shared; then build_expat x86_64 shared || exit 1; fi
 fi
 
 
@@ -217,7 +217,7 @@ build_libtool () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 
@@ -235,9 +235,9 @@ build_libtool () {
 if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	echo "Building libtool."
 	if target_scheduled i386 static; then build_libtool i386 static || exit 1; fi
-	if target_scheduled i386 dynamic; then build_libtool i386 dynamic || exit 1; fi
+	if target_scheduled i386 shared; then build_libtool i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_libtool x86_64 static || exit 1; fi
-	if target_scheduled x86_64 dynamic; then build_libtool x86_64 dynamic || exit 1; fi
+	if target_scheduled x86_64 shared; then build_libtool x86_64 shared || exit 1; fi
 fi
 
 
@@ -256,7 +256,7 @@ build_libiconv () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 
@@ -274,9 +274,9 @@ build_libiconv () {
 if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	echo "Building libiconv."
 	if target_scheduled i386 static; then build_libiconv i386 static || exit 1; fi
-	if target_scheduled i386 dynamic; then build_libiconv i386 dynamic || exit 1; fi
+	if target_scheduled i386 shared; then build_libiconv i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_libiconv x86_64 static || exit 1; fi
-	if target_scheduled x86_64 dynamic; then build_libiconv x86_64 dynamic || exit 1; fi
+	if target_scheduled x86_64 shared; then build_libiconv x86_64 shared || exit 1; fi
 fi
 
 
@@ -295,7 +295,7 @@ build_libxml2 () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --without-lzma"
@@ -317,9 +317,9 @@ build_libxml2 () {
 if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	echo "Bulding libxml2."
 	if target_scheduled i386 static; then build_libxml2 i386 static || exit 1; fi
-	if target_scheduled i386 dynamic; then build_libxml2 i386 dynamic || exit 1; fi
+	if target_scheduled i386 shared; then build_libxml2 i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_libxml2 x86_64 static || exit 1; fi
-	if target_scheduled x86_64 dynamic; then build_libxml2 x86_64 dynamic || exit 1; fi
+	if target_scheduled x86_64 shared; then build_libxml2 x86_64 shared || exit 1; fi
 fi
 
 
@@ -338,7 +338,7 @@ build_gettext () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
@@ -360,9 +360,9 @@ build_gettext () {
 if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	echo "Building gettext."
 	if target_scheduled i386 static; then build_gettext i386 static || exit 1; fi
-	if target_scheduled i386 dynamic; then build_gettext i386 dynamic || exit 1; fi
+	if target_scheduled i386 shared; then build_gettext i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_gettext x86_64 static || exit 1; fi
-	if target_scheduled x86_64 dynamic; then build_gettext x86_64 dynamic || exit 1; fi
+	if target_scheduled x86_64 shared; then build_gettext x86_64 shared || exit 1; fi
 fi
 
 
@@ -382,7 +382,7 @@ build_libcurl () {
 	#if [ "x${TYPE}" = "xstatic" ]; then
 	#	CONFOPTS="${CONFOPTS} --disable-shared"
 	#fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --enable-http"
@@ -422,9 +422,9 @@ build_libcurl () {
 if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	echo "Building libcurl."
 	if target_scheduled i386 static; then build_libcurl i386 static || exit 1; fi
-	if target_scheduled i386 dynamic; then build_libcurl i386 dynamic || exit 1; fi
+	if target_scheduled i386 shared; then build_libcurl i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_libcurl x86_64 static || exit 1; fi
-	if target_scheduled x86_64 dynamic; then build_libcurl x86_64 dynamic || exit 1; fi
+	if target_scheduled x86_64 shared; then build_libcurl x86_64 shared || exit 1; fi
 fi
 
 
@@ -450,7 +450,7 @@ build_openssl () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} no-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} shared"
 	fi
 	CONFOPTS="${CONFOPTS} no-krb5"
@@ -461,7 +461,7 @@ build_openssl () {
 	make depend || exit 1
 	make ${MAKEOPTS} && make install_sw || exit 1
 
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		rm -rf "${BUILTDIR}"/lib/libcrypto.a
 		rm -rf "${BUILTDIR}"/lib/libssl.a
 	fi
@@ -474,9 +474,9 @@ build_openssl () {
 if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	echo "Building openssl."
 	if target_scheduled i386 static; then build_openssl i386 static || exit 1; fi
-	if target_scheduled i386 dynamic; then build_openssl i386 dynamic || exit 1; fi
+	if target_scheduled i386 shared; then build_openssl i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_openssl x86_64 static || exit 1; fi
-	if target_scheduled x86_64 dynamic; then build_openssl x86_64 dynamic || exit 1; fi
+	if target_scheduled x86_64 shared; then build_openssl x86_64 shared || exit 1; fi
 fi
 
 
@@ -523,7 +523,7 @@ build_libisds () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --enable-debug"
@@ -564,7 +564,7 @@ if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
 elif [ ! -z "${LIBISDS_ARCHIVE}" -o ! -z "${LIBISDS_GIT}" ]; then
 	echo "Building libisds."
 	if target_scheduled i386 static; then build_libisds i386 static || exit 1; fi
-	if target_scheduled i386 dynamic; then build_libisds i386 dynamic || exit 1; fi
+	if target_scheduled i386 shared; then build_libisds i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_libisds x86_64 static || exit 1; fi
-	if target_scheduled x86_64 dynamic; then build_libisds x86_64 dynamic || exit 1; fi
+	if target_scheduled x86_64 shared; then build_libisds x86_64 shared || exit 1; fi
 fi

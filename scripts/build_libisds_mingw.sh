@@ -43,12 +43,12 @@ fi
 # Specifies which targets to build.
 TARGETS=""
 #TARGETS="${TARGETS} static"
-TARGETS="${TARGETS} dynamic"
+TARGETS="${TARGETS} shared"
 
 # Return 0 if targets are OK.
 check_params () {
 	TYPE=$1
-	if [ "x${TYPE}" != "xstatic" -a "x${TYPE}" != "xdynamic" ]; then
+	if [ "x${TYPE}" != "xstatic" -a "x${TYPE}" != "xshared" ]; then
 		echo "Unknown type '${TYPE}'." >&2
 		return 1
 	fi
@@ -84,8 +84,8 @@ ensure_dir_presence () {
 # Create missing directories.
 target_scheduled static && ensure_dir_presence $(workdir_name static)
 target_scheduled static && ensure_dir_presence $(builtdir_name static)
-target_scheduled dynamic && ensure_dir_presence $(workdir_name dynamic)
-target_scheduled dynamic && ensure_dir_presence $(builtdir_name dynamic)
+target_scheduled shared && ensure_dir_presence $(workdir_name shared)
+target_scheduled shared && ensure_dir_presence $(builtdir_name shared)
 
 # Store information about build.
 store_build_info () {
@@ -103,7 +103,7 @@ store_build_info () {
 }
 
 target_scheduled static && store_build_info static
-target_scheduled dynamic && store_build_info dynamic
+target_scheduled shared && store_build_info shared
 
 
 ZLIB_ARCHIVE="${_ZLIB_ARCHIVE}"
@@ -145,7 +145,7 @@ build_zlib () {
 	    LIBRARY_PATH=${BUILTDIR}/lib \
 	    install || exit 1
 
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		rm -rf "${BUILTDIR}"/lib/libz.a
 	fi
 
@@ -155,7 +155,7 @@ build_zlib () {
 if [ ! -z "${ZLIB_ARCHIVE}" ]; then
 	echo "Building zlib."
 	if target_scheduled static; then build_zlib static || exit 1; fi
-	if target_scheduled dynamic; then build_zlib dynamic || exit 1; fi
+	if target_scheduled shared; then build_zlib shared || exit 1; fi
 fi
 
 
@@ -173,7 +173,7 @@ build_expat () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 
@@ -188,7 +188,7 @@ build_expat () {
 if [ ! -z "${EXPAT_ARCHIVE}" ]; then
 	echo "Building expat."
 	if target_scheduled static; then build_expat static || exit 1; fi
-	if target_scheduled dynamic; then build_expat dynamic || exit 1; fi
+	if target_scheduled shared; then build_expat shared || exit 1; fi
 fi
 
 
@@ -206,7 +206,7 @@ build_libtool () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 
@@ -221,7 +221,7 @@ build_libtool () {
 if [ ! -z "${LIBTOOL_ARCHIVE}" ]; then
 	echo "Building libtool."
 	if target_scheduled static; then build_libtool static || exit 1; fi
-	if target_scheduled dynamic; then build_libtool dynamic || exit 1; fi
+	if target_scheduled shared; then build_libtool shared || exit 1; fi
 fi
 
 
@@ -239,7 +239,7 @@ build_libiconv () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 
@@ -254,7 +254,7 @@ build_libiconv () {
 if [ ! -z "${LIBICONV_ARCHIVE}" ]; then
 	echo "Building libiconv."
 	if target_scheduled static; then build_libiconv static || exit 1; fi
-	if target_scheduled dynamic; then build_libiconv dynamic || exit 1; fi
+	if target_scheduled shared; then build_libiconv shared || exit 1; fi
 fi
 
 
@@ -272,7 +272,7 @@ build_libxml2 () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --without-lzma"
@@ -291,7 +291,7 @@ build_libxml2 () {
 if [ ! -z "${LIBXML2_ARCHIVE}" ]; then
 	echo "Bulding libxml2."
 	if target_scheduled static; then build_libxml2 static || exit 1; fi
-	if target_scheduled dynamic; then build_libxml2 dynamic || exit 1; fi
+	if target_scheduled shared; then build_libxml2 shared || exit 1; fi
 fi
 
 
@@ -309,7 +309,7 @@ build_gettext () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --with-libxml2-prefix=${BUILTDIR}"
@@ -336,7 +336,7 @@ build_gettext () {
 if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 	echo "Building gettext."
 	if target_scheduled static; then build_gettext static || exit 1; fi
-	if target_scheduled dynamic; then build_gettext dynamic || exit 1; fi
+	if target_scheduled shared; then build_gettext shared || exit 1; fi
 fi
 
 
@@ -354,7 +354,7 @@ build_libcurl () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --enable-http"
@@ -390,7 +390,7 @@ build_libcurl () {
 if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	echo "Building libcurl."
 	if target_scheduled static; then build_libcurl static || exit 1; fi
-	if target_scheduled dynamic; then build_libcurl dynamic || exit 1; fi
+	if target_scheduled shared; then build_libcurl shared || exit 1; fi
 fi
 
 
@@ -410,7 +410,7 @@ build_openssl () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} no-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} shared"
 	fi
 	CONFOPTS="${CONFOPTS} no-krb5"
@@ -419,7 +419,7 @@ build_openssl () {
 	make depend || exit 1
 	make ${MAKEOPTS} && make install_sw || exit 1
 
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		cp libeay32.dll "${BUILTDIR}/bin/"
 		cp ssleay32.dll "${BUILTDIR}/bin/"
 	fi
@@ -432,7 +432,7 @@ build_openssl () {
 if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	echo "Building openssl."
 	if target_scheduled static; then build_openssl static || exit 1; fi
-	if target_scheduled dynamic; then build_openssl dynamic || exit 1; fi
+	if target_scheduled shared; then build_openssl shared || exit 1; fi
 fi
 
 
@@ -478,7 +478,7 @@ build_libisds () {
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
 	fi
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
 	CONFOPTS="${CONFOPTS} --enable-debug"
@@ -515,7 +515,7 @@ build_libisds () {
 	    CPPFLAGS="-I${BUILTDIR}/include -I${BUILTDIR}/include/libxml2 ${DEFINES}" \
 	    LDFLAGS="-L${BUILTDIR}/lib ${LINKER}"
 	make ${MAKEOPTS}
-	if [ "x${TYPE}" = "xdynamic" ]; then
+	if [ "x${TYPE}" = "xshared" ]; then
 		cd src
 		#i686-pc-mingw32-gcc -shared -O2 -g -std=c99 -Wall -o .libs/libisds.dll libisds_la-cdecode.o libisds_la-cencode.o libisds_la-isds.o libisds_la-physxml.o libisds_la-utils.o libisds_la-validator.o libisds_la-crypto_openssl.o libisds_la-soap.o libisds_la-win32.o -L${BUILTDIR}/lib -lxml2 -liconv -lcurl -lexpat -lintl -lcrypto
 		#../libtool -v --tag=CC --mode=link i686-pc-mingw32-gcc  -g -O2 -g -std=c99 -Wall -version-info 8:0:3 -L${BUILTDIR}/lib -lxml2 -lz -L${BUILTDIR}/lib -liconv -L${BUILTDIR}/lib -lcurl -lwldap32 -lz -lws2_32 -lexpat -L${BUILTDIR}/lib -lintl -L${BUILTDIR}/lib -liconv -R${BUILTDIR}/lib -L${BUILTDIR}/lib -o libisds.la -rpath ${BUILTDIR}/lib libisds_la-cdecode.lo libisds_la-cencode.lo libisds_la-isds.lo libisds_la-physxml.lo libisds_la-utils.lo libisds_la-validator.lo libisds_la-crypto_openssl.lo libisds_la-soap.lo libisds_la-win32.lo -L${BUILTDIR}/bin -leay32 -no-undefined
@@ -537,5 +537,5 @@ if [ ! -z "${LIBISDS_ARCHIVE}" -a ! -z "${LIBISDS_GIT}" ]; then
 elif [ ! -z "${LIBISDS_ARCHIVE}" -o ! -z "${LIBISDS_GIT}" ]; then
 	echo "Building libisds."
 	if target_scheduled static; then build_libisds static || exit 1; fi
-	if target_scheduled dynamic; then build_libisds dynamic || exit 1; fi
+	if target_scheduled shared; then build_libisds shared || exit 1; fi
 fi
