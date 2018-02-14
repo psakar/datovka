@@ -381,53 +381,53 @@
 <context>
     <name>DbMsgsTblModel</name>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="166"/>
+        <location filename="../src/models/messages_model.cpp" line="167"/>
         <source>message identifier</source>
         <translation>identifikátor zprávy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="181"/>
+        <location filename="../src/models/messages_model.cpp" line="182"/>
         <source>marked as read</source>
         <translation>označeno jako přečtené</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="183"/>
+        <location filename="../src/models/messages_model.cpp" line="184"/>
         <source>marked as unread</source>
         <translation>označeno jako nepřečtené</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="188"/>
+        <location filename="../src/models/messages_model.cpp" line="189"/>
         <source>attachments downloaded</source>
         <translation>přílohy staženy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="190"/>
+        <location filename="../src/models/messages_model.cpp" line="191"/>
         <source>attachments not downloaded</source>
         <translation>přílohy nestaženy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="201"/>
+        <location filename="../src/models/messages_model.cpp" line="202"/>
         <source>unsettled</source>
         <translation>nevyřízeno</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="204"/>
+        <location filename="../src/models/messages_model.cpp" line="205"/>
         <source>in progress</source>
         <translation>vyřizuje se</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="207"/>
+        <location filename="../src/models/messages_model.cpp" line="208"/>
         <source>settled</source>
         <translation>vyřízeno</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="532"/>
-        <location filename="../src/models/messages_model.cpp" line="571"/>
+        <location filename="../src/models/messages_model.cpp" line="533"/>
+        <location filename="../src/models/messages_model.cpp" line="572"/>
         <source>Attachments downloaded</source>
         <translation>Přílohy staženy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="540"/>
+        <location filename="../src/models/messages_model.cpp" line="541"/>
         <source>Processing state</source>
         <translation>Stav vyřizování</translation>
     </message>
@@ -4112,172 +4112,202 @@ neumožňuje zasílání poštovních datových zpráv.</translation>
         <translation>fyzická osoba</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="209"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="215"/>
+        <source>Subsidised postal data message, initiating reply postal data message</source>
+        <translation>Poštovní datová zpráva dotovaná, iniciuje použití odpovědní poštovní datové zprávy</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="219"/>
+        <source>Subsidised postal data message, initiating reply postal data message - used for sending reply</source>
+        <translation>Poštovní datová zpráva dotovaná, iniciuje použití odpovědní poštovní datové zprávy - využitá pro odeslání odpovědi</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="223"/>
+        <source>Subsidised postal data message, initiating reply postal data message - unused for sending reply, expired</source>
+        <translation>Poštovní datová zpráva dotovaná, iniciuje použití odpovědní poštovní datové zprávy - nevyužitá a expirovaná</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="227"/>
+        <source>Postal data message sent using a subscription (prepaid credit)</source>
+        <translation>Poštovní datová zpráva odeslaná pomocí předplacení (kreditu)</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="231"/>
+        <source>Postal data message sent in endowment mode by another data box to the benefactor account</source>
+        <translation>Poštovní datová zpráva zaslaná v režimu dotování jinou schránkou na účet schránky donátora</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="235"/>
         <source>Postal data message</source>
         <translation>Poštovní datová zpráva</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="212"/>
-        <source>Initialising postal data message</source>
-        <translation>Inicializační poštovní datová zpráva</translation>
+        <location filename="../src/isds/isds_conversion.cpp" line="238"/>
+        <source>Initiating postal data message</source>
+        <translation>Iniciační poštovní datová zpráva</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="215"/>
-        <source>Reply postal data message</source>
-        <translation>Odpovědní poštovní datová zpráva</translation>
+        <location filename="../src/isds/isds_conversion.cpp" line="241"/>
+        <source>Reply postal data message; sent at the expense of the sender of the initiating postal data message</source>
+        <translation>Odpovědní poštovní datová zpráva; zasílaná zdarma na účet odesílatele iniciační poštovní datové zprávy</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="218"/>
-        <source>Initialising postal data message - expired</source>
-        <translation>Inicializační poštovní datová zpráva - propadlá</translation>
+        <location filename="../src/isds/isds_conversion.cpp" line="245"/>
+        <source>Public message (recipient or sender is a public authority)</source>
+        <translation>Veřejná zpráva (adresát nebo odesílatel je OVM)</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="221"/>
-        <source>Initialising postal data message - used</source>
-        <translation>Inicializační poštovní datová zpráva - použitá</translation>
+        <location filename="../src/isds/isds_conversion.cpp" line="248"/>
+        <source>Initiating postal data message - unused for sending reply, expired</source>
+        <translation>Iniciační poštovní datová zpráva - nevyužitá a expirovaná</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="322"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="251"/>
+        <source>Initiating postal data message - used for sending reply</source>
+        <translation>Iniciační poštovní datová zpráva - využitá pro odeslání odpovědi</translation>
+    </message>
+    <message>
+        <location filename="../src/isds/isds_conversion.cpp" line="352"/>
         <source>Message has been submitted (has been created in ISDS)</source>
         <translation>Zpráva byla podána (vznikla v ISDS)</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="328"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="358"/>
         <source>Data message including its attachments signed with time-stamp.</source>
         <translation>Datová zpráva včetně písemností podepsána časovým razítkem.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="335"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="365"/>
         <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
         <translation>Zpráva neprošla AV kontrolou; nakažená písemnost je smazána; konečný stav zprávy před smazáním.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="340"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="370"/>
         <source>Message handed into ISDS (delivery time recorded).</source>
         <translation>Zpráva dodána do ISDS (zapsán čas dodání).</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="348"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="378"/>
         <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of acceptance through fiction in non-OVM DS); this state cannot occur for commercial messages.</source>
         <translation>Uplynulo 10 dnů od dodání veřejné zprávy, která dosud nebyla doručena přihlášením (předpoklad doručení fikcí u ne-OVM DS); tento stav nemůže nastat v případě poštovních datových zpráv.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="358"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="388"/>
         <source>A person authorised to read this message has logged in -- delivered message has been accepted.</source>
         <translation>Osoba oprávněná číst tuto zprávu se přihlásila -- dodaná zpráva byla doručena.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="363"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="393"/>
         <source>Message has been read (on the portal or by ESS action).</source>
         <translation>Zpráva byla přečtena (na portále nebo akcí ESS).</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="370"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="400"/>
         <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
         <translation>Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="378"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="408"/>
         <source>Message content deleted, envelope including hashes has been moved into archive.</source>
         <translation>Zpráva byla označena jako nedoručitelná, protože DS adresáta byla zpětně znepřístupněna.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="383"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="413"/>
         <source>Message resides in data vault.</source>
         <translation>Zpráva je v Datovém trezoru.</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="431"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="461"/>
         <source>Primary user</source>
         <translation>Oprávněná osoba</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="434"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="464"/>
         <source>Entrusted user</source>
         <translation>Pověřená osoba</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="437"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="467"/>
         <source>Administrator</source>
         <translation>Administrátor</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="440"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="470"/>
         <source>Official</source>
         <translation>Oficiální</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="443"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="473"/>
         <source>Virtual</source>
         <translation>Virtuální</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="445"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="475"/>
         <source>???</source>
         <translation>???</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="447"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="477"/>
         <source>Liquidator</source>
         <translation>Likvidátor</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="449"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="479"/>
         <source>Receiver</source>
         <translation>Nucený správce</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="451"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="481"/>
         <source>Guardian</source>
         <translation>Opatrovník</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="488"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="518"/>
         <source>Full control</source>
         <translation>Plný přístup</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="490"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="520"/>
         <source>Restricted control</source>
         <translation>Omezený přístup</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="495"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="525"/>
         <source>download and read incoming DM</source>
         <translation>stahovat a číst došlé DZ</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="501"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="531"/>
         <source>download and read DM sent into own hands</source>
         <translation>stahovat a číst DZ určené do vlastních rukou</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="506"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="536"/>
         <source>create and send DM, download sent DM</source>
         <translation>vytvářet a odesílat DZ, stahovat odeslané DZ</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="511"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="541"/>
         <source>retrieve DM lists, delivery and acceptance reports</source>
         <translation>načítat seznamy DZ, dodejky a doručenky</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="516"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="546"/>
         <source>search for data boxes</source>
         <translation>vyhledávat DS</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="520"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="550"/>
         <source>manage the data box</source>
         <translation>spravovat DS</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="524"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="554"/>
         <source>read message in data vault</source>
         <translation>číst zprávy v datovém trezoru</translation>
     </message>
     <message>
-        <location filename="../src/isds/isds_conversion.cpp" line="528"/>
+        <location filename="../src/isds/isds_conversion.cpp" line="558"/>
         <source>erase messages from data vault</source>
         <translation>mazat zprávy v datovém trezoru</translation>
     </message>
@@ -7545,7 +7575,7 @@ do původního umístění
 <context>
     <name>UploadHierarchyModel</name>
     <message>
-        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="163"/>
+        <location filename="../src/records_management/models/upload_hierarchy_model.cpp" line="167"/>
         <source>Records Management Hierarchy</source>
         <translation>Hierarchie spisové služby</translation>
     </message>
