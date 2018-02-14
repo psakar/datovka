@@ -227,7 +227,7 @@ if [ "x${BUILD_DMG}" != "xno" ]; then
 
 	# You must be logged in into a desktop session in order to create
 	# dmg files.
-	TGT="datovka-${PKG_VER}-osx${SDK_VER}.dmg"
+	TGT="datovka-${PKG_VER}-${CLANG_BITS}bit-osx${SDK_VER}.dmg"
 	rm -rf "${TGT}"
 	${SCRIPT_LOCATION}/build_dmg.sh
 	mv datovka-installer.dmg "${TGT}"
