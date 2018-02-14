@@ -46,9 +46,9 @@ fi
 # Specifies which targets to build.
 TARGETS=""
 TARGETS="${TARGETS} i386_static"
-#TARGETS="${TARGETS} i386_shared"
-#TARGETS="${TARGETS} x86_64_static"
-#TARGETS="${TARGETS} x86_64_shared"
+TARGETS="${TARGETS} i386_shared"
+TARGETS="${TARGETS} x86_64_static"
+TARGETS="${TARGETS} x86_64_shared"
 
 # Return 0 if targets are OK.
 check_params () {
