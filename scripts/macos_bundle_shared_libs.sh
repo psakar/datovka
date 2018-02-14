@@ -3,6 +3,10 @@
 SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
 SRC_ROOT=$(cd "${SCRIPT_LOCATION}"/..; pwd)
 
+if [ "x${GETOPT}" = "x" ]; then
+	GETOPT="getopt"
+fi
+
 APP="datovka"
 BUNDLE=""
 DFLT_BUNDLE="${APP}.app"
@@ -661,8 +665,15 @@ remove_debug () {
 	return 0
 }
 
+if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
+	echo "The default getopt does not support long options." >&2
+	echo "You may provide such getopt version via the GETOPT variable e.g.:" >&2
+	echo "GETOPT=/opt/local/bin/getopt $0" >&2
+	exit 1
+fi
+
 # Parse rest of command line
-set -- `getopt -l bundle:,help,no-debug -u -o b:hn -- "$@"`
+set -- $("${GETOPT}" -l bundle:,help,no-debug -u -o b:hn -- "$@")
 if [ $# -lt 1 ]; then
 	echo ${USAGE} >&2
 	exit 1

@@ -3,6 +3,10 @@
 SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
 SRC_ROOT="${SCRIPT_LOCATION}/.."
 
+if [ "x${GETOPT}" = "x" ]; then
+	GETOPT="getopt"
+fi
+
 DFLT_QT_VER="5.4.2"
 
 MAKE_OPTS="-j 2"
@@ -39,8 +43,15 @@ ARCH_NAME=""
 ARCH_I386="i386"
 ARCH_X86_64="x86_64"
 
+if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
+	echo "The default getopt does not support long options." >&2
+	echo "You may provide such getopt version via the GETOPT variable e.g.:" >&2
+	echo "GETOPT=/opt/local/bin/getopt $0" >&2
+	exit 1
+fi
+
 # Parse rest of command line
-set -- `getopt -l help -l sdk: -l shared -l static -l i386 -l x86_64 -u -o dDhs: -- "$@"`
+set -- $("${GETOPT}" -l help -l sdk: -l shared -l static -l i386 -l x86_64 -u -o dDhs: -- "$@")
 if [ $# -lt 1 ]; then
 	echo ${USAGE} >&2
 	exit 1
