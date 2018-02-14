@@ -192,6 +192,7 @@ dylibs_all () {
 	done
 
 	echo "${DYLIBS}"
+	return 0
 }
 
 # Return just the name of the library.
@@ -439,6 +440,8 @@ qt_plugins_copy_matching () {
 
 		shift
 	done
+
+	return 0
 }
 
 # Copy Qt plugins into bundle.
