@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include <QtGlobal> // qrand
 #include <QTime>
 
-#include "src/records_management/conversion.h"
+#include "src/datovka_shared/records_management/conversion.h"
 #include "tests/records_management_app/gui/dialogue_stored_files.h"
 #include "ui_dialogue_stored_files.h"
 
