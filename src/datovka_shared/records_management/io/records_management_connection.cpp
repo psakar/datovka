@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,10 +26,10 @@
 #include <QTimer>
 #include <QUrl>
 
-#include "src/records_management/io/records_management_connection.h"
+#include "src/datovka_shared/records_management/io/records_management_connection.h"
 
 /* Must be set to false for production releases. */
-const bool RecordsManagementConnection::ignoreSslErrorsDflt = true;
+const bool RecordsManagementConnection::ignoreSslErrorsDflt = false;
 
 #define logFuncCall() \
 	qDebug("%s()", __func__)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,14 +21,13 @@
  * the two.
  */
 
-#ifndef _STORED_FILES_H_
-#define _STORED_FILES_H_
+#pragma once
 
 #include <QByteArray>
 #include <QList>
 #include <QStringList>
 
-#include "src/records_management/json/entry_error.h"
+#include "src/datovka_shared/records_management/json/entry_error.h"
 
 class QJsonValue; /* Forward declaration. */
 
@@ -339,5 +338,3 @@ private:
 	int m_limit; /*!< Request limit, must be greater than zero. */
 	ErrorEntry m_error; /*!< Encountered error. */
 };
-
-#endif /* _STORED_FILES_H_ */

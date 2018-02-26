@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,19 +21,36 @@
  * the two.
  */
 
-#ifndef _CONVERSION_H_
-#define _CONVERSION_H_
+#include <QString>
 
-#include <QList>
-#include <QStringList>
+#include "src/datovka_shared/records_management/conversion.h"
 
-/*!
- * @brief Convert list of strings into list of qint64.
- *
- * @param[in] strList String list.
- * @param[out] ok Set to true if all entries are successfully converted.
- * @return List if qint64.
- */
-QList<qint64> createIdList(const QStringList &strList, bool *ok);
+QList<qint64> createIdList(const QStringList &strList, bool *ok)
+{
+	QList<qint64> idList;
+	bool iOk = false;
+	foreach (const QString &str, strList) {
+		qint64 id = str.toLongLong(&iOk);
+		idList.append(id);
+		if (!iOk) {
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			qCritical("Cannot convert '%s' into qint64.",
+			    str.toUtf8().constData());
+			return QList<qint64>();
+		}
+		if (id < 0) {
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			qCritical("%s", "Received negative identifier.");
+			return QList<qint64>();
+		}
+	}
 
-#endif /* _CONVERSION_H_ */
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return idList;
+}

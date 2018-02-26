@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,37 +21,29 @@
  * the two.
  */
 
-#include "src/localisation/localisation.h"
+#include <QImage>
+#include <QPainter>
+#include <QSvgRenderer>
 
-QLocale Localisation::programLocale;
-QCollator Localisation::stringCollator;
+#include "src/datovka_shared/graphics/graphics.h"
 
-const QString Localisation::langCs(QStringLiteral("cs"));
-const QString Localisation::langEn(QStringLiteral("en"));
-const QString Localisation::langSystem(QStringLiteral("system"));
-
-void Localisation::setProgramLocale(const QString &langCode)
+QPixmap Graphics::pixmapFromSvg(const QByteArray &svgData, int edgeLen)
 {
-	if (langCode == langCs) {
-		programLocale = QLocale(QLocale::Czech, QLocale::CzechRepublic);
-	} else if (langCode == langEn) {
-		programLocale = QLocale(QLocale::English, QLocale::UnitedKingdom);
-	} else {
-		/* Use system locale. */
-		programLocale = QLocale::system();
+	if (svgData.isEmpty()) {
+		return QPixmap();
 	}
 
-	stringCollator.setLocale(programLocale);
-}
-
-QString Localisation::shortLangName(const QString &langCode)
-{
-	if (langCode == langCs) {
-		return langCs;
-	} else if (langCode == langEn) {
-		return langEn;
-	} else {
-		/* Use system locale. */
-		return QLocale::system().name();
+	QSvgRenderer renderer;
+	if (!renderer.load(svgData)) {
+		return QPixmap();
 	}
+
+	QImage image(edgeLen, edgeLen, QImage::Format_ARGB32);
+	QPainter painter(&image);
+	renderer.render(&painter);
+
+	QPixmap pixmap;
+	pixmap.convertFromImage(image);
+
+	return pixmap;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 #include <QTimer>
 
-#include "src/graphics/graphics.h"
+#include "src/datovka_shared/graphics/graphics.h"
 #include "src/io/records_management_db.h"
 #include "src/log/log.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"

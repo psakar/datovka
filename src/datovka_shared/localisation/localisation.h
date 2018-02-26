@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _LOCALISATION_H_
-#define _LOCALISATION_H_
+#pragma once
 
 #include <QCollator>
 #include <QLocale>
@@ -63,12 +62,14 @@ public:
 	static
 	QCollator stringCollator; /*!< Used for localised string collation. */
 
+	/*
+	 * Using QString instead of char* causes problems with initialisation
+	 * order, where the instances may be used before actually being created.
+	 */
 	static
-	const QString langCs; /*!< Czech language code. */
+	const char *langCs; /*!< Czech language code. */
 	static
-	const QString langEn; /*!< English language code. */
+	const char *langEn; /*!< English language code. */
 	static
-	const QString langSystem; /*!< System-set language. */
+	const char *langSystem; /*!< System-set language. */
 };
-
-#endif /* _LOCALISATION_H_ */

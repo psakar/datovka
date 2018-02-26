@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,8 +23,8 @@
 
 #include <QString>
 
+#include "src/datovka_shared/localisation/localisation.h"
 #include "src/delegates/tag_item.h"
-#include "src/localisation/localisation.h"
 #include "src/models/sort_filter_proxy_model.h"
 
 const QString SortFilterProxyModel::blankFilterEditStyle(

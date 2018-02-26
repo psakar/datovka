@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include <QDir>
 #include <QMimeDatabase>
 
+#include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/utility/strings.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_contacts.h"
@@ -42,7 +43,6 @@
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
-#include "src/localisation/localisation.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
