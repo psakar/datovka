@@ -148,7 +148,7 @@ void DlgPreferences::clearPin(void)
  * @return Language name as used in settings.
  */
 static
-const QString &indexToSettingsLang(int index)
+const char *indexToSettingsLang(int index)
 {
 	switch (index) {
 	case LANG_CZECH:
