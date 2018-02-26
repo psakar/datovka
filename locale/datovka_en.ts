@@ -3855,47 +3855,47 @@ of postal data messages active.</source>
 <context>
     <name>ErrorEntry</name>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="136"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="136"/>
         <source>No error occurred</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="139"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="139"/>
         <source>Request was malformed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="142"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="142"/>
         <source>Identifier is missing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="145"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="145"/>
         <source>Supplied identifier is wrong</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="148"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="148"/>
         <source>File format is not supported</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="151"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="151"/>
         <source>Data are already present</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="154"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="154"/>
         <source>Service limit was exceeded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="157"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="157"/>
         <source>Unspecified error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="161"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="161"/>
         <source>Unknown error</source>
         <translation type="unfinished"></translation>
     </message>

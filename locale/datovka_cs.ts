@@ -3944,47 +3944,47 @@ neumožňuje zasílání poštovních datových zpráv.</translation>
 <context>
     <name>ErrorEntry</name>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="136"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="136"/>
         <source>No error occurred</source>
         <translation>Nevyskytla se žádná chyba</translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="139"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="139"/>
         <source>Request was malformed</source>
         <translation>Požadavek byl vadný</translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="142"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="142"/>
         <source>Identifier is missing</source>
         <translation>Chybí identifikátor</translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="145"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="145"/>
         <source>Supplied identifier is wrong</source>
         <translation>Dodaný identifikátor je špatný</translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="148"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="148"/>
         <source>File format is not supported</source>
         <translation>Formát souboru není podporován</translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="151"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="151"/>
         <source>Data are already present</source>
         <translation>Data jsou již k dispozici</translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="154"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="154"/>
         <source>Service limit was exceeded</source>
         <translation>Limit služby byl dosažen</translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="157"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="157"/>
         <source>Unspecified error</source>
         <translation>Nespecifikovaná chyba</translation>
     </message>
     <message>
-        <location filename="../src/records_management/json/entry_error.cpp" line="161"/>
+        <location filename="../src/datovka_shared/records_management/json/entry_error.cpp" line="161"/>
         <source>Unknown error</source>
         <translation>Neznámá chyba</translation>
     </message>
