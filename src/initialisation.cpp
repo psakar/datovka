@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include "src/cli/cli_parser.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/localisation/localisation.h"
 #include "src/initialisation.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
@@ -39,7 +40,6 @@
 #include "src/io/message_db_set_container.h"
 #include "src/io/records_management_db.h"
 #include "src/io/tag_db.h"
-#include "src/localisation/localisation.h"
 
 void setDefaultLocale(void)
 {

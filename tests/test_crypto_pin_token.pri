@@ -11,7 +11,7 @@ SOURCES += \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.c \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.cpp \
 	$${top_srcdir}src/datovka_shared/settings/pin.cpp \
-	$${top_srcdir}src/settings/records_management.cpp \
+	$${top_srcdir}src/datovka_shared/settings/records_management.cpp \
 	$${top_srcdir}tests/test_crypto_pin_token.cpp
 
 HEADERS += \
@@ -20,5 +20,5 @@ HEADERS += \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.h \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.h \
 	$${top_srcdir}src/datovka_shared/settings/pin.h \
-	$${top_srcdir}src/settings/records_management.h \
+	$${top_srcdir}src/datovka_shared/settings/records_management.h \
 	$${top_srcdir}tests/test_crypto_pin_token.h

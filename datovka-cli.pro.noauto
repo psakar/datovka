@@ -83,9 +83,11 @@ SOURCES += \
 	src/datovka_shared/crypto/crypto_pin.c \
 	src/datovka_shared/crypto/crypto_pwd.c \
 	src/datovka_shared/crypto/crypto_wrapped.cpp \
+	src/datovka_shared/io/records_management_db.cpp \
 	src/datovka_shared/io/sqlite/db.cpp \
 	src/datovka_shared/io/sqlite/db_single.cpp \
 	src/datovka_shared/io/sqlite/table.cpp \
+	src/datovka_shared/localisation/localisation.cpp \
 	src/datovka_shared/settings/pin.cpp \
 	src/datovka_shared/worker/pool.cpp \
 	src/initialisation.cpp \
@@ -105,7 +107,6 @@ SOURCES += \
 	src/io/tag_db.cpp \
 	src/isds/isds_conversion.cpp \
 	src/model_interaction/account_interaction.cpp \
-	src/localisation/localisation.cpp \
 	src/log/log.cpp \
 	src/log/log_c.cpp \
 	src/main_cli.cpp \
@@ -139,9 +140,11 @@ HEADERS += \
 	src/datovka_shared/crypto/crypto_pin.h \
 	src/datovka_shared/crypto/crypto_pwd.h \
 	src/datovka_shared/crypto/crypto_wrapped.h \
+	src/datovka_shared/io/records_management_db.h \
 	src/datovka_shared/io/sqlite/db.h \
 	src/datovka_shared/io/sqlite/db_single.h \
 	src/datovka_shared/io/sqlite/table.h \
+	src/datovka_shared/localisation/localisation.h \
 	src/datovka_shared/settings/pin.h \
 	src/datovka_shared/worker/pool.h \
 	src/initialisation.h \
@@ -160,7 +163,6 @@ HEADERS += \
 	src/io/tag_db.h \
 	src/isds/isds_conversion.h \
 	src/model_interaction/account_interaction.h \
-	src/localisation/localisation.h \
 	src/log/log_c.h \
 	src/log/log_common.h \
 	src/log/log.h \

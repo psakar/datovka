@@ -19,13 +19,15 @@ SOURCES += \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.c \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.c \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.cpp \
+	$${top_srcdir}src/datovka_shared/graphics/graphics.cpp \
+	$${top_srcdir}src/datovka_shared/io/records_management_db.cpp \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db.cpp \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db_single.cpp \
 	$${top_srcdir}src/datovka_shared/io/sqlite/table.cpp \
+	$${top_srcdir}src/datovka_shared/localisation/localisation.cpp \
 	$${top_srcdir}src/datovka_shared/worker/pool.cpp \
 	$${top_srcdir}src/delegates/tag_item.cpp \
 	$${top_srcdir}src/dimensions/dimensions.cpp \
-	$${top_srcdir}src/graphics/graphics.cpp \
 	$${top_srcdir}src/io/account_db.cpp \
 	$${top_srcdir}src/io/db_tables.cpp \
 	$${top_srcdir}src/io/dbs.cpp \
@@ -37,7 +39,6 @@ SOURCES += \
 	$${top_srcdir}src/io/records_management_db.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
 	$${top_srcdir}src/isds/isds_conversion.cpp \
-	$${top_srcdir}src/localisation/localisation.cpp \
 	$${top_srcdir}src/models/accounts_model.cpp \
 	$${top_srcdir}src/models/files_model.cpp \
 	$${top_srcdir}src/models/messages_model.cpp \
@@ -59,13 +60,15 @@ HEADERS += \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.h \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.h \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.h \
+	$${top_srcdir}src/datovka_shared/graphics/graphics.h \
+	$${top_srcdir}src/datovka_shared/io/records_management_db.h \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db.h \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db_single.h \
 	$${top_srcdir}src/datovka_shared/io/sqlite/table.h \
+	$${top_srcdir}src/datovka_shared/localisation/localisation.h \
 	$${top_srcdir}src/datovka_shared/worker/pool.h \
 	$${top_srcdir}src/delegates/tag_item.h \
 	$${top_srcdir}src/dimensions/dimensions.h \
-	$${top_srcdir}src/graphics/graphics.h \
 	$${top_srcdir}src/io/account_db.h \
 	$${top_srcdir}src/io/db_tables.h \
 	$${top_srcdir}src/io/dbs.h \
@@ -76,7 +79,6 @@ HEADERS += \
 	$${top_srcdir}src/io/records_management_db.h \
 	$${top_srcdir}src/io/tag_db.h \
 	$${top_srcdir}src/isds/isds_conversion.h \
-	$${top_srcdir}src/localisation/localisation.h \
 	$${top_srcdir}src/models/accounts_model.h \
 	$${top_srcdir}src/models/files_model.h \
 	$${top_srcdir}src/models/messages_model.h \

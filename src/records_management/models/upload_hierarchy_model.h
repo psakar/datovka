@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 #include <QAbstractItemModel>
 
-#include "src/records_management/json/upload_hierarchy.h"
+#include "src/datovka_shared/records_management/json/upload_hierarchy.h"
 
 /*!
  * @brief Upload hierarchy model.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,8 @@
 #include <QDir>
 
 #include "src/common.h"
+#include "src/datovka_shared/localisation/localisation.h"
 #include "src/io/filesystem.h"
-#include "src/localisation/localisation.h"
 #include "src/settings/preferences.h"
 
 GlobPreferences globPref;

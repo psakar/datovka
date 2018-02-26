@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
  * the two.
  */
 
-#include "src/localisation/localisation.h"
-#include "src/records_management/models/upload_hierarchy_proxy_model.h"
+#include "src/datovka_shared/localisation/localisation.h"
+#include "src/datovka_shared/records_management/models/upload_hierarchy_proxy_model.h"
 
 UploadHierarchyProxyModel::UploadHierarchyProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)

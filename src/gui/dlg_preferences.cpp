@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,10 @@
 #include <QString>
 
 #include "src/common.h"
+#include "src/datovka_shared/localisation/localisation.h"
 #include "src/dimensions/dimensions.h"
 #include "src/gui/dlg_pin_setup.h"
 #include "src/gui/dlg_preferences.h"
-#include "src/localisation/localisation.h"
 #include "ui_dlg_preferences.h"
 
 #define MSEC_IN_SEC 1000 /* One second in milliseconds. */

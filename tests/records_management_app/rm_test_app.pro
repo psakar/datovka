@@ -25,17 +25,17 @@ INCLUDEPATH += \
 	$${top_srcdir}
 
 SOURCES += \
-	$${top_srcdir}/src/localisation/localisation.cpp \
-	$${top_srcdir}/src/records_management/conversion.cpp \
-	$${top_srcdir}/src/records_management/io/records_management_connection.cpp \
-	$${top_srcdir}/src/records_management/json/entry_error.cpp \
-	$${top_srcdir}/src/records_management/json/helper.cpp \
-	$${top_srcdir}/src/records_management/json/service_info.cpp \
-	$${top_srcdir}/src/records_management/json/stored_files.cpp \
-	$${top_srcdir}/src/records_management/json/upload_file.cpp \
-	$${top_srcdir}/src/records_management/json/upload_hierarchy.cpp \
+	$${top_srcdir}/src/datovka_shared/localisation/localisation.cpp \
+	$${top_srcdir}/src/datovka_shared/records_management/conversion.cpp \
+	$${top_srcdir}/src/datovka_shared/records_management/io/records_management_connection.cpp \
+	$${top_srcdir}/src/datovka_shared/records_management/json/entry_error.cpp \
+	$${top_srcdir}/src/datovka_shared/records_management/json/helper.cpp \
+	$${top_srcdir}/src/datovka_shared/records_management/json/service_info.cpp \
+	$${top_srcdir}/src/datovka_shared/records_management/json/stored_files.cpp \
+	$${top_srcdir}/src/datovka_shared/records_management/json/upload_file.cpp \
+	$${top_srcdir}/src/datovka_shared/records_management/json/upload_hierarchy.cpp \
+	$${top_srcdir}/src/datovka_shared/records_management/models/upload_hierarchy_proxy_model.cpp \
 	$${top_srcdir}/src/records_management/models/upload_hierarchy_model.cpp \
-	$${top_srcdir}/src/records_management/models/upload_hierarchy_proxy_model.cpp \
 	$${top_srcdir}/tests/records_management_app/gui/app.cpp \
 	$${top_srcdir}/tests/records_management_app/gui/dialogue_service_info.cpp \
 	$${top_srcdir}/tests/records_management_app/gui/dialogue_stored_files.cpp \
@@ -43,17 +43,17 @@ SOURCES += \
 	main.cpp
 
 HEADERS += \
-	$${top_srcdir}/src/localisation/localisation.h \
-	$${top_srcdir}/src/records_management/conversion.h \
-	$${top_srcdir}/src/records_management/io/records_management_connection.h \
-	$${top_srcdir}/src/records_management/json/entry_error.h \
-	$${top_srcdir}/src/records_management/json/helper.h \
-	$${top_srcdir}/src/records_management/json/service_info.h \
-	$${top_srcdir}/src/records_management/json/stored_files.h \
-	$${top_srcdir}/src/records_management/json/upload_file.h \
-	$${top_srcdir}/src/records_management/json/upload_hierarchy.h \
+	$${top_srcdir}/src/datovka_shared/localisation/localisation.h \
+	$${top_srcdir}/src/datovka_shared/records_management/conversion.h \
+	$${top_srcdir}/src/datovka_shared/records_management/io/records_management_connection.h \
+	$${top_srcdir}/src/datovka_shared/records_management/json/entry_error.h \
+	$${top_srcdir}/src/datovka_shared/records_management/json/helper.h \
+	$${top_srcdir}/src/datovka_shared/records_management/json/service_info.h \
+	$${top_srcdir}/src/datovka_shared/records_management/json/stored_files.h \
+	$${top_srcdir}/src/datovka_shared/records_management/json/upload_file.h \
+	$${top_srcdir}/src/datovka_shared/records_management/json/upload_hierarchy.h \
+	$${top_srcdir}/src/datovka_shared/records_management/models/upload_hierarchy_proxy_model.h \
 	$${top_srcdir}/src/records_management/models/upload_hierarchy_model.h \
-	$${top_srcdir}/src/records_management/models/upload_hierarchy_proxy_model.h \
 	$${top_srcdir}/tests/records_management_app/gui/app.h \
 	$${top_srcdir}/tests/records_management_app/gui/dialogue_service_info.h \
 	$${top_srcdir}/tests/records_management_app/gui/dialogue_stored_files.h \

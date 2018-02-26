@@ -272,16 +272,28 @@ SOURCES += \
     src/datovka_shared/crypto/crypto_pin.c \
     src/datovka_shared/crypto/crypto_pwd.c \
     src/datovka_shared/crypto/crypto_wrapped.cpp \
+    src/datovka_shared/graphics/graphics.cpp \
+    src/datovka_shared/io/records_management_db.cpp \
     src/datovka_shared/io/sqlite/db.cpp \
     src/datovka_shared/io/sqlite/db_single.cpp \
     src/datovka_shared/io/sqlite/table.cpp \
+    src/datovka_shared/localisation/localisation.cpp \
+    src/datovka_shared/records_management/conversion.cpp \
+    src/datovka_shared/records_management/io/records_management_connection.cpp \
+    src/datovka_shared/records_management/json/entry_error.cpp \
+    src/datovka_shared/records_management/json/helper.cpp \
+    src/datovka_shared/records_management/json/service_info.cpp \
+    src/datovka_shared/records_management/json/stored_files.cpp \
+    src/datovka_shared/records_management/json/upload_file.cpp \
+    src/datovka_shared/records_management/json/upload_hierarchy.cpp \
+    src/datovka_shared/records_management/models/upload_hierarchy_proxy_model.cpp \
     src/datovka_shared/settings/pin.cpp \
+    src/datovka_shared/settings/records_management.cpp \
     src/datovka_shared/utility/strings.cpp \
     src/datovka_shared/worker/pool.cpp \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
-    src/graphics/graphics.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -325,7 +337,6 @@ SOURCES += \
     src/io/records_management_db.cpp \
     src/io/tag_db.cpp \
     src/isds/isds_conversion.cpp \
-    src/localisation/localisation.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
@@ -339,19 +350,10 @@ SOURCES += \
     src/models/sort_filter_proxy_model.cpp \
     src/models/table_model.cpp \
     src/models/tags_model.cpp \
-    src/records_management/conversion.cpp \
     src/records_management/gui/dlg_records_management.cpp \
     src/records_management/gui/dlg_records_management_stored.cpp \
     src/records_management/gui/dlg_records_management_upload.cpp \
-    src/records_management/io/records_management_connection.cpp \
-    src/records_management/json/entry_error.cpp \
-    src/records_management/json/helper.cpp \
-    src/records_management/json/service_info.cpp \
-    src/records_management/json/stored_files.cpp \
-    src/records_management/json/upload_file.cpp \
-    src/records_management/json/upload_hierarchy.cpp \
     src/records_management/models/upload_hierarchy_model.cpp \
-    src/records_management/models/upload_hierarchy_proxy_model.cpp \
     src/records_management/widgets/svg_view.cpp \
     src/settings/account.cpp \
     src/settings/accounts.cpp \
@@ -405,16 +407,28 @@ HEADERS += \
     src/datovka_shared/crypto/crypto_pin.h \
     src/datovka_shared/crypto/crypto_pwd.h \
     src/datovka_shared/crypto/crypto_wrapped.h \
+    src/datovka_shared/graphics/graphics.h \
+    src/datovka_shared/io/records_management_db.h \
     src/datovka_shared/io/sqlite/db.h \
     src/datovka_shared/io/sqlite/db_single.h \
     src/datovka_shared/io/sqlite/table.h \
+    src/datovka_shared/localisation/localisation.h \
+    src/datovka_shared/records_management/conversion.h \
+    src/datovka_shared/records_management/io/records_management_connection.h \
+    src/datovka_shared/records_management/json/entry_error.h \
+    src/datovka_shared/records_management/json/helper.h \
+    src/datovka_shared/records_management/json/service_info.h \
+    src/datovka_shared/records_management/json/stored_files.h \
+    src/datovka_shared/records_management/json/upload_file.h \
+    src/datovka_shared/records_management/json/upload_hierarchy.h \
+    src/datovka_shared/records_management/models/upload_hierarchy_proxy_model.h \
     src/datovka_shared/settings/pin.h \
+    src/datovka_shared/settings/records_management.h \
     src/datovka_shared/utility/strings.h \
     src/datovka_shared/worker/pool.h \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
-    src/graphics/graphics.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \
@@ -457,7 +471,6 @@ HEADERS += \
     src/io/records_management_db.h \
     src/io/tag_db.h \
     src/isds/isds_conversion.h \
-    src/localisation/localisation.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/log/log.h \
@@ -471,19 +484,10 @@ HEADERS += \
     src/models/sort_filter_proxy_model.h \
     src/models/table_model.h \
     src/models/tags_model.h \
-    src/records_management/conversion.h \
     src/records_management/gui/dlg_records_management.h \
     src/records_management/gui/dlg_records_management_stored.h \
     src/records_management/gui/dlg_records_management_upload.h \
-    src/records_management/io/records_management_connection.h \
-    src/records_management/json/entry_error.h \
-    src/records_management/json/helper.h \
-    src/records_management/json/service_info.h \
-    src/records_management/json/stored_files.h \
-    src/records_management/json/upload_file.h \
-    src/records_management/json/upload_hierarchy.h \
     src/records_management/models/upload_hierarchy_model.h \
-    src/records_management/models/upload_hierarchy_proxy_model.h \
     src/records_management/widgets/svg_view.h \
     src/settings/account.h \
     src/settings/accounts.h \
