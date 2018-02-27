@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,11 +36,6 @@
 #include <QString>
 
 #include "src/settings/account.h"
-
-/*!
- * @brief Global container holding libisds sessions.
- */
-extern class IsdsSessions *globIsdsSessionsPtr;
 
 /*!
  * @brief Container holding context structures of libisds.

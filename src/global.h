@@ -21,41 +21,20 @@
  * the two.
  */
 
-#include <QThread>
+#pragma once
 
-#include "src/global.h"
-#include "src/io/isds_sessions.h"
-#include "src/log/log.h"
-#include "src/worker/task_keep_alive.h"
+/*!
+ * @brief The class holds pointers to all globally accessible structures.
+ */
+class GlobInstcs {
 
-TaskKeepAlive::TaskKeepAlive(const QString &userName)
-    : m_isAlive(false),
-    m_userName(userName)
-{
-	Q_ASSERT(!m_userName.isEmpty());
-}
+public:
+	static
+	class IsdsSessions *isdsSessionsPtr; /*!< ISDS session container. */
 
-void TaskKeepAlive::run(void)
-{
-	if (m_userName.isEmpty()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	logDebugLv0NL("Starting keep-alive task in thread '%p'",
-	    (void *) QThread::currentThreadId());
-
-	/* ### Worker task begin. ### */
-
-	m_isAlive = GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_userName);
-	if (m_isAlive) {
-		logInfo("%s\n", "Connection to ISDS is alive :)");
-	} else {
-		logWarning("%s\n", "Connection to ISDS is dead :(");
-	}
-
-	/* ### Worker task end. ### */
-
-	logDebugLv0NL("Keep-alive task finished in thread '%p'",
-	    (void *) QThread::currentThreadId());
-}
+private:
+	/*!
+	 * @brief Private constructor.
+	 */
+	GlobInstcs(void);
+};

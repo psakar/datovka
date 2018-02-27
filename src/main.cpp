@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,7 @@
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
 #include "src/datovka_shared/io/sqlite/db.h"
+#include "src/global.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_pin_input.h"
 #include "src/gui/dlg_view_zfo.h"
@@ -77,6 +78,8 @@ int showZfo(const QString &fileName)
 
 int main(int argc, char *argv[])
 {
+	QApplication app(argc, argv);
+
 	/* Set random generator. */
 	qsrand(QDateTime::currentDateTime().toTime_t());
 
@@ -92,8 +95,6 @@ int main(int argc, char *argv[])
 	    libraryDependencies().join("; ") + "]");
 
 	qInstallMessageHandler(globalLogOutput);
-
-	QApplication app(argc, argv);
 
 	QCommandLineParser parser;
 	if (0 != CLIParser::setupCmdLineParser(parser)) {

@@ -21,41 +21,8 @@
  * the two.
  */
 
-#include <QThread>
+#include <QtCore> /* Q_NULLPTR */
 
 #include "src/global.h"
-#include "src/io/isds_sessions.h"
-#include "src/log/log.h"
-#include "src/worker/task_keep_alive.h"
 
-TaskKeepAlive::TaskKeepAlive(const QString &userName)
-    : m_isAlive(false),
-    m_userName(userName)
-{
-	Q_ASSERT(!m_userName.isEmpty());
-}
-
-void TaskKeepAlive::run(void)
-{
-	if (m_userName.isEmpty()) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	logDebugLv0NL("Starting keep-alive task in thread '%p'",
-	    (void *) QThread::currentThreadId());
-
-	/* ### Worker task begin. ### */
-
-	m_isAlive = GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_userName);
-	if (m_isAlive) {
-		logInfo("%s\n", "Connection to ISDS is alive :)");
-	} else {
-		logWarning("%s\n", "Connection to ISDS is dead :(");
-	}
-
-	/* ### Worker task end. ### */
-
-	logDebugLv0NL("Keep-alive task finished in thread '%p'",
-	    (void *) QThread::currentThreadId());
-}
+class IsdsSessions *GlobInstcs::isdsSessionsPtr = Q_NULLPTR;

@@ -31,6 +31,7 @@
 
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/utility/strings.h"
+#include "src/global.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_contacts.h"
 #include "src/gui/dlg_ds_search.h"
@@ -393,7 +394,7 @@ bool isLoggedIn(QTimer &keepAliveTimer, MainWindow *const mw,
 	keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
 	/* Check the presence of struct isds_ctx . */
-	if (NULL == globIsdsSessionsPtr->session(userName)) {
+	if (NULL == GlobInstcs::isdsSessionsPtr->session(userName)) {
 		logErrorNL("%s", "Missing ISDS session.");
 		loggedIn = false;
 	}

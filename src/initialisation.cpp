@@ -32,6 +32,7 @@
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/datovka_shared/localisation/localisation.h"
+#include "src/global.h"
 #include "src/initialisation.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
@@ -224,8 +225,8 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 	 * TODO -- Solve the problem of this globally accessible structures.
 	 */
 
-	globIsdsSessionsPtr = new (std::nothrow) IsdsSessions;
-	if (Q_NULLPTR == globIsdsSessionsPtr) {
+	GlobInstcs::isdsSessionsPtr = new (std::nothrow) IsdsSessions;
+	if (Q_NULLPTR == GlobInstcs::isdsSessionsPtr) {
 		logErrorNL("%s", "Cannot allocate session container.");
 		goto fail;
 	}
@@ -307,8 +308,8 @@ void deallocateGlobalObjects(void)
 		delete globAccountDbPtr;
 		globAccountDbPtr = Q_NULLPTR;
 	}
-	if (Q_NULLPTR != globIsdsSessionsPtr) {
-		delete globIsdsSessionsPtr;
-		globIsdsSessionsPtr = Q_NULLPTR;
+	if (Q_NULLPTR != GlobInstcs::isdsSessionsPtr) {
+		delete GlobInstcs::isdsSessionsPtr;
+		GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
 	}
 }
