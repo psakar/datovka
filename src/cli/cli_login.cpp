@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include "src/common.h" /* ISDS_CONNECT_TIMEOUT_MS */
 #include "src/cli/cli_login.h"
+#include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_helper.h"
 #include "src/io/isds_login.h"
@@ -165,7 +166,7 @@ bool connectToIsdsCLI(IsdsSessions &isdsSessions, AcntSettings acntSettings,
 		/* Notify only once. */
 		acntSettings._setPwdExpirDlgShown(true);
 
-		int daysTo = globAccountDbPtr->pwdExpiresInDays(
+		int daysTo = GlobInstcs::accntDbPtr->pwdExpiresInDays(
 		    AccountDb::keyFromLogin(userName),
 		    PWD_EXPIRATION_NOTIFICATION_DAYS);
 

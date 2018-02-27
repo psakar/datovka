@@ -1055,9 +1055,9 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 			const QString acntDbKey(AccountDb::keyFromLogin(
 			    map["username"].toString()));
 			const QString dbIDSender(
-			    globAccountDbPtr->dbId(acntDbKey));
+			    GlobInstcs::accntDbPtr->dbId(acntDbKey));
 			const QString dmSender(
-			    globAccountDbPtr->senderNameGuess(acntDbKey));
+			    GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
 			QDateTime deliveryTime = timevalToDateTime(
 			    sent_message->envelope->dmDeliveryTime);
 			MessageDb *messageDb =

@@ -457,11 +457,11 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 
 	const AcntSettings &accountInfo(globAccounts[m_userName]);
 	const QString acntDbKey(AccountDb::keyFromLogin(m_userName));
-	m_boxId = globAccountDbPtr->dbId(acntDbKey);
+	m_boxId = GlobInstcs::accntDbPtr->dbId(acntDbKey);
 	Q_ASSERT(!m_boxId.isEmpty());
-	m_senderName = globAccountDbPtr->senderNameGuess(acntDbKey);
+	m_senderName = GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey);
 	const QList<QString> accountData(
-	    globAccountDbPtr->getUserDataboxInfo(acntDbKey));
+	    GlobInstcs::accntDbPtr->getUserDataboxInfo(acntDbKey));
 	if (!accountData.isEmpty()) {
 		m_dbType = accountData.at(0);
 		m_dbEffectiveOVM = (accountData.at(1) == "1");

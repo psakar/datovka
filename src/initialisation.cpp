@@ -231,8 +231,8 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 		goto fail;
 	}
 
-	globAccountDbPtr = new (std::nothrow) AccountDb("accountDb", false);
-	if (Q_NULLPTR == globAccountDbPtr) {
+	GlobInstcs::accntDbPtr = new (std::nothrow) AccountDb("accountDb", false);
+	if (Q_NULLPTR == GlobInstcs::accntDbPtr) {
 		logErrorNL("%s", "Cannot allocate account db.");
 		goto fail;
 	}
@@ -240,7 +240,7 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 	flags = SQLiteDb::CREATE_MISSING;
 	flags |= globPref.store_additional_data_on_disk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
-	if (!globAccountDbPtr->openDb(prefs.accountDbPath(), flags)) {
+	if (!GlobInstcs::accntDbPtr->openDb(prefs.accountDbPath(), flags)) {
 		logErrorNL("Error opening account db '%s'.",
 		    prefs.accountDbPath().toUtf8().constData());
 		goto fail;
@@ -304,10 +304,11 @@ void deallocateGlobalObjects(void)
 		delete globMessageDbsPtr;
 		globMessageDbsPtr = Q_NULLPTR;
 	}
-	if (Q_NULLPTR != globAccountDbPtr) {
-		delete globAccountDbPtr;
-		globAccountDbPtr = Q_NULLPTR;
+	if (Q_NULLPTR != GlobInstcs::accntDbPtr) {
+		delete GlobInstcs::accntDbPtr;
+		GlobInstcs::accntDbPtr = Q_NULLPTR;
 	}
+
 	if (Q_NULLPTR != GlobInstcs::isdsSessionsPtr) {
 		delete GlobInstcs::isdsSessionsPtr;
 		GlobInstcs::isdsSessionsPtr = Q_NULLPTR;

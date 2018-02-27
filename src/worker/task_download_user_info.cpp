@@ -89,7 +89,7 @@ bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
 
 	Q_ASSERT(NULL != userInfo);
 
-	bool ret = globAccountDbPtr->insertUserIntoDb(
+	bool ret = GlobInstcs::accntDbPtr->insertUserIntoDb(
 	    AccountDb::keyFromLogin(userName),
 	    IsdsConversion::userTypeToStr(*userInfo->userType),
 	    (int) *userInfo->userPrivils,

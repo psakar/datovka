@@ -92,6 +92,6 @@ bool TaskDownloadPasswordInfo::downloadPasswordInfoFromISDS(
 		free(expiration); expiration = NULL;
 	} /* else -> password without expiration */
 
-	return globAccountDbPtr->setPwdExpirIntoDb(
+	return GlobInstcs::accntDbPtr->setPwdExpirIntoDb(
 	    AccountDb::keyFromLogin(userName), expirDate);
 }

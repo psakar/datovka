@@ -32,6 +32,9 @@ public:
 	static
 	class IsdsSessions *isdsSessionsPtr; /*!< ISDS session container. */
 
+	static
+	class AccountDb *accntDbPtr; /*!< Account database. */
+
 private:
 	/*!
 	 * @brief Private constructor.

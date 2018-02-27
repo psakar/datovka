@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <QThread>
 
 #include "src/common.h"
+#include "src/global.h"
 #include "src/gui/dlg_import_zfo.h" /* TODO -- Remove this dependency. */
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
@@ -316,7 +317,7 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 		isdsLongError.clear();
 		resultDesc.clear();
 
-		const QString databoxID(globAccountDbPtr->dbId(
+		const QString databoxID(GlobInstcs::accntDbPtr->dbId(
 		    AccountDb::keyFromLogin(acnt.userName)));
 		if ((databoxID != dbIDSender) && (databoxID != dbIDRecipient)) {
 			continue;

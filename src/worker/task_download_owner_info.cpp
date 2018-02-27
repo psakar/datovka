@@ -100,7 +100,7 @@ bool TaskDownloadOwnerInfo::downloadOwnerInfo(const QString &userName,
 		ic = QString(ownerInfo->ic).toInt();
 	}
 
-	bool ret = globAccountDbPtr->insertAccountIntoDb(
+	bool ret = GlobInstcs::accntDbPtr->insertAccountIntoDb(
 	    AccountDb::keyFromLogin(userName),
 	    ownerInfo->dbID,
 	    IsdsConversion::boxTypeToStr(*ownerInfo->dbType),
