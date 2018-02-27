@@ -247,8 +247,8 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 	}
 
 	/* Create message DB container. */
-	globMessageDbsPtr = new (std::nothrow) DbContainer("GLOBALDBS");
-	if (Q_NULLPTR == globMessageDbsPtr) {
+	GlobInstcs::msgDbsPtr = new (std::nothrow) DbContainer("GLOBALDBS");
+	if (Q_NULLPTR == GlobInstcs::msgDbsPtr) {
 		logErrorNL("%s", "Cannot allocate message db container.");
 		goto fail;
 	}
@@ -300,9 +300,9 @@ void deallocateGlobalObjects(void)
 		globTagDbPtr = Q_NULLPTR;
 	}
 
-	if (Q_NULLPTR != globMessageDbsPtr) {
-		delete globMessageDbsPtr;
-		globMessageDbsPtr = Q_NULLPTR;
+	if (Q_NULLPTR != GlobInstcs::msgDbsPtr) {
+		delete GlobInstcs::msgDbsPtr;
+		GlobInstcs::msgDbsPtr = Q_NULLPTR;
 	}
 	if (Q_NULLPTR != GlobInstcs::accntDbPtr) {
 		delete GlobInstcs::accntDbPtr;

@@ -4724,7 +4724,7 @@ void MainWindow::deleteAccount(const QString &userName)
 	}
 
 	if (DlgYesNoCheckbox::YesChecked == retVal) {
-		if (globMessageDbsPtr->deleteDbSet(dbSet)) {
+		if (GlobInstcs::msgDbsPtr->deleteDbSet(dbSet)) {
 			showStatusTextWithTimeout(tr("Account '%1' was deleted "
 			    "together with message database file.")
 			    .arg(accountName));

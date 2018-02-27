@@ -508,7 +508,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
     const QString &primaryKey, bool testing, enum Organisation organisation,
     const QString &connectionPrefix, enum CreationManner manner)
 {
-	MessageDbSet *dbSet = NULL;
+	MessageDbSet *dbSet = Q_NULLPTR;
 	QStringList matchingFiles;
 
 	if (manner == CM_MUST_EXIST) {
@@ -525,7 +525,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 		    primaryKey, testing, organisation, true);
 
 		if (matchingFiles.isEmpty()) {
-			return NULL;
+			return Q_NULLPTR;
 		}
 
 		/* Check primary keys. */
@@ -536,7 +536,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 			if (secondaryKey.isNull()) {
 				logErrorNL("Failed to obtain secondary key from file name '%s'.",
 				    fileName.toUtf8().constData());
-				return NULL;
+				return Q_NULLPTR;
 			}
 		}
 	} else {
@@ -546,7 +546,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 			/* Empty file will be created automatically. */
 			if (!dir.mkpath(dir.absolutePath())) {
 				/* Cannot create directory. */
-				return NULL;
+				return Q_NULLPTR;
 			}
 		}
 	}
@@ -555,15 +555,15 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 		logErrorNL("Ambiguous organisation of database '%s' in %s'.",
 		    primaryKey.toUtf8().constData(),
 		    locDir.toUtf8().constData());
-		return NULL;
+		return Q_NULLPTR;
 	}
 
 	/* Create database set. */
 	dbSet = new(std::nothrow) MessageDbSet(locDir, primaryKey, testing,
 	    organisation, connectionPrefix);
-	if (dbSet == NULL) {
+	if (dbSet == Q_NULLPTR) {
 		Q_ASSERT(0);
-		return NULL;
+		return Q_NULLPTR;
 	}
 
 	MessageDb *db = NULL;
@@ -579,7 +579,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 				logErrorNL("Failed to open database file '%s'.",
 				    fileName.toUtf8().constData());
 				delete dbSet;
-				return NULL;
+				return Q_NULLPTR;
 			}
 		}
 	} else if (manner == CM_CREATE_EMPTY_CURRENT) {
@@ -596,7 +596,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 			logErrorNL("Failed to open database file '%s'.",
 			    fileName.toUtf8().constData());
 			delete dbSet;
-			return NULL;
+			return Q_NULLPTR;
 		}
 	}
 

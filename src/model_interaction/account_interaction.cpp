@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include "src/global.h"
 #include "src/io/message_db_set.h"
 #include "src/io/message_db_set_container.h"
 #include "src/log/log.h"
@@ -96,7 +97,7 @@ MessageDbSet *AccountInteraction::accessDbSet(const QString &userName,
 		} else {
 			status = AS_OK;
 		}
-		dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
+		dbSet = GlobInstcs::msgDbsPtr->accessDbSet(dbDir, userName,
 		    itemSettings.isTestAccount(),
 		    MessageDbSet::DO_UNKNOWN,
 		    MessageDbSet::CM_MUST_EXIST);
@@ -112,7 +113,7 @@ MessageDbSet *AccountInteraction::accessDbSet(const QString &userName,
 		} else {
 			status = AS_OK;
 		}
-		dbSet = globMessageDbsPtr->accessDbSet(dbDir, userName,
+		dbSet = GlobInstcs::msgDbsPtr->accessDbSet(dbDir, userName,
 		    itemSettings.isTestAccount(),
 		    MessageDbSet::DO_YEARLY,
 		    MessageDbSet::CM_CREATE_EMPTY_CURRENT);

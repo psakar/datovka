@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -223,7 +223,7 @@ public:
 	 * @param[in] organisation     How to organise the database files.
 	 * @param[in] connectionPrefix Prefix of the connection name.
 	 * @param[in] manner           How to treat files when opening database.
-	 * @return Pointer to new container or zero pointer on error.
+	 * @return Pointer to new container or Q_NULLPTR on error.
 	 */
 	static
 	MessageDbSet *createNew(const QString &locDir,

@@ -34,6 +34,8 @@ public:
 
 	static
 	class AccountDb *accntDbPtr; /*!< Account database. */
+	static
+	class DbContainer *msgDbsPtr; /*!< Message database container. */
 
 private:
 	/*!

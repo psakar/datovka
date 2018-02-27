@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 #ifndef _MESSAGE_DB_SET_CONTAINER_H_
 #define _MESSAGE_DB_SET_CONTAINER_H_
 
-
 #include <QMap>
 #include <QString>
 
@@ -40,7 +39,7 @@
 class DbContainer : private QMap<QString, MessageDbSet *> {
 
 public:
-	DbContainer(const QString &connectionPrefix = QString());
+	explicit DbContainer(const QString &connectionPrefix = QString());
 	~DbContainer(void);
 
 	/*!
@@ -51,7 +50,7 @@ public:
 	 * @param[in] testing      True for testing accounts.
 	 * @param[in] organisation Way how the database is organised.
 	 * @param[in] manner       How to treat files when opening database.
-	 * @return Pointer to database, zero pointer on error.
+	 * @return Pointer to database, Q_NULLPTR on error.
 	 */
 	MessageDbSet *accessDbSet(const QString &locDir,
 	    const QString &primaryKey, bool testing,
@@ -75,12 +74,5 @@ private:
 
 	const QString m_connectionPrefix; /*!< Database connection prefix. */
 };
-
-
-/*!
- * @brief Global database container.
- */
-extern DbContainer *globMessageDbsPtr;
-
 
 #endif /* _MESSAGE_DB_SET_CONTAINER_H_ */

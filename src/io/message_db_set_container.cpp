@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,25 +21,18 @@
  * the two.
  */
 
-
 #include <QFileInfo>
 
 #include "message_db_set_container.h"
 #include "src/log/log.h"
 
-
-/* ========================================================================= */
 DbContainer::DbContainer(const QString &connectionPrefix)
-/* ========================================================================= */
     : QMap<QString, MessageDbSet *>(),
     m_connectionPrefix(connectionPrefix)
 {
 }
 
-
-/* ========================================================================= */
 DbContainer::~DbContainer(void)
-/* ========================================================================= */
 {
 	QMap<QString, MessageDbSet *>::iterator i;
 
@@ -48,18 +41,12 @@ DbContainer::~DbContainer(void)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Access/create+open message database related to item.
- */
 MessageDbSet *DbContainer::accessDbSet(const QString &locDir,
     const QString &primaryKey, bool testing,
     MessageDbSet::Organisation organisation,
     enum MessageDbSet::CreationManner manner)
-/* ========================================================================= */
 {
-	MessageDbSet *dbSet = NULL;
+	MessageDbSet *dbSet = Q_NULLPTR;
 
 	/* Already opened. */
 	if (this->find(primaryKey) != this->end()) {
@@ -68,23 +55,17 @@ MessageDbSet *DbContainer::accessDbSet(const QString &locDir,
 
 	dbSet = MessageDbSet::createNew(locDir, primaryKey, testing,
 	    organisation, m_connectionPrefix, manner);
-	if (NULL == dbSet) {
-		return NULL;
+	if (Q_NULLPTR == dbSet) {
+		return Q_NULLPTR;
 	}
 
 	this->insert(primaryKey, dbSet);
 	return dbSet;
 }
 
-
-/* ========================================================================= */
-/*
- * Delete message db.
- */
 bool DbContainer::deleteDbSet(MessageDbSet *dbSet)
-/* ========================================================================= */
 {
-	if (0 == dbSet) {
+	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -112,8 +93,4 @@ bool DbContainer::deleteDbSet(MessageDbSet *dbSet)
 	return true;
 }
 
-
 const QString DbContainer::dbDriverType("QSQLITE");
-
-
-DbContainer *globMessageDbsPtr;
