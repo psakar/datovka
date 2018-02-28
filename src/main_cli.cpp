@@ -35,13 +35,13 @@
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
 #include "src/datovka_shared/io/sqlite/db.h"
+#include "src/datovka_shared/settings/pin.h"
 #include "src/global.h"
 #include "src/initialisation.h"
 #include "src/io/db_tables.h"
 #include "src/io/filesystem.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
-#include "src/settings/pin.h"
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
 #include "src/worker/pool.h"
@@ -181,9 +181,9 @@ int main(int argc, char *argv[])
 		QSettings settings(GlobInstcs::prefsPtr->loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
-		globPinSet.loadFromSettings(settings);
-		if (globPinSet.pinConfigured()) {
-			if (!CLIPin::queryPin(globPinSet, 2)) {
+		GlobInstcs::pinSetPtr->loadFromSettings(settings);
+		if (GlobInstcs::pinSetPtr->pinConfigured()) {
+			if (!CLIPin::queryPin(*GlobInstcs::pinSetPtr, 2)) {
 				return EXIT_FAILURE;
 			}
 		}
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 		settings.setIniCodec("UTF-8");
 		globAccounts.loadFromSettings(GlobInstcs::prefsPtr->confDir(),
 		    settings);
-		globAccounts.decryptAllPwds(globPinSet._pinVal);
+		globAccounts.decryptAllPwds(GlobInstcs::pinSetPtr->_pinVal);
 	}
 
 	ret = CLIParser::runCLIService(srvcArgs, parser);

@@ -33,6 +33,7 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/localisation/localisation.h"
+#include "src/datovka_shared/settings/pin.h"
 #include "src/global.h"
 #include "src/initialisation.h"
 #include "src/io/account_db.h"
@@ -229,6 +230,12 @@ int allocGlobSettings(void)
 		goto fail;
 	}
 
+	GlobInstcs::pinSetPtr = new (std::nothrow) PinSettings;
+	if (Q_NULLPTR == GlobInstcs::pinSetPtr) {
+		logErrorNL("%s", "Cannot allocated PIN settings.");
+		goto fail;
+	}
+
 	return 0;
 
 fail:
@@ -238,6 +245,10 @@ fail:
 
 void deallocGlobSettings(void)
 {
+	if (Q_NULLPTR != GlobInstcs::pinSetPtr) {
+		delete GlobInstcs::pinSetPtr;
+		GlobInstcs::pinSetPtr = Q_NULLPTR;
+	}
 	if (Q_NULLPTR != GlobInstcs::proxSetPtr) {
 		delete GlobInstcs::proxSetPtr;
 		GlobInstcs::proxSetPtr = Q_NULLPTR;

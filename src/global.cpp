@@ -27,6 +27,7 @@
 
 class GlobPreferences *GlobInstcs::prefsPtr = Q_NULLPTR;
 class ProxiesSettings *GlobInstcs::proxSetPtr = Q_NULLPTR;
+class PinSettings *GlobInstcs::pinSetPtr = Q_NULLPTR;
 
 class IsdsSessions *GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
 

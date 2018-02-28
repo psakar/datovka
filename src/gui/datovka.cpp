@@ -47,6 +47,7 @@
 #include "src/about.h"
 #include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/settings/pin.h"
 #include "src/datovka_shared/utility/strings.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
@@ -87,7 +88,6 @@
 #include "src/records_management/gui/dlg_records_management.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
-#include "src/settings/pin.h"
 #include "src/settings/preferences.h"
 #include "src/settings/records_management.h"
 #include "src/views/table_home_end_filter.h"
@@ -656,7 +656,8 @@ void MainWindow::showPreferencesDialog(void)
 {
 	debugSlotCall();
 
-	if (!DlgPreferences::modify(*GlobInstcs::prefsPtr, globPinSet, this)) {
+	if (!DlgPreferences::modify(*GlobInstcs::prefsPtr,
+	        *GlobInstcs::pinSetPtr, this)) {
 		return;
 	}
 
@@ -4218,13 +4219,13 @@ void MainWindow::loadSettings(void)
 
 	/* Records management settings. */
 	globRecordsManagementSet.loadFromSettings(settings);
-	globRecordsManagementSet.decryptToken(globPinSet._pinVal);
+	globRecordsManagementSet.decryptToken(GlobInstcs::pinSetPtr->_pinVal);
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(GlobInstcs::prefsPtr->confDir(),
 	    settings);
 	ui->accountList->setModel(&m_accountModel);
-	globAccounts.decryptAllPwds(globPinSet._pinVal);
+	globAccounts.decryptAllPwds(GlobInstcs::pinSetPtr->_pinVal);
 
 	/* Select last-used account. */
 	setDefaultAccount(settings);
@@ -4491,10 +4492,10 @@ void MainWindow::saveSettings(void) const
 	saveAppIdConfigFormat(settings);
 
 	/* PIN settings. */
-	globPinSet.saveToSettings(settings);
+	GlobInstcs::pinSetPtr->saveToSettings(settings);
 
 	/* Accounts. */
-	m_accountModel.saveToSettings(globPinSet._pinVal,
+	m_accountModel.saveToSettings(GlobInstcs::pinSetPtr->_pinVal,
 	    GlobInstcs::prefsPtr->confDir(), settings);
 
 	/* Store last-used account. */
@@ -4513,7 +4514,8 @@ void MainWindow::saveSettings(void) const
 	GlobInstcs::proxSetPtr->saveToSettings(settings);
 
 	/* Records management settings. */
-	globRecordsManagementSet.saveToSettings(globPinSet._pinVal, settings);
+	globRecordsManagementSet.saveToSettings(GlobInstcs::pinSetPtr->_pinVal,
+	    settings);
 
 	/* Global preferences. */
 	GlobInstcs::prefsPtr->saveToSettings(settings);

@@ -33,6 +33,8 @@ public:
 	class GlobPreferences *prefsPtr; /*!< Preferences. */
 	static
 	class ProxiesSettings *proxSetPtr; /*!< Proxy settings. */
+	static
+	class PinSettings *pinSetPtr; /*!< PIN settings. */
 
 	static
 	class IsdsSessions *isdsSessionsPtr; /*!< ISDS session container. */

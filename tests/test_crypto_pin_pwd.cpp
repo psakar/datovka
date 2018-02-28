@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
 #include <QString>
 #include <QtTest/QtTest>
 
+#include "src/datovka_shared/settings/pin.h"
 #include "src/settings/account.h"
 #include "src/settings/accounts.h"
-#include "src/settings/pin.h"
 #include "tests/test_crypto_pin_pwd.h"
 
 class TestCryptoPinPwd : public QObject {
