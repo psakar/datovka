@@ -23,8 +23,9 @@
 
 #include <QMessageBox>
 
+#include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/records_management/json/service_info.h"
-#include "src/io/records_management_db.h"
+#include "src/global.h"
 #include "src/records_management/gui/dlg_records_management.h"
 #include "src/records_management/widgets/svg_view.h"
 #include "ui_dlg_records_management.h"
@@ -94,7 +95,7 @@ DlgRecordsManagement::~DlgRecordsManagement(void)
 bool DlgRecordsManagement::updateSettings(
     RecordsManagementSettings &recMgmtSettings, QWidget *parent)
 {
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		return false;
 	}
 
@@ -113,14 +114,14 @@ bool DlgRecordsManagement::updateSettings(
 		entry.name = dlg.m_ui->nameLine->text();
 		entry.tokenName = dlg.m_ui->tokenNameLine->text();
 		entry.logoSvg = dlg.m_logoSvg;
-		globRecordsManagementDbPtr->updateServiceInfo(entry);
+		GlobInstcs::recMgmtDbPtr->updateServiceInfo(entry);
 
 		if (recMgmtSettings.url() != dlg.m_ui->urlLine->text()) {
 			/* Erase all message-related data as URL has changed. */
-			globRecordsManagementDbPtr->deleteAllStoredMsg();
+			GlobInstcs::recMgmtDbPtr->deleteAllStoredMsg();
 		}
 	} else {
-		globRecordsManagementDbPtr->deleteAllEntries();
+		GlobInstcs::recMgmtDbPtr->deleteAllEntries();
 	}
 
 	/* Save changes to settings. */
@@ -195,12 +196,12 @@ void DlgRecordsManagement::notifyCommunicationError(const QString &errMsg)
 
 void DlgRecordsManagement::loadStoredServiceInfo(void)
 {
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		return;
 	}
 
 	RecordsManagementDb::ServiceInfoEntry entry(
-	    globRecordsManagementDbPtr->serviceInfo());
+	    GlobInstcs::recMgmtDbPtr->serviceInfo());
 	if (!entry.isValid()) {
 		return;
 	}

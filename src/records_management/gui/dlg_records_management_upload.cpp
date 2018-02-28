@@ -26,9 +26,10 @@
 #include <QTimer>
 
 #include "src/datovka_shared/graphics/graphics.h"
+#include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/records_management/json/upload_file.h"
 #include "src/datovka_shared/records_management/json/upload_hierarchy.h"
-#include "src/io/records_management_db.h"
+#include "src/global.h"
 #include "src/log/log.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
@@ -204,12 +205,12 @@ void DlgRecordsManagementUpload::notifyCommunicationError(const QString &errMsg)
 
 void DlgRecordsManagementUpload::loadRecordsManagementPixmap(int width)
 {
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		return;
 	}
 
 	RecordsManagementDb::ServiceInfoEntry entry(
-	    globRecordsManagementDbPtr->serviceInfo());
+	    GlobInstcs::recMgmtDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
 		return;
 	}
@@ -259,8 +260,8 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 		logInfoNL(
 		    "Message '%" PRId64 "'has been stored into records management service.",
 		    dmId);
-		if (Q_NULLPTR != globRecordsManagementDbPtr) {
-			return globRecordsManagementDbPtr->updateStoredMsg(dmId,
+		if (Q_NULLPTR != GlobInstcs::recMgmtDbPtr) {
+			return GlobInstcs::recMgmtDbPtr->updateStoredMsg(dmId,
 			    ufRes.locations());
 		} else {
 			Q_ASSERT(0);

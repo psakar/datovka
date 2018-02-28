@@ -31,6 +31,7 @@
 #include "src/cli/cli_parser.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/global.h"
 #include "src/initialisation.h"
@@ -39,7 +40,6 @@
 #include "src/io/file_downloader.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
-#include "src/io/records_management_db.h"
 #include "src/io/tag_db.h"
 
 void setDefaultLocale(void)
@@ -266,15 +266,15 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 		goto fail;
 	}
 
-	globRecordsManagementDbPtr = new (std::nothrow)
+	GlobInstcs::recMgmtDbPtr = new (std::nothrow)
 	    RecordsManagementDb("recordsManagementDb", false);
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		logErrorNL("%s", "Cannot allocate records management db.");
 		goto fail;
 	}
 	/* Open records management database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	if (!globRecordsManagementDbPtr->openDb(
+	if (!GlobInstcs::recMgmtDbPtr->openDb(
 	        prefs.recordsManagementDbPath(), flags)) {
 		logErrorNL("Error opening records management db '%s'.",
 		    prefs.recordsManagementDbPath().toUtf8().constData());
@@ -290,11 +290,10 @@ fail:
 
 void deallocateGlobalObjects(void)
 {
-	if (Q_NULLPTR != globRecordsManagementDbPtr) {
-		delete globRecordsManagementDbPtr;
-		globRecordsManagementDbPtr = Q_NULLPTR;
+	if (Q_NULLPTR != GlobInstcs::recMgmtDbPtr) {
+		delete GlobInstcs::recMgmtDbPtr;
+		GlobInstcs::recMgmtDbPtr = Q_NULLPTR;
 	}
-
 	if (Q_NULLPTR != GlobInstcs::tagDbPtr) {
 		delete GlobInstcs::tagDbPtr;
 		GlobInstcs::tagDbPtr = Q_NULLPTR;

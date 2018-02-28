@@ -25,12 +25,12 @@
 
 #include "src/common.h"
 #include "src/datovka_shared/graphics/graphics.h"
+#include "src/datovka_shared/io/records_management_db.h"
 #include "src/delegates/tag_item.h"
 #include "src/global.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db.h"
-#include "src/io/records_management_db.h"
 #include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/log/log.h"
 #include "src/models/messages_model.h"
@@ -725,13 +725,13 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 
 bool DbMsgsTblModel::setRecordsManagementIcon(void)
 {
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
 		return false;
 	}
 
 	RecordsManagementDb::ServiceInfoEntry entry(
-	    globRecordsManagementDbPtr->serviceInfo());
+	    GlobInstcs::recMgmtDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
 		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
 		return false;
@@ -748,7 +748,7 @@ bool DbMsgsTblModel::setRecordsManagementIcon(void)
 
 bool DbMsgsTblModel::fillRecordsManagementColumn(int col)
 {
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		return false;
 	}
 
@@ -767,7 +767,7 @@ bool DbMsgsTblModel::fillRecordsManagementColumn(int col)
 	for (int row = 0; row < rowCount(); ++row) {
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
 		m_data[row][col] =
-		    globRecordsManagementDbPtr->storedMsgLocations(dmId);
+		    GlobInstcs::recMgmtDbPtr->storedMsgLocations(dmId);
 	}
 
 	emit dataChanged(TblModel::index(0, col),
@@ -779,7 +779,7 @@ bool DbMsgsTblModel::fillRecordsManagementColumn(int col)
 bool DbMsgsTblModel::refillRecordsManagementColumn(const QList<qint64> &dmIds,
     int col)
 {
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		return false;
 	}
 
@@ -799,7 +799,7 @@ bool DbMsgsTblModel::refillRecordsManagementColumn(const QList<qint64> &dmIds,
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
 		if (dmIds.contains(dmId)) {
 			m_data[row][col] =
-			    globRecordsManagementDbPtr->storedMsgLocations(dmId);
+			    GlobInstcs::recMgmtDbPtr->storedMsgLocations(dmId);
 			emit dataChanged(TblModel::index(row, col),
 			    TblModel::index(row, col));
 		}

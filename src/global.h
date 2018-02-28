@@ -38,6 +38,8 @@ public:
 	class DbContainer *msgDbsPtr; /*!< Message database container. */
 	static
 	class TagDb *tagDbPtr; /*!< Tag database. */
+	static
+	class RecordsManagementDb *recMgmtDbPtr; /*!< Records management database. */
 
 private:
 	/*!

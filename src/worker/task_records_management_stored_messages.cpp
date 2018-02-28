@@ -27,10 +27,11 @@
 #include <QSet>
 #include <QThread>
 
+#include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/records_management/io/records_management_connection.h"
 #include "src/datovka_shared/records_management/json/entry_error.h"
 #include "src/datovka_shared/records_management/json/stored_files.h"
-#include "src/io/records_management_db.h"
+#include "src/global.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_records_management_stored_messages.h"
@@ -122,12 +123,12 @@ QList<qint64> obtainDbSetDmIds(const MessageDbSet *dbSet,
 static
 QList<qint64> obtainHeldDmIds(const QList<qint64> &exludedDmIds)
 {
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		Q_ASSERT(0);
 		return QList<qint64>();
 	}
 
-	QSet<qint64> dmIdSet = globRecordsManagementDbPtr->getAllDmIds().toSet();
+	QSet<qint64> dmIdSet(GlobInstcs::recMgmtDbPtr->getAllDmIds().toSet());
 
 	dmIdSet -= exludedDmIds.toSet();
 	return dmIdSet.toList();
@@ -176,11 +177,11 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 {
 	/* Process only messages. */
 
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		return false;
 	}
 
-	if (!globRecordsManagementDbPtr->beginTransaction()) {
+	if (!GlobInstcs::recMgmtDbPtr->beginTransaction()) {
 		return false;
 	}
 
@@ -188,14 +189,14 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 		if (entry.locations().isEmpty()) {
 			/* Not held within the records management service. */
 			if (clear) {
-				globRecordsManagementDbPtr->deleteStoredMsg(
+				GlobInstcs::recMgmtDbPtr->deleteStoredMsg(
 				    entry.dmId());
 			} else {
 				continue;
 			}
 		}
 
-		if (!globRecordsManagementDbPtr->updateStoredMsg(entry.dmId(),
+		if (!GlobInstcs::recMgmtDbPtr->updateStoredMsg(entry.dmId(),
 		        entry.locations())) {
 			logErrorNL(
 			    "Could not update information about message '%" PRId64 "'.",
@@ -204,13 +205,13 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 		}
 	}
 
-	if (!globRecordsManagementDbPtr->commitTransaction()) {
+	if (!GlobInstcs::recMgmtDbPtr->commitTransaction()) {
 		goto fail;
 	}
 	return true;
 
 fail:
-	globRecordsManagementDbPtr->rollbackTransaction();
+	GlobInstcs::recMgmtDbPtr->rollbackTransaction();
 	return false;
 }
 
@@ -364,7 +365,7 @@ TaskRecordsManagementStoredMessages::downloadStoredMessages(
 		return DS_DSM_ERR;
 	}
 
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		return DS_DSM_DB_INS_ERR;
 	}
 
