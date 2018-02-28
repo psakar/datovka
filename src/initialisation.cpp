@@ -41,6 +41,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
+#include "src/settings/preferences.h"
 
 void setDefaultLocale(void)
 {
@@ -213,6 +214,29 @@ void loadLocalisation(const GlobPreferences &prefs)
 	QCoreApplication::installTranslator(&qtTranslator);
 }
 
+int allocGlobSettings(void)
+{
+	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	if (Q_NULLPTR == GlobInstcs::prefsPtr) {
+		logErrorNL("%s", "Cannot allocate preferences.");
+		goto fail;
+	}
+
+	return 0;
+
+fail:
+	deallocGlobSettings();
+	return -1;
+}
+
+void deallocGlobSettings(void)
+{
+	if (Q_NULLPTR != GlobInstcs::prefsPtr) {
+		delete GlobInstcs::prefsPtr;
+		GlobInstcs::prefsPtr = Q_NULLPTR;
+	}
+}
+
 int allocateGlobalObjects(const GlobPreferences &prefs)
 {
 	SQLiteDb::OpenFlags flags = SQLiteDb::NO_OPTIONS;
@@ -238,7 +262,7 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 	}
 	/* Open accounts database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	flags |= globPref.store_additional_data_on_disk ?
+	flags |= prefs.store_additional_data_on_disk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
 	if (!GlobInstcs::accntDbPtr->openDb(prefs.accountDbPath(), flags)) {
 		logErrorNL("Error opening account db '%s'.",

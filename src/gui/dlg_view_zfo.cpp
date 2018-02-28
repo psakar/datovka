@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include <QTimeZone>
 
 #include "src/crypto/crypto_funcs.h"
+#include "src/global.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
@@ -443,7 +444,7 @@ bool DlgViewZfo::signatureFooterDescription(QString &html,
 	} else {
 		resultStr = QObject::tr("Invalid");
 	}
-	if (!globPref.check_crl) {
+	if (!GlobInstcs::prefsPtr->check_crl) {
 		resultStr += " (" +
 		    QObject::tr("Certificate revocation check is turned off!") +
 		    ")";

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <QMessageBox>
 
 #include "src/common.h"
+#include "src/global.h"
 #include "src/gui/dlg_account_from_db.h"
 #include "src/log/log.h"
 #include "src/settings/account.h"
@@ -193,7 +194,7 @@ QStringList createAccountsFromDatabaseFiles(AccountModel &accountModel,
 		itemSettings.setRememberPwd(false);
 		itemSettings.setSyncWithAll(false);
 		itemSettings.setDbDir(absoluteDirPath(filePath),
-		    globPref.confDir());
+		    GlobInstcs::prefsPtr->confDir());
 		accountModel.addAccount(itemSettings);
 		errMsg = DlgCreateAccountFromDb::tr(
 		        "Account with name '%1' has been created (user name '%1').")

@@ -26,6 +26,7 @@
 
 #include "src/global.h"
 #include "src/io/message_db_set_container.h"
+#include "src/settings/preferences.h"
 #include "tests/test_db_container.h"
 
 class TestDbContainer : public QObject {
@@ -83,9 +84,12 @@ TestDbContainer::TestDbContainer(void)
 
 void TestDbContainer::initTestCase(void)
 {
+	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
+	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
+
 	/* Pointer must be null before initialisation. */
 	QVERIFY(GlobInstcs::msgDbsPtr == Q_NULLPTR);
-
 	GlobInstcs::msgDbsPtr = new (std::nothrow) DbContainer(m_connectionPrefix);
 	QVERIFY(GlobInstcs::msgDbsPtr != Q_NULLPTR);
 
@@ -97,6 +101,8 @@ void TestDbContainer::initTestCase(void)
 void TestDbContainer::cleanupTestCase(void)
 {
 	delete GlobInstcs::msgDbsPtr; GlobInstcs::msgDbsPtr = Q_NULLPTR;
+
+	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
 
 	QVERIFY(m_dbDir.removeRecursively());
 	QVERIFY(!m_dbDir.exists());

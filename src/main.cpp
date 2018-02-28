@@ -96,6 +96,10 @@ int main(int argc, char *argv[])
 
 	qInstallMessageHandler(globalLogOutput);
 
+	if (0 != allocGlobSettings()) {
+		return EXIT_FAILURE;
+	}
+
 	QCommandLineParser parser;
 	if (0 != CLIParser::setupCmdLineParser(parser)) {
 		logErrorNL("%s", "Cannot set up command-line parser.");
@@ -105,7 +109,7 @@ int main(int argc, char *argv[])
 	/* Process command-line arguments. */
 	parser.process(app);
 
-	if (0 != preferencesSetUp(parser, globPref, globLog)) {
+	if (0 != preferencesSetUp(parser, *GlobInstcs::prefsPtr, globLog)) {
 		logErrorNL("%s",
 		    "Cannot apply command line arguments on global settings.");
 		return EXIT_FAILURE;
@@ -129,7 +133,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Ensure only one instance with given configuration file. */
-	SingleInstance singleInstance(globPref.loadConfPath());
+	SingleInstance singleInstance(GlobInstcs::prefsPtr->loadConfPath());
 	if (singleInstance.existsInSystem()) {
 		logErrorNL("%s",
 		    "Another application already uses same configuration.");
@@ -182,17 +186,17 @@ int main(int argc, char *argv[])
 		/* Stuff related to configuration file. */
 
 		logDebugLv0NL("Load: '%s'.",
-		    globPref.loadConfPath().toUtf8().constData());
+		    GlobInstcs::prefsPtr->loadConfPath().toUtf8().constData());
 		logDebugLv0NL("Save: '%s'.",
-		    globPref.saveConfPath().toUtf8().constData());
+		    GlobInstcs::prefsPtr->saveConfPath().toUtf8().constData());
 
 		/* Change "\" to "/" */
-		confFileFixBackSlashes(globPref.loadConfPath());
+		confFileFixBackSlashes(GlobInstcs::prefsPtr->loadConfPath());
 	}
 
 	/* Set up proxy. */
 	{
-		QSettings settings(globPref.loadConfPath(),
+		QSettings settings(GlobInstcs::prefsPtr->loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
 		/* Load proxy settings. */
@@ -216,11 +220,11 @@ int main(int argc, char *argv[])
 	logDebugLv0NL("App path: '%s'.",
 	    app.applicationDirPath().toUtf8().constData());
 
-	loadLocalisation(globPref);
+	loadLocalisation(*GlobInstcs::prefsPtr);
 
 	/* Ask for PIN. */
 	{
-		QSettings settings(globPref.loadConfPath(),
+		QSettings settings(GlobInstcs::prefsPtr->loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
 		globPinSet.loadFromSettings(settings);
@@ -257,7 +261,7 @@ int main(int argc, char *argv[])
 	/* Localise description in tables. */
 	localiseTableDescriptions();
 
-	if (0 != allocateGlobalObjects(globPref)) {
+	if (0 != allocateGlobalObjects(*GlobInstcs::prefsPtr)) {
 		return EXIT_FAILURE;
 	}
 
@@ -276,11 +280,11 @@ int main(int argc, char *argv[])
 	if (runMode == RM_CLI) {
 		/* Parse account information. */
 		{
-			QSettings settings(globPref.loadConfPath(),
+			QSettings settings(GlobInstcs::prefsPtr->loadConfPath(),
 			    QSettings::IniFormat);
 			settings.setIniCodec("UTF-8");
-			globAccounts.loadFromSettings(globPref.confDir(),
-			    settings);
+			globAccounts.loadFromSettings(
+			    GlobInstcs::prefsPtr->confDir(), settings);
 			globAccounts.decryptAllPwds(globPinSet._pinVal);
 		}
 		delete splash;
@@ -321,6 +325,7 @@ int main(int argc, char *argv[])
 	//crypto_cleanup_threads();
 
 	deallocateGlobalObjects();
+	deallocGlobSettings();
 
 	return ret;
 }

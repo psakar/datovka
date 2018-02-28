@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@
 #include <QVector>
 
 #include "src/crypto/crypto_funcs.h"
+#include "src/global.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db.h"
@@ -1231,10 +1232,11 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 			    QObject::tr("Valid"));
 			/* Check signing certificate. */
 			bool verified = msgCertValidAtDate(dmId,
-			    msgsVerificationDate(dmId), !globPref.check_crl);
+			    msgsVerificationDate(dmId),
+			    !GlobInstcs::prefsPtr->check_crl);
 			QString verifiedText = verified ?
 			    QObject::tr("Valid") : QObject::tr("Invalid");
-			if (!globPref.check_crl) {
+			if (!GlobInstcs::prefsPtr->check_crl) {
 				verifiedText += " (" +
 				    QObject::tr("Certificate revocation "
 				        "check is turned off!") +
@@ -4250,7 +4252,7 @@ bool MessageDb::openDb(const QString &fileName, bool createMissing)
 {
 	SQLiteDb::OpenFlags flags = createMissing ?
 	    SQLiteDb::CREATE_MISSING : SQLiteDb::NO_OPTIONS;
-	flags |= globPref.store_messages_on_disk ?
+	flags |= GlobInstcs::prefsPtr->store_messages_on_disk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
 
 	return SQLiteDb::openDb(fileName, flags);
@@ -4665,7 +4667,7 @@ QDateTime MessageDb::msgsVerificationDate(qint64 dmId) const
 	QString queryStr;
 
 	if (GlobPreferences::DOWNLOAD_DATE ==
-	    globPref.certificate_validation_date) {
+	    GlobInstcs::prefsPtr->certificate_validation_date) {
 
 		queryStr = "SELECT "
 		    "download_date"

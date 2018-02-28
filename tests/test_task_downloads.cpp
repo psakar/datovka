@@ -71,8 +71,6 @@ private:
 
 	MessageDbSet *m_recipientDbSet; /*!< Databases. */
 
-	QString m_confSubDirBackup; /*!< Backup for the configuration directory. */
-
 	const qint64 &m_receivedMsgId; /*!< Identifier ow newly received message. */
 	QDateTime m_deliveryTime; /*!< Message delivery time. */
 };
@@ -87,26 +85,27 @@ TestTaskDownloads::TestTaskDownloads(const qint64 &receivedMsgId)
     m_sender(),
     m_recipient(),
     m_recipientDbSet(Q_NULLPTR),
-    m_confSubDirBackup(globPref.confSubdir),
     m_receivedMsgId(receivedMsgId),
     m_deliveryTime()
 {
-	/* Set configuration subdirectory to some value. */
-	globPref.confSubdir = QLatin1String(".datovka_test");
 }
 
 TestTaskDownloads::~TestTaskDownloads(void)
 {
 	/* Just in case. */
 	delete m_recipientDbSet; m_recipientDbSet = Q_NULLPTR;
-
-	/* Restore original value. */
-	globPref.confSubdir = m_confSubDirBackup;
 }
 
 void TestTaskDownloads::initTestCase(void)
 {
 	bool ret;
+
+	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
+	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
+
+	/* Set configuration subdirectory to some value. */
+	GlobInstcs::prefsPtr->confSubdir = QLatin1String(".datovka_test");
 
 	/* Create empty working directory. */
 	m_testDir.removeRecursively();
@@ -171,7 +170,8 @@ void TestTaskDownloads::initTestCase(void)
 	if (!GlobInstcs::isdsSessionsPtr->holdsSession(m_recipient.userName)) {
 		QVERIFY(ctx == NULL);
 		ctx = GlobInstcs::isdsSessionsPtr->createCleanSession(
-		    m_recipient.userName, globPref.isds_download_timeout_ms);
+		    m_recipient.userName,
+		    GlobInstcs::prefsPtr->isds_download_timeout_ms);
 	}
 	if (ctx == NULL) {
 		QSKIP("Cannot obtain communication context.");
@@ -196,11 +196,13 @@ void TestTaskDownloads::cleanupTestCase(void)
 	delete GlobInstcs::accntDbPtr; GlobInstcs::accntDbPtr = Q_NULLPTR;
 
 	/* The configuration directory should be non-existent. */
-	QVERIFY(!QDir(globPref.confDir()).exists());
+	QVERIFY(!QDir(GlobInstcs::prefsPtr->confDir()).exists());
 
 	/* Delete testing directory. */
 	m_testDir.removeRecursively();
 	QVERIFY(!m_testDir.exists());
+
+	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
 }
 
 void TestTaskDownloads::downloadMessageList(void)

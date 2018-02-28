@@ -60,7 +60,7 @@ MessageDbSet *AccountInteraction::accessDbSet(const QString &userName,
 	dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
-		dbDir = globPref.confDir();
+		dbDir = GlobInstcs::prefsPtr->confDir();
 	}
 
 	flags = 0;

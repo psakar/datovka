@@ -25,6 +25,8 @@
 
 #include "src/global.h"
 
+class GlobPreferences *GlobInstcs::prefsPtr = Q_NULLPTR;
+
 class IsdsSessions *GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
 
 class AccountDb *GlobInstcs::accntDbPtr = Q_NULLPTR;

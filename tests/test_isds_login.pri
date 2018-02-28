@@ -20,6 +20,7 @@ SOURCES += \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.c \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.cpp \
 	$${top_srcdir}src/datovka_shared/localisation/localisation.cpp \
+	$${top_srcdir}src/global.cpp \
 	$${top_srcdir}src/io/filesystem.cpp \
 	$${top_srcdir}src/io/isds_login.cpp \
 	$${top_srcdir}src/io/isds_sessions.cpp \
@@ -36,6 +37,7 @@ HEADERS += \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.h \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.h \
 	$${top_srcdir}src/datovka_shared/localisation/localisation.h \
+	$${top_srcdir}src/global.h \
 	$${top_srcdir}src/io/filesystem.h \
 	$${top_srcdir}src/io/isds_login.h \
 	$${top_srcdir}src/io/isds_sessions.h \

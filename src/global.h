@@ -30,6 +30,9 @@ class GlobInstcs {
 
 public:
 	static
+	class GlobPreferences *prefsPtr; /*!< Preferences. */
+
+	static
 	class IsdsSessions *isdsSessionsPtr; /*!< ISDS session container. */
 
 	static

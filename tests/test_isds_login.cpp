@@ -24,8 +24,10 @@
 #include <QtTest/QtTest>
 
 #include "src/common.h"
+#include "src/global.h"
 #include "src/io/isds_login.h"
 #include "src/settings/accounts.h"
+#include "src/settings/preferences.h"
 #include "tests/helper_qt.h"
 #include "tests/test_isds_login.h"
 
@@ -58,10 +60,12 @@ TestIsdsLogin::TestIsdsLogin(void)
 
 void TestIsdsLogin::initTestCase(void)
 {
-	bool ret;
+	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
+	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
 
 	/* Load credentials. */
-	ret = m_user01.loadLoginCredentials(m_credFName, 1);
+	bool ret = m_user01.loadLoginCredentials(m_credFName, 1);
 	if (!ret) {
 		QSKIP("Failed to load login credentials. Skipping remaining tests.");
 	}
@@ -74,6 +78,8 @@ void TestIsdsLogin::initTestCase(void)
 void TestIsdsLogin::cleanupTestCase(void)
 {
 	m_user01.clearAll();
+
+	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
 }
 
 void TestIsdsLogin::logIn01(void)

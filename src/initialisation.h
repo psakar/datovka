@@ -58,6 +58,16 @@ void downloadCRL(void);
 void loadLocalisation(const GlobPreferences &prefs);
 
 /*!
+ * @brief Allocates global settings instances.
+ */
+int allocGlobSettings(void);
+
+/*!
+ * @brief Deallocate global settings instances.
+ */
+void deallocGlobSettings(void);
+
+/*!
  * @brief Allocates global database objects and containers.
  *
  * @param[in] prefs Preferences structure.

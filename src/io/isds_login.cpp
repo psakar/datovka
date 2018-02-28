@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include <QFileInfo>
 
 #include "src/crypto/crypto_funcs.h"
+#include "src/global.h"
 #include "src/io/isds_login.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
@@ -539,8 +540,8 @@ bool IsdsLogin::p12CertificateToPem(const QString &p12Path,
 	}
 
 	QFileInfo fileInfo(p12Path);
-	QString pemTmpPath = globPref.confDir() + QDir::separator() +
-	    userName + "_" + fileInfo.fileName() + "_.pem";
+	QString pemTmpPath(GlobInstcs::prefsPtr->confDir() + QDir::separator() +
+	    userName + "_" + fileInfo.fileName() + "_.pem");
 
 	QFile pemFile(pemTmpPath);
 	if (!pemFile.open(QIODevice::WriteOnly)) {
