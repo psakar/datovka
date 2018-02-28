@@ -42,6 +42,7 @@
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
 #include "src/settings/preferences.h"
+#include "src/settings/proxy.h"
 
 void setDefaultLocale(void)
 {
@@ -222,6 +223,12 @@ int allocGlobSettings(void)
 		goto fail;
 	}
 
+	GlobInstcs::proxSetPtr = new (std::nothrow) ProxiesSettings;
+	if (Q_NULLPTR == GlobInstcs::proxSetPtr) {
+		logErrorNL("%s", "Cannot allocate proxy settings.");
+		goto fail;
+	}
+
 	return 0;
 
 fail:
@@ -231,6 +238,10 @@ fail:
 
 void deallocGlobSettings(void)
 {
+	if (Q_NULLPTR != GlobInstcs::proxSetPtr) {
+		delete GlobInstcs::proxSetPtr;
+		GlobInstcs::proxSetPtr = Q_NULLPTR;
+	}
 	if (Q_NULLPTR != GlobInstcs::prefsPtr) {
 		delete GlobInstcs::prefsPtr;
 		GlobInstcs::prefsPtr = Q_NULLPTR;

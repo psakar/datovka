@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,6 @@
 
 #define HTTP_PROXY_VARMAME "http_proxy"
 #define HTTPS_PROXY_VARMAME "https_proxy"
-
-ProxiesSettings globProxSet;
 
 #define NO_PROXY_STR "None"
 #define AUTO_PROXY_STR "-1"

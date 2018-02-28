@@ -31,6 +31,8 @@ class GlobInstcs {
 public:
 	static
 	class GlobPreferences *prefsPtr; /*!< Preferences. */
+	static
+	class ProxiesSettings *proxSetPtr; /*!< Proxy settings. */
 
 	static
 	class IsdsSessions *isdsSessionsPtr; /*!< ISDS session container. */

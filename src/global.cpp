@@ -26,6 +26,7 @@
 #include "src/global.h"
 
 class GlobPreferences *GlobInstcs::prefsPtr = Q_NULLPTR;
+class ProxiesSettings *GlobInstcs::proxSetPtr = Q_NULLPTR;
 
 class IsdsSessions *GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
 

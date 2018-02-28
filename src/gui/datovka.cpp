@@ -680,7 +680,7 @@ void MainWindow::showProxySettingsDialog(void)
 {
 	debugSlotCall();
 
-	if (DlgProxysets::modify(globProxSet, this)) {
+	if (DlgProxysets::modify(*GlobInstcs::proxSetPtr, this)) {
 		/* Dialog accepted, store all settings. */
 		saveSettings();
 	}
@@ -4212,7 +4212,7 @@ void MainWindow::loadSettings(void)
 	GlobInstcs::prefsPtr->loadFromSettings(settings);
 
 	/* Proxy settings. */
-	globProxSet.loadFromSettings(settings);
+	GlobInstcs::proxSetPtr->loadFromSettings(settings);
 
 	/* PIN should already be set because main window is running. */
 
@@ -4510,7 +4510,7 @@ void MainWindow::saveSettings(void) const
 	saveAccountCollapseInfo(settings);
 
 	/* Proxy settings. */
-	globProxSet.saveToSettings(settings);
+	GlobInstcs::proxSetPtr->saveToSettings(settings);
 
 	/* Records management settings. */
 	globRecordsManagementSet.saveToSettings(globPinSet._pinVal, settings);

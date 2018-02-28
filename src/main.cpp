@@ -200,9 +200,9 @@ int main(int argc, char *argv[])
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
 		/* Load proxy settings. */
-		globProxSet.loadFromSettings(settings);
+		GlobInstcs::proxSetPtr->loadFromSettings(settings);
 		/* Apply settings onto the environment because of libcurl. */
-		globProxSet.setProxyEnvVars();
+		GlobInstcs::proxSetPtr->setProxyEnvVars();
 	}
 
 	/* Start downloading the CRL files. */

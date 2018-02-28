@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <QNetworkProxy>
 #include <QTimer>
 
+#include "src/global.h"
 #include "src/io/file_downloader.h"
 #include "src/log/log.h"
 #include "src/settings/proxy.h"
@@ -103,7 +104,8 @@ bool FileDownloader::setUpHttpProxyAccordingToGlobals(
 	QNetworkProxy proxy;
 
 	/* Use proxy according to configuration. */
-	proxySettings = globProxSet.proxySettings(ProxiesSettings::HTTP);
+	proxySettings =
+	    GlobInstcs::proxSetPtr->proxySettings(ProxiesSettings::HTTP);
 
 	/* If something detected or set up. */
 	if (ProxiesSettings::ProxySettings::NO_PROXY != proxySettings.usage) {
