@@ -21,7 +21,6 @@
  * the two.
  */
 
-#include <QDebug>
 #include <QFileDialog>
 #include <QPrinter>
 #include <QTextDocument>
@@ -86,68 +85,67 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 
 	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
-		errStr = QObject::tr("Cannot access message database "
-		    "for username \"%1\".").arg(userName);
+		errStr = tr("Cannot access message database for username \"%1\".")
+		    .arg(userName);
 		return EXP_DB_ERROR;
 	}
 
 	// what we will export?
 	switch (fileType) {
 	case ZFO_MESSAGE:
-		fileTypeStr = QObject::tr("message");
+		fileTypeStr = tr("message");
 		fileSufix = ".zfo";
 		fileNameformat = GlobInstcs::prefsPtr->message_filename_format;
 		base64 = messageDb->msgsMessageBase64(msgId.dmId);
 		break;
 	case ZFO_DELIVERY:
-		fileTypeStr = QObject::tr("acceptance info");
+		fileTypeStr = tr("acceptance info");
 		fileSufix = ".zfo";
 		fileNameformat = GlobInstcs::prefsPtr->delivery_filename_format;
 		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
 	case ZFO_DELIV_ATTACH:
-		fileTypeStr = QObject::tr("acceptance info");
+		fileTypeStr = tr("acceptance info");
 		fileSufix = ".zfo";
 		fileNameformat =
 		    GlobInstcs::prefsPtr->delivery_filename_format_all_attach;
 		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_DELIVERY:
-		fileTypeStr = QObject::tr("acceptance info");
+		fileTypeStr = tr("acceptance info");
 		fileSufix = ".pdf";
 		fileNameformat = GlobInstcs::prefsPtr->delivery_filename_format;
 		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_DELIV_ATTACH:
-		fileTypeStr = QObject::tr("acceptance info");
+		fileTypeStr = tr("acceptance info");
 		fileSufix = ".pdf";
 		fileNameformat =
 		    GlobInstcs::prefsPtr->delivery_filename_format_all_attach;
 		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_ENVELOPE:
-		fileTypeStr = QObject::tr("message envelope");
+		fileTypeStr = tr("message envelope");
 		fileSufix = ".pdf";
 		fileNameformat = GlobInstcs::prefsPtr->message_filename_format;
 		base64 = "n/a";
 		break;
 	default:
 		Q_ASSERT(0);
-		errStr = QObject::tr("Export file type of message \"%1\" "
-		    "was not specified!").arg(msgID);
+		errStr = tr("Export file type of message \"%1\" was not specified!")
+		    .arg(msgID);
 		return EXP_ERROR;
 		break;
 	}
 
 	// is complete message in database?
 	if (base64.isEmpty()) {
-		errStr = QObject::tr("Complete message \"%1\" "
-		    "missing!").arg(msgID);
+		errStr = tr("Complete message \"%1\" missing!").arg(msgID);
 		return EXP_NOT_MSG_DATA;
 	}
 
-	errStr = QObject::tr("Export of %1 \"%2\" to %3 was not "
-	    "successful!").arg(fileTypeStr).arg(msgID).arg(fileSufix);
+	errStr = tr("Export of %1 \"%2\" to %3 was not successful!")
+	    .arg(fileTypeStr).arg(msgID).arg(fileSufix);
 
 	MessageDb::FilenameEntry entry =
 	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
@@ -172,9 +170,8 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 	// ask for a new location?
 	if (askLocation) {
 		fileName = QFileDialog::getSaveFileName(parent,
-		    QObject::tr("Save %1 as file (*%2)").
-		         arg(fileTypeStr).arg(fileSufix),
-		    fileName, QObject::tr("File (*%1)").arg(fileSufix));
+		    tr("Save %1 as file (*%2)").arg(fileTypeStr).arg(fileSufix),
+		    fileName, tr("File (*%1)").arg(fileSufix));
 		if (fileName.isEmpty()) {
 			// export was canceled
 			return EXP_CANCELED;
@@ -213,8 +210,8 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 	if (ret) {
 		// remember last path
 		lastPath = QFileInfo(fileName).absoluteDir().absolutePath();
-		errStr = QObject::tr("Export of %1 \"%2\" to %3 was "
-		    "successful.").arg(fileTypeStr).arg(msgID).arg(fileSufix);
+		errStr = tr("Export of %1 \"%2\" to %3 was successful.")
+		    .arg(fileTypeStr).arg(msgID).arg(fileSufix);
 		return EXP_SUCCESS;
 	} else {
 		return EXP_WRITE_FILE_ERROR;
@@ -244,8 +241,8 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
 	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
-		errStr = QObject::tr("Cannot access message database "
-		    "for username \"%1\".").arg(userName);
+		errStr = tr("Cannot access message database for username \"%1\".")
+		    .arg(userName);
 		return EXP_DB_ERROR;
 	}
 
@@ -256,8 +253,7 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 	QList<MessageDb::FileData> attachList(
 	    messageDb->getFilesFromMessage(msgId.dmId));
 	if (attachList.isEmpty()) {
-		errStr = QObject::tr("Complete message \"%1\" "
-		    "missing!").arg(msgID);
+		errStr = tr("Complete message \"%1\" missing!").arg(msgID);
 		return EXP_NOT_MSG_DATA;
 	}
 
@@ -266,8 +262,8 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 		QString attName(attach.dmFileDescr);
 		if (attName.isEmpty()) {
 			Q_ASSERT(0);
-			errStr = QObject::tr("Some files of message \"%1\""
-			    " were not saved to disk!").arg(msgID);
+			errStr = tr("Some files of message \"%1\" were not saved to disk!")
+			    .arg(msgID);
 			attachWriteSuccess = false;
 			continue;
 		}
@@ -284,8 +280,8 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 		// save file to disk
 		if (WF_SUCCESS !=
 		    writeFile(nonconflictingFileName(attName), data)) {
-		    	errStr = QObject::tr("Some files of message \"%1\""
-			    " were not saved to disk!").arg(msgID);
+			errStr = tr("Some files of message \"%1\" were not saved to disk!")
+			    .arg(msgID);
 			attachWriteSuccess = false;
 			continue;
 		}
@@ -300,8 +296,8 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 	fileName = newTargetPath + QDir::separator() + fileName + ".pdf";
 
 	if (fileName.isEmpty()) {
-		errStr = QObject::tr("Export of message envelope \"%1\" to "
-		    "PDF was not successful!").arg(msgID);
+		errStr = tr("Export of message envelope \"%1\" to PDF was not successful!")
+		    .arg(msgID);
 		return EXP_ERROR;
 	}
 
@@ -309,12 +305,12 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 	if (printPDF(fileName,
 	    messageDb->descriptionHtml(msgId.dmId) +
 	    messageDb->fileListHtmlToPdf(msgId.dmId)) && attachWriteSuccess) {
-		errStr = QObject::tr("Export of message envelope \"%1\" to "
-		    "PDF and attachments were successful.").arg(msgID);
+		errStr = tr("Export of message envelope \"%1\" to PDF and attachments were successful.")
+		    .arg(msgID);
 		return EXP_SUCCESS;
 	} else {
-		errStr = QObject::tr("Export of message envelope \"%1\" to "
-		    "PDF and attachments were not successful!").arg(msgID);
+		errStr = tr("Export of message envelope \"%1\" to PDF and attachments were not successful!")
+		    .arg(msgID);
 		return EXP_WRITE_FILE_ERROR;
 	}
 }
@@ -333,8 +329,8 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
 	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
-		errStr = QObject::tr("Cannot access message database "
-		    "for username \"%1\".").arg(userName);
+		errStr = tr("Cannot access message database for username \"%1\".")
+		    .arg(userName);
 		return EXP_DB_ERROR;
 	}
 
@@ -342,8 +338,7 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 	QList<MessageDb::FileData> attachList(
 	    messageDb->getFilesFromMessage(msgId.dmId));
 	if (attachList.isEmpty()) {
-		errStr = QObject::tr("Complete message \"%1\" "
-		    "missing!").arg(msgID);
+		errStr = tr("Complete message \"%1\" missing!").arg(msgID);
 		return EXP_NOT_MSG_DATA;
 	}
 
@@ -352,8 +347,8 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 		QString attName(attach.dmFileDescr);
 		if (attName.isEmpty()) {
 			Q_ASSERT(0);
-			errStr = QObject::tr("Some files of message \"%1\""
-			    " were not saved to disk!").arg(msgID);
+			errStr = tr("Some files of message \"%1\" were not saved to disk!")
+			    .arg(msgID);
 			attachWriteSuccess = false;
 			continue;
 		}
@@ -371,8 +366,8 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 		// save file to disk
 		if (WF_SUCCESS !=
 		    writeFile(nonconflictingFileName(attName), data)) {
-		    	errStr = QObject::tr("Some files of message \"%1\""
-			    " were not saved to disk!").arg(msgID);
+			errStr = tr("Some files of message \"%1\" were not saved to disk!")
+			    .arg(msgID);
 			attachWriteSuccess = false;
 			continue;
 		}
@@ -417,12 +412,12 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 	}
 
 	if (attachWriteSuccess) {
-		errStr = QObject::tr("All message attachments \"%1\" were "
-		    "successfully saved to target folder.").arg(msgID);
+		errStr = tr("All message attachments \"%1\" were successfully saved to target folder.")
+		    .arg(msgID);
 		return EXP_SUCCESS;
 	} else {
-		errStr = QObject::tr("Some attachments of message \"%1\" were "
-		    "not successfully saved!").arg(msgID);
+		errStr = tr("Some attachments of message \"%1\" were not successfully saved!")
+		    .arg(msgID);
 		return EXP_WRITE_FILE_ERROR;
 	}
 }
