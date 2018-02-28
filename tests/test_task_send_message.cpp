@@ -185,11 +185,17 @@ void TestTaskSendMessage::initTestCase(void)
 		QSKIP("Error connection into ISDS.");
 	}
 	QVERIFY(err == IE_SUCCESS);
+
+	QVERIFY(GlobInstcs::acntMapPtr == Q_NULLPTR);
+	GlobInstcs::acntMapPtr = new (std::nothrow) AccountsMap;
+	QVERIFY(GlobInstcs::acntMapPtr != Q_NULLPTR);
 }
 
 void TestTaskSendMessage::cleanupTestCase(void)
 {
 	delete m_senderDbSet; m_senderDbSet = Q_NULLPTR;
+
+	delete GlobInstcs::acntMapPtr; GlobInstcs::acntMapPtr = Q_NULLPTR;
 
 	/* Destroy ISDS session container. */
 	delete GlobInstcs::isdsSessionsPtr; GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
