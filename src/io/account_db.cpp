@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -682,5 +682,3 @@ QList<class SQLiteTbl *> AccountDb::listOfTables(void) const
 	tables.append(&pwdexpdtTbl);
 	return tables;
 }
-
-AccountDb *globAccountDbPtr = Q_NULLPTR;

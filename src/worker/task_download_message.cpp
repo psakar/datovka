@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <cinttypes>
 #include <QThread>
 
+#include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/isds/isds_conversion.h"
@@ -117,7 +118,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadDeliveryInfo(
 
 	isds_error status;
 
-	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
+	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;
@@ -184,7 +185,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 
 	isds_error status;
 
-	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
+	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;
@@ -199,12 +200,12 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		/* sent or received message? */
 		if (MSG_RECEIVED == msgDirect) {
 			status = isds_get_signed_received_message(
-			    globIsdsSessionsPtr->session(userName),
+			    GlobInstcs::isdsSessionsPtr->session(userName),
 			    QString::number(mId.dmId).toUtf8().constData(),
 			    &message);
 		} else {
 			status = isds_get_signed_sent_message(
-			    globIsdsSessionsPtr->session(userName),
+			    GlobInstcs::isdsSessionsPtr->session(userName),
 			    QString::number(mId.dmId).toUtf8().constData(),
 			    &message);
 		}
@@ -213,7 +214,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		return DM_ERR;
 		/*
 		status = isds_get_received_message(
-		    globIsdsSessionsPtr->.session(userName),
+		    GlobInstcs::isdsSessionsPtr->session(userName),
 		    QString::number(mId.dmId).toUtf8().constData(),
 		    &message);
 		*/
@@ -320,7 +321,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
 	char * raw_sender_type = NULL;
 	char * sender_name = NULL;
 
-	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
+	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;
@@ -358,7 +359,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::markMessageAsDownloaded(
 {
 	debugFuncCall();
 
-	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
+	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;

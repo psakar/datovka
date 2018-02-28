@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include <QThread>
 
+#include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/task_keep_alive.h"
@@ -46,7 +47,7 @@ void TaskKeepAlive::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_isAlive = globIsdsSessionsPtr->isConnectedToIsds(m_userName);
+	m_isAlive = GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_userName);
 	if (m_isAlive) {
 		logInfo("%s\n", "Connection to ISDS is alive :)");
 	} else {

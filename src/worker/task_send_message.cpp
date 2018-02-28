@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <cstring>
 #include <QThread>
 
+#include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
@@ -446,7 +447,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	QString isdsError, isdsLongError;
 
-	session = globIsdsSessionsPtr->session(userName);
+	session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		logErrorNL("%s", "Missing ISDS session.");
@@ -493,9 +494,9 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		}
 
 		const QString acntDbKey(AccountDb::keyFromLogin(userName));
-		const QString dbId(globAccountDbPtr->dbId(acntDbKey));
+		const QString dbId(GlobInstcs::accntDbPtr->dbId(acntDbKey));
 		const QString senderName(
-		    globAccountDbPtr->senderNameGuess(acntDbKey));
+		    GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
 
 		if (!messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
 		        senderName, message->envelope->dbIDRecipient,

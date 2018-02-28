@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <cstring>
 #include <QThread>
 
+#include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
@@ -143,7 +144,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 		return VERIFY_ERR;
 	}
 
-	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
+	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return VERIFY_ERR;

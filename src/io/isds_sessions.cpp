@@ -32,8 +32,6 @@
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
 
-IsdsSessions *globIsdsSessionsPtr = Q_NULLPTR;
-
 /*!
  * @brief Returns logging facility name.
  *
@@ -178,7 +176,7 @@ bool IsdsSessions::holdsSession(const QString &userName) const
 	return NULL != m_sessions.value(userName, NULL);
 }
 
-struct isds_ctx * IsdsSessions::session(const QString &userName) const
+struct isds_ctx *IsdsSessions::session(const QString &userName) const
 {
 	return m_sessions.value(userName, NULL);
 }

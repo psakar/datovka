@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include <QThread>
 
+#include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
@@ -70,14 +71,14 @@ qint64 TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
 {
 	long credit = 0;
 
-	if (!globIsdsSessionsPtr->isConnectedToIsds(userName)) {
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName)) {
 		return -1;
 	}
 
 	isds_error status;
 	struct isds_list *history = NULL;
 
-	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
+	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return -1;

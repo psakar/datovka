@@ -21,14 +21,29 @@
  * the two.
  */
 
-#ifndef _RECORDS_MANAGEMENT_DB_H_
-#define _RECORDS_MANAGEMENT_DB_H_
-
-#include "src/datovka_shared/io/records_management_db.h"
+#pragma once
 
 /*!
- * @brief Global records management database.
+ * @brief The class holds pointers to all globally accessible structures.
  */
-extern RecordsManagementDb *globRecordsManagementDbPtr;
+class GlobInstcs {
 
-#endif /* _RECORDS_MANAGEMENT_DB_H_ */
+public:
+	static
+	class IsdsSessions *isdsSessionsPtr; /*!< ISDS session container. */
+
+	static
+	class AccountDb *accntDbPtr; /*!< Account database. */
+	static
+	class DbContainer *msgDbsPtr; /*!< Message database container. */
+	static
+	class TagDb *tagDbPtr; /*!< Tag database. */
+	static
+	class RecordsManagementDb *recMgmtDbPtr; /*!< Records management database. */
+
+private:
+	/*!
+	 * @brief Private constructor.
+	 */
+	GlobInstcs(void);
+};

@@ -294,6 +294,7 @@ SOURCES += \
     src/delegates/tag_item.cpp \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
+    src/global.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -334,7 +335,6 @@ SOURCES += \
     src/io/message_db_set_container.cpp \
     src/io/message_db_set_delegated.cpp \
     src/io/message_db_single.cpp \
-    src/io/records_management_db.cpp \
     src/io/tag_db.cpp \
     src/isds/isds_conversion.cpp \
     src/log/log.cpp \
@@ -429,6 +429,7 @@ HEADERS += \
     src/delegates/tag_item.h \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
+    src/global.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \
@@ -468,7 +469,6 @@ HEADERS += \
     src/io/message_db_set.h \
     src/io/message_db_set_container.h \
     src/io/message_db_single.h \
-    src/io/records_management_db.h \
     src/io/tag_db.h \
     src/isds/isds_conversion.h \
     src/log/log_c.h \

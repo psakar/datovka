@@ -31,14 +31,15 @@
 #include "src/cli/cli_parser.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/localisation/localisation.h"
+#include "src/global.h"
 #include "src/initialisation.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/file_downloader.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
-#include "src/io/records_management_db.h"
 #include "src/io/tag_db.h"
 
 void setDefaultLocale(void)
@@ -224,14 +225,14 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 	 * TODO -- Solve the problem of this globally accessible structures.
 	 */
 
-	globIsdsSessionsPtr = new (std::nothrow) IsdsSessions;
-	if (Q_NULLPTR == globIsdsSessionsPtr) {
+	GlobInstcs::isdsSessionsPtr = new (std::nothrow) IsdsSessions;
+	if (Q_NULLPTR == GlobInstcs::isdsSessionsPtr) {
 		logErrorNL("%s", "Cannot allocate session container.");
 		goto fail;
 	}
 
-	globAccountDbPtr = new (std::nothrow) AccountDb("accountDb", false);
-	if (Q_NULLPTR == globAccountDbPtr) {
+	GlobInstcs::accntDbPtr = new (std::nothrow) AccountDb("accountDb", false);
+	if (Q_NULLPTR == GlobInstcs::accntDbPtr) {
 		logErrorNL("%s", "Cannot allocate account db.");
 		goto fail;
 	}
@@ -239,41 +240,41 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 	flags = SQLiteDb::CREATE_MISSING;
 	flags |= globPref.store_additional_data_on_disk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
-	if (!globAccountDbPtr->openDb(prefs.accountDbPath(), flags)) {
+	if (!GlobInstcs::accntDbPtr->openDb(prefs.accountDbPath(), flags)) {
 		logErrorNL("Error opening account db '%s'.",
 		    prefs.accountDbPath().toUtf8().constData());
 		goto fail;
 	}
 
 	/* Create message DB container. */
-	globMessageDbsPtr = new (std::nothrow) DbContainer("GLOBALDBS");
-	if (Q_NULLPTR == globMessageDbsPtr) {
+	GlobInstcs::msgDbsPtr = new (std::nothrow) DbContainer("GLOBALDBS");
+	if (Q_NULLPTR == GlobInstcs::msgDbsPtr) {
 		logErrorNL("%s", "Cannot allocate message db container.");
 		goto fail;
 	}
 
-	globTagDbPtr = new (std::nothrow) TagDb("tagDb", false);
-	if (Q_NULLPTR == globTagDbPtr) {
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb("tagDb", false);
+	if (Q_NULLPTR == GlobInstcs::tagDbPtr) {
 		logErrorNL("%s", "Cannot allocate tag db.");
 		goto fail;
 	}
 	/* Open tags database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	if (!globTagDbPtr->openDb(prefs.tagDbPath(), flags)) {
+	if (!GlobInstcs::tagDbPtr->openDb(prefs.tagDbPath(), flags)) {
 		logErrorNL("Error opening tag db '%s'.",
 		    prefs.tagDbPath().toUtf8().constData());
 		goto fail;
 	}
 
-	globRecordsManagementDbPtr = new (std::nothrow)
+	GlobInstcs::recMgmtDbPtr = new (std::nothrow)
 	    RecordsManagementDb("recordsManagementDb", false);
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		logErrorNL("%s", "Cannot allocate records management db.");
 		goto fail;
 	}
 	/* Open records management database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	if (!globRecordsManagementDbPtr->openDb(
+	if (!GlobInstcs::recMgmtDbPtr->openDb(
 	        prefs.recordsManagementDbPath(), flags)) {
 		logErrorNL("Error opening records management db '%s'.",
 		    prefs.recordsManagementDbPath().toUtf8().constData());
@@ -289,26 +290,25 @@ fail:
 
 void deallocateGlobalObjects(void)
 {
-	if (Q_NULLPTR != globRecordsManagementDbPtr) {
-		delete globRecordsManagementDbPtr;
-		globRecordsManagementDbPtr = Q_NULLPTR;
+	if (Q_NULLPTR != GlobInstcs::recMgmtDbPtr) {
+		delete GlobInstcs::recMgmtDbPtr;
+		GlobInstcs::recMgmtDbPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != GlobInstcs::tagDbPtr) {
+		delete GlobInstcs::tagDbPtr;
+		GlobInstcs::tagDbPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != GlobInstcs::msgDbsPtr) {
+		delete GlobInstcs::msgDbsPtr;
+		GlobInstcs::msgDbsPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != GlobInstcs::accntDbPtr) {
+		delete GlobInstcs::accntDbPtr;
+		GlobInstcs::accntDbPtr = Q_NULLPTR;
 	}
 
-	if (Q_NULLPTR != globTagDbPtr) {
-		delete globTagDbPtr;
-		globTagDbPtr = Q_NULLPTR;
-	}
-
-	if (Q_NULLPTR != globMessageDbsPtr) {
-		delete globMessageDbsPtr;
-		globMessageDbsPtr = Q_NULLPTR;
-	}
-	if (Q_NULLPTR != globAccountDbPtr) {
-		delete globAccountDbPtr;
-		globAccountDbPtr = Q_NULLPTR;
-	}
-	if (Q_NULLPTR != globIsdsSessionsPtr) {
-		delete globIsdsSessionsPtr;
-		globIsdsSessionsPtr = Q_NULLPTR;
+	if (Q_NULLPTR != GlobInstcs::isdsSessionsPtr) {
+		delete GlobInstcs::isdsSessionsPtr;
+		GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
 	}
 }

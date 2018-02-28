@@ -24,7 +24,8 @@
 #include <QTimer>
 
 #include "src/datovka_shared/graphics/graphics.h"
-#include "src/io/records_management_db.h"
+#include "src/datovka_shared/io/records_management_db.h"
+#include "src/global.h"
 #include "src/log/log.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/worker/message_emitter.h"
@@ -83,7 +84,7 @@ bool DlgRecordsManagementStored::updateStoredInformation(
     const RecordsManagementSettings &recMgmtSettings,
     const QList<AcntData> &accounts, QWidget *parent)
 {
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		return false;
 	}
 
@@ -192,12 +193,12 @@ void DlgRecordsManagementStored::cancelLoop(void)
 
 void DlgRecordsManagementStored::loadRecordsManagementPixmap(int width)
 {
-	if (Q_NULLPTR == globRecordsManagementDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		return;
 	}
 
 	RecordsManagementDb::ServiceInfoEntry entry(
-	    globRecordsManagementDbPtr->serviceInfo());
+	    GlobInstcs::recMgmtDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
 		return;
 	}

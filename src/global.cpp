@@ -21,6 +21,13 @@
  * the two.
  */
 
-#include "src/io/records_management_db.h"
+#include <QtCore> /* Q_NULLPTR */
 
-RecordsManagementDb *globRecordsManagementDbPtr = Q_NULLPTR;
+#include "src/global.h"
+
+class IsdsSessions *GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
+
+class AccountDb *GlobInstcs::accntDbPtr = Q_NULLPTR;
+class DbContainer *GlobInstcs::msgDbsPtr = Q_NULLPTR;
+class TagDb *GlobInstcs::tagDbPtr = Q_NULLPTR;
+class RecordsManagementDb *GlobInstcs::recMgmtDbPtr = Q_NULLPTR;

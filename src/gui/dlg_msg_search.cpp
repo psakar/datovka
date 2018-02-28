@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include "src/global.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/io/message_db.h"
 #include "src/io/tag_db.h"
@@ -244,8 +245,9 @@ void DlgMsgSearch::searchMessages(void)
 	/* If tag data were supplied, get message ids from tag table. */
 	const bool searchTags = !m_ui->tagLine->text().isEmpty();
 	if (searchTags) {
-		tagResults = globTagDbPtr->getMsgIdsContainSearchTagText(
-		    m_ui->tagLine->text());
+		tagResults =
+		    GlobInstcs::tagDbPtr->getMsgIdsContainSearchTagText(
+		        m_ui->tagLine->text());
 	}
 
 	/* Number of accounts in which to search for messages in. */

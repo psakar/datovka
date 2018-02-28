@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <cstring>
 #include <QThread>
 
+#include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
@@ -294,7 +295,7 @@ enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(
 {
 	isds_error status = IE_ERROR;
 
-	struct isds_ctx *session = globIsdsSessionsPtr->session(userName);
+	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return SO_ERROR;

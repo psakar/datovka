@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 
 #include "src/cli/cli.h"
 #include "src/cli/cli_login.h"
+#include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
@@ -1037,7 +1038,7 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 		}
 
 		struct isds_ctx *session =
-		    globIsdsSessionsPtr->session(map["username"].toString());
+		    GlobInstcs::isdsSessionsPtr->session(map["username"].toString());
 		if (NULL == session) {
 			Q_ASSERT(0);
 			ret = CLI_ERROR;
@@ -1054,9 +1055,9 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 			const QString acntDbKey(AccountDb::keyFromLogin(
 			    map["username"].toString()));
 			const QString dbIDSender(
-			    globAccountDbPtr->dbId(acntDbKey));
+			    GlobInstcs::accntDbPtr->dbId(acntDbKey));
 			const QString dmSender(
-			    globAccountDbPtr->senderNameGuess(acntDbKey));
+			    GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
 			QDateTime deliveryTime = timevalToDateTime(
 			    sent_message->envelope->dmDeliveryTime);
 			MessageDb *messageDb =
@@ -1688,8 +1689,8 @@ int runService(const QString &lParam,
 			otp = loginMap["otpcode"].toString();
 		}
 
-		if (!globIsdsSessionsPtr->isConnectedToIsds(username) &&
-		    !connectToIsdsCLI(*globIsdsSessionsPtr,
+		if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(username) &&
+		    !connectToIsdsCLI(*GlobInstcs::isdsSessionsPtr,
 		        globAccounts[username], pwd, otp)) {
 			errmsg = "Missing session for " + username +
 			   " or connection fails";

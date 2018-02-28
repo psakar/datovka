@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,6 +50,7 @@
 #include "src/datovka_shared/utility/strings.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
+#include "src/global.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -1959,7 +1960,7 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	}
 
 	const QString dbId(
-	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
+	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
@@ -2013,7 +2014,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	}
 
 	const QString dbId(
-	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
+	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
@@ -2971,7 +2972,8 @@ void MainWindow::deleteMessage(void)
 			/* Delete all tags from message_tags table.
 			 * Tag in the tag table are kept.
 			 */
-			globTagDbPtr->removeAllTagsFromMsg(userName, id.dmId);
+			GlobInstcs::tagDbPtr->removeAllTagsFromMsg(userName,
+			    id.dmId);
 		}
 	}
 
@@ -3001,7 +3003,8 @@ bool MainWindow::eraseMessage(const QString &userName,
 	enum MessageDirection msgDirect =
 	    messageDirection(currentAccountModelIndex(), MSG_RECEIVED);
 
-	if (delFromIsds && !globIsdsSessionsPtr->isConnectedToIsds(userName) &&
+	if (delFromIsds &&
+	    !GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		logErrorNL(
 		    "Couldn't connect to ISDS when erasing message '%" PRId64 "'.",
@@ -3137,7 +3140,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		}
 
 		/* Try connecting to ISDS, just to generate log-in dialogue. */
-		if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
+		if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 		    !connectToIsds(userName)) {
 			continue;
 		}
@@ -3199,7 +3202,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	}
 
 	/* Try connecting to ISDS, just to generate log-in dialogue. */
-	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		ui->actionSync_all_accounts->setEnabled(wasEnabled);
 		ui->actionGet_messages->setEnabled(wasEnabled);
@@ -3212,7 +3215,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	if (downloadReceivedMessages) {
 		/* Method connectToIsds() acquires account information. */
 		const QString acntDbKey(AccountDb::keyFromLogin(userName));
-		DbEntry userEntry = globAccountDbPtr->userEntry(acntDbKey);
+		DbEntry userEntry = GlobInstcs::accntDbPtr->userEntry(acntDbKey);
 		const QString key("userPrivils");
 		if (userEntry.hasValue(key)) {
 			int privils = userEntry.value(key).toInt();
@@ -3261,7 +3264,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 		return;
 	}
 
-	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return;
 	}
@@ -3312,7 +3315,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	    globAccounts[userName].accountName()));
 
 	const QString acntDbKey(AccountDb::keyFromLogin(userName));
-	if (globAccountDbPtr->dbId(acntDbKey).isEmpty()) {
+	if (GlobInstcs::accntDbPtr->dbId(acntDbKey).isEmpty()) {
 		/*
 		 * Generate this message if no account information can
 		 * be obtained.
@@ -3331,7 +3334,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	    QString("</strong></div>"));
 	html.append("</td></tr><tr><td>");
 
-	userEntry = globAccountDbPtr->userEntry(acntDbKey);
+	userEntry = GlobInstcs::accntDbPtr->userEntry(acntDbKey);
 	html.append(strongAccountInfoLine(tr("User name"), userName));
 	/* Print non-empty entries. */
 	for (int i = 0; i < userinfTbl.knownAttrs.size(); ++i) {
@@ -3387,7 +3390,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 
 	html.append("</td><td></td><td>");
 
-	accountEntry = globAccountDbPtr->accountEntry(acntDbKey);
+	accountEntry = GlobInstcs::accntDbPtr->accountEntry(acntDbKey);
 	/* Print non-empty entries. */
 	for (int i = 0; i < accntinfTbl.knownAttrs.size(); ++i) {
 		const QString &key = accntinfTbl.knownAttrs[i].first;
@@ -3450,7 +3453,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 
 lastPart:
 
-	QString info = globAccountDbPtr->getPwdExpirFromDb(acntDbKey);
+	QString info(GlobInstcs::accntDbPtr->getPwdExpirFromDb(acntDbKey));
 	if (info.isEmpty()) {
 		info = tr("unknown or without expiration");
 	} else {
@@ -4717,12 +4720,12 @@ void MainWindow::deleteAccount(const QString &userName)
 	    (DlgYesNoCheckbox::YesUnchecked == retVal)) {
 		/* Delete account from model. */
 		m_accountModel.deleteAccount(userName);
-		globAccountDbPtr->deleteAccountInfo(
+		GlobInstcs::accntDbPtr->deleteAccountInfo(
 		    AccountDb::keyFromLogin(userName));
 	}
 
 	if (DlgYesNoCheckbox::YesChecked == retVal) {
-		if (globMessageDbsPtr->deleteDbSet(dbSet)) {
+		if (GlobInstcs::msgDbsPtr->deleteDbSet(dbSet)) {
 			showStatusTextWithTimeout(tr("Account '%1' was deleted "
 			    "together with message database file.")
 			    .arg(accountName));
@@ -4736,7 +4739,7 @@ void MainWindow::deleteAccount(const QString &userName)
 		    .arg(accountName));
 	}
 
-	globTagDbPtr->removeAllMsgTagsFromAccount(userName);
+	GlobInstcs::tagDbPtr->removeAllMsgTagsFromAccount(userName);
 
 	if ((DlgYesNoCheckbox::YesChecked == retVal) ||
 	    (DlgYesNoCheckbox::YesUnchecked == retVal)) {
@@ -4763,14 +4766,14 @@ void MainWindow::changeAccountPassword(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return;
 	}
 
 	/* Method connectToIsds() acquires account information. */
 	const QString dbId(
-	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
+	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	Q_ASSERT(!dbId.isEmpty());
 
 	const AcntSettings &accountInfo(globAccounts[userName]);
@@ -4888,14 +4891,14 @@ void MainWindow::findDatabox(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return;
 	}
 
 	/* Method connectToIsds() acquires account information. */
 	const QList<QString> accountData(
-	    globAccountDbPtr->getUserDataboxInfo(
+	    GlobInstcs::accntDbPtr->getUserDataboxInfo(
 	        AccountDb::keyFromLogin(userName)));
 
 	if (accountData.isEmpty()) {
@@ -4932,7 +4935,7 @@ void MainWindow::filterMessages(const QString &text)
 	QList<int> columnList;
 	columnList.append(1);
 	columnList.append(2);
-	if (0 != globTagDbPtr) {
+	if (Q_NULLPTR != GlobInstcs::tagDbPtr) {
 		columnList.append(7); /* Tags in sent messages. */
 		columnList.append(8); /* Tags in received messages. */
 	}
@@ -5332,7 +5335,7 @@ int MainWindow::authenticateMessageFromZFO(void)
 		return TaskAuthenticateMessage::AUTH_CANCELLED;
 	}
 
-	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return TaskAuthenticateMessage::AUTH_ISDS_ERROR;
 	}
@@ -5443,7 +5446,7 @@ void MainWindow::verifySelectedMessage(void)
 		return;
 	}
 
-	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::critical(this, tr("Verification error"),
@@ -5547,12 +5550,12 @@ void MainWindow::showExportCorrespondenceOverviewDialog(void)
 	}
 
 	const QString dbId(
-	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
+	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	setAccountStoragePaths(userName);
 
 	DlgCorrespondenceOverview::exportData(*dbSet, dbId, userName,
-	    *globTagDbPtr, m_export_correspond_dir, this);
+	    *GlobInstcs::tagDbPtr, m_export_correspond_dir, this);
 	storeExportPath(userName);
 }
 
@@ -5580,7 +5583,7 @@ void MainWindow::showImportZFOActionDialog(void)
 		Q_ASSERT(!userName.isEmpty());
 
 		if ((!checkZfoOnServer) ||
-		    globIsdsSessionsPtr->isConnectedToIsds(userName) ||
+		    GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) ||
 		    connectToIsds(userName)) {
 			MessageDbSet *dbSet = accountDbSet(userName);
 			if (Q_NULLPTR == dbSet) {
@@ -5751,7 +5754,7 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 		return false;
 	}
 
-	if (!globIsdsSessionsPtr->isConnectedToIsds(userName) &&
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		return false;
 	}
@@ -5858,7 +5861,7 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 	}
 
 	const QString dbId(
-	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
+	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	QString errStr;
 
 	foreach (MessageDb::MsgId msgId, msgIds) {
@@ -6623,7 +6626,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 {
 	AcntSettings settingsCopy(globAccounts[userName]);
 
-	if (!logInGUI(*globIsdsSessionsPtr, settingsCopy)) {
+	if (!logInGUI(*GlobInstcs::isdsSessionsPtr, settingsCopy)) {
 		return false;
 	}
 
@@ -6662,7 +6665,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 
 		const QString acntDbKey(AccountDb::keyFromLogin(userName));
 
-		int daysTo = globAccountDbPtr->pwdExpiresInDays(acntDbKey,
+		int daysTo = GlobInstcs::accntDbPtr->pwdExpiresInDays(acntDbKey,
 		    PWD_EXPIRATION_NOTIFICATION_DAYS);
 
 		if (daysTo >= 0) {
@@ -6674,7 +6677,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 
 			/* Password change dialogue. */
 			const QDateTime dbDateTime(QDateTime::fromString(
-			    globAccountDbPtr->getPwdExpirFromDb(acntDbKey),
+			    GlobInstcs::accntDbPtr->getPwdExpirFromDb(acntDbKey),
 			    "yyyy-MM-dd HH:mm:ss.000000"));
 			if (QMessageBox::Yes == showDialogueAboutPwdExpir(
 			        settingsCopy.accountName(), userName, daysTo,
@@ -6683,7 +6686,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 				    "Change password of account \"%1\".")
 				    .arg(settingsCopy.accountName()));
 				const QString dbId(
-				    globAccountDbPtr->dbId(acntDbKey));
+				    GlobInstcs::accntDbPtr->dbId(acntDbKey));
 				DlgChangePwd::changePassword(dbId, userName,
 				    this);
 			}
@@ -6691,7 +6694,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 	}
 
 	/* Set longer time-out. */
-	globIsdsSessionsPtr->setSessionTimeout(userName,
+	GlobInstcs::isdsSessionsPtr->setSessionTimeout(userName,
 	    globPref.isds_download_timeout_ms);
 
 	return true;
@@ -6706,7 +6709,7 @@ bool MainWindow::firstConnectToIsds(AcntSettings &accountInfo)
 {
 	debugFuncCall();
 
-	if (!logInGUI(*globIsdsSessionsPtr, accountInfo)) {
+	if (!logInGUI(*GlobInstcs::isdsSessionsPtr, accountInfo)) {
 		return false;
 	}
 
@@ -6803,7 +6806,8 @@ void MainWindow::getAccountUserDataboxInfo(AcntSettings accountInfo)
 {
 	debugSlotCall();
 
-	if (!globIsdsSessionsPtr->isConnectedToIsds(accountInfo.userName())) {
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(
+	        accountInfo.userName())) {
 		if (!firstConnectToIsds(accountInfo)) {
 			QString msgBoxTitle = tr("New account error") +
 			    ": " + accountInfo.accountName();
@@ -7435,7 +7439,7 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 	QString lastPath = newDir;
 	QString errStr;
 	const QString dbId(
-	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
+	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	Exports::ExportError ret;
 
 	foreach (MessageDb::MsgId mId, expirMsgIds) {
@@ -7500,7 +7504,7 @@ void MainWindow::prepareMsgsImportFromDatabase(void)
 	}
 
 	const QString dbId(
-	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
+	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	Imports::importDbMsgsIntoDatabase(*dbSet, dbFileList, userName, dbId);
 
@@ -8008,7 +8012,7 @@ void MainWindow::vacuumMsgDbSlot(void)
 
 void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 {
-	if (globTagDbPtr == Q_NULLPTR) {
+	if (GlobInstcs::tagDbPtr == Q_NULLPTR) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -8016,9 +8020,10 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 	int dlgRet = DlgTags::NO_ACTION;
 
 	if (msgIdList.isEmpty()) {
-		dlgRet = DlgTags::editAvailable(userName, globTagDbPtr, this);
+		dlgRet = DlgTags::editAvailable(userName, GlobInstcs::tagDbPtr,
+		    this);
 	} else if ((!userName.isEmpty() && !msgIdList.isEmpty()) || (!userName.isEmpty())) {
-		dlgRet = DlgTags::editAssignment(userName, globTagDbPtr,
+		dlgRet = DlgTags::editAssignment(userName, GlobInstcs::tagDbPtr,
 		    msgIdList, this);
 	} else {
 		Q_ASSERT(0);
@@ -8072,7 +8077,7 @@ void MainWindow::doExportOfSelectedFiles(
 	}
 
 	const QString dbId(
-	    globAccountDbPtr->dbId(AccountDb::keyFromLogin(userName)));
+	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 
 	setAccountStoragePaths(userName);
 	lastPath = m_on_export_zfo_activate;
