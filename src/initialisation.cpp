@@ -43,6 +43,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
+#include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
 #include "src/settings/proxy.h"
 
@@ -272,7 +273,7 @@ void deallocGlobSettings(void)
 	}
 }
 
-int allocateGlobalObjects(const GlobPreferences &prefs)
+int allocGlobContainers(const GlobPreferences &prefs)
 {
 	SQLiteDb::OpenFlags flags = SQLiteDb::NO_OPTIONS;
 
@@ -340,15 +341,26 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 		goto fail;
 	}
 
+	GlobInstcs::acntMapPtr = new (std::nothrow) AccountsMap;
+	if (Q_NULLPTR == GlobInstcs::acntMapPtr) {
+		logErrorNL("%s", "Cannot allocate account container.");
+		goto fail;
+	}
+
 	return 0;
 
 fail:
-	deallocateGlobalObjects();
+	deallocGlobContainers();
 	return -1;
 }
 
-void deallocateGlobalObjects(void)
+void deallocGlobContainers(void)
 {
+	if (Q_NULLPTR != GlobInstcs::acntMapPtr) {
+		delete GlobInstcs::acntMapPtr;
+		GlobInstcs::acntMapPtr = Q_NULLPTR;
+	}
+
 	if (Q_NULLPTR != GlobInstcs::recMgmtDbPtr) {
 		delete GlobInstcs::recMgmtDbPtr;
 		GlobInstcs::recMgmtDbPtr = Q_NULLPTR;

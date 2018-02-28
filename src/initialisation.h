@@ -63,7 +63,7 @@ void loadLocalisation(const GlobPreferences &prefs);
 int allocGlobSettings(void);
 
 /*!
- * @brief Deallocate global settings instances.
+ * @brief Deallocates global settings instances.
  */
 void deallocGlobSettings(void);
 
@@ -73,11 +73,11 @@ void deallocGlobSettings(void);
  * @param[in] prefs Preferences structure.
  * @return 0 on success, -1 on failure.
  */
-int allocateGlobalObjects(const GlobPreferences &prefs);
+int allocGlobContainers(const GlobPreferences &prefs);
 
 /*!
  * @brief Deallocates global database objects and containers.
  */
-void deallocateGlobalObjects(void);
+void deallocGlobContainers(void);
 
 #endif /* _INITIALISATION_H_ */

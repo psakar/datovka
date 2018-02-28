@@ -1691,7 +1691,7 @@ int runService(const QString &lParam,
 
 		if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(username) &&
 		    !connectToIsdsCLI(*GlobInstcs::isdsSessionsPtr,
-		        globAccounts[username], pwd, otp)) {
+		        (*GlobInstcs::acntMapPtr)[username], pwd, otp)) {
 			errmsg = "Missing session for " + username +
 			   " or connection fails";
 			qDebug() << errmsg;

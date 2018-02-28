@@ -50,6 +50,14 @@ public:
 	static
 	class RecordsManagementDb *recMgmtDbPtr; /*!< Records management database. */
 
+	/*!
+	 * @brief Holds account data related to account.
+	 *
+	 * @note Key is userName. The user name is held by the user name list.
+	 */
+	static
+	class AccountsMap *acntMapPtr;
+
 private:
 	/*!
 	 * @brief Private constructor.

@@ -79,7 +79,7 @@ void TaskDownloadMessage::run(void)
 	logDebugLv1NL("%s", "-----------------------------------------------");
 	logDebugLv1NL("Downloading %s message '%" PRId64 "' for account '%s'.",
 	    (MSG_RECEIVED == m_msgDirect) ? "received" : "sent", m_mId.dmId,
-	    globAccounts[m_userName].accountName().toUtf8().constData());
+	    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	logDebugLv1NL("%s", "-----------------------------------------------");
 
 	m_result = downloadMessage(m_userName, m_mId, true, m_msgDirect,
@@ -89,11 +89,11 @@ void TaskDownloadMessage::run(void)
 		logDebugLv1NL(
 		    "Done downloading message '%" PRId64 "' for account '%s'.",
 		    m_mId.dmId,
-		    globAccounts[m_userName].accountName().toUtf8().constData());
+		    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	} else {
 		logErrorNL("Downloading message '%" PRId64 "' for account '%s' failed.",
 		    m_mId.dmId,
-		    globAccounts[m_userName].accountName().toUtf8().constData());
+		    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	}
 
 	emit globMsgProcEmitter.downloadMessageFinished(m_userName, m_mId.dmId,

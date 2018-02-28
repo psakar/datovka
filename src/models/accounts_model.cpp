@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <QMimeData>
 
 #include "src/common.h"
+#include "src/global.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 
@@ -84,7 +85,7 @@ AccountModel::AccountModel(QObject *parent)
     m_countersMap()
 {
 	/* Automatically handle signalled changes. */
-	connect(&globAccounts, SIGNAL(accountDataChanged(QString)),
+	connect(GlobInstcs::acntMapPtr, SIGNAL(accountDataChanged(QString)),
 	    this, SLOT(handleAccountDataChange(QString)));
 }
 
@@ -227,7 +228,7 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 		Q_ASSERT(0);
 		return QVariant();
 	}
-	const AcntSettings &accountInfo(globAccounts[uName]);
+	const AcntSettings &accountInfo((*GlobInstcs::acntMapPtr)[uName]);
 	enum NodeType type = internalIdNodeType(index.internalId());
 
 	switch (role) {
@@ -708,7 +709,7 @@ void AccountModel::loadFromSettings(const QString &confDir,
     const QSettings &settings)
 {
 	/* Load into global account settings. */
-	globAccounts.loadFromSettings(confDir, settings);
+	GlobInstcs::acntMapPtr->loadFromSettings(confDir, settings);
 
 	QStringList groups = settings.childGroups();
 	QRegExp credRe(CredNames::creds + ".*");
@@ -759,7 +760,8 @@ void AccountModel::saveToSettings(const QString &pinVal, const QString &confDir,
 		const int uNameIdx = m_row2UserNameIdx.at(row);
 		Q_ASSERT((uNameIdx >= 0) && (uNameIdx < m_userNames.size()));
 		const QString &userName(m_userNames.at(uNameIdx));
-		const AcntSettings &itemSettings(globAccounts[userName]);
+		const AcntSettings &itemSettings(
+		    (*GlobInstcs::acntMapPtr)[userName]);
 
 		Q_ASSERT(userName == itemSettings.userName());
 
@@ -782,7 +784,8 @@ int AccountModel::addAccount(const AcntSettings &acntSettings, QModelIndex *idx)
 		return -1;
 	}
 
-	if (globAccounts.find(userName) != globAccounts.end()) {
+	if (GlobInstcs::acntMapPtr->find(userName) !=
+	    GlobInstcs::acntMapPtr->end()) {
 		logErrorNL("Account with user name '%s' already exists.",
 		    userName.toUtf8().constData());
 		return -2;
@@ -792,7 +795,7 @@ int AccountModel::addAccount(const AcntSettings &acntSettings, QModelIndex *idx)
 
 	beginInsertRows(QModelIndex(), rowCount(), rowCount());
 
-	globAccounts[userName] = acntSettings;
+	(*GlobInstcs::acntMapPtr)[userName] = acntSettings;
 
 	m_countersMap[userName] = AccountCounters();
 
@@ -828,7 +831,7 @@ void AccountModel::deleteAccount(const QString &userName)
 
 	m_countersMap.remove(userName);
 
-	globAccounts.remove(userName);
+	GlobInstcs::acntMapPtr->remove(userName);
 
 	endRemoveRows();
 }

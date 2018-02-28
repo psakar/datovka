@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@
  */
 
 #include "src/settings/accounts.h"
-
-AccountsMap globAccounts;
 
 void AccountsMap::loadFromSettings(const QString &confDir,
     const QSettings &settings)
@@ -62,8 +60,8 @@ void AccountsMap::loadFromSettings(const QString &confDir,
 
 void AccountsMap::decryptAllPwds(const QString &pinVal)
 {
-	for (AccountsMap::iterator it = globAccounts.begin();
-	     it != globAccounts.end(); ++it) {
+	for (AccountsMap::iterator it = this->begin();
+	     it != this->end(); ++it) {
 		it->decryptPassword(pinVal);
 	}
 }

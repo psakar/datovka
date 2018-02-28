@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
 	/* Localise description in tables. */
 	localiseTableDescriptions();
 
-	if (0 != allocateGlobalObjects(*GlobInstcs::prefsPtr)) {
+	if (0 != allocGlobContainers(*GlobInstcs::prefsPtr)) {
 		return EXIT_FAILURE;
 	}
 
@@ -207,9 +207,10 @@ int main(int argc, char *argv[])
 		QSettings settings(GlobInstcs::prefsPtr->loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
-		globAccounts.loadFromSettings(GlobInstcs::prefsPtr->confDir(),
-		    settings);
-		globAccounts.decryptAllPwds(GlobInstcs::pinSetPtr->_pinVal);
+		GlobInstcs::acntMapPtr->loadFromSettings(
+		    GlobInstcs::prefsPtr->confDir(), settings);
+		GlobInstcs::acntMapPtr->decryptAllPwds(
+		    GlobInstcs::pinSetPtr->_pinVal);
 	}
 
 	ret = CLIParser::runCLIService(srvcArgs, parser);
@@ -233,7 +234,7 @@ int main(int argc, char *argv[])
 	 */
 	//crypto_cleanup_threads();
 
-	deallocateGlobalObjects();
+	deallocGlobContainers();
 	deallocGlobSettings();
 
 	return ret;

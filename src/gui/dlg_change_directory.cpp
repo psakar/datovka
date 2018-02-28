@@ -75,7 +75,7 @@ bool DlgChangeDirectory::changeDataDirectory(const QString &userName,
 	QString newDirPath;
 
 	/* Get current settings. */
-	const AcntSettings &itemSettings(globAccounts[userName]);
+	const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
 
 	QString oldDbDir(itemSettings.dbDir());
 	if (oldDbDir.isEmpty()) {
@@ -144,7 +144,7 @@ bool DlgChangeDirectory::relocateDatabase(const QString &userName,
 	}
 
 	/* Get current settings. */
-	AcntSettings &itemSettings(globAccounts[userName]);
+	AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
 
 	switch (action) {
 	case ACT_MOVE:

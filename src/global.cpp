@@ -36,3 +36,5 @@ class AccountDb *GlobInstcs::accntDbPtr = Q_NULLPTR;
 class DbContainer *GlobInstcs::msgDbsPtr = Q_NULLPTR;
 class TagDb *GlobInstcs::tagDbPtr = Q_NULLPTR;
 class RecordsManagementDb *GlobInstcs::recMgmtDbPtr = Q_NULLPTR;
+
+class AccountsMap *GlobInstcs::acntMapPtr = Q_NULLPTR;

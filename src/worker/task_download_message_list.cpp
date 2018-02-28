@@ -94,7 +94,7 @@ void TaskDownloadMessageList::run(void)
 	logDebugLv1NL("%s", "-----------------------------------------------");
 	logDebugLv1NL("Downloading %s message list for account '%s'.",
 	    (MSG_RECEIVED == m_msgDirect) ? "received" : "sent",
-	    globAccounts[m_userName].accountName().toUtf8().constData());
+	    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	logDebugLv1NL("%s", "-----------------------------------------------");
 
 	if (MSG_RECEIVED == m_msgDirect) {
@@ -111,10 +111,10 @@ void TaskDownloadMessageList::run(void)
 
 	if (DL_SUCCESS == m_result) {
 		logDebugLv1NL("Done downloading message list for account '%s'.",
-		    globAccounts[m_userName].accountName().toUtf8().constData());
+		    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	} else {
 		logErrorNL("Downloading message list for account '%s' failed.",
-		    globAccounts[m_userName].accountName().toUtf8().constData());
+		    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	}
 
 	emit globMsgProcEmitter.downloadMessageListFinished(m_userName,

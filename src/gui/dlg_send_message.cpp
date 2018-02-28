@@ -455,7 +455,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		return;
 	}
 
-	const AcntSettings &accountInfo(globAccounts[m_userName]);
+	const AcntSettings &accountInfo((*GlobInstcs::acntMapPtr)[m_userName]);
 	const QString acntDbKey(AccountDb::keyFromLogin(m_userName));
 	m_boxId = GlobInstcs::accntDbPtr->dbId(acntDbKey);
 	Q_ASSERT(!m_boxId.isEmpty());
@@ -491,7 +491,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	}
 
 	m_ui->fromUser->setText("<strong>" +
-	    globAccounts[m_userName].accountName() + "</strong>" +
+	    (*GlobInstcs::acntMapPtr)[m_userName].accountName() + "</strong>" +
 	    " (" + m_userName + ") - " + m_dbType + dbOpenAddressingText);
 }
 
@@ -635,7 +635,7 @@ void DlgSendMessage::initContent(enum Action action,
 
 	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
 		const QString accountName =
-		    globAccounts[acnt.userName].accountName() +
+		    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName() +
 		    " (" + acnt.userName + ")";
 		m_ui->fromComboBox->addItem(accountName, QVariant(acnt.userName));
 		if (m_userName == acnt.userName) {

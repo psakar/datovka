@@ -46,7 +46,7 @@ MessageDbSet *AccountInteraction::accessDbSet(const QString &userName,
 	}
 
 	/* Get user name and db location. */
-	AcntSettings &itemSettings(globAccounts[userName]);
+	AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
 
 	if (!itemSettings.isValid()) {
 		logWarningNL(

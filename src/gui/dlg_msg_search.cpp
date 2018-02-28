@@ -325,7 +325,8 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	Q_ASSERT(!username.isEmpty());
 
 	/* Set account name and user name to label. */
-	m_ui->crntAcntNameLabel->setText(globAccounts[username].accountName() +
+	m_ui->crntAcntNameLabel->setText(
+	    (*GlobInstcs::acntMapPtr)[username].accountName() +
 	    " (" + username + ")");
 
 	/* Only one account available. */
