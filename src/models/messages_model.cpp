@@ -26,6 +26,7 @@
 #include "src/common.h"
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/delegates/tag_item.h"
+#include "src/global.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db.h"
@@ -650,7 +651,7 @@ bool DbMsgsTblModel::overrideProcessing(qint64 dmId,
 
 bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 {
-	if (Q_NULLPTR == globTagDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::tagDbPtr) {
 		return false;
 	}
 
@@ -672,7 +673,8 @@ bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 
 	for (int row = 0; row < rowCount(); ++row) {
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
-		TagItemList tagList(globTagDbPtr->getMessageTags(userName, dmId));
+		TagItemList tagList(
+		    GlobInstcs::tagDbPtr->getMessageTags(userName, dmId));
 		tagList.sortNames();
 		m_data[row][col] = QVariant::fromValue(tagList);
 	}
@@ -686,7 +688,7 @@ bool DbMsgsTblModel::fillTagsColumn(const QString &userName, int col)
 bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
     const QList<qint64> &dmIds, int col)
 {
-	if (Q_NULLPTR == globTagDbPtr) {
+	if (Q_NULLPTR == GlobInstcs::tagDbPtr) {
 		return false;
 	}
 
@@ -710,7 +712,7 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 		qint64 dmId = TblModel::index(row, 0).data().toLongLong();
 		if (dmIds.contains(dmId)) {
 			TagItemList tagList(
-			    globTagDbPtr->getMessageTags(userName, dmId));
+			    GlobInstcs::tagDbPtr->getMessageTags(userName, dmId));
 			tagList.sortNames();
 			m_data[row][col] = QVariant::fromValue(tagList);
 			emit dataChanged(TblModel::index(row, col),

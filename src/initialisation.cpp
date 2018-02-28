@@ -253,14 +253,14 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 		goto fail;
 	}
 
-	globTagDbPtr = new (std::nothrow) TagDb("tagDb", false);
-	if (Q_NULLPTR == globTagDbPtr) {
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb("tagDb", false);
+	if (Q_NULLPTR == GlobInstcs::tagDbPtr) {
 		logErrorNL("%s", "Cannot allocate tag db.");
 		goto fail;
 	}
 	/* Open tags database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	if (!globTagDbPtr->openDb(prefs.tagDbPath(), flags)) {
+	if (!GlobInstcs::tagDbPtr->openDb(prefs.tagDbPath(), flags)) {
 		logErrorNL("Error opening tag db '%s'.",
 		    prefs.tagDbPath().toUtf8().constData());
 		goto fail;
@@ -295,11 +295,10 @@ void deallocateGlobalObjects(void)
 		globRecordsManagementDbPtr = Q_NULLPTR;
 	}
 
-	if (Q_NULLPTR != globTagDbPtr) {
-		delete globTagDbPtr;
-		globTagDbPtr = Q_NULLPTR;
+	if (Q_NULLPTR != GlobInstcs::tagDbPtr) {
+		delete GlobInstcs::tagDbPtr;
+		GlobInstcs::tagDbPtr = Q_NULLPTR;
 	}
-
 	if (Q_NULLPTR != GlobInstcs::msgDbsPtr) {
 		delete GlobInstcs::msgDbsPtr;
 		GlobInstcs::msgDbsPtr = Q_NULLPTR;

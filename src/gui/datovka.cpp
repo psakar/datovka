@@ -2972,7 +2972,8 @@ void MainWindow::deleteMessage(void)
 			/* Delete all tags from message_tags table.
 			 * Tag in the tag table are kept.
 			 */
-			globTagDbPtr->removeAllTagsFromMsg(userName, id.dmId);
+			GlobInstcs::tagDbPtr->removeAllTagsFromMsg(userName,
+			    id.dmId);
 		}
 	}
 
@@ -4738,7 +4739,7 @@ void MainWindow::deleteAccount(const QString &userName)
 		    .arg(accountName));
 	}
 
-	globTagDbPtr->removeAllMsgTagsFromAccount(userName);
+	GlobInstcs::tagDbPtr->removeAllMsgTagsFromAccount(userName);
 
 	if ((DlgYesNoCheckbox::YesChecked == retVal) ||
 	    (DlgYesNoCheckbox::YesUnchecked == retVal)) {
@@ -4934,7 +4935,7 @@ void MainWindow::filterMessages(const QString &text)
 	QList<int> columnList;
 	columnList.append(1);
 	columnList.append(2);
-	if (0 != globTagDbPtr) {
+	if (Q_NULLPTR != GlobInstcs::tagDbPtr) {
 		columnList.append(7); /* Tags in sent messages. */
 		columnList.append(8); /* Tags in received messages. */
 	}
@@ -5554,7 +5555,7 @@ void MainWindow::showExportCorrespondenceOverviewDialog(void)
 	setAccountStoragePaths(userName);
 
 	DlgCorrespondenceOverview::exportData(*dbSet, dbId, userName,
-	    *globTagDbPtr, m_export_correspond_dir, this);
+	    *GlobInstcs::tagDbPtr, m_export_correspond_dir, this);
 	storeExportPath(userName);
 }
 
@@ -8011,7 +8012,7 @@ void MainWindow::vacuumMsgDbSlot(void)
 
 void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 {
-	if (globTagDbPtr == Q_NULLPTR) {
+	if (GlobInstcs::tagDbPtr == Q_NULLPTR) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -8019,9 +8020,10 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 	int dlgRet = DlgTags::NO_ACTION;
 
 	if (msgIdList.isEmpty()) {
-		dlgRet = DlgTags::editAvailable(userName, globTagDbPtr, this);
+		dlgRet = DlgTags::editAvailable(userName, GlobInstcs::tagDbPtr,
+		    this);
 	} else if ((!userName.isEmpty() && !msgIdList.isEmpty()) || (!userName.isEmpty())) {
-		dlgRet = DlgTags::editAssignment(userName, globTagDbPtr,
+		dlgRet = DlgTags::editAssignment(userName, GlobInstcs::tagDbPtr,
 		    msgIdList, this);
 	} else {
 		Q_ASSERT(0);

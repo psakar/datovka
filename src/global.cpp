@@ -29,3 +29,4 @@ class IsdsSessions *GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
 
 class AccountDb *GlobInstcs::accntDbPtr = Q_NULLPTR;
 class DbContainer *GlobInstcs::msgDbsPtr = Q_NULLPTR;
+class TagDb *GlobInstcs::tagDbPtr = Q_NULLPTR;
