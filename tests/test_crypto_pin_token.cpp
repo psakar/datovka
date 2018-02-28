@@ -26,7 +26,7 @@
 #include <QtTest/QtTest>
 
 #include "src/datovka_shared/settings/pin.h"
-#include "src/settings/records_management.h"
+#include "src/datovka_shared/settings/records_management.h"
 #include "tests/test_crypto_pin_token.h"
 
 class TestCryptoPinToken : public QObject {

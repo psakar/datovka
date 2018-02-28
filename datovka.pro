@@ -359,7 +359,6 @@ SOURCES += \
     src/settings/accounts.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
-    src/settings/records_management.cpp \
     src/single/single_instance.cpp \
     src/views/attachment_table_view.cpp \
     src/views/lowered_table_view.cpp \
@@ -492,7 +491,6 @@ HEADERS += \
     src/settings/accounts.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
-    src/settings/records_management.h \
     src/single/single_instance.h \
     src/views/attachment_table_view.h \
     src/views/lowered_table_view.h \

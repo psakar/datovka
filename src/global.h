@@ -35,6 +35,8 @@ public:
 	class ProxiesSettings *proxSetPtr; /*!< Proxy settings. */
 	static
 	class PinSettings *pinSetPtr; /*!< PIN settings. */
+	static
+	class RecordsManagementSettings *recMgmtSetPtr; /*!< Records management settings. */
 
 	static
 	class IsdsSessions *isdsSessionsPtr; /*!< ISDS session container. */

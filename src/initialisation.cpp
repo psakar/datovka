@@ -34,6 +34,7 @@
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/settings/pin.h"
+#include "src/datovka_shared/settings/records_management.h"
 #include "src/global.h"
 #include "src/initialisation.h"
 #include "src/io/account_db.h"
@@ -236,6 +237,14 @@ int allocGlobSettings(void)
 		goto fail;
 	}
 
+	GlobInstcs::recMgmtSetPtr =
+	    new (std::nothrow) RecordsManagementSettings;
+	if (Q_NULLPTR == GlobInstcs::recMgmtSetPtr) {
+		logErrorNL("%s",
+		    "Cannot allocate records management settings.");
+		goto fail;
+	}
+
 	return 0;
 
 fail:
@@ -245,6 +254,10 @@ fail:
 
 void deallocGlobSettings(void)
 {
+	if (Q_NULLPTR != GlobInstcs::recMgmtSetPtr) {
+		delete GlobInstcs::recMgmtSetPtr;
+		GlobInstcs::recMgmtSetPtr = Q_NULLPTR;
+	}
 	if (Q_NULLPTR != GlobInstcs::pinSetPtr) {
 		delete GlobInstcs::pinSetPtr;
 		GlobInstcs::pinSetPtr = Q_NULLPTR;

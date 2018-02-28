@@ -28,7 +28,7 @@
 #include <QList>
 #include <QString>
 
-#include "src/settings/records_management.h"
+#include "src/datovka_shared/settings/records_management.h"
 
 namespace Ui {
 	class DlgRecordsManagementStored;

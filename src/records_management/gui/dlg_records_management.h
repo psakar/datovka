@@ -28,7 +28,7 @@
 #include <QDialog>
 
 #include "src/datovka_shared/records_management/io/records_management_connection.h"
-#include "src/settings/records_management.h"
+#include "src/datovka_shared/settings/records_management.h"
 
 namespace Ui {
 	class DlgRecordsManagement;

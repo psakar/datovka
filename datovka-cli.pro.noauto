@@ -89,6 +89,7 @@ SOURCES += \
 	src/datovka_shared/io/sqlite/table.cpp \
 	src/datovka_shared/localisation/localisation.cpp \
 	src/datovka_shared/settings/pin.cpp \
+	src/datovka_shared/settings/records_management.cpp \
 	src/datovka_shared/worker/pool.cpp \
 	src/global.cpp \
 	src/initialisation.cpp \
@@ -145,6 +146,7 @@ HEADERS += \
 	src/datovka_shared/io/sqlite/table.h \
 	src/datovka_shared/localisation/localisation.h \
 	src/datovka_shared/settings/pin.h \
+	src/datovka_shared/settings/records_management.h \
 	src/datovka_shared/worker/pool.h \
 	src/global.h \
 	src/initialisation.h \

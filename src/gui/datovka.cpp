@@ -48,6 +48,7 @@
 #include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/datovka_shared/settings/pin.h"
+#include "src/datovka_shared/settings/records_management.h"
 #include "src/datovka_shared/utility/strings.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
@@ -89,7 +90,6 @@
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
 #include "src/settings/preferences.h"
-#include "src/settings/records_management.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
 #include "src/views/table_tab_ignore_filter.h"
@@ -512,7 +512,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* TODO -- This is only a temporary solution. */
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globRecordsManagementSet.isValid());
+	    GlobInstcs::recMgmtSetPtr->isValid());
 }
 
 void MainWindow::setWindowsAfterInit(void)
@@ -730,7 +730,7 @@ void showColumnsAccordingToFunctionality(QTableView *view)
 {
 	QList<int> negCols;
 
-	if (!globRecordsManagementSet.isValid()) {
+	if (!GlobInstcs::recMgmtSetPtr->isValid()) {
 		negCols.append(DbMsgsTblModel::REC_MGMT_NEG_COL);
 	}
 
@@ -741,13 +741,13 @@ void MainWindow::showRecordsManagementDialogue(void)
 {
 	debugSlotCall();
 
-	if (DlgRecordsManagement::updateSettings(globRecordsManagementSet,
+	if (DlgRecordsManagement::updateSettings(*GlobInstcs::recMgmtSetPtr,
 	        this)) {
 		saveSettings();
 	}
 
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globRecordsManagementSet.isValid());
+	    GlobInstcs::recMgmtSetPtr->isValid());
 
 	m_messageTableModel.setRecordsManagementIcon();
 	m_messageTableModel.fillRecordsManagementColumn(
@@ -4052,7 +4052,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globRecordsManagementSet.isValid());
+	    GlobInstcs::recMgmtSetPtr->isValid());
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
@@ -4094,7 +4094,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
 	    /* Separator. */
 	ui->actionSend_to_records_management->setEnabled(
-	    (numSelected == 1) && globRecordsManagementSet.isValid());
+	    (numSelected == 1) && GlobInstcs::recMgmtSetPtr->isValid());
 	    /* Separator. */
 	ui->actionExport_as_ZFO->setEnabled(numSelected > 0);
 	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
@@ -4218,8 +4218,8 @@ void MainWindow::loadSettings(void)
 	/* PIN should already be set because main window is running. */
 
 	/* Records management settings. */
-	globRecordsManagementSet.loadFromSettings(settings);
-	globRecordsManagementSet.decryptToken(GlobInstcs::pinSetPtr->_pinVal);
+	GlobInstcs::recMgmtSetPtr->loadFromSettings(settings);
+	GlobInstcs::recMgmtSetPtr->decryptToken(GlobInstcs::pinSetPtr->_pinVal);
 
 	/* Accounts. */
 	m_accountModel.loadFromSettings(GlobInstcs::prefsPtr->confDir(),
@@ -4514,8 +4514,8 @@ void MainWindow::saveSettings(void) const
 	GlobInstcs::proxSetPtr->saveToSettings(settings);
 
 	/* Records management settings. */
-	globRecordsManagementSet.saveToSettings(GlobInstcs::pinSetPtr->_pinVal,
-	    settings);
+	GlobInstcs::recMgmtSetPtr->saveToSettings(
+	    GlobInstcs::pinSetPtr->_pinVal, settings);
 
 	/* Global preferences. */
 	GlobInstcs::prefsPtr->saveToSettings(settings);
@@ -4982,7 +4982,7 @@ void MainWindow::setReceivedColumnWidths(void)
 	}
 	/* Last three columns display icons. */
 	int max = MessageDb::rcvdItemIds.size();
-	if (globRecordsManagementSet.isValid()) {
+	if (GlobInstcs::recMgmtSetPtr->isValid()) {
 		/* Add one column if records management service is activated. */
 		++max;
 	}
@@ -5017,7 +5017,7 @@ void MainWindow::setSentColumnWidths(void)
 	}
 	/* Last column displays an icon. */
 	int max = MessageDb::rcvdItemIds.size();
-	if (globRecordsManagementSet.isValid()) {
+	if (GlobInstcs::recMgmtSetPtr->isValid()) {
 		/* Add one column if records management service is activated. */
 		++max;
 	}
@@ -6300,7 +6300,7 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 	}
 
 	DlgRecordsManagementStored::updateStoredInformation(
-	    globRecordsManagementSet, accounts, this);
+	    *GlobInstcs::recMgmtSetPtr, accounts, this);
 
 	m_messageTableModel.fillRecordsManagementColumn(
 	    DbMsgsTblModel::REC_MGMT_NEG_COL);
@@ -6371,7 +6371,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	}
 
 	/* Show send to records management dialogue. */
-	DlgRecordsManagementUpload::uploadMessage(globRecordsManagementSet,
+	DlgRecordsManagementUpload::uploadMessage(*GlobInstcs::recMgmtSetPtr,
 	    msgId.dmId,
 	    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId),
 	    msgRaw, this);
