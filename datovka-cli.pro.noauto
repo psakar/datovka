@@ -90,6 +90,7 @@ SOURCES += \
 	src/datovka_shared/localisation/localisation.cpp \
 	src/datovka_shared/settings/pin.cpp \
 	src/datovka_shared/worker/pool.cpp \
+	src/global.cpp \
 	src/initialisation.cpp \
 	src/io/account_db.cpp \
 	src/io/db_tables.cpp \
@@ -103,7 +104,6 @@ SOURCES += \
 	src/io/message_db_set.cpp \
 	src/io/message_db_set_container.cpp \
 	src/io/message_db_set_delegated.cpp \
-	src/io/records_management_db.cpp \
 	src/io/tag_db.cpp \
 	src/isds/isds_conversion.cpp \
 	src/model_interaction/account_interaction.cpp \
@@ -147,6 +147,7 @@ HEADERS += \
 	src/datovka_shared/localisation/localisation.h \
 	src/datovka_shared/settings/pin.h \
 	src/datovka_shared/worker/pool.h \
+	src/global.h \
 	src/initialisation.h \
 	src/io/account_db.h \
 	src/io/db_tables.h \
@@ -159,7 +160,6 @@ HEADERS += \
 	src/io/message_db.h \
 	src/io/message_db_set.h \
 	src/io/message_db_set_container.h \
-	src/io/records_management_db.h \
 	src/io/tag_db.h \
 	src/isds/isds_conversion.h \
 	src/model_interaction/account_interaction.h \

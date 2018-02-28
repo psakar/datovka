@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <QFileInfo>
 #include <QtTest/QtTest>
 
+#include "src/global.h"
 #include "src/io/tag_db.h"
 #include "tests/test_db_single.h"
 
@@ -93,7 +94,7 @@ TestDbSingle::TestDbSingle(void)
 void TestDbSingle::initTestCase(void)
 {
 	/* Pointer must be null before initialisation. */
-	QVERIFY(globTagDbPtr == Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr == Q_NULLPTR);
 
 	QVERIFY(m_dbDir.removeRecursively());
 	QVERIFY(!m_dbDir.exists());
@@ -103,7 +104,7 @@ void TestDbSingle::initTestCase(void)
 
 void TestDbSingle::cleanupTestCase(void)
 {
-	QVERIFY(globTagDbPtr == Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr == Q_NULLPTR);
 
 	QVERIFY(m_dbDir.removeRecursively());
 	QVERIFY(!m_dbDir.exists());
@@ -111,7 +112,7 @@ void TestDbSingle::cleanupTestCase(void)
 
 void TestDbSingle::init(void)
 {
-	QVERIFY(globTagDbPtr == Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr == Q_NULLPTR);
 
 	QFile(m_dbPath1).remove();
 	QFile(m_dbPath2).remove();
@@ -122,504 +123,504 @@ void TestDbSingle::init(void)
 
 void TestDbSingle::cleanup(void)
 {
-	delete globTagDbPtr; globTagDbPtr = Q_NULLPTR;
+	delete GlobInstcs::tagDbPtr; GlobInstcs::tagDbPtr = Q_NULLPTR;
 }
 
 void TestDbSingle::relocateImmovableFile(void)
 {
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, false);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, false);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 }
 
 void TestDbSingle::relocateImmovableMemory(void)
 {
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, false);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, false);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(
 	    m_dbPath1, SQLiteDb::CREATE_MISSING | SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 }
 
 void TestDbSingle::relocateMovableFileCopy(void)
 {
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-//	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-//	QVERIFY(checkContent(globTagDbPtr));
+//	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+//	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 //	QVERIFY(QFileInfo::exists(m_dbPath1));
 //	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(QFileInfo::exists(m_dbPath2));
 
-//	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-//	QVERIFY(checkContent(globTagDbPtr));
+//	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+//	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 //	QVERIFY(!QFileInfo::exists(m_dbPath1));
 //	QVERIFY(!QFileInfo::exists(m_dbPath2));
 }
 
 void TestDbSingle::relocateMovableFileReopen(void)
 {
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-//	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-//	QVERIFY(checkContent(globTagDbPtr));
+//	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+//	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 //	QVERIFY(QFileInfo::exists(m_dbPath1));
 //	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(!checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(!checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(!checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(!checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(QFileInfo::exists(m_dbPath2));
 
-//	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-//	QVERIFY(checkContent(globTagDbPtr));
+//	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+//	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 //	QVERIFY(!QFileInfo::exists(m_dbPath1));
 //	QVERIFY(!QFileInfo::exists(m_dbPath2));
 }
 
 void TestDbSingle::relocateMovableFileMove(void)
 {
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-//	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-//	QVERIFY(checkContent(globTagDbPtr));
+//	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+//	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 //	QVERIFY(QFileInfo::exists(m_dbPath1));
 //	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(QFileInfo::exists(m_dbPath2));
 
-//	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-//	QVERIFY(checkContent(globTagDbPtr));
+//	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+//	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 //	QVERIFY(!QFileInfo::exists(m_dbPath1));
 //	QVERIFY(!QFileInfo::exists(m_dbPath2));
 }
 
 void TestDbSingle::relocateMovableFileOpen(void)
 {
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	cleanup();
-	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(!checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->openDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(!checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(!checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	cleanup();
+	init();
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(!checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->openDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(!checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(!checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(QFileInfo::exists(m_dbPath2));
 
 	cleanup();
 	init();
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(globTagDbPtr->openDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(!checkContent(globTagDbPtr));
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(!checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 }
@@ -632,116 +633,116 @@ void TestDbSingle::relocateMovableMemory(void)
 	 */
 	return;
 
-	globTagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
-	QVERIFY(globTagDbPtr != Q_NULLPTR);
-	QVERIFY(globTagDbPtr->openDb(
+	GlobInstcs::tagDbPtr = new (std::nothrow) TagDb(m_connectionPrefix, true);
+	QVERIFY(GlobInstcs::tagDbPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::tagDbPtr->openDb(
 	    m_dbPath1, SQLiteDb::CREATE_MISSING | SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(fillDbContent(globTagDbPtr));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(fillDbContent(GlobInstcs::tagDbPtr));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->copyDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->reopenDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->copyDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
-	QVERIFY(!QFileInfo::exists(m_dbPath1));
-	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->moveDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->reopenDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
-	QVERIFY(!globTagDbPtr->openDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
-	QVERIFY(checkContent(globTagDbPtr));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->moveDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath1, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::NO_OPTIONS));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::CREATE_MISSING));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
+	QVERIFY(!QFileInfo::exists(m_dbPath1));
+	QVERIFY(!QFileInfo::exists(m_dbPath2));
+	QVERIFY(!GlobInstcs::tagDbPtr->openDb(m_dbPath2, SQLiteDb::FORCE_IN_MEMORY));
+	QVERIFY(checkContent(GlobInstcs::tagDbPtr));
 	QVERIFY(!QFileInfo::exists(m_dbPath1));
 	QVERIFY(!QFileInfo::exists(m_dbPath2));
 }
