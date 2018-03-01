@@ -335,8 +335,9 @@ MainWindow::MainWindow(QWidget *parent)
 	    tr("Tags"), QIcon(), tr("User-assigned tags")));
 
 	/* Single instance emitter. */
-	connect(&globSingleInstanceEmitter, SIGNAL(messageReceived(QString)),
-	    this, SLOT(processSingleInstanceMessages(QString)));
+	connect(GlobInstcs::snglInstEmitterPtr,
+	    SIGNAL(messageReceived(QString)), this,
+	    SLOT(processSingleInstanceMessages(QString)));
 
 	/* Worker-related processing signals. */
 	connect(GlobInstcs::msgProcEmitterPtr,

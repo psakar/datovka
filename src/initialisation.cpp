@@ -47,6 +47,7 @@
 #include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
 #include "src/settings/proxy.h"
+#include "src/single/single_instance.h"
 #include "src/worker/message_emitter.h"
 
 void setDefaultLocale(void)
@@ -222,10 +223,18 @@ void loadLocalisation(const GlobPreferences &prefs)
 
 int allocGlobSettings(void)
 {
+	GlobInstcs::snglInstEmitterPtr =
+	    new (std::nothrow) SingleInstanceEmitter;
+	if (Q_NULLPTR == GlobInstcs::snglInstEmitterPtr) {
+		logErrorNL("%s",
+		    "Cannot allocate single instance message emitter.");
+		goto fail;
+	}
+
 	GlobInstcs::msgProcEmitterPtr =
 	    new (std::nothrow) MessageProcessingEmitter;
 	if (Q_NULLPTR == GlobInstcs::msgProcEmitterPtr) {
-		logErrorNL("%s","Cannot allocate task message emitter." );
+		logErrorNL("%s", "Cannot allocate task message emitter." );
 		goto fail;
 	}
 
@@ -301,6 +310,11 @@ void deallocGlobSettings(void)
 	if (Q_NULLPTR != GlobInstcs::msgProcEmitterPtr) {
 		delete GlobInstcs::msgProcEmitterPtr;
 		GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
+	}
+
+	if (Q_NULLPTR != GlobInstcs::snglInstEmitterPtr) {
+		delete GlobInstcs::snglInstEmitterPtr;
+		GlobInstcs::snglInstEmitterPtr = Q_NULLPTR;
 	}
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,10 +39,10 @@ public:
 	 * @brief Constructor.
 	 *
 	 * @param[in] shMemKey Shared memory key (usually configuration path).
-	 * @param[in] parent   Pointer to parent object.
+	 * @param[in] parent Pointer to parent object.
 	 */
-	SingleInstance(const QString &shMemKey = QString(),
-	    QObject *parent = 0);
+	explicit SingleInstance(const QString &shMemKey = QString(),
+	    QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Performs a system-wide check whether there is another
@@ -104,10 +104,5 @@ signals:
 	 */
 	void messageReceived(const QString &message);
 };
-
-/*!
- * @brief This object is used to emit signals from single instance objects.
- */
-extern SingleInstanceEmitter globSingleInstanceEmitter;
 
 #endif /* _SINGLE_INSTANCE_H_ */

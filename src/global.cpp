@@ -25,6 +25,8 @@
 
 #include "src/global.h"
 
+class SingleInstanceEmitter *GlobInstcs::snglInstEmitterPtr = Q_NULLPTR;
+
 class MessageProcessingEmitter *GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
 class WorkerPool *GlobInstcs::workPoolPtr = Q_NULLPTR;
 
