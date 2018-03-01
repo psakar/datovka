@@ -37,6 +37,7 @@
 #include "src/crypto/crypto_version.h"
 #include "src/datovka_shared/io/sqlite/db.h"
 #include "src/datovka_shared/settings/pin.h"
+#include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_pin_input.h"
@@ -48,7 +49,6 @@
 #include "src/settings/accounts.h"
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
-#include "src/worker/pool.h"
 
 /*!
  * @brief Specified the mode the executable is being executed with.
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
 	int ret = EXIT_SUCCESS;
 
 	/* Start worker threads. */
-	globWorkPool.start();
+	GlobInstcs::workPoolPtr->start();
 	logInfo("%s\n", "Worker pool started.");
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
@@ -310,8 +310,8 @@ int main(int argc, char *argv[])
 
 	/* Wait until all threads finished. */
 	logInfo("%s\n", "Waiting for pending worker threads.");
-	globWorkPool.wait();
-	globWorkPool.stop();
+	GlobInstcs::workPoolPtr->wait();
+	GlobInstcs::workPoolPtr->stop();
 	logInfo("%s\n", "All worker threads finished");
 
 	stop = QDateTime::currentMSecsSinceEpoch();

@@ -24,6 +24,7 @@
 #include <cinttypes>
 #include <QThread>
 
+#include "src/datovka_shared/worker/pool.h" /* List with whole messages. */
 #include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
@@ -31,7 +32,6 @@
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/pool.h" /* List with whole messages. */
 #include "src/worker/task_download_message.h" /* List with whole messages. */
 #include "src/worker/task_download_message_list.h"
 
@@ -266,11 +266,15 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 			Task::storeEnvelope(msgDirect, dbSet, item->envelope);
 			if (downloadWhole) {
-				TaskDownloadMessage *task;
-				task = new (std::nothrow) TaskDownloadMessage(
-				    userName, &dbSet, msgDirect, msgId, true);
-				task->setAutoDelete(true);
-				globWorkPool.assignLo(task, WorkerPool::PREPEND);
+				TaskDownloadMessage *task =
+				    new (std::nothrow) TaskDownloadMessage(
+				        userName, &dbSet, msgDirect, msgId,
+				        true);
+				if (task != Q_NULLPTR) {
+					task->setAutoDelete(true);
+					GlobInstcs::workPoolPtr->assignLo(task,
+					    WorkerPool::PREPEND);
+				}
 			}
 			newMsgIdList.append(msgId.dmId);
 			newcnt++;
@@ -294,13 +298,15 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				 */
 				if (downloadWhole || messageDb->msgsStoredWhole(msgId.dmId)) {
 
-					TaskDownloadMessage *task;
-					task = new (std::nothrow) TaskDownloadMessage(
-					    userName, &dbSet, msgDirect, msgId,
-					    true);
-					task->setAutoDelete(true);
-					globWorkPool.assignLo(task,
-					    WorkerPool::PREPEND);
+					TaskDownloadMessage *task =
+					    new (std::nothrow) TaskDownloadMessage(
+					        userName, &dbSet, msgDirect,
+					        msgId, true);
+					if (task != Q_NULLPTR) {
+						task->setAutoDelete(true);
+						GlobInstcs::workPoolPtr->assignLo(
+						    task, WorkerPool::PREPEND);
+					}
 				}
 
 				/* Update delivery info of sent message */

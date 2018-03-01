@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,10 @@
  * the two.
  */
 
+#include "src/datovka_shared/worker/pool.h"
+#include "src/global.h"
 #include "src/io/isds_helper.h"
 #include "src/log/log.h"
-#include "src/worker/pool.h"
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"
@@ -32,11 +33,13 @@ bool IsdsHelper::getOwnerInfoFromLogin(const QString &userName)
 {
 	debugFuncCall();
 
-	TaskDownloadOwnerInfo *task;
-
-	task = new (std::nothrow) TaskDownloadOwnerInfo(userName);
+	TaskDownloadOwnerInfo *task =
+	    new (std::nothrow) TaskDownloadOwnerInfo(userName);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		return false;
+	}
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	bool result = task->m_success;
 	delete task;
@@ -48,11 +51,13 @@ bool IsdsHelper::getUserInfoFromLogin(const QString &userName)
 {
 	debugFuncCall();
 
-	TaskDownloadUserInfo *task;
-
-	task = new (std::nothrow) TaskDownloadUserInfo(userName);
+	TaskDownloadUserInfo *task =
+	    new (std::nothrow) TaskDownloadUserInfo(userName);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		return false;
+	}
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	bool result = task->m_success;
 	delete task;
@@ -64,11 +69,13 @@ bool IsdsHelper::getPasswordInfoFromLogin(const QString &userName)
 {
 	debugFuncCall();
 
-	TaskDownloadPasswordInfo *task;
-
-	task = new (std::nothrow) TaskDownloadPasswordInfo(userName);
+	TaskDownloadPasswordInfo *task =
+	    new (std::nothrow) TaskDownloadPasswordInfo(userName);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		return false;
+	}
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	bool result = task->m_success;
 	delete task;

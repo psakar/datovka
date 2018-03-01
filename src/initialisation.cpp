@@ -35,6 +35,7 @@
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/settings/pin.h"
 #include "src/datovka_shared/settings/records_management.h"
+#include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/initialisation.h"
 #include "src/io/account_db.h"
@@ -220,6 +221,19 @@ void loadLocalisation(const GlobPreferences &prefs)
 
 int allocGlobSettings(void)
 {
+	/*
+	 * Only one worker thread currently.
+	 * TODO -- To be able to run multiple threads in the pool a locking
+	 * mechanism over isds context structures must be implemented. Also,
+	 * per-context queueing ought to be implemented to avoid unnecessary
+	 * waiting.
+	 */
+	GlobInstcs::workPoolPtr = new (std::nothrow) WorkerPool(1);
+	if (Q_NULLPTR == GlobInstcs::workPoolPtr) {
+		logErrorNL("%s", "Cannot allocate worker pool.");
+		goto fail;
+	}
+
 	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
 	if (Q_NULLPTR == GlobInstcs::prefsPtr) {
 		logErrorNL("%s", "Cannot allocate preferences.");
@@ -270,6 +284,11 @@ void deallocGlobSettings(void)
 	if (Q_NULLPTR != GlobInstcs::prefsPtr) {
 		delete GlobInstcs::prefsPtr;
 		GlobInstcs::prefsPtr = Q_NULLPTR;
+	}
+
+	if (Q_NULLPTR != GlobInstcs::workPoolPtr) {
+		delete GlobInstcs::workPoolPtr;
+		GlobInstcs::workPoolPtr = Q_NULLPTR;
 	}
 }
 

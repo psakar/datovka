@@ -30,6 +30,9 @@ class GlobInstcs {
 
 public:
 	static
+	class WorkerPool *workPoolPtr; /*!< Worker pool. */
+
+	static
 	class GlobPreferences *prefsPtr; /*!< Preferences. */
 	static
 	class ProxiesSettings *proxSetPtr; /*!< Proxy settings. */

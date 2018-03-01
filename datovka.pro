@@ -369,7 +369,6 @@ SOURCES += \
     src/views/table_space_selection_filter.cpp \
     src/views/table_tab_ignore_filter.cpp \
     src/worker/message_emitter.cpp \
-    src/worker/pool.cpp \
     src/worker/task.cpp \
     src/worker/task_authenticate_message.cpp \
     src/worker/task_change_pwd.cpp \
@@ -501,7 +500,6 @@ HEADERS += \
     src/views/table_space_selection_filter.h \
     src/views/table_tab_ignore_filter.h \
     src/worker/message_emitter.h \
-    src/worker/pool.h \
     src/worker/task.h \
     src/worker/task_authenticate_message.h \
     src/worker/task_change_pwd.h \
