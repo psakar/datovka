@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,22 +21,18 @@
  * the two.
  */
 
-
 #ifndef _LOG_COMMON_H_
 #define _LOG_COMMON_H_
-
 
 /*!
  * @brief Identifies the default source.
  */
 #define LOGSRC_DEF 0
 
-
 /*!
  * @brief Identifies all sources.
  */
 #define LOGSRC_ANY -1
-
 
 /* Taken from syslog.h */
 #define LOG_EMERG   0 /* system is unusable */
@@ -50,6 +46,5 @@
 
 #define LOG_MASK(pri) (1 << (pri)) /* mask for one priority */
 #define LOG_UPTO(pri) ((1 << ((pri)+1)) - 1) /* all priorities through pri */
-
 
 #endif /* _LOG_COMMON_H_ */

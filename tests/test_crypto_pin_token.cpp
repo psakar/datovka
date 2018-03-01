@@ -27,6 +27,8 @@
 
 #include "src/datovka_shared/settings/pin.h"
 #include "src/datovka_shared/settings/records_management.h"
+#include "src/global.h"
+#include "src/log/log.h"
 #include "tests/test_crypto_pin_token.h"
 
 class TestCryptoPinToken : public QObject {
@@ -89,11 +91,14 @@ TestCryptoPinToken::TestCryptoPinToken(void)
 
 void TestCryptoPinToken::initTestCase(void)
 {
-	/* No initialisation is needed. */
+	QVERIFY(GlobInstcs::logPtr == Q_NULLPTR);
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
 }
 
 void TestCryptoPinToken::cleanupTestCase(void)
 {
+	delete GlobInstcs::logPtr; GlobInstcs::logPtr = Q_NULLPTR;
 }
 
 void TestCryptoPinToken::loadConfigPinDisabled(void)

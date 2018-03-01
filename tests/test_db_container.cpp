@@ -26,6 +26,7 @@
 
 #include "src/global.h"
 #include "src/io/message_db_set_container.h"
+#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "tests/test_db_container.h"
 
@@ -84,6 +85,10 @@ TestDbContainer::TestDbContainer(void)
 
 void TestDbContainer::initTestCase(void)
 {
+	QVERIFY(GlobInstcs::logPtr == Q_NULLPTR);
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
+
 	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
 	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
 	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
@@ -103,6 +108,8 @@ void TestDbContainer::cleanupTestCase(void)
 	delete GlobInstcs::msgDbsPtr; GlobInstcs::msgDbsPtr = Q_NULLPTR;
 
 	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
+
+	delete GlobInstcs::logPtr; GlobInstcs::logPtr = Q_NULLPTR;
 
 	QVERIFY(m_dbDir.removeRecursively());
 	QVERIFY(!m_dbDir.exists());

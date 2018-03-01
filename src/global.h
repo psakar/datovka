@@ -30,6 +30,9 @@ class GlobInstcs {
 
 public:
 	static
+	class LogDevice *logPtr; /*!< Log device. */
+
+	static
 	class SingleInstanceEmitter *snglInstEmitterPtr; /*!< Single instance message emitter. */
 
 	static

@@ -28,6 +28,7 @@
 
 #include "src/global.h"
 #include "src/io/tag_db.h"
+#include "src/log/log.h"
 #include "tests/test_db_single.h"
 
 class TestDbSingle : public QObject {
@@ -93,6 +94,10 @@ TestDbSingle::TestDbSingle(void)
 
 void TestDbSingle::initTestCase(void)
 {
+	QVERIFY(GlobInstcs::logPtr == Q_NULLPTR);
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
+
 	/* Pointer must be null before initialisation. */
 	QVERIFY(GlobInstcs::tagDbPtr == Q_NULLPTR);
 
@@ -105,6 +110,8 @@ void TestDbSingle::initTestCase(void)
 void TestDbSingle::cleanupTestCase(void)
 {
 	QVERIFY(GlobInstcs::tagDbPtr == Q_NULLPTR);
+
+	delete GlobInstcs::logPtr; GlobInstcs::logPtr = Q_NULLPTR;
 
 	QVERIFY(m_dbDir.removeRecursively());
 	QVERIFY(!m_dbDir.exists());

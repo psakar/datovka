@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 #include <QtTest/QtTest>
 
 #include "src/about.h"
+#include "src/global.h"
+#include "src/log/log.h"
 
 class TestVersion : public QObject {
 	Q_OBJECT
@@ -56,11 +58,14 @@ QObject *newTestVersion(void)
 
 void TestVersion::initTestCase(void)
 {
-	/* No initialisation is needed. */
+	QVERIFY(GlobInstcs::logPtr == Q_NULLPTR);
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
 }
 
 void TestVersion::cleanupTestCase(void)
 {
+	delete GlobInstcs::logPtr; GlobInstcs::logPtr = Q_NULLPTR;
 }
 
 void TestVersion::compareCleanLegalVersionStrings(void)

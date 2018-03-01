@@ -29,6 +29,7 @@
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
+#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_message.h"
@@ -100,6 +101,10 @@ TestTaskDownloads::~TestTaskDownloads(void)
 void TestTaskDownloads::initTestCase(void)
 {
 	bool ret;
+
+	QVERIFY(GlobInstcs::logPtr == Q_NULLPTR);
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
 
 	QVERIFY(GlobInstcs::msgProcEmitterPtr == Q_NULLPTR);
 	GlobInstcs::msgProcEmitterPtr =
@@ -217,6 +222,8 @@ void TestTaskDownloads::cleanupTestCase(void)
 	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
 
 	delete GlobInstcs::msgProcEmitterPtr; GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
+
+	delete GlobInstcs::logPtr; GlobInstcs::logPtr = Q_NULLPTR;
 }
 
 void TestTaskDownloads::downloadMessageList(void)

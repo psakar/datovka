@@ -80,11 +80,16 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 
+	if (0 != allocGlobLog()) {
+		/* Cannot continue without logging facility. */
+		return EXIT_FAILURE;
+	}
+
 	/* Set random generator. */
 	qsrand(QDateTime::currentDateTime().toTime_t());
 
 	/* Log warnings. */
-	globLog.setLogLevels(LogDevice::LF_STDERR, LOGSRC_ANY,
+	GlobInstcs::logPtr->setLogLevels(LogDevice::LF_STDERR, LOGSRC_ANY,
 	    LOG_UPTO(LOG_WARNING));
 
 	setDefaultLocale();
@@ -112,7 +117,8 @@ int main(int argc, char *argv[])
 	/* Process command-line arguments. */
 	parser.process(app);
 
-	if (0 != preferencesSetUp(parser, *GlobInstcs::prefsPtr, globLog)) {
+	if (0 != preferencesSetUp(parser, *GlobInstcs::prefsPtr,
+	        *GlobInstcs::logPtr)) {
 		logErrorNL("%s",
 		    "Cannot apply command line arguments on global settings.");
 		return EXIT_FAILURE;
@@ -333,6 +339,7 @@ int main(int argc, char *argv[])
 	deallocGlobContainers();
 	deallocGlobSettings();
 	deallocGlobInfrastruct();
+	deallocGlobLog();
 
 	return ret;
 }

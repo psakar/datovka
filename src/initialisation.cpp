@@ -221,6 +221,24 @@ void loadLocalisation(const GlobPreferences &prefs)
 	QCoreApplication::installTranslator(&qtTranslator);
 }
 
+int allocGlobLog(void)
+{
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	if (Q_NULLPTR == GlobInstcs::logPtr) {
+		return -1;
+	}
+
+	return 0;
+}
+
+void deallocGlobLog(void)
+{
+	if (Q_NULLPTR != GlobInstcs::logPtr) {
+		delete GlobInstcs::logPtr;
+		GlobInstcs::logPtr = Q_NULLPTR;
+	}
+}
+
 int allocGlobInfrastruct(void)
 {
 	GlobInstcs::snglInstEmitterPtr =

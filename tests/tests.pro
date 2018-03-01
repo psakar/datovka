@@ -45,7 +45,10 @@ macx {
 # MOC files are generated only directly from *.cpp files when using testlib.
 # Adding a custom compiler rule does not help.
 
+# src/global.* is needed because of global logging facility.
+
 SOURCES = \
+	$${top_srcdir}src/global.cpp \
 	$${top_srcdir}src/log/log.cpp \
 	$${top_srcdir}src/log/log_c.cpp \
 	$${top_srcdir}tests/helper.c \
@@ -53,6 +56,7 @@ SOURCES = \
 	$${top_srcdir}tests/tests.cpp
 
 HEADERS = \
+	$${top_srcdir}src/global.h \
 	$${top_srcdir}src/log/log_c.h \
 	$${top_srcdir}src/log/log_common.h \
 	$${top_srcdir}src/log/log.h \
