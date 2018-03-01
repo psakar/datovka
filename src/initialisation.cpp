@@ -47,6 +47,7 @@
 #include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
 #include "src/settings/proxy.h"
+#include "src/worker/message_emitter.h"
 
 void setDefaultLocale(void)
 {
@@ -221,6 +222,13 @@ void loadLocalisation(const GlobPreferences &prefs)
 
 int allocGlobSettings(void)
 {
+	GlobInstcs::msgProcEmitterPtr =
+	    new (std::nothrow) MessageProcessingEmitter;
+	if (Q_NULLPTR == GlobInstcs::msgProcEmitterPtr) {
+		logErrorNL("%s","Cannot allocate task message emitter." );
+		goto fail;
+	}
+
 	/*
 	 * Only one worker thread currently.
 	 * TODO -- To be able to run multiple threads in the pool a locking
@@ -289,6 +297,10 @@ void deallocGlobSettings(void)
 	if (Q_NULLPTR != GlobInstcs::workPoolPtr) {
 		delete GlobInstcs::workPoolPtr;
 		GlobInstcs::workPoolPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != GlobInstcs::msgProcEmitterPtr) {
+		delete GlobInstcs::msgProcEmitterPtr;
+		GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
 	}
 }
 

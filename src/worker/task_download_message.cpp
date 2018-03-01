@@ -96,13 +96,13 @@ void TaskDownloadMessage::run(void)
 		    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	}
 
-	emit globMsgProcEmitter.downloadMessageFinished(m_userName, m_mId.dmId,
-	    m_mId.deliveryTime, m_result,
+	emit GlobInstcs::msgProcEmitterPtr->downloadMessageFinished(m_userName,
+	    m_mId.dmId, m_mId.deliveryTime, m_result,
 	    (!m_isdsError.isEmpty() || !m_isdsLongError.isEmpty()) ?
 	        m_isdsError + " " + m_isdsLongError : "",
 	    m_listScheduled);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
@@ -181,7 +181,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 	logDebugLv0NL("Trying to download complete message '%" PRId64 "'",
 	    mId.dmId);
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 0);
 
 	isds_error status;
 
@@ -193,7 +193,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 	// message structures - all members
 	struct isds_message *message = NULL;
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 10);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 10);
 
 	/* download signed message? */
 	if (signedMsg) {
@@ -220,7 +220,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		*/
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 20);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 20);
 
 	if ((IE_SUCCESS != status) ||
 	    (NULL == message) || (NULL == message->envelope)) {
@@ -265,7 +265,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 	Task::storeMessage(signedMsg, msgDirect, dbSet, message,
 	    progressLabel);
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 90);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 90);
 
 	Q_ASSERT(QString(message->envelope->dmID).toLongLong() == mId.dmId);
 
@@ -301,7 +301,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		}
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 100);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 100);
 
 	isds_list_free(&message->documents);
 	isds_message_free(&message);

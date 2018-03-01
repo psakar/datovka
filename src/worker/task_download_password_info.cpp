@@ -55,7 +55,7 @@ void TaskDownloadPasswordInfo::run(void)
 	m_success = downloadPasswordInfoFromISDS(m_userName, m_isdsError,
 	    m_isdsLongError);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 

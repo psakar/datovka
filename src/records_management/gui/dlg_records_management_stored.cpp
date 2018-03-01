@@ -67,7 +67,7 @@ DlgRecordsManagementStored::DlgRecordsManagementStored(const QString &urlStr,
 	m_ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 
 	connect(m_ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancelLoop()));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(recordsManagementStoredMessagesFinished(QString)),
 	    this, SLOT(downloadAndStoreContinue()));
 

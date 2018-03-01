@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 
 #include <QThread>
 
+#include "src/global.h"
 #include "src/io/message_db_set_container.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
@@ -70,7 +71,7 @@ void TaskSplitDb::run(void)
 	m_success = splitMsgDbByYears(m_dbSet, m_userName, m_dbDir, m_newDbDir,
 	    m_isTestAccount, m_error);
 
-	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_SPLIT_DB, 0);
 
 	/* ### Worker task end. ### */
 
@@ -109,7 +110,7 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 		flags |= MDS_FLG_TESTING;
 	}
 
-	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 5);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_SPLIT_DB, 5);
 
 	/*
 	 * test if current account already use database files
@@ -122,8 +123,8 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 		return false;
 	}
 
-	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 10);
-	emit globMsgProcEmitter.statusBarChange(
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_SPLIT_DB, 10);
+	emit GlobInstcs::msgProcEmitterPtr->statusBarChange(
 	    QObject::tr("Copying origin database file to selected location"));
 
 	/* copy current account dbset to new location and open here */
@@ -162,7 +163,7 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 		return false;
 	}
 
-	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 20);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_SPLIT_DB, 20);
 
 	int years = yearList.count();
 	if (years > 0) {
@@ -173,8 +174,9 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 
 		diff += delta;
 
-		emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, (20 + diff));
-		emit globMsgProcEmitter.statusBarChange(
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_SPLIT_DB,
+		    (20 + diff));
+		emit GlobInstcs::msgProcEmitterPtr->statusBarChange(
 		    QObject::tr("Creating a new database file for year %1").arg(yearList.at(i)));
 
 		QString newDbName = userName + "_" + yearList.at(i);
@@ -220,7 +222,7 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 		}
 	}
 
-	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 85);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_SPLIT_DB, 85);
 
 	/* set back original database path and removed previous connection */
 	if (!dbSet->openLocation(dbDir, dbSet->organisation(),
@@ -232,9 +234,9 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 		return false;
 	}
 
-	emit globMsgProcEmitter.statusBarChange(
+	emit GlobInstcs::msgProcEmitterPtr->statusBarChange(
 	    QObject::tr("Replacing of new database files to origin database location"));
-	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 90);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_SPLIT_DB, 90);
 
 	/* move new database set to origin database path */
 	if (!dstDbSet->moveToLocation(dbDir)) {
@@ -247,7 +249,7 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 		return false;
 	}
 
-	emit globMsgProcEmitter.statusBarChange(
+	emit GlobInstcs::msgProcEmitterPtr->statusBarChange(
 	    QObject::tr("Deleting of old database from origin location"));
 
 	/* delete origin database file */
@@ -261,8 +263,9 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 		return false;
 	}
 
-	emit globMsgProcEmitter.statusBarChange(QObject::tr("Opening of new database files"));
-	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 95);
+	emit GlobInstcs::msgProcEmitterPtr->statusBarChange(
+	    QObject::tr("Opening of new database files"));
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_SPLIT_DB, 95);
 
 	/* open new database set in the origin location */
 	if (!dbSet->openLocation(dbDir, dbSet->organisation(),
@@ -275,7 +278,7 @@ bool TaskSplitDb::splitMsgDbByYears(MessageDbSet *dbSet,
 		return false;
 	}
 
-	emit globMsgProcEmitter.progressChange(PL_SPLIT_DB, 100);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_SPLIT_DB, 100);
 
 	return true;
 }

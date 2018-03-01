@@ -120,7 +120,7 @@ void TaskChangePwd::run(void)
 	m_isdsRetError = changePassword(m_userName, m_oldPwd, m_newPwd, m_otp,
 	    m_refNumber, m_isdsError, m_isdsLongError);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 

@@ -368,7 +368,6 @@ SOURCES += \
     src/views/table_key_press_filter.cpp \
     src/views/table_space_selection_filter.cpp \
     src/views/table_tab_ignore_filter.cpp \
-    src/worker/message_emitter.cpp \
     src/worker/task.cpp \
     src/worker/task_authenticate_message.cpp \
     src/worker/task_change_pwd.cpp \

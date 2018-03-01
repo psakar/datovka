@@ -25,6 +25,7 @@
 
 #include "src/global.h"
 
+class MessageProcessingEmitter *GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
 class WorkerPool *GlobInstcs::workPoolPtr = Q_NULLPTR;
 
 class GlobPreferences *GlobInstcs::prefsPtr = Q_NULLPTR;

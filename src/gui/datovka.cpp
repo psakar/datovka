@@ -339,33 +339,33 @@ MainWindow::MainWindow(QWidget *parent)
 	    this, SLOT(processSingleInstanceMessages(QString)));
 
 	/* Worker-related processing signals. */
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(downloadMessageFinished(QString, qint64, QDateTime, int,
-	        QString, bool)),
-	    this,
+	        QString, bool)), this,
 	    SLOT(collectDownloadMessageStatus(QString, qint64, QDateTime, int,
 	        QString, bool)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
 	        bool, int, int, int, int)), this,
 	    SLOT(collectDownloadMessageListStatus(QString, int, int, QString,
 	        bool, int, int, int, int)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(importZfoFinished(QString, int, QString)), this,
 	    SLOT(collectImportZfoStatus(QString, int, QString)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(importMessageFinished(QString, QStringList, int, int)), this,
 	    SLOT(showImportMessageResults(QString, QStringList, int, int)));
-	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
-	    this, SLOT(updateProgressBar(QString, int)));
-	connect(&globMsgProcEmitter, SIGNAL(statusBarChange(QString)),
+	connect(GlobInstcs::msgProcEmitterPtr,
+	    SIGNAL(progressChange(QString, int)), this,
+	    SLOT(updateProgressBar(QString, int)));
+	connect(GlobInstcs::msgProcEmitterPtr, SIGNAL(statusBarChange(QString)),
 	    this, SLOT(updateStatusBarText(QString)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(refreshAccountList(QString)), this,
 	    SLOT(refreshAccountList(QString)));
 

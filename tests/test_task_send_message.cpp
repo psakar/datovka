@@ -29,6 +29,7 @@
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
 #include "src/settings/preferences.h"
+#include "src/worker/message_emitter.h"
 #include "src/worker/task_send_message.h"
 #include "tests/helper_qt.h"
 #include "tests/test_task_send_message.h"
@@ -100,6 +101,11 @@ TestTaskSendMessage::~TestTaskSendMessage(void)
 void TestTaskSendMessage::initTestCase(void)
 {
 	bool ret;
+
+	QVERIFY(GlobInstcs::msgProcEmitterPtr == Q_NULLPTR);
+	GlobInstcs::msgProcEmitterPtr =
+	    new (std::nothrow) MessageProcessingEmitter;
+	QVERIFY(GlobInstcs::msgProcEmitterPtr != Q_NULLPTR);
 
 	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
 	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
@@ -211,6 +217,8 @@ void TestTaskSendMessage::cleanupTestCase(void)
 	QVERIFY(!m_testDir.exists());
 
 	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
+
+	delete GlobInstcs::msgProcEmitterPtr; GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
 }
 
 void TestTaskSendMessage::sendMessage(void)

@@ -87,7 +87,7 @@ void TaskSearchOwnerFulltext::run(void)
 	    m_pageNumber, m_askAll, m_totalMatchingBoxes, m_gotLastPage,
 	    m_foundBoxes, m_isdsError, m_isdsLongError);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 

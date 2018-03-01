@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <QThread>
 
 #include "src/common.h"
+#include "src/global.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_import_message.h"
@@ -72,10 +73,10 @@ void TaskImportMessage::run(void)
 	m_result = importMessages(m_userName, m_dbSet, m_dbFileList,
 	    m_dbId, m_resultDescList, m_msgCntTotal, m_importedMsg);
 
-	emit globMsgProcEmitter.importMessageFinished(m_userName,
+	emit GlobInstcs::msgProcEmitterPtr->importMessageFinished(m_userName,
 	    m_resultDescList, m_msgCntTotal, m_importedMsg);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
@@ -142,7 +143,8 @@ enum TaskImportMessage::Result TaskImportMessage::importMessages(
 	/* via all files */
 	foreach (const QString &dbFile, dbFileList) {
 
-		emit globMsgProcEmitter.progressChange(PL_IMPORT_MSG, 0);
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(
+		    PL_IMPORT_MSG, 0);
 
 		/* get db filename from path */
 		QFileInfo file(dbFile);
@@ -181,7 +183,8 @@ enum TaskImportMessage::Result TaskImportMessage::importMessages(
 
 		msgCntTotal += msgIdList.count();
 
-		emit globMsgProcEmitter.progressChange(PL_IMPORT_MSG, 20);
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(
+		    PL_IMPORT_MSG, 20);
 
 		msgCntTotal += msgIdList.count();
 		delta = 80.0 / msgCntTotal;
@@ -190,11 +193,12 @@ enum TaskImportMessage::Result TaskImportMessage::importMessages(
 		foreach (const MessageDb::MsgId &mId, msgIdList) {
 
 			if (msgCntTotal == 0) {
-				emit globMsgProcEmitter.progressChange(PL_IMPORT_MSG, 50);
+				emit GlobInstcs::msgProcEmitterPtr->progressChange(
+				    PL_IMPORT_MSG, 50);
 			} else {
 				diff += delta;
-				emit globMsgProcEmitter.progressChange(PL_IMPORT_MSG,
-				    (20+diff));
+				emit GlobInstcs::msgProcEmitterPtr->progressChange(
+				    PL_IMPORT_MSG, (20 + diff));
 			}
 			if (TaskImportMessage::IMP_SUCCESS !=
 			    importSingleMessage(userName, dbSet, srcDbSingle,
@@ -205,7 +209,8 @@ enum TaskImportMessage::Result TaskImportMessage::importMessages(
 			}
 		}
 
-		emit globMsgProcEmitter.progressChange(PL_IMPORT_MSG, 100);
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(
+		    PL_IMPORT_MSG, 100);
 
 		delete srcDbSingle; srcDbSingle = NULL;
 	}

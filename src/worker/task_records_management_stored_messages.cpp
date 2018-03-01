@@ -73,14 +73,15 @@ void TaskRecordsManagementStoredMessages::run(void)
 	m_result = downloadStoredMessages(m_url, m_token, m_operation, m_dbSet,
 	    m_exludedDmIds);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
 	logDebugLv0NL("Download stored messages from records management service task '%s' finished in thread '%p'.",
 	    m_id.toUtf8().constData(), (void *) QThread::currentThreadId());
 
-	emit globMsgProcEmitter.recordsManagementStoredMessagesFinished(m_id);
+	emit GlobInstcs::msgProcEmitterPtr->recordsManagementStoredMessagesFinished(
+	    m_id);
 }
 
 const QString &TaskRecordsManagementStoredMessages::id(void) const

@@ -73,7 +73,7 @@ void TaskEraseMessage::run(void)
 	m_result = eraseMessage(m_userName, m_dbSet, m_msgId, m_msgDirect,
 	    m_delFromIsds, m_isdsError, m_isdsLongError);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 

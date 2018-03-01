@@ -83,7 +83,7 @@ void TaskSearchOwner::run(void)
 	m_result = isdsSearch(m_userName, m_soughtInfo, m_foundBoxes,
 	    m_isdsError, m_isdsLongError);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 

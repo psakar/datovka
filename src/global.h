@@ -30,6 +30,8 @@ class GlobInstcs {
 
 public:
 	static
+	class MessageProcessingEmitter *msgProcEmitterPtr; /*!< Task message emitter. */
+	static
 	class WorkerPool *workPoolPtr; /*!< Worker pool. */
 
 	static
