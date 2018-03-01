@@ -66,6 +66,9 @@ int main(int argc, char *argv[])
 
 	qInstallMessageHandler(globalLogOutput);
 
+	if (0 != allocGlobInfrastruct()) {
+		return EXIT_FAILURE;
+	}
 	if (0 != allocGlobSettings()) {
 		return EXIT_FAILURE;
 	}
@@ -236,6 +239,7 @@ int main(int argc, char *argv[])
 
 	deallocGlobContainers();
 	deallocGlobSettings();
+	deallocGlobInfrastruct();
 
 	return ret;
 }

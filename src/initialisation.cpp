@@ -221,7 +221,7 @@ void loadLocalisation(const GlobPreferences &prefs)
 	QCoreApplication::installTranslator(&qtTranslator);
 }
 
-int allocGlobSettings(void)
+int allocGlobInfrastruct(void)
 {
 	GlobInstcs::snglInstEmitterPtr =
 	    new (std::nothrow) SingleInstanceEmitter;
@@ -251,6 +251,32 @@ int allocGlobSettings(void)
 		goto fail;
 	}
 
+	return 0;
+
+fail:
+	deallocGlobInfrastruct();
+	return -1;
+}
+
+void deallocGlobInfrastruct(void)
+{
+	if (Q_NULLPTR != GlobInstcs::workPoolPtr) {
+		delete GlobInstcs::workPoolPtr;
+		GlobInstcs::workPoolPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != GlobInstcs::msgProcEmitterPtr) {
+		delete GlobInstcs::msgProcEmitterPtr;
+		GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
+	}
+
+	if (Q_NULLPTR != GlobInstcs::snglInstEmitterPtr) {
+		delete GlobInstcs::snglInstEmitterPtr;
+		GlobInstcs::snglInstEmitterPtr = Q_NULLPTR;
+	}
+}
+
+int allocGlobSettings(void)
+{
 	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
 	if (Q_NULLPTR == GlobInstcs::prefsPtr) {
 		logErrorNL("%s", "Cannot allocate preferences.");
@@ -301,20 +327,6 @@ void deallocGlobSettings(void)
 	if (Q_NULLPTR != GlobInstcs::prefsPtr) {
 		delete GlobInstcs::prefsPtr;
 		GlobInstcs::prefsPtr = Q_NULLPTR;
-	}
-
-	if (Q_NULLPTR != GlobInstcs::workPoolPtr) {
-		delete GlobInstcs::workPoolPtr;
-		GlobInstcs::workPoolPtr = Q_NULLPTR;
-	}
-	if (Q_NULLPTR != GlobInstcs::msgProcEmitterPtr) {
-		delete GlobInstcs::msgProcEmitterPtr;
-		GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
-	}
-
-	if (Q_NULLPTR != GlobInstcs::snglInstEmitterPtr) {
-		delete GlobInstcs::snglInstEmitterPtr;
-		GlobInstcs::snglInstEmitterPtr = Q_NULLPTR;
 	}
 }
 
