@@ -25,9 +25,16 @@
 
 #include "src/global.h"
 
+class GlobPreferences *GlobInstcs::prefsPtr = Q_NULLPTR;
+class ProxiesSettings *GlobInstcs::proxSetPtr = Q_NULLPTR;
+class PinSettings *GlobInstcs::pinSetPtr = Q_NULLPTR;
+class RecordsManagementSettings *GlobInstcs::recMgmtSetPtr = Q_NULLPTR;
+
 class IsdsSessions *GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
 
 class AccountDb *GlobInstcs::accntDbPtr = Q_NULLPTR;
 class DbContainer *GlobInstcs::msgDbsPtr = Q_NULLPTR;
 class TagDb *GlobInstcs::tagDbPtr = Q_NULLPTR;
 class RecordsManagementDb *GlobInstcs::recMgmtDbPtr = Q_NULLPTR;
+
+class AccountsMap *GlobInstcs::acntMapPtr = Q_NULLPTR;

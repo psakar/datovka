@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <QTextStream>
 
 #include "src/delegates/tag_item.h"
+#include "src/global.h"
 #include "src/gui/dlg_correspondence_overview.h"
 #include "src/gui/dlg_msg_box_informative.h"
 #include "src/io/exports.h"
@@ -52,7 +53,8 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 
 	Q_ASSERT(!userName.isEmpty());
 
-	m_ui->accountName->setText(globAccounts[userName].accountName() +
+	m_ui->accountName->setText(
+	    (*GlobInstcs::acntMapPtr)[userName].accountName() +
 	    QStringLiteral(" (") + userName + QStringLiteral(")"));
 
 	m_ui->toCalendarWidget->setMinimumDate(

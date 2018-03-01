@@ -89,7 +89,9 @@ SOURCES += \
 	src/datovka_shared/io/sqlite/table.cpp \
 	src/datovka_shared/localisation/localisation.cpp \
 	src/datovka_shared/settings/pin.cpp \
+	src/datovka_shared/settings/records_management.cpp \
 	src/datovka_shared/worker/pool.cpp \
+	src/global.cpp \
 	src/initialisation.cpp \
 	src/io/account_db.cpp \
 	src/io/db_tables.cpp \
@@ -103,7 +105,6 @@ SOURCES += \
 	src/io/message_db_set.cpp \
 	src/io/message_db_set_container.cpp \
 	src/io/message_db_set_delegated.cpp \
-	src/io/records_management_db.cpp \
 	src/io/tag_db.cpp \
 	src/isds/isds_conversion.cpp \
 	src/model_interaction/account_interaction.cpp \
@@ -112,7 +113,6 @@ SOURCES += \
 	src/main_cli.cpp \
 	src/settings/account.cpp \
 	src/settings/accounts.cpp \
-	src/settings/pin.cpp \
 	src/settings/preferences.cpp \
 	src/settings/proxy.cpp \
 	src/single/single_instance.cpp \
@@ -146,7 +146,9 @@ HEADERS += \
 	src/datovka_shared/io/sqlite/table.h \
 	src/datovka_shared/localisation/localisation.h \
 	src/datovka_shared/settings/pin.h \
+	src/datovka_shared/settings/records_management.h \
 	src/datovka_shared/worker/pool.h \
+	src/global.h \
 	src/initialisation.h \
 	src/io/account_db.h \
 	src/io/db_tables.h \
@@ -159,7 +161,6 @@ HEADERS += \
 	src/io/message_db.h \
 	src/io/message_db_set.h \
 	src/io/message_db_set_container.h \
-	src/io/records_management_db.h \
 	src/io/tag_db.h \
 	src/isds/isds_conversion.h \
 	src/model_interaction/account_interaction.h \
@@ -168,7 +169,6 @@ HEADERS += \
 	src/log/log.h \
 	src/settings/account.h \
 	src/settings/accounts.h \
-	src/settings/pin.h \
 	src/settings/preferences.h \
 	src/settings/proxy.h \
 	src/single/single_instance.h \

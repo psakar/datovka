@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,9 @@
 #include <QDir>
 #include <QtTest/QtTest>
 
+#include "src/global.h"
 #include "src/io/message_db_set_container.h"
+#include "src/settings/preferences.h"
 #include "tests/test_db_container.h"
 
 class TestDbContainer : public QObject {
@@ -82,11 +84,14 @@ TestDbContainer::TestDbContainer(void)
 
 void TestDbContainer::initTestCase(void)
 {
-	/* Pointer must be null before initialisation. */
-	QVERIFY(globMessageDbsPtr == NULL);
+	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
+	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
 
-	globMessageDbsPtr = new (std::nothrow) DbContainer(m_connectionPrefix);
-	QVERIFY(globMessageDbsPtr != NULL);
+	/* Pointer must be null before initialisation. */
+	QVERIFY(GlobInstcs::msgDbsPtr == Q_NULLPTR);
+	GlobInstcs::msgDbsPtr = new (std::nothrow) DbContainer(m_connectionPrefix);
+	QVERIFY(GlobInstcs::msgDbsPtr != Q_NULLPTR);
 
 	/* Remove and check that is not present. */
 	QVERIFY(m_dbDir.removeRecursively());
@@ -95,7 +100,9 @@ void TestDbContainer::initTestCase(void)
 
 void TestDbContainer::cleanupTestCase(void)
 {
-	delete globMessageDbsPtr; globMessageDbsPtr = NULL;
+	delete GlobInstcs::msgDbsPtr; GlobInstcs::msgDbsPtr = Q_NULLPTR;
+
+	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
 
 	QVERIFY(m_dbDir.removeRecursively());
 	QVERIFY(!m_dbDir.exists());
@@ -109,19 +116,19 @@ void TestDbContainer::accessDbSet00(void)
 	MessageDbSet *dbSet;
 
 	/* Nothing does exist, there is nothing to open. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName,
 	    testing, MessageDbSet::DO_UNKNOWN,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
 	/* CM_CREATE_EMPTY_CURRENT cannot be used with DO_UNKNOWN. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName,
 	    testing, MessageDbSet::DO_UNKNOWN,
 	    MessageDbSet::CM_CREATE_ON_DEMAND);
 	QVERIFY(dbSet == NULL);
 
 	/* CM_CREATE_ON_DEMAND cannot be used with DO_UNKNOWN. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName,
 	    testing, MessageDbSet::DO_UNKNOWN,
 	    MessageDbSet::CM_CREATE_ON_DEMAND);
 	QVERIFY(dbSet == NULL);
@@ -137,13 +144,13 @@ void TestDbContainer::accessDbSet01(void)
 	MessageDbSet *dbSet, *dbSet2;
 
 	/* Nothing does exist, there is nothing to open. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName1,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName1,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
 	/* Open database, but actually don't create a file. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName1,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName1,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_CREATE_ON_DEMAND);
 	QVERIFY(dbSet != NULL);
@@ -152,28 +159,28 @@ void TestDbContainer::accessDbSet01(void)
 	QVERIFY(dbFileNameList().isEmpty());
 
 	/* Open database, create a file. There must be one file. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName2,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName2,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
 	QVERIFY(dbSet != NULL);
 	QVERIFY(dbFileNameList().size() == 1);
 
 	/* Open database again. There must be one file. */
-	dbSet2 = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName2,
+	dbSet2 = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName2,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
 	QVERIFY(dbSet2 == dbSet);
 	QVERIFY(dbFileNameList().size() == 1);
 
 	/* Open database, create a file. There must be two files. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName3,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName3,
 	    testing, MessageDbSet::DO_YEARLY,
 	    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
 	QVERIFY(dbSet != NULL);
 	QVERIFY(dbFileNameList().size() == 2);
 
 	/* Open database again. There must be one file.  */
-	dbSet2 = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName3,
+	dbSet2 = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName3,
 	    testing, MessageDbSet::DO_YEARLY,
 	    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
 	QVERIFY(dbSet2 == dbSet);
@@ -195,24 +202,24 @@ void TestDbContainer::accessDbSet02(void)
 	MessageDbSet *dbSet;
 
 	/* Nothing does exist, there is nothing to open. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName1,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName1,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName1,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName1,
 	    testing, MessageDbSet::DO_YEARLY,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
 	/* Database exists, but is a single file. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName2,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName2,
 	    testing, MessageDbSet::DO_YEARLY,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
 	/* Database exists, but is yearly organised. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName3,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName3,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
@@ -228,34 +235,34 @@ void TestDbContainer::accessDbSet03(void)
 	MessageDbSet *dbSet;
 
 	/* Nothing does exist, there is nothing to open. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName1,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName1,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName1,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName1,
 	    testing, MessageDbSet::DO_YEARLY,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
 	/* Database exists, but is a single file. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName2,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName2,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName2,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName2,
 	    testing, MessageDbSet::DO_YEARLY,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
 	/* Database exists, but is yearly organised. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName3,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName3,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName3,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName3,
 	    testing, MessageDbSet::DO_YEARLY,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
@@ -270,13 +277,13 @@ void TestDbContainer::accessDbSet04(void)
 	MessageDbSet *dbSet;
 
 	/* Databases exist. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName2,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName2,
 	    testing, MessageDbSet::DO_SINGLE_FILE,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet != NULL);
 	QVERIFY(dbFileNameList().size() == 2);
 
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName3,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName3,
 	    testing, MessageDbSet::DO_YEARLY,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet != NULL);
@@ -297,13 +304,13 @@ void TestDbContainer::accessDbSet05(void)
 	MessageDbSet *dbSet;
 
 	/* Databases exist. */
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName2,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName2,
 	    testing, MessageDbSet::DO_UNKNOWN,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet != NULL);
 	QVERIFY(dbFileNameList().size() == 2);
 
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName3,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName3,
 	    testing, MessageDbSet::DO_UNKNOWN,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet != NULL);
@@ -323,28 +330,28 @@ void TestDbContainer::deleteDbSet(void)
 	 * The method will fail on NULL pointer ow on values that aren't
 	 * handled by the container.
 	 */
-	//QVERIFY(!globMessageDbsPtr->deleteDbSet(NULL));
+	//QVERIFY(!GlobInstcs::msgDbsPtr->deleteDbSet(NULL));
 
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName2,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName2,
 	    testing, MessageDbSet::DO_UNKNOWN,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet != NULL);
 	QVERIFY(dbFileNameList().size() == 2);
-	QVERIFY(globMessageDbsPtr->deleteDbSet(dbSet));
+	QVERIFY(GlobInstcs::msgDbsPtr->deleteDbSet(dbSet));
 	QVERIFY(dbFileNameList().size() == 1);
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName2,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName2,
 	    testing, MessageDbSet::DO_UNKNOWN,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
 
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName3,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName3,
 	    testing, MessageDbSet::DO_UNKNOWN,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet != NULL);
 	QVERIFY(dbFileNameList().size() == 1);
-	QVERIFY(globMessageDbsPtr->deleteDbSet(dbSet));
+	QVERIFY(GlobInstcs::msgDbsPtr->deleteDbSet(dbSet));
 	QVERIFY(dbFileNameList().isEmpty());
-	dbSet = globMessageDbsPtr->accessDbSet(m_dbLocationPath, uName3,
+	dbSet = GlobInstcs::msgDbsPtr->accessDbSet(m_dbLocationPath, uName3,
 	    testing, MessageDbSet::DO_UNKNOWN,
 	    MessageDbSet::CM_MUST_EXIST);
 	QVERIFY(dbSet == NULL);
@@ -352,10 +359,10 @@ void TestDbContainer::deleteDbSet(void)
 
 void TestDbContainer::deleteAndRecreate(void)
 {
-	delete globMessageDbsPtr; globMessageDbsPtr = NULL;
+	delete GlobInstcs::msgDbsPtr; GlobInstcs::msgDbsPtr = Q_NULLPTR;
 
-	globMessageDbsPtr = new (std::nothrow) DbContainer(m_connectionPrefix);
-	QVERIFY(globMessageDbsPtr != NULL);
+	GlobInstcs::msgDbsPtr = new (std::nothrow) DbContainer(m_connectionPrefix);
+	QVERIFY(GlobInstcs::msgDbsPtr != Q_NULLPTR);
 }
 
 QObject *newTestDbContainer(void)

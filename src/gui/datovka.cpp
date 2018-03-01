@@ -47,6 +47,8 @@
 #include "src/about.h"
 #include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/settings/pin.h"
+#include "src/datovka_shared/settings/records_management.h"
 #include "src/datovka_shared/utility/strings.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
@@ -87,9 +89,7 @@
 #include "src/records_management/gui/dlg_records_management.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
-#include "src/settings/pin.h"
 #include "src/settings/preferences.h"
-#include "src/settings/records_management.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_key_press_filter.h"
 #include "src/views/table_tab_ignore_filter.h"
@@ -406,10 +406,10 @@ MainWindow::MainWindow(QWidget *parent)
 	loadSettings();
 
 	/* Set toolbar buttons style from settings */
-	if (globPref.toolbar_button_style >=0
-	    && globPref.toolbar_button_style <= 3) {
+	if ((GlobInstcs::prefsPtr->toolbar_button_style >= 0) &&
+	    (GlobInstcs::prefsPtr->toolbar_button_style <= 3)) {
 		ui->toolBar->setToolButtonStyle(
-		    (Qt::ToolButtonStyle)globPref.toolbar_button_style);
+		    (Qt::ToolButtonStyle)GlobInstcs::prefsPtr->toolbar_button_style);
 	} else {
 		ui->toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	}
@@ -480,9 +480,10 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Initialisation of message download timer. */
 	connect(&m_timerSyncAccounts, SIGNAL(timeout()), this,
 	    SLOT(synchroniseAllAccounts()));
-	if (globPref.download_on_background) {
-		if (globPref.timer_value > 4) {
-			m_timeoutSyncAccounts = globPref.timer_value * 60000;
+	if (GlobInstcs::prefsPtr->download_on_background) {
+		if (GlobInstcs::prefsPtr->timer_value > 4) {
+			m_timeoutSyncAccounts =
+			    GlobInstcs::prefsPtr->timer_value * 60000;
 		} else {
 			m_timeoutSyncAccounts = TIMER_DEFAULT_TIMEOUT_MS;
 		}
@@ -498,11 +499,11 @@ MainWindow::MainWindow(QWidget *parent)
 	QString msgStrg(tr("disk"));
 	QString acntStrg(tr("disk"));
 
-	if (!globPref.store_messages_on_disk) {
+	if (!GlobInstcs::prefsPtr->store_messages_on_disk) {
 		msgStrg = tr("memory");
 	}
 
-	if (!globPref.store_additional_data_on_disk) {
+	if (!GlobInstcs::prefsPtr->store_additional_data_on_disk) {
 		acntStrg = tr("memory");
 	}
 
@@ -511,21 +512,21 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* TODO -- This is only a temporary solution. */
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globRecordsManagementSet.isValid());
+	    GlobInstcs::recMgmtSetPtr->isValid());
 }
 
 void MainWindow::setWindowsAfterInit(void)
 {
 	debugSlotCall();
 
-	if (globPref.check_new_versions) {
+	if (GlobInstcs::prefsPtr->check_new_versions) {
 		checkNewDatovkaVersion();
 	}
 
 	if (ui->accountList->model()->rowCount() <= 0) {
 		showAddNewAccountDialog();
 	} else {
-		if (globPref.download_at_start &&
+		if (GlobInstcs::prefsPtr->download_at_start &&
 		    ui->actionSync_all_accounts->isEnabled()) {
 			/*
 			 * Calling account synchronisation as slot bound to
@@ -546,7 +547,7 @@ void MainWindow::checkNewDatovkaVersion(void)
 {
 	debugSlotCall();
 
-	if (globPref.send_stats_with_version_checks) {
+	if (GlobInstcs::prefsPtr->send_stats_with_version_checks) {
 		/* TODO - sent info about datovka, libs and OS to our server */
 		nam = new QNetworkAccessManager(this);
 		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
@@ -655,14 +656,16 @@ void MainWindow::showPreferencesDialog(void)
 {
 	debugSlotCall();
 
-	if (!DlgPreferences::modify(globPref, globPinSet, this)) {
+	if (!DlgPreferences::modify(*GlobInstcs::prefsPtr,
+	        *GlobInstcs::pinSetPtr, this)) {
 		return;
 	}
 
 	// set actual download timer value from settings if is enable
-	if (globPref.download_on_background) {
-		if (globPref.timer_value > 4) {
-			m_timeoutSyncAccounts = globPref.timer_value * 60000;
+	if (GlobInstcs::prefsPtr->download_on_background) {
+		if (GlobInstcs::prefsPtr->timer_value > 4) {
+			m_timeoutSyncAccounts =
+			    GlobInstcs::prefsPtr->timer_value * 60000;
 		} else {
 			m_timeoutSyncAccounts = TIMER_DEFAULT_TIMEOUT_MS;
 		}
@@ -678,7 +681,7 @@ void MainWindow::showProxySettingsDialog(void)
 {
 	debugSlotCall();
 
-	if (DlgProxysets::modify(globProxSet, this)) {
+	if (DlgProxysets::modify(*GlobInstcs::proxSetPtr, this)) {
 		/* Dialog accepted, store all settings. */
 		saveSettings();
 	}
@@ -727,7 +730,7 @@ void showColumnsAccordingToFunctionality(QTableView *view)
 {
 	QList<int> negCols;
 
-	if (!globRecordsManagementSet.isValid()) {
+	if (!GlobInstcs::recMgmtSetPtr->isValid()) {
 		negCols.append(DbMsgsTblModel::REC_MGMT_NEG_COL);
 	}
 
@@ -738,13 +741,13 @@ void MainWindow::showRecordsManagementDialogue(void)
 {
 	debugSlotCall();
 
-	if (DlgRecordsManagement::updateSettings(globRecordsManagementSet,
+	if (DlgRecordsManagement::updateSettings(*GlobInstcs::recMgmtSetPtr,
 	        this)) {
 		saveSettings();
 	}
 
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globRecordsManagementSet.isValid());
+	    GlobInstcs::recMgmtSetPtr->isValid());
 
 	m_messageTableModel.setRecordsManagementIcon();
 	m_messageTableModel.fillRecordsManagementColumn(
@@ -819,12 +822,13 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 
 		/* Get user name and db location. */
-		const AcntSettings &itemSettings(globAccounts[userName]);
+		const AcntSettings &itemSettings(
+		    (*GlobInstcs::acntMapPtr)[userName]);
 
 		QString dbDir = itemSettings.dbDir();
 		if (dbDir.isEmpty()) {
 			/* Set default directory name. */
-			dbDir = globPref.confDir();
+			dbDir = GlobInstcs::prefsPtr->confDir();
 		}
 
 		/* Decouple model and show banner page. */
@@ -1254,12 +1258,12 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 
 	/* Mark message locally read. */
 	if (!messageDb->smsgdtLocallyRead(msgId.dmId)) {
-		if (globPref.message_mark_as_read_timeout >= 0) {
+		if (GlobInstcs::prefsPtr->message_mark_as_read_timeout >= 0) {
 			qDebug() << "Starting timer to mark as read for message"
 			    << msgId.dmId;
 			m_messageMarker.setSingleShot(true);
 			m_messageMarker.start(
-			    globPref.message_mark_as_read_timeout);
+			    GlobInstcs::prefsPtr->message_mark_as_read_timeout);
 		}
 	} else {
 		m_messageMarker.stop();
@@ -1567,7 +1571,7 @@ void MainWindow::messageItemStoreSelection(qint64 msgId)
 
 		const QString userName(m_accountModel.userName(acntIdx));
 		Q_ASSERT(!userName.isEmpty());
-		globAccounts[userName].setLastMsg(msgId);
+		(*GlobInstcs::acntMapPtr)[userName].setLastMsg(msgId);
 	}
 }
 
@@ -1577,7 +1581,7 @@ void MainWindow::storeExportPath(const QString &userName)
 
 	Q_ASSERT(!userName.isEmpty());
 
-	AcntSettings &accountInfo(globAccounts[userName]);
+	AcntSettings &accountInfo((*GlobInstcs::acntMapPtr)[userName]);
 	accountInfo.setLastAttachSavePath(m_save_attach_dir);
 	accountInfo.setLastAttachAddPath(m_add_attach_dir);
 	accountInfo.setLastCorrespPath(m_export_correspond_dir);
@@ -1655,7 +1659,7 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 	 * If we selected a message from last received then restore the
 	 * selection according to the model.
 	 */
-	switch (globPref.after_start_select) {
+	switch (GlobInstcs::prefsPtr->after_start_select) {
 	case GlobPreferences::SELECT_NEWEST:
 		/* Search for the message with the largest id. */
 		{
@@ -1688,7 +1692,8 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 				    m_accountModel.userName(acntIdx));
 				Q_ASSERT(!userName.isEmpty());
 
-				msgLastId = globAccounts[userName].lastMsg();
+				msgLastId =
+				    (*GlobInstcs::acntMapPtr)[userName].lastMsg();
 			} else {
 				msgLastId = m_lastStoredMessageId;
 			}
@@ -1953,8 +1958,8 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	setAccountStoragePaths(userName);
 
 	QString saveAttachPath;
-	if (globPref.use_global_paths) {
-		saveAttachPath = globPref.save_attachments_path;
+	if (GlobInstcs::prefsPtr->use_global_paths) {
+		saveAttachPath = GlobInstcs::prefsPtr->save_attachments_path;
 	} else {
 		saveAttachPath = m_save_attach_dir;
 	}
@@ -1977,7 +1982,7 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		showStatusTextWithTimeout(tr(
 		    "Saving attachment of message '%1' to file was successful.")
 		    .arg(msgId.dmId));
-		if (!globPref.use_global_paths) {
+		if (!GlobInstcs::prefsPtr->use_global_paths) {
 			m_save_attach_dir =
 			    QFileInfo(savedFileName).absoluteDir()
 			        .absolutePath();
@@ -2025,8 +2030,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	setAccountStoragePaths(userName);
 
 	// how does default path used for?
-	if (globPref.use_global_paths) {
-		attSaveDir = globPref.save_attachments_path;
+	if (GlobInstcs::prefsPtr->use_global_paths) {
+		attSaveDir = GlobInstcs::prefsPtr->save_attachments_path;
 	} else {
 		attSaveDir = m_save_attach_dir;
 	}
@@ -2041,7 +2046,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	}
 
 	// store selected path
-	if ((!globPref.use_global_paths) && (!attSaveDir.isEmpty())) {
+	if ((!GlobInstcs::prefsPtr->use_global_paths) && (!attSaveDir.isEmpty())) {
 		m_save_attach_dir = attSaveDir;
 		storeExportPath(userName);
 	}
@@ -2111,7 +2116,7 @@ void MainWindow::backgroundWorkersFinished(void)
 	 */
 	dataFromWorkerToStatusBarInfo(false, 0, 0, 0, 0);
 
-	if (globPref.download_on_background) {
+	if (GlobInstcs::prefsPtr->download_on_background) {
 		m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 	}
 }
@@ -2295,7 +2300,7 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 	if (TaskSendMessage::SM_SUCCESS == result) {
 		showStatusTextWithTimeout(tr(
 		    "Message from '%1' (%2) has been successfully sent to '%3' (%4).").
-		    arg(globAccounts[userName].accountName()).
+		    arg((*GlobInstcs::acntMapPtr)[userName].accountName()).
 		    arg(userName).arg(recipientName).arg(dbIDRecipient));
 
 		/* Refresh account list. */
@@ -2303,7 +2308,7 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 	} else {
 		showStatusTextWithTimeout(tr(
 		    "Error while sending message from '%1' (%2) to '%3' (%4).").
-		    arg(globAccounts[userName].accountName()).
+		    arg((*GlobInstcs::acntMapPtr)[userName].accountName()).
 		    arg(userName).arg(recipientName).arg(dbIDRecipient));
 	}
 
@@ -3120,7 +3125,7 @@ void MainWindow::synchroniseAllAccounts(void)
 	showStatusTextPermanently(
 	    tr("Synchronise all accounts with ISDS server."));
 
-	if (globPref.download_on_background) {
+	if (GlobInstcs::prefsPtr->download_on_background) {
 		m_timerSyncAccounts.stop();
 	}
 
@@ -3135,7 +3140,7 @@ void MainWindow::synchroniseAllAccounts(void)
 		Q_ASSERT(!userName.isEmpty());
 
 		/* Skip those that should omitted. */
-		if (!globAccounts[userName].syncWithAll()) {
+		if (!(*GlobInstcs::acntMapPtr)[userName].syncWithAll()) {
 			continue;
 		}
 
@@ -3152,7 +3157,7 @@ void MainWindow::synchroniseAllAccounts(void)
 
 	if (!appended) {
 		showStatusTextWithTimeout(tr("No account synchronised."));
-		if (globPref.download_on_background) {
+		if (GlobInstcs::prefsPtr->download_on_background) {
 			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 		}
 		return;
@@ -3211,7 +3216,8 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 
 	/* Method connectToIsds() acquires account information. */
 
-	bool downloadReceivedMessages = globPref.auto_download_whole_messages;
+	bool downloadReceivedMessages =
+	    GlobInstcs::prefsPtr->auto_download_whole_messages;
 	if (downloadReceivedMessages) {
 		/* Method connectToIsds() acquires account information. */
 		const QString acntDbKey(AccountDb::keyFromLogin(userName));
@@ -3236,7 +3242,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	globWorkPool.assignLo(task);
 
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
-	    MSG_SENT, globPref.auto_download_whole_messages);
+	    MSG_SENT, GlobInstcs::prefsPtr->auto_download_whole_messages);
 	task->setAutoDelete(true);
 	globWorkPool.assignLo(task);
 
@@ -3303,7 +3309,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	html.append("<h3>");
 
 
-	if (globAccounts[userName].isTestAccount()) {
+	if ((*GlobInstcs::acntMapPtr)[userName].isTestAccount()) {
 		html.append(tr("Test account"));
 	} else {
 		html.append(tr("Standard account"));
@@ -3312,7 +3318,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 	html.append("</h3>");
 
 	html.append(strongAccountInfoLine(tr("Account name"),
-	    globAccounts[userName].accountName()));
+	    (*GlobInstcs::acntMapPtr)[userName].accountName()));
 
 	const QString acntDbKey(AccountDb::keyFromLogin(userName));
 	if (GlobInstcs::accntDbPtr->dbId(acntDbKey).isEmpty()) {
@@ -3698,7 +3704,7 @@ void MainWindow::setAccountStoragePaths(const QString &userName)
 
 	Q_ASSERT(!userName.isEmpty());
 
-	const AcntSettings &itemSettings(globAccounts[userName]);
+	const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
 
 	if (!itemSettings.lastAttachSavePath().isEmpty()) {
 		m_save_attach_dir = itemSettings.lastAttachSavePath();
@@ -4048,7 +4054,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	ui->actionDelete_account->setEnabled(false);
 	ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionUpdate_records_management_information->setEnabled(
-	    globRecordsManagementSet.isValid());
+	    GlobInstcs::recMgmtSetPtr->isValid());
 	// Menu: Tools
 	ui->actionFind_databox->setEnabled(false);
 	ui->actionImport_ZFO_file_into_database->setEnabled(false);
@@ -4090,7 +4096,7 @@ void MainWindow::setMessageActionVisibility(int numSelected) const
 	ui->actionOpen_delivery_info_externally->setEnabled(numSelected == 1);
 	    /* Separator. */
 	ui->actionSend_to_records_management->setEnabled(
-	    (numSelected == 1) && globRecordsManagementSet.isValid());
+	    (numSelected == 1) && GlobInstcs::recMgmtSetPtr->isValid());
 	    /* Separator. */
 	ui->actionExport_as_ZFO->setEnabled(numSelected > 0);
 	ui->actionExport_delivery_info_as_ZFO->setEnabled(numSelected > 0);
@@ -4192,7 +4198,8 @@ void MainWindow::saveWindowGeometry(QSettings &settings) const
 void MainWindow::loadSettings(void)
 /* ========================================================================= */
 {
-	QSettings settings(globPref.loadConfPath(), QSettings::IniFormat);
+	QSettings settings(GlobInstcs::prefsPtr->loadConfPath(),
+	    QSettings::IniFormat);
 	settings.setIniCodec("UTF-8");
 
 	/* Load last directory paths */
@@ -4205,21 +4212,22 @@ void MainWindow::loadSettings(void)
 	loadWindowGeometry(settings);
 
 	/* Global preferences. */
-	globPref.loadFromSettings(settings);
+	GlobInstcs::prefsPtr->loadFromSettings(settings);
 
 	/* Proxy settings. */
-	globProxSet.loadFromSettings(settings);
+	GlobInstcs::proxSetPtr->loadFromSettings(settings);
 
 	/* PIN should already be set because main window is running. */
 
 	/* Records management settings. */
-	globRecordsManagementSet.loadFromSettings(settings);
-	globRecordsManagementSet.decryptToken(globPinSet._pinVal);
+	GlobInstcs::recMgmtSetPtr->loadFromSettings(settings);
+	GlobInstcs::recMgmtSetPtr->decryptToken(GlobInstcs::pinSetPtr->_pinVal);
 
 	/* Accounts. */
-	m_accountModel.loadFromSettings(globPref.confDir(), settings);
+	m_accountModel.loadFromSettings(GlobInstcs::prefsPtr->confDir(),
+	    settings);
 	ui->accountList->setModel(&m_accountModel);
-	globAccounts.decryptAllPwds(globPinSet._pinVal);
+	GlobInstcs::acntMapPtr->decryptAllPwds(GlobInstcs::pinSetPtr->_pinVal);
 
 	/* Select last-used account. */
 	setDefaultAccount(settings);
@@ -4476,7 +4484,8 @@ void MainWindow::saveSettings(void) const
 	/*
 	 * TODO -- Target file name differs from source for testing purposes.
 	 */
-	QSettings settings(globPref.saveConfPath(), QSettings::IniFormat);
+	QSettings settings(GlobInstcs::prefsPtr->saveConfPath(),
+	    QSettings::IniFormat);
 	settings.setIniCodec("UTF-8");
 
 	settings.clear();
@@ -4485,11 +4494,11 @@ void MainWindow::saveSettings(void) const
 	saveAppIdConfigFormat(settings);
 
 	/* PIN settings. */
-	globPinSet.saveToSettings(settings);
+	GlobInstcs::pinSetPtr->saveToSettings(settings);
 
 	/* Accounts. */
-	m_accountModel.saveToSettings(globPinSet._pinVal, globPref.confDir(),
-	   settings);
+	m_accountModel.saveToSettings(GlobInstcs::pinSetPtr->_pinVal,
+	    GlobInstcs::prefsPtr->confDir(), settings);
 
 	/* Store last-used account. */
 	saveAccountIndex(settings);
@@ -4504,18 +4513,19 @@ void MainWindow::saveSettings(void) const
 	saveAccountCollapseInfo(settings);
 
 	/* Proxy settings. */
-	globProxSet.saveToSettings(settings);
+	GlobInstcs::proxSetPtr->saveToSettings(settings);
 
 	/* Records management settings. */
-	globRecordsManagementSet.saveToSettings(globPinSet._pinVal, settings);
+	GlobInstcs::recMgmtSetPtr->saveToSettings(
+	    GlobInstcs::pinSetPtr->_pinVal, settings);
 
 	/* Global preferences. */
-	globPref.saveToSettings(settings);
+	GlobInstcs::prefsPtr->saveToSettings(settings);
 
 	settings.sync();
 
 	/* Remove " symbols from passwords in dsgui.conf */
-	confFileRemovePwdQuotes(globPref.saveConfPath());
+	confFileRemovePwdQuotes(GlobInstcs::prefsPtr->saveConfPath());
 }
 
 void MainWindow::createAndSendMessage(void)
@@ -4637,7 +4647,7 @@ void MainWindow::storeAttachmentPath(const QString &userName,
 
 	Q_UNUSED(userName);
 
-	if (!globPref.use_global_paths) {
+	if (!GlobInstcs::prefsPtr->use_global_paths) {
 		m_add_attach_dir = lastDir;
 		storeExportPath(userName);
 	}
@@ -4700,7 +4710,8 @@ void MainWindow::deleteAccount(const QString &userName)
 		return;
 	}
 
-	const QString accountName(globAccounts[userName].accountName());
+	const QString accountName(
+	    (*GlobInstcs::acntMapPtr)[userName].accountName());
 
 	QString dlgTitleText = tr("Remove account ") + accountName;
 	QString questionText = tr("Do you want to remove account") + " '" +
@@ -4776,7 +4787,7 @@ void MainWindow::changeAccountPassword(void)
 	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	Q_ASSERT(!dbId.isEmpty());
 
-	const AcntSettings &accountInfo(globAccounts[userName]);
+	const AcntSettings &accountInfo((*GlobInstcs::acntMapPtr)[userName]);
 
 	showStatusTextWithTimeout(tr("Change password of account \"%1\".")
 	    .arg(accountInfo.accountName()));
@@ -4793,16 +4804,16 @@ void MainWindow::manageAccountProperties(void)
 	Q_ASSERT(!userName.isEmpty());
 
 	showStatusTextWithTimeout(tr("Change properties of account \"%1\".")
-	    .arg(globAccounts[userName].accountName()));
+	    .arg((*GlobInstcs::acntMapPtr)[userName].accountName()));
 
-	if (!DlgCreateAccount::modify(globAccounts[userName],
+	if (!DlgCreateAccount::modify((*GlobInstcs::acntMapPtr)[userName],
 	        DlgCreateAccount::ACT_EDIT,
 	        ui->actionSync_all_accounts->text(), this)) {
 		return;
 	}
 
 	/* Save changes. */
-	emit globAccounts.accountDataChanged(userName);
+	emit GlobInstcs::acntMapPtr->accountDataChanged(userName);
 
 	showStatusTextWithTimeout(
 	    tr("Account '%1' was updated.").arg(userName));
@@ -4866,7 +4877,7 @@ void MainWindow::changeDataDirectory(void)
 		return;
 	}
 
-	const AcntSettings &itemSettings(globAccounts[userName]);
+	const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
 	showStatusTextWithTimeout(tr("Change data dierctory of account \"%1\".")
 	    .arg(itemSettings.accountName()));
 
@@ -4910,7 +4921,7 @@ void MainWindow::findDatabox(void)
 	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
 
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
-	    .arg(globAccounts[userName].accountName()));
+	    .arg((*GlobInstcs::acntMapPtr)[userName].accountName()));
 
 	DlgDsSearch::search(userName, dbType, dbEffectiveOVM, dbOpenAddressing,
 	    this);
@@ -4974,7 +4985,7 @@ void MainWindow::setReceivedColumnWidths(void)
 	}
 	/* Last three columns display icons. */
 	int max = MessageDb::rcvdItemIds.size();
-	if (globRecordsManagementSet.isValid()) {
+	if (GlobInstcs::recMgmtSetPtr->isValid()) {
 		/* Add one column if records management service is activated. */
 		++max;
 	}
@@ -5009,7 +5020,7 @@ void MainWindow::setSentColumnWidths(void)
 	}
 	/* Last column displays an icon. */
 	int max = MessageDb::rcvdItemIds.size();
-	if (globRecordsManagementSet.isValid()) {
+	if (GlobInstcs::recMgmtSetPtr->isValid()) {
 		/* Add one column if records management service is activated. */
 		++max;
 	}
@@ -6287,12 +6298,12 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 			return;
 		}
 		accounts.append(DlgRecordsManagementStored::AcntData(
-		    globAccounts[userName].accountName(),
+		    (*GlobInstcs::acntMapPtr)[userName].accountName(),
 		    userName, dbSet));
 	}
 
 	DlgRecordsManagementStored::updateStoredInformation(
-	    globRecordsManagementSet, accounts, this);
+	    *GlobInstcs::recMgmtSetPtr, accounts, this);
 
 	m_messageTableModel.fillRecordsManagementColumn(
 	    DbMsgsTblModel::REC_MGMT_NEG_COL);
@@ -6363,7 +6374,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	}
 
 	/* Show send to records management dialogue. */
-	DlgRecordsManagementUpload::uploadMessage(globRecordsManagementSet,
+	DlgRecordsManagementUpload::uploadMessage(*GlobInstcs::recMgmtSetPtr,
 	    msgId.dmId,
 	    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId),
 	    msgRaw, this);
@@ -6624,21 +6635,21 @@ bool MainWindow::logInGUI(IsdsSessions &isdsSessions,
 
 bool MainWindow::connectToIsds(const QString &userName)
 {
-	AcntSettings settingsCopy(globAccounts[userName]);
+	AcntSettings settingsCopy((*GlobInstcs::acntMapPtr)[userName]);
 
 	if (!logInGUI(*GlobInstcs::isdsSessionsPtr, settingsCopy)) {
 		return false;
 	}
 
 	/* Logged in. */
-	globAccounts[userName] = settingsCopy;
+	(*GlobInstcs::acntMapPtr)[userName] = settingsCopy;
 	/*
 	 * Catching the following signal is required only when account has
 	 * changed.
 	 *
 	 * The account model catches the signal.
 	 */
-	emit globAccounts.accountDataChanged(userName);
+	emit GlobInstcs::acntMapPtr->accountDataChanged(userName);
 	saveSettings();
 
 	/* Get account information if possible. */
@@ -6695,7 +6706,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 
 	/* Set longer time-out. */
 	GlobInstcs::isdsSessionsPtr->setSessionTimeout(userName,
-	    globPref.isds_download_timeout_ms);
+	    GlobInstcs::prefsPtr->isds_download_timeout_ms);
 
 	return true;
 }
@@ -7160,9 +7171,8 @@ void MainWindow::prepareMsgTmstmpExpir(enum DlgTimestampExpir::Action action)
 		/* Process the selected account. */
 		userName = m_accountModel.userName(currentAccountModelIndex());
 		Q_ASSERT(!userName.isEmpty());
-		showStatusTextPermanently(tr("Checking time stamps in "
-		    "account '%1'...").arg(
-		        globAccounts[userName].accountName()));
+		showStatusTextPermanently(tr("Checking time stamps in account '%1'...")
+		    .arg((*GlobInstcs::acntMapPtr)[userName].accountName()));
 		checkMsgsTmstmpExpiration(userName, QStringList());
 		break;
 
@@ -7173,7 +7183,7 @@ void MainWindow::prepareMsgTmstmpExpir(enum DlgTimestampExpir::Action action)
 			Q_ASSERT(!userName.isEmpty());
 			showStatusTextPermanently(
 			    tr("Checking time stamps in account '%1'...").arg(
-			        globAccounts[userName].accountName()));
+			        (*GlobInstcs::acntMapPtr)[userName].accountName()));
 			checkMsgsTmstmpExpiration(userName, QStringList());
 		}
 		break;
@@ -7289,9 +7299,8 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 				continue;
 			}
 
-			if (DlgSignatureDetail::signingCertExpiresBefore(
-			        tstData,
-			        globPref.timestamp_expir_before_days)) {
+			if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
+			        GlobInstcs::prefsPtr->timestamp_expir_before_days)) {
 				expirMsgFileNames.append(filePathList.at(i));
 			}
 		}
@@ -7304,7 +7313,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 		    tr("Total of ZFO files: %1").arg(msgCnt)
 		    + "<br/><b>" +
 		    tr("ZFO files with time stamp expiring within %1 days: %2")
-			.arg(globPref.timestamp_expir_before_days)
+			.arg(GlobInstcs::prefsPtr->timestamp_expir_before_days)
 			.arg(expirMsgFileNames.count())
 		    + "</b><br/>" +
 		    tr("Unchecked ZFO files: %1").arg(errorMsgFileNames.count());
@@ -7334,19 +7343,19 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 				continue;
 			}
 			if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
-			    globPref.timestamp_expir_before_days)) {
+			        GlobInstcs::prefsPtr->timestamp_expir_before_days)) {
 				expirMsgIds.append(mId);
 			}
 		}
 
 		dlgText = tr("Time stamp expiration check "
 		    "in account '%1' finished with result:").arg(
-		        globAccounts[userName].accountName())
+		        (*GlobInstcs::acntMapPtr)[userName].accountName())
 		    + "<br/><br/>" +
 		    tr("Total of messages in database: %1").arg(msgCnt)
 		    + "<br/><b>" +
 		    tr("Messages with time stamp expiring within %1 days: %2")
-			.arg(globPref.timestamp_expir_before_days)
+			.arg(GlobInstcs::prefsPtr->timestamp_expir_before_days)
 			.arg(expirMsgIds.count())
 		    + "</b><br/>" +
 		    tr("Unchecked messages: %1").arg(errorMsgIds.count());
@@ -7537,10 +7546,10 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 	QString newDbDir;
 	QString userName = m_accountModel.userName(currentAccountModelIndex());
 	/* get current db file location */
-	AcntSettings &itemSettings(globAccounts[userName]);
+	AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
 	QString dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
-		dbDir = globPref.confDir();
+		dbDir = GlobInstcs::prefsPtr->confDir();
 	}
 
 	/* get origin message db set based on username */
@@ -7935,7 +7944,7 @@ void MainWindow::vacuumMsgDbSlot(void)
 {
 	debugSlotCall();
 
-	if (!globPref.store_messages_on_disk) {
+	if (!GlobInstcs::prefsPtr->store_messages_on_disk) {
 		showStatusTextWithTimeout(tr("Vacuum cannot be performed on databases in memory."));
 
 		DlgMsgBox::message(this, QMessageBox::Warning,

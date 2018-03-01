@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <QDir>
 #include <QtTest/QtTest>
 
+#include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
 #include "src/settings/preferences.h"
@@ -67,8 +68,6 @@ private:
 
 	MessageDbSet *m_senderDbSet; /*!< Databases. */
 
-	QString m_confSubDirBackup; /*!< Backup for the configuration directory. */
-
 	qint64 &m_sentMsgId; /*!< Identifier ow newly sent message. */
 };
 
@@ -87,26 +86,27 @@ TestTaskSendMessage::TestTaskSendMessage(qint64 &sentMsgId)
     m_credFName(QLatin1String(CREDENTIALS_FNAME)),
     m_sender(),
     m_recipient(),
-    m_senderDbSet(NULL),
-    m_confSubDirBackup(globPref.confSubdir),
+    m_senderDbSet(Q_NULLPTR),
     m_sentMsgId(sentMsgId)
 {
-	/* Set configuration subdirectory to some value. */
-	globPref.confSubdir = QLatin1String(".datovka_test");
 }
 
 TestTaskSendMessage::~TestTaskSendMessage(void)
 {
 	/* Just in case. */
-	delete m_senderDbSet; m_senderDbSet = NULL;
-
-	/* Restore original value. */
-	globPref.confSubdir = m_confSubDirBackup;
+	delete m_senderDbSet; m_senderDbSet = Q_NULLPTR;
 }
 
 void TestTaskSendMessage::initTestCase(void)
 {
 	bool ret;
+
+	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
+	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
+
+	/* Set configuration subdirectory to some value. */
+	GlobInstcs::prefsPtr->confSubdir = QLatin1String(".datovka_test");
 
 	/* Create empty working directory. */
 	m_testDir.removeRecursively();
@@ -135,21 +135,22 @@ void TestTaskSendMessage::initTestCase(void)
 	m_senderDbSet = MessageDbSet::createNew(m_testPath, m_sender.userName,
 	    m_testing, m_organisation, m_connectionPrefix,
 	    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
-	if (m_senderDbSet == NULL) {
+	if (m_senderDbSet == Q_NULLPTR) {
 		QSKIP("Failed to open message database.");
 	}
-	QVERIFY(m_senderDbSet != NULL);
+	QVERIFY(m_senderDbSet != Q_NULLPTR);
 
 	/*
 	 * Create accounts database and open it. It is required by the task.
 	 */
-	QVERIFY(globAccountDbPtr == NULL);
-	globAccountDbPtr = new (::std::nothrow) AccountDb("accountDb", false);
-	if (globAccountDbPtr == NULL) {
+	QVERIFY(GlobInstcs::accntDbPtr == Q_NULLPTR);
+	GlobInstcs::accntDbPtr = new (::std::nothrow) AccountDb("accountDb",
+	    false);
+	if (GlobInstcs::accntDbPtr == Q_NULLPTR) {
 		QSKIP("Cannot create accounts database.");
 	}
-	QVERIFY(globAccountDbPtr != NULL);
-	ret = globAccountDbPtr->openDb(
+	QVERIFY(GlobInstcs::accntDbPtr != Q_NULLPTR);
+	ret = GlobInstcs::accntDbPtr->openDb(
 	    m_testPath + QDir::separator() + "messages.shelf.db",
 	    SQLiteDb::CREATE_MISSING);
 	if (!ret) {
@@ -158,19 +159,21 @@ void TestTaskSendMessage::initTestCase(void)
 	QVERIFY(ret);
 
 	/* Create ISDS session container. */
-	QVERIFY(globIsdsSessionsPtr == Q_NULLPTR);
-	globIsdsSessionsPtr = new (std::nothrow) IsdsSessions;
-	if (globIsdsSessionsPtr == Q_NULLPTR) {
+	QVERIFY(GlobInstcs::isdsSessionsPtr == Q_NULLPTR);
+	GlobInstcs::isdsSessionsPtr = new (std::nothrow) IsdsSessions;
+	if (GlobInstcs::isdsSessionsPtr == Q_NULLPTR) {
 		QSKIP("Cannot create session container.");
 	}
-	QVERIFY(globIsdsSessionsPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::isdsSessionsPtr != Q_NULLPTR);
 
 	/* Log into ISDS. */
-	struct isds_ctx *ctx = globIsdsSessionsPtr->session(m_sender.userName);
-	if (!globIsdsSessionsPtr->holdsSession(m_sender.userName)) {
+	struct isds_ctx *ctx =
+	    GlobInstcs::isdsSessionsPtr->session(m_sender.userName);
+	if (!GlobInstcs::isdsSessionsPtr->holdsSession(m_sender.userName)) {
 		QVERIFY(ctx == NULL);
-		ctx = globIsdsSessionsPtr->createCleanSession(m_sender.userName,
-		    globPref.isds_download_timeout_ms);
+		ctx = GlobInstcs::isdsSessionsPtr->createCleanSession(
+		    m_sender.userName,
+		    GlobInstcs::prefsPtr->isds_download_timeout_ms);
 	}
 	if (ctx == NULL) {
 		QSKIP("Cannot obtain communication context.");
@@ -182,24 +185,32 @@ void TestTaskSendMessage::initTestCase(void)
 		QSKIP("Error connection into ISDS.");
 	}
 	QVERIFY(err == IE_SUCCESS);
+
+	QVERIFY(GlobInstcs::acntMapPtr == Q_NULLPTR);
+	GlobInstcs::acntMapPtr = new (std::nothrow) AccountsMap;
+	QVERIFY(GlobInstcs::acntMapPtr != Q_NULLPTR);
 }
 
 void TestTaskSendMessage::cleanupTestCase(void)
 {
-	delete m_senderDbSet; m_senderDbSet = NULL;
+	delete m_senderDbSet; m_senderDbSet = Q_NULLPTR;
+
+	delete GlobInstcs::acntMapPtr; GlobInstcs::acntMapPtr = Q_NULLPTR;
 
 	/* Destroy ISDS session container. */
-	delete globIsdsSessionsPtr; globIsdsSessionsPtr = Q_NULLPTR;
+	delete GlobInstcs::isdsSessionsPtr; GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
 
 	/* Delete account database. */
-	delete globAccountDbPtr; globAccountDbPtr = NULL;
+	delete GlobInstcs::accntDbPtr; GlobInstcs::accntDbPtr = Q_NULLPTR;
 
 	/* The configuration directory should be non-existent. */
-	QVERIFY(!QDir(globPref.confDir()).exists());
+	QVERIFY(!QDir(GlobInstcs::prefsPtr->confDir()).exists());
 
 	/* Delete testing directory. */
 	m_testDir.removeRecursively();
 	QVERIFY(!m_testDir.exists());
+
+	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
 }
 
 void TestTaskSendMessage::sendMessage(void)
@@ -208,12 +219,13 @@ void TestTaskSendMessage::sendMessage(void)
 
 	QVERIFY(!m_sender.userName.isEmpty());
 
-	QVERIFY(m_senderDbSet != NULL);
+	QVERIFY(m_senderDbSet != Q_NULLPTR);
 
-	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_sender.userName));
-	struct isds_ctx *ctx = globIsdsSessionsPtr->session(m_sender.userName);
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
+	struct isds_ctx *ctx = GlobInstcs::isdsSessionsPtr->session(
+	    m_sender.userName);
 	QVERIFY(ctx != NULL);
-	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_sender.userName));
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
 
 	QString transactionId(QLatin1String("some_id"));
 	QString recipientName(QLatin1String("recipient name"));
@@ -224,20 +236,20 @@ void TestTaskSendMessage::sendMessage(void)
 	task = new (::std::nothrow) TaskSendMessage(m_sender.userName,
 	    m_senderDbSet, transactionId, IsdsMessage(), recipientName,
 	    recipientAddress, isPDZ);
-	QVERIFY(task != NULL);
+	QVERIFY(task != Q_NULLPTR);
 	task->setAutoDelete(false);
 
 	task->run();
 
 	QVERIFY(task->m_resultData.result == TaskSendMessage::SM_ERR);
 
-	delete task; task = NULL;
+	delete task; task = Q_NULLPTR;
 
 	/* Sending message should succeed. */
 	task = new (::std::nothrow) TaskSendMessage(m_sender.userName,
 	    m_senderDbSet, transactionId, buildMessage(m_recipient.boxName),
 	    recipientName, recipientAddress, isPDZ);
-	QVERIFY(task != NULL);
+	QVERIFY(task != Q_NULLPTR);
 	task->setAutoDelete(false);
 
 	task->run();
@@ -247,7 +259,7 @@ void TestTaskSendMessage::sendMessage(void)
 	QVERIFY(task->m_resultData.dmId != 0);
 	m_sentMsgId = task->m_resultData.dmId;
 
-	delete task; task = NULL;
+	delete task; task = Q_NULLPTR;
 }
 
 IsdsMessage TestTaskSendMessage::buildMessage(const QString &recipBox)

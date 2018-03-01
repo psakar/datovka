@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/global.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
@@ -331,7 +332,7 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		resStr += YES;
 	}
 
-	if (!globPref.check_crl) {
+	if (!GlobInstcs::prefsPtr->check_crl) {
 //		iconPath = ICON_3PARTY_PATH "warning_16.png";
 		resStr += " <b>(" +
 		    tr("Certificate revocation check is turned off!") + ")</b>";
@@ -367,14 +368,14 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		resStr += "<b>" + tr("Certificate time validity is ok") +
 		    ": </b>" + checkResult + "<br/>";
 
-		if (!globPref.check_crl) {
+		if (!GlobInstcs::prefsPtr->check_crl) {
 			checkResult = UNAVAILABLE;
 		} else {
 			checkResult = cvo.crt_revoked ? NO : YES;
 		}
 		resStr += "<b>" + tr("Certificate was not revoked") +
 		    ": </b>" + checkResult + "<br/>";
-		if (!globPref.check_crl) {
+		if (!GlobInstcs::prefsPtr->check_crl) {
 			resStr += "&nbsp;&nbsp;" "<i>" +
 			    tr("Certificate revocation check is turned off!") +
 			    "</i><br/>";

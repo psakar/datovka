@@ -46,7 +46,7 @@ MessageDbSet *AccountInteraction::accessDbSet(const QString &userName,
 	}
 
 	/* Get user name and db location. */
-	AcntSettings &itemSettings(globAccounts[userName]);
+	AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
 
 	if (!itemSettings.isValid()) {
 		logWarningNL(
@@ -60,7 +60,7 @@ MessageDbSet *AccountInteraction::accessDbSet(const QString &userName,
 	dbDir = itemSettings.dbDir();
 	if (dbDir.isEmpty()) {
 		/* Set default directory name. */
-		dbDir = globPref.confDir();
+		dbDir = GlobInstcs::prefsPtr->confDir();
 	}
 
 	flags = 0;

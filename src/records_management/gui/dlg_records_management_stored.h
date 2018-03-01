@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include <QList>
 #include <QString>
 
-#include "src/settings/records_management.h"
+#include "src/datovka_shared/settings/records_management.h"
 
 namespace Ui {
 	class DlgRecordsManagementStored;

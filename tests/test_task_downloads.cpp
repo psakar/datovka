@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@
 #include <QDir>
 #include <QtTest/QtTest>
 
+#include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
@@ -70,8 +71,6 @@ private:
 
 	MessageDbSet *m_recipientDbSet; /*!< Databases. */
 
-	QString m_confSubDirBackup; /*!< Backup for the configuration directory. */
-
 	const qint64 &m_receivedMsgId; /*!< Identifier ow newly received message. */
 	QDateTime m_deliveryTime; /*!< Message delivery time. */
 };
@@ -85,27 +84,28 @@ TestTaskDownloads::TestTaskDownloads(const qint64 &receivedMsgId)
     m_credFName(QLatin1String(CREDENTIALS_FNAME)),
     m_sender(),
     m_recipient(),
-    m_recipientDbSet(NULL),
-    m_confSubDirBackup(globPref.confSubdir),
+    m_recipientDbSet(Q_NULLPTR),
     m_receivedMsgId(receivedMsgId),
     m_deliveryTime()
 {
-	/* Set configuration subdirectory to some value. */
-	globPref.confSubdir = QLatin1String(".datovka_test");
 }
 
 TestTaskDownloads::~TestTaskDownloads(void)
 {
 	/* Just in case. */
-	delete m_recipientDbSet; m_recipientDbSet = NULL;
-
-	/* Restore original value. */
-	globPref.confSubdir = m_confSubDirBackup;
+	delete m_recipientDbSet; m_recipientDbSet = Q_NULLPTR;
 }
 
 void TestTaskDownloads::initTestCase(void)
 {
 	bool ret;
+
+	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
+	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
+
+	/* Set configuration subdirectory to some value. */
+	GlobInstcs::prefsPtr->confSubdir = QLatin1String(".datovka_test");
 
 	/* Create empty working directory. */
 	m_testDir.removeRecursively();
@@ -134,21 +134,21 @@ void TestTaskDownloads::initTestCase(void)
 	m_recipientDbSet = MessageDbSet::createNew(m_testPath, m_recipient.userName,
 	    m_testing, m_organisation, m_connectionPrefix,
 	    MessageDbSet::CM_CREATE_EMPTY_CURRENT);
-	if (m_recipientDbSet == NULL) {
+	if (m_recipientDbSet == Q_NULLPTR) {
 		QSKIP("Failed to open message database.");
 	}
-	QVERIFY(m_recipientDbSet != NULL);
+	QVERIFY(m_recipientDbSet != Q_NULLPTR);
 
 	/*
 	 * Create accounts database and open it. It is required by the task.
 	 */
-	QVERIFY(globAccountDbPtr == NULL);
-	globAccountDbPtr = new (::std::nothrow) AccountDb("accountDb", false);
-	if (globAccountDbPtr == NULL) {
+	QVERIFY(GlobInstcs::accntDbPtr == Q_NULLPTR);
+	GlobInstcs::accntDbPtr = new (::std::nothrow) AccountDb("accountDb", false);
+	if (GlobInstcs::accntDbPtr == Q_NULLPTR) {
 		QSKIP("Cannot create accounts database.");
 	}
-	QVERIFY(globAccountDbPtr != NULL);
-	ret = globAccountDbPtr->openDb(
+	QVERIFY(GlobInstcs::accntDbPtr != Q_NULLPTR);
+	ret = GlobInstcs::accntDbPtr->openDb(
 	    m_testPath + QDir::separator() + "messages.shelf.db",
 	    SQLiteDb::CREATE_MISSING);
 	if (!ret) {
@@ -157,20 +157,21 @@ void TestTaskDownloads::initTestCase(void)
 	QVERIFY(ret);
 
 	/* Create ISDS session container. */
-	QVERIFY(globIsdsSessionsPtr == Q_NULLPTR);
-	globIsdsSessionsPtr = new (std::nothrow) IsdsSessions;
-	if (globIsdsSessionsPtr == Q_NULLPTR) {
+	QVERIFY(GlobInstcs::isdsSessionsPtr == Q_NULLPTR);
+	GlobInstcs::isdsSessionsPtr = new (std::nothrow) IsdsSessions;
+	if (GlobInstcs::isdsSessionsPtr == Q_NULLPTR) {
 		QSKIP("Cannot create session container.");
 	}
-	QVERIFY(globIsdsSessionsPtr != Q_NULLPTR);
+	QVERIFY(GlobInstcs::isdsSessionsPtr != Q_NULLPTR);
 
 	/* Log into ISDS. */
-	struct isds_ctx *ctx = globIsdsSessionsPtr->session(
+	struct isds_ctx *ctx = GlobInstcs::isdsSessionsPtr->session(
 	    m_recipient.userName);
-	if (!globIsdsSessionsPtr->holdsSession(m_recipient.userName)) {
+	if (!GlobInstcs::isdsSessionsPtr->holdsSession(m_recipient.userName)) {
 		QVERIFY(ctx == NULL);
-		ctx = globIsdsSessionsPtr->createCleanSession(
-		    m_recipient.userName, globPref.isds_download_timeout_ms);
+		ctx = GlobInstcs::isdsSessionsPtr->createCleanSession(
+		    m_recipient.userName,
+		    GlobInstcs::prefsPtr->isds_download_timeout_ms);
 	}
 	if (ctx == NULL) {
 		QSKIP("Cannot obtain communication context.");
@@ -182,24 +183,32 @@ void TestTaskDownloads::initTestCase(void)
 		QSKIP("Error connection into ISDS.");
 	}
 	QVERIFY(err == IE_SUCCESS);
+
+	QVERIFY(GlobInstcs::acntMapPtr == Q_NULLPTR);
+	GlobInstcs::acntMapPtr = new (std::nothrow) AccountsMap;
+	QVERIFY(GlobInstcs::acntMapPtr != Q_NULLPTR);
 }
 
 void TestTaskDownloads::cleanupTestCase(void)
 {
-	delete m_recipientDbSet; m_recipientDbSet = NULL;
+	delete m_recipientDbSet; m_recipientDbSet = Q_NULLPTR;
+
+	delete GlobInstcs::acntMapPtr; GlobInstcs::acntMapPtr = Q_NULLPTR;
 
 	/* Destroy ISDS session container. */
-	delete globIsdsSessionsPtr; globIsdsSessionsPtr = Q_NULLPTR;
+	delete GlobInstcs::isdsSessionsPtr; GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
 
 	/* Delete account database. */
-	delete globAccountDbPtr; globAccountDbPtr = NULL;
+	delete GlobInstcs::accntDbPtr; GlobInstcs::accntDbPtr = Q_NULLPTR;
 
 	/* The configuration directory should be non-existent. */
-	QVERIFY(!QDir(globPref.confDir()).exists());
+	QVERIFY(!QDir(GlobInstcs::prefsPtr->confDir()).exists());
 
 	/* Delete testing directory. */
 	m_testDir.removeRecursively();
 	QVERIFY(!m_testDir.exists());
+
+	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
 }
 
 void TestTaskDownloads::downloadMessageList(void)
@@ -208,26 +217,26 @@ void TestTaskDownloads::downloadMessageList(void)
 
 	QVERIFY(!m_recipient.userName.isEmpty());
 
-	QVERIFY(m_recipientDbSet != NULL);
+	QVERIFY(m_recipientDbSet != Q_NULLPTR);
 
-	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
-	struct isds_ctx *ctx = globIsdsSessionsPtr->session(
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
+	struct isds_ctx *ctx = GlobInstcs::isdsSessionsPtr->session(
 	    m_recipient.userName);
 	QVERIFY(ctx != NULL);
-	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
 
 	task = new (::std::nothrow) TaskDownloadMessageList(
 	    m_recipient.userName, m_recipientDbSet, MSG_RECEIVED, false,
 	    MESSAGE_LIST_LIMIT, MESSAGESTATE_ANY);
 
-	QVERIFY(task != NULL);
+	QVERIFY(task != Q_NULLPTR);
 	task->setAutoDelete(false);
 
 	task->run();
 
 	QVERIFY(task->m_result == TaskDownloadMessageList::DL_SUCCESS);
 
-	delete task; task = NULL;
+	delete task; task = Q_NULLPTR;
 }
 
 void TestTaskDownloads::getDeliveryTime(void)
@@ -238,7 +247,7 @@ void TestTaskDownloads::getDeliveryTime(void)
 
 	QVERIFY(!m_recipient.userName.isEmpty());
 
-	QVERIFY(m_recipientDbSet != NULL);
+	QVERIFY(m_recipientDbSet != Q_NULLPTR);
 
 	MessageDb::MsgId msgId(m_recipientDbSet->msgsMsgId(m_receivedMsgId));
 	QVERIFY(msgId.isValid());
@@ -258,41 +267,41 @@ void TestTaskDownloads::downloadMessage(void)
 
 	QVERIFY(!m_recipient.userName.isEmpty());
 
-	QVERIFY(m_recipientDbSet != NULL);
+	QVERIFY(m_recipientDbSet != Q_NULLPTR);
 
-	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
-	struct isds_ctx *ctx = globIsdsSessionsPtr->session(
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
+	struct isds_ctx *ctx = GlobInstcs::isdsSessionsPtr->session(
 	    m_recipient.userName);
 	QVERIFY(ctx != NULL);
-	QVERIFY(globIsdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_recipient.userName));
 
 	/* Should fail, is a received message. */
 	task = new (::std::nothrow) TaskDownloadMessage(m_recipient.userName,
 	    m_recipientDbSet, MSG_SENT,
 	    MessageDb::MsgId(m_receivedMsgId, m_deliveryTime), false);
 
-	QVERIFY(task != NULL);
+	QVERIFY(task != Q_NULLPTR);
 	task->setAutoDelete(false);
 
 	task->run();
 
 	QVERIFY(task->m_result == TaskDownloadMessage::DM_ISDS_ERROR);
 
-	delete task; task = NULL;
+	delete task; task = Q_NULLPTR;
 
 	/* Must succeed. */
 	task = new (::std::nothrow) TaskDownloadMessage(m_recipient.userName,
 	    m_recipientDbSet, MSG_RECEIVED,
 	    MessageDb::MsgId(m_receivedMsgId, m_deliveryTime), false);
 
-	QVERIFY(task != NULL);
+	QVERIFY(task != Q_NULLPTR);
 	task->setAutoDelete(false);
 
 	task->run();
 
 	QVERIFY(task->m_result == TaskDownloadMessage::DM_SUCCESS);
 
-	delete task; task = NULL;
+	delete task; task = Q_NULLPTR;
 }
 
 QObject *newTestTaskDownloads(const qint64 &receivedMsgId)

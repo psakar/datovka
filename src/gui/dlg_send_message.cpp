@@ -297,7 +297,7 @@ void DlgSendMessage::addAttachmentFile(void)
 
 	if (dialog.exec()) {
 		fileNames = dialog.selectedFiles();
-		if (!globPref.use_global_paths) {
+		if (!GlobInstcs::prefsPtr->use_global_paths) {
 			m_lastAttAddPath = dialog.directory().absolutePath();
 			emit usedAttachmentPath(m_userName, m_lastAttAddPath);
 		}
@@ -455,7 +455,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		return;
 	}
 
-	const AcntSettings &accountInfo(globAccounts[m_userName]);
+	const AcntSettings &accountInfo((*GlobInstcs::acntMapPtr)[m_userName]);
 	const QString acntDbKey(AccountDb::keyFromLogin(m_userName));
 	m_boxId = GlobInstcs::accntDbPtr->dbId(acntDbKey);
 	Q_ASSERT(!m_boxId.isEmpty());
@@ -467,8 +467,9 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		m_dbEffectiveOVM = (accountData.at(1) == "1");
 		m_dbOpenAddressing = (accountData.at(2) == "1");
 	}
-	if (globPref.use_global_paths) {
-		m_lastAttAddPath = globPref.add_file_to_attachments_path;
+	if (GlobInstcs::prefsPtr->use_global_paths) {
+		m_lastAttAddPath =
+		    GlobInstcs::prefsPtr->add_file_to_attachments_path;
 	} else {
 		m_lastAttAddPath = accountInfo.lastAttachAddPath();
 	}
@@ -490,7 +491,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	}
 
 	m_ui->fromUser->setText("<strong>" +
-	    globAccounts[m_userName].accountName() + "</strong>" +
+	    (*GlobInstcs::acntMapPtr)[m_userName].accountName() + "</strong>" +
 	    " (" + m_userName + ") - " + m_dbType + dbOpenAddressingText);
 }
 
@@ -634,7 +635,7 @@ void DlgSendMessage::initContent(enum Action action,
 
 	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
 		const QString accountName =
-		    globAccounts[acnt.userName].accountName() +
+		    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName() +
 		    " (" + acnt.userName + ")";
 		m_ui->fromComboBox->addItem(accountName, QVariant(acnt.userName));
 		if (m_userName == acnt.userName) {

@@ -28,6 +28,7 @@ SOURCES += \
 	$${top_srcdir}src/datovka_shared/worker/pool.cpp \
 	$${top_srcdir}src/delegates/tag_item.cpp \
 	$${top_srcdir}src/dimensions/dimensions.cpp \
+	$${top_srcdir}src/global.cpp \
 	$${top_srcdir}src/io/account_db.cpp \
 	$${top_srcdir}src/io/db_tables.cpp \
 	$${top_srcdir}src/io/dbs.cpp \
@@ -36,7 +37,6 @@ SOURCES += \
 	$${top_srcdir}src/io/message_db.cpp \
 	$${top_srcdir}src/io/message_db_set.cpp \
 	$${top_srcdir}src/io/message_db_set_delegated.cpp \
-	$${top_srcdir}src/io/records_management_db.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
 	$${top_srcdir}src/isds/isds_conversion.cpp \
 	$${top_srcdir}src/models/accounts_model.cpp \
@@ -69,6 +69,7 @@ HEADERS += \
 	$${top_srcdir}src/datovka_shared/worker/pool.h \
 	$${top_srcdir}src/delegates/tag_item.h \
 	$${top_srcdir}src/dimensions/dimensions.h \
+	$${top_srcdir}src/global.h \
 	$${top_srcdir}src/io/account_db.h \
 	$${top_srcdir}src/io/db_tables.h \
 	$${top_srcdir}src/io/dbs.h \
@@ -76,7 +77,6 @@ HEADERS += \
 	$${top_srcdir}src/io/isds_sessions.h \
 	$${top_srcdir}src/io/message_db.h \
 	$${top_srcdir}src/io/message_db_set.h \
-	$${top_srcdir}src/io/records_management_db.h \
 	$${top_srcdir}src/io/tag_db.h \
 	$${top_srcdir}src/isds/isds_conversion.h \
 	$${top_srcdir}src/models/accounts_model.h \

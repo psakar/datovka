@@ -33,6 +33,8 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/localisation/localisation.h"
+#include "src/datovka_shared/settings/pin.h"
+#include "src/datovka_shared/settings/records_management.h"
 #include "src/global.h"
 #include "src/initialisation.h"
 #include "src/io/account_db.h"
@@ -41,6 +43,9 @@
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
+#include "src/settings/accounts.h"
+#include "src/settings/preferences.h"
+#include "src/settings/proxy.h"
 
 void setDefaultLocale(void)
 {
@@ -213,7 +218,62 @@ void loadLocalisation(const GlobPreferences &prefs)
 	QCoreApplication::installTranslator(&qtTranslator);
 }
 
-int allocateGlobalObjects(const GlobPreferences &prefs)
+int allocGlobSettings(void)
+{
+	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	if (Q_NULLPTR == GlobInstcs::prefsPtr) {
+		logErrorNL("%s", "Cannot allocate preferences.");
+		goto fail;
+	}
+
+	GlobInstcs::proxSetPtr = new (std::nothrow) ProxiesSettings;
+	if (Q_NULLPTR == GlobInstcs::proxSetPtr) {
+		logErrorNL("%s", "Cannot allocate proxy settings.");
+		goto fail;
+	}
+
+	GlobInstcs::pinSetPtr = new (std::nothrow) PinSettings;
+	if (Q_NULLPTR == GlobInstcs::pinSetPtr) {
+		logErrorNL("%s", "Cannot allocated PIN settings.");
+		goto fail;
+	}
+
+	GlobInstcs::recMgmtSetPtr =
+	    new (std::nothrow) RecordsManagementSettings;
+	if (Q_NULLPTR == GlobInstcs::recMgmtSetPtr) {
+		logErrorNL("%s",
+		    "Cannot allocate records management settings.");
+		goto fail;
+	}
+
+	return 0;
+
+fail:
+	deallocGlobSettings();
+	return -1;
+}
+
+void deallocGlobSettings(void)
+{
+	if (Q_NULLPTR != GlobInstcs::recMgmtSetPtr) {
+		delete GlobInstcs::recMgmtSetPtr;
+		GlobInstcs::recMgmtSetPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != GlobInstcs::pinSetPtr) {
+		delete GlobInstcs::pinSetPtr;
+		GlobInstcs::pinSetPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != GlobInstcs::proxSetPtr) {
+		delete GlobInstcs::proxSetPtr;
+		GlobInstcs::proxSetPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != GlobInstcs::prefsPtr) {
+		delete GlobInstcs::prefsPtr;
+		GlobInstcs::prefsPtr = Q_NULLPTR;
+	}
+}
+
+int allocGlobContainers(const GlobPreferences &prefs)
 {
 	SQLiteDb::OpenFlags flags = SQLiteDb::NO_OPTIONS;
 
@@ -238,7 +298,7 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 	}
 	/* Open accounts database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	flags |= globPref.store_additional_data_on_disk ?
+	flags |= prefs.store_additional_data_on_disk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
 	if (!GlobInstcs::accntDbPtr->openDb(prefs.accountDbPath(), flags)) {
 		logErrorNL("Error opening account db '%s'.",
@@ -281,15 +341,26 @@ int allocateGlobalObjects(const GlobPreferences &prefs)
 		goto fail;
 	}
 
+	GlobInstcs::acntMapPtr = new (std::nothrow) AccountsMap;
+	if (Q_NULLPTR == GlobInstcs::acntMapPtr) {
+		logErrorNL("%s", "Cannot allocate account container.");
+		goto fail;
+	}
+
 	return 0;
 
 fail:
-	deallocateGlobalObjects();
+	deallocGlobContainers();
 	return -1;
 }
 
-void deallocateGlobalObjects(void)
+void deallocGlobContainers(void)
 {
+	if (Q_NULLPTR != GlobInstcs::acntMapPtr) {
+		delete GlobInstcs::acntMapPtr;
+		GlobInstcs::acntMapPtr = Q_NULLPTR;
+	}
+
 	if (Q_NULLPTR != GlobInstcs::recMgmtDbPtr) {
 		delete GlobInstcs::recMgmtDbPtr;
 		GlobInstcs::recMgmtDbPtr = Q_NULLPTR;

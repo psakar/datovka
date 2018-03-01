@@ -36,6 +36,7 @@
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
 #include "src/datovka_shared/io/sqlite/db.h"
+#include "src/datovka_shared/settings/pin.h"
 #include "src/global.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_pin_input.h"
@@ -45,7 +46,6 @@
 #include "src/io/filesystem.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
-#include "src/settings/pin.h"
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
 #include "src/worker/pool.h"
@@ -96,6 +96,10 @@ int main(int argc, char *argv[])
 
 	qInstallMessageHandler(globalLogOutput);
 
+	if (0 != allocGlobSettings()) {
+		return EXIT_FAILURE;
+	}
+
 	QCommandLineParser parser;
 	if (0 != CLIParser::setupCmdLineParser(parser)) {
 		logErrorNL("%s", "Cannot set up command-line parser.");
@@ -105,7 +109,7 @@ int main(int argc, char *argv[])
 	/* Process command-line arguments. */
 	parser.process(app);
 
-	if (0 != preferencesSetUp(parser, globPref, globLog)) {
+	if (0 != preferencesSetUp(parser, *GlobInstcs::prefsPtr, globLog)) {
 		logErrorNL("%s",
 		    "Cannot apply command line arguments on global settings.");
 		return EXIT_FAILURE;
@@ -129,7 +133,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Ensure only one instance with given configuration file. */
-	SingleInstance singleInstance(globPref.loadConfPath());
+	SingleInstance singleInstance(GlobInstcs::prefsPtr->loadConfPath());
 	if (singleInstance.existsInSystem()) {
 		logErrorNL("%s",
 		    "Another application already uses same configuration.");
@@ -182,23 +186,23 @@ int main(int argc, char *argv[])
 		/* Stuff related to configuration file. */
 
 		logDebugLv0NL("Load: '%s'.",
-		    globPref.loadConfPath().toUtf8().constData());
+		    GlobInstcs::prefsPtr->loadConfPath().toUtf8().constData());
 		logDebugLv0NL("Save: '%s'.",
-		    globPref.saveConfPath().toUtf8().constData());
+		    GlobInstcs::prefsPtr->saveConfPath().toUtf8().constData());
 
 		/* Change "\" to "/" */
-		confFileFixBackSlashes(globPref.loadConfPath());
+		confFileFixBackSlashes(GlobInstcs::prefsPtr->loadConfPath());
 	}
 
 	/* Set up proxy. */
 	{
-		QSettings settings(globPref.loadConfPath(),
+		QSettings settings(GlobInstcs::prefsPtr->loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
 		/* Load proxy settings. */
-		globProxSet.loadFromSettings(settings);
+		GlobInstcs::proxSetPtr->loadFromSettings(settings);
 		/* Apply settings onto the environment because of libcurl. */
-		globProxSet.setProxyEnvVars();
+		GlobInstcs::proxSetPtr->setProxyEnvVars();
 	}
 
 	/* Start downloading the CRL files. */
@@ -216,15 +220,15 @@ int main(int argc, char *argv[])
 	logDebugLv0NL("App path: '%s'.",
 	    app.applicationDirPath().toUtf8().constData());
 
-	loadLocalisation(globPref);
+	loadLocalisation(*GlobInstcs::prefsPtr);
 
 	/* Ask for PIN. */
 	{
-		QSettings settings(globPref.loadConfPath(),
+		QSettings settings(GlobInstcs::prefsPtr->loadConfPath(),
 		    QSettings::IniFormat);
 		settings.setIniCodec("UTF-8");
-		globPinSet.loadFromSettings(settings);
-		if (globPinSet.pinConfigured()) {
+		GlobInstcs::pinSetPtr->loadFromSettings(settings);
+		if (GlobInstcs::pinSetPtr->pinConfigured()) {
 			bool pinOk = false;
 			if (RM_GUI == runMode) {
 				splash->hide();
@@ -233,10 +237,12 @@ int main(int argc, char *argv[])
 				 * the splash screen as this window cannot be
 				 * focused using Alt+Tab on Windows.
 				 */
-				pinOk = DlgPinInput::queryPin(globPinSet);
+				pinOk = DlgPinInput::queryPin(
+				    *GlobInstcs::pinSetPtr);
 				splash->show();
 			} else if (RM_CLI == runMode) {
-				pinOk = CLIPin::queryPin(globPinSet, 2);
+				pinOk = CLIPin::queryPin(
+				    *GlobInstcs::pinSetPtr, 2);
 			}
 
 			if (!pinOk) {
@@ -257,7 +263,7 @@ int main(int argc, char *argv[])
 	/* Localise description in tables. */
 	localiseTableDescriptions();
 
-	if (0 != allocateGlobalObjects(globPref)) {
+	if (0 != allocGlobContainers(*GlobInstcs::prefsPtr)) {
 		return EXIT_FAILURE;
 	}
 
@@ -276,12 +282,13 @@ int main(int argc, char *argv[])
 	if (runMode == RM_CLI) {
 		/* Parse account information. */
 		{
-			QSettings settings(globPref.loadConfPath(),
+			QSettings settings(GlobInstcs::prefsPtr->loadConfPath(),
 			    QSettings::IniFormat);
 			settings.setIniCodec("UTF-8");
-			globAccounts.loadFromSettings(globPref.confDir(),
-			    settings);
-			globAccounts.decryptAllPwds(globPinSet._pinVal);
+			GlobInstcs::acntMapPtr->loadFromSettings(
+			    GlobInstcs::prefsPtr->confDir(), settings);
+			GlobInstcs::acntMapPtr->decryptAllPwds(
+			    GlobInstcs::pinSetPtr->_pinVal);
 		}
 		delete splash;
 		ret = CLIParser::runCLIService(srvcArgs, parser);
@@ -320,7 +327,8 @@ int main(int argc, char *argv[])
 	 */
 	//crypto_cleanup_threads();
 
-	deallocateGlobalObjects();
+	deallocGlobContainers();
+	deallocGlobSettings();
 
 	return ret;
 }

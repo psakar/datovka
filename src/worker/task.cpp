@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include <cinttypes>
 
 #include "src/crypto/crypto_funcs.h"
-#include "src/io/account_db.h" /* globAccountDbPtr */
+#include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/isds/isds_conversion.h"
@@ -239,7 +239,8 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 	if (signedMsg) {
 		/* Verify message signature. */
 		int ret = raw_msg_verify_signature(msg->raw,
-		    msg->raw_length, 1, globPref.check_crl ? 1 : 0);
+		    msg->raw_length, 1,
+		    GlobInstcs::prefsPtr->check_crl ? 1 : 0);
 		logDebugLv0NL(
 		   "Verification of message '%" PRId64 "' returned: %d.",
 		   dmID, ret);

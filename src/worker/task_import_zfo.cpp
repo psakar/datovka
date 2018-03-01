@@ -221,7 +221,8 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
 		    "database file could not be accessed or created.");
 		return TaskImportZfo::IMP_ERR;
 	}
-	const QString accountName(globAccounts[acnt.userName].accountName());
+	const QString accountName(
+	    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName());
 	if (-1 != messageDb->msgsStatusIfExists(dmId)) {
 		resultDesc = QObject::tr("Message '%1' already exists in "
 		    "the local database, account '%2'.").
@@ -369,7 +370,8 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 
 	MessageDb *messageDb = acnt.messageDbSet->accessMessageDb(deliveryTime,
 	    false);
-	const QString accountName(globAccounts[acnt.userName].accountName());
+	const QString accountName(
+	    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName());
 	if ((NULL == messageDb) ||
 	    (-1 == messageDb->msgsStatusIfExists(dmId))) {
 		/* Corresponding message does not exist in database. */

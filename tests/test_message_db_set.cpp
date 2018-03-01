@@ -26,8 +26,10 @@
 #include <QtTest/QtTest>
 
 #include "src/common.h"
+#include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db_set.h"
+#include "src/settings/preferences.h"
 #include "tests/test_message_db_set.h"
 
 class DatabaseIdentifier {
@@ -138,6 +140,10 @@ TestMessageDbSet::~TestMessageDbSet(void)
 
 void TestMessageDbSet::initTestCase(void)
 {
+	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
+	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
+
 	/* Try accessing a non-existent one. */
 	m_dbSet01 = MessageDbSet::createNew(m_dbLocationPathSrc,
 	    m_dbId01.primaryKey, m_dbId01.testing, m_dbId01.organisation,
@@ -154,6 +160,8 @@ void TestMessageDbSet::initTestCase(void)
 
 void TestMessageDbSet::cleanupTestCase(void)
 {
+	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
+
 	cleanup(true);
 }
 

@@ -26,6 +26,7 @@
 #include <QFile>
 
 #include "src/common.h"
+#include "src/global.h"
 #include "src/io/imports.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
@@ -191,7 +192,8 @@ bool IsdsSessions::isConnectedToIsds(const QString &userName)
 
 	setSessionTimeout(userName, ISDS_PING_TIMEOUT_MS);
 	ping_status = isds_ping(session(userName));
-	setSessionTimeout(userName, globPref.isds_download_timeout_ms);
+	setSessionTimeout(userName,
+	    GlobInstcs::prefsPtr->isds_download_timeout_ms);
 
 	return IE_SUCCESS == ping_status;
 }

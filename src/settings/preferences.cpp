@@ -25,10 +25,9 @@
 
 #include "src/common.h"
 #include "src/datovka_shared/localisation/localisation.h"
+#include "src/global.h"
 #include "src/io/filesystem.h"
 #include "src/settings/preferences.h"
-
-GlobPreferences globPref;
 
 /* Defaults. */
 static const
@@ -94,13 +93,13 @@ GlobPreferences::~GlobPreferences(void)
 
 bool GlobPreferences::ensureConfPresence(void)
 {
-	if (!QDir(globPref.confDir()).exists()) {
-		if (!QDir(globPref.confDir()).mkpath(".")) {
+	if (!QDir(GlobInstcs::prefsPtr->confDir()).exists()) {
+		if (!QDir(GlobInstcs::prefsPtr->confDir()).mkpath(".")) {
 			return false;
 		}
 	}
-	if (!QFile(globPref.loadConfPath()).exists()) {
-		QFile file(globPref.loadConfPath());
+	if (!QFile(GlobInstcs::prefsPtr->loadConfPath()).exists()) {
+		QFile file(GlobInstcs::prefsPtr->loadConfPath());
 		if (!file.open(QIODevice::ReadWrite)) {
 			return false;
 		}

@@ -357,10 +357,8 @@ SOURCES += \
     src/records_management/widgets/svg_view.cpp \
     src/settings/account.cpp \
     src/settings/accounts.cpp \
-    src/settings/pin.cpp \
     src/settings/preferences.cpp \
     src/settings/proxy.cpp \
-    src/settings/records_management.cpp \
     src/single/single_instance.cpp \
     src/views/attachment_table_view.cpp \
     src/views/lowered_table_view.cpp \
@@ -491,10 +489,8 @@ HEADERS += \
     src/records_management/widgets/svg_view.h \
     src/settings/account.h \
     src/settings/accounts.h \
-    src/settings/pin.h \
     src/settings/preferences.h \
     src/settings/proxy.h \
-    src/settings/records_management.h \
     src/single/single_instance.h \
     src/views/attachment_table_view.h \
     src/views/lowered_table_view.h \

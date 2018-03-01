@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,8 @@
 #ifndef _EXPORTS_H_
 #define _EXPORTS_H_
 
-#include <QObject>
+#include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
+
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
 
@@ -32,6 +33,7 @@
  * @brief Provides exports from local database to disk.
  */
 class Exports {
+	Q_DECLARE_TR_FUNCTIONS(Exports)
 
 public:
 	/*!

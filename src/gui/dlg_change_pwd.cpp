@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 #include <QMessageBox>
 
 #include "src/datovka_shared/utility/strings.h"
+#include "src/global.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/io/isds_sessions.h"
 #include "src/settings/accounts.h"
@@ -63,14 +64,14 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
 	m_ui->secCodeLine->setEnabled(false);
 	m_ui->smsPushButton->setEnabled(false);
 
-	if (globAccounts[m_userName].loginMethod() ==
+	if ((*GlobInstcs::acntMapPtr)[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_HOTP) {
 		m_ui->otpLabel->setText(tr("Enter security code:"));
 		m_ui->otpLabel->setEnabled(true);
 		m_ui->secCodeLine->setEnabled(true);
 	}
 
-	if (globAccounts[m_userName].loginMethod() ==
+	if ((*GlobInstcs::acntMapPtr)[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		m_ui->otpLabel->setText(tr("Enter SMS code:"));
 		m_ui->otpLabel->setEnabled(true);
@@ -114,13 +115,13 @@ bool sendChangePwdRequest(const QString &userName,
 
 	TaskChangePwd *task = Q_NULLPTR;
 
-	if (globAccounts[userName].loginMethod() ==
+	if ((*GlobInstcs::acntMapPtr)[userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_HOTP ||
-	    globAccounts[userName].loginMethod() ==
+	    (*GlobInstcs::acntMapPtr)[userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		task = new (std::nothrow) TaskChangePwd(userName,
 		    currentPwd, newPwd,
-		    (globAccounts[userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
+		    ((*GlobInstcs::acntMapPtr)[userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
 		    secCode);
 	} else {
 		task = new (std::nothrow) TaskChangePwd(userName, currentPwd,
@@ -147,7 +148,7 @@ bool sendChangePwdRequest(const QString &userName,
 		        "Also don't forget to remember the new password so you will still be able to log into your data box via the web interface."),
 		    QMessageBox::Ok);
 
-		globAccounts[userName].setPassword(newPwd);
+		(*GlobInstcs::acntMapPtr)[userName].setPassword(newPwd);
 
 		/*
 		 * TODO - Delete and create new ISDS context with new settings.
@@ -225,9 +226,9 @@ void DlgChangePwd::checkInputFields(void)
 		return;
 	}
 
-	if (globAccounts[m_userName].loginMethod() ==
+	if ((*GlobInstcs::acntMapPtr)[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_HOTP ||
-	    globAccounts[m_userName].loginMethod() ==
+	    (*GlobInstcs::acntMapPtr)[m_userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
 		buttonEnabled = buttonEnabled &&
 		    !m_ui->secCodeLine->text().isEmpty();
@@ -256,9 +257,10 @@ void DlgChangePwd::sendSmsCode(void)
 
 	/* Show Premium SMS request dialogue. */
 	QMessageBox::StandardButton reply = QMessageBox::question(this,
-	    tr("SMS code for account '%1'").arg(globAccounts[m_userName].accountName()),
+	    tr("SMS code for account '%1'")
+	        .arg((*GlobInstcs::acntMapPtr)[m_userName].accountName()),
 	    tr("Account \"%1\" requires authentication via security code for connection to data box.")
-	        .arg(globAccounts[m_userName].accountName()) +
+	        .arg((*GlobInstcs::acntMapPtr)[m_userName].accountName()) +
 	    "<br/>" +
 	    tr("Security code will be sent you via Premium SMS.") +
 	    "<br/><br/>" +
@@ -285,11 +287,11 @@ void DlgChangePwd::sendSmsCode(void)
 	if (IE_PARTIAL_SUCCESS == taskStatus) {
 		QMessageBox::information(this, tr("Enter SMS security code"),
 		    tr("SMS security code for account \"%1\"<br/>has been sent on your mobile phone...")
-		        .arg(globAccounts[m_userName].accountName()) +
+		        .arg((*GlobInstcs::acntMapPtr)[m_userName].accountName()) +
 		    "<br/><br/>" +
 		    tr("Enter SMS security code for account") +
 		        "<br/><b>" +
-		        globAccounts[m_userName].accountName() +
+		        (*GlobInstcs::acntMapPtr)[m_userName].accountName() +
 		        "</b> (" + m_userName + ").",
 		    QMessageBox::Ok);
 		m_ui->otpLabel->setText(tr("Enter SMS code:"));

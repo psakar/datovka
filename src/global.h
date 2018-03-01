@@ -30,6 +30,15 @@ class GlobInstcs {
 
 public:
 	static
+	class GlobPreferences *prefsPtr; /*!< Preferences. */
+	static
+	class ProxiesSettings *proxSetPtr; /*!< Proxy settings. */
+	static
+	class PinSettings *pinSetPtr; /*!< PIN settings. */
+	static
+	class RecordsManagementSettings *recMgmtSetPtr; /*!< Records management settings. */
+
+	static
 	class IsdsSessions *isdsSessionsPtr; /*!< ISDS session container. */
 
 	static
@@ -40,6 +49,14 @@ public:
 	class TagDb *tagDbPtr; /*!< Tag database. */
 	static
 	class RecordsManagementDb *recMgmtDbPtr; /*!< Records management database. */
+
+	/*!
+	 * @brief Holds account data related to account.
+	 *
+	 * @note Key is userName. The user name is held by the user name list.
+	 */
+	static
+	class AccountsMap *acntMapPtr;
 
 private:
 	/*!

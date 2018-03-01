@@ -404,7 +404,7 @@ void TaskSendMessage::run(void)
 	struct isds_message *message = libisdsMessage(m_message);
 	if (NULL == message) {
 		logErrorNL("Could not create isds_message for account '%s'.",
-		    globAccounts[m_userName].accountName().toUtf8().constData());
+		    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 		return;
 	}
 

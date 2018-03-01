@@ -31,8 +31,8 @@
 
 #include "src/datovka_shared/records_management/io/records_management_connection.h"
 #include "src/datovka_shared/records_management/models/upload_hierarchy_proxy_model.h"
+#include "src/datovka_shared/settings/records_management.h"
 #include "src/records_management/models/upload_hierarchy_model.h"
-#include "src/settings/records_management.h"
 
 namespace Ui {
 	class DlgRecordsManagementUpload;
