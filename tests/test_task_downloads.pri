@@ -46,8 +46,6 @@ SOURCES += \
 	$${top_srcdir}src/settings/account.cpp \
 	$${top_srcdir}src/settings/accounts.cpp \
 	$${top_srcdir}src/settings/preferences.cpp \
-	$${top_srcdir}src/worker/message_emitter.cpp \
-	$${top_srcdir}src/worker/pool.cpp \
 	$${top_srcdir}src/worker/task.cpp \
 	$${top_srcdir}src/worker/task_download_message.cpp \
 	$${top_srcdir}src/worker/task_download_message_list.cpp \
@@ -87,7 +85,6 @@ HEADERS += \
 	$${top_srcdir}src/settings/accounts.h \
 	$${top_srcdir}src/settings/preferences.h \
 	$${top_srcdir}src/worker/message_emitter.h \
-	$${top_srcdir}src/worker/pool.h \
 	$${top_srcdir}src/worker/task.h \
 	$${top_srcdir}src/worker/task_download_message.h \
 	$${top_srcdir}src/worker/task_download_message_list.h \

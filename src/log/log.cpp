@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,10 @@
 #include <QString>
 #include <QtGlobal>
 
+#include "src/global.h"
 #include "src/log/log.h"
 
 #define LOG_TIME_FMT "MMM dd hh:mm:ss"
-
-LogDevice globLog;
 
 void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
     const QString &msg)
@@ -52,22 +51,22 @@ void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
 #endif /* >= Qt-5.5 */
 	case QtWarningMsg:
 	case QtCriticalMsg:
-		if (globLog.logVerbosity() > 0) {
-			globLog.log(LOGSRC_DEF, level, "%s (%s:%u, %s)\n",
-			    localMsg.constData(), context.file, context.line,
-			    context.function);
+		if (GlobInstcs::logPtr->logVerbosity() > 0) {
+			GlobInstcs::logPtr->log(LOGSRC_DEF, level,
+			    "%s (%s:%u, %s)\n", localMsg.constData(),
+			    context.file, context.line, context.function);
 		} else {
-			globLog.log(LOGSRC_DEF, level, "%s\n",
+			GlobInstcs::logPtr->log(LOGSRC_DEF, level, "%s\n",
 			    localMsg.constData());
 		}
 		break;
 	case QtFatalMsg:
-		if (globLog.logVerbosity() > 0) {
-			globLog.log(LOGSRC_DEF, level, "%s (%s:%u, %s)\n",
-			    localMsg.constData(), context.file, context.line,
-			    context.function);
+		if (GlobInstcs::logPtr->logVerbosity() > 0) {
+			GlobInstcs::logPtr->log(LOGSRC_DEF, level,
+			    "%s (%s:%u, %s)\n", localMsg.constData(),
+			    context.file, context.line, context.function);
 		} else {
-			globLog.log(LOGSRC_DEF, level, "%s\n",
+			GlobInstcs::logPtr->log(LOGSRC_DEF, level, "%s\n",
 			    localMsg.constData());
 		}
 		abort();
@@ -463,7 +462,7 @@ void LogDevice::logPrefixVlog(int source, uint8_t level,
 		msgPrefix = dateTime;
 	}
 	if (m_logVerbosity > 2) {
-		msgPrefix += " " + globLog.m_hostName + " " +
+		msgPrefix += " " + m_hostName + " " +
 		    QCoreApplication::applicationName() + "[" +
 		    QString::number(QCoreApplication::applicationPid()) +
 		    "]";
@@ -534,7 +533,7 @@ void LogDevice::logPrefixVlogMl(int source, uint8_t level,
 		msgPrefix = dateTime;
 	}
 	if (m_logVerbosity > 2) {
-		msgPrefix += " " + globLog.m_hostName + " " +
+		msgPrefix += " " + m_hostName + " " +
 		    QCoreApplication::applicationName() + "[" +
 		    QString::number(QCoreApplication::applicationPid()) +
 		    "]";

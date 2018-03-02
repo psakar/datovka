@@ -413,12 +413,12 @@ void TaskSendMessage::run(void)
 
 	isds_message_free(&message);
 
-	emit globMsgProcEmitter.sendMessageFinished(m_userName, m_transactId,
-	    m_resultData.result, m_resultData.errInfo,
+	emit GlobInstcs::msgProcEmitterPtr->sendMessageFinished(m_userName,
+	    m_transactId, m_resultData.result, m_resultData.errInfo,
 	    m_resultData.dbIDRecipient, m_resultData.recipientName,
 	    m_isPDZ, m_resultData.dmId);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
@@ -436,7 +436,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 	Q_ASSERT(NULL != message);
 	Q_ASSERT(NULL != message->envelope);
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 0);
 
 	enum TaskSendMessage::Result ret = SM_ERR;
 
@@ -455,7 +455,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		goto fail;
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 40);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 40);
 
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
@@ -470,7 +470,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		goto fail;
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 70);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 70);
 
 	{
 		{
@@ -509,16 +509,18 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 			goto fail;
 		}
 
-		emit globMsgProcEmitter.progressChange(progressLabel, 80);
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(
+		    progressLabel, 80);
 
 		Task::storeAttachments(*messageDb, dmId, message->documents);
 
-		emit globMsgProcEmitter.progressChange(progressLabel, 90);
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(
+		    progressLabel, 90);
 	}
 
 	ret = SM_SUCCESS;
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 100);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 100);
 
 fail:
 	if (0 != resultData) {

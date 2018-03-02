@@ -50,6 +50,7 @@
 #include "src/datovka_shared/settings/pin.h"
 #include "src/datovka_shared/settings/records_management.h"
 #include "src/datovka_shared/utility/strings.h"
+#include "src/datovka_shared/worker/pool.h"
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
 #include "src/global.h"
@@ -94,7 +95,6 @@
 #include "src/views/table_key_press_filter.h"
 #include "src/views/table_tab_ignore_filter.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/pool.h"
 #include "src/worker/task_authenticate_message.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
@@ -335,41 +335,42 @@ MainWindow::MainWindow(QWidget *parent)
 	    tr("Tags"), QIcon(), tr("User-assigned tags")));
 
 	/* Single instance emitter. */
-	connect(&globSingleInstanceEmitter, SIGNAL(messageReceived(QString)),
-	    this, SLOT(processSingleInstanceMessages(QString)));
+	connect(GlobInstcs::snglInstEmitterPtr,
+	    SIGNAL(messageReceived(QString)), this,
+	    SLOT(processSingleInstanceMessages(QString)));
 
 	/* Worker-related processing signals. */
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(downloadMessageFinished(QString, qint64, QDateTime, int,
-	        QString, bool)),
-	    this,
+	        QString, bool)), this,
 	    SLOT(collectDownloadMessageStatus(QString, qint64, QDateTime, int,
 	        QString, bool)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
 	        bool, int, int, int, int)), this,
 	    SLOT(collectDownloadMessageListStatus(QString, int, int, QString,
 	        bool, int, int, int, int)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(importZfoFinished(QString, int, QString)), this,
 	    SLOT(collectImportZfoStatus(QString, int, QString)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(importMessageFinished(QString, QStringList, int, int)), this,
 	    SLOT(showImportMessageResults(QString, QStringList, int, int)));
-	connect(&globMsgProcEmitter, SIGNAL(progressChange(QString, int)),
-	    this, SLOT(updateProgressBar(QString, int)));
-	connect(&globMsgProcEmitter, SIGNAL(statusBarChange(QString)),
+	connect(GlobInstcs::msgProcEmitterPtr,
+	    SIGNAL(progressChange(QString, int)), this,
+	    SLOT(updateProgressBar(QString, int)));
+	connect(GlobInstcs::msgProcEmitterPtr, SIGNAL(statusBarChange(QString)),
 	    this, SLOT(updateStatusBarText(QString)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64)));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(refreshAccountList(QString)), this,
 	    SLOT(refreshAccountList(QString)));
 
-	connect(&globWorkPool, SIGNAL(assignedFinished()),
+	connect(GlobInstcs::workPoolPtr, SIGNAL(assignedFinished()),
 	    this, SLOT(backgroundWorkersFinished()));
 
 	/* Account list. */
@@ -3023,7 +3024,7 @@ bool MainWindow::eraseMessage(const QString &userName,
 	task = new (std::nothrow) TaskEraseMessage(userName, dbSet, msgId,
 	    msgDirect, delFromIsds);
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	TaskEraseMessage::Result result = task->m_result;
 	errorStr = task->m_isdsError;
@@ -3239,12 +3240,12 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
 	    MSG_RECEIVED, downloadReceivedMessages);
 	task->setAutoDelete(true);
-	globWorkPool.assignLo(task);
+	GlobInstcs::workPoolPtr->assignLo(task);
 
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
 	    MSG_SENT, GlobInstcs::prefsPtr->auto_download_whole_messages);
 	task->setAutoDelete(true);
-	globWorkPool.assignLo(task);
+	GlobInstcs::workPoolPtr->assignLo(task);
 
 	return true;
 }
@@ -3288,7 +3289,7 @@ void MainWindow::downloadSelectedMessageAttachments(void)
 			continue;
 		}
 		task->setAutoDelete(true);
-		globWorkPool.assignLo(task, WorkerPool::PREPEND);
+		GlobInstcs::workPoolPtr->assignLo(task, WorkerPool::PREPEND);
 	}
 }
 
@@ -5358,7 +5359,7 @@ int MainWindow::authenticateMessageFromZFO(void)
 
 	task = new (std::nothrow) TaskAuthenticateMessage(userName, fileName);
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	TaskAuthenticateMessage::Result result = task->m_result;
 	delete task;
@@ -5469,7 +5470,7 @@ void MainWindow::verifySelectedMessage(void)
 	TaskVerifyMessage *task = new (std::nothrow) TaskVerifyMessage(userName,
 	    dbSet, msgId);
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	TaskVerifyMessage::Result result = task->m_result;
 	delete task;
@@ -5774,7 +5775,7 @@ bool MainWindow::downloadCompleteMessage(MessageDb::MsgId &msgId)
 	task = new (std::nothrow) TaskDownloadMessage(
 	    userName, dbSet, msgDirect, msgId, false);
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 	bool ret = TaskDownloadMessage::DM_SUCCESS == task->m_result;
 	if (ret) {
 		msgId.deliveryTime = task->m_mId.deliveryTime;
@@ -6748,7 +6749,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	 * Check whether currently some tasks are being processed or are
 	 * pending. If nothing works finish immediately, else show question.
 	 */
-	if (globWorkPool.working()) {
+	if (GlobInstcs::workPoolPtr->working()) {
 		int dlgRet = DlgMsgBox::message(this, QMessageBox::Question,
 		    tr("Datovka"),
 		    tr("Datovka is currently processing some tasks."),
@@ -6757,8 +6758,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		    QMessageBox::No);
 
 		if (QMessageBox::Yes == dlgRet) {
-			globWorkPool.stop();
-			globWorkPool.clear();
+			GlobInstcs::workPoolPtr->stop();
+			GlobInstcs::workPoolPtr->clear();
 		} else {
 			event->ignore();
 		}
@@ -7596,7 +7597,7 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 	    userName, dbDir, newDbDir, itemSettings.isTestAccount());
 	task->setAutoDelete(false);
 	/* This will block the GUI and all workers. */
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	QApplication::restoreOverrideCursor();
 
@@ -7999,7 +8000,7 @@ void MainWindow::vacuumMsgDbSlot(void)
 	TaskVacuumDbSet *task = new (::std::nothrow) TaskVacuumDbSet(msgDbSet);
 	task->setAutoDelete(false);
 	/* This will block the GUI and all workers. */
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	showStatusTextWithTimeout(tr("Database clean-up finished."));
 	QApplication::restoreOverrideCursor();

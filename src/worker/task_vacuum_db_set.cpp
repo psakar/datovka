@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #endif /* >= Qt-5.4 */
 #include <QThread>
 
+#include "src/global.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_vacuum_db_set.h"
@@ -56,7 +57,7 @@ void TaskVacuumDbSet::run(void)
 
 	m_success = vacuumDbSet(m_dbSet, m_error);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 

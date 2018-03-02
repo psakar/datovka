@@ -86,10 +86,10 @@ void TaskImportZfo::run(void)
 		    m_resultDesc);
 	}
 
-	emit globMsgProcEmitter.importZfoFinished(m_fileName, m_result,
-	    m_resultDesc);
+	emit GlobInstcs::msgProcEmitterPtr->importZfoFinished(m_fileName,
+	    m_result, m_resultDesc);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
@@ -276,7 +276,8 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 {
 	struct isds_message *message = NULL;
 
-	emit globMsgProcEmitter.progressChange(PL_IMPORT_ZFO_MSG, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_MSG,
+	    0);
 
 	{
 		enum TaskImportZfo::Result res = loadZfo(fileName,
@@ -309,7 +310,8 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 	bool imported = false;
 	bool exists = false;
 
-	emit globMsgProcEmitter.progressChange(PL_IMPORT_ZFO_MSG, 10);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_MSG,
+	    10);
 
 	float increment = 90.0 / accounts.size();
 
@@ -330,8 +332,8 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 		    authenticate ? fileName : QString(),
 		    isdsError, isdsLongError, resultDesc);
 
-		emit globMsgProcEmitter.progressChange(PL_IMPORT_ZFO_MSG,
-		    (int) (10 + increment));
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(
+		    PL_IMPORT_ZFO_MSG, (int)(10 + increment));
 
 		if (IMP_SUCCESS == res) {
 			imported = true;
@@ -346,7 +348,8 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 
 	isds_message_free(&message);
 
-	emit globMsgProcEmitter.progressChange(PL_IMPORT_ZFO_MSG, 100);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_MSG,
+	    100);
 
 	if (imported) {
 		resultDesc = importedDescr;
@@ -433,7 +436,8 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfo(
 {
 	struct isds_message *message = NULL;
 
-	emit globMsgProcEmitter.progressChange(PL_IMPORT_ZFO_DINFO, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_DINFO,
+	    0);
 
 	{
 		enum TaskImportZfo::Result res = loadZfo(fileName,
@@ -463,7 +467,8 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfo(
 	bool imported = false;
 	bool exists = false;
 
-	emit globMsgProcEmitter.progressChange(PL_IMPORT_ZFO_DINFO, 10);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_DINFO,
+	    10);
 
 	float increment = 90.0 / accounts.size();
 
@@ -476,8 +481,8 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfo(
 		    deliveryTime, authenticate ? fileName : QString(),
 		    isdsError, isdsLongError, resultDesc);
 
-		emit globMsgProcEmitter.progressChange(PL_IMPORT_ZFO_DINFO,
-		    (int) (10 + increment));
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(
+		    PL_IMPORT_ZFO_DINFO, (int)(10 + increment));
 
 		if (IMP_SUCCESS == res) {
 			imported = true;
@@ -492,7 +497,8 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfo(
 
 	isds_message_free(&message);
 
-	emit globMsgProcEmitter.progressChange(PL_IMPORT_ZFO_DINFO, 100);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_DINFO,
+	    100);
 
 	if (imported) {
 		resultDesc = importedDescr;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,14 +26,13 @@
 #include <QSystemSemaphore>
 #include <QTimer>
 
+#include "src/global.h"
 #include "src/log/log.h"
 #include "src/single/single_instance.h"
 
 #define UNIQUE_SEM_ID "CZ.NIC_Datovka_(e-gov_client)_semaphore"
 #define UNIQUE_MEM_ID "CZ.NIC_Datovka_(e-gov_client)_shared_mem"
 #define MEM_SIZE 4096
-
-SingleInstanceEmitter globSingleInstanceEmitter;
 
 const QString SingleInstance::msgRaiseMainWindow("RaiseMainWindow");
 
@@ -157,7 +156,7 @@ void SingleInstance::checkMessage(void)
 		QByteArray byteArray(from, sizeToRead);
 		from += sizeToRead;
 
-		emit globSingleInstanceEmitter.messageReceived(
+		emit GlobInstcs::snglInstEmitterPtr->messageReceived(
 		    QString::fromUtf8((byteArray + '\0').constData()));
 	}
 

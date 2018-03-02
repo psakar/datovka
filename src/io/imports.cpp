@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,11 @@
 
 #include <QMessageBox>
 
+#include "src/datovka_shared/worker/pool.h"
+#include "src/global.h"
 #include "src/common.h"
 #include "src/io/imports.h"
 #include "src/log/log.h"
-#include "src/worker/pool.h"
 #include "src/worker/task_import_message.h"
 #include "src/worker/task_import_zfo.h"
 
@@ -35,11 +36,13 @@ void Imports::importDbMsgsIntoDatabase(MessageDbSet &dbSet,
 {
 	debugFuncCall();
 
-	TaskImportMessage *task;
-	task = new (std::nothrow) TaskImportMessage(userName, &dbSet,
-	    dbFileList, dbId);
+	TaskImportMessage *task = new (std::nothrow) TaskImportMessage(userName,
+	    &dbSet, dbFileList, dbId);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		return;
+	}
 	task->setAutoDelete(true);
-	globWorkPool.assignLo(task);
+	GlobInstcs::workPoolPtr->assignLo(task);
 }
 
 void Imports::importZfoIntoDatabase(const QStringList &fileList,
@@ -90,20 +93,23 @@ void Imports::importZfoIntoDatabase(const QStringList &fileList,
 
 	/* First, import messages. */
 	foreach (const QString &fileName, messageZfoFiles) {
-
-		TaskImportZfo *task;
-		task = new (std::nothrow) TaskImportZfo(databaseList, fileName,
-		    TaskImportZfo::ZT_MESSAGE, authenticate);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task);
+		TaskImportZfo *task = new (std::nothrow) TaskImportZfo(
+		    databaseList, fileName, TaskImportZfo::ZT_MESSAGE,
+		    authenticate);
+		if (task != Q_NULLPTR) {
+			task->setAutoDelete(true);
+			GlobInstcs::workPoolPtr->assignLo(task);
+		}
 	}
 	/* Second, import delivery information. */
 	foreach (const QString &fileName, deliveryZfoFiles) {
 
-		TaskImportZfo *task;
-		task = new (std::nothrow) TaskImportZfo(databaseList, fileName,
-		    TaskImportZfo::ZT_DELIVERY_INFO, authenticate);
-		task->setAutoDelete(true);
-		globWorkPool.assignLo(task);
+		TaskImportZfo *task = new (std::nothrow) TaskImportZfo(
+		    databaseList, fileName, TaskImportZfo::ZT_DELIVERY_INFO,
+		    authenticate);
+		if (task != Q_NULLPTR) {
+			task->setAutoDelete(true);
+			GlobInstcs::workPoolPtr->assignLo(task);
+		}
 	}
 }

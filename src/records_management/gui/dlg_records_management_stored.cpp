@@ -25,11 +25,11 @@
 
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/datovka_shared/io/records_management_db.h"
+#include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/log/log.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/pool.h"
 #include "src/worker/task_records_management_stored_messages.h"
 #include "ui_dlg_records_management_stored.h"
 
@@ -67,7 +67,7 @@ DlgRecordsManagementStored::DlgRecordsManagementStored(const QString &urlStr,
 	m_ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 
 	connect(m_ui->buttonBox, SIGNAL(rejected()), this, SLOT(cancelLoop()));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(recordsManagementStoredMessagesFinished(QString)),
 	    this, SLOT(downloadAndStoreContinue()));
 
@@ -118,14 +118,14 @@ void DlgRecordsManagementStored::downloadAndStoreStart(void)
 		        m_url, m_token,
 		        TaskRecordsManagementStoredMessages::RM_UPDATE_STORED,
 		        Q_NULLPTR);
-		if (Q_NULLPTR == task) {
+		if (Q_UNLIKELY(task == Q_NULLPTR)) {
 			logErrorNL("%s",
 			    "Cannot create stored_files update task.");
 			return;
 		}
 		task->setAutoDelete(true);
 		/* Run in background. */
-		globWorkPool.assignHi(task);
+		GlobInstcs::workPoolPtr->assignHi(task);
 
 		return;
 	}
@@ -165,7 +165,7 @@ void DlgRecordsManagementStored::downloadAndStoreContinue(void)
 		        m_url, m_token,
 		        TaskRecordsManagementStoredMessages::RM_DOWNLOAD_ALL,
 		        account.dbSet);
-		if (Q_NULLPTR == task) {
+		if (Q_UNLIKELY(task == Q_NULLPTR)) {
 			logErrorNL("Cannot create stored_files task for '%s'.",
 			    account.userName.toUtf8().constData());
 			pBar->setValue(pBar->value() + m_taskIncr);
@@ -174,7 +174,7 @@ void DlgRecordsManagementStored::downloadAndStoreContinue(void)
 		}
 		task->setAutoDelete(true);
 		/* Run in background. */
-		globWorkPool.assignHi(task);
+		GlobInstcs::workPoolPtr->assignHi(task);
 
 		++m_accIdx;
 		return;

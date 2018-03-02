@@ -31,6 +31,7 @@
 
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/utility/strings.h"
+#include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/gui/datovka.h"
 #include "src/gui/dlg_contacts.h"
@@ -51,7 +52,6 @@
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_tab_ignore_filter.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/pool.h"
 #include "src/worker/task_download_credit_info.h"
 #include "src/worker/task_keep_alive.h"
 #include "src/worker/task_send_message.h"
@@ -351,7 +351,7 @@ void DlgSendMessage::pingIsdsServer(void) const
 		return;
 	}
 	task->setAutoDelete(true);
-	globWorkPool.assignHi(task);
+	GlobInstcs::workPoolPtr->assignHi(task);
 }
 
 /*!
@@ -380,7 +380,7 @@ bool isLoggedIn(QTimer &keepAliveTimer, MainWindow *const mw,
 			return false;
 		}
 		task->setAutoDelete(false);
-		globWorkPool.runSingle(task);
+		GlobInstcs::workPoolPtr->runSingle(task);
 
 		loggedIn = task->m_isAlive;
 
@@ -714,7 +714,7 @@ void DlgSendMessage::initContent(enum Action action,
 
 	connect(m_ui->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
-	connect(&globMsgProcEmitter,
+	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
 	        QString, QString, bool, qint64)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
@@ -1060,18 +1060,24 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 	 */
 
 	/* Search for box information according to supplied identifier. */
+	enum TaskSearchOwnerFulltext::Result result =
+	    TaskSearchOwnerFulltext::SOF_ERROR;
+	QString errMsg, longErrMsg;
+	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes;
 	TaskSearchOwnerFulltext *task =
 	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, boxId,
 	        TaskSearchOwnerFulltext::FT_BOX_ID,
 	        TaskSearchOwnerFulltext::BT_ALL);
-	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	if (task != Q_NULLPTR) {
+		task->setAutoDelete(false);
+		GlobInstcs::workPoolPtr->runSingle(task);
 
-	enum TaskSearchOwnerFulltext::Result result = task->m_result;
-	QString errMsg = task->m_isdsError;
-	QString longErrMsg = task->m_isdsLongError;
-	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
-	delete task; task = Q_NULLPTR;
+		result = task->m_result;
+		errMsg = task->m_isdsError;
+		longErrMsg = task->m_isdsLongError;
+		foundBoxes = task->m_foundBoxes;
+		delete task; task = Q_NULLPTR;
+	}
 
 	QString name = tr("Unknown");
 	QString address = tr("Unknown");
@@ -1164,8 +1170,11 @@ QString DlgSendMessage::getPDZCreditFromISDS(const QString &userName,
 
 	TaskDownloadCreditInfo *task =
 	    new (std::nothrow) TaskDownloadCreditInfo(userName, dbId);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		return QString();
+	}
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	qint64 credit = task->m_heller;
 	delete task; task = Q_NULLPTR;
@@ -1188,8 +1197,11 @@ bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,
 
 	TaskSearchOwner *task =
 	    new (std::nothrow) TaskSearchOwner(userName, soughtInfo);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		return false;
+	}
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
 
@@ -1382,8 +1394,10 @@ void DlgSendMessage::sendMessageISDS(
 		TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
 		    m_userName, m_dbSet, taskIdentifiers.at(i), message,
 		    e.name, e.address, e.pdz);
-		task->setAutoDelete(true);
-		globWorkPool.assignHi(task);
+		if (task != Q_NULLPTR) {
+			task->setAutoDelete(true);
+			GlobInstcs::workPoolPtr->assignHi(task);
+		}
 	}
 
 	return;

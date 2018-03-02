@@ -24,6 +24,7 @@
 #include <cinttypes>
 #include <QThread>
 
+#include "src/datovka_shared/worker/pool.h" /* List with whole messages. */
 #include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
@@ -31,7 +32,6 @@
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
-#include "src/worker/pool.h" /* List with whole messages. */
 #include "src/worker/task_download_message.h" /* List with whole messages. */
 #include "src/worker/task_download_message_list.h"
 
@@ -117,13 +117,13 @@ void TaskDownloadMessageList::run(void)
 		    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	}
 
-	emit globMsgProcEmitter.downloadMessageListFinished(m_userName,
-	    m_msgDirect, m_result,
+	emit GlobInstcs::msgProcEmitterPtr->downloadMessageListFinished(
+	    m_userName, m_msgDirect, m_result,
 	    (!m_isdsError.isEmpty() || !m_isdsLongError.isEmpty()) ?
 	        m_isdsError + " " + m_isdsLongError : "",
 	    true, rt, rn , st, sn);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 
@@ -148,11 +148,11 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		return DL_ERR;
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 0);
 
 	isds_error status = IE_ERROR;
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 10);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 10);
 
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
@@ -170,7 +170,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &messageList);
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 20);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 20);
 
 	if (status != IE_SUCCESS) {
 		error = isds_error(status);
@@ -196,7 +196,8 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 	box = messageList;
 
 	if (allcnt == 0) {
-		emit globMsgProcEmitter.progressChange(progressLabel, 50);
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(
+		    progressLabel, 50);
 	} else {
 		delta = 80.0 / allcnt;
 	}
@@ -219,8 +220,8 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 	while (0 != box) {
 
 		diff += delta;
-		emit globMsgProcEmitter.progressChange(progressLabel,
-		    (int)(20 + diff));
+		emit GlobInstcs::msgProcEmitterPtr->progressChange(
+		    progressLabel, (int)(20 + diff));
 
 		const isds_message *item = (isds_message *)box->data;
 
@@ -266,11 +267,15 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 			Task::storeEnvelope(msgDirect, dbSet, item->envelope);
 			if (downloadWhole) {
-				TaskDownloadMessage *task;
-				task = new (std::nothrow) TaskDownloadMessage(
-				    userName, &dbSet, msgDirect, msgId, true);
-				task->setAutoDelete(true);
-				globWorkPool.assignLo(task, WorkerPool::PREPEND);
+				TaskDownloadMessage *task =
+				    new (std::nothrow) TaskDownloadMessage(
+				        userName, &dbSet, msgDirect, msgId,
+				        true);
+				if (task != Q_NULLPTR) {
+					task->setAutoDelete(true);
+					GlobInstcs::workPoolPtr->assignLo(task,
+					    WorkerPool::PREPEND);
+				}
 			}
 			newMsgIdList.append(msgId.dmId);
 			newcnt++;
@@ -294,13 +299,15 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				 */
 				if (downloadWhole || messageDb->msgsStoredWhole(msgId.dmId)) {
 
-					TaskDownloadMessage *task;
-					task = new (std::nothrow) TaskDownloadMessage(
-					    userName, &dbSet, msgDirect, msgId,
-					    true);
-					task->setAutoDelete(true);
-					globWorkPool.assignLo(task,
-					    WorkerPool::PREPEND);
+					TaskDownloadMessage *task =
+					    new (std::nothrow) TaskDownloadMessage(
+					        userName, &dbSet, msgDirect,
+					        msgId, true);
+					if (task != Q_NULLPTR) {
+						task->setAutoDelete(true);
+						GlobInstcs::workPoolPtr->assignLo(
+						    task, WorkerPool::PREPEND);
+					}
 				}
 
 				/* Update delivery info of sent message */
@@ -324,7 +331,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 	isds_list_free(&messageList);
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 100);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 100);
 
 	if (MSG_RECEIVED == msgDirect) {
 		logDebugLv0NL("#Received total: %d #Received new: %d",

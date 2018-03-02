@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,10 +134,5 @@ signals:
 	 */
 	void recordsManagementStoredMessagesFinished(const QString &taskId);
 };
-
-/*!
- * @brief This object is used to emit signals from message processing workers.
- */
-extern MessageProcessingEmitter globMsgProcEmitter;
 
 #endif /* _MESSAGE_EMITTER_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <QMutex>
 #include <QString>
 
+#include "src/global.h" /* GlobInstcs::logPtr */
 #include "src/log/log_common.h"
 
 /*!
@@ -302,8 +303,6 @@ private:
 	    const char *prefix, const char *format, va_list ap);
 };
 
-extern LogDevice globLog; /*!< Global log facility. */
-
 /*!
  * @brief Logging macro used for internal purposes.
  *
@@ -314,12 +313,13 @@ extern LogDevice globLog; /*!< Global log facility. */
  * @param[in] ...           Variadic arguments.
  */
 #define _internalLogNL(logVerbThresh, logSrc, logUrg, format, ...) \
-	if (globLog.logVerbosity() > (logVerbThresh)) { \
-		globLog.log((logSrc), (logUrg), \
+	if (GlobInstcs::logPtr->logVerbosity() > (logVerbThresh)) { \
+		GlobInstcs::logPtr->log((logSrc), (logUrg), \
 		    format " (%s:%d, %s())\n", \
 		    __VA_ARGS__, __FILE__, __LINE__, __func__); \
 	} else { \
-		globLog.log((logSrc), (logUrg), format "\n", __VA_ARGS__); \
+		GlobInstcs::logPtr->log((logSrc), (logUrg), format "\n", \
+		    __VA_ARGS__); \
 	}
 
 /*!
@@ -337,7 +337,7 @@ extern LogDevice globLog; /*!< Global log facility. */
 #if DEBUG
 #define logDebugNL(verbThresh, format, ...) \
 	do { \
-		if (globLog.debugVerbosity() > (verbThresh)) { \
+		if (GlobInstcs::logPtr->debugVerbosity() > (verbThresh)) { \
 			_internalLogNL(0, LOGSRC_DEF, LOG_DEBUG, \
 			    format, __VA_ARGS__); \
 		} \
@@ -391,8 +391,8 @@ extern LogDevice globLog; /*!< Global log facility. */
  */
 #define logDebugMl(verbThresh, format, ...) \
 	do { \
-		if (globLog.debugVerbosity() > verbThresh) { \
-			globLog.logMl(LOGSRC_DEF, LOG_DEBUG, \
+		if (GlobInstcs::logPtr->debugVerbosity() > verbThresh) { \
+			GlobInstcs::logPtr->logMl(LOGSRC_DEF, LOG_DEBUG, \
 			    format, __VA_ARGS__); \
 		} \
 	} while (0)
@@ -441,7 +441,8 @@ extern LogDevice globLog; /*!< Global log facility. */
  */
 #define logInfo(format, ...) \
 	do { \
-		globLog.log(LOGSRC_DEF, LOG_INFO, format, __VA_ARGS__); \
+		GlobInstcs::logPtr->log(LOGSRC_DEF, LOG_INFO, format, \
+		    __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -461,7 +462,8 @@ extern LogDevice globLog; /*!< Global log facility. */
  */
 #define logInfoMl(format, ...) \
 	do { \
-		globLog.logMl(LOGSRC_DEF, LOG_INFO, format, __VA_ARGS__); \
+		GlobInstcs::logPtr->logMl(LOGSRC_DEF, LOG_INFO, format, \
+		    __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -472,7 +474,8 @@ extern LogDevice globLog; /*!< Global log facility. */
  */
 #define logWarning(format, ...) \
 	do { \
-		globLog.log(LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__); \
+		GlobInstcs::logPtr->log(LOGSRC_DEF, LOG_WARNING, format, \
+		    __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -492,7 +495,8 @@ extern LogDevice globLog; /*!< Global log facility. */
  */
 #define logWarningMl(format, ...) \
 	do { \
-		globLog.logMl(LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__); \
+		GlobInstcs::logPtr->logMl(LOGSRC_DEF, LOG_WARNING, format, \
+		    __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -503,7 +507,8 @@ extern LogDevice globLog; /*!< Global log facility. */
  */
 #define logError(format, ...) \
 	do { \
-		globLog.log(LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__); \
+		GlobInstcs::logPtr->log(LOGSRC_DEF, LOG_ERR, format, \
+		    __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -523,7 +528,8 @@ extern LogDevice globLog; /*!< Global log facility. */
  */
 #define logErrorMl(format, ...) \
 	do { \
-		globLog.logMl(LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__); \
+		GlobInstcs::logPtr->logMl(LOGSRC_DEF, LOG_ERR, format, \
+		    __VA_ARGS__); \
 	} while (0)
 
 #endif /* _LOG_H_ */

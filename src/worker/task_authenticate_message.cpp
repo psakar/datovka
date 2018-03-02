@@ -79,7 +79,7 @@ void TaskAuthenticateMessage::run(void)
 	m_result = authenticateMessage(m_userName, m_data, m_isdsError,
 	    m_isdsLongError);
 
-	emit globMsgProcEmitter.progressChange(PL_IDLE, 0);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
 	/* ### Worker task end. ### */
 

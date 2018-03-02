@@ -135,7 +135,7 @@ IsdsSessions::IsdsSessions(void)
 	 * with MinGW. See https://gitlab.labs.nic.cz/datovka/datovka/issues/233
 	 * for more details.
 	 */
-	if (globLog.logVerbosity() < 3) {
+	if (GlobInstcs::logPtr->logVerbosity() < 3) {
 		/* Don't write transferred data into log. */
 		isds_set_logging(ILF_ALL, ILL_INFO);
 	} else {

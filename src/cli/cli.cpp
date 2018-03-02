@@ -27,6 +27,7 @@
 
 #include "src/cli/cli.h"
 #include "src/cli/cli_login.h"
+#include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
@@ -35,7 +36,6 @@
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/model_interaction/account_interaction.h"
-#include "src/worker/pool.h"
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_search_owner.h"
@@ -246,7 +246,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		    username, msgDbSet, MSG_RECEIVED, complete, dmLimit,
 		    dmStatusFilter);
 		task->setAutoDelete(false);
-		globWorkPool.runSingle(task);
+		GlobInstcs::workPoolPtr->runSingle(task);
 
 		bool success =
 		   TaskDownloadMessageList::DL_SUCCESS == task->m_result;
@@ -267,8 +267,8 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 		if (!success) {
 			/* Stop pending jobs. */
-			globWorkPool.stop();
-			globWorkPool.clear();
+			GlobInstcs::workPoolPtr->stop();
+			GlobInstcs::workPoolPtr->clear();
 			return CLI_ERROR;
 		}
 	}
@@ -281,7 +281,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		    username, msgDbSet, MSG_SENT, complete, dmLimit,
 		    dmStatusFilter);
 		task->setAutoDelete(false);
-		globWorkPool.runSingle(task);
+		GlobInstcs::workPoolPtr->runSingle(task);
 
 		bool success =
 		   TaskDownloadMessageList::DL_SUCCESS == task->m_result;
@@ -301,14 +301,14 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 		if (!success) {
 			/* Stop pending jobs. */
-			globWorkPool.stop();
-			globWorkPool.clear();
+			GlobInstcs::workPoolPtr->stop();
+			GlobInstcs::workPoolPtr->clear();
 			return CLI_ERROR;
 		}
 	}
 
 	/* Wait for possible pending jobs. */
-	globWorkPool.wait();
+	GlobInstcs::workPoolPtr->wait();
 
 	printDataToStdOut(newMsgIdList);
 	return CLI_SUCCESS;

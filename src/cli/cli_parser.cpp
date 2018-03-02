@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 
 #include "src/cli/cli.h"
 #include "src/cli/cli_parser.h"
+#include "src/global.h"
 #include "src/log/log.h"
 
 int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
@@ -53,7 +54,8 @@ int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
 	}
 	QCommandLineOption logVerb(QStringList() << "L" << LOG_VERBOSITY_OPT,
 	    tr("Set verbosity of logged messages to <%1>. Default is %2.")
-	        .arg(tr("level")).arg(QString::number(globLog.logVerbosity())),
+	        .arg(tr("level"))
+	        .arg(QString::number(GlobInstcs::logPtr->logVerbosity())),
 	    tr("level"));
 	if (!parser.addOption(logVerb)) {
 		return -1;
@@ -67,7 +69,8 @@ int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
 	}
 	QCommandLineOption debugVerb(QStringList() << "V" << DEBUG_VERBOSITY_OPT,
 	    tr("Set debugging verbosity to <%1>. Default is %2.")
-	        .arg(tr("level")).arg(QString::number(globLog.debugVerbosity())),
+	        .arg(tr("level"))
+	        .arg(QString::number(GlobInstcs::logPtr->debugVerbosity())),
 	    tr("level"));
 	if (!parser.addOption(debugVerb)) {
 		return -1;

@@ -30,6 +30,17 @@ class GlobInstcs {
 
 public:
 	static
+	class LogDevice *logPtr; /*!< Log device. */
+
+	static
+	class SingleInstanceEmitter *snglInstEmitterPtr; /*!< Single instance message emitter. */
+
+	static
+	class MessageProcessingEmitter *msgProcEmitterPtr; /*!< Task message emitter. */
+	static
+	class WorkerPool *workPoolPtr; /*!< Worker pool. */
+
+	static
 	class GlobPreferences *prefsPtr; /*!< Preferences. */
 	static
 	class ProxiesSettings *proxSetPtr; /*!< Proxy settings. */

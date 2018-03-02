@@ -44,7 +44,6 @@ SOURCES += \
 	$${top_srcdir}src/settings/account.cpp \
 	$${top_srcdir}src/settings/accounts.cpp \
 	$${top_srcdir}src/settings/preferences.cpp \
-	$${top_srcdir}src/worker/message_emitter.cpp \
 	$${top_srcdir}src/worker/task.cpp \
 	$${top_srcdir}src/worker/task_send_message.cpp \
 	$${top_srcdir}tests/test_task_send_message.cpp

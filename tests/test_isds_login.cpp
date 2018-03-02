@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include "src/common.h"
 #include "src/global.h"
 #include "src/io/isds_login.h"
+#include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
 #include "tests/helper_qt.h"
@@ -60,6 +61,10 @@ TestIsdsLogin::TestIsdsLogin(void)
 
 void TestIsdsLogin::initTestCase(void)
 {
+	QVERIFY(GlobInstcs::logPtr == Q_NULLPTR);
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
+
 	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
 	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
 	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
@@ -80,6 +85,8 @@ void TestIsdsLogin::cleanupTestCase(void)
 	m_user01.clearAll();
 
 	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
+
+	delete GlobInstcs::logPtr; GlobInstcs::logPtr = Q_NULLPTR;
 }
 
 void TestIsdsLogin::logIn01(void)

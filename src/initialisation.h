@@ -58,6 +58,26 @@ void downloadCRL(void);
 void loadLocalisation(const GlobPreferences &prefs);
 
 /*!
+ * @brief Allocates global log facility.
+ */
+int allocGlobLog(void);
+
+/*!
+ * @brief Deallocates global log facility.
+ */
+void deallocGlobLog(void);
+
+/*!
+ * @brief Allocates global infrastructure providing basic functionality.
+ */
+int allocGlobInfrastruct(void);
+
+/*!
+ * @brief Deallocates global infrastructure.
+ */
+void deallocGlobInfrastruct(void);
+
+/*!
  * @brief Allocates global settings instances.
  */
 int allocGlobSettings(void);

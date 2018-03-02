@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,12 +24,13 @@
 #include <QCoreApplication>
 #include <QMessageBox>
 
+#include "src/datovka_shared/worker/pool.h"
+#include "src/global.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/views/table_tab_ignore_filter.h"
-#include "src/worker/pool.h"
 #include "ui_dlg_ds_search.h"
 
 #define CBOX_TARGET_ALL 0
@@ -636,7 +637,7 @@ DlgDsSearch::SearchResult DlgDsSearch::queryBoxNormal(const QString &boxId,
 		return SearchResult(TaskSearchOwner::SO_ERROR, QString());
 	}
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	enum TaskSearchOwner::Result taskResult = task->m_result;
 	QString longErrMsg(task->m_isdsLongError);
@@ -713,7 +714,7 @@ DlgDsSearch::SearchResultFt DlgDsSearch::queryBoxFulltextPage(
 		    QString(), false);
 	}
 	task->setAutoDelete(false);
-	globWorkPool.runSingle(task);
+	GlobInstcs::workPoolPtr->runSingle(task);
 
 	enum TaskSearchOwnerFulltext::Result taskResult = task->m_result;
 	QString longErrMsg(task->m_isdsLongError);

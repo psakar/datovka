@@ -224,7 +224,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		}
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 30);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 30);
 
 	if (Q_SUCCESS == updateEnvelope(msgDirect, *messageDb, envel)) {
 		logDebugLv0NL("Envelope of message '%" PRId64 "' updated.",
@@ -234,7 +234,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		    dmID);
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 50);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 50);
 
 	if (signedMsg) {
 		/* Verify message signature. */
@@ -255,7 +255,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		}
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 60);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 60);
 
 	/* insert/update hash into db */
 	if (NULL != envel->hash) {
@@ -275,7 +275,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		}
 	}
 
-	emit globMsgProcEmitter.progressChange(progressLabel, 70);
+	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 70);
 
 	/* Insert/update all attachment files */
 	storeAttachments(*messageDb, dmID, msg->documents);

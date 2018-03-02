@@ -35,6 +35,7 @@
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/settings/pin.h"
 #include "src/datovka_shared/settings/records_management.h"
+#include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/initialisation.h"
 #include "src/io/account_db.h"
@@ -46,6 +47,8 @@
 #include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
 #include "src/settings/proxy.h"
+#include "src/single/single_instance.h"
+#include "src/worker/message_emitter.h"
 
 void setDefaultLocale(void)
 {
@@ -216,6 +219,78 @@ void loadLocalisation(const GlobPreferences &prefs)
 	}
 
 	QCoreApplication::installTranslator(&qtTranslator);
+}
+
+int allocGlobLog(void)
+{
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	if (Q_NULLPTR == GlobInstcs::logPtr) {
+		return -1;
+	}
+
+	return 0;
+}
+
+void deallocGlobLog(void)
+{
+	if (Q_NULLPTR != GlobInstcs::logPtr) {
+		delete GlobInstcs::logPtr;
+		GlobInstcs::logPtr = Q_NULLPTR;
+	}
+}
+
+int allocGlobInfrastruct(void)
+{
+	GlobInstcs::snglInstEmitterPtr =
+	    new (std::nothrow) SingleInstanceEmitter;
+	if (Q_NULLPTR == GlobInstcs::snglInstEmitterPtr) {
+		logErrorNL("%s",
+		    "Cannot allocate single instance message emitter.");
+		goto fail;
+	}
+
+	GlobInstcs::msgProcEmitterPtr =
+	    new (std::nothrow) MessageProcessingEmitter;
+	if (Q_NULLPTR == GlobInstcs::msgProcEmitterPtr) {
+		logErrorNL("%s", "Cannot allocate task message emitter." );
+		goto fail;
+	}
+
+	/*
+	 * Only one worker thread currently.
+	 * TODO -- To be able to run multiple threads in the pool a locking
+	 * mechanism over isds context structures must be implemented. Also,
+	 * per-context queueing ought to be implemented to avoid unnecessary
+	 * waiting.
+	 */
+	GlobInstcs::workPoolPtr = new (std::nothrow) WorkerPool(1);
+	if (Q_NULLPTR == GlobInstcs::workPoolPtr) {
+		logErrorNL("%s", "Cannot allocate worker pool.");
+		goto fail;
+	}
+
+	return 0;
+
+fail:
+	deallocGlobInfrastruct();
+	return -1;
+}
+
+void deallocGlobInfrastruct(void)
+{
+	if (Q_NULLPTR != GlobInstcs::workPoolPtr) {
+		delete GlobInstcs::workPoolPtr;
+		GlobInstcs::workPoolPtr = Q_NULLPTR;
+	}
+	if (Q_NULLPTR != GlobInstcs::msgProcEmitterPtr) {
+		delete GlobInstcs::msgProcEmitterPtr;
+		GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
+	}
+
+	if (Q_NULLPTR != GlobInstcs::snglInstEmitterPtr) {
+		delete GlobInstcs::snglInstEmitterPtr;
+		GlobInstcs::snglInstEmitterPtr = Q_NULLPTR;
+	}
 }
 
 int allocGlobSettings(void)

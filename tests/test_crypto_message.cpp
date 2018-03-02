@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_version.h"
+#include "src/global.h"
 #include "src/log/log.h"
 #include "tests/helper.h"
 #include "tests/test_crypto_message.h"
@@ -134,6 +135,10 @@ TestCryptoMessage::TestCryptoMessage(void)
 
 void TestCryptoMessage::initTestCase(void)
 {
+	QVERIFY(GlobInstcs::logPtr == Q_NULLPTR);
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
+
 	/* Initialise cryptographic context. */
 	int ret = crypto_init();
 	QVERIFY(ret == 0);
@@ -156,6 +161,8 @@ void TestCryptoMessage::cleanupTestCase(void)
 	ddz.unloadContent();
 	bin.unloadContent();
 	tst.unloadContent();
+
+	delete GlobInstcs::logPtr; GlobInstcs::logPtr = Q_NULLPTR;
 }
 
 void TestCryptoMessage::x509CrtVerify(void)

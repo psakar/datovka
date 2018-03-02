@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@
 #include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db_set.h"
+#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "tests/test_message_db_set.h"
 
@@ -140,6 +141,10 @@ TestMessageDbSet::~TestMessageDbSet(void)
 
 void TestMessageDbSet::initTestCase(void)
 {
+	QVERIFY(GlobInstcs::logPtr == Q_NULLPTR);
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
+
 	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
 	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
 	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
@@ -161,6 +166,8 @@ void TestMessageDbSet::initTestCase(void)
 void TestMessageDbSet::cleanupTestCase(void)
 {
 	delete GlobInstcs::prefsPtr; GlobInstcs::prefsPtr = Q_NULLPTR;
+
+	delete GlobInstcs::logPtr; GlobInstcs::logPtr = Q_NULLPTR;
 
 	cleanup(true);
 }
