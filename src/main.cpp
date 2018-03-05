@@ -26,6 +26,7 @@
 #include <QCommandLineParser>
 #include <QDateTime>
 #include <QSplashScreen>
+#include <QStyleFactory>
 #include <QtGlobal> /* qsrand() */
 #include <QThread>
 
@@ -223,6 +224,20 @@ int main(int argc, char *argv[])
 		/* TODO -- throw a dialog notifying the user. */
 		return EXIT_FAILURE;
 	}
+
+#if defined(Q_OS_OSX)
+	/* Set style. */
+	{
+		const char *styleKey = "macintosh";
+		QStyle *style = QStyleFactory::create(styleKey);
+		if (Q_NULLPTR != style) {
+			logInfoNL("Setting style '%s'.", styleKey);
+			QApplication::setStyle(style);
+		} else {
+			logErrorNL("Cannot find style '%s'.", styleKey);
+		}
+	}
+#endif /* Q_OS_OSX */
 
 	logDebugLv0NL("GUI main thread: %p.", QThread::currentThreadId());
 

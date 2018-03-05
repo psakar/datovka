@@ -479,6 +479,15 @@ qt_plugins_copy () {
 		return 1
 	fi
 
+	# Style directory was introduced in Qt-5.10,
+	if [ -d "${SRC_LOC}/styles" ]; then
+		cp -R "${SRC_LOC}/styles" "${TGT_LOC}/"
+		if [ "$?" != "0" ]; then
+			rm -rf "${TGT_LOC}/"
+			return 1
+		fi
+	fi
+
 	return 0
 }
 
