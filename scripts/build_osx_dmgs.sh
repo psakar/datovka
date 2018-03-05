@@ -211,6 +211,9 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	fi
 	${QMAKE} SDK_VER="${SDK_VER}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${DEBUG_INFO_OPT} datovka.pro
 	rm -rf "${APP}"
+	# Erase -DQT_NO_DEBUG from Makefile.
+	cp Makefile Makefile.qt_no_debug
+	cat Makefile.qt_no_debug | sed 's/-DQT_NO_DEBUG//g' > Makefile
 	make clean
 	make ${MAKE_OPTS}
 
