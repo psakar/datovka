@@ -215,10 +215,10 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	cp Makefile Makefile.qt_no_debug
 	cat Makefile.qt_no_debug | sed 's/-DQT_NO_DEBUG//g' > Makefile
 	make clean
-	make ${MAKE_OPTS}
+	make ${MAKE_OPTS} || exit 1
 
 	if [ "x${BUILD_TYPE}" = "x${BUILD_SHARED}" ]; then
-		${SCRIPT_LOCATION}/macos_bundle_shared_libs.sh -b "${APP}" -n
+		${SCRIPT_LOCATION}/macos_bundle_shared_libs.sh -b "${APP}" -n || exit 1
 	fi
 fi
 

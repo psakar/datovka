@@ -68,7 +68,7 @@ line_number_match () {
 	local VAR1="$1"
 	local VAR2="$2"
 	if [ "x${VAR1}" = "x" -o "x${VAR2}" = "x" ]; then
-		echo "Received empty paramater." >&2
+		echo "Received empty parameter." >&2
 		return 1
 	fi
 	local LINENUM1=$(echo "${VAR1}" | wc -l)
@@ -77,6 +77,47 @@ line_number_match () {
 		echo "Line number does not match." >&2
 		return 1
 	fi
+	return 0
+}
+
+# Adjust libs directory location.
+real_dir_libs () {
+	local APP="$1"
+	local EXPECTED_DIR="$2"
+	if [ "x${APP}" = "x" -o "x${EXPECTED_DIR}" = "x" ]; then
+		echo ""
+		echo "Missing arguments." >&2
+		return 1
+	fi
+
+	local FOUND=$(otool -L "${APP}" | grep "${EXPECTED_DIR}")
+	if [ "x${FOUND}" != "x" ]; then
+		echo "${EXPECTED_DIR}"
+		return 0
+	fi
+
+	# Expected directory not found. Grep and sed expression contains '\t' character.
+	FOUND=$(otool -L "${APP}" | grep '^[ 	]' | grep "datovka/libs" | sed -e 's/^[ 	]*//g' -e 's/\(^.*\/datovka\/libs\).*$/\1/g' | sort -u)
+	if [ "x${FOUND}" != "x" ]; then
+		LINE_NUM=$(echo "${FOUND}" | wc -l)
+		if [ "${LINE_NUM}" -ne "1" ]; then
+			echo ""
+			echo "No definite library location could be determined." >&2
+			return 1
+		fi
+	else
+		echo ""
+		echo "No library location could be determined." >&2
+		return 1
+	fi
+
+	if [ ! -d "${FOUND}" ]; then
+		echo ""
+		echo "'${FOUND}' is not a directory." >&2
+		return 1
+	fi
+
+	echo "${FOUND}"
 	return 0
 }
 
@@ -649,7 +690,7 @@ app_update_rpath () {
 remove_debug () {
 	local LOC="$1"
 	if [ "x${LOC}" = "x" ]; then
-		echo "No paramater given." >&2
+		echo "No parameter given." >&2
 		return 1
 	fi
 
@@ -751,16 +792,25 @@ FILE_APP="${DIR_MACOS}/${APP}"
 # https://stackoverflow.com/a/38291080
 # http://thecourtsofchaos.com/2013/09/16/how-to-copy-and-relink-binaries-on-osx/
 
+DIR_LIBS=$(real_dir_libs "${FILE_APP}" "${DIR_LIBS}")
+if [ "x${DIR_LIBS}" = "x" ]; then
+	echo "Could not determine real library location." >&2
+	exit 1
+fi
+echo $DIR_LIBS
+
 # Get Qt frameworks which the application directly depened on.
 DYLIBS=$(dylibs "${FILE_APP}")
-DYLIBS_BUILT=$(echo "${DYLIBS}" | grep "${SRC_ROOT}")
+# Cannot use SRC_ROOT as the libraries may be built elsewhere.
+#DYLIBS_BUILT=$(echo "${DYLIBS}" | grep "${SRC_ROOT}")
+DYLIBS_BUILT=$(echo "${DYLIBS}" | grep "datovka/libs")
 QT_FRAMEWORKS=$(qt_frameworks "${FILE_APP}")
 QT_FRAMEWORKS_WITH_RPATH=$(echo "${QT_FRAMEWORKS}" | grep @rpath)
 
 
 # Double check whether local libraries are present.
 if ! line_number_match "${DYLIBS}" "${DYLIBS_BUILT}"; then
-	echo "Something is wrong with locally built libraries."
+	echo "Something is wrong with locally built libraries." >&2
 	exit 1
 fi
 
