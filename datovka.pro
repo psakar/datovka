@@ -118,8 +118,7 @@ unix:!macx {
 QMAKE_CXXFLAGS = \
 	-g -O0 -std=c++11 \
 	-Wall -Wextra -pedantic \
-	-Wdate-time -Wformat -Werror=format-security \
-	-Isrc/views
+	-Wdate-time -Wformat -Werror=format-security
 
 INCLUDEPATH += \
 	src

@@ -415,7 +415,7 @@
   <customwidget>
    <class>LoweredTableWidget</class>
    <extends>QTableWidget</extends>
-   <header>lowered_table_widget.h</header>
+   <header>src/views/lowered_table_widget.h</header>
   </customwidget>
  </customwidgets>
  <resources>
