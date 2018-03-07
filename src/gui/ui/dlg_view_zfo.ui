@@ -88,7 +88,7 @@
   <customwidget>
    <class>AttachmentTableView</class>
    <extends>QTableView</extends>
-   <header>attachment_table_view.h</header>
+   <header>src/views/attachment_table_view.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

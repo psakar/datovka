@@ -279,7 +279,7 @@ contain all otherwise matching databoxes.</string>
   <customwidget>
    <class>LoweredTableView</class>
    <extends>QTableView</extends>
-   <header>lowered_table_view.h</header>
+   <header>src/views/lowered_table_view.h</header>
   </customwidget>
  </customwidgets>
  <resources>

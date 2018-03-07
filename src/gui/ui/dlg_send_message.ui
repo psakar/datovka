@@ -793,12 +793,12 @@ of postal data messages active.</string>
   <customwidget>
    <class>LoweredTableView</class>
    <extends>QTableView</extends>
-   <header>lowered_table_view.h</header>
+   <header>src/views/lowered_table_view.h</header>
   </customwidget>
   <customwidget>
    <class>AttachmentTableView</class>
    <extends>QTableView</extends>
-   <header>attachment_table_view.h</header>
+   <header>src/views/attachment_table_view.h</header>
   </customwidget>
  </customwidgets>
  <tabstops>
