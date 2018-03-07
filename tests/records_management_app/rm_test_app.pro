@@ -12,6 +12,17 @@ include($${top_srcdir}/pri/check_qt_version.pri)
 
 sufficientQtVersion(5, 2, 3, 2)
 
+isEmpty(MOC_DIR) {
+	MOC_DIR = gen_moc
+}
+isEmpty(OBJECTS_DIR) {
+	OBJECTS_DIR = gen_objects
+}
+isEmpty(UI_DIR) {
+	UI_DIR = gen_ui
+}
+CONFIG += object_parallel_to_source
+
 DEFINES += \
 	DEBUG=1 \
 	VERSION=\\\"$${VERSION}\\\"

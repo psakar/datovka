@@ -11,8 +11,14 @@ TARGET = tests
 
 include($${top_srcdir}pri/version.pri)
 
+isEmpty(MOC_DIR) {
+	MOC_DIR = gen_moc
+}
 isEmpty(OBJECTS_DIR) {
-	OBJECTS_DIR = objects
+	OBJECTS_DIR = gen_objects
+}
+isEmpty(UI_DIR) {
+	UI_DIR = gen_ui
 }
 CONFIG += object_parallel_to_source
 

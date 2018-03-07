@@ -31,8 +31,14 @@ win32 {
 # Version 5.4.1 should be fine.
 sufficientQtVersion(5, 3, 4, 1)
 
+isEmpty(MOC_DIR) {
+	MOC_DIR = gen_moc
+}
 isEmpty(OBJECTS_DIR) {
-	OBJECTS_DIR = objects
+	OBJECTS_DIR = gen_objects
+}
+isEmpty(UI_DIR) {
+	UI_DIR = gen_ui
 }
 CONFIG += object_parallel_to_source
 
@@ -120,8 +126,7 @@ QMAKE_CXXFLAGS = \
 	-Wall -Wextra -pedantic \
 	-Wdate-time -Wformat -Werror=format-security
 
-INCLUDEPATH += \
-	src
+#INCLUDEPATH +=
 
 LIBS = \
 	-lisds
