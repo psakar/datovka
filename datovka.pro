@@ -242,12 +242,16 @@ macx {
 }
 
 win32 {
-        RC_FILE += res/icon.rc
+        RC_FILE += res/datovka.rc
 
-	DEFINES += WIN32=1
+	VERSION_COMMAS=$$replace(VERSION, '\.', ',')
+	DEFINES += \
+		WIN32=1 \
+		VERSION_COMMAS=$${VERSION_COMMAS} \
+		INRC_FILEDESCR=\\\"Datovka\\\" \
+		INRC_ORIG_FNAME=\\\"$${APP_NAME}.exe\\\"
 
 	INCLUDEPATH = \
-		src \
 		mingw32built/include/libxml2 \
 		mingw32built/include/
 

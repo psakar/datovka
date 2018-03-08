@@ -1,0 +1,77 @@
+
+IDI_ICON1	ICON DISCARDABLE "datovka.ico"
+
+#include <windows.h>
+
+/*
+ * VERSIONINFO resource:
+ * https://msdn.microsoft.com/library/aa381058
+ * Language Identifier Constants and Strings:
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/dd318693(v=vs.85).aspx
+ *
+ * https://www.transmissionzero.co.uk/computing/building-dlls-with-mingw/
+ * http://doc.qt.io/qt-5/qmake-platform-notes.html
+ * https://stackoverflow.com/questions/2784697/setting-application-info-in-a-qt-executable-file-on-windows
+ * http://www.qtcentre.org/threads/40166-qmake-rc-file-define-version
+ */
+
+#define xstr(s) str(s)
+#define str(s) #s
+
+/* The values are passed via command line. */
+#define RC_VER VERSION_COMMAS,0
+#define RC_VER_STR xstr(VERSION) ".0\0"
+#define RC_FILEDESCR xstr(INRC_FILEDESCR)
+#define RC_ORIG_FNAME xstr(INRC_ORIG_FNAME)
+
+#define RC_FILEVERSION RC_VER
+#define RC_FILEVERSION_STR RC_VER_STR
+
+#define RC_PRODUCTVERSION RC_VER
+#define RC_PRODUCTVERSION_STR RC_VER_STR
+
+#define RC_COMPANYNAME_STR "CZ.NIC, z. s. p. o."
+#define RC_FILEDESCRIPTION_STR RC_FILEDESCR
+#define RC_INTERNALNAME_STR "Datovka"
+#define RC_LEGALCOPYRIGHT_STR "Copyright \xA9 2014-2018 CZ.NIC, z. s. p. o." /* CP-1250 (\xA9 = copyright sign) */
+#define RC_LEGALTRADEMARKS1_STR "All Rights Reserved"
+#define RC_LEGALTRADEMARKS2_STR RC_LEGALTRADEMARKS1_STR
+#define RC_ORIGINALFILENAME_STR RC_ORIG_FNAME
+#define RC_PRODUCTNAME_STR "Datovka"
+
+#define VER_COMPANYDOMAIN_STR "nic.cz"
+
+VS_VERSION_INFO VERSIONINFO
+	FILEVERSION RC_FILEVERSION
+	PRODUCTVERSION RC_PRODUCTVERSION
+//	FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+	FILEFLAGS VS_FF_DEBUG
+#else
+	FILEFLAGS 0x0L
+#endif
+	FILEOS VOS__WINDOWS32
+	FILETYPE VFT_APP
+	FILESUBTYPE 0x0L
+	BEGIN
+		BLOCK "StringFileInfo"
+		BEGIN
+			BLOCK "000004B0"
+			BEGIN
+			VALUE "CompanyName", RC_COMPANYNAME_STR
+			VALUE "FileDescription", RC_FILEDESCRIPTION_STR
+			VALUE "FileVersion", RC_FILEVERSION_STR
+			VALUE "InternalName", RC_INTERNALNAME_STR
+			VALUE "LegalCopyright", RC_LEGALCOPYRIGHT_STR
+			VALUE "LegalTrademarks1", RC_LEGALTRADEMARKS1_STR
+			VALUE "LegalTrademarks2", RC_LEGALTRADEMARKS2_STR
+			VALUE "OriginalFilename", RC_ORIGINALFILENAME_STR
+			VALUE "ProductName", RC_PRODUCTNAME_STR
+			VALUE "ProductVersion", RC_PRODUCTVERSION_STR
+			END
+		END
+		BLOCK "VarFileInfo"
+		BEGIN
+			VALUE "Translation", 0x0000, 1200
+	        END
+	END
