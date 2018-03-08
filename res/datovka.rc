@@ -11,19 +11,28 @@ IDI_ICON1	ICON DISCARDABLE "datovka.ico"
  * http://www.qtcentre.org/threads/40166-qmake-rc-file-define-version
  */
 
-#define RC_FILEVERSION 4,10,1,0
-#define RC_FILEVERSION_STR "4.10.1.0\0"
+#define xstr(s) str(s)
+#define str(s) #s
 
-#define RC_PRODUCTVERSION 4,10,1,0
-#define RC_PRODUCTVERSION_STR "4.10.1.0\0"
+/* The values are passed via command line. */
+#define RC_VER VERSION_COMMAS,0
+#define RC_VER_STR xstr(VERSION) ".0\0"
+#define RC_FILEDESCR xstr(INRC_FILEDESCR)
+#define RC_ORIG_FNAME xstr(INRC_ORIG_FNAME)
+
+#define RC_FILEVERSION RC_VER
+#define RC_FILEVERSION_STR RC_VER_STR
+
+#define RC_PRODUCTVERSION RC_VER
+#define RC_PRODUCTVERSION_STR RC_VER_STR
 
 #define RC_COMPANYNAME_STR "CZ.NIC, z. s. p. o."
-#define RC_FILEDESCRIPTION_STR "Datovka"
+#define RC_FILEDESCRIPTION_STR RC_FILEDESCR
 #define RC_INTERNALNAME_STR "Datovka"
 #define RC_LEGALCOPYRIGHT_STR "Copyright © 2014-2018 CZ.NIC, z. s. p. o."
 #define RC_LEGALTRADEMARKS1_STR "All Rights Reserved"
 #define RC_LEGALTRADEMARKS2_STR RC_LEGALTRADEMARKS1_STR
-#define RC_ORIGINALFILENAME_STR "datovka.exe"
+#define RC_ORIGINALFILENAME_STR RC_ORIG_FNAME
 #define RC_PRODUCTNAME_STR "Datovka"
 
 #define VER_COMPANYDOMAIN_STR "nic.cz"
