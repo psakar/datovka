@@ -4,7 +4,11 @@ IDI_ICON1	ICON DISCARDABLE "datovka.ico"
 #include <windows.h>
 
 /*
+ * VERSIONINFO resource:
  * https://msdn.microsoft.com/library/aa381058
+ * Language Identifier Constants and Strings:
+ * https://msdn.microsoft.com/en-us/library/windows/desktop/dd318693(v=vs.85).aspx
+ *
  * https://www.transmissionzero.co.uk/computing/building-dlls-with-mingw/
  * http://doc.qt.io/qt-5/qmake-platform-notes.html
  * https://stackoverflow.com/questions/2784697/setting-application-info-in-a-qt-executable-file-on-windows
@@ -52,7 +56,7 @@ VS_VERSION_INFO VERSIONINFO
 	BEGIN
 		BLOCK "StringFileInfo"
 		BEGIN
-			BLOCK "080904B0"
+			BLOCK "000004B0"
 			BEGIN
 			VALUE "CompanyName", RC_COMPANYNAME_STR
 			VALUE "FileDescription", RC_FILEDESCRIPTION_STR
@@ -68,6 +72,6 @@ VS_VERSION_INFO VERSIONINFO
 		END
 		BLOCK "VarFileInfo"
 		BEGIN
-			VALUE "Translation", 0x809, 1200
+			VALUE "Translation", 0x0000, 1200
 	        END
 	END
