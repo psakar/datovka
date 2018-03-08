@@ -242,7 +242,7 @@ macx {
 }
 
 win32 {
-        RC_FILE += res/icon.rc
+        RC_FILE += res/datovka.rc
 
 	DEFINES += WIN32=1
 

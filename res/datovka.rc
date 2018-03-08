@@ -1,0 +1,64 @@
+
+IDI_ICON1	ICON DISCARDABLE "datovka.ico"
+
+#include <windows.h>
+
+/*
+ * https://msdn.microsoft.com/library/aa381058
+ * https://www.transmissionzero.co.uk/computing/building-dlls-with-mingw/
+ * http://doc.qt.io/qt-5/qmake-platform-notes.html
+ * https://stackoverflow.com/questions/2784697/setting-application-info-in-a-qt-executable-file-on-windows
+ * http://www.qtcentre.org/threads/40166-qmake-rc-file-define-version
+ */
+
+#define RC_FILEVERSION 4,10,1,0
+#define RC_FILEVERSION_STR "4.10.1.0\0"
+
+#define RC_PRODUCTVERSION 4,10,1,0
+#define RC_PRODUCTVERSION_STR "4.10.1.0\0"
+
+#define RC_COMPANYNAME_STR "CZ.NIC, z. s. p. o."
+#define RC_FILEDESCRIPTION_STR "Datovka"
+#define RC_INTERNALNAME_STR "Datovka"
+#define RC_LEGALCOPYRIGHT_STR "Copyright © 2014-2018 CZ.NIC, z. s. p. o."
+#define RC_LEGALTRADEMARKS1_STR "All Rights Reserved"
+#define RC_LEGALTRADEMARKS2_STR RC_LEGALTRADEMARKS1_STR
+#define RC_ORIGINALFILENAME_STR "datovka.exe"
+#define RC_PRODUCTNAME_STR "Datovka"
+
+#define VER_COMPANYDOMAIN_STR "nic.cz"
+
+VS_VERSION_INFO VERSIONINFO
+	FILEVERSION RC_FILEVERSION
+	PRODUCTVERSION RC_PRODUCTVERSION
+//	FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+	FILEFLAGS VS_FF_DEBUG
+#else
+	FILEFLAGS 0x0L
+#endif
+	FILEOS VOS__WINDOWS32
+	FILETYPE VFT_APP
+	FILESUBTYPE 0x0L
+	BEGIN
+		BLOCK "StringFileInfo"
+		BEGIN
+			BLOCK "080904B0"
+			BEGIN
+			VALUE "CompanyName", RC_COMPANYNAME_STR
+			VALUE "FileDescription", RC_FILEDESCRIPTION_STR
+			VALUE "FileVersion", RC_FILEVERSION_STR
+			VALUE "InternalName", RC_INTERNALNAME_STR
+			VALUE "LegalCopyright", RC_LEGALCOPYRIGHT_STR
+			VALUE "LegalTrademarks1", RC_LEGALTRADEMARKS1_STR
+			VALUE "LegalTrademarks2", RC_LEGALTRADEMARKS2_STR
+			VALUE "OriginalFilename", RC_ORIGINALFILENAME_STR
+			VALUE "ProductName", RC_PRODUCTNAME_STR
+			VALUE "ProductVersion", RC_PRODUCTVERSION_STR
+			END
+		END
+		BLOCK "VarFileInfo"
+		BEGIN
+			VALUE "Translation", 0x809, 1200
+	        END
+	END
