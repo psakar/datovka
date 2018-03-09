@@ -46,9 +46,9 @@ Preferences::Preferences(void)
     : confSubdir(DFLT_CONF_SUBDIR),
     loadFromConf(DFLT_CONF_FILE),
     saveToConf(DFLT_CONF_FILE),
-    accountDbFile(ACCOUNT_DB_FILE),
+    acntDbFile(ACCOUNT_DB_FILE),
     tagDbFile(TAG_DB_FILE),
-    recordsManagementDbFile(RECORDS_MANAGEMENT_DB_FILE),
+    recMgmtDbFile(RECORDS_MANAGEMENT_DB_FILE),
     auto_download_whole_messages(false),
     default_download_signed(true),
     //store_passwords_on_disk(false),
@@ -462,9 +462,9 @@ QString Preferences::saveConfPath(void) const
 	return confDir() + QDir::separator() + saveToConf;
 }
 
-QString Preferences::accountDbPath(void) const
+QString Preferences::acntDbPath(void) const
 {
-	return confDir() + QDir::separator() + accountDbFile;
+	return confDir() + QDir::separator() + acntDbFile;
 }
 
 QString Preferences::tagDbPath(void) const
@@ -472,7 +472,7 @@ QString Preferences::tagDbPath(void) const
 	return confDir() + QDir::separator() + tagDbFile;
 }
 
-QString Preferences::recordsManagementDbPath(void) const
+QString Preferences::recMgmtDbPath(void) const
 {
-	return confDir() + QDir::separator() + recordsManagementDbFile;
+	return confDir() + QDir::separator() + recMgmtDbFile;
 }

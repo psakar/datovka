@@ -375,9 +375,9 @@ int allocGlobContainers(const Preferences &prefs)
 	flags = SQLiteDb::CREATE_MISSING;
 	flags |= prefs.store_additional_data_on_disk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
-	if (!GlobInstcs::accntDbPtr->openDb(prefs.accountDbPath(), flags)) {
+	if (!GlobInstcs::accntDbPtr->openDb(prefs.acntDbPath(), flags)) {
 		logErrorNL("Error opening account db '%s'.",
-		    prefs.accountDbPath().toUtf8().constData());
+		    prefs.acntDbPath().toUtf8().constData());
 		goto fail;
 	}
 
@@ -409,10 +409,9 @@ int allocGlobContainers(const Preferences &prefs)
 	}
 	/* Open records management database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	if (!GlobInstcs::recMgmtDbPtr->openDb(
-	        prefs.recordsManagementDbPath(), flags)) {
+	if (!GlobInstcs::recMgmtDbPtr->openDb(prefs.recMgmtDbPath(), flags)) {
 		logErrorNL("Error opening records management db '%s'.",
-		    prefs.recordsManagementDbPath().toUtf8().constData());
+		    prefs.recMgmtDbPath().toUtf8().constData());
 		goto fail;
 	}
 

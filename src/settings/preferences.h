@@ -53,12 +53,16 @@ public:
 	 */
 	Preferences(void);
 
+	/* Set via command line. */
 	QString confSubdir; /*!< Configuration directory. */
 	QString loadFromConf; /*!< Configuration file to load from. */
 	QString saveToConf; /*!< Configuration file to save to. */
-	const QString accountDbFile; /*!< Account db file. */
+
+	/* Fixed settings. */
+	const QString acntDbFile; /*!< Account db file. */
 	const QString tagDbFile; /*!< Tag db file. */
-	const QString recordsManagementDbFile; /*!< Records management db file. */
+	const QString recMgmtDbFile; /*!< Records management db file. */
+
 	bool auto_download_whole_messages;
 	bool default_download_signed; /*!< Default downloading method. */
 	//bool store_passwords_on_disk;
@@ -139,7 +143,7 @@ public:
 	 *
 	 * @return Whole path to account database file.
 	 */
-	QString accountDbPath(void) const;
+	QString acntDbPath(void) const;
 
 	/*!
 	 * @brief Returns whole tag db path.
@@ -153,7 +157,7 @@ public:
 	 *
 	 * @return Whole path to records management database file.
 	 */
-	QString recordsManagementDbPath(void) const;
+	QString recMgmtDbPath(void) const;
 };
 
 #endif /* _PREFERENCES_H_ */
