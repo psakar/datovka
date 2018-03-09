@@ -181,7 +181,7 @@ bool connectToIsdsCLI(IsdsSessions &isdsSessions, AcntSettings acntSettings,
 
 	/* Set longer time-out. */
 	isdsSessions.setSessionTimeout(userName,
-	    GlobInstcs::prefsPtr->isds_download_timeout_ms);
+	    GlobInstcs::prefsPtr->isdsDownloadTimeoutMs);
 
 	return true;
 }

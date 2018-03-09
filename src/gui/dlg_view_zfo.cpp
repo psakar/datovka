@@ -444,7 +444,7 @@ bool DlgViewZfo::signatureFooterDescription(QString &html,
 	} else {
 		resultStr = QObject::tr("Invalid");
 	}
-	if (!GlobInstcs::prefsPtr->check_crl) {
+	if (!GlobInstcs::prefsPtr->checkCrl) {
 		resultStr += " (" +
 		    QObject::tr("Certificate revocation check is turned off!") +
 		    ")";

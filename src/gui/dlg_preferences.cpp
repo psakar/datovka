@@ -185,28 +185,28 @@ void DlgPreferences::saveSettings(Preferences &prefs,
     PinSettings &pinSett) const
 {
 	/* downloading */
-	prefs.download_on_background = m_ui->downloadOnBackground->isChecked();
-	prefs.timer_value = m_ui->timerSpinBox->value();
-	prefs.auto_download_whole_messages =
+	prefs.downloadOnBackground = m_ui->downloadOnBackground->isChecked();
+	prefs.timerValue = m_ui->timerSpinBox->value();
+	prefs.autoDownloadWholeMessages =
 	    m_ui->autoDownloadWholeMessages->isChecked();
-	prefs.download_at_start = m_ui->downloadAtStart->isChecked();
-	prefs.isds_download_timeout_ms =
+	prefs.downloadAtStart = m_ui->downloadAtStart->isChecked();
+	prefs.isdsDownloadTimeoutMs =
 	    m_ui->timeoutMinSpinBox->value() * MSEC_IN_MIN;
-	prefs.message_mark_as_read_timeout =
+	prefs.messageMarkAsReadTimeout =
 	    m_ui->timeoutMarkMsgSpinBox->value() * MSEC_IN_SEC;
-	prefs.check_new_versions = m_ui->checkNewVersions->isChecked();
-	prefs.send_stats_with_version_checks =
+	prefs.checkNewVersions = m_ui->checkNewVersions->isChecked();
+	prefs.sendStatsWithVersionChecks =
 	    m_ui->sendStatsWithVersionChecks->isChecked();
 
 	/* security */
-	prefs.store_messages_on_disk = m_ui->storeMessagesOnDisk->isChecked();
-	prefs.store_additional_data_on_disk =
+	prefs.storeMessagesOnDisk = m_ui->storeMessagesOnDisk->isChecked();
+	prefs.storeAdditionalDataOnDisk =
 	    m_ui->storeAdditionalDataOnDisk->isChecked();
-	prefs.certificate_validation_date =
+	prefs.certificateValidationDate =
 	    m_ui->certValidationDateNow->isChecked() ?
 	        Preferences::CURRENT_DATE : Preferences::DOWNLOAD_DATE;
-	prefs.check_crl = m_ui->checkCrl->isChecked();
-	prefs.timestamp_expir_before_days =
+	prefs.checkCrl = m_ui->checkCrl->isChecked();
+	prefs.timestampExpirBeforeDays =
 	    m_ui->timestampExpirSpinBox->value();
 	pinSett = m_pinSett;
 
@@ -258,27 +258,27 @@ void DlgPreferences::saveSettings(Preferences &prefs,
 void DlgPreferences::initDialogue(const Preferences &prefs)
 {
 	/* downloading */
-	m_ui->downloadOnBackground->setChecked(prefs.download_on_background);
-	m_ui->timerSpinBox->setValue(prefs.timer_value);
+	m_ui->downloadOnBackground->setChecked(prefs.downloadOnBackground);
+	m_ui->timerSpinBox->setValue(prefs.timerValue);
 	m_ui->autoDownloadWholeMessages->setChecked(
-	    prefs.auto_download_whole_messages);
-	m_ui->downloadAtStart->setChecked(prefs.download_at_start);
+	    prefs.autoDownloadWholeMessages);
+	m_ui->downloadAtStart->setChecked(prefs.downloadAtStart);
 	m_ui->timeoutMinSpinBox->setValue(
-	    prefs.isds_download_timeout_ms / MSEC_IN_MIN);
+	    prefs.isdsDownloadTimeoutMs / MSEC_IN_MIN);
 	m_ui->labelTimeoutNote->setText(tr(
 	    "Note: If you have a slow network connection or you cannot download complete messages, here you can increase the connection timeout. "
 	    "Default value is %1 minutes. Use 0 to disable timeout limit (not recommended).")
 	        .arg(ISDS_DOWNLOAD_TIMEOUT_MS / MSEC_IN_MIN));
 	m_ui->timeoutMarkMsgSpinBox->setValue(
-	    prefs.message_mark_as_read_timeout / MSEC_IN_SEC);
+	    prefs.messageMarkAsReadTimeout / MSEC_IN_SEC);
 	m_ui->noteMarkMsgLabel->setText(tr(
 	    "Note: Marked unread message will be marked as read after set interval. "
 	    "Default value is %1 seconds. Use -1 disable the function.")
 	        .arg(TIMER_MARK_MSG_READ_MS / MSEC_IN_SEC));
-	m_ui->checkNewVersions->setChecked(prefs.check_new_versions);
+	m_ui->checkNewVersions->setChecked(prefs.checkNewVersions);
 	/* TODO - this choice must be disabled */
 //	m_ui->sendStatsWithVersionChecks->setChecked(
-//	    prefs.send_stats_with_version_checks);
+//	    prefs.sendStatsWithVersionChecks);
 //	m_ui->sendStatsWithVersionChecks->setEnabled(
 //	    m_ui->checkNewVersions->isChecked());
 
@@ -288,23 +288,21 @@ void DlgPreferences::initDialogue(const Preferences &prefs)
 	activateBackgroundTimer(m_ui->downloadOnBackground->checkState());
 
 	/* security */
-	m_ui->storeMessagesOnDisk->setChecked(prefs.store_messages_on_disk);
+	m_ui->storeMessagesOnDisk->setChecked(prefs.storeMessagesOnDisk);
 	m_ui->storeAdditionalDataOnDisk->setChecked(
-	    prefs.store_additional_data_on_disk);
-	if (Preferences::CURRENT_DATE ==
-	    prefs.certificate_validation_date) {
+	    prefs.storeAdditionalDataOnDisk);
+	if (Preferences::CURRENT_DATE == prefs.certificateValidationDate) {
 		m_ui->certValidationDateNow->setChecked(true);
 		m_ui->certValidationDateDownload->setChecked(false);
 	} else if (Preferences::DOWNLOAD_DATE ==
-	    prefs.certificate_validation_date) {
+	    prefs.certificateValidationDate) {
 		m_ui->certValidationDateNow->setChecked(false);
 		m_ui->certValidationDateDownload->setChecked(true);
 	} else {
 		Q_ASSERT(0);
 	}
-	m_ui->checkCrl->setChecked(prefs.check_crl);
-	m_ui->timestampExpirSpinBox->setValue(
-	    prefs.timestamp_expir_before_days);
+	m_ui->checkCrl->setChecked(prefs.checkCrl);
+	m_ui->timestampExpirSpinBox->setValue(prefs.timestampExpirBeforeDays);
 
 	connect(m_ui->setPinButton, SIGNAL(clicked()), this, SLOT(setPin()));
 	connect(m_ui->changePinButton, SIGNAL(clicked()),

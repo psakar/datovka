@@ -42,6 +42,22 @@ Preferences dlftlGlobPref;
 #define TAG_DB_FILE "tag.db"
 #define RECORDS_MANAGEMENT_DB_FILE "records_management.db"
 
+#define PREF_GROUP "preferences"
+#define ENTR_AUTO_DOWNLOAD_WHOLE_MESSAGES "auto_download_whole_messages"
+#define ENTR_DEFAULT_DOWNLOAD_SIGNED "default_download_signed"
+#define ENTR_STORE_MESSAGES_ON_DISK "store_messages_on_disk"
+#define ENTR_STORE_ADDITIONAL_DATA_ON_DISK "store_additional_data_on_disk"
+#define ENTR_DOWNLOAD_ON_BACKGROUND "download_on_background"
+#define ENTR_TIMER_VALUE "timer_value"
+#define ENTR_DOWNLOAD_AT_START "download_at_start"
+#define ENTR_CHECK_NEW_VERSIONS "check_new_versions"
+#define ENTR_SEND_STATS_WITH_VERSION_CHECKS "send_stats_with_version_checks"
+#define ENTR_ISDS_DOWNLOAD_TIMEOUT_MS "isds_download_timeout_ms"
+#define ENTR_MESSAGE_MARK_AS_READ_TIMEOUT "message_mark_as_read_timeout"
+#define ENTR_CERTIFICATE_VALIDATION_DATE "certificate_validation_date"
+#define ENTR_CHECK_CRL "check_crl"
+#define ENTR_TIMESTAMP_EXPIR_BEFORE_DAYS "timestamp_expir_before_days"
+
 Preferences::Preferences(void)
     : confSubdir(DFLT_CONF_SUBDIR),
     loadFromConf(DFLT_CONF_FILE),
@@ -49,27 +65,29 @@ Preferences::Preferences(void)
     acntDbFile(ACCOUNT_DB_FILE),
     tagDbFile(TAG_DB_FILE),
     recMgmtDbFile(RECORDS_MANAGEMENT_DB_FILE),
-    auto_download_whole_messages(false),
-    default_download_signed(true),
-    //store_passwords_on_disk(false),
-    store_messages_on_disk(true),
-    toolbar_button_style(Qt::ToolButtonTextUnderIcon),
-    store_additional_data_on_disk(true),
-    certificate_validation_date(DOWNLOAD_DATE),
-    check_crl(true),
+    autoDownloadWholeMessages(false),
+    defaultDownloadSigned(true),
+    //storePasswordsOnDisk(false),
+    storeMessagesOnDisk(true),
+    storeAdditionalDataOnDisk(true),
+    downloadOnBackground(false),
+    timerValue(10),
+    downloadAtStart(false),
 #ifdef DISABLE_VERSION_CHECK_BY_DEFAULT
-    check_new_versions(false),
+    checkNewVersions(false),
 #else /* !DISABLE_VERSION_CHECK_BY_DEFAULT */
-    check_new_versions(true),
+    checkNewVersions(true),
 #endif /* DISABLE_VERSION_CHECK_BY_DEFAULT */
-    send_stats_with_version_checks(false),
-    download_on_background(false),
-    timer_value(10),
-    download_at_start(false),
+    sendStatsWithVersionChecks(false),
+    isdsDownloadTimeoutMs(ISDS_DOWNLOAD_TIMEOUT_MS),
+    messageMarkAsReadTimeout(TIMER_MARK_MSG_READ_MS),
+    certificateValidationDate(DOWNLOAD_DATE),
+    checkCrl(true),
+    timestampExpirBeforeDays(TIMESTAMP_EXPIR_BEFORE_DAYS),
+    toolbar_button_style(Qt::ToolButtonTextUnderIcon),
     date_format(DATE_FORMAT_DEFAULT),
     language(Localisation::langSystem), /* Use local settings. */
     after_start_select(SELECT_NOTHING),
-    message_mark_as_read_timeout(TIMER_MARK_MSG_READ_MS),
     use_global_paths(false),
     save_attachments_path(QDir::homePath()),
     add_file_to_attachments_path(QDir::homePath()),
@@ -81,9 +99,7 @@ Preferences::Preferences(void)
     delivery_filename_format(DEFAULT_DELIVERY_FILENAME_FORMAT),
     attachment_filename_format(DEFAULT_ATTACHMENT_FILENAME_FORMAT),
     delivery_filename_format_all_attach(DEFAULT_DELIVERY_ATTACH_FORMAT),
-    delivery_info_for_every_file(false),
-    isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS),
-    timestamp_expir_before_days(TIMESTAMP_EXPIR_BEFORE_DAYS)
+    delivery_info_for_every_file(false)
 {
 }
 
@@ -113,82 +129,83 @@ void Preferences::loadFromSettings(const QSettings &settings)
 {
 	int value;
 
-	auto_download_whole_messages = settings.value(
-	    "preferences/auto_download_whole_messages",
-	    dlftlGlobPref.auto_download_whole_messages).toBool();
+	autoDownloadWholeMessages = settings.value(
+	    PREF_GROUP "/" ENTR_AUTO_DOWNLOAD_WHOLE_MESSAGES,
+	    dlftlGlobPref.autoDownloadWholeMessages).toBool();
 
-	default_download_signed = settings.value(
-	    "preferences/default_download_signed",
-	    dlftlGlobPref.default_download_signed).toBool();
+	defaultDownloadSigned = settings.value(
+	    PREF_GROUP "/" ENTR_DEFAULT_DOWNLOAD_SIGNED,
+	    dlftlGlobPref.defaultDownloadSigned).toBool();
 
-	store_messages_on_disk = settings.value(
-	    "preferences/store_messages_on_disk",
-	    dlftlGlobPref.store_messages_on_disk).toBool();
+	storeMessagesOnDisk = settings.value(
+	    PREF_GROUP "/" ENTR_STORE_MESSAGES_ON_DISK,
+	    dlftlGlobPref.storeMessagesOnDisk).toBool();
 
-	store_additional_data_on_disk = settings.value(
-	    "preferences/store_additional_data_on_disk",
-	    dlftlGlobPref.store_additional_data_on_disk).toBool();
+	storeAdditionalDataOnDisk = settings.value(
+	    PREF_GROUP "/" ENTR_STORE_ADDITIONAL_DATA_ON_DISK,
+	    dlftlGlobPref.storeAdditionalDataOnDisk).toBool();
 
-	download_on_background = settings.value(
-	    "preferences/download_on_background",
-	    dlftlGlobPref.download_on_background).toBool();
+	downloadOnBackground = settings.value(
+	    PREF_GROUP "/" ENTR_DOWNLOAD_ON_BACKGROUND,
+	    dlftlGlobPref.downloadOnBackground).toBool();
 
-	download_at_start = settings.value(
-	    "preferences/download_at_start",
-	    dlftlGlobPref.download_at_start).toBool();
+	timerValue = settings.value(PREF_GROUP "/" ENTR_TIMER_VALUE,
+	    dlftlGlobPref.timerValue).toInt();
+
+	downloadAtStart = settings.value(PREF_GROUP "/" ENTR_DOWNLOAD_AT_START,
+	    dlftlGlobPref.downloadAtStart).toBool();
+
+	checkNewVersions = settings.value(
+	    PREF_GROUP "/" ENTR_CHECK_NEW_VERSIONS,
+	    dlftlGlobPref.checkNewVersions).toBool();
+
+	sendStatsWithVersionChecks = settings.value(
+	    PREF_GROUP "/" ENTR_SEND_STATS_WITH_VERSION_CHECKS,
+	    dlftlGlobPref.sendStatsWithVersionChecks).toBool();
+
+	isdsDownloadTimeoutMs = settings.value(
+	    PREF_GROUP "/" ENTR_ISDS_DOWNLOAD_TIMEOUT_MS,
+	    dlftlGlobPref.isdsDownloadTimeoutMs).toInt();
+
+	messageMarkAsReadTimeout = settings.value(
+	    PREF_GROUP "/" ENTR_MESSAGE_MARK_AS_READ_TIMEOUT,
+	    dlftlGlobPref.messageMarkAsReadTimeout).toInt();
+
+	value = settings.value(
+	    PREF_GROUP "/" ENTR_CERTIFICATE_VALIDATION_DATE,
+	    dlftlGlobPref.certificateValidationDate).toInt();
+	switch (value) {
+	case DOWNLOAD_DATE:
+		certificateValidationDate = DOWNLOAD_DATE;
+		break;
+	case CURRENT_DATE:
+		certificateValidationDate = CURRENT_DATE;
+		break;
+	default:
+		certificateValidationDate =
+		    dlftlGlobPref.certificateValidationDate;
+		Q_ASSERT(0);
+		break;
+	}
+
+	checkCrl = settings.value(PREF_GROUP "/" ENTR_CHECK_CRL,
+	    dlftlGlobPref.checkCrl).toBool();
+
+	timestampExpirBeforeDays = settings.value(
+	    PREF_GROUP "/" ENTR_TIMESTAMP_EXPIR_BEFORE_DAYS,
+	    dlftlGlobPref.timestampExpirBeforeDays).toInt();
 
 	toolbar_button_style = settings.value(
 	    "preferences/toolbar_button_style",
 	    dlftlGlobPref.toolbar_button_style).toInt();
 
-	timer_value = settings.value(
-	    "preferences/timer_value", dlftlGlobPref.timer_value).toInt();
-
-	isds_download_timeout_ms = settings.value(
-	    "preferences/isds_download_timeout_ms",
-	    dlftlGlobPref.isds_download_timeout_ms).toInt();
-
-	timestamp_expir_before_days = settings.value(
-	    "preferences/timestamp_expir_before_days",
-	    dlftlGlobPref.timestamp_expir_before_days).toInt();
-
-	message_mark_as_read_timeout = settings.value(
-	    "preferences/message_mark_as_read_timeout",
-	    dlftlGlobPref.message_mark_as_read_timeout).toInt();
-
 	use_global_paths = settings.value(
 	    "preferences/use_global_paths",
 	    dlftlGlobPref.use_global_paths).toBool();
 
-	value = settings.value("preferences/certificate_validation_date",
-	    dlftlGlobPref.certificate_validation_date).toInt();
-	switch (value) {
-	case DOWNLOAD_DATE:
-		certificate_validation_date = DOWNLOAD_DATE;
-		break;
-	case CURRENT_DATE:
-		certificate_validation_date = CURRENT_DATE;
-		break;
-	default:
-		certificate_validation_date =
-		    dlftlGlobPref.certificate_validation_date;
-		Q_ASSERT(0);
-		break;
-	}
-
-	check_crl = settings.value("preferences/check_crl",
-	    dlftlGlobPref.check_crl).toBool();
-
-	check_new_versions = settings.value("preferences/check_new_versions",
-	    dlftlGlobPref.check_new_versions).toBool();
-
 	delivery_info_for_every_file = settings.value(
 	    "preferences/delivery_info_for_every_file",
 	    dlftlGlobPref.delivery_info_for_every_file).toBool();
-
-	send_stats_with_version_checks = settings.value(
-	    "preferences/send_stats_with_version_checks",
-	    dlftlGlobPref.send_stats_with_version_checks).toBool();
 
 	value = settings.value("preferences/date_format",
 	    dlftlGlobPref.date_format).toInt();
@@ -282,50 +299,80 @@ void Preferences::loadFromSettings(const QSettings &settings)
 
 void Preferences::saveToSettings(QSettings &settings) const
 {
-	settings.beginGroup("preferences");
+	settings.beginGroup(PREF_GROUP);
 
 	/* Only values differing from defaults are written. */
 
-	if (dlftlGlobPref.auto_download_whole_messages !=
-	    auto_download_whole_messages) {
-		settings.setValue("auto_download_whole_messages",
-		    auto_download_whole_messages);
+	if (dlftlGlobPref.autoDownloadWholeMessages !=
+	    autoDownloadWholeMessages) {
+		settings.setValue(ENTR_AUTO_DOWNLOAD_WHOLE_MESSAGES,
+		    autoDownloadWholeMessages);
 	}
 
-	if (dlftlGlobPref.default_download_signed != default_download_signed) {
-		settings.setValue("default_download_signed",
-		    default_download_signed);
+	if (dlftlGlobPref.defaultDownloadSigned != defaultDownloadSigned) {
+		settings.setValue(ENTR_DEFAULT_DOWNLOAD_SIGNED,
+		    defaultDownloadSigned);
 	}
 
-	if (dlftlGlobPref.store_messages_on_disk != store_messages_on_disk) {
-		settings.setValue("store_messages_on_disk",
-		    store_messages_on_disk);
+	if (dlftlGlobPref.storeMessagesOnDisk != storeMessagesOnDisk) {
+		settings.setValue(ENTR_STORE_MESSAGES_ON_DISK,
+		    storeMessagesOnDisk);
 	}
 
-	if (dlftlGlobPref.store_additional_data_on_disk !=
-	    store_additional_data_on_disk) {
-		settings.setValue("store_additional_data_on_disk",
-		    store_additional_data_on_disk);
+	if (dlftlGlobPref.storeAdditionalDataOnDisk !=
+	    storeAdditionalDataOnDisk) {
+		settings.setValue(ENTR_STORE_ADDITIONAL_DATA_ON_DISK,
+		    storeAdditionalDataOnDisk);
 	}
 
-	if (dlftlGlobPref.certificate_validation_date !=
-	    certificate_validation_date) {
-		settings.setValue("certificate_validation_date",
-		    certificate_validation_date);
+	if (dlftlGlobPref.downloadOnBackground != downloadOnBackground) {
+		settings.setValue(ENTR_DOWNLOAD_ON_BACKGROUND,
+		    downloadOnBackground);
 	}
 
-	if (dlftlGlobPref.check_crl != check_crl) {
-		settings.setValue("check_crl", check_crl);
+	if (dlftlGlobPref.timerValue != timerValue) {
+		settings.setValue(ENTR_TIMER_VALUE, timerValue);
 	}
 
-	if (dlftlGlobPref.check_new_versions != check_new_versions) {
-		settings.setValue("check_new_versions", check_new_versions);
+	if (dlftlGlobPref.downloadAtStart != downloadAtStart) {
+		settings.setValue(ENTR_DOWNLOAD_AT_START, downloadAtStart);
 	}
 
-	if (dlftlGlobPref.send_stats_with_version_checks !=
-	    send_stats_with_version_checks) {
-		settings.setValue("send_stats_with_version_checks",
-		    send_stats_with_version_checks);
+	if (dlftlGlobPref.checkNewVersions != checkNewVersions) {
+		settings.setValue(ENTR_CHECK_NEW_VERSIONS, checkNewVersions);
+	}
+
+	if (dlftlGlobPref.sendStatsWithVersionChecks !=
+	    sendStatsWithVersionChecks) {
+		settings.setValue(ENTR_SEND_STATS_WITH_VERSION_CHECKS,
+		    sendStatsWithVersionChecks);
+	}
+
+	if (dlftlGlobPref.isdsDownloadTimeoutMs != isdsDownloadTimeoutMs) {
+		settings.setValue(ENTR_ISDS_DOWNLOAD_TIMEOUT_MS,
+		    isdsDownloadTimeoutMs);
+	}
+
+	if (dlftlGlobPref.messageMarkAsReadTimeout !=
+	    messageMarkAsReadTimeout) {
+		settings.setValue(ENTR_MESSAGE_MARK_AS_READ_TIMEOUT,
+		    messageMarkAsReadTimeout);
+	}
+
+	if (dlftlGlobPref.certificateValidationDate !=
+	    certificateValidationDate) {
+		settings.setValue(ENTR_CERTIFICATE_VALIDATION_DATE,
+		    certificateValidationDate);
+	}
+
+	if (dlftlGlobPref.checkCrl != checkCrl) {
+		settings.setValue(ENTR_CHECK_CRL, checkCrl);
+	}
+
+	if (dlftlGlobPref.timestampExpirBeforeDays !=
+	    timestampExpirBeforeDays) {
+		settings.setValue(ENTR_TIMESTAMP_EXPIR_BEFORE_DAYS,
+		    timestampExpirBeforeDays);
 	}
 
 	if (dlftlGlobPref.date_format != date_format) {
@@ -342,37 +389,6 @@ void Preferences::saveToSettings(QSettings &settings) const
 
 	if (dlftlGlobPref.toolbar_button_style != toolbar_button_style) {
 		settings.setValue("toolbar_button_style", toolbar_button_style);
-	}
-
-	if (dlftlGlobPref.timer_value != timer_value) {
-		settings.setValue("timer_value", timer_value);
-	}
-
-	if (dlftlGlobPref.isds_download_timeout_ms !=
-	    isds_download_timeout_ms) {
-		settings.setValue("isds_download_timeout_ms",
-		    isds_download_timeout_ms);
-	}
-
-	if (dlftlGlobPref.timestamp_expir_before_days !=
-	    timestamp_expir_before_days) {
-		settings.setValue("timestamp_expir_before_days",
-		    timestamp_expir_before_days);
-	}
-
-	if (dlftlGlobPref.message_mark_as_read_timeout !=
-	    message_mark_as_read_timeout) {
-		settings.setValue("message_mark_as_read_timeout",
-		    message_mark_as_read_timeout);
-	}
-
-	if (dlftlGlobPref.download_on_background != download_on_background) {
-		settings.setValue("download_on_background",
-		    download_on_background);
-	}
-
-	if (dlftlGlobPref.download_at_start != download_at_start) {
-		settings.setValue("download_at_start", download_at_start);
 	}
 
 	if (dlftlGlobPref.use_global_paths != use_global_paths) {

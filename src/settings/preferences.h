@@ -63,23 +63,32 @@ public:
 	const QString tagDbFile; /*!< Tag db file. */
 	const QString recMgmtDbFile; /*!< Records management db file. */
 
-	bool auto_download_whole_messages;
-	bool default_download_signed; /*!< Default downloading method. */
-	//bool store_passwords_on_disk;
-	bool store_messages_on_disk;
+	bool autoDownloadWholeMessages;
+	bool defaultDownloadSigned; /*!<
+	                             * Default downloading method (true if
+	                             * signed messages should be downloaded).
+	                             * This value is unused. TODO -- unused.
+	                             */
+	//bool storePasswordsOnDisk;
+	bool storeMessagesOnDisk;
+	bool storeAdditionalDataOnDisk; /*!< Store account information to disk. */
+	bool downloadOnBackground;
+	int timerValue; /*!< Interval in minutes to check for new messages. */
+	bool downloadAtStart;
+	bool checkNewVersions;
+	bool sendStatsWithVersionChecks;
+
+	int isdsDownloadTimeoutMs;
+	int messageMarkAsReadTimeout;
+
+	enum CertValDate certificateValidationDate;
+	bool checkCrl;
+	int timestampExpirBeforeDays;
+
 	int toolbar_button_style;
-	bool store_additional_data_on_disk;
-	enum CertValDate certificate_validation_date;
-	bool check_crl;
-	bool check_new_versions;
-	bool send_stats_with_version_checks;
-	bool download_on_background;
-	int timer_value;
-	bool download_at_start;
 	enum DateFmt date_format;
 	QString language;
 	enum SelectType after_start_select;
-	int message_mark_as_read_timeout;
 	bool use_global_paths;
 	QString save_attachments_path;
 	QString add_file_to_attachments_path;
@@ -92,8 +101,6 @@ public:
 	QString attachment_filename_format;
 	QString delivery_filename_format_all_attach;
 	bool delivery_info_for_every_file;
-	int isds_download_timeout_ms;
-	int timestamp_expir_before_days;
 
 	/*!
 	 * @brief Create configuration file if not present.

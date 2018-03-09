@@ -240,7 +240,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		/* Verify message signature. */
 		int ret = raw_msg_verify_signature(msg->raw,
 		    msg->raw_length, 1,
-		    GlobInstcs::prefsPtr->check_crl ? 1 : 0);
+		    GlobInstcs::prefsPtr->checkCrl ? 1 : 0);
 		logDebugLv0NL(
 		   "Verification of message '%" PRId64 "' returned: %d.",
 		   dmID, ret);

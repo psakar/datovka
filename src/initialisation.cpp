@@ -373,7 +373,7 @@ int allocGlobContainers(const Preferences &prefs)
 	}
 	/* Open accounts database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	flags |= prefs.store_additional_data_on_disk ?
+	flags |= prefs.storeAdditionalDataOnDisk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
 	if (!GlobInstcs::accntDbPtr->openDb(prefs.acntDbPath(), flags)) {
 		logErrorNL("Error opening account db '%s'.",
