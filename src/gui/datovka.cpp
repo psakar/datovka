@@ -551,14 +551,14 @@ void MainWindow::checkNewDatovkaVersion(void)
 	if (GlobInstcs::prefsPtr->send_stats_with_version_checks) {
 		/* TODO - sent info about datovka, libs and OS to our server */
 		nam = new QNetworkAccessManager(this);
-		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
-		this, SLOT(datovkaVersionResponce(QNetworkReply*)));
+		connect(nam, SIGNAL(finished(QNetworkReply *)),
+		    this, SLOT(datovkaVersionResponce(QNetworkReply *)));
 		QUrl url(DATOVKA_CHECK_NEW_VERSION_URL);
 		nam->get(QNetworkRequest(url));
 	} else {
 		nam = new QNetworkAccessManager(this);
-		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
-		this, SLOT(datovkaVersionResponce(QNetworkReply*)));
+		connect(nam, SIGNAL(finished(QNetworkReply *)),
+		    this, SLOT(datovkaVersionResponce(QNetworkReply *)));
 		QUrl url(DATOVKA_CHECK_NEW_VERSION_URL);
 		nam->get(QNetworkRequest(url));
 	}
@@ -1661,7 +1661,7 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 	 * selection according to the model.
 	 */
 	switch (GlobInstcs::prefsPtr->after_start_select) {
-	case GlobPreferences::SELECT_NEWEST:
+	case Preferences::SELECT_NEWEST:
 		/* Search for the message with the largest id. */
 		{
 			msgIndex = model->index(0, 0);
@@ -1685,7 +1685,7 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 			}
 		}
 		break;
-	case GlobPreferences::SELECT_LAST_VISITED:
+	case Preferences::SELECT_LAST_VISITED:
 		{
 			qint64 msgLastId = -1;
 			if (AccountModel::nodeRecentReceived == acntNodeType) {
@@ -1723,7 +1723,7 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 			}
 		}
 		break;
-	case GlobPreferences::SELECT_NOTHING:
+	case Preferences::SELECT_NOTHING:
 		/* Don't select anything. */
 		break;
 	default:

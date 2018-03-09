@@ -31,7 +31,7 @@
 
 /* Defaults. */
 static const
-GlobPreferences dlftlGlobPref;
+Preferences dlftlGlobPref;
 
 /*! Default configuration folder location. */
 #define DFLT_CONF_SUBDIR ".dsgui"
@@ -42,7 +42,7 @@ GlobPreferences dlftlGlobPref;
 #define TAG_DB_FILE "tag.db"
 #define RECORDS_MANAGEMENT_DB_FILE "records_management.db"
 
-GlobPreferences::GlobPreferences(void)
+Preferences::Preferences(void)
     : confSubdir(DFLT_CONF_SUBDIR),
     loadFromConf(DFLT_CONF_FILE),
     saveToConf(DFLT_CONF_FILE),
@@ -87,11 +87,7 @@ GlobPreferences::GlobPreferences(void)
 {
 }
 
-GlobPreferences::~GlobPreferences(void)
-{
-}
-
-bool GlobPreferences::ensureConfPresence(void)
+bool Preferences::ensureConfPresence(void)
 {
 	if (!QDir(GlobInstcs::prefsPtr->confDir()).exists()) {
 		if (!QDir(GlobInstcs::prefsPtr->confDir()).mkpath(".")) {
@@ -109,7 +105,7 @@ bool GlobPreferences::ensureConfPresence(void)
 	return true;
 }
 
-void GlobPreferences::loadFromSettings(const QSettings &settings)
+void Preferences::loadFromSettings(const QSettings &settings)
 {
 	int value;
 
@@ -280,7 +276,7 @@ void GlobPreferences::loadFromSettings(const QSettings &settings)
 	    dlftlGlobPref.delivery_filename_format_all_attach).toString();
 }
 
-void GlobPreferences::saveToSettings(QSettings &settings) const
+void Preferences::saveToSettings(QSettings &settings) const
 {
 	settings.beginGroup("preferences");
 
@@ -447,32 +443,32 @@ void GlobPreferences::saveToSettings(QSettings &settings) const
 	settings.endGroup();
 }
 
-QString GlobPreferences::confDir(void) const
+QString Preferences::confDir(void) const
 {
 	return confDirPath(confSubdir);
 }
 
-QString GlobPreferences::loadConfPath(void) const
+QString Preferences::loadConfPath(void) const
 {
 	return confDir() + QDir::separator() + loadFromConf;
 }
 
-QString GlobPreferences::saveConfPath(void) const
+QString Preferences::saveConfPath(void) const
 {
 	return confDir() + QDir::separator() + saveToConf;
 }
 
-QString GlobPreferences::accountDbPath(void) const
+QString Preferences::accountDbPath(void) const
 {
 	return confDir() + QDir::separator() + accountDbFile;
 }
 
-QString GlobPreferences::tagDbPath(void) const
+QString Preferences::tagDbPath(void) const
 {
 	return confDir() + QDir::separator() + tagDbFile;
 }
 
-QString GlobPreferences::recordsManagementDbPath(void) const
+QString Preferences::recordsManagementDbPath(void) const
 {
 	return confDir() + QDir::separator() + recordsManagementDbFile;
 }

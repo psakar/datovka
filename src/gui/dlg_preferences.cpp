@@ -43,7 +43,7 @@ enum LangIndex {
 	LANG_ENGLISH = 2
 };
 
-DlgPreferences::DlgPreferences(const GlobPreferences &prefs,
+DlgPreferences::DlgPreferences(const Preferences &prefs,
     const PinSettings &pinSett, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgPreferences),
@@ -67,7 +67,7 @@ DlgPreferences::~DlgPreferences(void)
 	delete m_ui;
 }
 
-bool DlgPreferences::modify(GlobPreferences &prefs, PinSettings &pinSett,
+bool DlgPreferences::modify(Preferences &prefs, PinSettings &pinSett,
     QWidget *parent)
 {
 	DlgPreferences dlg(prefs, pinSett, parent);
@@ -181,7 +181,7 @@ int settingsLangtoIndex(const QString &lang)
 	}
 }
 
-void DlgPreferences::saveSettings(GlobPreferences &prefs,
+void DlgPreferences::saveSettings(Preferences &prefs,
     PinSettings &pinSett) const
 {
 	/* downloading */
@@ -204,8 +204,7 @@ void DlgPreferences::saveSettings(GlobPreferences &prefs,
 	    m_ui->storeAdditionalDataOnDisk->isChecked();
 	prefs.certificate_validation_date =
 	    m_ui->certValidationDateNow->isChecked() ?
-	        GlobPreferences::CURRENT_DATE :
-	        GlobPreferences::DOWNLOAD_DATE;
+	        Preferences::CURRENT_DATE : Preferences::DOWNLOAD_DATE;
 	prefs.check_crl = m_ui->checkCrl->isChecked();
 	prefs.timestamp_expir_before_days =
 	    m_ui->timestampExpirSpinBox->value();
@@ -213,11 +212,11 @@ void DlgPreferences::saveSettings(GlobPreferences &prefs,
 
 	/* navigation */
 	if (m_ui->afterStartSelectNewest->isChecked()) {
-		prefs.after_start_select = GlobPreferences::SELECT_NEWEST;
+		prefs.after_start_select = Preferences::SELECT_NEWEST;
 	} else if (m_ui->afterStartSelectLast->isChecked()) {
-		prefs.after_start_select = GlobPreferences::SELECT_LAST_VISITED;
+		prefs.after_start_select = Preferences::SELECT_LAST_VISITED;
 	} else {
-		prefs.after_start_select = GlobPreferences::SELECT_NOTHING;
+		prefs.after_start_select = Preferences::SELECT_NOTHING;
 	}
 
 	/* interface */
@@ -256,7 +255,7 @@ void DlgPreferences::saveSettings(GlobPreferences &prefs,
 	    indexToSettingsLang(m_ui->langComboBox->currentIndex());
 }
 
-void DlgPreferences::initDialogue(const GlobPreferences &prefs)
+void DlgPreferences::initDialogue(const Preferences &prefs)
 {
 	/* downloading */
 	m_ui->downloadOnBackground->setChecked(prefs.download_on_background);
@@ -292,11 +291,11 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 	m_ui->storeMessagesOnDisk->setChecked(prefs.store_messages_on_disk);
 	m_ui->storeAdditionalDataOnDisk->setChecked(
 	    prefs.store_additional_data_on_disk);
-	if (GlobPreferences::CURRENT_DATE ==
+	if (Preferences::CURRENT_DATE ==
 	    prefs.certificate_validation_date) {
 		m_ui->certValidationDateNow->setChecked(true);
 		m_ui->certValidationDateDownload->setChecked(false);
-	} else if (GlobPreferences::DOWNLOAD_DATE ==
+	} else if (Preferences::DOWNLOAD_DATE ==
 	    prefs.certificate_validation_date) {
 		m_ui->certValidationDateNow->setChecked(false);
 		m_ui->certValidationDateDownload->setChecked(true);
@@ -314,16 +313,16 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 	    this, SLOT(clearPin()));
 
 	/* navigation */
-	if (GlobPreferences::SELECT_NEWEST == prefs.after_start_select) {
+	if (Preferences::SELECT_NEWEST == prefs.after_start_select) {
 		m_ui->afterStartSelectNewest->setChecked(true);
 		m_ui->afterStartSelectLast->setChecked(false);
 		m_ui->afterStartSelectNothing->setChecked(false);
-	} else if (GlobPreferences::SELECT_LAST_VISITED ==
+	} else if (Preferences::SELECT_LAST_VISITED ==
 	    prefs.after_start_select) {
 		m_ui->afterStartSelectNewest->setChecked(false);
 		m_ui->afterStartSelectLast->setChecked(true);
 		m_ui->afterStartSelectNothing->setChecked(false);
-	} else if (GlobPreferences::SELECT_NOTHING ==
+	} else if (Preferences::SELECT_NOTHING ==
 	    prefs.after_start_select) {
 		m_ui->afterStartSelectNewest->setChecked(false);
 		m_ui->afterStartSelectLast->setChecked(false);

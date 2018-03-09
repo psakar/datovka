@@ -4666,7 +4666,7 @@ QDateTime MessageDb::msgsVerificationDate(qint64 dmId) const
 	QSqlQuery query(m_db);
 	QString queryStr;
 
-	if (GlobPreferences::DOWNLOAD_DATE ==
+	if (Preferences::DOWNLOAD_DATE ==
 	    GlobInstcs::prefsPtr->certificate_validation_date) {
 
 		queryStr = "SELECT "

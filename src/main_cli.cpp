@@ -114,8 +114,8 @@ int main(int argc, char *argv[])
 	start = QDateTime::currentMSecsSinceEpoch();
 	logInfo("Starting at %lld.%03lld .\n", start / 1000, start % 1000);
 
-	/* Create configuration file is file is missing. */
-	GlobPreferences::ensureConfPresence();
+	/* Create configuration file if file is missing. */
+	Preferences::ensureConfPresence();
 
 	switch (crypto_compiled_lib_ver_check()) {
 	case 1:

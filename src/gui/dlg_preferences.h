@@ -47,7 +47,7 @@ private:
 	 * @param[in] pinSett PIN settings to use to set dialogue.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgPreferences(const GlobPreferences &prefs,
+	explicit DlgPreferences(const Preferences &prefs,
 	    const PinSettings &pinSett, QWidget *parent = Q_NULLPTR);
 
 public:
@@ -66,7 +66,7 @@ public:
 	 *     have been updated.
 	 */
 	static
-	bool modify(GlobPreferences &prefs, PinSettings &pinSett,
+	bool modify(Preferences &prefs, PinSettings &pinSett,
 	    QWidget *parent = Q_NULLPTR);
 
 private slots:
@@ -109,14 +109,14 @@ private:
 	 * @param[out] prefs Preferences to be modified.
 	 * @param[out] pinSett PIN settings to be modified.
 	 */
-	void saveSettings(GlobPreferences &prefs, PinSettings &pinSett) const;
+	void saveSettings(Preferences &prefs, PinSettings &pinSett) const;
 
 	/*!
 	 * @brief Initialises the dialogue according to settings.
 	 *
 	 * @param[in] prefs Preferences according to which to set the dialogue.
 	 */
-	void initDialogue(const GlobPreferences &prefs);
+	void initDialogue(const Preferences &prefs);
 
 	/*!
 	 * @brief Set PIN button activity.

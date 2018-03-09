@@ -66,8 +66,8 @@ void setDefaultLocale(void)
 #endif /* !WIN32 */
 }
 
-int preferencesSetUp(const QCommandLineParser &parser,
-    GlobPreferences &prefs, LogDevice &log)
+int preferencesSetUp(const QCommandLineParser &parser, Preferences &prefs,
+    LogDevice &log)
 {
 	int logFileId = -1;
 
@@ -163,7 +163,7 @@ void downloadCRL(void)
 	}
 }
 
-void loadLocalisation(const GlobPreferences &prefs)
+void loadLocalisation(const Preferences &prefs)
 {
 	static QTranslator qtTranslator, appTranslator;
 
@@ -295,7 +295,7 @@ void deallocGlobInfrastruct(void)
 
 int allocGlobSettings(void)
 {
-	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	GlobInstcs::prefsPtr = new (std::nothrow) Preferences;
 	if (Q_NULLPTR == GlobInstcs::prefsPtr) {
 		logErrorNL("%s", "Cannot allocate preferences.");
 		goto fail;
@@ -348,7 +348,7 @@ void deallocGlobSettings(void)
 	}
 }
 
-int allocGlobContainers(const GlobPreferences &prefs)
+int allocGlobContainers(const Preferences &prefs)
 {
 	SQLiteDb::OpenFlags flags = SQLiteDb::NO_OPTIONS;
 

@@ -27,7 +27,7 @@
 #include <QSettings>
 #include <QString>
 
-class GlobPreferences {
+class Preferences {
 
 public:
 	enum CertValDate {
@@ -51,12 +51,7 @@ public:
 	/*!
 	 * @brief Constructor.
 	 */
-	GlobPreferences(void);
-
-	/*!
-	 * @brief Destructor.
-	 */
-	~GlobPreferences(void);
+	Preferences(void);
 
 	/*!
 	 * @brief Create configuration file if not present.

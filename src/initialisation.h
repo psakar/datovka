@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,8 +42,8 @@ void setDefaultLocale(void);
  * @param[in,out] log Log device to be set.
  * @return 0 on success, -1 on failure.
  */
-int preferencesSetUp(const QCommandLineParser &parser,
-    GlobPreferences &prefs, LogDevice &log);
+int preferencesSetUp(const QCommandLineParser &parser, Preferences &prefs,
+    LogDevice &log);
 
 /*!
  * @brief Downloads CRL files and installs them into OpenSSL context.
@@ -55,7 +55,7 @@ void downloadCRL(void);
  *
  * @param[in] prefs Preferences structure.
  */
-void loadLocalisation(const GlobPreferences &prefs);
+void loadLocalisation(const Preferences &prefs);
 
 /*!
  * @brief Allocates global log facility.
@@ -93,7 +93,7 @@ void deallocGlobSettings(void);
  * @param[in] prefs Preferences structure.
  * @return 0 on success, -1 on failure.
  */
-int allocGlobContainers(const GlobPreferences &prefs);
+int allocGlobContainers(const Preferences &prefs);
 
 /*!
  * @brief Deallocates global database objects and containers.
