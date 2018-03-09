@@ -53,12 +53,6 @@ public:
 	 */
 	Preferences(void);
 
-	/*!
-	 * @brief Create configuration file if not present.
-	 */
-	static
-	bool ensureConfPresence(void);
-
 	QString confSubdir; /*!< Configuration directory. */
 	QString loadFromConf; /*!< Configuration file to load from. */
 	QString saveToConf; /*!< Configuration file to save to. */
@@ -96,6 +90,14 @@ public:
 	bool delivery_info_for_every_file;
 	int isds_download_timeout_ms;
 	int timestamp_expir_before_days;
+
+	/*!
+	 * @brief Create configuration file if not present.
+	 *
+	 * @note Location of the configuration file is taken from this
+	 *     preferences structure.
+	 */
+	bool ensureConfPresence(void) const;
 
 	/*!
 	 * @brief Load data from supplied settings.

@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 	logInfo("Starting at %lld.%03lld .\n", start / 1000, start % 1000);
 
 	/* Create configuration file if file is missing. */
-	Preferences::ensureConfPresence();
+	GlobInstcs::prefsPtr->ensureConfPresence();
 
 	switch (crypto_compiled_lib_ver_check()) {
 	case 1:

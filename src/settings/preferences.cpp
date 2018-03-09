@@ -22,10 +22,10 @@
  */
 
 #include <QDir>
+#include <QFile>
 
 #include "src/common.h"
 #include "src/datovka_shared/localisation/localisation.h"
-#include "src/global.h"
 #include "src/io/filesystem.h"
 #include "src/settings/preferences.h"
 
@@ -87,21 +87,25 @@ Preferences::Preferences(void)
 {
 }
 
-bool Preferences::ensureConfPresence(void)
+bool Preferences::ensureConfPresence(void) const
 {
-	if (!QDir(GlobInstcs::prefsPtr->confDir()).exists()) {
-		if (!QDir(GlobInstcs::prefsPtr->confDir()).mkpath(".")) {
-			return false;
+	{
+		QDir dir(confDir());
+		if (!dir.exists()) {
+			if (!dir.mkpath(".")) {
+				return false;
+			}
 		}
 	}
-	if (!QFile(GlobInstcs::prefsPtr->loadConfPath()).exists()) {
-		QFile file(GlobInstcs::prefsPtr->loadConfPath());
-		if (!file.open(QIODevice::ReadWrite)) {
-			return false;
+	{
+		QFile file(loadConfPath());
+		if (!file.exists()) {
+			if (!file.open(QIODevice::ReadWrite)) {
+				return false;
+			}
+			file.close();
 		}
-		file.close();
 	}
-
 	return true;
 }
 
