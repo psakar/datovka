@@ -101,7 +101,7 @@ Preferences::Preferences(void)
     checkCrl(true),
     timestampExpirBeforeDays(TIMESTAMP_EXPIR_BEFORE_DAYS),
     afterStartSelect(SELECT_NOTHING),
-    toolbarButtonStyle(Qt::ToolButtonTextUnderIcon),
+    toolbarButtonStyle(TEXT_UNDER_ICON),
     useGlobalPaths(false),
     saveAttachmentsPath(QDir::homePath()),
     addFileToAttachmentsPath(QDir::homePath()),
@@ -117,6 +117,25 @@ Preferences::Preferences(void)
     language(Localisation::langSystem), /* Use local settings. */
     dateFormat(DATE_FORMAT_DEFAULT)
 {
+}
+
+int Preferences::qtToolButtonStyle(enum ToolbarButtonStyle style)
+{
+	switch (style) {
+	case Preferences::ICON_ONLY:
+		return Qt::ToolButtonIconOnly;
+		break;
+	case Preferences::TEXT_BESIDE_ICON:
+		return Qt::ToolButtonTextBesideIcon;
+		break;
+	case Preferences::TEXT_UNDER_ICON:
+		return Qt::ToolButtonTextUnderIcon;
+		break;
+	default:
+		Q_ASSERT(0);
+		return Qt::ToolButtonTextUnderIcon; /* Default. */
+		break;
+	}
 }
 
 bool Preferences::ensureConfPresence(void) const
@@ -229,9 +248,23 @@ void Preferences::loadFromSettings(const QSettings &settings)
 		break;
 	}
 
-	toolbarButtonStyle = settings.value(
-	    PREF_GROUP "/" ENTR_TOOLBAR_BUTTON_STYLE,
+	value = settings.value(PREF_GROUP "/" ENTR_TOOLBAR_BUTTON_STYLE,
 	    dlftlGlobPref.toolbarButtonStyle).toInt();
+	switch (value) {
+	case ICON_ONLY:
+		toolbarButtonStyle = ICON_ONLY;
+		break;
+	case TEXT_BESIDE_ICON:
+		toolbarButtonStyle = TEXT_BESIDE_ICON;
+		break;
+	case TEXT_UNDER_ICON:
+		toolbarButtonStyle = TEXT_UNDER_ICON;
+		break;
+	default:
+		toolbarButtonStyle = dlftlGlobPref.toolbarButtonStyle;
+		Q_ASSERT(0);
+		break;
+	}
 
 	useGlobalPaths = settings.value(PREF_GROUP "/" ENTR_USE_GLOBAL_PATHS,
 	    dlftlGlobPref.useGlobalPaths).toBool();

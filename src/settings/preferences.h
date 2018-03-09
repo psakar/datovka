@@ -48,6 +48,12 @@ public:
 		SELECT_NOTHING = 3
 	};
 
+	enum ToolbarButtonStyle {
+		ICON_ONLY = 0, /* Qt::ToolButtonIconOnly */
+		TEXT_BESIDE_ICON = 2, /* Qt::ToolButtonTextBesideIcon */
+		TEXT_UNDER_ICON = 3 /* Qt::ToolButtonTextUnderIcon */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 */
@@ -87,7 +93,7 @@ public:
 
 	enum SelectType afterStartSelect;
 
-	int toolbarButtonStyle;
+	enum ToolbarButtonStyle toolbarButtonStyle;
 
 	bool useGlobalPaths;
 	QString saveAttachmentsPath;
@@ -106,6 +112,15 @@ public:
 	QString language;
 
 	enum DateFmt dateFormat; /*!< TODO -- unused. */
+
+	/*!
+	 * @brief Converts style to to Qt::ToolButtonStyle value.
+	 *
+	 * @param style Style value as used in preferences.
+	 * @return Value corresponding with enum Qt::ToolButtonStyle.
+	 */
+	static
+	int qtToolButtonStyle(enum ToolbarButtonStyle style);
 
 	/*!
 	 * @brief Create configuration file if not present.

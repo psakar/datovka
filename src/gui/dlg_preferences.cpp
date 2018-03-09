@@ -221,11 +221,11 @@ void DlgPreferences::saveSettings(Preferences &prefs,
 
 	/* interface */
 	if (m_ui->toolButtonIconOnly->isChecked()) {
-		prefs.toolbarButtonStyle = Qt::ToolButtonIconOnly;
+		prefs.toolbarButtonStyle = Preferences::ICON_ONLY;
 	} else if (m_ui->toolButtonTextBesideIcon->isChecked()) {
-		prefs.toolbarButtonStyle = Qt::ToolButtonTextBesideIcon;
+		prefs.toolbarButtonStyle = Preferences::TEXT_BESIDE_ICON;
 	} else {
-		prefs.toolbarButtonStyle = Qt::ToolButtonTextUnderIcon;
+		prefs.toolbarButtonStyle = Preferences::TEXT_UNDER_ICON;
 	}
 
 	/* directories */
@@ -330,22 +330,25 @@ void DlgPreferences::initDialogue(const Preferences &prefs)
 	}
 
 	/* interface */
-	if (Qt::ToolButtonIconOnly == prefs.toolbarButtonStyle) {
+	switch (prefs.toolbarButtonStyle) {
+	case Preferences::ICON_ONLY:
 		m_ui->toolButtonIconOnly->setChecked(true);
 		m_ui->toolButtonTextBesideIcon->setChecked(false);
 		m_ui->toolButtonTextUnderIcon->setChecked(false);
-	} else if (Qt::ToolButtonTextBesideIcon ==
-	    prefs.toolbarButtonStyle) {
+		break;
+	case Preferences::TEXT_BESIDE_ICON:
 		m_ui->toolButtonIconOnly->setChecked(false);
 		m_ui->toolButtonTextBesideIcon->setChecked(true);
 		m_ui->toolButtonTextUnderIcon->setChecked(false);
-	} else if (Qt::ToolButtonTextUnderIcon ==
-	    prefs.toolbarButtonStyle) {
+		break;
+	case Preferences::TEXT_UNDER_ICON:
 		m_ui->toolButtonIconOnly->setChecked(false);
 		m_ui->toolButtonTextBesideIcon->setChecked(false);
 		m_ui->toolButtonTextUnderIcon->setChecked(true);
-	} else {
+		break;
+	default:
 		Q_ASSERT(0);
+		break;
 	}
 
 	/* directories */

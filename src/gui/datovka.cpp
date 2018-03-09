@@ -407,13 +407,9 @@ MainWindow::MainWindow(QWidget *parent)
 	loadSettings();
 
 	/* Set toolbar buttons style from settings */
-	if ((GlobInstcs::prefsPtr->toolbarButtonStyle >= 0) &&
-	    (GlobInstcs::prefsPtr->toolbarButtonStyle <= 3)) {
-		ui->toolBar->setToolButtonStyle(
-		    (Qt::ToolButtonStyle)GlobInstcs::prefsPtr->toolbarButtonStyle);
-	} else {
-		ui->toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-	}
+	ui->toolBar->setToolButtonStyle(
+	    (Qt::ToolButtonStyle)Preferences::qtToolButtonStyle(
+	        GlobInstcs::prefsPtr->toolbarButtonStyle));
 
 	/* Account list must already be set in order to connect this signal. */
 	connect(ui->accountList->selectionModel(),
