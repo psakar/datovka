@@ -407,10 +407,10 @@ MainWindow::MainWindow(QWidget *parent)
 	loadSettings();
 
 	/* Set toolbar buttons style from settings */
-	if ((GlobInstcs::prefsPtr->toolbar_button_style >= 0) &&
-	    (GlobInstcs::prefsPtr->toolbar_button_style <= 3)) {
+	if ((GlobInstcs::prefsPtr->toolbarButtonStyle >= 0) &&
+	    (GlobInstcs::prefsPtr->toolbarButtonStyle <= 3)) {
 		ui->toolBar->setToolButtonStyle(
-		    (Qt::ToolButtonStyle)GlobInstcs::prefsPtr->toolbar_button_style);
+		    (Qt::ToolButtonStyle)GlobInstcs::prefsPtr->toolbarButtonStyle);
 	} else {
 		ui->toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
 	}
@@ -1660,7 +1660,7 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 	 * If we selected a message from last received then restore the
 	 * selection according to the model.
 	 */
-	switch (GlobInstcs::prefsPtr->after_start_select) {
+	switch (GlobInstcs::prefsPtr->afterStartSelect) {
 	case Preferences::SELECT_NEWEST:
 		/* Search for the message with the largest id. */
 		{
@@ -1959,8 +1959,8 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	setAccountStoragePaths(userName);
 
 	QString saveAttachPath;
-	if (GlobInstcs::prefsPtr->use_global_paths) {
-		saveAttachPath = GlobInstcs::prefsPtr->save_attachments_path;
+	if (GlobInstcs::prefsPtr->useGlobalPaths) {
+		saveAttachPath = GlobInstcs::prefsPtr->saveAttachmentsPath;
 	} else {
 		saveAttachPath = m_save_attach_dir;
 	}
@@ -1983,7 +1983,7 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		showStatusTextWithTimeout(tr(
 		    "Saving attachment of message '%1' to file was successful.")
 		    .arg(msgId.dmId));
-		if (!GlobInstcs::prefsPtr->use_global_paths) {
+		if (!GlobInstcs::prefsPtr->useGlobalPaths) {
 			m_save_attach_dir =
 			    QFileInfo(savedFileName).absoluteDir()
 			        .absolutePath();
@@ -2031,8 +2031,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	setAccountStoragePaths(userName);
 
 	// how does default path used for?
-	if (GlobInstcs::prefsPtr->use_global_paths) {
-		attSaveDir = GlobInstcs::prefsPtr->save_attachments_path;
+	if (GlobInstcs::prefsPtr->useGlobalPaths) {
+		attSaveDir = GlobInstcs::prefsPtr->saveAttachmentsPath;
 	} else {
 		attSaveDir = m_save_attach_dir;
 	}
@@ -2047,7 +2047,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	}
 
 	// store selected path
-	if ((!GlobInstcs::prefsPtr->use_global_paths) && (!attSaveDir.isEmpty())) {
+	if ((!GlobInstcs::prefsPtr->useGlobalPaths) && (!attSaveDir.isEmpty())) {
 		m_save_attach_dir = attSaveDir;
 		storeExportPath(userName);
 	}
@@ -4648,7 +4648,7 @@ void MainWindow::storeAttachmentPath(const QString &userName,
 
 	Q_UNUSED(userName);
 
-	if (!GlobInstcs::prefsPtr->use_global_paths) {
+	if (!GlobInstcs::prefsPtr->useGlobalPaths) {
 		m_add_attach_dir = lastDir;
 		storeExportPath(userName);
 	}

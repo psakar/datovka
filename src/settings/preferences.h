@@ -85,22 +85,27 @@ public:
 	bool checkCrl;
 	int timestampExpirBeforeDays;
 
-	int toolbar_button_style;
-	enum DateFmt date_format;
+	enum SelectType afterStartSelect;
+
+	int toolbarButtonStyle;
+
+	bool useGlobalPaths;
+	QString saveAttachmentsPath;
+	QString addFileToAttachmentsPath;
+
+	bool allAttachmentsSaveZfoMsg;
+	bool allAttachmentsSaveZfoDelinfo;
+	bool allAttachmentsSavePdfMsgenvel;
+	bool allAttachmentsSavePdfDelinfo;
+	QString messageFilenameFormat;
+	QString deliveryFilenameFormat;
+	QString attachmentFilenameFormat;
+	QString deliveryFilenameFormatAllAttach;
+	bool deliveryInfoForEveryFile;
+
 	QString language;
-	enum SelectType after_start_select;
-	bool use_global_paths;
-	QString save_attachments_path;
-	QString add_file_to_attachments_path;
-	bool all_attachments_save_zfo_delinfo;
-	bool all_attachments_save_zfo_msg;
-	bool all_attachments_save_pdf_msgenvel;
-	bool all_attachments_save_pdf_delinfo;
-	QString message_filename_format;
-	QString delivery_filename_format;
-	QString attachment_filename_format;
-	QString delivery_filename_format_all_attach;
-	bool delivery_info_for_every_file;
+
+	enum DateFmt dateFormat; /*!< TODO -- unused. */
 
 	/*!
 	 * @brief Create configuration file if not present.

@@ -212,42 +212,42 @@ void DlgPreferences::saveSettings(Preferences &prefs,
 
 	/* navigation */
 	if (m_ui->afterStartSelectNewest->isChecked()) {
-		prefs.after_start_select = Preferences::SELECT_NEWEST;
+		prefs.afterStartSelect = Preferences::SELECT_NEWEST;
 	} else if (m_ui->afterStartSelectLast->isChecked()) {
-		prefs.after_start_select = Preferences::SELECT_LAST_VISITED;
+		prefs.afterStartSelect = Preferences::SELECT_LAST_VISITED;
 	} else {
-		prefs.after_start_select = Preferences::SELECT_NOTHING;
+		prefs.afterStartSelect = Preferences::SELECT_NOTHING;
 	}
 
 	/* interface */
 	if (m_ui->toolButtonIconOnly->isChecked()) {
-		prefs.toolbar_button_style = Qt::ToolButtonIconOnly;
+		prefs.toolbarButtonStyle = Qt::ToolButtonIconOnly;
 	} else if (m_ui->toolButtonTextBesideIcon->isChecked()) {
-		prefs.toolbar_button_style = Qt::ToolButtonTextBesideIcon;
+		prefs.toolbarButtonStyle = Qt::ToolButtonTextBesideIcon;
 	} else {
-		prefs.toolbar_button_style = Qt::ToolButtonTextUnderIcon;
+		prefs.toolbarButtonStyle = Qt::ToolButtonTextUnderIcon;
 	}
 
 	/* directories */
-	prefs.use_global_paths = m_ui->enableGlobalPaths->isChecked();
-	prefs.save_attachments_path = m_ui->savePath->text();
-	prefs.add_file_to_attachments_path = m_ui->addFilePath->text();
+	prefs.useGlobalPaths = m_ui->enableGlobalPaths->isChecked();
+	prefs.saveAttachmentsPath = m_ui->savePath->text();
+	prefs.addFileToAttachmentsPath = m_ui->addFilePath->text();
 
 	/* saving */
-	prefs.all_attachments_save_zfo_msg =
+	prefs.allAttachmentsSaveZfoMsg =
 	    m_ui->allAttachmentsSaveZfoMsg->isChecked();
-	prefs.all_attachments_save_zfo_delinfo =
+	prefs.allAttachmentsSaveZfoDelinfo =
 	    m_ui->allAttachmentsSaveZfoDelInfo->isChecked();
-	prefs.all_attachments_save_pdf_msgenvel =
+	prefs.allAttachmentsSavePdfMsgenvel =
 	    m_ui->allAttachmentsSavePdfMsgEnvel->isChecked();
-	prefs.all_attachments_save_pdf_delinfo =
+	prefs.allAttachmentsSavePdfDelinfo =
 	    m_ui->allAttachmentsSavePdfDelInfo->isChecked();
-	prefs.message_filename_format = m_ui->msgFileNameFmt->text();
-	prefs.delivery_filename_format = m_ui->delInfoFileNameFmt->text();
-	prefs.attachment_filename_format = m_ui->attachFileNameFmt->text();
-	prefs.delivery_info_for_every_file =
+	prefs.messageFilenameFormat = m_ui->msgFileNameFmt->text();
+	prefs.deliveryFilenameFormat = m_ui->delInfoFileNameFmt->text();
+	prefs.attachmentFilenameFormat = m_ui->attachFileNameFmt->text();
+	prefs.deliveryInfoForEveryFile =
 	    m_ui->delInfoForEveryFile->isChecked();
-	prefs.delivery_filename_format_all_attach =
+	prefs.deliveryFilenameFormatAllAttach =
 	    m_ui->allAttachDelInfoFileNameFmt->text();
 
 	/* language */
@@ -311,17 +311,17 @@ void DlgPreferences::initDialogue(const Preferences &prefs)
 	    this, SLOT(clearPin()));
 
 	/* navigation */
-	if (Preferences::SELECT_NEWEST == prefs.after_start_select) {
+	if (Preferences::SELECT_NEWEST == prefs.afterStartSelect) {
 		m_ui->afterStartSelectNewest->setChecked(true);
 		m_ui->afterStartSelectLast->setChecked(false);
 		m_ui->afterStartSelectNothing->setChecked(false);
 	} else if (Preferences::SELECT_LAST_VISITED ==
-	    prefs.after_start_select) {
+	    prefs.afterStartSelect) {
 		m_ui->afterStartSelectNewest->setChecked(false);
 		m_ui->afterStartSelectLast->setChecked(true);
 		m_ui->afterStartSelectNothing->setChecked(false);
 	} else if (Preferences::SELECT_NOTHING ==
-	    prefs.after_start_select) {
+	    prefs.afterStartSelect) {
 		m_ui->afterStartSelectNewest->setChecked(false);
 		m_ui->afterStartSelectLast->setChecked(false);
 		m_ui->afterStartSelectNothing->setChecked(true);
@@ -330,17 +330,17 @@ void DlgPreferences::initDialogue(const Preferences &prefs)
 	}
 
 	/* interface */
-	if (Qt::ToolButtonIconOnly == prefs.toolbar_button_style) {
+	if (Qt::ToolButtonIconOnly == prefs.toolbarButtonStyle) {
 		m_ui->toolButtonIconOnly->setChecked(true);
 		m_ui->toolButtonTextBesideIcon->setChecked(false);
 		m_ui->toolButtonTextUnderIcon->setChecked(false);
 	} else if (Qt::ToolButtonTextBesideIcon ==
-	    prefs.toolbar_button_style) {
+	    prefs.toolbarButtonStyle) {
 		m_ui->toolButtonIconOnly->setChecked(false);
 		m_ui->toolButtonTextBesideIcon->setChecked(true);
 		m_ui->toolButtonTextUnderIcon->setChecked(false);
 	} else if (Qt::ToolButtonTextUnderIcon ==
-	    prefs.toolbar_button_style) {
+	    prefs.toolbarButtonStyle) {
 		m_ui->toolButtonIconOnly->setChecked(false);
 		m_ui->toolButtonTextBesideIcon->setChecked(false);
 		m_ui->toolButtonTextUnderIcon->setChecked(true);
@@ -349,9 +349,9 @@ void DlgPreferences::initDialogue(const Preferences &prefs)
 	}
 
 	/* directories */
-	m_ui->enableGlobalPaths->setChecked(prefs.use_global_paths);
-	m_ui->savePath->setText(prefs.save_attachments_path);
-	m_ui->addFilePath->setText(prefs.add_file_to_attachments_path);
+	m_ui->enableGlobalPaths->setChecked(prefs.useGlobalPaths);
+	m_ui->savePath->setText(prefs.saveAttachmentsPath);
+	m_ui->addFilePath->setText(prefs.addFileToAttachmentsPath);
 
 	connect(m_ui->savePathPushButton, SIGNAL(clicked()),
 	    this, SLOT(setSavePath()));
@@ -360,20 +360,20 @@ void DlgPreferences::initDialogue(const Preferences &prefs)
 
 	/* saving */
 	m_ui->allAttachmentsSaveZfoMsg->setChecked(
-	    prefs.all_attachments_save_zfo_msg);
+	    prefs.allAttachmentsSaveZfoMsg);
 	m_ui->allAttachmentsSaveZfoDelInfo->setChecked(
-	    prefs.all_attachments_save_zfo_delinfo);
+	    prefs.allAttachmentsSaveZfoDelinfo);
 	m_ui->allAttachmentsSavePdfMsgEnvel->setChecked(
-	    prefs.all_attachments_save_pdf_msgenvel);
+	    prefs.allAttachmentsSavePdfMsgenvel);
 	m_ui->allAttachmentsSavePdfDelInfo->setChecked(
-	    prefs.all_attachments_save_pdf_delinfo);
-	m_ui->msgFileNameFmt->setText(prefs.message_filename_format);
-	m_ui->delInfoFileNameFmt->setText(prefs.delivery_filename_format);
-	m_ui->attachFileNameFmt->setText(prefs.attachment_filename_format);
+	    prefs.allAttachmentsSavePdfDelinfo);
+	m_ui->msgFileNameFmt->setText(prefs.messageFilenameFormat);
+	m_ui->delInfoFileNameFmt->setText(prefs.deliveryFilenameFormat);
+	m_ui->attachFileNameFmt->setText(prefs.attachmentFilenameFormat);
 	m_ui->delInfoForEveryFile->setChecked(
-	    prefs.delivery_info_for_every_file);
+	    prefs.deliveryInfoForEveryFile);
 	m_ui->allAttachDelInfoFileNameFmt->setText(
-	    prefs.delivery_filename_format_all_attach);
+	    prefs.deliveryFilenameFormatAllAttach);
 
 	/* language */
 	m_ui->langComboBox->addItem(tr("Use system language"));

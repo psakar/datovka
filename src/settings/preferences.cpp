@@ -57,6 +57,22 @@ Preferences dlftlGlobPref;
 #define ENTR_CERTIFICATE_VALIDATION_DATE "certificate_validation_date"
 #define ENTR_CHECK_CRL "check_crl"
 #define ENTR_TIMESTAMP_EXPIR_BEFORE_DAYS "timestamp_expir_before_days"
+#define ENTR_AFTER_START_SELECT "after_start_select"
+#define ENTR_TOOLBAR_BUTTON_STYLE "toolbar_button_style"
+#define ENTR_USE_GLOBAL_PATHS "use_global_paths"
+#define ENTR_SAVE_ATTACHMENTS_PATH "save_attachments_path"
+#define ENTR_ADD_FILE_TO_ATTACHMENTS_PATH "add_file_to_attachments_path"
+#define ENTR_ALL_ATTACHMENTS_SAVE_ZFO_MSG "all_attachments_save_zfo_msg"
+#define ENTR_ALL_ATTACHMENTS_SAVE_ZFO_DELINFO "all_attachments_save_zfo_delinfo"
+#define ENTR_ALL_ATTACHMENTS_SAVE_PDF_MSGENVEL "all_attachments_save_pdf_msgenvel"
+#define ENTR_ALL_ATTACHMENTS_SAVE_PDF_DELINFO "all_attachments_save_pdf_delinfo"
+#define ENTR_MESSAGE_FILENAME_FORMAT "message_filename_format"
+#define ENTR_DELIVERY_FILENAME_FORMAT "delivery_filename_format"
+#define ENTR_ATTACHMENT_FILENAME_FORMAT "attachment_filename_format"
+#define ENTR_DELIVERY_FILENAME_FORMAT_ALL_ATTACH "delivery_filename_format_all_attach"
+#define ENTR_DELIVERY_INFO_FOR_EVERY_FILE "delivery_info_for_every_file"
+#define ENTR_LANGUAGE "language"
+#define ENTR_DATE_FORMAT "date_format"
 
 Preferences::Preferences(void)
     : confSubdir(DFLT_CONF_SUBDIR),
@@ -84,22 +100,22 @@ Preferences::Preferences(void)
     certificateValidationDate(DOWNLOAD_DATE),
     checkCrl(true),
     timestampExpirBeforeDays(TIMESTAMP_EXPIR_BEFORE_DAYS),
-    toolbar_button_style(Qt::ToolButtonTextUnderIcon),
-    date_format(DATE_FORMAT_DEFAULT),
+    afterStartSelect(SELECT_NOTHING),
+    toolbarButtonStyle(Qt::ToolButtonTextUnderIcon),
+    useGlobalPaths(false),
+    saveAttachmentsPath(QDir::homePath()),
+    addFileToAttachmentsPath(QDir::homePath()),
+    allAttachmentsSaveZfoMsg(false),
+    allAttachmentsSaveZfoDelinfo(false),
+    allAttachmentsSavePdfMsgenvel(false),
+    allAttachmentsSavePdfDelinfo(false),
+    messageFilenameFormat(DEFAULT_MESSAGE_FILENAME_FORMAT),
+    deliveryFilenameFormat(DEFAULT_DELIVERY_FILENAME_FORMAT),
+    attachmentFilenameFormat(DEFAULT_ATTACHMENT_FILENAME_FORMAT),
+    deliveryFilenameFormatAllAttach(DEFAULT_DELIVERY_ATTACH_FORMAT),
+    deliveryInfoForEveryFile(false),
     language(Localisation::langSystem), /* Use local settings. */
-    after_start_select(SELECT_NOTHING),
-    use_global_paths(false),
-    save_attachments_path(QDir::homePath()),
-    add_file_to_attachments_path(QDir::homePath()),
-    all_attachments_save_zfo_delinfo(false),
-    all_attachments_save_zfo_msg(false),
-    all_attachments_save_pdf_msgenvel(false),
-    all_attachments_save_pdf_delinfo(false),
-    message_filename_format(DEFAULT_MESSAGE_FILENAME_FORMAT),
-    delivery_filename_format(DEFAULT_DELIVERY_FILENAME_FORMAT),
-    attachment_filename_format(DEFAULT_ATTACHMENT_FILENAME_FORMAT),
-    delivery_filename_format_all_attach(DEFAULT_DELIVERY_ATTACH_FORMAT),
-    delivery_info_for_every_file(false)
+    dateFormat(DATE_FORMAT_DEFAULT)
 {
 }
 
@@ -195,106 +211,105 @@ void Preferences::loadFromSettings(const QSettings &settings)
 	    PREF_GROUP "/" ENTR_TIMESTAMP_EXPIR_BEFORE_DAYS,
 	    dlftlGlobPref.timestampExpirBeforeDays).toInt();
 
-	toolbar_button_style = settings.value(
-	    "preferences/toolbar_button_style",
-	    dlftlGlobPref.toolbar_button_style).toInt();
-
-	use_global_paths = settings.value(
-	    "preferences/use_global_paths",
-	    dlftlGlobPref.use_global_paths).toBool();
-
-	delivery_info_for_every_file = settings.value(
-	    "preferences/delivery_info_for_every_file",
-	    dlftlGlobPref.delivery_info_for_every_file).toBool();
-
-	value = settings.value("preferences/date_format",
-	    dlftlGlobPref.date_format).toInt();
+	value = settings.value(PREF_GROUP "/" ENTR_AFTER_START_SELECT,
+	    dlftlGlobPref.afterStartSelect).toInt();
 	switch (value) {
-	case DATE_FORMAT_LOCALE:
-		date_format = DATE_FORMAT_LOCALE;
+	case SELECT_NEWEST:
+		afterStartSelect = SELECT_NEWEST;
 		break;
-	case DATE_FORMAT_ISO:
-		date_format = DATE_FORMAT_ISO;
+	case SELECT_LAST_VISITED:
+		afterStartSelect = SELECT_LAST_VISITED;
 		break;
-	case DATE_FORMAT_DEFAULT:
-		date_format = DATE_FORMAT_DEFAULT;
+	case SELECT_NOTHING:
+		afterStartSelect = SELECT_NOTHING;
 		break;
 	default:
-		date_format = dlftlGlobPref.date_format;
+		afterStartSelect = dlftlGlobPref.afterStartSelect;
 		Q_ASSERT(0);
 		break;
 	}
 
-	language = settings.value("preferences/language",
+	toolbarButtonStyle = settings.value(
+	    PREF_GROUP "/" ENTR_TOOLBAR_BUTTON_STYLE,
+	    dlftlGlobPref.toolbarButtonStyle).toInt();
+
+	useGlobalPaths = settings.value(PREF_GROUP "/" ENTR_USE_GLOBAL_PATHS,
+	    dlftlGlobPref.useGlobalPaths).toBool();
+
+	saveAttachmentsPath = settings.value(
+	    PREF_GROUP "/" ENTR_SAVE_ATTACHMENTS_PATH,
+	    dlftlGlobPref.saveAttachmentsPath).toString();
+	if (saveAttachmentsPath.isEmpty()) {
+		saveAttachmentsPath = dlftlGlobPref.saveAttachmentsPath;
+	}
+
+	addFileToAttachmentsPath = settings.value(
+	    PREF_GROUP "/" ENTR_ADD_FILE_TO_ATTACHMENTS_PATH,
+	    dlftlGlobPref.addFileToAttachmentsPath).toString();
+	if (addFileToAttachmentsPath.isEmpty()) {
+		addFileToAttachmentsPath =
+		    dlftlGlobPref.addFileToAttachmentsPath;
+	}
+
+	allAttachmentsSaveZfoMsg = settings.value(
+	    PREF_GROUP "/" ENTR_ALL_ATTACHMENTS_SAVE_ZFO_MSG,
+	    dlftlGlobPref.allAttachmentsSaveZfoMsg).toBool();
+
+	allAttachmentsSaveZfoDelinfo = settings.value(
+	    PREF_GROUP "/" ENTR_ALL_ATTACHMENTS_SAVE_ZFO_DELINFO,
+	    dlftlGlobPref.allAttachmentsSaveZfoDelinfo).toBool();
+
+	allAttachmentsSavePdfMsgenvel = settings.value(
+	    PREF_GROUP "/" ENTR_ALL_ATTACHMENTS_SAVE_PDF_MSGENVEL,
+	    dlftlGlobPref.allAttachmentsSavePdfMsgenvel).toBool();
+
+	allAttachmentsSavePdfDelinfo = settings.value(
+	    PREF_GROUP "/" ENTR_ALL_ATTACHMENTS_SAVE_PDF_DELINFO,
+	    dlftlGlobPref.allAttachmentsSavePdfDelinfo).toBool();
+
+	messageFilenameFormat = settings.value(
+	    PREF_GROUP "/" ENTR_MESSAGE_FILENAME_FORMAT,
+	    dlftlGlobPref.messageFilenameFormat).toString();
+
+	deliveryFilenameFormat = settings.value(
+	    PREF_GROUP "/" ENTR_DELIVERY_FILENAME_FORMAT,
+	    dlftlGlobPref.deliveryFilenameFormat).toString();
+
+	attachmentFilenameFormat = settings.value(
+	    PREF_GROUP "/" ENTR_ATTACHMENT_FILENAME_FORMAT,
+	    dlftlGlobPref.attachmentFilenameFormat).toString();
+
+	deliveryFilenameFormatAllAttach = settings.value(
+	    PREF_GROUP "/" ENTR_DELIVERY_FILENAME_FORMAT_ALL_ATTACH,
+	    dlftlGlobPref.deliveryFilenameFormatAllAttach).toString();
+
+	deliveryInfoForEveryFile = settings.value(
+	    PREF_GROUP "/" ENTR_DELIVERY_INFO_FOR_EVERY_FILE,
+	    dlftlGlobPref.deliveryInfoForEveryFile).toBool();
+
+	language = settings.value(PREF_GROUP "/" ENTR_LANGUAGE,
 	    dlftlGlobPref.language).toString();
 	if (language.isEmpty()) {
 		language = dlftlGlobPref.language;
 	}
 
-	value = settings.value("preferences/after_start_select",
-	    dlftlGlobPref.after_start_select).toInt();
+	value = settings.value(PREF_GROUP "/" ENTR_DATE_FORMAT,
+	    dlftlGlobPref.dateFormat).toInt();
 	switch (value) {
-	case SELECT_NEWEST:
-		after_start_select = SELECT_NEWEST;
+	case DATE_FORMAT_LOCALE:
+		dateFormat = DATE_FORMAT_LOCALE;
 		break;
-	case SELECT_LAST_VISITED:
-		after_start_select = SELECT_LAST_VISITED;
+	case DATE_FORMAT_ISO:
+		dateFormat = DATE_FORMAT_ISO;
 		break;
-	case SELECT_NOTHING:
-		after_start_select = SELECT_NOTHING;
+	case DATE_FORMAT_DEFAULT:
+		dateFormat = DATE_FORMAT_DEFAULT;
 		break;
 	default:
-		after_start_select = dlftlGlobPref.after_start_select;
+		dateFormat = dlftlGlobPref.dateFormat;
 		Q_ASSERT(0);
 		break;
 	}
-
-	save_attachments_path = settings.value(
-	    "preferences/save_attachments_path",
-	    dlftlGlobPref.save_attachments_path).toString();
-	if (save_attachments_path.isEmpty()) {
-		save_attachments_path = dlftlGlobPref.save_attachments_path;
-	}
-
-	add_file_to_attachments_path = settings.value(
-	    "preferences/add_file_to_attachments_path",
-	    dlftlGlobPref.add_file_to_attachments_path).toString();
-	if (add_file_to_attachments_path.isEmpty()) {
-		add_file_to_attachments_path =
-		    dlftlGlobPref.add_file_to_attachments_path;
-	}
-
-	all_attachments_save_zfo_msg = settings.value(
-	    "preferences/all_attachments_save_zfo_msg",
-	    dlftlGlobPref.all_attachments_save_zfo_msg).toBool();
-
-	all_attachments_save_zfo_delinfo = settings.value(
-	    "preferences/all_attachments_save_zfo_delinfo",
-	    dlftlGlobPref.all_attachments_save_zfo_delinfo).toBool();
-
-	all_attachments_save_pdf_msgenvel = settings.value(
-	    "preferences/all_attachments_save_pdf_msgenvel",
-	    dlftlGlobPref.all_attachments_save_pdf_msgenvel).toBool();
-
-	all_attachments_save_pdf_delinfo = settings.value(
-	    "preferences/all_attachments_save_pdf_delinfo",
-	    dlftlGlobPref.all_attachments_save_pdf_delinfo).toBool();
-
-	message_filename_format = settings.value(
-	    "preferences/message_filename_format",
-	    dlftlGlobPref.message_filename_format).toString();
-
-	delivery_filename_format = settings.value(
-	    "preferences/delivery_filename_format",
-	    dlftlGlobPref.delivery_filename_format).toString();
-
-	attachment_filename_format = settings.value(
-	    "preferences/attachment_filename_format",
-	    dlftlGlobPref.attachment_filename_format).toString();
-
-	delivery_filename_format_all_attach = settings.value(
-	    "preferences/delivery_filename_format_all_attach",
-	    dlftlGlobPref.delivery_filename_format_all_attach).toString();
 }
 
 void Preferences::saveToSettings(QSettings &settings) const
@@ -375,89 +390,88 @@ void Preferences::saveToSettings(QSettings &settings) const
 		    timestampExpirBeforeDays);
 	}
 
-	if (dlftlGlobPref.date_format != date_format) {
-		settings.setValue("date_format", date_format);
+	if (dlftlGlobPref.afterStartSelect != afterStartSelect) {
+		settings.setValue(ENTR_AFTER_START_SELECT, afterStartSelect);
+	}
+
+	if (dlftlGlobPref.toolbarButtonStyle != toolbarButtonStyle) {
+		settings.setValue(ENTR_TOOLBAR_BUTTON_STYLE,
+		    toolbarButtonStyle);
+	}
+
+	if (dlftlGlobPref.useGlobalPaths != useGlobalPaths) {
+		settings.setValue(ENTR_USE_GLOBAL_PATHS, useGlobalPaths);
+	}
+
+	if (dlftlGlobPref.saveAttachmentsPath != saveAttachmentsPath) {
+		settings.setValue(ENTR_SAVE_ATTACHMENTS_PATH,
+		    saveAttachmentsPath);
+	}
+
+	if (dlftlGlobPref.addFileToAttachmentsPath !=
+	    addFileToAttachmentsPath) {
+		settings.setValue(ENTR_ADD_FILE_TO_ATTACHMENTS_PATH,
+		    addFileToAttachmentsPath);
+	}
+
+	if (dlftlGlobPref.allAttachmentsSaveZfoMsg !=
+	    allAttachmentsSaveZfoMsg) {
+		settings.setValue(ENTR_ALL_ATTACHMENTS_SAVE_ZFO_MSG,
+		    allAttachmentsSaveZfoMsg);
+	}
+
+	if (dlftlGlobPref.allAttachmentsSaveZfoDelinfo !=
+	    allAttachmentsSaveZfoDelinfo) {
+		settings.setValue(ENTR_ALL_ATTACHMENTS_SAVE_ZFO_DELINFO,
+		    allAttachmentsSaveZfoDelinfo);
+	}
+
+	if (dlftlGlobPref.allAttachmentsSavePdfMsgenvel !=
+	    allAttachmentsSavePdfMsgenvel) {
+		settings.setValue(ENTR_ALL_ATTACHMENTS_SAVE_PDF_MSGENVEL,
+		    allAttachmentsSavePdfMsgenvel);
+	}
+
+	if (dlftlGlobPref.allAttachmentsSavePdfDelinfo !=
+	    allAttachmentsSavePdfDelinfo) {
+		settings.setValue(ENTR_ALL_ATTACHMENTS_SAVE_PDF_DELINFO,
+		    allAttachmentsSavePdfDelinfo);
+	}
+
+	if (dlftlGlobPref.messageFilenameFormat != messageFilenameFormat) {
+		settings.setValue(ENTR_MESSAGE_FILENAME_FORMAT,
+		    messageFilenameFormat);
+	}
+
+	if (dlftlGlobPref.deliveryFilenameFormat != deliveryFilenameFormat) {
+		settings.setValue(ENTR_DELIVERY_FILENAME_FORMAT,
+		    deliveryFilenameFormat);
+	}
+
+	if (dlftlGlobPref.attachmentFilenameFormat !=
+	    attachmentFilenameFormat) {
+		settings.setValue(ENTR_ATTACHMENT_FILENAME_FORMAT,
+		    attachmentFilenameFormat);
+	}
+
+	if (dlftlGlobPref.deliveryFilenameFormatAllAttach !=
+	    deliveryFilenameFormatAllAttach) {
+		settings.setValue(ENTR_DELIVERY_FILENAME_FORMAT_ALL_ATTACH,
+		    deliveryFilenameFormatAllAttach);
+	}
+
+	if (dlftlGlobPref.deliveryInfoForEveryFile !=
+	    deliveryInfoForEveryFile) {
+		settings.setValue(ENTR_DELIVERY_INFO_FOR_EVERY_FILE,
+		    deliveryInfoForEveryFile);
 	}
 
 	if (dlftlGlobPref.language != language) {
-		settings.setValue("language", language);
+		settings.setValue(ENTR_LANGUAGE, language);
 	}
 
-	if (dlftlGlobPref.after_start_select != after_start_select) {
-		settings.setValue("after_start_select", after_start_select);
-	}
-
-	if (dlftlGlobPref.toolbar_button_style != toolbar_button_style) {
-		settings.setValue("toolbar_button_style", toolbar_button_style);
-	}
-
-	if (dlftlGlobPref.use_global_paths != use_global_paths) {
-		settings.setValue("use_global_paths", use_global_paths);
-	}
-
-	if (dlftlGlobPref.save_attachments_path != save_attachments_path) {
-		settings.setValue("save_attachments_path",
-		    save_attachments_path);
-	}
-	if (dlftlGlobPref.add_file_to_attachments_path !=
-	    add_file_to_attachments_path) {
-		settings.setValue("add_file_to_attachments_path",
-		    add_file_to_attachments_path);
-	}
-
-	if (dlftlGlobPref.all_attachments_save_zfo_msg !=
-	    all_attachments_save_zfo_msg) {
-		settings.setValue("all_attachments_save_zfo_msg",
-		    all_attachments_save_zfo_msg);
-	}
-
-	if (dlftlGlobPref.all_attachments_save_zfo_delinfo !=
-	    all_attachments_save_zfo_delinfo) {
-		settings.setValue("all_attachments_save_zfo_delinfo",
-		    all_attachments_save_zfo_delinfo);
-	}
-
-
-	if (dlftlGlobPref.all_attachments_save_pdf_msgenvel !=
-	    all_attachments_save_pdf_msgenvel) {
-		settings.setValue("all_attachments_save_pdf_msgenvel",
-		    all_attachments_save_pdf_msgenvel);
-	}
-
-	if (dlftlGlobPref.all_attachments_save_pdf_delinfo !=
-	    all_attachments_save_pdf_delinfo) {
-		settings.setValue("all_attachments_save_pdf_delinfo",
-		    all_attachments_save_pdf_delinfo);
-	}
-
-	if (dlftlGlobPref.message_filename_format !=
-	    message_filename_format) {
-		settings.setValue("message_filename_format",
-		    message_filename_format);
-	}
-
-	if (dlftlGlobPref.delivery_filename_format !=
-	    delivery_filename_format) {
-		settings.setValue("delivery_filename_format",
-		    delivery_filename_format);
-	}
-
-	if (dlftlGlobPref.attachment_filename_format !=
-	    attachment_filename_format) {
-		settings.setValue("attachment_filename_format",
-		    attachment_filename_format);
-	}
-
-	if (dlftlGlobPref.delivery_filename_format_all_attach !=
-	    delivery_filename_format_all_attach) {
-		settings.setValue("delivery_filename_format_all_attach",
-		    delivery_filename_format_all_attach);
-	}
-
-	if (dlftlGlobPref.delivery_info_for_every_file !=
-	    delivery_info_for_every_file) {
-		settings.setValue("delivery_info_for_every_file",
-		    delivery_info_for_every_file);
+	if (dlftlGlobPref.dateFormat != dateFormat) {
+		settings.setValue(ENTR_DATE_FORMAT, dateFormat);
 	}
 
 	settings.endGroup();
