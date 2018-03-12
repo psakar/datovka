@@ -51,7 +51,27 @@
  */
 
 /*!
- * @brief Converts entry enum into registry name.
+ * @brief Converts enum Location into registry root name.
+ */
+static
+QString locationName(enum RegPreferences::Location loc)
+{
+	switch (loc) {
+	case RegPreferences::LOC_SYS:
+		return SYS_REG_SW_ROOT;
+		break;
+	case RegPreferences::LOC_USR:
+		return USR_REG_SW_ROOT;
+		break;
+	default:
+		Q_ASSERT(0);
+		return QString();
+		break;
+	}
+}
+
+/*!
+ * @brief Converts enum Entry into registry name.
  */
 static
 QString entryName(enum RegPreferences::Entry entry)
@@ -67,81 +87,50 @@ QString entryName(enum RegPreferences::Entry entry)
 	}
 }
 
-bool RegPreferences::haveSys(enum Entry entry)
+bool RegPreferences::haveEntry(enum Location loc, enum Entry entr)
 {
-	QString name(entryName(entry));
-	if (name.isEmpty()) {
+	const QString root(locationName(loc));
+	if (Q_UNLIKELY(root.isEmpty())) {
+		Q_ASSERT(0);
+		return false;
+	}
+	const QString eName(entryName(entr));
+	if (Q_UNLIKELY(eName.isEmpty())) {
 		Q_ASSERT(0);
 		return false;
 	}
 
-	QSettings settings(SYS_REG_SW_ROOT "\\" APP_LOC, REG_FMT);
+	const QString appRoot(root + "\\" APP_LOC);
+	const QSettings settings(appRoot, REG_FMT);
 
-	//bool ret = settings.childKeys().contains(name, Qt::CaseInsensitive);
-	bool ret = settings.contains(name);
+	//bool ret = settings.childKeys().contains(eName, Qt::CaseInsensitive);
+	bool ret = settings.contains(eName);
 
 	logInfoNL("Registry entry '%s': %s",
-	    (SYS_REG_SW_ROOT "\\" APP_LOC "\\" + name).toUtf8().constData(),
+	    (appRoot + "\\" + eName).toUtf8().constData(),
 	    ret ? "present" : "missing");
 
 	return ret;
 }
 
-bool RegPreferences::haveUsr(enum Entry entry)
+bool RegPreferences::newVersionNotification(enum Location loc)
 {
-	QString name(entryName(entry));
-	if (name.isEmpty()) {
+	if (!haveEntry(loc, ENTR_NEW_VER_NOTIF)) {
 		Q_ASSERT(0);
-		return false;
+		return true;
 	}
+	const QString root(locationName(loc));
+	Q_ASSERT(!root.isEmpty());
+	const QString eName(entryName(ENTR_NEW_VER_NOTIF));
+	Q_ASSERT(!eName.isEmpty());
 
-	QSettings settings(USR_REG_SW_ROOT "\\" APP_LOC, REG_FMT);
+	const QString appRoot(root + "\\" APP_LOC);
+	const QSettings settings(appRoot, REG_FMT);
 
-	//bool ret = settings.childKeys().contains(name, Qt::CaseInsensitive);
-	bool ret = settings.contains(name);
+	bool ret = settings.value(eName, true).toBool();
 
 	logInfoNL("Registry entry '%s': %s",
-	    (USR_REG_SW_ROOT "\\" APP_LOC "\\" + name).toUtf8().constData(),
-	    ret ? "present" : "missing");
-
-	return ret;
-}
-
-bool RegPreferences::sysNewVersionNotification(void)
-{
-	if (!haveSys(ENTR_NEW_VER_NOTIF)) {
-		Q_ASSERT(0);
-		return true;
-	}
-	QString name(entryName(ENTR_NEW_VER_NOTIF));
-	Q_ASSERT(!name.isEmpty());
-
-	QSettings settings(SYS_REG_SW_ROOT "\\" APP_LOC, REG_FMT);
-
-	bool ret = settings.value(name, true).toBool();
-
-	logInfoNL("registry entry '%s': %s",
-	    (SYS_REG_SW_ROOT "\\" APP_LOC + name).toUtf8().constData(),
-	    ret ? "true" : "false");
-
-	return ret;
-}
-
-bool RegPreferences::usrNewVersionNotification(void)
-{
-	if (!haveUsr(ENTR_NEW_VER_NOTIF)) {
-		Q_ASSERT(0);
-		return true;
-	}
-	QString name(entryName(ENTR_NEW_VER_NOTIF));
-	Q_ASSERT(!name.isEmpty());
-
-	QSettings settings(USR_REG_SW_ROOT "\\" APP_LOC, REG_FMT);
-
-	bool ret = settings.value(name, true).toBool();
-
-	logInfoNL("registry entry '%s': %s",
-	    (USR_REG_SW_ROOT "\\" APP_LOC "\\" + name).toUtf8().constData(),
+	    (appRoot + "\\" + eName).toUtf8().constData(),
 	    ret ? "true" : "false");
 
 	return ret;

@@ -31,7 +31,17 @@
 class RegPreferences {
 
 public:
-	/*!< Registry entries. */
+	/*!
+	 * @brief System- or user-related.
+	 */
+	enum Location {
+		LOC_SYS,
+		LOC_USR
+	};
+
+	/*!
+	 * @brief Registry entries.
+	 */
 	enum Entry {
 		ENTR_NEW_VER_NOTIF
 	};
@@ -44,37 +54,23 @@ private:
 
 public:
 	/*!
-	 * @brief Check presence of system registry settings.
+	 * @brief Check presence of registry settings.
 	 *
-	 * @param[in] entry Entry to search for.
+	 * @param[in] loc Location to search in.
+	 * @param[in] entr Entry to search for.
 	 * @return True if the entry exists in registry.
 	 */
 	static
-	bool haveSys(enum Entry entry);
-
-	/*!
-	 * @brief Check presence of user registry settings.
-	 *
-	 * @param[in] entry Entry to search for.
-	 * @return True if the entry exists in registry.
-	 */
-	static
-	bool haveUsr(enum Entry entry);
+	bool haveEntry(enum Location loc, enum Entry entr);
 
 	/*!
 	 * @brief System settings.
 	 *
 	 * @note The value must be present. Check the presence of the setting
 	 * before reading it!
-	 */
-	static
-	bool sysNewVersionNotification(void);
-	/*!
-	 * @brief User settings.
 	 *
-	 * @note The value must be present. Check the presence of the setting
-	 * before reading it!
+	 * @param[in] loc Location to search in.
 	 */
 	static
-	bool usrNewVersionNotification(void);
+	bool newVersionNotification(enum Location loc);
 };

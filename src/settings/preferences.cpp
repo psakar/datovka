@@ -546,8 +546,11 @@ bool Preferences::canConfigureCheckNewVersions(void)
 {
 #if defined(Q_OS_WIN)
 	/* Registry settings can override the default behaviour. */
-	return !(RegPreferences::haveSys(RegPreferences::ENTR_NEW_VER_NOTIF) ||
-	    RegPreferences::haveUsr(RegPreferences::ENTR_NEW_VER_NOTIF));
+	return !(
+	    RegPreferences::haveEntry(RegPreferences::LOC_SYS,
+	        RegPreferences::ENTR_NEW_VER_NOTIF) ||
+	    RegPreferences::haveEntry(RegPreferences::LOC_USR,
+	        RegPreferences::ENTR_NEW_VER_NOTIF));
 #else /* !Q_OS_WIN */
 	return true;
 #endif /* Q_OS_WIN */
@@ -559,10 +562,14 @@ bool Preferences::checkNewVersions(void) const
 		return m_checkNewVersions;
 	} else {
 #if defined(Q_OS_WIN)
-		if (RegPreferences::haveSys(RegPreferences::ENTR_NEW_VER_NOTIF)) {
-			return RegPreferences::sysNewVersionNotification();
-		} else if (RegPreferences::haveUsr(RegPreferences::ENTR_NEW_VER_NOTIF)) {
-			return RegPreferences::usrNewVersionNotification();
+		if (RegPreferences::haveEntry(RegPreferences::LOC_SYS,
+		        RegPreferences::ENTR_NEW_VER_NOTIF)) {
+			return RegPreferences::newVersionNotification(
+			    RegPreferences::LOC_SYS);
+		} else if (RegPreferences::haveEntry(RegPreferences::LOC_USR,
+		        RegPreferences::ENTR_NEW_VER_NOTIF)) {
+			return RegPreferences::newVersionNotification(
+			    RegPreferences::LOC_USR);
 		} else {
 			Q_ASSERT(0);
 			return dlftlGlobPref.m_checkNewVersions;
