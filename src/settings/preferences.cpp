@@ -555,7 +555,22 @@ bool Preferences::canConfigureCheckNewVersions(void)
 
 bool Preferences::checkNewVersions(void) const
 {
-	return m_checkNewVersions;
+	if (canConfigureCheckNewVersions()) {
+		return m_checkNewVersions;
+	} else {
+#if defined(Q_OS_WIN)
+		if (RegPreferences::haveSys(RegPreferences::ENTR_NEW_VER_NOTIF)) {
+			return RegPreferences::sysNewVersionNotification();
+		} else if (RegPreferences::haveUsr(RegPreferences::ENTR_NEW_VER_NOTIF)) {
+			return RegPreferences::usrNewVersionNotification();
+		} else {
+			Q_ASSERT(0);
+			return dlftlGlobPref.m_checkNewVersions;
+		}
+#else /* !Q_OS_WIN */
+		return dlftlGlobPref.m_checkNewVersions;
+#endif /* Q_OS_WIN */
+	}
 }
 
 void Preferences::setCheckNewVersions(bool val)
