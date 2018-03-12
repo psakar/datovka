@@ -194,9 +194,9 @@ void DlgPreferences::saveSettings(Preferences &prefs,
 	    m_ui->timeoutMinSpinBox->value() * MSEC_IN_MIN;
 	prefs.messageMarkAsReadTimeout =
 	    m_ui->timeoutMarkMsgSpinBox->value() * MSEC_IN_SEC;
-	prefs.checkNewVersions = m_ui->checkNewVersions->isChecked();
-	prefs.sendStatsWithVersionChecks =
-	    m_ui->sendStatsWithVersionChecks->isChecked();
+	prefs.setCheckNewVersions(m_ui->checkNewVersions->isChecked());
+	prefs.setSendStatsWithVersionChecks(
+	    m_ui->sendStatsWithVersionChecks->isChecked());
 
 	/* security */
 	prefs.storeMessagesOnDisk = m_ui->storeMessagesOnDisk->isChecked();
@@ -275,10 +275,10 @@ void DlgPreferences::initDialogue(const Preferences &prefs)
 	    "Note: Marked unread message will be marked as read after set interval. "
 	    "Default value is %1 seconds. Use -1 disable the function.")
 	        .arg(TIMER_MARK_MSG_READ_MS / MSEC_IN_SEC));
-	m_ui->checkNewVersions->setChecked(prefs.checkNewVersions);
+	m_ui->checkNewVersions->setChecked(prefs.checkNewVersions());
 	/* TODO - this choice must be disabled */
 //	m_ui->sendStatsWithVersionChecks->setChecked(
-//	    prefs.sendStatsWithVersionChecks);
+//	    prefs.sendStatsWithVersionChecks());
 //	m_ui->sendStatsWithVersionChecks->setEnabled(
 //	    m_ui->checkNewVersions->isChecked());
 

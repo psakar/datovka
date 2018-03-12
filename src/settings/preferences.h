@@ -81,9 +81,13 @@ public:
 	bool downloadOnBackground;
 	int timerValue; /*!< Interval in minutes to check for new messages. */
 	bool downloadAtStart;
-	bool checkNewVersions;
-	bool sendStatsWithVersionChecks;
 
+private:
+	/* Cannot set those values directly. */
+	bool m_checkNewVersions;
+	bool m_sendStatsWithVersionChecks;
+
+public:
 	int isdsDownloadTimeoutMs;
 	int messageMarkAsReadTimeout;
 
@@ -185,6 +189,12 @@ public:
 	 * @return Whole path to records management database file.
 	 */
 	QString recMgmtDbPath(void) const;
+
+	bool checkNewVersions(void) const;
+	void setCheckNewVersions(bool val);
+
+	bool sendStatsWithVersionChecks(void) const;
+	void setSendStatsWithVersionChecks(bool val);
 };
 
 #endif /* _PREFERENCES_H_ */

@@ -90,11 +90,11 @@ Preferences::Preferences(void)
     timerValue(10),
     downloadAtStart(false),
 #ifdef DISABLE_VERSION_CHECK_BY_DEFAULT
-    checkNewVersions(false),
+    m_checkNewVersions(false),
 #else /* !DISABLE_VERSION_CHECK_BY_DEFAULT */
-    checkNewVersions(true),
+    m_checkNewVersions(true),
 #endif /* DISABLE_VERSION_CHECK_BY_DEFAULT */
-    sendStatsWithVersionChecks(false),
+    m_sendStatsWithVersionChecks(false),
     isdsDownloadTimeoutMs(ISDS_DOWNLOAD_TIMEOUT_MS),
     messageMarkAsReadTimeout(TIMER_MARK_MSG_READ_MS),
     certificateValidationDate(DOWNLOAD_DATE),
@@ -190,13 +190,13 @@ void Preferences::loadFromSettings(const QSettings &settings)
 	downloadAtStart = settings.value(PREF_GROUP "/" ENTR_DOWNLOAD_AT_START,
 	    dlftlGlobPref.downloadAtStart).toBool();
 
-	checkNewVersions = settings.value(
+	m_checkNewVersions = settings.value(
 	    PREF_GROUP "/" ENTR_CHECK_NEW_VERSIONS,
-	    dlftlGlobPref.checkNewVersions).toBool();
+	    dlftlGlobPref.m_checkNewVersions).toBool();
 
-	sendStatsWithVersionChecks = settings.value(
+	m_sendStatsWithVersionChecks = settings.value(
 	    PREF_GROUP "/" ENTR_SEND_STATS_WITH_VERSION_CHECKS,
-	    dlftlGlobPref.sendStatsWithVersionChecks).toBool();
+	    dlftlGlobPref.m_sendStatsWithVersionChecks).toBool();
 
 	isdsDownloadTimeoutMs = settings.value(
 	    PREF_GROUP "/" ENTR_ISDS_DOWNLOAD_TIMEOUT_MS,
@@ -386,14 +386,14 @@ void Preferences::saveToSettings(QSettings &settings) const
 		settings.setValue(ENTR_DOWNLOAD_AT_START, downloadAtStart);
 	}
 
-	if (dlftlGlobPref.checkNewVersions != checkNewVersions) {
-		settings.setValue(ENTR_CHECK_NEW_VERSIONS, checkNewVersions);
+	if (dlftlGlobPref.m_checkNewVersions != m_checkNewVersions) {
+		settings.setValue(ENTR_CHECK_NEW_VERSIONS, m_checkNewVersions);
 	}
 
-	if (dlftlGlobPref.sendStatsWithVersionChecks !=
-	    sendStatsWithVersionChecks) {
+	if (dlftlGlobPref.m_sendStatsWithVersionChecks !=
+	    m_sendStatsWithVersionChecks) {
 		settings.setValue(ENTR_SEND_STATS_WITH_VERSION_CHECKS,
-		    sendStatsWithVersionChecks);
+		    m_sendStatsWithVersionChecks);
 	}
 
 	if (dlftlGlobPref.isdsDownloadTimeoutMs != isdsDownloadTimeoutMs) {
@@ -538,4 +538,24 @@ QString Preferences::tagDbPath(void) const
 QString Preferences::recMgmtDbPath(void) const
 {
 	return confDir() + QDir::separator() + recMgmtDbFile;
+}
+
+bool Preferences::checkNewVersions(void) const
+{
+	return m_checkNewVersions;
+}
+
+void Preferences::setCheckNewVersions(bool val)
+{
+	m_checkNewVersions = val;
+}
+
+bool Preferences::sendStatsWithVersionChecks(void) const
+{
+	return m_sendStatsWithVersionChecks;
+}
+
+void Preferences::setSendStatsWithVersionChecks(bool val)
+{
+	m_sendStatsWithVersionChecks = val;
 }

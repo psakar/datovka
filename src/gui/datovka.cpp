@@ -516,9 +516,8 @@ void MainWindow::setWindowsAfterInit(void)
 {
 	debugSlotCall();
 
-	if (GlobInstcs::prefsPtr->checkNewVersions) {
-		checkNewDatovkaVersion();
-	}
+	/* Always send the request for new version check. */
+	checkNewDatovkaVersion();
 
 	if (ui->accountList->model()->rowCount() <= 0) {
 		showAddNewAccountDialog();
@@ -544,7 +543,7 @@ void MainWindow::checkNewDatovkaVersion(void)
 {
 	debugSlotCall();
 
-	if (GlobInstcs::prefsPtr->sendStatsWithVersionChecks) {
+	if (GlobInstcs::prefsPtr->sendStatsWithVersionChecks()) {
 		/* TODO - sent info about datovka, libs and OS to our server */
 		nam = new QNetworkAccessManager(this);
 		connect(nam, SIGNAL(finished(QNetworkReply *)),
@@ -560,11 +559,17 @@ void MainWindow::checkNewDatovkaVersion(void)
 	}
 }
 
-void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
+void MainWindow::datovkaVersionResponce(QNetworkReply *reply)
 {
 	debugFuncCall();
 
-	 if (reply->error() == QNetworkReply::NoError) {
+	if (!GlobInstcs::prefsPtr->checkNewVersions()) {
+		/* Just discard the response. */
+		delete reply;
+		return;
+	}
+
+	if (reply->error() == QNetworkReply::NoError) {
 		QByteArray bytes = reply->readAll();
 		QString vstr = QString::fromUtf8(bytes.data(), bytes.size());
 		vstr.remove(QRegExp("[\n\t\r]"));

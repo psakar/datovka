@@ -152,7 +152,7 @@ private slots:
 	/*!
 	 * @brief Version response slot.
 	 */
-	void datovkaVersionResponce(QNetworkReply* reply);
+	void datovkaVersionResponce(QNetworkReply *reply);
 
 	/*!
 	 * @brief Redraws widgets according to selected account item.
