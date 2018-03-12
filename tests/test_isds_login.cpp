@@ -66,7 +66,7 @@ void TestIsdsLogin::initTestCase(void)
 	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
 
 	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
-	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	GlobInstcs::prefsPtr = new (std::nothrow) Preferences;
 	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
 
 	/* Load credentials. */
