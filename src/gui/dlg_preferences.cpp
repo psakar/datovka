@@ -276,6 +276,8 @@ void DlgPreferences::initDialogue(const Preferences &prefs)
 	    "Default value is %1 seconds. Use -1 disable the function.")
 	        .arg(TIMER_MARK_MSG_READ_MS / MSEC_IN_SEC));
 	m_ui->checkNewVersions->setChecked(prefs.checkNewVersions());
+	m_ui->checkNewVersions->setEnabled(
+	    Preferences::canConfigureCheckNewVersions());
 	/* TODO - this choice must be disabled */
 //	m_ui->sendStatsWithVersionChecks->setChecked(
 //	    prefs.sendStatsWithVersionChecks());

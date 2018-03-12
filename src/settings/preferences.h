@@ -190,6 +190,16 @@ public:
 	 */
 	QString recMgmtDbPath(void) const;
 
+	/*!
+	 * @brief Check whether version check option can be configured from
+	 * inside the application.
+	 *
+	 * @return False it the value the option is controlled from somewhere
+	 *     else.
+	 */
+	static
+	bool canConfigureCheckNewVersions(void);
+
 	bool checkNewVersions(void) const;
 	void setCheckNewVersions(bool val);
 

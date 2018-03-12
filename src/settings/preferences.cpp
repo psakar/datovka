@@ -28,6 +28,7 @@
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/io/filesystem.h"
 #include "src/settings/preferences.h"
+#include "src/settings/registry.h"
 
 /* Defaults. */
 static const
@@ -386,7 +387,8 @@ void Preferences::saveToSettings(QSettings &settings) const
 		settings.setValue(ENTR_DOWNLOAD_AT_START, downloadAtStart);
 	}
 
-	if (dlftlGlobPref.m_checkNewVersions != m_checkNewVersions) {
+	if (canConfigureCheckNewVersions() &&
+	    (dlftlGlobPref.m_checkNewVersions != m_checkNewVersions)) {
 		settings.setValue(ENTR_CHECK_NEW_VERSIONS, m_checkNewVersions);
 	}
 
@@ -538,6 +540,17 @@ QString Preferences::tagDbPath(void) const
 QString Preferences::recMgmtDbPath(void) const
 {
 	return confDir() + QDir::separator() + recMgmtDbFile;
+}
+
+bool Preferences::canConfigureCheckNewVersions(void)
+{
+#if defined(Q_OS_WIN)
+	/* Registry settings can override the default behaviour. */
+	return !(RegPreferences::haveSys(RegPreferences::ENTR_NEW_VER_NOTIF) ||
+	    RegPreferences::haveUsr(RegPreferences::ENTR_NEW_VER_NOTIF));
+#else /* !Q_OS_WIN */
+	return true;
+#endif /* Q_OS_WIN */
 }
 
 bool Preferences::checkNewVersions(void) const
