@@ -32,15 +32,23 @@
  */
 
 /* System-wide registry root. */
-#define SYS_REG_SW_ROOT "HKEY_LOCAL_MACHINE\\Software\\"
+#define SYS_REG_SW_ROOT "HKEY_LOCAL_MACHINE\\Software"
 
 /* User registry root. */
-#define USR_REG_SW_ROOT "HKEY_CURRENT_USER\\Software\\"
+#define USR_REG_SW_ROOT "HKEY_CURRENT_USER\\Software"
 
 /* Application location. */
-#define APP_LOC "CZ.NIC\\Datovka\\"
+#define APP_LOC "CZ.NIC\\Datovka"
 
 #define REG_FMT QSettings::NativeFormat
+
+/*
+ * 32- and 64- bit registry are separated. The 64-bit regedit displays the
+ * 32-bit registry entries in "HKEY_LOCAL_MACHINE\\Software\\WOW6432Node".
+ * Datovka for Windows is a 32-bit application, therefore you must use the
+ * aforementioned registry path (containing WOW6432Node).
+ * https://support.microsoft.com/en-us/help/305097/how-to-view-the-system-registry-by-using-64-bit-versions-of-windows
+ */
 
 /*!
  * @brief Converts entry enum into registry name.
@@ -67,12 +75,13 @@ bool RegPreferences::haveSys(enum Entry entry)
 		return false;
 	}
 
-	QSettings settings(SYS_REG_SW_ROOT APP_LOC, REG_FMT);
+	QSettings settings(SYS_REG_SW_ROOT "\\" APP_LOC, REG_FMT);
 
-	bool ret = settings.childGroups().contains(name, Qt::CaseInsensitive);
+	//bool ret = settings.childKeys().contains(name, Qt::CaseInsensitive);
+	bool ret = settings.contains(name);
 
 	logInfoNL("Registry entry '%s': %s",
-	    (SYS_REG_SW_ROOT APP_LOC + name).toUtf8().constData(),
+	    (SYS_REG_SW_ROOT "\\" APP_LOC "\\" + name).toUtf8().constData(),
 	    ret ? "present" : "missing");
 
 	return ret;
@@ -86,12 +95,13 @@ bool RegPreferences::haveUsr(enum Entry entry)
 		return false;
 	}
 
-	QSettings settings(USR_REG_SW_ROOT APP_LOC, REG_FMT);
+	QSettings settings(USR_REG_SW_ROOT "\\" APP_LOC, REG_FMT);
 
-	bool ret = settings.childGroups().contains(name, Qt::CaseInsensitive);
+	//bool ret = settings.childKeys().contains(name, Qt::CaseInsensitive);
+	bool ret = settings.contains(name);
 
 	logInfoNL("Registry entry '%s': %s",
-	    (USR_REG_SW_ROOT APP_LOC + name).toUtf8().constData(),
+	    (USR_REG_SW_ROOT "\\" APP_LOC "\\" + name).toUtf8().constData(),
 	    ret ? "present" : "missing");
 
 	return ret;
@@ -106,12 +116,12 @@ bool RegPreferences::sysNewVersionNotification(void)
 	QString name(entryName(ENTR_NEW_VER_NOTIF));
 	Q_ASSERT(!name.isEmpty());
 
-	QSettings settings(SYS_REG_SW_ROOT APP_LOC, REG_FMT);
+	QSettings settings(SYS_REG_SW_ROOT "\\" APP_LOC, REG_FMT);
 
 	bool ret = settings.value(name, true).toBool();
 
 	logInfoNL("registry entry '%s': %s",
-	    (SYS_REG_SW_ROOT APP_LOC + name).toUtf8().constData(),
+	    (SYS_REG_SW_ROOT "\\" APP_LOC + name).toUtf8().constData(),
 	    ret ? "true" : "false");
 
 	return ret;
@@ -126,12 +136,12 @@ bool RegPreferences::usrNewVersionNotification(void)
 	QString name(entryName(ENTR_NEW_VER_NOTIF));
 	Q_ASSERT(!name.isEmpty());
 
-	QSettings settings(USR_REG_SW_ROOT APP_LOC, REG_FMT);
+	QSettings settings(USR_REG_SW_ROOT "\\" APP_LOC, REG_FMT);
 
 	bool ret = settings.value(name, true).toBool();
 
 	logInfoNL("registry entry '%s': %s",
-	    (USR_REG_SW_ROOT APP_LOC + name).toUtf8().constData(),
+	    (USR_REG_SW_ROOT "\\" APP_LOC "\\" + name).toUtf8().constData(),
 	    ret ? "true" : "false");
 
 	return ret;
