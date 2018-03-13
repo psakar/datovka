@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,18 +58,12 @@ public:
 	static
 	void about(QWidget *parent = Q_NULLPTR);
 
-private slots:
+private:
 	/*!
 	 * @brief Loads the license file into the text field.
 	 */
 	void showLicence(void);
 
-	/*!
-	 * @brief Displays credits information in the text field.
-	 */
-	void showCredits(void);
-
-private:
 	Ui::DlgAbout *m_ui; /*!< UI generated from UI file. */
 };
 

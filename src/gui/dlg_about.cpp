@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,10 +73,7 @@ DlgAbout::DlgAbout(QWidget *parent)
 	m_ui->labelLibs->setAlignment(Qt::AlignHCenter);
 	m_ui->labelLibs->setWordWrap(true);
 
-	connect(m_ui->pushButtonLicence, SIGNAL(clicked()), this,
-	    SLOT(showLicence()));
-	connect(m_ui->pushButtonCredits, SIGNAL(clicked()), this,
-	    SLOT(showCredits()));
+	showLicence();
 
 	connect(m_ui->buttonBox, SIGNAL(accepted()), this, SLOT(close()));
 }
@@ -100,16 +97,5 @@ void DlgAbout::showLicence(void)
 		m_ui->textEdit->setPlainText(
 		    tr("File '%1' either doesn't exist or is empty.")
 		        .arg(expectedTextFilePath(TEXT_FILE_LICENCE)));
-	}
-}
-
-void DlgAbout::showCredits(void)
-{
-	m_ui->textEdit->setPlainText(
-	    suppliedTextFileContent(TEXT_FILE_CREDITS));
-	if (m_ui->textEdit->toPlainText().isEmpty()) {
-		m_ui->textEdit->setPlainText(
-		    tr("File '%1' either doesn't exist or is empty.")
-		        .arg(expectedTextFilePath(TEXT_FILE_CREDITS)));
 	}
 }
