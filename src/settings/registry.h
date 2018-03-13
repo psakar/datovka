@@ -35,6 +35,7 @@ public:
 	 * @brief System- or user-related.
 	 */
 	enum Location {
+		LOC_POL,
 		LOC_SYS,
 		LOC_USR
 	};
@@ -43,7 +44,7 @@ public:
 	 * @brief Registry entries.
 	 */
 	enum Entry {
-		ENTR_NEW_VER_NOTIF
+		ENTR_DISABLE_VER_NOTIF
 	};
 
 private:
@@ -64,13 +65,15 @@ public:
 	bool haveEntry(enum Location loc, enum Entry entr);
 
 	/*!
-	 * @brief System settings.
+	 * @brief Reurns the required value.
 	 *
 	 * @note The value must be present. Check the presence of the setting
 	 * before reading it!
 	 *
 	 * @param[in] loc Location to search in.
+	 * @return Value of the entry. Returns undefined value if entry does
+	 *     not exist.
 	 */
 	static
-	bool newVersionNotification(enum Location loc);
+	bool disableVersionNotification(enum Location loc);
 };

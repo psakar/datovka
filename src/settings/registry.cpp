@@ -31,6 +31,9 @@
  * settings conflict, then system settings should be taken.
  */
 
+/* Policies. */
+#define POLICY_REG_SW_ROOT "HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies"
+
 /* System-wide registry root. */
 #define SYS_REG_SW_ROOT "HKEY_LOCAL_MACHINE\\Software"
 
@@ -57,6 +60,9 @@ static
 QString locationName(enum RegPreferences::Location loc)
 {
 	switch (loc) {
+	case RegPreferences::LOC_POL:
+		return POLICY_REG_SW_ROOT;
+		break;
 	case RegPreferences::LOC_SYS:
 		return SYS_REG_SW_ROOT;
 		break;
@@ -77,8 +83,8 @@ static
 QString entryName(enum RegPreferences::Entry entry)
 {
 	switch (entry) {
-	case RegPreferences::ENTR_NEW_VER_NOTIF:
-		return "NewVersionNotification";
+	case RegPreferences::ENTR_DISABLE_VER_NOTIF:
+		return "DisableVersionNotification";
 		break;
 	default:
 		Q_ASSERT(0);
@@ -113,15 +119,15 @@ bool RegPreferences::haveEntry(enum Location loc, enum Entry entr)
 	return ret;
 }
 
-bool RegPreferences::newVersionNotification(enum Location loc)
+bool RegPreferences::disableVersionNotification(enum Location loc)
 {
-	if (!haveEntry(loc, ENTR_NEW_VER_NOTIF)) {
+	if (!haveEntry(loc, ENTR_DISABLE_VER_NOTIF)) {
 		Q_ASSERT(0);
 		return true;
 	}
 	const QString root(locationName(loc));
 	Q_ASSERT(!root.isEmpty());
-	const QString eName(entryName(ENTR_NEW_VER_NOTIF));
+	const QString eName(entryName(ENTR_DISABLE_VER_NOTIF));
 	Q_ASSERT(!eName.isEmpty());
 
 	const QString appRoot(root + "\\" APP_LOC);

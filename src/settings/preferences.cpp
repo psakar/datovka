@@ -547,10 +547,12 @@ bool Preferences::canConfigureCheckNewVersions(void)
 #if defined(Q_OS_WIN)
 	/* Registry settings can override the default behaviour. */
 	return !(
+	    RegPreferences::haveEntry(RegPreferences::LOC_POL,
+	        RegPreferences::ENTR_DISABLE_VER_NOTIF) ||
 	    RegPreferences::haveEntry(RegPreferences::LOC_SYS,
-	        RegPreferences::ENTR_NEW_VER_NOTIF) ||
+	        RegPreferences::ENTR_DISABLE_VER_NOTIF) ||
 	    RegPreferences::haveEntry(RegPreferences::LOC_USR,
-	        RegPreferences::ENTR_NEW_VER_NOTIF));
+	        RegPreferences::ENTR_DISABLE_VER_NOTIF));
 #else /* !Q_OS_WIN */
 	return true;
 #endif /* Q_OS_WIN */
@@ -562,13 +564,17 @@ bool Preferences::checkNewVersions(void) const
 		return m_checkNewVersions;
 	} else {
 #if defined(Q_OS_WIN)
-		if (RegPreferences::haveEntry(RegPreferences::LOC_SYS,
-		        RegPreferences::ENTR_NEW_VER_NOTIF)) {
-			return RegPreferences::newVersionNotification(
+		if (RegPreferences::haveEntry(RegPreferences::LOC_POL,
+		        RegPreferences::ENTR_DISABLE_VER_NOTIF)) {
+			return !RegPreferences::disableVersionNotification(
+			    RegPreferences::LOC_POL);
+		} else if (RegPreferences::haveEntry(RegPreferences::LOC_SYS,
+		        RegPreferences::ENTR_DISABLE_VER_NOTIF)) {
+			return !RegPreferences::disableVersionNotification(
 			    RegPreferences::LOC_SYS);
 		} else if (RegPreferences::haveEntry(RegPreferences::LOC_USR,
-		        RegPreferences::ENTR_NEW_VER_NOTIF)) {
-			return RegPreferences::newVersionNotification(
+		        RegPreferences::ENTR_DISABLE_VER_NOTIF)) {
+			return !RegPreferences::disableVersionNotification(
 			    RegPreferences::LOC_USR);
 		} else {
 			Q_ASSERT(0);
