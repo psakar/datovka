@@ -161,8 +161,7 @@ QString qtLocalisationDir(void);
  * @brief Text files supplied with the application.
  */
 enum TextFile {
-	TEXT_FILE_CREDITS = 1, /*!< Credits file. */
-	TEXT_FILE_LICENCE /*!< License file. */
+	TEXT_FILE_LICENCE = 1 /*!< License file. */
 };
 
 /*!

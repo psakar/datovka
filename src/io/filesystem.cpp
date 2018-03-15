@@ -429,14 +429,10 @@ QString qtLocalisationDir(void)
 static inline
 const char *textFileName(enum TextFile textFile)
 {
-#define CREDITS_FILE "AUTHORS"
 #define LICENCE_FILE "COPYING"
 	const char *fileName = NULL;
 
 	switch (textFile) {
-	case TEXT_FILE_CREDITS:
-		fileName = CREDITS_FILE;
-		break;
 	case TEXT_FILE_LICENCE:
 		fileName = LICENCE_FILE;
 		break;
@@ -445,7 +441,6 @@ const char *textFileName(enum TextFile textFile)
 	}
 
 	return fileName;
-#undef CREDITS_FILE
 #undef LICENCE_FILE
 }
 
