@@ -32,7 +32,7 @@ class SingleInstanceEmitter *GlobInstcs::snglInstEmitterPtr = Q_NULLPTR;
 class MessageProcessingEmitter *GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;
 class WorkerPool *GlobInstcs::workPoolPtr = Q_NULLPTR;
 
-class GlobPreferences *GlobInstcs::prefsPtr = Q_NULLPTR;
+class Preferences *GlobInstcs::prefsPtr = Q_NULLPTR;
 class ProxiesSettings *GlobInstcs::proxSetPtr = Q_NULLPTR;
 class PinSettings *GlobInstcs::pinSetPtr = Q_NULLPTR;
 class RecordsManagementSettings *GlobInstcs::recMgmtSetPtr = Q_NULLPTR;

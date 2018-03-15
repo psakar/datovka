@@ -297,7 +297,7 @@ void DlgSendMessage::addAttachmentFile(void)
 
 	if (dialog.exec()) {
 		fileNames = dialog.selectedFiles();
-		if (!GlobInstcs::prefsPtr->use_global_paths) {
+		if (!GlobInstcs::prefsPtr->useGlobalPaths) {
 			m_lastAttAddPath = dialog.directory().absolutePath();
 			emit usedAttachmentPath(m_userName, m_lastAttAddPath);
 		}
@@ -467,9 +467,9 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		m_dbEffectiveOVM = (accountData.at(1) == "1");
 		m_dbOpenAddressing = (accountData.at(2) == "1");
 	}
-	if (GlobInstcs::prefsPtr->use_global_paths) {
+	if (GlobInstcs::prefsPtr->useGlobalPaths) {
 		m_lastAttAddPath =
-		    GlobInstcs::prefsPtr->add_file_to_attachments_path;
+		    GlobInstcs::prefsPtr->addFileToAttachmentsPath;
 	} else {
 		m_lastAttAddPath = accountInfo.lastAttachAddPath();
 	}

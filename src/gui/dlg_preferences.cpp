@@ -43,7 +43,7 @@ enum LangIndex {
 	LANG_ENGLISH = 2
 };
 
-DlgPreferences::DlgPreferences(const GlobPreferences &prefs,
+DlgPreferences::DlgPreferences(const Preferences &prefs,
     const PinSettings &pinSett, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgPreferences),
@@ -67,7 +67,7 @@ DlgPreferences::~DlgPreferences(void)
 	delete m_ui;
 }
 
-bool DlgPreferences::modify(GlobPreferences &prefs, PinSettings &pinSett,
+bool DlgPreferences::modify(Preferences &prefs, PinSettings &pinSett,
     QWidget *parent)
 {
 	DlgPreferences dlg(prefs, pinSett, parent);
@@ -181,74 +181,73 @@ int settingsLangtoIndex(const QString &lang)
 	}
 }
 
-void DlgPreferences::saveSettings(GlobPreferences &prefs,
+void DlgPreferences::saveSettings(Preferences &prefs,
     PinSettings &pinSett) const
 {
 	/* downloading */
-	prefs.download_on_background = m_ui->downloadOnBackground->isChecked();
-	prefs.timer_value = m_ui->timerSpinBox->value();
-	prefs.auto_download_whole_messages =
+	prefs.downloadOnBackground = m_ui->downloadOnBackground->isChecked();
+	prefs.timerValue = m_ui->timerSpinBox->value();
+	prefs.autoDownloadWholeMessages =
 	    m_ui->autoDownloadWholeMessages->isChecked();
-	prefs.download_at_start = m_ui->downloadAtStart->isChecked();
-	prefs.isds_download_timeout_ms =
+	prefs.downloadAtStart = m_ui->downloadAtStart->isChecked();
+	prefs.isdsDownloadTimeoutMs =
 	    m_ui->timeoutMinSpinBox->value() * MSEC_IN_MIN;
-	prefs.message_mark_as_read_timeout =
+	prefs.messageMarkAsReadTimeout =
 	    m_ui->timeoutMarkMsgSpinBox->value() * MSEC_IN_SEC;
-	prefs.check_new_versions = m_ui->checkNewVersions->isChecked();
-	prefs.send_stats_with_version_checks =
-	    m_ui->sendStatsWithVersionChecks->isChecked();
+	prefs.setCheckNewVersions(m_ui->checkNewVersions->isChecked());
+	prefs.setSendStatsWithVersionChecks(
+	    m_ui->sendStatsWithVersionChecks->isChecked());
 
 	/* security */
-	prefs.store_messages_on_disk = m_ui->storeMessagesOnDisk->isChecked();
-	prefs.store_additional_data_on_disk =
+	prefs.storeMessagesOnDisk = m_ui->storeMessagesOnDisk->isChecked();
+	prefs.storeAdditionalDataOnDisk =
 	    m_ui->storeAdditionalDataOnDisk->isChecked();
-	prefs.certificate_validation_date =
+	prefs.certificateValidationDate =
 	    m_ui->certValidationDateNow->isChecked() ?
-	        GlobPreferences::CURRENT_DATE :
-	        GlobPreferences::DOWNLOAD_DATE;
-	prefs.check_crl = m_ui->checkCrl->isChecked();
-	prefs.timestamp_expir_before_days =
+	        Preferences::CURRENT_DATE : Preferences::DOWNLOAD_DATE;
+	prefs.checkCrl = m_ui->checkCrl->isChecked();
+	prefs.timestampExpirBeforeDays =
 	    m_ui->timestampExpirSpinBox->value();
 	pinSett = m_pinSett;
 
 	/* navigation */
 	if (m_ui->afterStartSelectNewest->isChecked()) {
-		prefs.after_start_select = GlobPreferences::SELECT_NEWEST;
+		prefs.afterStartSelect = Preferences::SELECT_NEWEST;
 	} else if (m_ui->afterStartSelectLast->isChecked()) {
-		prefs.after_start_select = GlobPreferences::SELECT_LAST_VISITED;
+		prefs.afterStartSelect = Preferences::SELECT_LAST_VISITED;
 	} else {
-		prefs.after_start_select = GlobPreferences::SELECT_NOTHING;
+		prefs.afterStartSelect = Preferences::SELECT_NOTHING;
 	}
 
 	/* interface */
 	if (m_ui->toolButtonIconOnly->isChecked()) {
-		prefs.toolbar_button_style = Qt::ToolButtonIconOnly;
+		prefs.toolbarButtonStyle = Preferences::ICON_ONLY;
 	} else if (m_ui->toolButtonTextBesideIcon->isChecked()) {
-		prefs.toolbar_button_style = Qt::ToolButtonTextBesideIcon;
+		prefs.toolbarButtonStyle = Preferences::TEXT_BESIDE_ICON;
 	} else {
-		prefs.toolbar_button_style = Qt::ToolButtonTextUnderIcon;
+		prefs.toolbarButtonStyle = Preferences::TEXT_UNDER_ICON;
 	}
 
 	/* directories */
-	prefs.use_global_paths = m_ui->enableGlobalPaths->isChecked();
-	prefs.save_attachments_path = m_ui->savePath->text();
-	prefs.add_file_to_attachments_path = m_ui->addFilePath->text();
+	prefs.useGlobalPaths = m_ui->enableGlobalPaths->isChecked();
+	prefs.saveAttachmentsPath = m_ui->savePath->text();
+	prefs.addFileToAttachmentsPath = m_ui->addFilePath->text();
 
 	/* saving */
-	prefs.all_attachments_save_zfo_msg =
+	prefs.allAttachmentsSaveZfoMsg =
 	    m_ui->allAttachmentsSaveZfoMsg->isChecked();
-	prefs.all_attachments_save_zfo_delinfo =
+	prefs.allAttachmentsSaveZfoDelinfo =
 	    m_ui->allAttachmentsSaveZfoDelInfo->isChecked();
-	prefs.all_attachments_save_pdf_msgenvel =
+	prefs.allAttachmentsSavePdfMsgenvel =
 	    m_ui->allAttachmentsSavePdfMsgEnvel->isChecked();
-	prefs.all_attachments_save_pdf_delinfo =
+	prefs.allAttachmentsSavePdfDelinfo =
 	    m_ui->allAttachmentsSavePdfDelInfo->isChecked();
-	prefs.message_filename_format = m_ui->msgFileNameFmt->text();
-	prefs.delivery_filename_format = m_ui->delInfoFileNameFmt->text();
-	prefs.attachment_filename_format = m_ui->attachFileNameFmt->text();
-	prefs.delivery_info_for_every_file =
+	prefs.messageFilenameFormat = m_ui->msgFileNameFmt->text();
+	prefs.deliveryFilenameFormat = m_ui->delInfoFileNameFmt->text();
+	prefs.attachmentFilenameFormat = m_ui->attachFileNameFmt->text();
+	prefs.deliveryInfoForEveryFile =
 	    m_ui->delInfoForEveryFile->isChecked();
-	prefs.delivery_filename_format_all_attach =
+	prefs.deliveryFilenameFormatAllAttach =
 	    m_ui->allAttachDelInfoFileNameFmt->text();
 
 	/* language */
@@ -256,30 +255,32 @@ void DlgPreferences::saveSettings(GlobPreferences &prefs,
 	    indexToSettingsLang(m_ui->langComboBox->currentIndex());
 }
 
-void DlgPreferences::initDialogue(const GlobPreferences &prefs)
+void DlgPreferences::initDialogue(const Preferences &prefs)
 {
 	/* downloading */
-	m_ui->downloadOnBackground->setChecked(prefs.download_on_background);
-	m_ui->timerSpinBox->setValue(prefs.timer_value);
+	m_ui->downloadOnBackground->setChecked(prefs.downloadOnBackground);
+	m_ui->timerSpinBox->setValue(prefs.timerValue);
 	m_ui->autoDownloadWholeMessages->setChecked(
-	    prefs.auto_download_whole_messages);
-	m_ui->downloadAtStart->setChecked(prefs.download_at_start);
+	    prefs.autoDownloadWholeMessages);
+	m_ui->downloadAtStart->setChecked(prefs.downloadAtStart);
 	m_ui->timeoutMinSpinBox->setValue(
-	    prefs.isds_download_timeout_ms / MSEC_IN_MIN);
+	    prefs.isdsDownloadTimeoutMs / MSEC_IN_MIN);
 	m_ui->labelTimeoutNote->setText(tr(
 	    "Note: If you have a slow network connection or you cannot download complete messages, here you can increase the connection timeout. "
 	    "Default value is %1 minutes. Use 0 to disable timeout limit (not recommended).")
 	        .arg(ISDS_DOWNLOAD_TIMEOUT_MS / MSEC_IN_MIN));
 	m_ui->timeoutMarkMsgSpinBox->setValue(
-	    prefs.message_mark_as_read_timeout / MSEC_IN_SEC);
+	    prefs.messageMarkAsReadTimeout / MSEC_IN_SEC);
 	m_ui->noteMarkMsgLabel->setText(tr(
 	    "Note: Marked unread message will be marked as read after set interval. "
 	    "Default value is %1 seconds. Use -1 disable the function.")
 	        .arg(TIMER_MARK_MSG_READ_MS / MSEC_IN_SEC));
-	m_ui->checkNewVersions->setChecked(prefs.check_new_versions);
+	m_ui->checkNewVersions->setChecked(prefs.checkNewVersions());
+	m_ui->checkNewVersions->setEnabled(
+	    Preferences::canConfigureCheckNewVersions());
 	/* TODO - this choice must be disabled */
 //	m_ui->sendStatsWithVersionChecks->setChecked(
-//	    prefs.send_stats_with_version_checks);
+//	    prefs.sendStatsWithVersionChecks());
 //	m_ui->sendStatsWithVersionChecks->setEnabled(
 //	    m_ui->checkNewVersions->isChecked());
 
@@ -289,23 +290,21 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 	activateBackgroundTimer(m_ui->downloadOnBackground->checkState());
 
 	/* security */
-	m_ui->storeMessagesOnDisk->setChecked(prefs.store_messages_on_disk);
+	m_ui->storeMessagesOnDisk->setChecked(prefs.storeMessagesOnDisk);
 	m_ui->storeAdditionalDataOnDisk->setChecked(
-	    prefs.store_additional_data_on_disk);
-	if (GlobPreferences::CURRENT_DATE ==
-	    prefs.certificate_validation_date) {
+	    prefs.storeAdditionalDataOnDisk);
+	if (Preferences::CURRENT_DATE == prefs.certificateValidationDate) {
 		m_ui->certValidationDateNow->setChecked(true);
 		m_ui->certValidationDateDownload->setChecked(false);
-	} else if (GlobPreferences::DOWNLOAD_DATE ==
-	    prefs.certificate_validation_date) {
+	} else if (Preferences::DOWNLOAD_DATE ==
+	    prefs.certificateValidationDate) {
 		m_ui->certValidationDateNow->setChecked(false);
 		m_ui->certValidationDateDownload->setChecked(true);
 	} else {
 		Q_ASSERT(0);
 	}
-	m_ui->checkCrl->setChecked(prefs.check_crl);
-	m_ui->timestampExpirSpinBox->setValue(
-	    prefs.timestamp_expir_before_days);
+	m_ui->checkCrl->setChecked(prefs.checkCrl);
+	m_ui->timestampExpirSpinBox->setValue(prefs.timestampExpirBeforeDays);
 
 	connect(m_ui->setPinButton, SIGNAL(clicked()), this, SLOT(setPin()));
 	connect(m_ui->changePinButton, SIGNAL(clicked()),
@@ -314,17 +313,17 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 	    this, SLOT(clearPin()));
 
 	/* navigation */
-	if (GlobPreferences::SELECT_NEWEST == prefs.after_start_select) {
+	if (Preferences::SELECT_NEWEST == prefs.afterStartSelect) {
 		m_ui->afterStartSelectNewest->setChecked(true);
 		m_ui->afterStartSelectLast->setChecked(false);
 		m_ui->afterStartSelectNothing->setChecked(false);
-	} else if (GlobPreferences::SELECT_LAST_VISITED ==
-	    prefs.after_start_select) {
+	} else if (Preferences::SELECT_LAST_VISITED ==
+	    prefs.afterStartSelect) {
 		m_ui->afterStartSelectNewest->setChecked(false);
 		m_ui->afterStartSelectLast->setChecked(true);
 		m_ui->afterStartSelectNothing->setChecked(false);
-	} else if (GlobPreferences::SELECT_NOTHING ==
-	    prefs.after_start_select) {
+	} else if (Preferences::SELECT_NOTHING ==
+	    prefs.afterStartSelect) {
 		m_ui->afterStartSelectNewest->setChecked(false);
 		m_ui->afterStartSelectLast->setChecked(false);
 		m_ui->afterStartSelectNothing->setChecked(true);
@@ -333,28 +332,31 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 	}
 
 	/* interface */
-	if (Qt::ToolButtonIconOnly == prefs.toolbar_button_style) {
+	switch (prefs.toolbarButtonStyle) {
+	case Preferences::ICON_ONLY:
 		m_ui->toolButtonIconOnly->setChecked(true);
 		m_ui->toolButtonTextBesideIcon->setChecked(false);
 		m_ui->toolButtonTextUnderIcon->setChecked(false);
-	} else if (Qt::ToolButtonTextBesideIcon ==
-	    prefs.toolbar_button_style) {
+		break;
+	case Preferences::TEXT_BESIDE_ICON:
 		m_ui->toolButtonIconOnly->setChecked(false);
 		m_ui->toolButtonTextBesideIcon->setChecked(true);
 		m_ui->toolButtonTextUnderIcon->setChecked(false);
-	} else if (Qt::ToolButtonTextUnderIcon ==
-	    prefs.toolbar_button_style) {
+		break;
+	case Preferences::TEXT_UNDER_ICON:
 		m_ui->toolButtonIconOnly->setChecked(false);
 		m_ui->toolButtonTextBesideIcon->setChecked(false);
 		m_ui->toolButtonTextUnderIcon->setChecked(true);
-	} else {
+		break;
+	default:
 		Q_ASSERT(0);
+		break;
 	}
 
 	/* directories */
-	m_ui->enableGlobalPaths->setChecked(prefs.use_global_paths);
-	m_ui->savePath->setText(prefs.save_attachments_path);
-	m_ui->addFilePath->setText(prefs.add_file_to_attachments_path);
+	m_ui->enableGlobalPaths->setChecked(prefs.useGlobalPaths);
+	m_ui->savePath->setText(prefs.saveAttachmentsPath);
+	m_ui->addFilePath->setText(prefs.addFileToAttachmentsPath);
 
 	connect(m_ui->savePathPushButton, SIGNAL(clicked()),
 	    this, SLOT(setSavePath()));
@@ -363,20 +365,20 @@ void DlgPreferences::initDialogue(const GlobPreferences &prefs)
 
 	/* saving */
 	m_ui->allAttachmentsSaveZfoMsg->setChecked(
-	    prefs.all_attachments_save_zfo_msg);
+	    prefs.allAttachmentsSaveZfoMsg);
 	m_ui->allAttachmentsSaveZfoDelInfo->setChecked(
-	    prefs.all_attachments_save_zfo_delinfo);
+	    prefs.allAttachmentsSaveZfoDelinfo);
 	m_ui->allAttachmentsSavePdfMsgEnvel->setChecked(
-	    prefs.all_attachments_save_pdf_msgenvel);
+	    prefs.allAttachmentsSavePdfMsgenvel);
 	m_ui->allAttachmentsSavePdfDelInfo->setChecked(
-	    prefs.all_attachments_save_pdf_delinfo);
-	m_ui->msgFileNameFmt->setText(prefs.message_filename_format);
-	m_ui->delInfoFileNameFmt->setText(prefs.delivery_filename_format);
-	m_ui->attachFileNameFmt->setText(prefs.attachment_filename_format);
+	    prefs.allAttachmentsSavePdfDelinfo);
+	m_ui->msgFileNameFmt->setText(prefs.messageFilenameFormat);
+	m_ui->delInfoFileNameFmt->setText(prefs.deliveryFilenameFormat);
+	m_ui->attachFileNameFmt->setText(prefs.attachmentFilenameFormat);
 	m_ui->delInfoForEveryFile->setChecked(
-	    prefs.delivery_info_for_every_file);
+	    prefs.deliveryInfoForEveryFile);
 	m_ui->allAttachDelInfoFileNameFmt->setText(
-	    prefs.delivery_filename_format_all_attach);
+	    prefs.deliveryFilenameFormatAllAttach);
 
 	/* language */
 	m_ui->langComboBox->addItem(tr("Use system language"));

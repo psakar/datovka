@@ -112,7 +112,7 @@ void TestTaskDownloads::initTestCase(void)
 	QVERIFY(GlobInstcs::msgProcEmitterPtr != Q_NULLPTR);
 
 	QVERIFY(GlobInstcs::prefsPtr == Q_NULLPTR);
-	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	GlobInstcs::prefsPtr = new (std::nothrow) Preferences;
 	QVERIFY(GlobInstcs::prefsPtr != Q_NULLPTR);
 
 	/* Set configuration subdirectory to some value. */
@@ -182,7 +182,7 @@ void TestTaskDownloads::initTestCase(void)
 		QVERIFY(ctx == NULL);
 		ctx = GlobInstcs::isdsSessionsPtr->createCleanSession(
 		    m_recipient.userName,
-		    GlobInstcs::prefsPtr->isds_download_timeout_ms);
+		    GlobInstcs::prefsPtr->isdsDownloadTimeoutMs);
 	}
 	if (ctx == NULL) {
 		QSKIP("Cannot obtain communication context.");

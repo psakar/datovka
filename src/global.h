@@ -41,7 +41,7 @@ public:
 	class WorkerPool *workPoolPtr; /*!< Worker pool. */
 
 	static
-	class GlobPreferences *prefsPtr; /*!< Preferences. */
+	class Preferences *prefsPtr; /*!< Preferences. */
 	static
 	class ProxiesSettings *proxSetPtr; /*!< Proxy settings. */
 	static

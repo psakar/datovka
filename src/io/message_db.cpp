@@ -1233,10 +1233,10 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 			/* Check signing certificate. */
 			bool verified = msgCertValidAtDate(dmId,
 			    msgsVerificationDate(dmId),
-			    !GlobInstcs::prefsPtr->check_crl);
+			    !GlobInstcs::prefsPtr->checkCrl);
 			QString verifiedText = verified ?
 			    QObject::tr("Valid") : QObject::tr("Invalid");
-			if (!GlobInstcs::prefsPtr->check_crl) {
+			if (!GlobInstcs::prefsPtr->checkCrl) {
 				verifiedText += " (" +
 				    QObject::tr("Certificate revocation "
 				        "check is turned off!") +
@@ -4252,7 +4252,7 @@ bool MessageDb::openDb(const QString &fileName, bool createMissing)
 {
 	SQLiteDb::OpenFlags flags = createMissing ?
 	    SQLiteDb::CREATE_MISSING : SQLiteDb::NO_OPTIONS;
-	flags |= GlobInstcs::prefsPtr->store_messages_on_disk ?
+	flags |= GlobInstcs::prefsPtr->storeMessagesOnDisk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
 
 	return SQLiteDb::openDb(fileName, flags);
@@ -4666,8 +4666,8 @@ QDateTime MessageDb::msgsVerificationDate(qint64 dmId) const
 	QSqlQuery query(m_db);
 	QString queryStr;
 
-	if (GlobPreferences::DOWNLOAD_DATE ==
-	    GlobInstcs::prefsPtr->certificate_validation_date) {
+	if (Preferences::DOWNLOAD_DATE ==
+	    GlobInstcs::prefsPtr->certificateValidationDate) {
 
 		queryStr = "SELECT "
 		    "download_date"

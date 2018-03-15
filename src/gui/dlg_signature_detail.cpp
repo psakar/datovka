@@ -332,7 +332,7 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		resStr += YES;
 	}
 
-	if (!GlobInstcs::prefsPtr->check_crl) {
+	if (!GlobInstcs::prefsPtr->checkCrl) {
 //		iconPath = ICON_3PARTY_PATH "warning_16.png";
 		resStr += " <b>(" +
 		    tr("Certificate revocation check is turned off!") + ")</b>";
@@ -368,14 +368,14 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 		resStr += "<b>" + tr("Certificate time validity is ok") +
 		    ": </b>" + checkResult + "<br/>";
 
-		if (!GlobInstcs::prefsPtr->check_crl) {
+		if (!GlobInstcs::prefsPtr->checkCrl) {
 			checkResult = UNAVAILABLE;
 		} else {
 			checkResult = cvo.crt_revoked ? NO : YES;
 		}
 		resStr += "<b>" + tr("Certificate was not revoked") +
 		    ": </b>" + checkResult + "<br/>";
-		if (!GlobInstcs::prefsPtr->check_crl) {
+		if (!GlobInstcs::prefsPtr->checkCrl) {
 			resStr += "&nbsp;&nbsp;" "<i>" +
 			    tr("Certificate revocation check is turned off!") +
 			    "</i><br/>";

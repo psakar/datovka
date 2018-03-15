@@ -22,16 +22,17 @@
  */
 
 #include <QDir>
+#include <QFile>
 
 #include "src/common.h"
 #include "src/datovka_shared/localisation/localisation.h"
-#include "src/global.h"
 #include "src/io/filesystem.h"
 #include "src/settings/preferences.h"
+#include "src/settings/registry.h"
 
 /* Defaults. */
 static const
-GlobPreferences dlftlGlobPref;
+Preferences dlftlGlobPref;
 
 /*! Default configuration folder location. */
 #define DFLT_CONF_SUBDIR ".dsgui"
@@ -42,437 +43,560 @@ GlobPreferences dlftlGlobPref;
 #define TAG_DB_FILE "tag.db"
 #define RECORDS_MANAGEMENT_DB_FILE "records_management.db"
 
-GlobPreferences::GlobPreferences(void)
+#define PREF_GROUP "preferences"
+#define ENTR_AUTO_DOWNLOAD_WHOLE_MESSAGES "auto_download_whole_messages"
+#define ENTR_DEFAULT_DOWNLOAD_SIGNED "default_download_signed"
+#define ENTR_STORE_MESSAGES_ON_DISK "store_messages_on_disk"
+#define ENTR_STORE_ADDITIONAL_DATA_ON_DISK "store_additional_data_on_disk"
+#define ENTR_DOWNLOAD_ON_BACKGROUND "download_on_background"
+#define ENTR_TIMER_VALUE "timer_value"
+#define ENTR_DOWNLOAD_AT_START "download_at_start"
+#define ENTR_CHECK_NEW_VERSIONS "check_new_versions"
+#define ENTR_SEND_STATS_WITH_VERSION_CHECKS "send_stats_with_version_checks"
+#define ENTR_ISDS_DOWNLOAD_TIMEOUT_MS "isds_download_timeout_ms"
+#define ENTR_MESSAGE_MARK_AS_READ_TIMEOUT "message_mark_as_read_timeout"
+#define ENTR_CERTIFICATE_VALIDATION_DATE "certificate_validation_date"
+#define ENTR_CHECK_CRL "check_crl"
+#define ENTR_TIMESTAMP_EXPIR_BEFORE_DAYS "timestamp_expir_before_days"
+#define ENTR_AFTER_START_SELECT "after_start_select"
+#define ENTR_TOOLBAR_BUTTON_STYLE "toolbar_button_style"
+#define ENTR_USE_GLOBAL_PATHS "use_global_paths"
+#define ENTR_SAVE_ATTACHMENTS_PATH "save_attachments_path"
+#define ENTR_ADD_FILE_TO_ATTACHMENTS_PATH "add_file_to_attachments_path"
+#define ENTR_ALL_ATTACHMENTS_SAVE_ZFO_MSG "all_attachments_save_zfo_msg"
+#define ENTR_ALL_ATTACHMENTS_SAVE_ZFO_DELINFO "all_attachments_save_zfo_delinfo"
+#define ENTR_ALL_ATTACHMENTS_SAVE_PDF_MSGENVEL "all_attachments_save_pdf_msgenvel"
+#define ENTR_ALL_ATTACHMENTS_SAVE_PDF_DELINFO "all_attachments_save_pdf_delinfo"
+#define ENTR_MESSAGE_FILENAME_FORMAT "message_filename_format"
+#define ENTR_DELIVERY_FILENAME_FORMAT "delivery_filename_format"
+#define ENTR_ATTACHMENT_FILENAME_FORMAT "attachment_filename_format"
+#define ENTR_DELIVERY_FILENAME_FORMAT_ALL_ATTACH "delivery_filename_format_all_attach"
+#define ENTR_DELIVERY_INFO_FOR_EVERY_FILE "delivery_info_for_every_file"
+#define ENTR_LANGUAGE "language"
+#define ENTR_DATE_FORMAT "date_format"
+
+Preferences::Preferences(void)
     : confSubdir(DFLT_CONF_SUBDIR),
     loadFromConf(DFLT_CONF_FILE),
     saveToConf(DFLT_CONF_FILE),
-    accountDbFile(ACCOUNT_DB_FILE),
+    acntDbFile(ACCOUNT_DB_FILE),
     tagDbFile(TAG_DB_FILE),
-    recordsManagementDbFile(RECORDS_MANAGEMENT_DB_FILE),
-    auto_download_whole_messages(false),
-    default_download_signed(true),
-    //store_passwords_on_disk(false),
-    store_messages_on_disk(true),
-    toolbar_button_style(Qt::ToolButtonTextUnderIcon),
-    store_additional_data_on_disk(true),
-    certificate_validation_date(DOWNLOAD_DATE),
-    check_crl(true),
+    recMgmtDbFile(RECORDS_MANAGEMENT_DB_FILE),
+    autoDownloadWholeMessages(false),
+    defaultDownloadSigned(true),
+    //storePasswordsOnDisk(false),
+    storeMessagesOnDisk(true),
+    storeAdditionalDataOnDisk(true),
+    downloadOnBackground(false),
+    timerValue(10),
+    downloadAtStart(false),
 #ifdef DISABLE_VERSION_CHECK_BY_DEFAULT
-    check_new_versions(false),
+    m_checkNewVersions(false),
 #else /* !DISABLE_VERSION_CHECK_BY_DEFAULT */
-    check_new_versions(true),
+    m_checkNewVersions(true),
 #endif /* DISABLE_VERSION_CHECK_BY_DEFAULT */
-    send_stats_with_version_checks(false),
-    download_on_background(false),
-    timer_value(10),
-    download_at_start(false),
-    date_format(DATE_FORMAT_DEFAULT),
+    m_sendStatsWithVersionChecks(false),
+    isdsDownloadTimeoutMs(ISDS_DOWNLOAD_TIMEOUT_MS),
+    messageMarkAsReadTimeout(TIMER_MARK_MSG_READ_MS),
+    certificateValidationDate(DOWNLOAD_DATE),
+    checkCrl(true),
+    timestampExpirBeforeDays(TIMESTAMP_EXPIR_BEFORE_DAYS),
+    afterStartSelect(SELECT_NOTHING),
+    toolbarButtonStyle(TEXT_UNDER_ICON),
+    useGlobalPaths(false),
+    saveAttachmentsPath(QDir::homePath()),
+    addFileToAttachmentsPath(QDir::homePath()),
+    allAttachmentsSaveZfoMsg(false),
+    allAttachmentsSaveZfoDelinfo(false),
+    allAttachmentsSavePdfMsgenvel(false),
+    allAttachmentsSavePdfDelinfo(false),
+    messageFilenameFormat(DEFAULT_MESSAGE_FILENAME_FORMAT),
+    deliveryFilenameFormat(DEFAULT_DELIVERY_FILENAME_FORMAT),
+    attachmentFilenameFormat(DEFAULT_ATTACHMENT_FILENAME_FORMAT),
+    deliveryFilenameFormatAllAttach(DEFAULT_DELIVERY_ATTACH_FORMAT),
+    deliveryInfoForEveryFile(false),
     language(Localisation::langSystem), /* Use local settings. */
-    after_start_select(SELECT_NOTHING),
-    message_mark_as_read_timeout(TIMER_MARK_MSG_READ_MS),
-    use_global_paths(false),
-    save_attachments_path(QDir::homePath()),
-    add_file_to_attachments_path(QDir::homePath()),
-    all_attachments_save_zfo_delinfo(false),
-    all_attachments_save_zfo_msg(false),
-    all_attachments_save_pdf_msgenvel(false),
-    all_attachments_save_pdf_delinfo(false),
-    message_filename_format(DEFAULT_MESSAGE_FILENAME_FORMAT),
-    delivery_filename_format(DEFAULT_DELIVERY_FILENAME_FORMAT),
-    attachment_filename_format(DEFAULT_ATTACHMENT_FILENAME_FORMAT),
-    delivery_filename_format_all_attach(DEFAULT_DELIVERY_ATTACH_FORMAT),
-    delivery_info_for_every_file(false),
-    isds_download_timeout_ms(ISDS_DOWNLOAD_TIMEOUT_MS),
-    timestamp_expir_before_days(TIMESTAMP_EXPIR_BEFORE_DAYS)
+    dateFormat(DATE_FORMAT_DEFAULT)
 {
 }
 
-GlobPreferences::~GlobPreferences(void)
+int Preferences::qtToolButtonStyle(enum ToolbarButtonStyle style)
 {
+	switch (style) {
+	case Preferences::ICON_ONLY:
+		return Qt::ToolButtonIconOnly;
+		break;
+	case Preferences::TEXT_BESIDE_ICON:
+		return Qt::ToolButtonTextBesideIcon;
+		break;
+	case Preferences::TEXT_UNDER_ICON:
+		return Qt::ToolButtonTextUnderIcon;
+		break;
+	default:
+		Q_ASSERT(0);
+		return Qt::ToolButtonTextUnderIcon; /* Default. */
+		break;
+	}
 }
 
-bool GlobPreferences::ensureConfPresence(void)
+bool Preferences::ensureConfPresence(void) const
 {
-	if (!QDir(GlobInstcs::prefsPtr->confDir()).exists()) {
-		if (!QDir(GlobInstcs::prefsPtr->confDir()).mkpath(".")) {
-			return false;
+	{
+		QDir dir(confDir());
+		if (!dir.exists()) {
+			if (!dir.mkpath(".")) {
+				return false;
+			}
 		}
 	}
-	if (!QFile(GlobInstcs::prefsPtr->loadConfPath()).exists()) {
-		QFile file(GlobInstcs::prefsPtr->loadConfPath());
-		if (!file.open(QIODevice::ReadWrite)) {
-			return false;
+	{
+		QFile file(loadConfPath());
+		if (!file.exists()) {
+			if (!file.open(QIODevice::ReadWrite)) {
+				return false;
+			}
+			file.close();
 		}
-		file.close();
 	}
-
 	return true;
 }
 
-void GlobPreferences::loadFromSettings(const QSettings &settings)
+void Preferences::loadFromSettings(const QSettings &settings)
 {
 	int value;
 
-	auto_download_whole_messages = settings.value(
-	    "preferences/auto_download_whole_messages",
-	    dlftlGlobPref.auto_download_whole_messages).toBool();
+	autoDownloadWholeMessages = settings.value(
+	    PREF_GROUP "/" ENTR_AUTO_DOWNLOAD_WHOLE_MESSAGES,
+	    dlftlGlobPref.autoDownloadWholeMessages).toBool();
 
-	default_download_signed = settings.value(
-	    "preferences/default_download_signed",
-	    dlftlGlobPref.default_download_signed).toBool();
+	defaultDownloadSigned = settings.value(
+	    PREF_GROUP "/" ENTR_DEFAULT_DOWNLOAD_SIGNED,
+	    dlftlGlobPref.defaultDownloadSigned).toBool();
 
-	store_messages_on_disk = settings.value(
-	    "preferences/store_messages_on_disk",
-	    dlftlGlobPref.store_messages_on_disk).toBool();
+	storeMessagesOnDisk = settings.value(
+	    PREF_GROUP "/" ENTR_STORE_MESSAGES_ON_DISK,
+	    dlftlGlobPref.storeMessagesOnDisk).toBool();
 
-	store_additional_data_on_disk = settings.value(
-	    "preferences/store_additional_data_on_disk",
-	    dlftlGlobPref.store_additional_data_on_disk).toBool();
+	storeAdditionalDataOnDisk = settings.value(
+	    PREF_GROUP "/" ENTR_STORE_ADDITIONAL_DATA_ON_DISK,
+	    dlftlGlobPref.storeAdditionalDataOnDisk).toBool();
 
-	download_on_background = settings.value(
-	    "preferences/download_on_background",
-	    dlftlGlobPref.download_on_background).toBool();
+	downloadOnBackground = settings.value(
+	    PREF_GROUP "/" ENTR_DOWNLOAD_ON_BACKGROUND,
+	    dlftlGlobPref.downloadOnBackground).toBool();
 
-	download_at_start = settings.value(
-	    "preferences/download_at_start",
-	    dlftlGlobPref.download_at_start).toBool();
+	timerValue = settings.value(PREF_GROUP "/" ENTR_TIMER_VALUE,
+	    dlftlGlobPref.timerValue).toInt();
 
-	toolbar_button_style = settings.value(
-	    "preferences/toolbar_button_style",
-	    dlftlGlobPref.toolbar_button_style).toInt();
+	downloadAtStart = settings.value(PREF_GROUP "/" ENTR_DOWNLOAD_AT_START,
+	    dlftlGlobPref.downloadAtStart).toBool();
 
-	timer_value = settings.value(
-	    "preferences/timer_value", dlftlGlobPref.timer_value).toInt();
+	m_checkNewVersions = settings.value(
+	    PREF_GROUP "/" ENTR_CHECK_NEW_VERSIONS,
+	    dlftlGlobPref.m_checkNewVersions).toBool();
 
-	isds_download_timeout_ms = settings.value(
-	    "preferences/isds_download_timeout_ms",
-	    dlftlGlobPref.isds_download_timeout_ms).toInt();
+	m_sendStatsWithVersionChecks = settings.value(
+	    PREF_GROUP "/" ENTR_SEND_STATS_WITH_VERSION_CHECKS,
+	    dlftlGlobPref.m_sendStatsWithVersionChecks).toBool();
 
-	timestamp_expir_before_days = settings.value(
-	    "preferences/timestamp_expir_before_days",
-	    dlftlGlobPref.timestamp_expir_before_days).toInt();
+	isdsDownloadTimeoutMs = settings.value(
+	    PREF_GROUP "/" ENTR_ISDS_DOWNLOAD_TIMEOUT_MS,
+	    dlftlGlobPref.isdsDownloadTimeoutMs).toInt();
 
-	message_mark_as_read_timeout = settings.value(
-	    "preferences/message_mark_as_read_timeout",
-	    dlftlGlobPref.message_mark_as_read_timeout).toInt();
+	messageMarkAsReadTimeout = settings.value(
+	    PREF_GROUP "/" ENTR_MESSAGE_MARK_AS_READ_TIMEOUT,
+	    dlftlGlobPref.messageMarkAsReadTimeout).toInt();
 
-	use_global_paths = settings.value(
-	    "preferences/use_global_paths",
-	    dlftlGlobPref.use_global_paths).toBool();
-
-	value = settings.value("preferences/certificate_validation_date",
-	    dlftlGlobPref.certificate_validation_date).toInt();
+	value = settings.value(
+	    PREF_GROUP "/" ENTR_CERTIFICATE_VALIDATION_DATE,
+	    dlftlGlobPref.certificateValidationDate).toInt();
 	switch (value) {
 	case DOWNLOAD_DATE:
-		certificate_validation_date = DOWNLOAD_DATE;
+		certificateValidationDate = DOWNLOAD_DATE;
 		break;
 	case CURRENT_DATE:
-		certificate_validation_date = CURRENT_DATE;
+		certificateValidationDate = CURRENT_DATE;
 		break;
 	default:
-		certificate_validation_date =
-		    dlftlGlobPref.certificate_validation_date;
+		certificateValidationDate =
+		    dlftlGlobPref.certificateValidationDate;
 		Q_ASSERT(0);
 		break;
 	}
 
-	check_crl = settings.value("preferences/check_crl",
-	    dlftlGlobPref.check_crl).toBool();
+	checkCrl = settings.value(PREF_GROUP "/" ENTR_CHECK_CRL,
+	    dlftlGlobPref.checkCrl).toBool();
 
-	check_new_versions = settings.value("preferences/check_new_versions",
-	    dlftlGlobPref.check_new_versions).toBool();
+	timestampExpirBeforeDays = settings.value(
+	    PREF_GROUP "/" ENTR_TIMESTAMP_EXPIR_BEFORE_DAYS,
+	    dlftlGlobPref.timestampExpirBeforeDays).toInt();
 
-	delivery_info_for_every_file = settings.value(
-	    "preferences/delivery_info_for_every_file",
-	    dlftlGlobPref.delivery_info_for_every_file).toBool();
-
-	send_stats_with_version_checks = settings.value(
-	    "preferences/send_stats_with_version_checks",
-	    dlftlGlobPref.send_stats_with_version_checks).toBool();
-
-	value = settings.value("preferences/date_format",
-	    dlftlGlobPref.date_format).toInt();
+	value = settings.value(PREF_GROUP "/" ENTR_AFTER_START_SELECT,
+	    dlftlGlobPref.afterStartSelect).toInt();
 	switch (value) {
-	case DATE_FORMAT_LOCALE:
-		date_format = DATE_FORMAT_LOCALE;
+	case SELECT_NEWEST:
+		afterStartSelect = SELECT_NEWEST;
 		break;
-	case DATE_FORMAT_ISO:
-		date_format = DATE_FORMAT_ISO;
+	case SELECT_LAST_VISITED:
+		afterStartSelect = SELECT_LAST_VISITED;
 		break;
-	case DATE_FORMAT_DEFAULT:
-		date_format = DATE_FORMAT_DEFAULT;
+	case SELECT_NOTHING:
+		afterStartSelect = SELECT_NOTHING;
 		break;
 	default:
-		date_format = dlftlGlobPref.date_format;
+		afterStartSelect = dlftlGlobPref.afterStartSelect;
 		Q_ASSERT(0);
 		break;
 	}
 
-	language = settings.value("preferences/language",
+	value = settings.value(PREF_GROUP "/" ENTR_TOOLBAR_BUTTON_STYLE,
+	    dlftlGlobPref.toolbarButtonStyle).toInt();
+	switch (value) {
+	case ICON_ONLY:
+		toolbarButtonStyle = ICON_ONLY;
+		break;
+	case TEXT_BESIDE_ICON:
+		toolbarButtonStyle = TEXT_BESIDE_ICON;
+		break;
+	case TEXT_UNDER_ICON:
+		toolbarButtonStyle = TEXT_UNDER_ICON;
+		break;
+	default:
+		toolbarButtonStyle = dlftlGlobPref.toolbarButtonStyle;
+		Q_ASSERT(0);
+		break;
+	}
+
+	useGlobalPaths = settings.value(PREF_GROUP "/" ENTR_USE_GLOBAL_PATHS,
+	    dlftlGlobPref.useGlobalPaths).toBool();
+
+	saveAttachmentsPath = settings.value(
+	    PREF_GROUP "/" ENTR_SAVE_ATTACHMENTS_PATH,
+	    dlftlGlobPref.saveAttachmentsPath).toString();
+	if (saveAttachmentsPath.isEmpty()) {
+		saveAttachmentsPath = dlftlGlobPref.saveAttachmentsPath;
+	}
+
+	addFileToAttachmentsPath = settings.value(
+	    PREF_GROUP "/" ENTR_ADD_FILE_TO_ATTACHMENTS_PATH,
+	    dlftlGlobPref.addFileToAttachmentsPath).toString();
+	if (addFileToAttachmentsPath.isEmpty()) {
+		addFileToAttachmentsPath =
+		    dlftlGlobPref.addFileToAttachmentsPath;
+	}
+
+	allAttachmentsSaveZfoMsg = settings.value(
+	    PREF_GROUP "/" ENTR_ALL_ATTACHMENTS_SAVE_ZFO_MSG,
+	    dlftlGlobPref.allAttachmentsSaveZfoMsg).toBool();
+
+	allAttachmentsSaveZfoDelinfo = settings.value(
+	    PREF_GROUP "/" ENTR_ALL_ATTACHMENTS_SAVE_ZFO_DELINFO,
+	    dlftlGlobPref.allAttachmentsSaveZfoDelinfo).toBool();
+
+	allAttachmentsSavePdfMsgenvel = settings.value(
+	    PREF_GROUP "/" ENTR_ALL_ATTACHMENTS_SAVE_PDF_MSGENVEL,
+	    dlftlGlobPref.allAttachmentsSavePdfMsgenvel).toBool();
+
+	allAttachmentsSavePdfDelinfo = settings.value(
+	    PREF_GROUP "/" ENTR_ALL_ATTACHMENTS_SAVE_PDF_DELINFO,
+	    dlftlGlobPref.allAttachmentsSavePdfDelinfo).toBool();
+
+	messageFilenameFormat = settings.value(
+	    PREF_GROUP "/" ENTR_MESSAGE_FILENAME_FORMAT,
+	    dlftlGlobPref.messageFilenameFormat).toString();
+
+	deliveryFilenameFormat = settings.value(
+	    PREF_GROUP "/" ENTR_DELIVERY_FILENAME_FORMAT,
+	    dlftlGlobPref.deliveryFilenameFormat).toString();
+
+	attachmentFilenameFormat = settings.value(
+	    PREF_GROUP "/" ENTR_ATTACHMENT_FILENAME_FORMAT,
+	    dlftlGlobPref.attachmentFilenameFormat).toString();
+
+	deliveryFilenameFormatAllAttach = settings.value(
+	    PREF_GROUP "/" ENTR_DELIVERY_FILENAME_FORMAT_ALL_ATTACH,
+	    dlftlGlobPref.deliveryFilenameFormatAllAttach).toString();
+
+	deliveryInfoForEveryFile = settings.value(
+	    PREF_GROUP "/" ENTR_DELIVERY_INFO_FOR_EVERY_FILE,
+	    dlftlGlobPref.deliveryInfoForEveryFile).toBool();
+
+	language = settings.value(PREF_GROUP "/" ENTR_LANGUAGE,
 	    dlftlGlobPref.language).toString();
 	if (language.isEmpty()) {
 		language = dlftlGlobPref.language;
 	}
 
-	value = settings.value("preferences/after_start_select",
-	    dlftlGlobPref.after_start_select).toInt();
+	value = settings.value(PREF_GROUP "/" ENTR_DATE_FORMAT,
+	    dlftlGlobPref.dateFormat).toInt();
 	switch (value) {
-	case SELECT_NEWEST:
-		after_start_select = SELECT_NEWEST;
+	case DATE_FORMAT_LOCALE:
+		dateFormat = DATE_FORMAT_LOCALE;
 		break;
-	case SELECT_LAST_VISITED:
-		after_start_select = SELECT_LAST_VISITED;
+	case DATE_FORMAT_ISO:
+		dateFormat = DATE_FORMAT_ISO;
 		break;
-	case SELECT_NOTHING:
-		after_start_select = SELECT_NOTHING;
+	case DATE_FORMAT_DEFAULT:
+		dateFormat = DATE_FORMAT_DEFAULT;
 		break;
 	default:
-		after_start_select = dlftlGlobPref.after_start_select;
+		dateFormat = dlftlGlobPref.dateFormat;
 		Q_ASSERT(0);
 		break;
 	}
-
-	save_attachments_path = settings.value(
-	    "preferences/save_attachments_path",
-	    dlftlGlobPref.save_attachments_path).toString();
-	if (save_attachments_path.isEmpty()) {
-		save_attachments_path = dlftlGlobPref.save_attachments_path;
-	}
-
-	add_file_to_attachments_path = settings.value(
-	    "preferences/add_file_to_attachments_path",
-	    dlftlGlobPref.add_file_to_attachments_path).toString();
-	if (add_file_to_attachments_path.isEmpty()) {
-		add_file_to_attachments_path =
-		    dlftlGlobPref.add_file_to_attachments_path;
-	}
-
-	all_attachments_save_zfo_msg = settings.value(
-	    "preferences/all_attachments_save_zfo_msg",
-	    dlftlGlobPref.all_attachments_save_zfo_msg).toBool();
-
-	all_attachments_save_zfo_delinfo = settings.value(
-	    "preferences/all_attachments_save_zfo_delinfo",
-	    dlftlGlobPref.all_attachments_save_zfo_delinfo).toBool();
-
-	all_attachments_save_pdf_msgenvel = settings.value(
-	    "preferences/all_attachments_save_pdf_msgenvel",
-	    dlftlGlobPref.all_attachments_save_pdf_msgenvel).toBool();
-
-	all_attachments_save_pdf_delinfo = settings.value(
-	    "preferences/all_attachments_save_pdf_delinfo",
-	    dlftlGlobPref.all_attachments_save_pdf_delinfo).toBool();
-
-	message_filename_format = settings.value(
-	    "preferences/message_filename_format",
-	    dlftlGlobPref.message_filename_format).toString();
-
-	delivery_filename_format = settings.value(
-	    "preferences/delivery_filename_format",
-	    dlftlGlobPref.delivery_filename_format).toString();
-
-	attachment_filename_format = settings.value(
-	    "preferences/attachment_filename_format",
-	    dlftlGlobPref.attachment_filename_format).toString();
-
-	delivery_filename_format_all_attach = settings.value(
-	    "preferences/delivery_filename_format_all_attach",
-	    dlftlGlobPref.delivery_filename_format_all_attach).toString();
 }
 
-void GlobPreferences::saveToSettings(QSettings &settings) const
+void Preferences::saveToSettings(QSettings &settings) const
 {
-	settings.beginGroup("preferences");
+	settings.beginGroup(PREF_GROUP);
 
 	/* Only values differing from defaults are written. */
 
-	if (dlftlGlobPref.auto_download_whole_messages !=
-	    auto_download_whole_messages) {
-		settings.setValue("auto_download_whole_messages",
-		    auto_download_whole_messages);
+	if (dlftlGlobPref.autoDownloadWholeMessages !=
+	    autoDownloadWholeMessages) {
+		settings.setValue(ENTR_AUTO_DOWNLOAD_WHOLE_MESSAGES,
+		    autoDownloadWholeMessages);
 	}
 
-	if (dlftlGlobPref.default_download_signed != default_download_signed) {
-		settings.setValue("default_download_signed",
-		    default_download_signed);
+	if (dlftlGlobPref.defaultDownloadSigned != defaultDownloadSigned) {
+		settings.setValue(ENTR_DEFAULT_DOWNLOAD_SIGNED,
+		    defaultDownloadSigned);
 	}
 
-	if (dlftlGlobPref.store_messages_on_disk != store_messages_on_disk) {
-		settings.setValue("store_messages_on_disk",
-		    store_messages_on_disk);
+	if (dlftlGlobPref.storeMessagesOnDisk != storeMessagesOnDisk) {
+		settings.setValue(ENTR_STORE_MESSAGES_ON_DISK,
+		    storeMessagesOnDisk);
 	}
 
-	if (dlftlGlobPref.store_additional_data_on_disk !=
-	    store_additional_data_on_disk) {
-		settings.setValue("store_additional_data_on_disk",
-		    store_additional_data_on_disk);
+	if (dlftlGlobPref.storeAdditionalDataOnDisk !=
+	    storeAdditionalDataOnDisk) {
+		settings.setValue(ENTR_STORE_ADDITIONAL_DATA_ON_DISK,
+		    storeAdditionalDataOnDisk);
 	}
 
-	if (dlftlGlobPref.certificate_validation_date !=
-	    certificate_validation_date) {
-		settings.setValue("certificate_validation_date",
-		    certificate_validation_date);
+	if (dlftlGlobPref.downloadOnBackground != downloadOnBackground) {
+		settings.setValue(ENTR_DOWNLOAD_ON_BACKGROUND,
+		    downloadOnBackground);
 	}
 
-	if (dlftlGlobPref.check_crl != check_crl) {
-		settings.setValue("check_crl", check_crl);
+	if (dlftlGlobPref.timerValue != timerValue) {
+		settings.setValue(ENTR_TIMER_VALUE, timerValue);
 	}
 
-	if (dlftlGlobPref.check_new_versions != check_new_versions) {
-		settings.setValue("check_new_versions", check_new_versions);
+	if (dlftlGlobPref.downloadAtStart != downloadAtStart) {
+		settings.setValue(ENTR_DOWNLOAD_AT_START, downloadAtStart);
 	}
 
-	if (dlftlGlobPref.send_stats_with_version_checks !=
-	    send_stats_with_version_checks) {
-		settings.setValue("send_stats_with_version_checks",
-		    send_stats_with_version_checks);
+	if (canConfigureCheckNewVersions() &&
+	    (dlftlGlobPref.m_checkNewVersions != m_checkNewVersions)) {
+		settings.setValue(ENTR_CHECK_NEW_VERSIONS, m_checkNewVersions);
 	}
 
-	if (dlftlGlobPref.date_format != date_format) {
-		settings.setValue("date_format", date_format);
+	if (dlftlGlobPref.m_sendStatsWithVersionChecks !=
+	    m_sendStatsWithVersionChecks) {
+		settings.setValue(ENTR_SEND_STATS_WITH_VERSION_CHECKS,
+		    m_sendStatsWithVersionChecks);
+	}
+
+	if (dlftlGlobPref.isdsDownloadTimeoutMs != isdsDownloadTimeoutMs) {
+		settings.setValue(ENTR_ISDS_DOWNLOAD_TIMEOUT_MS,
+		    isdsDownloadTimeoutMs);
+	}
+
+	if (dlftlGlobPref.messageMarkAsReadTimeout !=
+	    messageMarkAsReadTimeout) {
+		settings.setValue(ENTR_MESSAGE_MARK_AS_READ_TIMEOUT,
+		    messageMarkAsReadTimeout);
+	}
+
+	if (dlftlGlobPref.certificateValidationDate !=
+	    certificateValidationDate) {
+		settings.setValue(ENTR_CERTIFICATE_VALIDATION_DATE,
+		    certificateValidationDate);
+	}
+
+	if (dlftlGlobPref.checkCrl != checkCrl) {
+		settings.setValue(ENTR_CHECK_CRL, checkCrl);
+	}
+
+	if (dlftlGlobPref.timestampExpirBeforeDays !=
+	    timestampExpirBeforeDays) {
+		settings.setValue(ENTR_TIMESTAMP_EXPIR_BEFORE_DAYS,
+		    timestampExpirBeforeDays);
+	}
+
+	if (dlftlGlobPref.afterStartSelect != afterStartSelect) {
+		settings.setValue(ENTR_AFTER_START_SELECT, afterStartSelect);
+	}
+
+	if (dlftlGlobPref.toolbarButtonStyle != toolbarButtonStyle) {
+		settings.setValue(ENTR_TOOLBAR_BUTTON_STYLE,
+		    toolbarButtonStyle);
+	}
+
+	if (dlftlGlobPref.useGlobalPaths != useGlobalPaths) {
+		settings.setValue(ENTR_USE_GLOBAL_PATHS, useGlobalPaths);
+	}
+
+	if (dlftlGlobPref.saveAttachmentsPath != saveAttachmentsPath) {
+		settings.setValue(ENTR_SAVE_ATTACHMENTS_PATH,
+		    saveAttachmentsPath);
+	}
+
+	if (dlftlGlobPref.addFileToAttachmentsPath !=
+	    addFileToAttachmentsPath) {
+		settings.setValue(ENTR_ADD_FILE_TO_ATTACHMENTS_PATH,
+		    addFileToAttachmentsPath);
+	}
+
+	if (dlftlGlobPref.allAttachmentsSaveZfoMsg !=
+	    allAttachmentsSaveZfoMsg) {
+		settings.setValue(ENTR_ALL_ATTACHMENTS_SAVE_ZFO_MSG,
+		    allAttachmentsSaveZfoMsg);
+	}
+
+	if (dlftlGlobPref.allAttachmentsSaveZfoDelinfo !=
+	    allAttachmentsSaveZfoDelinfo) {
+		settings.setValue(ENTR_ALL_ATTACHMENTS_SAVE_ZFO_DELINFO,
+		    allAttachmentsSaveZfoDelinfo);
+	}
+
+	if (dlftlGlobPref.allAttachmentsSavePdfMsgenvel !=
+	    allAttachmentsSavePdfMsgenvel) {
+		settings.setValue(ENTR_ALL_ATTACHMENTS_SAVE_PDF_MSGENVEL,
+		    allAttachmentsSavePdfMsgenvel);
+	}
+
+	if (dlftlGlobPref.allAttachmentsSavePdfDelinfo !=
+	    allAttachmentsSavePdfDelinfo) {
+		settings.setValue(ENTR_ALL_ATTACHMENTS_SAVE_PDF_DELINFO,
+		    allAttachmentsSavePdfDelinfo);
+	}
+
+	if (dlftlGlobPref.messageFilenameFormat != messageFilenameFormat) {
+		settings.setValue(ENTR_MESSAGE_FILENAME_FORMAT,
+		    messageFilenameFormat);
+	}
+
+	if (dlftlGlobPref.deliveryFilenameFormat != deliveryFilenameFormat) {
+		settings.setValue(ENTR_DELIVERY_FILENAME_FORMAT,
+		    deliveryFilenameFormat);
+	}
+
+	if (dlftlGlobPref.attachmentFilenameFormat !=
+	    attachmentFilenameFormat) {
+		settings.setValue(ENTR_ATTACHMENT_FILENAME_FORMAT,
+		    attachmentFilenameFormat);
+	}
+
+	if (dlftlGlobPref.deliveryFilenameFormatAllAttach !=
+	    deliveryFilenameFormatAllAttach) {
+		settings.setValue(ENTR_DELIVERY_FILENAME_FORMAT_ALL_ATTACH,
+		    deliveryFilenameFormatAllAttach);
+	}
+
+	if (dlftlGlobPref.deliveryInfoForEveryFile !=
+	    deliveryInfoForEveryFile) {
+		settings.setValue(ENTR_DELIVERY_INFO_FOR_EVERY_FILE,
+		    deliveryInfoForEveryFile);
 	}
 
 	if (dlftlGlobPref.language != language) {
-		settings.setValue("language", language);
+		settings.setValue(ENTR_LANGUAGE, language);
 	}
 
-	if (dlftlGlobPref.after_start_select != after_start_select) {
-		settings.setValue("after_start_select", after_start_select);
-	}
-
-	if (dlftlGlobPref.toolbar_button_style != toolbar_button_style) {
-		settings.setValue("toolbar_button_style", toolbar_button_style);
-	}
-
-	if (dlftlGlobPref.timer_value != timer_value) {
-		settings.setValue("timer_value", timer_value);
-	}
-
-	if (dlftlGlobPref.isds_download_timeout_ms !=
-	    isds_download_timeout_ms) {
-		settings.setValue("isds_download_timeout_ms",
-		    isds_download_timeout_ms);
-	}
-
-	if (dlftlGlobPref.timestamp_expir_before_days !=
-	    timestamp_expir_before_days) {
-		settings.setValue("timestamp_expir_before_days",
-		    timestamp_expir_before_days);
-	}
-
-	if (dlftlGlobPref.message_mark_as_read_timeout !=
-	    message_mark_as_read_timeout) {
-		settings.setValue("message_mark_as_read_timeout",
-		    message_mark_as_read_timeout);
-	}
-
-	if (dlftlGlobPref.download_on_background != download_on_background) {
-		settings.setValue("download_on_background",
-		    download_on_background);
-	}
-
-	if (dlftlGlobPref.download_at_start != download_at_start) {
-		settings.setValue("download_at_start", download_at_start);
-	}
-
-	if (dlftlGlobPref.use_global_paths != use_global_paths) {
-		settings.setValue("use_global_paths", use_global_paths);
-	}
-
-	if (dlftlGlobPref.save_attachments_path != save_attachments_path) {
-		settings.setValue("save_attachments_path",
-		    save_attachments_path);
-	}
-	if (dlftlGlobPref.add_file_to_attachments_path !=
-	    add_file_to_attachments_path) {
-		settings.setValue("add_file_to_attachments_path",
-		    add_file_to_attachments_path);
-	}
-
-	if (dlftlGlobPref.all_attachments_save_zfo_msg !=
-	    all_attachments_save_zfo_msg) {
-		settings.setValue("all_attachments_save_zfo_msg",
-		    all_attachments_save_zfo_msg);
-	}
-
-	if (dlftlGlobPref.all_attachments_save_zfo_delinfo !=
-	    all_attachments_save_zfo_delinfo) {
-		settings.setValue("all_attachments_save_zfo_delinfo",
-		    all_attachments_save_zfo_delinfo);
-	}
-
-
-	if (dlftlGlobPref.all_attachments_save_pdf_msgenvel !=
-	    all_attachments_save_pdf_msgenvel) {
-		settings.setValue("all_attachments_save_pdf_msgenvel",
-		    all_attachments_save_pdf_msgenvel);
-	}
-
-	if (dlftlGlobPref.all_attachments_save_pdf_delinfo !=
-	    all_attachments_save_pdf_delinfo) {
-		settings.setValue("all_attachments_save_pdf_delinfo",
-		    all_attachments_save_pdf_delinfo);
-	}
-
-	if (dlftlGlobPref.message_filename_format !=
-	    message_filename_format) {
-		settings.setValue("message_filename_format",
-		    message_filename_format);
-	}
-
-	if (dlftlGlobPref.delivery_filename_format !=
-	    delivery_filename_format) {
-		settings.setValue("delivery_filename_format",
-		    delivery_filename_format);
-	}
-
-	if (dlftlGlobPref.attachment_filename_format !=
-	    attachment_filename_format) {
-		settings.setValue("attachment_filename_format",
-		    attachment_filename_format);
-	}
-
-	if (dlftlGlobPref.delivery_filename_format_all_attach !=
-	    delivery_filename_format_all_attach) {
-		settings.setValue("delivery_filename_format_all_attach",
-		    delivery_filename_format_all_attach);
-	}
-
-	if (dlftlGlobPref.delivery_info_for_every_file !=
-	    delivery_info_for_every_file) {
-		settings.setValue("delivery_info_for_every_file",
-		    delivery_info_for_every_file);
+	if (dlftlGlobPref.dateFormat != dateFormat) {
+		settings.setValue(ENTR_DATE_FORMAT, dateFormat);
 	}
 
 	settings.endGroup();
 }
 
-QString GlobPreferences::confDir(void) const
+QString Preferences::confDir(void) const
 {
 	return confDirPath(confSubdir);
 }
 
-QString GlobPreferences::loadConfPath(void) const
+QString Preferences::loadConfPath(void) const
 {
 	return confDir() + QDir::separator() + loadFromConf;
 }
 
-QString GlobPreferences::saveConfPath(void) const
+QString Preferences::saveConfPath(void) const
 {
 	return confDir() + QDir::separator() + saveToConf;
 }
 
-QString GlobPreferences::accountDbPath(void) const
+QString Preferences::acntDbPath(void) const
 {
-	return confDir() + QDir::separator() + accountDbFile;
+	return confDir() + QDir::separator() + acntDbFile;
 }
 
-QString GlobPreferences::tagDbPath(void) const
+QString Preferences::tagDbPath(void) const
 {
 	return confDir() + QDir::separator() + tagDbFile;
 }
 
-QString GlobPreferences::recordsManagementDbPath(void) const
+QString Preferences::recMgmtDbPath(void) const
 {
-	return confDir() + QDir::separator() + recordsManagementDbFile;
+	return confDir() + QDir::separator() + recMgmtDbFile;
+}
+
+bool Preferences::canConfigureCheckNewVersions(void)
+{
+#if defined(Q_OS_WIN)
+	/* Registry settings can override the default behaviour. */
+	return !(
+	    RegPreferences::haveEntry(RegPreferences::LOC_POL,
+	        RegPreferences::ENTR_DISABLE_VER_NOTIF) ||
+	    RegPreferences::haveEntry(RegPreferences::LOC_SYS,
+	        RegPreferences::ENTR_DISABLE_VER_NOTIF) ||
+	    RegPreferences::haveEntry(RegPreferences::LOC_USR,
+	        RegPreferences::ENTR_DISABLE_VER_NOTIF));
+#else /* !Q_OS_WIN */
+	return true;
+#endif /* Q_OS_WIN */
+}
+
+bool Preferences::checkNewVersions(void) const
+{
+	if (canConfigureCheckNewVersions()) {
+		return m_checkNewVersions;
+	} else {
+#if defined(Q_OS_WIN)
+		if (RegPreferences::haveEntry(RegPreferences::LOC_POL,
+		        RegPreferences::ENTR_DISABLE_VER_NOTIF)) {
+			return !RegPreferences::disableVersionNotification(
+			    RegPreferences::LOC_POL);
+		} else if (RegPreferences::haveEntry(RegPreferences::LOC_SYS,
+		        RegPreferences::ENTR_DISABLE_VER_NOTIF)) {
+			return !RegPreferences::disableVersionNotification(
+			    RegPreferences::LOC_SYS);
+		} else if (RegPreferences::haveEntry(RegPreferences::LOC_USR,
+		        RegPreferences::ENTR_DISABLE_VER_NOTIF)) {
+			return !RegPreferences::disableVersionNotification(
+			    RegPreferences::LOC_USR);
+		} else {
+			Q_ASSERT(0);
+			return dlftlGlobPref.m_checkNewVersions;
+		}
+#else /* !Q_OS_WIN */
+		return dlftlGlobPref.m_checkNewVersions;
+#endif /* Q_OS_WIN */
+	}
+}
+
+void Preferences::setCheckNewVersions(bool val)
+{
+	m_checkNewVersions = val;
+}
+
+bool Preferences::sendStatsWithVersionChecks(void) const
+{
+	return m_sendStatsWithVersionChecks;
+}
+
+void Preferences::setSendStatsWithVersionChecks(bool val)
+{
+	m_sendStatsWithVersionChecks = val;
 }

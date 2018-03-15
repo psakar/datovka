@@ -53,7 +53,7 @@ QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,
 	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
 
 	QString fileName = fileSubpathFromFormat(
-	    GlobInstcs::prefsPtr->attachment_filename_format, prohibitDirSep,
+	    GlobInstcs::prefsPtr->attachmentFilenameFormat, prohibitDirSep,
 	    msgId.dmId, dbId, userName, attachName, entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 	if (fileName.isEmpty()) {
@@ -95,39 +95,39 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 	case ZFO_MESSAGE:
 		fileTypeStr = tr("message");
 		fileSufix = ".zfo";
-		fileNameformat = GlobInstcs::prefsPtr->message_filename_format;
+		fileNameformat = GlobInstcs::prefsPtr->messageFilenameFormat;
 		base64 = messageDb->msgsMessageBase64(msgId.dmId);
 		break;
 	case ZFO_DELIVERY:
 		fileTypeStr = tr("acceptance info");
 		fileSufix = ".zfo";
-		fileNameformat = GlobInstcs::prefsPtr->delivery_filename_format;
+		fileNameformat = GlobInstcs::prefsPtr->deliveryFilenameFormat;
 		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
 	case ZFO_DELIV_ATTACH:
 		fileTypeStr = tr("acceptance info");
 		fileSufix = ".zfo";
 		fileNameformat =
-		    GlobInstcs::prefsPtr->delivery_filename_format_all_attach;
+		    GlobInstcs::prefsPtr->deliveryFilenameFormatAllAttach;
 		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_DELIVERY:
 		fileTypeStr = tr("acceptance info");
 		fileSufix = ".pdf";
-		fileNameformat = GlobInstcs::prefsPtr->delivery_filename_format;
+		fileNameformat = GlobInstcs::prefsPtr->deliveryFilenameFormat;
 		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_DELIV_ATTACH:
 		fileTypeStr = tr("acceptance info");
 		fileSufix = ".pdf";
 		fileNameformat =
-		    GlobInstcs::prefsPtr->delivery_filename_format_all_attach;
+		    GlobInstcs::prefsPtr->deliveryFilenameFormatAllAttach;
 		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_ENVELOPE:
 		fileTypeStr = tr("message envelope");
 		fileSufix = ".pdf";
-		fileNameformat = GlobInstcs::prefsPtr->message_filename_format;
+		fileNameformat = GlobInstcs::prefsPtr->messageFilenameFormat;
 		base64 = "n/a";
 		break;
 	default:
@@ -289,7 +289,7 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 
 	// create new file name with format string
 	QString fileName = fileSubpathFromFormat(
-	    GlobInstcs::prefsPtr->message_filename_format, true,
+	    GlobInstcs::prefsPtr->messageFilenameFormat, true,
 	    msgId.dmId, dbId, userName, QString(), entry.dmDeliveryTime,
 	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
 
@@ -372,13 +372,13 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 			continue;
 		}
 
-		if (GlobInstcs::prefsPtr->delivery_info_for_every_file) {
-			if (GlobInstcs::prefsPtr->all_attachments_save_zfo_delinfo) {
+		if (GlobInstcs::prefsPtr->deliveryInfoForEveryFile) {
+			if (GlobInstcs::prefsPtr->allAttachmentsSaveZfoDelinfo) {
 				exportAs(0, dbSet, Exports::ZFO_DELIV_ATTACH,
 				    targetPath, attach.dmFileDescr, userName,
 				    dbId, msgId, false, lastPath, errStr);
 			}
-			if (GlobInstcs::prefsPtr->all_attachments_save_pdf_delinfo) {
+			if (GlobInstcs::prefsPtr->allAttachmentsSavePdfDelinfo) {
 				exportAs(0, dbSet, Exports::PDF_DELIV_ATTACH,
 				    targetPath, attach.dmFileDescr, userName,
 				    dbId, msgId, false, lastPath, errStr);
@@ -386,25 +386,25 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 		}
 	}
 
-	if (GlobInstcs::prefsPtr->all_attachments_save_zfo_msg) {
+	if (GlobInstcs::prefsPtr->allAttachmentsSaveZfoMsg) {
 		exportAs(0, dbSet, Exports::ZFO_MESSAGE,
 		    targetPath, QString(), userName, dbId, msgId, false,
 		    lastPath, errStr);
 	}
 
-	if (GlobInstcs::prefsPtr->all_attachments_save_pdf_msgenvel) {
+	if (GlobInstcs::prefsPtr->allAttachmentsSavePdfMsgenvel) {
 		exportAs(0, dbSet, Exports::PDF_ENVELOPE,
 		    targetPath, QString(), userName, dbId, msgId, false,
 		    lastPath, errStr);
 	}
 
-	if (!GlobInstcs::prefsPtr->delivery_info_for_every_file) {
-		if (GlobInstcs::prefsPtr->all_attachments_save_zfo_delinfo) {
+	if (!GlobInstcs::prefsPtr->deliveryInfoForEveryFile) {
+		if (GlobInstcs::prefsPtr->allAttachmentsSaveZfoDelinfo) {
 			exportAs(0, dbSet, Exports::ZFO_DELIVERY,
 			    targetPath, QString(), userName, dbId, msgId, false,
 			    lastPath, errStr);
 		}
-		if (GlobInstcs::prefsPtr->all_attachments_save_pdf_delinfo) {
+		if (GlobInstcs::prefsPtr->allAttachmentsSavePdfDelinfo) {
 			exportAs(0, dbSet, Exports::PDF_DELIVERY,
 			    targetPath, QString(), userName, dbId, msgId,
 			    false, lastPath, errStr);

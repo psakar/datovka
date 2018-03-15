@@ -35,6 +35,7 @@ SOURCES += \
 	$${top_srcdir}src/models/messages_model.cpp \
 	$${top_srcdir}src/models/table_model.cpp \
 	$${top_srcdir}src/settings/preferences.cpp \
+	$${top_srcdir}src/settings/registry.cpp \
 	$${top_srcdir}tests/test_db_container.cpp
 
 HEADERS += \
@@ -61,4 +62,5 @@ HEADERS += \
 	$${top_srcdir}src/models/messages_model.h \
 	$${top_srcdir}src/models/table_model.h \
 	$${top_srcdir}src/settings/preferences.h \
+	$${top_srcdir}src/settings/registry.h \
 	$${top_srcdir}tests/test_db_container.h

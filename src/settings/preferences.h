@@ -27,7 +27,7 @@
 #include <QSettings>
 #include <QString>
 
-class GlobPreferences {
+class Preferences {
 
 public:
 	enum CertValDate {
@@ -48,59 +48,91 @@ public:
 		SELECT_NOTHING = 3
 	};
 
+	enum ToolbarButtonStyle {
+		ICON_ONLY = 0, /* Qt::ToolButtonIconOnly */
+		TEXT_BESIDE_ICON = 2, /* Qt::ToolButtonTextBesideIcon */
+		TEXT_UNDER_ICON = 3 /* Qt::ToolButtonTextUnderIcon */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 */
-	GlobPreferences(void);
+	Preferences(void);
 
-	/*!
-	 * @brief Destructor.
-	 */
-	~GlobPreferences(void);
-
-	/*!
-	 * @brief Create configuration file if not present.
-	 */
-	static
-	bool ensureConfPresence(void);
-
+	/* Set via command line. */
 	QString confSubdir; /*!< Configuration directory. */
 	QString loadFromConf; /*!< Configuration file to load from. */
 	QString saveToConf; /*!< Configuration file to save to. */
-	const QString accountDbFile; /*!< Account db file. */
+
+	/* Fixed settings. */
+	const QString acntDbFile; /*!< Account db file. */
 	const QString tagDbFile; /*!< Tag db file. */
-	const QString recordsManagementDbFile; /*!< Records management db file. */
-	bool auto_download_whole_messages;
-	bool default_download_signed; /*!< Default downloading method. */
-	//bool store_passwords_on_disk;
-	bool store_messages_on_disk;
-	int toolbar_button_style;
-	bool store_additional_data_on_disk;
-	enum CertValDate certificate_validation_date;
-	bool check_crl;
-	bool check_new_versions;
-	bool send_stats_with_version_checks;
-	bool download_on_background;
-	int timer_value;
-	bool download_at_start;
-	enum DateFmt date_format;
+	const QString recMgmtDbFile; /*!< Records management db file. */
+
+	bool autoDownloadWholeMessages;
+	bool defaultDownloadSigned; /*!<
+	                             * Default downloading method (true if
+	                             * signed messages should be downloaded).
+	                             * This value is unused. TODO -- unused.
+	                             */
+	//bool storePasswordsOnDisk;
+	bool storeMessagesOnDisk;
+	bool storeAdditionalDataOnDisk; /*!< Store account information to disk. */
+	bool downloadOnBackground;
+	int timerValue; /*!< Interval in minutes to check for new messages. */
+	bool downloadAtStart;
+
+private:
+	/* Cannot set those values directly. */
+	bool m_checkNewVersions;
+	bool m_sendStatsWithVersionChecks;
+
+public:
+	int isdsDownloadTimeoutMs;
+	int messageMarkAsReadTimeout;
+
+	enum CertValDate certificateValidationDate;
+	bool checkCrl;
+	int timestampExpirBeforeDays;
+
+	enum SelectType afterStartSelect;
+
+	enum ToolbarButtonStyle toolbarButtonStyle;
+
+	bool useGlobalPaths;
+	QString saveAttachmentsPath;
+	QString addFileToAttachmentsPath;
+
+	bool allAttachmentsSaveZfoMsg;
+	bool allAttachmentsSaveZfoDelinfo;
+	bool allAttachmentsSavePdfMsgenvel;
+	bool allAttachmentsSavePdfDelinfo;
+	QString messageFilenameFormat;
+	QString deliveryFilenameFormat;
+	QString attachmentFilenameFormat;
+	QString deliveryFilenameFormatAllAttach;
+	bool deliveryInfoForEveryFile;
+
 	QString language;
-	enum SelectType after_start_select;
-	int message_mark_as_read_timeout;
-	bool use_global_paths;
-	QString save_attachments_path;
-	QString add_file_to_attachments_path;
-	bool all_attachments_save_zfo_delinfo;
-	bool all_attachments_save_zfo_msg;
-	bool all_attachments_save_pdf_msgenvel;
-	bool all_attachments_save_pdf_delinfo;
-	QString message_filename_format;
-	QString delivery_filename_format;
-	QString attachment_filename_format;
-	QString delivery_filename_format_all_attach;
-	bool delivery_info_for_every_file;
-	int isds_download_timeout_ms;
-	int timestamp_expir_before_days;
+
+	enum DateFmt dateFormat; /*!< TODO -- unused. */
+
+	/*!
+	 * @brief Converts style to to Qt::ToolButtonStyle value.
+	 *
+	 * @param style Style value as used in preferences.
+	 * @return Value corresponding with enum Qt::ToolButtonStyle.
+	 */
+	static
+	int qtToolButtonStyle(enum ToolbarButtonStyle style);
+
+	/*!
+	 * @brief Create configuration file if not present.
+	 *
+	 * @note Location of the configuration file is taken from this
+	 *     preferences structure.
+	 */
+	bool ensureConfPresence(void) const;
 
 	/*!
 	 * @brief Load data from supplied settings.
@@ -142,7 +174,7 @@ public:
 	 *
 	 * @return Whole path to account database file.
 	 */
-	QString accountDbPath(void) const;
+	QString acntDbPath(void) const;
 
 	/*!
 	 * @brief Returns whole tag db path.
@@ -156,7 +188,23 @@ public:
 	 *
 	 * @return Whole path to records management database file.
 	 */
-	QString recordsManagementDbPath(void) const;
+	QString recMgmtDbPath(void) const;
+
+	/*!
+	 * @brief Check whether version check option can be configured from
+	 * inside the application.
+	 *
+	 * @return False it the value the option is controlled from somewhere
+	 *     else.
+	 */
+	static
+	bool canConfigureCheckNewVersions(void);
+
+	bool checkNewVersions(void) const;
+	void setCheckNewVersions(bool val);
+
+	bool sendStatsWithVersionChecks(void) const;
+	void setSendStatsWithVersionChecks(bool val);
 };
 
 #endif /* _PREFERENCES_H_ */

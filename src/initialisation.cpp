@@ -66,8 +66,8 @@ void setDefaultLocale(void)
 #endif /* !WIN32 */
 }
 
-int preferencesSetUp(const QCommandLineParser &parser,
-    GlobPreferences &prefs, LogDevice &log)
+int preferencesSetUp(const QCommandLineParser &parser, Preferences &prefs,
+    LogDevice &log)
 {
 	int logFileId = -1;
 
@@ -163,7 +163,7 @@ void downloadCRL(void)
 	}
 }
 
-void loadLocalisation(const GlobPreferences &prefs)
+void loadLocalisation(const Preferences &prefs)
 {
 	static QTranslator qtTranslator, appTranslator;
 
@@ -295,7 +295,7 @@ void deallocGlobInfrastruct(void)
 
 int allocGlobSettings(void)
 {
-	GlobInstcs::prefsPtr = new (std::nothrow) GlobPreferences;
+	GlobInstcs::prefsPtr = new (std::nothrow) Preferences;
 	if (Q_NULLPTR == GlobInstcs::prefsPtr) {
 		logErrorNL("%s", "Cannot allocate preferences.");
 		goto fail;
@@ -348,7 +348,7 @@ void deallocGlobSettings(void)
 	}
 }
 
-int allocGlobContainers(const GlobPreferences &prefs)
+int allocGlobContainers(const Preferences &prefs)
 {
 	SQLiteDb::OpenFlags flags = SQLiteDb::NO_OPTIONS;
 
@@ -373,11 +373,11 @@ int allocGlobContainers(const GlobPreferences &prefs)
 	}
 	/* Open accounts database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	flags |= prefs.store_additional_data_on_disk ?
+	flags |= prefs.storeAdditionalDataOnDisk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
-	if (!GlobInstcs::accntDbPtr->openDb(prefs.accountDbPath(), flags)) {
+	if (!GlobInstcs::accntDbPtr->openDb(prefs.acntDbPath(), flags)) {
 		logErrorNL("Error opening account db '%s'.",
-		    prefs.accountDbPath().toUtf8().constData());
+		    prefs.acntDbPath().toUtf8().constData());
 		goto fail;
 	}
 
@@ -409,10 +409,9 @@ int allocGlobContainers(const GlobPreferences &prefs)
 	}
 	/* Open records management database. */
 	flags = SQLiteDb::CREATE_MISSING;
-	if (!GlobInstcs::recMgmtDbPtr->openDb(
-	        prefs.recordsManagementDbPath(), flags)) {
+	if (!GlobInstcs::recMgmtDbPtr->openDb(prefs.recMgmtDbPath(), flags)) {
 		logErrorNL("Error opening records management db '%s'.",
-		    prefs.recordsManagementDbPath().toUtf8().constData());
+		    prefs.recMgmtDbPath().toUtf8().constData());
 		goto fail;
 	}
 

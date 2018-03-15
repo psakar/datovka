@@ -407,13 +407,9 @@ MainWindow::MainWindow(QWidget *parent)
 	loadSettings();
 
 	/* Set toolbar buttons style from settings */
-	if ((GlobInstcs::prefsPtr->toolbar_button_style >= 0) &&
-	    (GlobInstcs::prefsPtr->toolbar_button_style <= 3)) {
-		ui->toolBar->setToolButtonStyle(
-		    (Qt::ToolButtonStyle)GlobInstcs::prefsPtr->toolbar_button_style);
-	} else {
-		ui->toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-	}
+	ui->toolBar->setToolButtonStyle(
+	    (Qt::ToolButtonStyle)Preferences::qtToolButtonStyle(
+	        GlobInstcs::prefsPtr->toolbarButtonStyle));
 
 	/* Account list must already be set in order to connect this signal. */
 	connect(ui->accountList->selectionModel(),
@@ -481,10 +477,10 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Initialisation of message download timer. */
 	connect(&m_timerSyncAccounts, SIGNAL(timeout()), this,
 	    SLOT(synchroniseAllAccounts()));
-	if (GlobInstcs::prefsPtr->download_on_background) {
-		if (GlobInstcs::prefsPtr->timer_value > 4) {
+	if (GlobInstcs::prefsPtr->downloadOnBackground) {
+		if (GlobInstcs::prefsPtr->timerValue > 4) {
 			m_timeoutSyncAccounts =
-			    GlobInstcs::prefsPtr->timer_value * 60000;
+			    GlobInstcs::prefsPtr->timerValue * 60000;
 		} else {
 			m_timeoutSyncAccounts = TIMER_DEFAULT_TIMEOUT_MS;
 		}
@@ -500,11 +496,11 @@ MainWindow::MainWindow(QWidget *parent)
 	QString msgStrg(tr("disk"));
 	QString acntStrg(tr("disk"));
 
-	if (!GlobInstcs::prefsPtr->store_messages_on_disk) {
+	if (!GlobInstcs::prefsPtr->storeMessagesOnDisk) {
 		msgStrg = tr("memory");
 	}
 
-	if (!GlobInstcs::prefsPtr->store_additional_data_on_disk) {
+	if (!GlobInstcs::prefsPtr->storeAdditionalDataOnDisk) {
 		acntStrg = tr("memory");
 	}
 
@@ -520,14 +516,13 @@ void MainWindow::setWindowsAfterInit(void)
 {
 	debugSlotCall();
 
-	if (GlobInstcs::prefsPtr->check_new_versions) {
-		checkNewDatovkaVersion();
-	}
+	/* Always send the request for new version check. */
+	checkNewDatovkaVersion();
 
 	if (ui->accountList->model()->rowCount() <= 0) {
 		showAddNewAccountDialog();
 	} else {
-		if (GlobInstcs::prefsPtr->download_at_start &&
+		if (GlobInstcs::prefsPtr->downloadAtStart &&
 		    ui->actionSync_all_accounts->isEnabled()) {
 			/*
 			 * Calling account synchronisation as slot bound to
@@ -548,27 +543,33 @@ void MainWindow::checkNewDatovkaVersion(void)
 {
 	debugSlotCall();
 
-	if (GlobInstcs::prefsPtr->send_stats_with_version_checks) {
+	if (GlobInstcs::prefsPtr->sendStatsWithVersionChecks()) {
 		/* TODO - sent info about datovka, libs and OS to our server */
 		nam = new QNetworkAccessManager(this);
-		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
-		this, SLOT(datovkaVersionResponce(QNetworkReply*)));
+		connect(nam, SIGNAL(finished(QNetworkReply *)),
+		    this, SLOT(datovkaVersionResponce(QNetworkReply *)));
 		QUrl url(DATOVKA_CHECK_NEW_VERSION_URL);
 		nam->get(QNetworkRequest(url));
 	} else {
 		nam = new QNetworkAccessManager(this);
-		QObject::connect(nam, SIGNAL(finished(QNetworkReply*)),
-		this, SLOT(datovkaVersionResponce(QNetworkReply*)));
+		connect(nam, SIGNAL(finished(QNetworkReply *)),
+		    this, SLOT(datovkaVersionResponce(QNetworkReply *)));
 		QUrl url(DATOVKA_CHECK_NEW_VERSION_URL);
 		nam->get(QNetworkRequest(url));
 	}
 }
 
-void MainWindow::datovkaVersionResponce(QNetworkReply* reply)
+void MainWindow::datovkaVersionResponce(QNetworkReply *reply)
 {
 	debugFuncCall();
 
-	 if (reply->error() == QNetworkReply::NoError) {
+	if (!GlobInstcs::prefsPtr->checkNewVersions()) {
+		/* Just discard the response. */
+		delete reply;
+		return;
+	}
+
+	if (reply->error() == QNetworkReply::NoError) {
 		QByteArray bytes = reply->readAll();
 		QString vstr = QString::fromUtf8(bytes.data(), bytes.size());
 		vstr.remove(QRegExp("[\n\t\r]"));
@@ -663,10 +664,10 @@ void MainWindow::showPreferencesDialog(void)
 	}
 
 	// set actual download timer value from settings if is enable
-	if (GlobInstcs::prefsPtr->download_on_background) {
-		if (GlobInstcs::prefsPtr->timer_value > 4) {
+	if (GlobInstcs::prefsPtr->downloadOnBackground) {
+		if (GlobInstcs::prefsPtr->timerValue > 4) {
 			m_timeoutSyncAccounts =
-			    GlobInstcs::prefsPtr->timer_value * 60000;
+			    GlobInstcs::prefsPtr->timerValue * 60000;
 		} else {
 			m_timeoutSyncAccounts = TIMER_DEFAULT_TIMEOUT_MS;
 		}
@@ -1259,12 +1260,12 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 
 	/* Mark message locally read. */
 	if (!messageDb->smsgdtLocallyRead(msgId.dmId)) {
-		if (GlobInstcs::prefsPtr->message_mark_as_read_timeout >= 0) {
+		if (GlobInstcs::prefsPtr->messageMarkAsReadTimeout >= 0) {
 			qDebug() << "Starting timer to mark as read for message"
 			    << msgId.dmId;
 			m_messageMarker.setSingleShot(true);
 			m_messageMarker.start(
-			    GlobInstcs::prefsPtr->message_mark_as_read_timeout);
+			    GlobInstcs::prefsPtr->messageMarkAsReadTimeout);
 		}
 	} else {
 		m_messageMarker.stop();
@@ -1660,8 +1661,8 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 	 * If we selected a message from last received then restore the
 	 * selection according to the model.
 	 */
-	switch (GlobInstcs::prefsPtr->after_start_select) {
-	case GlobPreferences::SELECT_NEWEST:
+	switch (GlobInstcs::prefsPtr->afterStartSelect) {
+	case Preferences::SELECT_NEWEST:
 		/* Search for the message with the largest id. */
 		{
 			msgIndex = model->index(0, 0);
@@ -1685,7 +1686,7 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 			}
 		}
 		break;
-	case GlobPreferences::SELECT_LAST_VISITED:
+	case Preferences::SELECT_LAST_VISITED:
 		{
 			qint64 msgLastId = -1;
 			if (AccountModel::nodeRecentReceived == acntNodeType) {
@@ -1723,7 +1724,7 @@ void MainWindow::messageItemRestoreSelectionOnModelChange(void)
 			}
 		}
 		break;
-	case GlobPreferences::SELECT_NOTHING:
+	case Preferences::SELECT_NOTHING:
 		/* Don't select anything. */
 		break;
 	default:
@@ -1959,8 +1960,8 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	setAccountStoragePaths(userName);
 
 	QString saveAttachPath;
-	if (GlobInstcs::prefsPtr->use_global_paths) {
-		saveAttachPath = GlobInstcs::prefsPtr->save_attachments_path;
+	if (GlobInstcs::prefsPtr->useGlobalPaths) {
+		saveAttachPath = GlobInstcs::prefsPtr->saveAttachmentsPath;
 	} else {
 		saveAttachPath = m_save_attach_dir;
 	}
@@ -1983,7 +1984,7 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		showStatusTextWithTimeout(tr(
 		    "Saving attachment of message '%1' to file was successful.")
 		    .arg(msgId.dmId));
-		if (!GlobInstcs::prefsPtr->use_global_paths) {
+		if (!GlobInstcs::prefsPtr->useGlobalPaths) {
 			m_save_attach_dir =
 			    QFileInfo(savedFileName).absoluteDir()
 			        .absolutePath();
@@ -2031,8 +2032,8 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	setAccountStoragePaths(userName);
 
 	// how does default path used for?
-	if (GlobInstcs::prefsPtr->use_global_paths) {
-		attSaveDir = GlobInstcs::prefsPtr->save_attachments_path;
+	if (GlobInstcs::prefsPtr->useGlobalPaths) {
+		attSaveDir = GlobInstcs::prefsPtr->saveAttachmentsPath;
 	} else {
 		attSaveDir = m_save_attach_dir;
 	}
@@ -2047,7 +2048,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	}
 
 	// store selected path
-	if ((!GlobInstcs::prefsPtr->use_global_paths) && (!attSaveDir.isEmpty())) {
+	if ((!GlobInstcs::prefsPtr->useGlobalPaths) && (!attSaveDir.isEmpty())) {
 		m_save_attach_dir = attSaveDir;
 		storeExportPath(userName);
 	}
@@ -2117,7 +2118,7 @@ void MainWindow::backgroundWorkersFinished(void)
 	 */
 	dataFromWorkerToStatusBarInfo(false, 0, 0, 0, 0);
 
-	if (GlobInstcs::prefsPtr->download_on_background) {
+	if (GlobInstcs::prefsPtr->downloadOnBackground) {
 		m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 	}
 }
@@ -3126,7 +3127,7 @@ void MainWindow::synchroniseAllAccounts(void)
 	showStatusTextPermanently(
 	    tr("Synchronise all accounts with ISDS server."));
 
-	if (GlobInstcs::prefsPtr->download_on_background) {
+	if (GlobInstcs::prefsPtr->downloadOnBackground) {
 		m_timerSyncAccounts.stop();
 	}
 
@@ -3158,7 +3159,7 @@ void MainWindow::synchroniseAllAccounts(void)
 
 	if (!appended) {
 		showStatusTextWithTimeout(tr("No account synchronised."));
-		if (GlobInstcs::prefsPtr->download_on_background) {
+		if (GlobInstcs::prefsPtr->downloadOnBackground) {
 			m_timerSyncAccounts.start(m_timeoutSyncAccounts);
 		}
 		return;
@@ -3218,7 +3219,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	/* Method connectToIsds() acquires account information. */
 
 	bool downloadReceivedMessages =
-	    GlobInstcs::prefsPtr->auto_download_whole_messages;
+	    GlobInstcs::prefsPtr->autoDownloadWholeMessages;
 	if (downloadReceivedMessages) {
 		/* Method connectToIsds() acquires account information. */
 		const QString acntDbKey(AccountDb::keyFromLogin(userName));
@@ -3243,7 +3244,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 	GlobInstcs::workPoolPtr->assignLo(task);
 
 	task = new (std::nothrow) TaskDownloadMessageList(userName, dbSet,
-	    MSG_SENT, GlobInstcs::prefsPtr->auto_download_whole_messages);
+	    MSG_SENT, GlobInstcs::prefsPtr->autoDownloadWholeMessages);
 	task->setAutoDelete(true);
 	GlobInstcs::workPoolPtr->assignLo(task);
 
@@ -4648,7 +4649,7 @@ void MainWindow::storeAttachmentPath(const QString &userName,
 
 	Q_UNUSED(userName);
 
-	if (!GlobInstcs::prefsPtr->use_global_paths) {
+	if (!GlobInstcs::prefsPtr->useGlobalPaths) {
 		m_add_attach_dir = lastDir;
 		storeExportPath(userName);
 	}
@@ -6707,7 +6708,7 @@ bool MainWindow::connectToIsds(const QString &userName)
 
 	/* Set longer time-out. */
 	GlobInstcs::isdsSessionsPtr->setSessionTimeout(userName,
-	    GlobInstcs::prefsPtr->isds_download_timeout_ms);
+	    GlobInstcs::prefsPtr->isdsDownloadTimeoutMs);
 
 	return true;
 }
@@ -7301,7 +7302,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 			}
 
 			if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
-			        GlobInstcs::prefsPtr->timestamp_expir_before_days)) {
+			        GlobInstcs::prefsPtr->timestampExpirBeforeDays)) {
 				expirMsgFileNames.append(filePathList.at(i));
 			}
 		}
@@ -7314,7 +7315,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 		    tr("Total of ZFO files: %1").arg(msgCnt)
 		    + "<br/><b>" +
 		    tr("ZFO files with time stamp expiring within %1 days: %2")
-			.arg(GlobInstcs::prefsPtr->timestamp_expir_before_days)
+			.arg(GlobInstcs::prefsPtr->timestampExpirBeforeDays)
 			.arg(expirMsgFileNames.count())
 		    + "</b><br/>" +
 		    tr("Unchecked ZFO files: %1").arg(errorMsgFileNames.count());
@@ -7344,7 +7345,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 				continue;
 			}
 			if (DlgSignatureDetail::signingCertExpiresBefore(tstData,
-			        GlobInstcs::prefsPtr->timestamp_expir_before_days)) {
+			        GlobInstcs::prefsPtr->timestampExpirBeforeDays)) {
 				expirMsgIds.append(mId);
 			}
 		}
@@ -7356,7 +7357,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 		    tr("Total of messages in database: %1").arg(msgCnt)
 		    + "<br/><b>" +
 		    tr("Messages with time stamp expiring within %1 days: %2")
-			.arg(GlobInstcs::prefsPtr->timestamp_expir_before_days)
+			.arg(GlobInstcs::prefsPtr->timestampExpirBeforeDays)
 			.arg(expirMsgIds.count())
 		    + "</b><br/>" +
 		    tr("Unchecked messages: %1").arg(errorMsgIds.count());
@@ -7945,7 +7946,7 @@ void MainWindow::vacuumMsgDbSlot(void)
 {
 	debugSlotCall();
 
-	if (!GlobInstcs::prefsPtr->store_messages_on_disk) {
+	if (!GlobInstcs::prefsPtr->storeMessagesOnDisk) {
 		showStatusTextWithTimeout(tr("Vacuum cannot be performed on databases in memory."));
 
 		DlgMsgBox::message(this, QMessageBox::Warning,
