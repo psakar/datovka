@@ -27,6 +27,7 @@
 #include "src/common.h"
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/io/filesystem.h"
+#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/settings/registry.h"
 
@@ -544,7 +545,9 @@ QString Preferences::recMgmtDbPath(void) const
 
 bool Preferences::canConfigureCheckNewVersions(void)
 {
-#if defined(Q_OS_WIN)
+#if defined(DISABLE_VERSION_NOTIFICATION)
+	return false;
+#elif defined(Q_OS_WIN) /* !DISABLE_VERSION_NOTIFICATION */
 	/* Registry settings can override the default behaviour. */
 	return !(
 	    RegPreferences::haveEntry(RegPreferences::LOC_POL,
@@ -563,7 +566,11 @@ bool Preferences::checkNewVersions(void) const
 	if (canConfigureCheckNewVersions()) {
 		return m_checkNewVersions;
 	} else {
-#if defined(Q_OS_WIN)
+#if defined(DISABLE_VERSION_NOTIFICATION)
+		logInfoNL("%s",
+		    "Version notification disabled at compile time.");
+		return false;
+#elif defined(Q_OS_WIN) /* !DISABLE_VERSION_NOTIFICATION */
 		if (RegPreferences::haveEntry(RegPreferences::LOC_POL,
 		        RegPreferences::ENTR_DISABLE_VER_NOTIF)) {
 			return !RegPreferences::disableVersionNotification(
@@ -577,7 +584,10 @@ bool Preferences::checkNewVersions(void) const
 			return !RegPreferences::disableVersionNotification(
 			    RegPreferences::LOC_USR);
 		} else {
-			Q_ASSERT(0);
+			/*
+			 * The value could be deleted manually in between
+			 * the calls.
+			 */
 			return dlftlGlobPref.m_checkNewVersions;
 		}
 #else /* !Q_OS_WIN */

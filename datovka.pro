@@ -153,6 +153,11 @@ isEqual(STATIC, 1) {
 	DEFINES += DISABLE_VERSION_CHECK_BY_DEFAULT=1
 }
 
+!isEmpty(DISABLE_VERSION_NOTIFICATION) {
+	warning(Disabling version notification.)
+	DEFINES += DISABLE_VERSION_NOTIFICATION=1
+}
+
 macx {
 	ICON = res/datovka.icns
 
