@@ -544,7 +544,9 @@ QString Preferences::recMgmtDbPath(void) const
 
 bool Preferences::canConfigureCheckNewVersions(void)
 {
-#if defined(Q_OS_WIN)
+#if defined(DISABLE_VERSION_NOTIFICATION)
+	return false;
+#elif defined(Q_OS_WIN) /* !DISABLE_VERSION_NOTIFICATION */
 	/* Registry settings can override the default behaviour. */
 	return !(
 	    RegPreferences::haveEntry(RegPreferences::LOC_POL,
@@ -563,7 +565,9 @@ bool Preferences::checkNewVersions(void) const
 	if (canConfigureCheckNewVersions()) {
 		return m_checkNewVersions;
 	} else {
-#if defined(Q_OS_WIN)
+#if defined(DISABLE_VERSION_NOTIFICATION)
+		return false;
+#elif defined(Q_OS_WIN) /* !DISABLE_VERSION_NOTIFICATION */
 		if (RegPreferences::haveEntry(RegPreferences::LOC_POL,
 		        RegPreferences::ENTR_DISABLE_VER_NOTIF)) {
 			return !RegPreferences::disableVersionNotification(
