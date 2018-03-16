@@ -584,7 +584,10 @@ bool Preferences::checkNewVersions(void) const
 			return !RegPreferences::disableVersionNotification(
 			    RegPreferences::LOC_USR);
 		} else {
-			Q_ASSERT(0);
+			/*
+			 * The value could be deleted manually in between
+			 * the calls.
+			 */
 			return dlftlGlobPref.m_checkNewVersions;
 		}
 #else /* !Q_OS_WIN */
