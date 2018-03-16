@@ -27,6 +27,7 @@
 #include "src/common.h"
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/io/filesystem.h"
+#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/settings/registry.h"
 
@@ -566,6 +567,8 @@ bool Preferences::checkNewVersions(void) const
 		return m_checkNewVersions;
 	} else {
 #if defined(DISABLE_VERSION_NOTIFICATION)
+		logInfoNL("%s",
+		    "Version notification disabled at compile time.");
 		return false;
 #elif defined(Q_OS_WIN) /* !DISABLE_VERSION_NOTIFICATION */
 		if (RegPreferences::haveEntry(RegPreferences::LOC_POL,
