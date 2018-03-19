@@ -867,8 +867,15 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	ui->messageList->disconnect(SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(messageItemClicked(QModelIndex)));
 
+	/* Clicked account item. */
 	const enum AccountModel::NodeType accntNodeType =
 	    AccountModel::nodeType(current);
+	/* Depending on which account item was clicked show/hide elements. */
+	enum AccountModel::NodeType msgViewType = AccountModel::nodeUnknown;
+
+	/* Reading database data may take some time. */
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	QApplication::processEvents();
 
 	m_messageTableModel.removeRows(0, m_messageTableModel.rowCount());
 	m_messageListProxyModel.setSourceModel(&m_messageTableModel); /* TODO */
@@ -962,7 +969,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	default:
 		logErrorNL("%s", "Cannot determine account node type.");
 //		Q_ASSERT(0);
-		return;
+		goto end;
 		break;
 	}
 
@@ -1001,9 +1008,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 	}
 
-	/* Depending on which item was clicked show/hide elements. */
-	enum AccountModel::NodeType viewMsgs = AccountModel::nodeUnknown;
-
 	switch (accntNodeType) {
 	case AccountModel::nodeAccountTop:
 	case AccountModel::nodeAll:
@@ -1024,7 +1028,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setReceivedColumnWidths();
-		viewMsgs = AccountModel::nodeReceived;
+		msgViewType = AccountModel::nodeReceived;
 		break;
 	case AccountModel::nodeRecentSent:
 #ifndef DISABLE_ALL_TABLE
@@ -1035,17 +1039,17 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setSentColumnWidths();
-		viewMsgs = AccountModel::nodeSent;
+		msgViewType = AccountModel::nodeSent;
 		break;
 	default:
 		logErrorNL("%s", "Cannot determine account node type.");
 //		Q_ASSERT(0);
-		return;
+		goto end;
 		break;
 	}
 
 	/* Set model. */
-	if (viewMsgs != AccountModel::nodeUnknown) {
+	if (msgViewType != AccountModel::nodeUnknown) {
 		ui->messageStackedWidget->setCurrentIndex(1);
 		/* Apply message filter. */
 		filterMessages(mui_filterLine->text());
@@ -1083,7 +1087,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	}
 
 	/* Set specific column width. */
-	switch (viewMsgs) {
+	switch (msgViewType) {
 	case AccountModel::nodeReceived:
 		setReceivedColumnWidths();
 		break;
@@ -1093,6 +1097,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	default:
 		break;
 	}
+
+end:
+	QApplication::restoreOverrideCursor();
 }
 
 /* ========================================================================= */
