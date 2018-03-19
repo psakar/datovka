@@ -800,13 +800,13 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	}
 
 	const QString userName(m_accountModel.userName(current));
-
 	if (userName.isEmpty()) {
 		logErrorNL("%s", "Have empty user name.");
 //		Q_ASSERT(0);
 		return;
 	}
-	MessageDbSet *dbSet = accountDbSet(userName);
+
+	const MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		/* May occur on deleting last account. */
 		setMessageActionVisibility(0);
@@ -867,12 +867,22 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	ui->messageList->disconnect(SIGNAL(clicked(QModelIndex)),
 	    this, SLOT(messageItemClicked(QModelIndex)));
 
+	/* Clicked account item. */
+	const enum AccountModel::NodeType accntNodeType =
+	    AccountModel::nodeType(current);
+	/* Depending on which account item was clicked show/hide elements. */
+	enum AccountModel::NodeType msgViewType = AccountModel::nodeUnknown;
+
+	/* Reading database data may take some time. */
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	QApplication::processEvents();
+
 	m_messageTableModel.removeRows(0, m_messageTableModel.rowCount());
 	m_messageListProxyModel.setSourceModel(&m_messageTableModel); /* TODO */
 	m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT); /* TODO */
 	ui->messageList->setModel(&m_messageListProxyModel); /* TODO */
 
-	switch (AccountModel::nodeType(current)) {
+	switch (accntNodeType) {
 	case AccountModel::nodeAccountTop:
 		setMessageActionVisibility(0);
 		html = createAccountInfo(userName);
@@ -959,7 +969,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	default:
 		logErrorNL("%s", "Cannot determine account node type.");
 //		Q_ASSERT(0);
-		return;
+		goto end;
 		break;
 	}
 
@@ -998,11 +1008,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
 	}
 
-	/* Depending on which item was clicked show/hide elements. */
-	QAbstractItemModel *itemModel;
-	bool received = true;
-
-	switch (AccountModel::nodeType(current)) {
+	switch (accntNodeType) {
 	case AccountModel::nodeAccountTop:
 	case AccountModel::nodeAll:
 #ifdef DISABLE_ALL_TABLE
@@ -1022,8 +1028,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setReceivedColumnWidths();
-		received = true;
-		goto setmodel;
+		msgViewType = AccountModel::nodeReceived;
+		break;
 	case AccountModel::nodeRecentSent:
 #ifndef DISABLE_ALL_TABLE
 	case AccountModel::nodeSent:
@@ -1033,9 +1039,17 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		showColumnsAccordingToFunctionality(ui->messageList);
 		/* Set specific column width. */
 		setSentColumnWidths();
-		received = false;
+		msgViewType = AccountModel::nodeSent;
+		break;
+	default:
+		logErrorNL("%s", "Cannot determine account node type.");
+//		Q_ASSERT(0);
+		goto end;
+		break;
+	}
 
-setmodel:
+	/* Set model. */
+	if (msgViewType != AccountModel::nodeUnknown) {
 		ui->messageStackedWidget->setCurrentIndex(1);
 		/* Apply message filter. */
 		filterMessages(mui_filterLine->text());
@@ -1055,29 +1069,37 @@ setmodel:
 		ui->messageInfo->clear();
 		/* Clear attachment list. */
 		messageItemsSelectionChanged(QItemSelection());
-		/* Select last message in list if there are some messages. */
-		itemModel = ui->messageList->model();
-		/* enable/disable buttons */
-		if ((Q_NULLPTR != itemModel) && (0 < itemModel->rowCount())) {
-			messageItemRestoreSelectionOnModelChange();
-			ui->actionAuthenticate_message_file->setEnabled(true);
-			ui->actionExport_correspondence_overview->
-			    setEnabled(true);
-			ui->actionCheck_message_timestamp_expiration->
-			    setEnabled(true);
-		} else {
-			ui->actionAuthenticate_message_file->setEnabled(false);
+		{
+			/* Select last message in list if there are some messages. */
+			QAbstractItemModel *itemModel = ui->messageList->model();
+			/* enable/disable buttons */
+			if ((Q_NULLPTR != itemModel) && (0 < itemModel->rowCount())) {
+				messageItemRestoreSelectionOnModelChange();
+				ui->actionAuthenticate_message_file->setEnabled(true);
+				ui->actionExport_correspondence_overview->
+				    setEnabled(true);
+				ui->actionCheck_message_timestamp_expiration->
+				    setEnabled(true);
+			} else {
+				ui->actionAuthenticate_message_file->setEnabled(false);
+			}
 		}
-		break;
-	default:
-		logErrorNL("%s", "Cannot determine account node type.");
-//		Q_ASSERT(0);
-		return;
-		break;
 	}
 
 	/* Set specific column width. */
-	received ? setReceivedColumnWidths() : setSentColumnWidths();
+	switch (msgViewType) {
+	case AccountModel::nodeReceived:
+		setReceivedColumnWidths();
+		break;
+	case AccountModel::nodeSent:
+		setSentColumnWidths();
+		break;
+	default:
+		break;
+	}
+
+end:
+	QApplication::restoreOverrideCursor();
 }
 
 /* ========================================================================= */
