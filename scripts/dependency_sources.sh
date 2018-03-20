@@ -328,7 +328,7 @@ adjust_sources () {
 		# Latest gettext fails to compile with Mingw.
 
 		_GETTEXT_ARCHIVE="gettext-0.19.7.tar.xz"
-		_GETTEXT_SHA256="378fa86a091cec3acdece3c961bb8d8c0689906287809a8daa79dc0c6398d934"
+		_GETTEXT_SHA256=""
 		echo "Using '${_GETTEXT_ARCHIVE}'."
 		;;
 	osx)
@@ -340,7 +340,7 @@ adjust_sources () {
 		# See also https://github.com/sparklemotion/nokogiri/issues/1445
 
 		#_LIBXML2_ARCHIVE="libxml2-2.9.8.tar.gz"
-		#_LIBXML2_SHA256="0b74e51595654f958148759cfef0993114ddccccbb6f31aee018f3558e8e2732"
+		#_LIBXML2_SHA256=""
 		echo "Using '${_LIBXML2_ARCHIVE}'."
 		;;
 	*)
