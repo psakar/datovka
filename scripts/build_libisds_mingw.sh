@@ -40,6 +40,9 @@ if [ ! -d "${SRCDIR}" ]; then
 	mkdir "${SRCDIR}"
 fi
 
+download_all_sources "${SRCDIR}" || exit 1
+sleep 3
+
 # Specifies which targets to build.
 TARGETS=""
 #TARGETS="${TARGETS} static"
