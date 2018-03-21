@@ -1,6 +1,22 @@
 4.10.2 /
+ * Displaying busy cursor when switching between entries in account list.
+ * New version notification can be blocked on Windows in runtime by setting
+       specific registry values. It can also be blocked at compile time
+       by using a configuration option when running qmake.
+ * Extended resource information for the generated Windows executable.
+ * Fixed project file include paths in order not to interfere with user-defined
+       compiler flags.
+ * Fixed problem with unpredictable construction order of global object
+       instances.
+ * Added missing conversion strings to some unknown message types.
+ * Removed support for unneeded protocols from bundled libcurl.
+ * Building procedure for macOS now supports 64-bit builds and allows bundling
+       shared libraries together with the application.
+ * Scripts (used for building libraries which are then bundled with the
+       application binary for Windows and macOS) can now automatically
+       download missing sources.
  * Fixed issue causing the application to crash on macOS when switching
-   between accounts and having some text in the message filter field.
+   between accounts and when having some text in the message filter field.
  * Fixed issue causing the application to crash on macOS when updating
    information about messages without a valid delivery time.
  * Re-enabled logging of transferred message on Windows data when setting
