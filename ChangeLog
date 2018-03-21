@@ -1,4 +1,4 @@
-4.10.2 /
+4.10.2 / 2018-03-21
  * Displaying busy cursor when switching between entries in account list.
  * New version notification can be blocked on Windows in runtime by setting
        specific registry values. It can also be blocked at compile time
