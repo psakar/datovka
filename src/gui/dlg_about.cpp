@@ -48,7 +48,7 @@ DlgAbout::DlgAbout(QWidget *parent)
 	m_ui->labelVersion->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
 	QString copyrightHtml(
-	    "Copyright &copy; 2014–2017 CZ.NIC, z. s. p. o. "
+	    "Copyright &copy; 2014–2018 CZ.NIC, z. s. p. o. "
 	    "&lt;<a href=\"" CZ_NIC_URL "\">" CZ_NIC_URL "</a>&gt;");
 	copyrightHtml += "<br/>" + tr("Additional informations") + ": "
 	    "<a href=\"" DATOVKA_HOMEPAGE_URL "\">" + tr("home page") + "</a>"
