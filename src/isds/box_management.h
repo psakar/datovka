@@ -186,9 +186,6 @@ namespace Isds {
 		/* pnFirstName, pnMiddleName, pnLastName, pnLastNameAtBirth */
 		PersonName personName(void) const;
 		void setPersonName(const PersonName &pn);
-#ifdef Q_COMPILER_RVALUE_REFS
-		void setPersonName(PersonName &&pn);
-#endif /* Q_COMPILER_RVALUE_REFS */
 		/* firmName */
 		QString firmName(void) const;
 		void setFirmName(const QString &fn);
