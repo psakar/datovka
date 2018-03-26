@@ -27,19 +27,30 @@
 
 /* wsdl2h -s -o dbTypes.h dbTypes.xsd  */
 
+namespace Isds {
+
 /*!
  * @brief Provides enumeration types based on dbTypes.xsd .
  */
-class IsdsType : public QObject {
+class Type : public QObject {
 	Q_OBJECT
 
 private:
 	/*!
 	 * @brief Private constructor.
 	 */
-	IsdsType(QObject *parent = Q_NULLPTR);
+	Type(QObject *parent = Q_NULLPTR);
 
 public:
+	/*!
+	 * @brief Nillable bool.
+	 */
+	enum NilBool {
+		BOOL_NULL = -1, /*!< Conveninence value, converted from/to NULL. */
+		BOOL_FALSE = 0,
+		BOOL_TRUE = 1
+	};
+
 	/*!
 	 * @brief Data box type.
 	 *
@@ -48,6 +59,7 @@ public:
 	 *     (section 2.1 CreateDataBox).
 	 */
 	enum DbType {
+		BT_NULL = -1, /*!< Conveninence value, converted from/to NULL. */
 		BT_SYSTEM = 0, /*!<
 		                * This value is not listed in dbTypes.xsd but is mentioned in
 		                * pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
@@ -78,7 +90,7 @@ public:
 	 *     (appendix 4).
 	 */
 	enum DbState {
-		BS_ERROR = 0, /* Error value, see documentation. */
+		BS_ERROR = 0, /* Error value, see documentation. */ /* Also converted ftom/to NULL. */
 		BS_ACCESSIBLE = 1,
 		BS_TEMP_INACCESSIBLE = 2,
 		BS_NOT_YET_ACCESSIBLE = 3,
@@ -128,4 +140,6 @@ public:
 	};
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(IsdsType::Privileges)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Type::Privileges)
+
+}
