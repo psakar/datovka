@@ -1,8 +1,8 @@
 #!/usr/bin/env sh
 
 PROJECT="home:CZ-NIC:datovka-devel"
-PACKAGE="libisds"
-VERSION="0.10.7"
+PACKAGE="datovka"
+VERSION="4.10.2"
 
 SCRIPT_LOCATION=""
 SYSTEM=$(uname -s)
@@ -35,6 +35,7 @@ if [ ! -f "${LIBISDS_ORIG_SRC}" ]; then
 fi
 
 ${CMD_OSC} co "${PROJECT}" "${PACKAGE}"
+
 pushd "${PROJECT}/${PACKAGE}"
 ${CMD_OSC} del *
 cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb/${PACKAGE}.dsc" ./ || exit 1

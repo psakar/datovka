@@ -1,0 +1,4 @@
+# Compulsory line, this is a version 3 file
+version=3
+
+https://secure.nic.cz/files/datove_schranky/(\d\.\d\.\d)/datovka-(\d\.\d\.\d)\.tar\.xz

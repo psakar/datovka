@@ -1,0 +1,67 @@
+From 84dd71ff872c8d6cfafc323b3cc1b57140b1aa68 Mon Sep 17 00:00:00 2001
+From: Karel Slany <karel.slany@nic.cz>
+Date: Wed, 28 Mar 2018 14:09:32 +0200
+Subject: [PATCH 2/2] Disable -Wdate-time to fix FTBFS with older gcc
+
+---
+ datovka-cli.pro.noauto                       | 2 +-
+ datovka.pro                                  | 2 +-
+ tests/records_management_app/rm_test_app.pro | 2 +-
+ tests/tests.pro                              | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/datovka-cli.pro.noauto b/datovka-cli.pro.noauto
+index 4c36ddc1..86b2d153 100644
+--- a/datovka-cli.pro.noauto
++++ b/datovka-cli.pro.noauto
+@@ -28,7 +28,7 @@ DEFINES += \
+ QMAKE_CXXFLAGS = \
+ 	-g -O0 -std=c++11 \
+ 	-Wall -Wextra -pedantic \
+-	-Wdate-time -Wformat -Werror=format-security
++	-Wformat -Werror=format-security
+ 
+ #INCLUDEPATH +=
+ 
+diff --git a/datovka.pro b/datovka.pro
+index 30e40693..963f27e2 100644
+--- a/datovka.pro
++++ b/datovka.pro
+@@ -124,7 +124,7 @@ unix:!macx {
+ QMAKE_CXXFLAGS = \
+ 	-g -O0 -std=c++11 \
+ 	-Wall -Wextra -pedantic \
+-	-Wdate-time -Wformat -Werror=format-security
++	-Wformat -Werror=format-security
+ 
+ #INCLUDEPATH +=
+ 
+diff --git a/tests/records_management_app/rm_test_app.pro b/tests/records_management_app/rm_test_app.pro
+index 5f5a682a..56219955 100644
+--- a/tests/records_management_app/rm_test_app.pro
++++ b/tests/records_management_app/rm_test_app.pro
+@@ -30,7 +30,7 @@ DEFINES += \
+ QMAKE_CXXFLAGS = \
+ 	-g -O0 -std=c++11 \
+ 	-Wall -Wextra -pedantic \
+-	-Wdate-time -Wformat -Werror=format-security
++	-Wformat -Werror=format-security
+ 
+ INCLUDEPATH += \
+ 	$${top_srcdir}
+diff --git a/tests/tests.pro b/tests/tests.pro
+index 50efcb44..e06d9120 100644
+--- a/tests/tests.pro
++++ b/tests/tests.pro
+@@ -29,7 +29,7 @@ DEFINES += \
+ QMAKE_CXXFLAGS = \
+ 	-g -O0 -std=c++11 \
+ 	-Wall -Wextra -pedantic \
+-	-Wdate-time -Wformat -Werror=format-security
++	-Wformat -Werror=format-security
+ 
+ INCLUDEPATH += \
+ 	$${top_srcdir}
+-- 
+2.16.1
+

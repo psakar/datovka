@@ -1,0 +1,32 @@
+Source: datovka
+Section: x11
+Priority: optional
+Maintainer: Ondřej Surý <ondrej@debian.org>
+Build-Depends: debhelper (>= 9),
+               libisds-dev (>= 0.10.7),
+               libqt5svg5-dev,
+               libssl-dev,
+               libxml2-dev,
+               qtbase5-dev,
+               qttools5-dev-tools
+Standards-Version: 3.9.6
+Homepage: http://www.datovka.cz
+Vcs-Git: git://anonscm.debian.org/collab-maint/datovka.git
+Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/datovka.git;a=summary
+
+Package: datovka
+Architecture: any
+Depends: libisds5 (>= 0.10.7),
+         libqt5sql5-sqlite,
+         qttranslations5-l10n,
+         ${misc:Depends},
+         ${shlibs:Depends}
+Description: Czech Data Boxes client
+ Datovka is a rich desktop client to access messages stored in the
+ Czech Data Boxes system (databox)
+ .
+ The client provides access to multiple databoxes from one interface
+ and also can be used to store sent and received messages indefinitely
+ on a local system.
+ .
+ It's mostly useful only to a Czech citizens.

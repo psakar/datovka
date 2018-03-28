@@ -12,7 +12,8 @@ Copyright: Chris Venter <chris.venter@gmail.com>
 License: CC0-1
 
 Files: debian/*
-Copyright: CZ.NIC z. s. p. o., Ondřej Surý <ondrej@debian.org>
+Copyright: 2018 CZ.NIC, z.s.p.o.
+           2015-2017 Ondřej Surý <ondrej@debian.org>
 License: CC0-1
 
 License: LGPL-3+

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
-PACKAGE="libisds"
-VERSION="0.10.7"
+PACKAGE="datovka"
+VERSION="4.10.2"
 
 SCRIPT_LOCATION=""
 SYSTEM=$(uname -s)
@@ -15,7 +15,7 @@ fi
 SRC_ROOT="${SCRIPT_LOCATION}/.."
 cd "${SRC_ROOT}"
 
-PACKAGE_SRC="${SRC_ROOT}/libs/srcs/${PACKAGE}-${VERSION}.tar.xz"
+PACKAGE_SRC="${SRC_ROOT}/${PACKAGE}-${VERSION}.tar.xz"
 if [ ! -f "${PACKAGE_SRC}" ]; then
 	echo "Cannot find '${PACKAGE_SRC}'." >&2
 	exit 1
