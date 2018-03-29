@@ -3,6 +3,7 @@
 PROJECT="home:CZ-NIC:datovka-devel"
 PACKAGE="datovka"
 VERSION="4.10.2"
+RELEASE="1"
 
 SCRIPT_LOCATION=""
 SYSTEM=$(uname -s)
@@ -28,19 +29,19 @@ if [ ! -d "${DISTRO_WORK_DIR}" ]; then
 	return 1
 fi
 
-LIBISDS_ORIG_SRC="${DISTRO_WORK_DIR}/${PACKAGE}_${VERSION}.orig.tar.xz"
-if [ ! -f "${LIBISDS_ORIG_SRC}" ]; then
-	echo "Cannot find '${LIBISDS_ORIG_SRC}'." >&2
+PACKAGE_ORIG_SRC="${DISTRO_WORK_DIR}/${PACKAGE}_${VERSION}.orig.tar.xz"
+if [ ! -f "${PACKAGE_ORIG_SRC}" ]; then
+	echo "Cannot find '${PACKAGE_ORIG_SRC}'." >&2
 	return 1
 fi
 
 ${CMD_OSC} co "${PROJECT}" "${PACKAGE}"
-
 pushd "${PROJECT}/${PACKAGE}"
 ${CMD_OSC} del *
+cp "${SRC_ROOT}/${PACKAGE_ORIG_SRC}" ./ || exit 1
+cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/rpm/${PACKAGE}.spec" ./
 cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb/${PACKAGE}.dsc" ./ || exit 1
-cp "${SRC_ROOT}/${LIBISDS_ORIG_SRC}" ./ || exit 1
-cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb/${PACKAGE}_${VERSION}-1.debian.tar.xz" ./ || exit 1
+cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb/${PACKAGE}_${VERSION}-${RELEASE}.debian.tar.xz" ./ || exit 1
 osc addremove
 osc ci -n
 popd

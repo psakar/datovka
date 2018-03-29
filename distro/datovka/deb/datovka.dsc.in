@@ -2,7 +2,7 @@ Format: 3.0 (quilt)
 Source: datovka
 Binary: datovka
 Architecture: any all
-Version: __VERSION__-1
+Version: __VERSION__-__RELEASE__
 Maintainer: Datovka <datove-schranky@labs.nic.cz>
 Uploaders: Karel Slany <karel.slany@nic.cz>
 Homepage: https://www.datovka.cz/

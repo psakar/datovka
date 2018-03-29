@@ -2,6 +2,7 @@
 
 PACKAGE="libisds"
 VERSION="0.10.7"
+RELEASE="1"
 
 SCRIPT_LOCATION=""
 SYSTEM=$(uname -s)
@@ -45,6 +46,7 @@ rm_swp_files () {
 			fi
 		fi
 	done
+	return 0
 }
 
 cp -r "${SRC_ROOT}/distro/${PACKAGE}/"* "${DISTRO_WORK_DIR}"
@@ -55,7 +57,7 @@ SUBST_FILES=$(find "${DISTRO_WORK_DIR}" | grep '[.]in$')
 for f in ${SUBST_FILES}; do
 	OUT_NAME=$(echo "${f}" | sed 's/[.]in$//g')
 	echo "'${f}' -> '${OUT_NAME}'"
-	cat "${f}" | sed -e "s/__VERSION__/${VERSION}/g" > "${OUT_NAME}"
+	cat "${f}" | sed -e "s/__VERSION__/${VERSION}/g" -e "s/__RELEASE__/${RELEASE}/g" > "${OUT_NAME}"
 	rm "${f}"
 done
 
@@ -85,7 +87,7 @@ compute_md5_checksum () {
 
 # Create Debian archive and complete dsc.
 pushd "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb"
-ARCHIVE="${PACKAGE}_${VERSION}-1.debian.tar.xz"
+ARCHIVE="${PACKAGE}_${VERSION}-${RELEASE}.debian.tar.xz"
 tar -chJf "${ARCHIVE}" debian
 echo " $(compute_md5_checksum ${ARCHIVE}) $(wc -c ${ARCHIVE})" >> "${PACKAGE}.dsc"
 cd ..

@@ -1,4 +1,4 @@
-datovka (__VERSION__-1) unstable; urgency=medium
+datovka (__VERSION__-__RELEASE__) unstable; urgency=medium
 
   * moved changelog to OBS
   * see NEWS or https://www.datovka.cz
