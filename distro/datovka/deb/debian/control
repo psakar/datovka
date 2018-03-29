@@ -1,7 +1,8 @@
 Source: datovka
 Section: x11
 Priority: optional
-Maintainer: Ondřej Surý <ondrej@debian.org>
+Maintainer: Datovka <datove-schranky@labs.nic.cz>
+Uploaders: Karel Slany <karel.slany@nic.cz>
 Build-Depends: debhelper (>= 9),
                libisds-dev (>= 0.10.7),
                libqt5svg5-dev,

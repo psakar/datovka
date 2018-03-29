@@ -26,4 +26,7 @@ override_dh_auto_install:
 	dh_auto_install --destdir=debian/tmp
 
 override_dh_install:
-	dh_install --fail-missing -XAUTHORS -XCOPYING
+	dh_install --fail-missing -XAUTHORS
+
+override_dh_compress:
+	dh_compress -XCOPYING
