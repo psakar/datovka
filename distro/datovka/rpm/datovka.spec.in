@@ -12,9 +12,11 @@ BuildRequires: desktop-file-utils
 BuildRequires: libisds-devel >= 0.10.7
 BuildRequires: openssl-devel
 BuildRequires: qt5-linguist
+# qt5-qtbase provides SQLite driver
 BuildRequires: qt5-qtbase-devel
 BuildRequires: qt5-qtsvg-devel
 BuildRequires: qt5-qttools-devel
+Requires: qt5-qttranslations
 
 %description
 GUI application allowing access to Czech Databox - an electronic communication
