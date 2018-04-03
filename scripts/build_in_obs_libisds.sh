@@ -39,6 +39,7 @@ ${CMD_OSC} co "${PROJECT}" "${PACKAGE}"
 pushd "${PROJECT}/${PACKAGE}"
 ${CMD_OSC} del *
 cp "${SRC_ROOT}/${PACKAGE_ORIG_SRC}" ./ || exit 1
+cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/rpm/${PACKAGE}.spec" ./
 cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb/${PACKAGE}.dsc" ./ || exit 1
 cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb/${PACKAGE}_${VERSION}-${RELEASE}.debian.tar.xz" ./ || exit 1
 osc addremove
