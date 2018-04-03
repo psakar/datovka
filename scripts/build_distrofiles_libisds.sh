@@ -16,6 +16,8 @@ fi
 SRC_ROOT="${SCRIPT_LOCATION}/.."
 cd "${SRC_ROOT}"
 
+. "${SRC_ROOT}"/scripts/helper_packaging.sh
+
 PACKAGE_SRC="${SRC_ROOT}/libs/srcs/${PACKAGE}-${VERSION}.tar.xz"
 if [ ! -f "${PACKAGE_SRC}" ]; then
 	echo "Cannot find '${PACKAGE_SRC}'." >&2
@@ -23,67 +25,15 @@ if [ ! -f "${PACKAGE_SRC}" ]; then
 fi
 
 DISTRO_WORK_DIR="_distrofiles/${PACKAGE}"
-rm -rf "${DISTRO_WORK_DIR}"
-if [ ! -d "${DISTRO_WORK_DIR}" ]; then
-	rm -rf "${DISTRO_WORK_DIR}"
-	mkdir -p "${DISTRO_WORK_DIR}"
-fi
+rm_and_create_dir "${DISTRO_WORK_DIR}" || exit 1
 
-# Remove *.swp files.
-rm_swp_files () {
-	local DIR="$1"
-
-	if [ ! -d "${DIR}" ]; then
-		echo "'${DIR}' is not a directory." >&2
-		return 1
-	fi
-	for f in $(find "${DISTRO_WORK_DIR}/"); do
-		if [ -f "${f}" ]; then
-			SWP_FILE=$(echo "${f}" | grep '[.]swp$')
-			if [ "x${SWP_FILE}" != "x" ]; then
-				echo "Removing '${SWP_FILE}'."
-				rm "${SWP_FILE}"
-			fi
-		fi
-	done
-	return 0
-}
-
-cp -r "${SRC_ROOT}/distro/${PACKAGE}/"* "${DISTRO_WORK_DIR}"
+cp -ra "${SRC_ROOT}/distro/${PACKAGE}/"* "${DISTRO_WORK_DIR}"
 rm_swp_files "${DISTRO_WORK_DIR}"
 
-# Fill VERSION field in distribution specific files.
-SUBST_FILES=$(find "${DISTRO_WORK_DIR}" | grep '[.]in$')
-for f in ${SUBST_FILES}; do
-	OUT_NAME=$(echo "${f}" | sed 's/[.]in$//g')
-	echo "'${f}' -> '${OUT_NAME}'"
-	cat "${f}" | sed -e "s/__VERSION__/${VERSION}/g" -e "s/__RELEASE__/${RELEASE}/g" > "${OUT_NAME}"
-	rm "${f}"
-done
+fill_in_files "${DISTRO_WORK_DIR}" || exit 1
 
 # Rename archive to Debian format.
-cp "${PACKAGE_SRC}" "${DISTRO_WORK_DIR}/${PACKAGE}_${VERSION}.orig.tar.xz" || exit 1
-
-# Compute MD5 checksum.
-compute_md5_checksum () {
-	local FILE_NAME="$1"
-
-	local CMD_SHA256SUM=md5sum
-	local CMD_OPENSSL=openssl
-
-	if [ -z $(command -v "${CMD_OPENSSL}") ]; then
-		echo "Install '${CMD_OPENSSL}' to be able to check checksum file." >&2
-		CMD_OPENSSL=""
-	fi
-
-	if [ "x${CMD_OPENSSL}" = "x" ]; then
-		echo ""
-		return 1
-	fi
-
-	"${CMD_OPENSSL}" md5 "${FILE_NAME}" | sed -e 's/^.*\s//g'
-	return 0
-}
+cp -p "${PACKAGE_SRC}" "${DISTRO_WORK_DIR}/${PACKAGE}_${VERSION}.orig.tar.xz" || exit 1
 
 # Create Debian archive and complete dsc.
 pushd "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb"
