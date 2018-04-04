@@ -1,7 +1,20 @@
 #!/usr/bin/env sh
 
-SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
-SRC_ROOT="${SCRIPT_LOCATION}/.."
+# Obtain location of source root.
+src_root () {
+	local SCRIPT_LOCATION=""
+	local SYSTEM=$(uname -s)
+	if [ ! "x${SYSTEM}" = "xDarwin" ]; then
+		local SCRIPT=$(readlink -f "$0")
+		SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
+	else
+		SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
+	fi
+
+	echo $(cd "$(dirname "${SCRIPT_LOCATION}")"; pwd)
+}
+
+SRC_ROOT=$(src_root)
 
 DB_SHORT="-D"
 DB_LONG="--desktop-branch"

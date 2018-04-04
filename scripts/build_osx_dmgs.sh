@@ -1,7 +1,20 @@
 #!/usr/bin/env sh
 
-SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
-SRC_ROOT="${SCRIPT_LOCATION}/.."
+# Obtain location of source root.
+src_root () {
+	local SCRIPT_LOCATION=""
+	local SYSTEM=$(uname -s)
+	if [ ! "x${SYSTEM}" = "xDarwin" ]; then
+		local SCRIPT=$(readlink -f "$0")
+		SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
+	else
+		SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
+	fi
+
+	echo $(cd "$(dirname "${SCRIPT_LOCATION}")"; pwd)
+}
+
+SRC_ROOT=$(src_root)
 
 if [ "x${GETOPT}" = "x" ]; then
 	GETOPT="getopt"
@@ -218,7 +231,7 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	make ${MAKE_OPTS} || exit 1
 
 	if [ "x${BUILD_TYPE}" = "x${BUILD_SHARED}" ]; then
-		${SCRIPT_LOCATION}/macos_bundle_shared_libs.sh -b "${APP}" -n || exit 1
+		"${SRC_ROOT}"/scripts/macos_bundle_shared_libs.sh -b "${APP}" -n || exit 1
 	fi
 fi
 
@@ -232,6 +245,6 @@ if [ "x${BUILD_DMG}" != "xno" ]; then
 	# dmg files.
 	TGT="datovka-${PKG_VER}-${CLANG_BITS}bit-osx${SDK_VER}.dmg"
 	rm -rf "${TGT}"
-	${SCRIPT_LOCATION}/build_dmg.sh
+	"${SRC_ROOT}"/scripts/build_dmg.sh
 	mv datovka-installer.dmg "${TGT}"
 fi

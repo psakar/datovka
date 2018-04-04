@@ -1,19 +1,24 @@
 #!/usr/bin/env sh
 
+# Obtain location of source root.
+src_root () {
+	local SCRIPT_LOCATION=""
+	local SYSTEM=$(uname -s)
+	if [ ! "x${SYSTEM}" = "xDarwin" ]; then
+		local SCRIPT=$(readlink -f "$0")
+		SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
+	else
+		SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
+	fi
+
+	echo $(cd "$(dirname "${SCRIPT_LOCATION}")"; pwd)
+}
+
 PACKAGE="libisds"
 VERSION="0.10.7"
 RELEASE="1"
 
-SCRIPT_LOCATION=""
-SYSTEM=$(uname -s)
-if [ ! "x${SYSTEM}" = "xDarwin" ]; then
-	SCRIPT=$(readlink -f "$0")
-	SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
-else
-	SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
-fi
-
-SRC_ROOT="${SCRIPT_LOCATION}/.."
+SRC_ROOT=$(src_root)
 cd "${SRC_ROOT}"
 
 . "${SRC_ROOT}"/scripts/helper_packaging.sh
