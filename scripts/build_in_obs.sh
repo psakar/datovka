@@ -21,10 +21,16 @@ cd "${SRC_ROOT}"
 . "${SRC_ROOT}"/scripts/helper_packaging.sh
 
 REPO=""
+PACKAGE=""
 ANSWER_YES="no"
 
 H_SHORT="-h"
 H_LONG="--help"
+
+P_SHORT="-p"
+P_LONG="--package"
+P_DATOVKA="datovka"
+P_LIBISDS="libisds"
 
 D_LONG="--devel"
 L_LONG="--latest"
@@ -33,6 +39,7 @@ Y_LONG="--yes"
 USAGE="Usage:\n\t$0 [options]\n\n"
 USAGE="${USAGE}Supported options:\n"
 USAGE="${USAGE}\t${H_SHORT}, ${H_LONG}\n\t\tPrints help message.\n"
+USAGE="${USAGE}\t${P_SHORT}, ${P_LONG} <package>\n\t\tSupported arguments are '${P_DATOVKA}' and '${P_LIBISDS}'.\n"
 USAGE="${USAGE}\t${D_LONG} (default)\n\t\tPush into '${HP_REPO_DEVEL}'.\n"
 USAGE="${USAGE}\t${L_LONG}\n\t\tPush into '${HP_REPO_LATEST}'.\n"
 USAGE="${USAGE}\t${Y_LONG}\n\t\tAutomatically answer 'yes' to all questions.\n"
@@ -40,10 +47,24 @@ USAGE="${USAGE}\t${Y_LONG}\n\t\tAutomatically answer 'yes' to all questions.\n"
 # Parse rest of command line
 while [ $# -gt 0 ]; do
 	KEY="$1"
+	VAL="$2"
 	case "${KEY}" in
 	${H_SHORT}|${H_LONG})
 		echo -e ${USAGE}
 		exit 0
+		;;
+	${P_SHORT}|${P_LONG})
+		if [ "x${VAL}" = "x" ]; then
+			echo "Argument '${KEY}' requires an ergument." >&2
+			exit 1
+		fi
+		if [ "x${PACKAGE}" = "x" ]; then
+			PACKAGE="${VAL}"
+			shift
+		else
+			echo "Package name already specified or in colflict." >&2
+			exit 1
+		fi
 		;;
 	${D_LONG})
 		if [ "x${REPO}" = "x" ]; then
@@ -88,9 +109,29 @@ if [ "x${REPO}" = "x" ]; then
 fi
 
 PROJECT="${HP_OBS_PROJECT}:${REPO}"
-PACKAGE="libisds"
-VERSION="0.10.7"
-RELEASE="1"
+#PACKAGE=""
+VERSION=""
+RELEASE=""
+
+# Set package to be uploaded.
+case "x${PACKAGE}" in
+x${P_DATOVKA})
+	VERSION="4.10.2"
+	RELEASE="1"
+	;;
+x${P_LIBISDS})
+	VERSION="0.10.7"
+	RELEASE="1"
+	;;
+x)
+	echo "Unspecified package." >&2
+	exit 1
+	;;
+*)
+	echo "Unsupported package '${PACKAGE}'." >&2
+	exit 1
+	;;
+esac
 
 # Ask twice when dealing with stable.
 if [ "x${ANSWER_YES}" != "xyes" -a "x${REPO}" = "x${HP_REPO_LATEST}" ]; then
