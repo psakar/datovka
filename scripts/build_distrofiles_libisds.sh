@@ -24,10 +24,7 @@ cd "${SRC_ROOT}"
 . "${SRC_ROOT}"/scripts/helper_packaging.sh
 
 PACKAGE_SRC="${SRC_ROOT}/libs/srcs/${PACKAGE}-${VERSION}.tar.xz"
-if [ ! -f "${PACKAGE_SRC}" ]; then
-	echo "Cannot find '${PACKAGE_SRC}'." >&2
-	exit 1
-fi
+file_present "${PACKAGE_SRC}" || exit 1
 
 DISTRO_WORK_DIR="_distrofiles/${PACKAGE}"
 rm_and_create_dir "${DISTRO_WORK_DIR}" || exit 1

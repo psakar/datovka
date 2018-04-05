@@ -1,5 +1,44 @@
 #!/usr/bin/env sh
 
+# Global variables defined here use the 'HP_' prefix.
+HP_OBS_PROJECT="home:CZ-NIC"
+HP_REPO_DEVEL="datovka-devel"
+HP_REPO_LATEST="datovka-latest"
+
+# Check directory presence.
+dir_present () {
+	local DIR="$1"
+
+	if [ "x${DIR}" = "x" ]; then
+		echo "Missing directory name as parameter." >&2
+		return 1
+	fi
+
+	if [ ! -d "${DIR}" ]; then
+		echo "Cannot find directory '${DIR}'." >&2
+		return 1
+	fi
+
+	return 0
+}
+
+# Check file presence.
+file_present () {
+	local FILE="$1"
+
+	if [ "x${FILE}" = "x" ]; then
+		echo "Missing file name as parameter." >&2
+		return 1
+	fi
+
+	if [ ! -f "${FILE}" ]; then
+		echo "Cannot find file '${FILE}'." >&2
+		return 1
+	fi
+
+	return 0
+}
+
 # Delete and recreate empty directory.
 rm_and_create_dir () {
 	local DIR="$1"

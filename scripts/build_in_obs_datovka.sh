@@ -14,31 +14,27 @@ src_root () {
 	echo $(cd "$(dirname "${SCRIPT_LOCATION}")"; pwd)
 }
 
-PROJECT="home:CZ-NIC:datovka-devel"
+SRC_ROOT=$(src_root)
+cd "${SRC_ROOT}"
+
+. "${SRC_ROOT}"/scripts/helper_packaging.sh
+
+PROJECT="${HP_OBS_PROJECT}:${HP_REPO_DEVEL}"
 PACKAGE="datovka"
 VERSION="4.10.2"
 RELEASE="1"
 
-SRC_ROOT=$(src_root)
-cd "${SRC_ROOT}"
-
 CMD_OSC="osc"
 if [ -z $(command -v "${CMD_OSC}") ]; then
 	echo "Install '${CMD_OSC}' to be able to use the openSUSE Build Service." >&2
-	return 1
+	exit 1
 fi
 
 DISTRO_WORK_DIR="_distrofiles/${PACKAGE}"
-if [ ! -d "${DISTRO_WORK_DIR}" ]; then
-	echo "Cannot find '${DISTRO_WORK_DIR}'." >&2
-	return 1
-fi
+dir_present "${DISTRO_WORK_DIR}" || exit 1
 
 PACKAGE_ORIG_SRC="${DISTRO_WORK_DIR}/${PACKAGE}_${VERSION}.orig.tar.xz"
-if [ ! -f "${PACKAGE_ORIG_SRC}" ]; then
-	echo "Cannot find '${PACKAGE_ORIG_SRC}'." >&2
-	return 1
-fi
+file_present "${PACKAGE_ORIG_SRC}" || exit 1
 
 ${CMD_OSC} co "${PROJECT}" "${PACKAGE}"
 pushd "${PROJECT}/${PACKAGE}"
