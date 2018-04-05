@@ -17,7 +17,7 @@ src_root () {
 SRC_ROOT=$(src_root)
 cd "${SRC_ROOT}"
 
-. "${SRC_ROOT}"/scripts/dependency_sources.sh
+. "${SRC_ROOT}"/scripts/helper_dependency_sources.sh
 
 adjust_sources "osx"
 

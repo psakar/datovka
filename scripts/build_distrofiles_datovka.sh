@@ -21,8 +21,11 @@ RELEASE="1"
 SRC_ROOT=$(src_root)
 cd "${SRC_ROOT}"
 
+. "${SRC_ROOT}"/scripts/helper_dependency_sources.sh
 . "${SRC_ROOT}"/scripts/helper_packaging.sh
 
+ensure_source_presence "${SRC_ROOT}" "${PACKAGE}-${VERSION}.tar.xz" \
+    "https://secure.nic.cz/files/datove_schranky/${VERSION}/" "ed0cd597fe7c4438de397da058fb582453dbfeedf696a65b9e5fde677824c4d2" "" ""
 PACKAGE_SRC="${SRC_ROOT}/${PACKAGE}-${VERSION}.tar.xz"
 file_present "${PACKAGE_SRC}" || exit 1
 

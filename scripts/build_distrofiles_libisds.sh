@@ -21,8 +21,11 @@ RELEASE="1"
 SRC_ROOT=$(src_root)
 cd "${SRC_ROOT}"
 
+. "${SRC_ROOT}"/scripts/helper_dependency_sources.sh
 . "${SRC_ROOT}"/scripts/helper_packaging.sh
 
+ensure_source_presence "${SRC_ROOT}/libs/srcs" "${_LIBISDS_ARCHIVE}" \
+    "${_LIBISDS_URL_PREFIX}" "${_LIBISDS_SHA256}" "${_LIBISDS_SIG_SUFF}" "${_LIBISDS_KEY_FP}"
 PACKAGE_SRC="${SRC_ROOT}/libs/srcs/${PACKAGE}-${VERSION}.tar.xz"
 file_present "${PACKAGE_SRC}" || exit 1
 

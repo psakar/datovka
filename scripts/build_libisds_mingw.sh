@@ -16,7 +16,7 @@ src_root () {
 
 SRC_ROOT=$(src_root)
 
-. "${SRC_ROOT}"/scripts/dependency_sources.sh
+. "${SRC_ROOT}"/scripts/helper_dependency_sources.sh
 
 adjust_sources "mingw"
 
