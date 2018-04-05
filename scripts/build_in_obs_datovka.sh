@@ -20,14 +20,80 @@ cd "${SRC_ROOT}"
 . "${SRC_ROOT}"/scripts/helper_generic.sh
 . "${SRC_ROOT}"/scripts/helper_packaging.sh
 
-REPO="${HP_REPO_DEVEL}"
+REPO=""
+ANSWER_YES="no"
+
+H_SHORT="-h"
+H_LONG="--help"
+
+D_LONG="--devel"
+L_LONG="--latest"
+Y_LONG="--yes"
+
+USAGE="Usage:\n\t$0 [options]\n\n"
+USAGE="${USAGE}Supported options:\n"
+USAGE="${USAGE}\t${H_SHORT}, ${H_LONG}\n\t\tPrints help message.\n"
+USAGE="${USAGE}\t${D_LONG} (default)\n\t\tPush into '${HP_REPO_DEVEL}'.\n"
+USAGE="${USAGE}\t${L_LONG}\n\t\tPush into '${HP_REPO_LATEST}'.\n"
+USAGE="${USAGE}\t${Y_LONG}\n\t\tAutomatically answer 'yes' to all questions.\n"
+
+# Parse rest of command line
+while [ $# -gt 0 ]; do
+	KEY="$1"
+	case "${KEY}" in
+	${H_SHORT}|${H_LONG})
+		echo -e ${USAGE}
+		exit 0
+		;;
+	${D_LONG})
+		if [ "x${REPO}" = "x" ]; then
+			REPO="${HP_REPO_DEVEL}"
+		else
+			echo "Subproject already specified or in conflict." >&2
+			exit 1
+		fi
+		;;
+	${L_LONG})
+		if [ "x${REPO}" = "x" ]; then
+			REPO="${HP_REPO_LATEST}"
+		else
+			echo "Subproject already specified or in conflict." >&2
+			exit 1
+		fi
+		;;
+	${Y_LONG})
+		ANSWER_YES="yes"
+		;;
+	--)
+		shift
+		break
+		;;
+	-*|*)
+		echo "Unknown option '${KEY}'." >&2
+		echo -e ${USAGE} >&2
+		exit 1
+		;;
+	esac
+	shift
+done
+if [ $# -gt 0 ]; then
+	echo -e "Unknown options: $@" >&2
+	echo -en ${USAGE} >&2
+	exit 1
+fi
+
+# Use devel by defauilt.
+if [ "x${REPO}" = "x" ]; then
+	REPO="${HP_REPO_DEVEL}"
+fi
 
 PROJECT="${HP_OBS_PROJECT}:${REPO}"
 PACKAGE="datovka"
 VERSION="4.10.2"
 RELEASE="1"
 
-if [ "x${REPO}" = "x${HP_REPO_LATEST}" ]; then
+# Ask twice when dealing with stable.
+if [ "x${ANSWER_YES}" != "xyes" -a "x${REPO}" = "x${HP_REPO_LATEST}" ]; then
 	ANSWER=$(ask_user_yn "Do you want to push '${PACKAGE}-${VERSION}-${RELEASE}' into '${PROJECT}'?" "n")
 	if [ "x${ANSWER}" != "xy" ]; then
 		exit 0
@@ -50,11 +116,11 @@ ${CMD_OSC} co "${PROJECT}" "${PACKAGE}"
 pushd "${PROJECT}/${PACKAGE}"
 ${CMD_OSC} del *
 cp "${SRC_ROOT}/${PACKAGE_ORIG_SRC}" ./ || exit 1
-cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/rpm/${PACKAGE}.spec" ./
+cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/rpm/${PACKAGE}.spec" ./ || exit 1
 cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb/${PACKAGE}.dsc" ./ || exit 1
 cp "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb/${PACKAGE}_${VERSION}-${RELEASE}.debian.tar.xz" ./ || exit 1
-if true; then
-	ANSWER=$(ask_user_yn "Do you want to push newly created package sources to OBS?" "n")
+if [ "x${ANSWER_YES}" != "xyes" ]; then
+	ANSWER=$(ask_user_yn "Do you want to push newly created '${PACKAGE}' package sources to '${PROJECT}' OBS?" "n")
 	if [ "x${ANSWER}" != "xy" ]; then
 		exit 0
 	fi
