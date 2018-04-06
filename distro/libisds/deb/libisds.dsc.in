@@ -1,0 +1,19 @@
+Format: 3.0 (quilt)
+Source: libisds
+Binary: libisds5, libisds-dev
+Architecture: any all
+Version: __VERSION__-__RELEASE__
+Maintainer: Datovka <datove-schranky@labs.nic.cz>
+Uploaders: Karel Slany <karel.slany@nic.cz>
+Homepage: http://xpisar.wz.cz/libisds/
+Testsuite: autopkgtest
+Build-Depends: debhelper (>= 9),
+               gettext,
+               libcurl4-openssl-dev,
+               libexpat-dev,
+               libssl-dev,
+               libxml2-dev
+Package-List:
+ libisds5 deb libs optional arch=any
+ libisds-dev deb libdevel arch=any
+Files:

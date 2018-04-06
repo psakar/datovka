@@ -1,0 +1,19 @@
+Format: 3.0 (quilt)
+Source: datovka
+Binary: datovka
+Architecture: any all
+Version: __VERSION__-__RELEASE__
+Maintainer: Datovka <datove-schranky@labs.nic.cz>
+Uploaders: Karel Slany <karel.slany@nic.cz>
+Homepage: https://www.datovka.cz/
+Testsuite: autopkgtest
+Build-Depends: debhelper (>= 9),
+               libisds-dev (>= 0.10.7),
+               libqt5svg5-dev,
+               libssl-dev,
+               libxml2-dev,
+               qtbase5-dev,
+               qttools5-dev-tools
+Package-List:
+ datovka deb x11 optional arch=any
+Files:

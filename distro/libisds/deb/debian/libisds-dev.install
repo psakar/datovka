@@ -1,0 +1,4 @@
+usr/include/*
+usr/lib/*/libisds*.a
+usr/lib/*/libisds*.so
+usr/lib/*/pkgconfig/libisds.pc

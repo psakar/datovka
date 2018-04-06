@@ -1,11 +1,23 @@
 #!/usr/bin/env sh
 
-SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
-SRC_ROOT=$(cd "${SCRIPT_LOCATION}"/..; pwd)
+# Obtain location of source root.
+src_root () {
+	local SCRIPT_LOCATION=""
+	local SYSTEM=$(uname -s)
+	if [ ! "x${SYSTEM}" = "xDarwin" ]; then
+		local SCRIPT=$(readlink -f "$0")
+		SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
+	else
+		SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
+	fi
 
+	echo $(cd "$(dirname "${SCRIPT_LOCATION}")"; pwd)
+}
+
+SRC_ROOT=$(src_root)
 cd "${SRC_ROOT}"
 
-. "${SRC_ROOT}"/scripts/dependency_sources.sh
+. "${SRC_ROOT}"/scripts/helper_dependency_sources.sh
 
 adjust_sources "osx"
 

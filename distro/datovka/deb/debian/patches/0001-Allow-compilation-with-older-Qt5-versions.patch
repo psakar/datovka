@@ -1,0 +1,25 @@
+From a2815bfb53574b365d761f4b56ac012e7c8a6b47 Mon Sep 17 00:00:00 2001
+From: Karel Slany <karel.slany@nic.cz>
+Date: Wed, 28 Mar 2018 14:06:30 +0200
+Subject: [PATCH 1/2] Allow compilation with older Qt5 versions.
+
+---
+ datovka.pro | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/datovka.pro b/datovka.pro
+index 6b6f1848..30e40693 100644
+--- a/datovka.pro
++++ b/datovka.pro
+@@ -29,7 +29,7 @@ win32 {
+ # Qt 5.2.1 contains a bug causing the application to crash on some drop events.
+ # Qt prior to version 5.4.1 may not behave correctly on some drop events.
+ # Version 5.4.1 should be fine.
+-sufficientQtVersion(5, 3, 4, 1)
++#sufficientQtVersion(5, 3, 4, 1)
+ 
+ isEmpty(MOC_DIR) {
+ 	MOC_DIR = gen_moc
+-- 
+2.16.1
+

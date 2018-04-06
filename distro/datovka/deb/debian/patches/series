@@ -1,0 +1,2 @@
+0001-Allow-compilation-with-older-Qt5-versions.patch
+0002-Disable-Wdate-time-to-fix-FTBFS-with-older-gcc.patch

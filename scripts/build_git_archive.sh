@@ -1,17 +1,22 @@
 #!/usr/bin/env sh
 
+# Obtain location of source root.
+src_root () {
+	local SCRIPT_LOCATION=""
+	local SYSTEM=$(uname -s)
+	if [ ! "x${SYSTEM}" = "xDarwin" ]; then
+		local SCRIPT=$(readlink -f "$0")
+		SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
+	else
+		SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
+	fi
+
+	echo $(cd "$(dirname "${SCRIPT_LOCATION}")"; pwd)
+}
+
 DESIRED_VERSION="$1"
 
-SYSTEM=$(uname -s)
-if [ ! "x${SYSTEM}" = "xDarwin" ]; then
-	SCRIPT=$(readlink -f "$0")
-	SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
-else
-	SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
-fi
-
-SRC_ROOT="${SCRIPT_LOCATION}/.."
-
+SRC_ROOT=$(src_root)
 cd "${SRC_ROOT}"
 
 ALL_TAGS=$(git tag -l --sort=-version:refname)
