@@ -49,12 +49,9 @@ rm_and_create_dir () {
 	fi
 
 	rm -rf "${DIR}"
-	if [ ! -d "${DIR}" ]; then
-		rm -rf "${DIR}"
-		mkdir -p "${DIR}"
-		if [ 0 != $? ]; then
-			return 1
-		fi
+	mkdir -p "${DIR}"
+	if [ 0 != $? ]; then
+		return 1
 	fi
 
 	return 0
