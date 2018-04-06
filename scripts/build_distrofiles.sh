@@ -127,7 +127,7 @@ cp -p "${PACKAGE_SRC}" "${DISTRO_WORK_DIR}/${PACKAGE}_${VERSION}.orig.tar.xz" ||
 # Create Debian archive and complete dsc.
 pushd "${SRC_ROOT}/${DISTRO_WORK_DIR}/deb"
 ARCHIVE="${PACKAGE}_${VERSION}-${RELEASE}.debian.tar.xz"
-tar -chJf "${ARCHIVE}" debian
+tar --mtime="2018-04-06 12:00Z" -chJf "${ARCHIVE}" debian
 echo " $(compute_md5_checksum ${ARCHIVE}) $(wc -c ${ARCHIVE})" >> "${PACKAGE}.dsc"
 cd ..
 ARCHIVE="${PACKAGE}_${VERSION}.orig.tar.xz"
