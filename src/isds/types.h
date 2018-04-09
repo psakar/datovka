@@ -138,6 +138,23 @@ public:
 		MS_REMOVED = 9,
 		MS_IN_VAULT = 10
 	};
+
+	/*!
+	 * @brief User types tUserType (dbTypes.xsd).
+	 *
+	 * @note Described in
+	 *     pril_3/WS_ISDS_Sprava_datovych_schranek.pdf (section 2.4).
+	 */
+	enum UserType {
+		UT_PRIMARY,
+		UT_ENTRUSTED,
+		UT_ADMINISTRATOR,
+		UT_OFFICIAL,
+		UT_OFFICIAL_CERT,
+		UT_LIQUIDATOR,
+		UT_RECEIVER,
+		UT_GUARDIAN
+	};
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Type::Privileges)

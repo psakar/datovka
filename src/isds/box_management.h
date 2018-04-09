@@ -233,4 +233,58 @@ namespace Isds {
 	private:
 		void *m_dataPtr;
 	};
+
+	/*!
+	 * @brief Exists as type tDbUserInfo, tDbUserInfoExt (dbTypes.xsd).
+	 *
+	 * pril_3/WS_ISDS_Sprava_datovych_schranek.pdf (section 1.6.2)
+	 */
+	class DbUserInfo {
+	public:
+		DbUserInfo(void);
+		~DbUserInfo(void);
+
+		/* pnFirstName, pnMiddleName, pnLastName, pnLastNameAtBirth */
+		PersonName personName(void) const;
+		void setPersonName(const PersonName &pn);
+		/* adCity, adStreet, adNumberInStreet, adNumberInMunicipality, adZipCode, adState */
+		Address address(void) const;
+		void setAddress(const Address &a);
+		/* biDate */
+		QDate biDate(void) const;
+		void setBiDate(const QDate &d);
+		/* userID */
+		QString userID(void) const;
+		void setUserId(const QString &uid);
+		/* userType */
+		enum Type::UserType userType(void) const;
+		void setUserType(enum Type::UserType ut);
+		/* userPrivils */
+		Type::Privileges userPrivils(void) const;
+		void setUserPrivils(Type::Privileges p);
+		/* ic */
+		QString ic(void) const;
+		void setIc(const QString &ic);
+		/* firmName */
+		QString firmName(void) const;
+		void setFirmName(const QString &fn);
+		/* caStreet */
+		QString caStreet(void) const;
+		void setCaStreet(const QString &cs);
+		/* caCity */
+		QString caCity(void) const;
+		void setCaCity(const QString &cc);
+		/* caZipCode */
+		QString caZipCode(void) const;
+		void setCaZipCode(const QString &cz);
+		/* caState */
+		QString caState(void) const;
+		void setCaState(const QString &cs);
+		/* AIFOTicket -- Optional, tDbUsersArray (dbTypes.xsd). */
+		QString aifoTicket(void) const;
+		void setAifoTicket(const QString &at);
+
+	private:
+		void *m_dataPtr;
+	};
 }
