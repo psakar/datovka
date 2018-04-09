@@ -64,7 +64,17 @@ namespace Isds {
 	void toCDateCopy(struct tm **cDatePtr, const QDate &date);
 
 	/*!
+	 * @brief Convert from long int.
+	 *
+	 * @param[in] cLongPtr Pointer to long.
+	 * @return -1 if NULL pointer supplied as parameter.
+	 */
+	qint64 fromLongInt(const long int *cLongPtr);
+
+	/*!
 	 * @brief Creates a long int from supplied number.
+	 *
+	 * @note Negative integers cause the pointer to be set to NULL.
 	 *
 	 * @param[in,out] cLongPtr Pointer to long int.
 	 * @param[in] i Integerer.

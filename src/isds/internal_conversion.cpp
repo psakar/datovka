@@ -101,10 +101,24 @@ void Isds::toCDateCopy(struct tm **cDatePtr, const QDate &date)
 	(*cDatePtr)->tm_mday = date.day();
 }
 
+qint64 Isds::fromLongInt(const long int *cLongPtr)
+{
+	if (cLongPtr == NULL) {
+		return -1;
+	}
+	return *cLongPtr;
+}
+
 void Isds::toLongInt(long int **cLongPtr, qint64 i)
 {
 	if (Q_UNLIKELY(cLongPtr == Q_NULLPTR)) {
 		Q_ASSERT(0);
+		return;
+	}
+	if (i < 0) {
+		if (*cLongPtr != NULL) {
+			std::free(*cLongPtr); *cLongPtr = NULL;
+		}
 		return;
 	}
 	if (*cLongPtr == NULL) {

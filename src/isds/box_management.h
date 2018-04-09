@@ -34,13 +34,14 @@ namespace Isds {
 
 	/*!
 	 * @brief Exists as address element group gAddress (dbTypes.xsd).
-	 *     // DbOwnerInfo, DbUserInfo
+	 *     // DbOwnerInfo, DbUserInfo, DbUserInfoExt
 	 */
 	class Address {
 	public:
 		Address(void)
-		    : m_adCity(), m_adStreet(), m_adNumberInStreet(),
-		    m_adNumberInMunicipality(), m_adZipCode(), m_adState()
+		    : m_adCity(), m_adDistrict(), m_adStreet(),
+		    m_adNumberInStreet(), m_adNumberInMunicipality(),
+		    m_adZipCode(), m_adState(), m_adAMCode(-1)
 		{ }
 
 		Address(const Address &other);
@@ -51,6 +52,9 @@ namespace Isds {
 		/* adCity */
 		QString city(void) const { return m_adCity; }
 		void setCity(const QString &c) { m_adCity = c; }
+		/* adDistrict */
+		QString district(void) const { return m_adDistrict; }
+		void setDistrict(const QString &d) { m_adDistrict = d; }
 		/* adStreet */
 		QString street(void) const { return m_adStreet; }
 		void setStreet(const QString &s) { m_adStreet = s; }
@@ -66,6 +70,9 @@ namespace Isds {
 		/* adState */
 		QString state(void) const { return m_adState; }
 		void setState(const QString &s) { m_adState = s; }
+		/* adAMCode */
+		qint64 amCode(void) const { return m_adAMCode; }
+		void setAmCode(qint64 amc) { m_adAMCode = amc; }
 
 		Address &operator=(const Address &other) Q_DECL_NOTHROW;
 #ifdef Q_COMPILER_RVALUE_REFS
@@ -74,11 +81,17 @@ namespace Isds {
 
 	private:
 		QString m_adCity;
+		QString m_adDistrict; /* Optional, used in extended structure versions. */
 		QString m_adStreet;
 		QString m_adNumberInStreet;
 		QString m_adNumberInMunicipality;
 		QString m_adZipCode;
 		QString m_adState;
+		qint64 m_adAMCode; /*
+		                     * AM (adresni misto) code according to RUIAN (Registr uzemni identifikace, adres a nemovitosti)
+		                     * It's a number code.
+		                     * Optional, used in extended structure versions.
+		                     */
 	};
 
 	/*!

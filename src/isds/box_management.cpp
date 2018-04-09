@@ -38,22 +38,26 @@
 
 Isds::Address::Address(const Address &other)
     : m_adCity(other.m_adCity),
+    m_adDistrict(other.m_adDistrict),
     m_adStreet(other.m_adStreet),
     m_adNumberInStreet(other.m_adNumberInStreet),
     m_adNumberInMunicipality(other.m_adNumberInMunicipality),
     m_adZipCode(other.m_adZipCode),
-    m_adState(other.m_adState)
+    m_adState(other.m_adState),
+    m_adAMCode(other.m_adAMCode)
 {
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::Address::Address(Address &&other) Q_DECL_NOEXCEPT
     : m_adCity(std::move(other.m_adCity)),
+    m_adDistrict(std::move(other.m_adDistrict)),
     m_adStreet(std::move(other.m_adStreet)),
     m_adNumberInStreet(std::move(other.m_adNumberInStreet)),
     m_adNumberInMunicipality(std::move(other.m_adNumberInMunicipality)),
     m_adZipCode(std::move(other.m_adZipCode)),
-    m_adState(std::move(other.m_adState))
+    m_adState(std::move(other.m_adState)),
+    m_adAMCode(std::move(other.m_adAMCode))
 {
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
@@ -61,11 +65,13 @@ Isds::Address::Address(Address &&other) Q_DECL_NOEXCEPT
 Isds::Address &Isds::Address::operator=(const Address &other) Q_DECL_NOTHROW
 {
 	m_adCity = other.m_adCity;
+	m_adDistrict = other.m_adDistrict;
 	m_adStreet = other.m_adStreet;
 	m_adNumberInStreet = other.m_adNumberInStreet;
 	m_adNumberInMunicipality = other.m_adNumberInMunicipality;
 	m_adZipCode = other.m_adZipCode;
 	m_adState = other.m_adState;
+	m_adAMCode = other.m_adAMCode;
 	return *this;
 }
 
@@ -73,11 +79,13 @@ Isds::Address &Isds::Address::operator=(const Address &other) Q_DECL_NOTHROW
 Isds::Address &Isds::Address::operator=(Address &&other) Q_DECL_NOTHROW
 {
 	std::swap(m_adCity, other.m_adCity);
+	std::swap(m_adDistrict, other.m_adDistrict);
 	std::swap(m_adStreet, other.m_adStreet);
 	std::swap(m_adNumberInStreet, other.m_adNumberInStreet);
 	std::swap(m_adNumberInMunicipality, other.m_adNumberInMunicipality);
 	std::swap(m_adZipCode, other.m_adZipCode);
 	std::swap(m_adState, other.m_adState);
+	std::swap(m_adAMCode, other.m_adAMCode);
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
@@ -463,6 +471,27 @@ void Isds::DbOwnerInfo::setBirthInfo(const BirthInfo &bi)
 	toCStrCopy(&boi->birthInfo->biState, bi.state());
 }
 
+/*!
+ * @brief Set address according to the libisds address structure.
+ */
+static
+void setAddressContent(Isds::Address &tgt, const struct isds_Address *src)
+{
+	if (Q_UNLIKELY(src == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	tgt.setCity(Isds::fromCStr(src->adCity));
+	tgt.setDistrict(Isds::fromCStr(src->adDistrict));
+	tgt.setStreet(Isds::fromCStr(src->adStreet));
+	tgt.setNumberInStreet(Isds::fromCStr(src->adNumberInStreet));
+	tgt.setNumberInMunicipality(Isds::fromCStr(src->adNumberInMunicipality));
+	tgt.setZipCode(Isds::fromCStr(src->adZipCode));
+	tgt.setState(Isds::fromCStr(src->adState));
+	tgt.setAmCode(Isds::fromLongInt(src->adCode));
+}
+
 Isds::Address Isds::DbOwnerInfo::address(void) const
 {
 	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
@@ -471,16 +500,30 @@ Isds::Address Isds::DbOwnerInfo::address(void) const
 	}
 
 	Address address;
-
-	address.setCity(fromCStr(boi->address->adCity));
-	address.setStreet(fromCStr(boi->address->adStreet));
-	address.setNumberInStreet(fromCStr(boi->address->adNumberInStreet));
-	address.setNumberInMunicipality(fromCStr(boi->address->adNumberInMunicipality));
-	address.setZipCode(fromCStr(boi->address->adZipCode));
-	address.setState(fromCStr(boi->address->adState));
+	setAddressContent(address, boi->address);
 	return address;
 }
 
+/*!
+ * @brief Set libisds address structure according to the address.
+ */
+static
+void setLibisdsAddressContent(struct isds_Address *tgt, const Isds::Address &src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	Isds::toCStrCopy(&tgt->adCity, src.city());
+	Isds::toCStrCopy(&tgt->adDistrict, src.district());
+	Isds::toCStrCopy(&tgt->adStreet, src.street());
+	Isds::toCStrCopy(&tgt->adNumberInStreet, src.numberInStreet());
+	Isds::toCStrCopy(&tgt->adNumberInMunicipality, src.numberInMunicipality());
+	Isds::toCStrCopy(&tgt->adZipCode, src.zipCode());
+	Isds::toCStrCopy(&tgt->adState, src.state());
+	Isds::toLongInt(&tgt->adCode, src.amCode());
+}
 
 void Isds::DbOwnerInfo::setAddress(const Address &a)
 {
@@ -500,12 +543,7 @@ void Isds::DbOwnerInfo::setAddress(const Address &a)
 		std::memset(boi->address, 0, sizeof(*boi->address));
 	}
 
-	toCStrCopy(&boi->address->adCity, a.city());
-	toCStrCopy(&boi->address->adStreet, a.street());
-	toCStrCopy(&boi->address->adNumberInStreet, a.numberInStreet());
-	toCStrCopy(&boi->address->adNumberInMunicipality, a.numberInMunicipality());
-	toCStrCopy(&boi->address->adZipCode, a.zipCode());
-	toCStrCopy(&boi->address->adState, a.state());
+	setLibisdsAddressContent(boi->address, a);
 }
 
 QString Isds::DbOwnerInfo::nationality(void) const
