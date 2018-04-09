@@ -444,8 +444,50 @@ void Isds::DbOwnerInfo::setBirthInfo(const BirthInfo &bi)
 	toCStrCopy(&boi->birthInfo->biState, bi.state());
 }
 
-//Address address(void) const;
-//void setAddress(const Address &a);
+Isds::Address Isds::DbOwnerInfo::address(void) const
+{
+	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
+	if (Q_UNLIKELY((boi == NULL) || (boi->address == NULL))) {
+		return Address();
+	}
+
+	Address address;
+
+	address.setCity(fromCStr(boi->address->adCity));
+	address.setStreet(fromCStr(boi->address->adStreet));
+	address.setNumberInStreet(fromCStr(boi->address->adNumberInStreet));
+	address.setNumberInMunicipality(fromCStr(boi->address->adNumberInMunicipality));
+	address.setZipCode(fromCStr(boi->address->adZipCode));
+	address.setState(fromCStr(boi->address->adState));
+	return address;
+}
+
+
+void Isds::DbOwnerInfo::setAddress(const Address &a)
+{
+	intAllocMissingDbOwnerInfo(&m_dataPtr);
+	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
+	if (Q_UNLIKELY(boi == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (boi->address == NULL) {
+		boi->address = (struct isds_Address *)std::malloc(sizeof(*boi->address));
+		if (Q_UNLIKELY(boi->address == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+		std::memset(boi->address, 0, sizeof(*boi->address));
+	}
+
+	toCStrCopy(&boi->address->adCity, a.city());
+	toCStrCopy(&boi->address->adStreet, a.street());
+	toCStrCopy(&boi->address->adNumberInStreet, a.numberInStreet());
+	toCStrCopy(&boi->address->adNumberInMunicipality, a.numberInMunicipality());
+	toCStrCopy(&boi->address->adZipCode, a.zipCode());
+	toCStrCopy(&boi->address->adState, a.state());
+}
 
 QString Isds::DbOwnerInfo::nationality(void) const
 {
@@ -556,11 +598,97 @@ void Isds::DbOwnerInfo::setRegistryCode(const QString &rc)
 	toCStrCopy(&boi->registryCode, rc);
 }
 
-//enum Type::DbState dbState(void) const;
-//void setDbState(enum Type::DbState bs);
+enum Isds::Type::DbState Isds::DbOwnerInfo::dbState(void) const
+{
+	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
+	if (Q_UNLIKELY((boi == NULL) || (boi->dbState == NULL))) {
+		return Type::BS_ERROR;
+	}
 
-//enum Type::NilBool dbEffectiveOVM(void) const;
-//void setDbEffectiveOVM(enum Type::NilBool eo);
+	switch (*boi->dbState) {
+	case 1:
+		return Type::BS_ACCESSIBLE;
+		break;
+	case 2:
+		return Type::BS_TEMP_INACCESSIBLE;
+		break;
+	case 3:
+		return Type::BS_NOT_YET_ACCESSIBLE;
+		break;
+	case 4:
+		return Type::BS_PERM_INACCESSIBLE;
+		break;
+	case 5:
+		return Type::BS_REMOVED;
+		break;
+	case 6:
+		return Type::BS_TEMP_UNACCESSIBLE_LAW;
+		break;
+	default:
+		Q_ASSERT(0);
+		return Type::BS_ERROR;
+		break;
+	}
+}
 
-//enum Type::NilBool dbOpenAddressing(void) const;
-//void setDbOpenAddressing(enum Type::NilBool oa)
+void Isds::DbOwnerInfo::setDbState(enum Type::DbState bs)
+{
+	intAllocMissingDbOwnerInfo(&m_dataPtr);
+	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
+	if (Q_UNLIKELY(boi == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (bs == Type::BS_ERROR) {
+		if (boi->dbState != NULL) {
+			std::free(boi->dbState); boi->dbState = NULL;
+		}
+	} else {
+		toLongInt(&boi->dbState, bs);
+	}
+}
+
+enum Isds::Type::NilBool Isds::DbOwnerInfo::dbEffectiveOVM(void) const
+{
+	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
+	if (Q_UNLIKELY(boi == NULL)) {
+		return Type::BOOL_NULL;
+	}
+
+	return fromBool(boi->dbEffectiveOVM);
+}
+
+void Isds::DbOwnerInfo::setDbEffectiveOVM(enum Type::NilBool eo)
+{
+	intAllocMissingDbOwnerInfo(&m_dataPtr);
+	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
+	if (Q_UNLIKELY(boi == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toBool(&boi->dbEffectiveOVM, eo);
+}
+
+enum Isds::Type::NilBool Isds::DbOwnerInfo::dbOpenAddressing(void) const
+{
+	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
+	if (Q_UNLIKELY(boi == NULL)) {
+		return Type::BOOL_NULL;
+	}
+
+	return fromBool(boi->dbOpenAddressing);
+}
+
+void Isds::DbOwnerInfo::setDbOpenAddressing(enum Type::NilBool oa)
+{
+	intAllocMissingDbOwnerInfo(&m_dataPtr);
+	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
+	if (Q_UNLIKELY(boi == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toBool(&boi->dbOpenAddressing, oa);
+}

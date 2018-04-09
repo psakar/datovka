@@ -23,8 +23,11 @@
 
 #pragma once
 
+#include <cstdbool>
 #include <QDate>
 #include <QString>
+
+#include "src/isds/types.h"
 
 namespace Isds {
 
@@ -34,7 +37,7 @@ namespace Isds {
 	 * @param[in] cStr C string.
 	 * @return String object, null string if NULL pointer was supplied.
 	 */
-	QString fromCStr(char *cStr);
+	QString fromCStr(const char *cStr);
 
 	/*!
 	 * @brief Creates a C-string copy to the supplied QString.
@@ -53,10 +56,34 @@ namespace Isds {
 	QDate dateFromStructTM(struct tm *cDate);
 
 	/*!
-	 * @brief Creates a struct tm copy if the supplied QDate.
+	 * @brief Creates a struct tm copy of the supplied QDate.
 	 *
 	 * @param[in,out] cDatePtr Address of pointer to struct tm.
 	 * @param[in] date Date object.
 	 */
 	void toCDateCopy(struct tm **cDatePtr, const QDate &date);
+
+	/*!
+	 * @brief Creates a long int from supplied number.
+	 *
+	 * @param[in,out] cLongPtr Pointer to long int.
+	 * @param[in] i Integerer.
+	 */
+	void toLongInt(long int **cLongPtr, qint64 i);
+
+	/*!
+	 * @brief Converts internal pointer to bool.
+	 *
+	 * @param[in] cBoolPtr Pointer to bool.
+	 * @return Nullable bool enumeration type.
+	 */
+	enum Type::NilBool fromBool(const _Bool *cBoolPtr);
+
+	/*!
+	 * @brief Sets bool pointer according to supplied value.
+	 *
+	 * @param[in,out] cBoolPtr Bool pointer to be set.
+	 * @param[in] nilBool Nullable bool value.
+	 */
+	void toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool);
 }

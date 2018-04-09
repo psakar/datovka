@@ -27,7 +27,7 @@
 
 #include "src/isds/internal_conversion.h"
 
-QString Isds::fromCStr(char *cStr)
+QString Isds::fromCStr(const char *cStr)
 {
 	if (cStr == NULL) {
 		return QString();
@@ -99,4 +99,56 @@ void Isds::toCDateCopy(struct tm **cDatePtr, const QDate &date)
 	(*cDatePtr)->tm_year = date.year() - 1900;
 	(*cDatePtr)->tm_mon = date.month() - 1;
 	(*cDatePtr)->tm_mday = date.day();
+}
+
+void Isds::toLongInt(long int **cLongPtr, qint64 i)
+{
+	if (Q_UNLIKELY(cLongPtr == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (*cLongPtr == NULL) {
+		*cLongPtr = (long int*)std::malloc(sizeof(**cLongPtr));
+		if (Q_UNLIKELY(*cLongPtr == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	**cLongPtr = i;
+}
+
+enum Isds::Type::NilBool Isds::fromBool(const _Bool *cBoolPtr)
+{
+	if (cBoolPtr == NULL) {
+		return Type::BOOL_NULL;
+	} else if (*cBoolPtr == false) {
+		return Type::BOOL_FALSE;
+	} else {
+		return Type::BOOL_TRUE;
+	}
+}
+
+void Isds::toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool)
+{
+	if (Q_UNLIKELY(cBoolPtr == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (nilBool == Type::BOOL_NULL) {
+		if (*cBoolPtr != NULL) {
+			std::free(*cBoolPtr); *cBoolPtr = NULL;
+		}
+		return;
+	}
+	if (*cBoolPtr == NULL) {
+		*cBoolPtr = (_Bool *)std::malloc(sizeof(**cBoolPtr));
+		if (Q_UNLIKELY(*cBoolPtr == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	**cBoolPtr = (nilBool == Type::BOOL_TRUE);
 }
