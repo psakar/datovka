@@ -174,6 +174,11 @@ namespace Isds {
 		DbOwnerInfo(void);
 		~DbOwnerInfo(void);
 
+		DbOwnerInfo(const DbOwnerInfo &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		DbOwnerInfo(DbOwnerInfo &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 		/* dbID */
 		QString dbID(void) const;
 		void setDbID(const QString &bi);
@@ -219,6 +224,11 @@ namespace Isds {
 		/* dbOpenAddressing */
 		enum Type::NilBool dbOpenAddressing(void) const;
 		void setDbOpenAddressing(enum Type::NilBool oa);
+
+		DbOwnerInfo &operator=(const DbOwnerInfo &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		DbOwnerInfo &operator=(DbOwnerInfo &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 	private:
 		void *m_dataPtr;

@@ -172,6 +172,25 @@ Isds::DbOwnerInfo::~DbOwnerInfo(void)
 	isds_DbOwnerInfo_free(&boi);
 }
 
+Isds::DbOwnerInfo::DbOwnerInfo(const DbOwnerInfo &other)
+    : m_dataPtr(NULL)
+{
+	if (other.m_dataPtr != NULL) {
+		m_dataPtr = isds_DbOwnerInfo_duplicate(
+		    (const struct isds_DbOwnerInfo *)other.m_dataPtr);
+		if (Q_UNLIKELY(m_dataPtr = NULL)) {
+			Q_ASSERT(0);
+		}
+	}
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::DbOwnerInfo::DbOwnerInfo(DbOwnerInfo &&other) Q_DECL_NOEXCEPT
+    : m_dataPtr(std::move(other.m_dataPtr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 QString Isds::DbOwnerInfo::dbID(void) const
 {
 	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
@@ -692,3 +711,25 @@ void Isds::DbOwnerInfo::setDbOpenAddressing(enum Type::NilBool oa)
 
 	toBool(&boi->dbOpenAddressing, oa);
 }
+
+Isds::DbOwnerInfo &Isds::DbOwnerInfo::operator=(const DbOwnerInfo &other) Q_DECL_NOTHROW
+{
+	if (m_dataPtr != NULL) {
+		isds_DbOwnerInfo_free((struct isds_DbOwnerInfo **)&m_dataPtr);
+	}
+
+	m_dataPtr = isds_DbOwnerInfo_duplicate(
+	    (const struct isds_DbOwnerInfo *)other.m_dataPtr);
+	if (Q_UNLIKELY(m_dataPtr = NULL)) {
+		Q_ASSERT(0);
+	}
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::DbOwnerInfo &Isds::DbOwnerInfo::operator=(DbOwnerInfo &&other) Q_DECL_NOTHROW
+{
+	std::swap(m_dataPtr, other.m_dataPtr);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
