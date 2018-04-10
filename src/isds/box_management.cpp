@@ -774,10 +774,12 @@ Isds::DbOwnerInfo &Isds::DbOwnerInfo::operator=(const DbOwnerInfo &other) Q_DECL
 		isds_DbOwnerInfo_free((struct isds_DbOwnerInfo **)&m_dataPtr);
 	}
 
-	m_dataPtr = isds_DbOwnerInfo_duplicate(
-	    (const struct isds_DbOwnerInfo *)other.m_dataPtr);
-	if (Q_UNLIKELY(m_dataPtr = NULL)) {
-		Q_ASSERT(0);
+	if (other.m_dataPtr != NULL) {
+		m_dataPtr = isds_DbOwnerInfo_duplicate(
+		    (const struct isds_DbOwnerInfo *)other.m_dataPtr);
+		if (Q_UNLIKELY(m_dataPtr = NULL)) {
+			Q_ASSERT(0);
+		}
 	}
 	return *this;
 }
@@ -803,6 +805,25 @@ Isds::DbUserInfo::~DbUserInfo(void)
 	}
 	isds_DbUserInfo_free(&bui);
 }
+
+Isds::DbUserInfo::DbUserInfo(const DbUserInfo &other)
+    : m_dataPtr(NULL)
+{
+	if (other.m_dataPtr != NULL) {
+		m_dataPtr = isds_DbUserInfo_duplicate(
+		    (const struct isds_DbUserInfo *)other.m_dataPtr);
+		if (Q_UNLIKELY(m_dataPtr = NULL)) {
+			Q_ASSERT(0);
+		}
+	}
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::DbUserInfo::DbUserInfo(DbUserInfo &&other) Q_DECL_NOEXCEPT
+    : m_dataPtr(std::move(other.m_dataPtr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 Isds::PersonName Isds::DbUserInfo::personName(void) const
 {
@@ -1232,3 +1253,27 @@ void Isds::DbUserInfo::setAifoTicket(const QString &at)
 
 	toCStrCopy(&bui->aifo_ticket, at);
 }
+
+Isds::DbUserInfo &Isds::DbUserInfo::operator=(const DbUserInfo &other) Q_DECL_NOTHROW
+{
+	if (m_dataPtr != NULL) {
+		isds_DbUserInfo_free((struct isds_DbUserInfo **)&m_dataPtr);
+	}
+
+	if (other.m_dataPtr != NULL) {
+		m_dataPtr = isds_DbUserInfo_duplicate(
+		    (const struct isds_DbUserInfo *)other.m_dataPtr);
+		if (Q_UNLIKELY(m_dataPtr = NULL)) {
+			Q_ASSERT(0);
+		}
+	}
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::DbUserInfo &Isds::DbUserInfo::operator=(DbUserInfo &&other) Q_DECL_NOTHROW
+{
+	std::swap(m_dataPtr, other.m_dataPtr);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */

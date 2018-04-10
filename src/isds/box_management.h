@@ -257,6 +257,11 @@ namespace Isds {
 		DbUserInfo(void);
 		~DbUserInfo(void);
 
+		DbUserInfo(const DbUserInfo &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		DbUserInfo(DbUserInfo &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 		/* pnFirstName, pnMiddleName, pnLastName, pnLastNameAtBirth */
 		PersonName personName(void) const;
 		void setPersonName(const PersonName &pn);
@@ -296,6 +301,11 @@ namespace Isds {
 		/* AIFOTicket -- Optional, tDbUsersArray (dbTypes.xsd). */
 		QString aifoTicket(void) const;
 		void setAifoTicket(const QString &at);
+
+		DbUserInfo &operator=(const DbUserInfo &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		DbUserInfo &operator=(DbUserInfo &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 	private:
 		void *m_dataPtr;
