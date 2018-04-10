@@ -251,7 +251,7 @@ void Isds::DbOwnerInfo::setDbID(const QString &bi)
  * @brief Converts data box types.
  */
 static
-Isds::Type::DbType libisdsDbType2DbType(isds_DbType *bt)
+Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt)
 {
 	if (bt == NULL) {
 		return Isds::Type::BT_NULL;
@@ -369,6 +369,24 @@ void Isds::DbOwnerInfo::setIc(const QString &ic)
 	toCStrCopy(&boi->ic, ic);
 }
 
+/*!
+ * @brief Set person name according to the libisds person name structure.
+ */
+static
+void setPersonNameContent(Isds::PersonName &tgt,
+    const struct isds_PersonName *src)
+{
+	if (Q_UNLIKELY(src == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	tgt.setFirstName(Isds::fromCStr(src->pnFirstName));
+	tgt.setMiddleName(Isds::fromCStr(src->pnMiddleName));
+	tgt.setLastName(Isds::fromCStr(src->pnLastName));
+	tgt.setLastNameAtBirth(Isds::fromCStr(src->pnLastNameAtBirth));
+}
+
 Isds::PersonName Isds::DbOwnerInfo::personName(void) const
 {
 	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
@@ -377,11 +395,26 @@ Isds::PersonName Isds::DbOwnerInfo::personName(void) const
 	}
 
 	PersonName personName;
-	personName.setFirstName(fromCStr(boi->personName->pnFirstName));
-	personName.setMiddleName(fromCStr(boi->personName->pnMiddleName));
-	personName.setLastName(fromCStr(boi->personName->pnLastName));
-	personName.setLastNameAtBirth(fromCStr(boi->personName->pnLastNameAtBirth));
+	setPersonNameContent(personName, boi->personName);
 	return personName;
+}
+
+/*!
+ * @brief Set libisds person name structure according to the person name.
+ */
+static
+void setLibisdsPersonNameContent(struct isds_PersonName *tgt,
+    const Isds::PersonName &src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	Isds::toCStrCopy(&tgt->pnFirstName, src.firstName());
+	Isds::toCStrCopy(&tgt->pnMiddleName, src.middleName());
+	Isds::toCStrCopy(&tgt->pnLastName, src.lastName());
+	Isds::toCStrCopy(&tgt->pnLastNameAtBirth, src.lastNameAtBirth());
 }
 
 void Isds::DbOwnerInfo::setPersonName(const PersonName &pn)
@@ -403,10 +436,7 @@ void Isds::DbOwnerInfo::setPersonName(const PersonName &pn)
 		std::memset(boi->personName, 0, sizeof(*boi->personName));
 	}
 
-	toCStrCopy(&boi->personName->pnFirstName, pn.firstName());
-	toCStrCopy(&boi->personName->pnMiddleName, pn.middleName());
-	toCStrCopy(&boi->personName->pnLastName, pn.lastName());
-	toCStrCopy(&boi->personName->pnLastNameAtBirth, pn.lastNameAtBirth());
+	setLibisdsPersonNameContent(boi->personName, pn);
 }
 
 QString Isds::DbOwnerInfo::firmName(void) const
@@ -663,24 +693,12 @@ enum Isds::Type::DbState Isds::DbOwnerInfo::dbState(void) const
 	}
 
 	switch (*boi->dbState) {
-	case 1:
-		return Type::BS_ACCESSIBLE;
-		break;
-	case 2:
-		return Type::BS_TEMP_INACCESSIBLE;
-		break;
-	case 3:
-		return Type::BS_NOT_YET_ACCESSIBLE;
-		break;
-	case 4:
-		return Type::BS_PERM_INACCESSIBLE;
-		break;
-	case 5:
-		return Type::BS_REMOVED;
-		break;
-	case 6:
-		return Type::BS_TEMP_UNACCESSIBLE_LAW;
-		break;
+	case 1: return Type::BS_ACCESSIBLE; break;
+	case 2: return Type::BS_TEMP_INACCESSIBLE; break;
+	case 3: return Type::BS_NOT_YET_ACCESSIBLE; break;
+	case 4: return Type::BS_PERM_INACCESSIBLE; break;
+	case 5: return Type::BS_REMOVED; break;
+	case 6: return Type::BS_TEMP_UNACCESSIBLE_LAW; break;
 	default:
 		Q_ASSERT(0);
 		return Type::BS_ERROR;
@@ -771,3 +789,446 @@ Isds::DbOwnerInfo &Isds::DbOwnerInfo::operator=(DbOwnerInfo &&other) Q_DECL_NOTH
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::DbUserInfo::DbUserInfo(void)
+    : m_dataPtr(NULL)
+{
+}
+
+Isds::DbUserInfo::~DbUserInfo(void)
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return;
+	}
+	isds_DbUserInfo_free(&bui);
+}
+
+Isds::PersonName Isds::DbUserInfo::personName(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY((bui == NULL) || (bui->personName == NULL))) {
+		return PersonName();
+	}
+
+	PersonName personName;
+	setPersonNameContent(personName, bui->personName);
+	return personName;
+}
+
+/*!
+ * @brief Allocates libisds DbUserInfo structure.
+ *
+ * @param[in,out] dataPtr Pointer to pointer holding the structure.
+ */
+static
+void intAllocMissingDbUserInfo(void **dataPtr)
+{
+	if (Q_UNLIKELY(dataPtr == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (*dataPtr != NULL) {
+		/* Already allocated. */
+		return;
+	}
+	struct isds_DbUserInfo *bui =
+	    (struct isds_DbUserInfo *)std::malloc(sizeof(*bui));
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+	std::memset(bui, 0, sizeof(*bui));
+	*dataPtr = bui;
+}
+
+void Isds::DbUserInfo::setPersonName(const PersonName &pn)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (bui->personName == NULL) {
+		bui->personName =
+		    (struct isds_PersonName *)std::malloc(sizeof(*bui->personName));
+		if (Q_UNLIKELY(bui->personName == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+		std::memset(bui->personName, 0, sizeof(*bui->personName));
+	}
+
+	setLibisdsPersonNameContent(bui->personName, pn);
+}
+
+Isds::Address Isds::DbUserInfo::address(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY((bui == NULL) || (bui->address == NULL))) {
+		return Address();
+	}
+
+	Address address;
+	setAddressContent(address, bui->address);
+	return address;
+}
+
+void Isds::DbUserInfo::setAddress(const Address &a)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (bui->address == NULL) {
+		bui->address = (struct isds_Address *)std::malloc(sizeof(*bui->address));
+		if (Q_UNLIKELY(bui->address == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+		std::memset(bui->address, 0, sizeof(*bui->address));
+	}
+
+	setLibisdsAddressContent(bui->address, a);
+}
+
+QDate Isds::DbUserInfo::biDate(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return QDate();
+	}
+
+	return dateFromStructTM(bui->biDate);
+}
+
+void Isds::DbUserInfo::setBiDate(const QDate &d)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCDateCopy(&bui->biDate, d);
+}
+
+QString Isds::DbUserInfo::userID(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(bui->userID);
+}
+
+void Isds::DbUserInfo::setUserId(const QString &uid)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&bui->userID, uid);
+}
+
+/*!
+ * @brief Converts user types.
+ */
+static
+Isds::Type::UserType libisdsUserType2UserType(const isds_UserType *ut)
+{
+	if (ut == NULL) {
+		return Isds::Type::UT_NULL;
+	}
+
+	switch (*ut) {
+	case USERTYPE_PRIMARY: return Isds::Type::UT_PRIMARY; break;
+	case USERTYPE_ENTRUSTED: return Isds::Type::UT_ENTRUSTED; break;
+	case USERTYPE_ADMINISTRATOR: return Isds::Type::UT_ADMINISTRATOR; break;
+	case USERTYPE_OFFICIAL: return Isds::Type::UT_OFFICIAL; break;
+	case USERTYPE_OFFICIAL_CERT: return Isds::Type::UT_OFFICIAL_CERT; break;
+	case USERTYPE_LIQUIDATOR: return Isds::Type::UT_LIQUIDATOR; break;
+	case USERTYPE_RECEIVER: return Isds::Type::UT_RECEIVER; break;
+	case USERTYPE_GUARDIAN: return Isds::Type::UT_GUARDIAN; break;
+	default:
+		Q_ASSERT(0);
+		return Isds::Type::UT_PRIMARY; /* FIXME */
+		break;
+	}
+}
+
+/*!
+ * @brief Converts user types.
+ */
+static
+void userType2libisdsUserType(isds_UserType **utPtr, Isds::Type::UserType ut)
+{
+	if (Q_UNLIKELY(utPtr == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (*utPtr == NULL) {
+		*utPtr = (isds_UserType *)std::malloc(sizeof(*utPtr));
+		if (Q_UNLIKELY(utPtr == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+	switch (ut) {
+	/* case Isds::Type::UT_NULL: Same as default. */
+	case Isds::Type::UT_PRIMARY: **utPtr = USERTYPE_PRIMARY; break;
+	case Isds::Type::UT_ENTRUSTED: **utPtr = USERTYPE_ENTRUSTED; break;
+	case Isds::Type::UT_ADMINISTRATOR: **utPtr = USERTYPE_ADMINISTRATOR; break;
+	case Isds::Type::UT_OFFICIAL: **utPtr = USERTYPE_OFFICIAL; break;
+	case Isds::Type::UT_OFFICIAL_CERT: **utPtr = USERTYPE_OFFICIAL_CERT; break;
+	case Isds::Type::UT_LIQUIDATOR: **utPtr = USERTYPE_LIQUIDATOR; break;
+	case Isds::Type::UT_RECEIVER: **utPtr = USERTYPE_RECEIVER; break;
+	case Isds::Type::UT_GUARDIAN: **utPtr = USERTYPE_GUARDIAN; break;
+	default:
+		Q_ASSERT(0);
+		std::free(*utPtr); *utPtr = NULL;
+		break;
+	}
+}
+
+enum Isds::Type::UserType Isds::DbUserInfo::userType(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return Type::UT_NULL;
+	}
+
+	return libisdsUserType2UserType(bui->userType);
+}
+
+void Isds::DbUserInfo::setUserType(enum Type::UserType ut)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	userType2libisdsUserType(&bui->userType, ut);
+}
+
+Isds::Type::Privileges Isds::DbUserInfo::userPrivils(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY((bui == NULL) || (bui->userPrivils == NULL))) {
+		return Type::PRIVIL_NONE;
+	}
+
+	const qint64 privNum = *bui->userPrivils;
+	Type::Privileges privileges = Type::PRIVIL_NONE;
+	if (privNum & Type::PRIVIL_READ_NON_PERSONAL) {
+		privileges |= Type::PRIVIL_READ_NON_PERSONAL;
+	}
+	if (privNum & Type::PRIVIL_READ_ALL) {
+		privileges |= Type::PRIVIL_READ_ALL;
+	}
+	if (privNum & Type::PRIVIL_CREATE_DM) {
+		privileges |= Type::PRIVIL_CREATE_DM;
+	}
+	if (privNum & Type::PRIVIL_VIEW_INFO) {
+		privileges |= Type::PRIVIL_VIEW_INFO;
+	}
+	if (privNum & Type::PRIVIL_SEARCH_DB) {
+		privileges |= Type::PRIVIL_SEARCH_DB;
+	}
+	if (privNum & Type::PRIVIL_OWNER_ADM) {
+		privileges |= Type::PRIVIL_OWNER_ADM;
+	}
+	if (privNum & Type::PRIVIL_READ_VAULT) {
+		privileges |= Type::PRIVIL_READ_VAULT;
+	}
+	if (privNum & Type::PRIVIL_ERASE_VAULT) {
+		privileges |= Type::PRIVIL_ERASE_VAULT;
+	}
+	return privileges;
+}
+
+void Isds::DbUserInfo::setUserPrivils(Type::Privileges p)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (bui->userPrivils == NULL) {
+		bui->userPrivils = (long int *)std::malloc(sizeof(*bui->userPrivils));
+		if (Q_UNLIKELY(bui->userPrivils == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	*bui->userPrivils = p;
+}
+
+QString Isds::DbUserInfo::ic(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(bui->ic);
+}
+
+void Isds::DbUserInfo::setIc(const QString &ic)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&bui->ic, ic);
+}
+
+QString Isds::DbUserInfo::firmName(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(bui->firmName);
+}
+
+void Isds::DbUserInfo::setFirmName(const QString &fn)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&bui->firmName, fn);
+}
+
+QString Isds::DbUserInfo::caStreet(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(bui->caStreet);
+}
+
+void Isds::DbUserInfo::setCaStreet(const QString &cs)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&bui->caStreet, cs);
+}
+
+QString Isds::DbUserInfo::caCity(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(bui->caCity);
+}
+
+void Isds::DbUserInfo::setCaCity(const QString &cc)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&bui->caCity, cc);
+}
+
+QString Isds::DbUserInfo::caZipCode(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(bui->caZipCode);
+}
+
+void Isds::DbUserInfo::setCaZipCode(const QString &cz)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&bui->caZipCode, cz);
+}
+
+QString Isds::DbUserInfo::caState(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(bui->caState);
+}
+
+void Isds::DbUserInfo::setCaState(const QString &cs)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&bui->caState, cs);
+}
+
+QString Isds::DbUserInfo::aifoTicket(void) const
+{
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(bui->aifo_ticket);
+}
+
+void Isds::DbUserInfo::setAifoTicket(const QString &at)
+{
+	intAllocMissingDbUserInfo(&m_dataPtr);
+	struct isds_DbUserInfo *bui = (struct isds_DbUserInfo *)m_dataPtr;
+	if (Q_UNLIKELY(bui == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&bui->aifo_ticket, at);
+}

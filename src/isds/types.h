@@ -146,6 +146,7 @@ public:
 	 *     pril_3/WS_ISDS_Sprava_datovych_schranek.pdf (section 2.4).
 	 */
 	enum UserType {
+		UT_NULL = -1, /*!< Conveninence value, converted from/to NULL. */
 		UT_PRIMARY,
 		UT_ENTRUSTED,
 		UT_ADMINISTRATOR,
