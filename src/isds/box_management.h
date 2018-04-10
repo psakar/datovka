@@ -28,7 +28,9 @@
 
 #include "src/isds/types.h"
 
-/* Structures originating from pril_3/WS_ISDS_Sprava_datovych_schranek.pdf. */
+/*
+ * Structures originating from pril_3/WS_ISDS_Sprava_datovych_schranek.pdf.
+ */
 
 namespace Isds {
 
@@ -310,4 +312,5 @@ namespace Isds {
 	private:
 		void *m_dataPtr;
 	};
+
 }

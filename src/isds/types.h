@@ -25,7 +25,10 @@
 
 #include <QObject>
 
-/* wsdl2h -s -o dbTypes.h dbTypes.xsd  */
+/*
+ * wsdl2h -s -o dmBaseTypes.h dmBaseTypes.xsd
+ * wsdl2h -s -o dbTypes.h dbTypes.xsd
+ */
 
 namespace Isds {
 
@@ -43,10 +46,12 @@ private:
 
 public:
 	/*!
-	 * @brief Nillable bool.
+	 * @brief Nullable bool.
+	 *
+	 * @note Should NULL value be treated as false?
 	 */
 	enum NilBool {
-		BOOL_NULL = -1, /*!< Conveninence value, converted from/to NULL. */
+		BOOL_NULL = -1, /*!< Convenience value, converted from/to NULL. */
 		BOOL_FALSE = 0,
 		BOOL_TRUE = 1
 	};
@@ -59,7 +64,7 @@ public:
 	 *     (section 2.1 CreateDataBox).
 	 */
 	enum DbType {
-		BT_NULL = -1, /*!< Conveninence value, converted from/to NULL. */
+		BT_NULL = -1, /*!< Convenience value, converted from/to NULL. */
 		BT_SYSTEM = 0, /*!<
 		                * This value is not listed in dbTypes.xsd but is mentioned in
 		                * pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
@@ -127,6 +132,7 @@ public:
 	 *     pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf (section 1.5).
 	 */
 	enum DmState {
+		MS_NULL = -1, /*!< Convenience value, converted from/to NULL. */
 		MS_POSTED = 1,
 		MS_STAMPED = 2,
 		MS_INFECTED = 3,
@@ -146,7 +152,7 @@ public:
 	 *     pril_3/WS_ISDS_Sprava_datovych_schranek.pdf (section 2.4).
 	 */
 	enum UserType {
-		UT_NULL = -1, /*!< Conveninence value, converted from/to NULL. */
+		UT_NULL = -1, /*!< Convenience value, converted from/to NULL. */
 		UT_PRIMARY,
 		UT_ENTRUSTED,
 		UT_ADMINISTRATOR,
@@ -155,6 +161,41 @@ public:
 		UT_LIQUIDATOR,
 		UT_RECEIVER,
 		UT_GUARDIAN
+	};
+
+	/*!
+	 * @brief Hash algorithm type.
+	 *
+	 * @todo Find definition in documentation.
+	 */
+	enum HashAlg {
+		HA_UNKNOWN = -1, /* Convenience value. */
+		HA_MD5,
+		HA_SHA_1,
+		HA_SHA_224,
+		HA_SHA_256,
+		HA_SHA_384,
+		HA_SHA_512
+	};
+
+	/*!
+	 * @brief Message event.
+	 *
+	 * @note Described in pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf,
+	 *     section 2.7.1.
+	 */
+	enum Event {
+		EV_UNKNOWN = -1, /* Convenience value. */
+		EV_ENTERED = 0, /* Message came into being. */
+		EV_DELIVERED = 5, /* Message was delivered into recipient's box. */
+		EV_ACCEPTED_LOGIN = 1, /* Before 27.10.210, message was accepted by recipient logging in. */
+		EV_PRIMARY_LOGIN = 11, /* Primary/competent (Czech: opravneny) user with capability to read has logged in. */
+		EV_ENTRUSTED_LOGIN = 12, /* Entrusted (Czech: povereny) user with capability to read has logged in. */
+		EV_SYSCERT_LOGIN = 13, /* Application authenticated using a system certificate has logged in. */
+		EV_ACCEPTED_FICTION = 2, /* Message has been accepted by fiction. */
+		EV_UNDELIVERABLE = 3, /* Recipient box made inaccessible, message is undeliverable. */
+		EV_ACCEPTED_BY_RECIPIENT = 4, /* Before 11.2011, message has been delivered and accepted by recipient action. */
+		EV_UNDELIVERED_AV_CHECK = 8 /* Message didn't mass antivirus check, message has been rejected. */
 	};
 };
 
