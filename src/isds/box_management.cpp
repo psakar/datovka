@@ -293,8 +293,8 @@ void dbType2libisdsDbType(isds_DbType **btPtr, Isds::Type::DbType bt)
 		return;
 	}
 	if (*btPtr == NULL) {
-		*btPtr = (isds_DbType *)std::malloc(sizeof(*btPtr));
-		if (Q_UNLIKELY(btPtr == NULL)) {
+		*btPtr = (isds_DbType *)std::malloc(sizeof(**btPtr));
+		if (Q_UNLIKELY(*btPtr == NULL)) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -565,7 +565,8 @@ void Isds::DbOwnerInfo::setAddress(const Address &a)
 	}
 
 	if (boi->address == NULL) {
-		boi->address = (struct isds_Address *)std::malloc(sizeof(*boi->address));
+		boi->address =
+		    (struct isds_Address *)std::malloc(sizeof(*boi->address));
 		if (Q_UNLIKELY(boi->address == NULL)) {
 			Q_ASSERT(0);
 			return;
@@ -907,7 +908,8 @@ void Isds::DbUserInfo::setAddress(const Address &a)
 	}
 
 	if (bui->address == NULL) {
-		bui->address = (struct isds_Address *)std::malloc(sizeof(*bui->address));
+		bui->address =
+		    (struct isds_Address *)std::malloc(sizeof(*bui->address));
 		if (Q_UNLIKELY(bui->address == NULL)) {
 			Q_ASSERT(0);
 			return;
@@ -999,8 +1001,8 @@ void userType2libisdsUserType(isds_UserType **utPtr, Isds::Type::UserType ut)
 		return;
 	}
 	if (*utPtr == NULL) {
-		*utPtr = (isds_UserType *)std::malloc(sizeof(*utPtr));
-		if (Q_UNLIKELY(utPtr == NULL)) {
+		*utPtr = (isds_UserType *)std::malloc(sizeof(**utPtr));
+		if (Q_UNLIKELY(*utPtr == NULL)) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -1090,7 +1092,8 @@ void Isds::DbUserInfo::setUserPrivils(Type::Privileges p)
 	}
 
 	if (bui->userPrivils == NULL) {
-		bui->userPrivils = (long int *)std::malloc(sizeof(*bui->userPrivils));
+		bui->userPrivils =
+		    (long int *)std::malloc(sizeof(*bui->userPrivils));
 		if (Q_UNLIKELY(bui->userPrivils == NULL)) {
 			Q_ASSERT(0);
 			return;
