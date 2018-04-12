@@ -131,3 +131,298 @@ void Isds::Envelope::setDbIDSender(const QString &sbi)
 
 	toCStrCopy(&e->dbIDSender, sbi);
 }
+
+QString Isds::Envelope::dmSender(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmSender);
+}
+
+void Isds::Envelope::setDmSender(const QString &sn)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmSender, sn);
+}
+
+QString Isds::Envelope::dmSenderAddress(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmSenderAddress);
+}
+
+void Isds::Envelope::setDmSenderAddress(const QString &sa)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmSenderAddress, sa);
+}
+
+/*!
+ * @brief Converts data box types.
+ */
+static
+Isds::Type::DbType long2DbType(const long int *bt)
+{
+	if (bt == NULL) {
+		return Isds::Type::BT_NULL;
+	}
+
+	switch (*bt) {
+	case Isds::Type::BT_SYSTEM: return Isds::Type::BT_SYSTEM; break;
+	case Isds::Type::BT_OVM: return Isds::Type::BT_OVM; break;
+	case Isds::Type::BT_OVM_NOTAR: return Isds::Type::BT_OVM_NOTAR; break;
+	case Isds::Type::BT_OVM_EXEKUT: return Isds::Type::BT_OVM_EXEKUT; break;
+	case Isds::Type::BT_OVM_REQ: return Isds::Type::BT_OVM_REQ; break;
+	case Isds::Type::BT_OVM_FO: return Isds::Type::BT_OVM_FO; break;
+	case Isds::Type::BT_OVM_PFO: return Isds::Type::BT_OVM_PFO; break;
+	case Isds::Type::BT_OVM_PO: return Isds::Type::BT_OVM_PO; break;
+	case Isds::Type::BT_PO: return Isds::Type::BT_PO; break;
+	case Isds::Type::BT_PO_ZAK: return Isds::Type::BT_PO_ZAK; break;
+	case Isds::Type::BT_PO_REQ: return Isds::Type::BT_PO_REQ; break;
+	case Isds::Type::BT_PFO: return Isds::Type::BT_PFO; break;
+	case Isds::Type::BT_PFO_ADVOK: return Isds::Type::BT_PFO_ADVOK; break;
+	case Isds::Type::BT_PFO_DANPOR: return Isds::Type::BT_PFO_DANPOR; break;
+	case Isds::Type::BT_PFO_INSSPR: return Isds::Type::BT_PFO_INSSPR; break;
+	case Isds::Type::BT_PFO_AUDITOR: return Isds::Type::BT_PFO_AUDITOR; break;
+	case Isds::Type::BT_FO: return Isds::Type::BT_FO; break;
+	default:
+		Q_ASSERT(0);
+		return Isds::Type::BT_SYSTEM; /* FIXME */
+		break;
+	}
+}
+
+/*!
+ * @brief Converts data box types.
+ */
+static
+void dbType2long(long int **btPtr, Isds::Type::DbType bt)
+{
+	if (Q_UNLIKELY(btPtr == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (*btPtr == NULL) {
+		*btPtr = (long int *)std::malloc(sizeof(**btPtr));
+		if (Q_UNLIKELY(btPtr == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+	switch (bt) {
+	case Isds::Type::BT_NULL:
+		Q_ASSERT(0);
+		std::free(*btPtr); *btPtr = NULL;
+		break;
+	default:
+		**btPtr = bt;
+		break;
+	}
+}
+
+enum Isds::Type::DbType Isds::Envelope::dmSenderType(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return Isds::Type::BT_NULL;
+	}
+
+	return long2DbType(e->dmSenderType);
+}
+
+void Isds::Envelope::setDmSenderType(enum Type::DbType st)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	dbType2long(&e->dmSenderType, st);
+}
+
+QString Isds::Envelope::dmRecipient(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmRecipient);
+}
+
+void Isds::Envelope::setDmRecipient(const QString &rn)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmRecipient, rn);
+}
+
+QString Isds::Envelope::dmRecipientAddress(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmRecipientAddress);
+}
+
+void Isds::Envelope::setDmRecipientAddress(const QString &ra)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmRecipientAddress, ra);
+}
+
+enum Isds::Type::NilBool Isds::Envelope::dmAmbiguousRecipient(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return Type::BOOL_NULL;
+	}
+
+	return fromBool(e->dmAmbiguousRecipient);
+}
+
+void Isds::Envelope::setDmAmbiguousRecipient(enum Type::NilBool ar)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toBool(&e->dmAmbiguousRecipient, ar);
+}
+
+quint64 Isds::Envelope::dmOrdinal(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY((e == NULL) || (e->dmOrdinal))) {
+		return 0;
+	}
+
+	return *e->dmOrdinal;
+}
+
+void Isds::Envelope::setDmOrdinal(quint64 o)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (e->dmOrdinal == NULL) {
+		e->dmOrdinal = (unsigned long int *)std::malloc(sizeof(*e->dmOrdinal));
+		if (e->dmOrdinal == NULL) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	*e->dmOrdinal = o;
+}
+
+/*!
+ * @brief Converts message status.
+ */
+static
+enum Isds::Type::DmState libisdsMessageStatus2DmState(
+    const isds_message_status *ms)
+{
+	if (ms == NULL) {
+		return Isds::Type::MS_NULL;
+	}
+
+	switch (*ms) {
+	case MESSAGESTATE_SENT: return Isds::Type::MS_POSTED; break;
+	case MESSAGESTATE_STAMPED: return Isds::Type::MS_STAMPED; break;
+	case MESSAGESTATE_INFECTED: return Isds::Type::MS_INFECTED; break;
+	case MESSAGESTATE_DELIVERED: return Isds::Type::MS_DELIVERED; break;
+	case MESSAGESTATE_SUBSTITUTED: return Isds::Type::MS_ACCEPTED_FICT; break;
+	case MESSAGESTATE_RECEIVED: return Isds::Type::MS_ACCEPTED; break;
+	case MESSAGESTATE_READ: return Isds::Type::MS_READ; break;
+	case MESSAGESTATE_UNDELIVERABLE: return Isds::Type::MS_UNDELIVERABLE; break;
+	case MESSAGESTATE_REMOVED: return Isds::Type::MS_REMOVED; break;
+	case MESSAGESTATE_IN_SAFE: return Isds::Type::MS_IN_VAULT; break;
+	default:
+		return Isds::Type::MS_NULL;
+		break;
+	}
+}
+
+/*!
+ * @brief Converts message status.
+ */
+static
+void dmState2libisdsMessageStatus(isds_message_status **tgt,
+    enum Isds::Type::DmState src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (src == Isds::Type::MS_NULL) {
+		if (*tgt != NULL) {
+			std::free(*tgt); *tgt = NULL;
+		}
+		return;
+	}
+	if (*tgt == NULL) {
+		*tgt = (isds_message_status *)std::malloc(sizeof(**tgt));
+		if (Q_UNLIKELY(*tgt == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+	switch (src) {
+	/* case Isds::Type::MS_NULL: Same as default. */
+	case Isds::Type::MS_POSTED: **tgt = MESSAGESTATE_SENT; break;
+	case Isds::Type::MS_STAMPED: **tgt = MESSAGESTATE_STAMPED; break;
+	case Isds::Type::MS_INFECTED: **tgt = MESSAGESTATE_INFECTED; break;
+	case Isds::Type::MS_DELIVERED: **tgt = MESSAGESTATE_DELIVERED; break;
+	case Isds::Type::MS_ACCEPTED_FICT: **tgt = MESSAGESTATE_SUBSTITUTED; break;
+	case Isds::Type::MS_ACCEPTED: **tgt = MESSAGESTATE_RECEIVED; break;
+	case Isds::Type::MS_READ: **tgt = MESSAGESTATE_READ; break;
+	case Isds::Type::MS_UNDELIVERABLE: **tgt = MESSAGESTATE_UNDELIVERABLE; break;
+	case Isds::Type::MS_REMOVED: **tgt = MESSAGESTATE_REMOVED; break;
+	case Isds::Type::MS_IN_VAULT: **tgt = MESSAGESTATE_IN_SAFE; break;
+	default:
+		Q_ASSERT(0);
+		std::free(*tgt); *tgt = NULL;
+		break;
+	}
+}
