@@ -146,6 +146,16 @@ public:
 	};
 
 	/*!
+	 * @brief Describes message type.
+	 *
+	 * @note See pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf.
+	 */
+	enum DmType {
+		MT_UNKNOWN = -1 /*!< Convenience value, converted from/to NULL. */
+		/* TODO */
+	};
+
+	/*!
 	 * @brief User types tUserType (dbTypes.xsd).
 	 *
 	 * @note Described in

@@ -35,3 +35,99 @@
 
 #include "src/isds/internal_conversion.h"
 #include "src/isds/message_management.h"
+
+Isds::Envelope::Envelope(void)
+    : m_dataPtr(NULL)
+{
+}
+
+Isds::Envelope::~Envelope(void)
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return;
+	}
+	isds_envelope_free(&e);
+}
+
+qint64 Isds::Envelope::dmId(void) const
+{
+	bool ok = false;
+	qint64 id = dmID().toLongLong(&ok);
+	return ok ? id : -1;
+}
+
+void Isds::Envelope::setDmId(qint64 id)
+{
+	setDmID((id >= 0) ? QString::number(id) : QString());
+}
+
+QString Isds::Envelope::dmID(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmID);
+}
+
+/*!
+ * @brief Allocates libisds envelope structure.
+ *
+ * @param[in,out] dataPtr Pointer to pointer holding the structure.
+ */
+static
+void intAllocMissingEnvelope(void **dataPtr)
+{
+	if (Q_UNLIKELY(dataPtr == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (*dataPtr != NULL) {
+		/* Already allocated. */
+		return;
+	}
+	struct isds_envelope *e =
+	    (struct isds_envelope *)std::malloc(sizeof(*e));
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+	std::memset(e, 0, sizeof(*e));
+	*dataPtr = e;
+}
+
+void Isds::Envelope::setDmID(const QString &id)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmID, id);
+}
+
+QString Isds::Envelope::dbIDSender(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dbIDSender);
+}
+
+void Isds::Envelope::setDbIDSender(const QString &sbi)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dbIDSender, sbi);
+}
