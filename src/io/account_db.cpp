@@ -419,40 +419,28 @@ fail:
 bool AccountDb::deleteAccountInfo(const QString &key)
 {
 	QSqlQuery query(m_db);
+	QString queryStr;
 
-	QString queryStr = "DELETE FROM password_expiration_date "
-	    "WHERE key = :key";
+	/* Delete account info from these tables */
+	const QStringList tables = QStringList() << "password_expiration_date"
+	    << "user_info" << "account_info";
 
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
+	foreach (const QString &table, tables) {
+		queryStr = "DELETE FROM " + table + " WHERE key = :key";
+		if (!query.prepare(queryStr)) {
+			logErrorNL("Cannot prepare SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			return false;
+		}
+
+		query.bindValue(":key", key);
+		if (!query.exec()) {
+			logErrorNL("Cannot execute SQL query: %s.",
+			    query.lastError().text().toUtf8().constData());
+			return false;
+		}
 	}
-
-	query.bindValue(":key", key);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	queryStr = "DELETE FROM account_info WHERE key = :key";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	query.bindValue(":key", key);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
 	return true;
-fail:
-	return false;
 }
 
 QStringList AccountDb::getUserDataboxInfo(const QString &key) const
