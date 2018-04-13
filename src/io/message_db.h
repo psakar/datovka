@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _MESSAGE_DB_H_
-#define _MESSAGE_DB_H_
+#pragma once
 
 #include <QDateTime>
 #include <QJsonDocument>
@@ -1134,5 +1133,3 @@ private:
 	friend class MessageDbSet;
 	friend class MessageDbSingle;
 };
-
-#endif /* _MESSAGE_DB_H_ */

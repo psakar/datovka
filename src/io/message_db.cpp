@@ -202,13 +202,8 @@ fail:
 	return QList<RcvdEntry>();
 }
 
-/* ========================================================================= */
-/*
- * Return list of years (strings) in database.
- */
 QStringList MessageDb::msgsYears(enum MessageDb::MessageType type,
     enum Sorting sorting) const
-/* ========================================================================= */
 {
 	QStringList yearList;
 	QSqlQuery query(m_db);
@@ -253,14 +248,8 @@ fail:
 	return yearList;
 }
 
-
-/* ========================================================================= */
-/*
- * Return list of years and number of messages in database.
- */
 QList< QPair<QString, int> > MessageDb::msgsYearlyCounts(enum MessageType type,
     enum Sorting sorting) const
-/* ========================================================================= */
 {
 	QList< QPair<QString, int> > yearlyCounts;
 	QList<QString> yearList = msgsYears(type, sorting);
@@ -303,14 +292,7 @@ fail:
 	return yearlyCounts;
 }
 
-
-/* ========================================================================= */
-/*
- * Return number of unread messages received within past 90
- *     days.
- */
 int MessageDb::msgsUnreadWithin90Days(enum MessageType type) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -345,14 +327,8 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Return number of unread received messages in year.
- */
 int MessageDb::msgsUnreadInYear(enum MessageType type,
     const QString &year) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -494,12 +470,7 @@ fail:
 	return QList<SntEntry>();
 }
 
-/* ========================================================================= */
-/*
- * Get message information for reply/template send message dialog.
- */
 MessageDb::PartialEnvelopeData MessageDb::msgsReplyData(qint64 dmId) const
-/* ========================================================================= */
 {
 	PartialEnvelopeData envData;
 	QSqlQuery query(m_db);
@@ -588,12 +559,7 @@ fail:
 	return -1;
 }
 
-/* ========================================================================= */
-/*
- * Returns true if verification attempt was performed.
- */
 bool MessageDb::msgsVerificationAttempted(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -626,13 +592,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Returns whether message is verified.
- */
 bool MessageDb::msgsVerified(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -661,13 +621,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Returns whether message was read locally.
- */
 bool MessageDb::smsgdtLocallyRead(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -695,13 +649,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Set message read locally status.
- */
 bool MessageDb::smsgdtSetLocallyRead(qint64 dmId, bool read)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -728,13 +676,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Set message read locally for all messages.
- */
 bool MessageDb::smsgdtSetAllReceivedLocallyRead(bool read)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -761,14 +703,8 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Set message read locally for received messages in given year.
- */
 bool MessageDb::smsgdtSetReceivedYearLocallyRead(const QString &year,
     bool read)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -801,13 +737,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Set message read locally for recently received messages.
- */
 bool MessageDb::smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -839,13 +769,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Returns message identifier of message with given id number.
- */
 MessageDb::MsgId MessageDb::msgsMsgId(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	MsgId ret;
@@ -874,13 +798,7 @@ fail:
 	return ret;
 }
 
-
-/* ========================================================================= */
-/*
- * Return contact list from message db.
- */
 QList<MessageDb::ContactEntry> MessageDb::uniqueContacts(void) const
-/* ========================================================================= */
 {
 	QMap<QString, ContactEntry> mapOfBoxes;
 	QList<ContactEntry> contactList;
@@ -1293,14 +1211,8 @@ fail:
 	return QString();
 }
 
-
-/* ========================================================================= */
-/*
- * Return message envelope HTML to be used to generate a PDF.
- */
 QString MessageDb::envelopeInfoHtmlToPdf(qint64 dmId,
     const QString &dbType) const
-/* ========================================================================= */
 {
 	QString html;
 	QSqlQuery query(m_db);
@@ -1482,13 +1394,7 @@ fail:
 	return QString();
 }
 
-
-/* ========================================================================= */
-/*
- * Return message file list HTML to be used to generate a PDF.
- */
 QString MessageDb::fileListHtmlToPdf(qint64 dmId) const
-/* ========================================================================= */
 {
 	QString html;
 	QSqlQuery query(m_db);
@@ -1526,13 +1432,7 @@ fail:
 	return QString();
 }
 
-
-/* ========================================================================= */
-/*
- * Return message delivery info HTML to PDF
- */
 QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
-/* ========================================================================= */
 {
 	QString html;
 	QSqlQuery query(m_db);
@@ -1723,13 +1623,7 @@ fail:
 	return QString();
 }
 
-
-/* ========================================================================= */
-/*
- * Return fileList related to given message.
- */
 QList<MessageDb::FileData> MessageDb::getFilesFromMessage(qint64 msgId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QList<FileData> retList;
@@ -1807,12 +1701,7 @@ fail:
 	return QList<AttachmentEntry>();
 }
 
-/* ========================================================================= */
-/*
- * Check if any message (dmID) exists in the table
- */
 int MessageDb::msgsStatusIfExists(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -1877,13 +1766,7 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Check if delivery info exists in the table.
- */
 bool MessageDb::isDeliveryInfoRawDb(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -1911,17 +1794,10 @@ fail:
 	return false;
 }
 
-
-
-/* ========================================================================= */
-/*
- * Insert newly sent message into messages table.
- */
 bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
     const QString &dbIDSender, const QString &dmSender,
     const QString &dbIDRecipient, const QString &dmRecipient,
     const QString &dmRecipientAddress, const QString &dmAnnotation)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -1980,11 +1856,6 @@ bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
 	return msgSetProcessState(dmId, UNSETTLED, true);
 }
 
-
-/* ========================================================================= */
-/*
- * Insert message envelope into messages table.
- */
 bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
     const QString &_origin, const QString &dbIDSender,
     const QString &dmSender, const QString &dmSenderAddress,
@@ -2004,7 +1875,6 @@ bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
     const QString &dmAcceptanceTime, int dmMessageStatus,
     int dmAttachmentSize, const QString &_dmType,
     enum MessageDirection msgDirect)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -2110,11 +1980,6 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Update exist message envelope/supplementary data in db
- */
 bool MessageDb::msgsUpdateMessageEnvelope(qint64 dmId,
     const QString &_origin, const QString &dbIDSender,
     const QString &dmSender, const QString &dmSenderAddress,
@@ -2134,7 +1999,6 @@ bool MessageDb::msgsUpdateMessageEnvelope(qint64 dmId,
     const QString &dmAcceptanceTime, int dmMessageStatus,
     int dmAttachmentSize, const QString &_dmType,
     enum MessageDirection msgDirect)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -2241,13 +2105,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Get message state.
- */
 int MessageDb::messageState(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -2273,11 +2131,6 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Advance message envelope search.
- */
 QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
     qint64 dmId,
     const QString &dmAnnotation,
@@ -2291,7 +2144,6 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
     const QString &dmToHands,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
     enum MessageDirection msgDirect) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -2592,13 +2444,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	return msgList;
 }
 
-
-/* ========================================================================= */
-/*
- * Get message envelope data from id.
- */
 MessageDb::SoughtMsg MessageDb::msgsGetMsgDataFromId(const qint64 msgId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -2640,15 +2486,9 @@ fail:
 	return SoughtMsg();
 }
 
-
-/* ========================================================================= */
-/*
- * Update message envelope delivery information.
- */
 bool MessageDb::msgsUpdateMessageState(qint64 dmId,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
     int dmMessageStatus)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -2679,17 +2519,11 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Insert/update message file into file table
- */
 bool MessageDb::msgsInsertUpdateMessageFile(qint64 dmId,
     const QString &dmFileDescr, const QString &dmUpFileGuid,
     const QString &dmFileGuid, const QString &dmMimeType,
     const QString &dmFormat, const QString &dmFileMetaType,
     const QByteArray &dmEncodedContentBase64)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	int dbId = -1;
@@ -2767,13 +2601,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Delete all files related to message with given id.
- */
 bool MessageDb::flsDeleteMessageFiles(qint64 dmId)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -2796,14 +2624,8 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Insert/update message hash into hashes table.
- */
 bool MessageDb::msgsInsertUpdateMessageHash(qint64 dmId,
     const QByteArray &valueBase64, const QString &algorithm)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	int dbId = -1;
@@ -2862,15 +2684,9 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Insert/update message events into events table.
- */
 bool MessageDb::msgsInsertUpdateMessageEvent(qint64 dmId,
     const QString &dmEventTime, const QString &dmEventType,
     const QString &dmEventDescr)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	int dbId = -1;
@@ -2931,15 +2747,8 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Insert/update raw (DER) message data into raw_message_data
- *     table.
- */
 bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
     int messageType)
-/* ========================================================================= */
 {
 	/* TODO -- The whole operation must fail or succeed. */
 
@@ -3025,13 +2834,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Check whether whole message is stored in database.
- */
 bool MessageDb::msgsStoredWhole(qint64 dmId) const
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -3061,13 +2864,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Get raw message data from raw_message_data table.
- */
 QByteArray MessageDb::msgsMessageBase64(qint64 dmId) const
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -3097,27 +2894,14 @@ fail:
 	return QByteArray();
 }
 
-
-/* ========================================================================= */
-/*
- * Get message data in DER (raw) format.
- */
 QByteArray MessageDb::msgsMessageRaw(qint64 dmId) const
-/* ========================================================================= */
 {
 	debugFuncCall();
 
 	return QByteArray::fromBase64(msgsMessageBase64(dmId));
 }
 
-
-/* ========================================================================= */
-/*
- * Get base64-encoded delivery info from
- *     raw_delivery_info_data table.
- */
 QByteArray MessageDb::msgsGetDeliveryInfoBase64(qint64 dmId) const
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -3203,12 +2987,7 @@ fail:
 	return QList<qint64>();
 }
 
-/* ========================================================================= */
-/*
- * Return all message ID from database.
- */
 QList<MessageDb::MsgId> MessageDb::getAllMessageIDsFromDB(void) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT dmID, dmDeliveryTime FROM messages";
@@ -3269,14 +3048,8 @@ fail:
 	return QList<qint64>();
 }
 
-/* ========================================================================= */
-/*
- * Copy all messages correspond with year and their records
- * from tables into new db.
- */
 bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
     const QString &year)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	bool attached = false;
@@ -3460,13 +3233,8 @@ fail:
 	return false;
 }
 
-/* ========================================================================= */
-/*
- * Insert raw (DER) delivery info into raw_delivery_info_data table.
- */
 bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
     const QByteArray &raw)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	qint64 dbId = -1;
@@ -3523,14 +3291,8 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Update information about author (sender).
- */
 bool MessageDb::updateMessageAuthorInfo(qint64 dmId, const QString &senderType,
     const QString &senderName)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 
@@ -3568,13 +3330,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Get message hash from db
- */
 MessageDb::MessageHash MessageDb::msgsGetHashFromDb(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -3604,13 +3360,7 @@ fail:
 	return MessageHash();
 }
 
-
-/* ========================================================================= */
-/*
- * Delete message records from db.
- */
 bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
-/* ========================================================================= */
 {
 	/* TODO -- The whole operation must fail or succeed. */
 
@@ -3823,15 +3573,8 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Return list of message ids corresponding to given date
- *     interval.
- */
 QList<MessageDb::MsgId> MessageDb::msgsDateInterval(const QDate &fromDate,
     const QDate &toDate, enum MessageDirection msgDirect) const
-/* ========================================================================= */
 {
 	/* TODO -- Check whether time is interpreted in correct time zone! */
 
@@ -3878,14 +3621,7 @@ fail:
 	return QList<MessageDb::MsgId>();
 }
 
-
-/* ========================================================================= */
-/*
- * Return some message items in order to export correspondence
- *     to HTML.
- */
 QStringList MessageDb::getMsgForHtmlExport(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -3925,13 +3661,7 @@ fail:
 	return QStringList();
 }
 
-
-/* ========================================================================= */
-/*
- * Return some message items for export correspondence to csv.
- */
 QStringList MessageDb::getMsgForCsvExport(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -3974,13 +3704,7 @@ fail:
 	return QStringList();
 }
 
-
-/* ========================================================================= */
-/*
- * Set the verification result.
- */
 bool MessageDb::msgsSetVerified(qint64 dmId, bool verified)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -4010,14 +3734,8 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Set process state of received message
- */
 bool MessageDb::msgSetProcessState(qint64 dmId, enum MessageProcessState state,
     bool insert)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -4054,13 +3772,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Get process state of received message
- */
 int MessageDb::msgGetProcessState(qint64 dmId) const
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -4089,13 +3801,7 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Set process state of received messages.
- */
 bool MessageDb::msgSetAllReceivedProcessState(enum MessageProcessState state)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -4126,14 +3832,8 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Set process state of received messages in given year.
- */
 bool MessageDb::smsgdtSetReceivedYearProcessState(const QString &year,
     enum MessageProcessState state)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -4167,14 +3867,8 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Set process state of recently received messages.
- */
 bool MessageDb::smsgdtSetWithin90DaysReceivedProcessState(
     enum MessageProcessState state)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -4207,13 +3901,7 @@ fail:
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Returns time stamp in raw (DER) format.
- */
 QByteArray MessageDb::msgsTimestampRaw(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -4465,13 +4153,8 @@ bool MessageDb::assureConsistency(void)
 	return ensurePrimaryKeyInProcessStateTable(m_db);
 }
 
-/* ========================================================================= */
-/*
- * Add/update message certificate in database.
- */
 bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
     const QByteArray &crtBase64)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	int certId = -1;
@@ -4604,12 +4287,7 @@ fail:
 	return false;
 }
 
-/* ========================================================================= */
-/*
- * Returns verification date (in local time).
- */
 QDateTime MessageDb::msgsVerificationDate(qint64 dmId) const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -4650,15 +4328,8 @@ fail:
 	return QDateTime();
 }
 
-
-/* ========================================================================= */
-/*
- * Return some additional filename entries as struct:
- * (dmDeliveryTime, dmAcceptanceTime, dmAnnotation, dmSender)
- */
 MessageDb::FilenameEntry MessageDb::msgsGetAdditionalFilenameEntry(qint64 dmId)
     const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -4693,13 +4364,7 @@ fail:
 	return entry;
 }
 
-
-/* ========================================================================= */
-/*
- * Read data from supplementary message data table.
- */
 QJsonDocument MessageDb::smsgdCustomData(qint64 msgId) const
-/* ========================================================================= */
 {
 	QJsonDocument jsonDoc;
 	QSqlQuery query(m_db);
@@ -4733,15 +4398,8 @@ fail:
 	return QJsonDocument();
 }
 
-
-/* ========================================================================= */
-/*
- * Check whether message signature was valid at given date
- *     (local time).
- */
 bool MessageDb::msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
     bool ignoreMissingCrlCheck) const
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -4760,14 +4418,8 @@ bool MessageDb::msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
 	    ignoreMissingCrlCheck ? 0 : 1);
 }
 
-
-/* ========================================================================= */
-/*
- * Test if imported message is relevent to account db.
- */
 bool MessageDb::isRelevantMsgForImport(qint64 msgId, const QString databoxId)
     const
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -4796,14 +4448,8 @@ bool MessageDb::isRelevantMsgForImport(qint64 msgId, const QString databoxId)
 	return false;
 }
 
-
-/* ========================================================================= */
-/*
- * Copy all message data to account database from source database.
- */
 bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
     qint64 msgId)
-/* ========================================================================= */
 {
 	QSqlQuery query(m_db);
 	QByteArray der_data;
