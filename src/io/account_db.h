@@ -194,7 +194,7 @@ public:
 	 *
 	 * @param[in] key Key value.
 	 */
-	QList<QString> getUserDataboxInfo(const QString &key) const;
+	QStringList getUserDataboxInfo(const QString &key) const;
 
 	/*!
 	 * @brief Return key used to access user entries in account database.

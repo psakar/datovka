@@ -151,29 +151,23 @@ const QString AccountDb::dbId(const QString &key,
     const QString &defaultValue) const
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
+	QString queryStr = "SELECT dbID FROM account_info WHERE key = :key";
 
-	queryStr = "SELECT dbID FROM account_info WHERE key = :key";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		return query.value(0).toString();
 	} else {
-		logErrorNL("Cannot execute SQL query and/or read SQL data: "
-		    "%s.", query.lastError().text().toUtf8().constData());
-		goto fail;
+		logErrorNL("Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
 	}
-
 fail:
 	return defaultValue;
 }
@@ -182,55 +176,38 @@ const QString AccountDb::senderNameGuess(const QString &key,
     const QString &defaultValue) const
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 	QString name;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
+	QString queryStr = "SELECT firmName, pnFirstName, pnMiddleName, "
+	    "pnLastName FROM account_info WHERE key = :key";
 
-	queryStr = "SELECT firmName FROM account_info WHERE key = :key";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
+	    	/* firmName */
 		name = query.value(0).toString();
 		if (!(name.isNull() || name.isEmpty())) {
 			return name;
 		}
-	} else {
-		logErrorNL("Cannot execute SQL query and/or read SQL data: "
-		    "%s.", query.lastError().text().toUtf8().constData());
-		/* goto fail; */ /* Try a different query. */
-	}
-
-	queryStr = "SELECT pnFirstName, pnMiddleName, pnLastName "
-	    "FROM account_info WHERE key = :key";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":key", key);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		name = query.value(0).toString();
-		if (!query.value(1).toString().isEmpty()) {
-			name += " " + query.value(1).toString();
+		/* pnFirstName */
+		name = query.value(1).toString();
+		if (!query.value(2).toString().isEmpty()) {
+			/* pnMiddleName */
+			name += " " + query.value(2).toString();
 		}
-		name += " " + query.value(2).toString();
+		/* pnLastName */
+		name += " " + query.value(3).toString();
 		return name;
 	} else {
-		logErrorNL("Cannot execute SQL query and/or read SQL data: "
-		    "%s.", query.lastError().text().toUtf8().constData());
-		goto fail;
+		logErrorNL("Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
 	}
-
 fail:
 	return defaultValue;
 }
@@ -238,34 +215,26 @@ fail:
 const QString AccountDb::getPwdExpirFromDb(const QString &key) const
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
+	QString queryStr = "SELECT expDate FROM password_expiration_date "
+	    "WHERE key = :key";
 
-	queryStr = "SELECT expDate "
-	    "FROM password_expiration_date WHERE key = :key";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive()) {
 		if (query.first() && query.isValid() &&
 		    !query.value(0).toString().isEmpty()) {
 			return query.value(0).toString();
-		} else {
-			return QString();
 		}
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
 	}
-
 fail:
 	return QString();
 }
@@ -296,61 +265,24 @@ int AccountDb::pwdExpiresInDays(const QString &key, int days) const
 bool AccountDb::setPwdExpirIntoDb(const QString &key, const QString &date)
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
-	bool update = true;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
+	QString queryStr = "INSERT OR REPLACE INTO password_expiration_date "
+	    "(key, expDate) VALUES (:key, :expDate)";
 
-	queryStr = "SELECT count(*) "
-	    "FROM password_expiration_date WHERE key = :key";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":key", key);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			if (query.value(0).toInt() != 0) {
-				update = true;
-			} else {
-				update = false;
-			}
-		}
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
+		return false;
 	}
 
-	if (update) {
-		queryStr = "UPDATE password_expiration_date "
-		    "SET expDate = :expDate WHERE key = :key";
-	} else {
-		queryStr = "INSERT INTO password_expiration_date "
-		    "(key, expDate) VALUES (:key, :expDate)";
-	}
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
 	query.bindValue(":key", key);
 	query.bindValue(":expDate", date);
-	if (query.exec()) {
-		return true;
-	} else {
+	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
+		return false;
 	}
-
-fail:
-	return false;
+	return true;
 }
 
 bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
@@ -365,77 +297,28 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
     int dbState, bool dbEffectiveOVM, bool dbOpenAddressing)
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
-	bool update = true;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
-
-	queryStr = "SELECT count(*) "
-	    "FROM account_info WHERE key = :key";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":key", key);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			if (query.value(0).toInt() != 0) {
-				update = true;
-			} else {
-				update = false;
-			}
-		}
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	if (update) {
-		queryStr = "UPDATE account_info "
-		    "SET dbID = :dbID, dbType = :dbType, ic = :ic, "
-		    "pnFirstName = :pnFirstName, pnMiddleName = :pnMiddleName, "
-		    "pnLastName = :pnLastName, "
-		    "pnLastNameAtBirth = :pnLastNameAtBirth, "
-		    "firmName = :firmName, biDate = :biDate, "
-		    "biCity = :biCity, biCounty = :biCounty, "
-		    "biState = :biState, "
-		    "adCity = :adCity, adStreet = :adStreet, "
-		    "adNumberInStreet = :adNumberInStreet, "
-		    "adNumberInMunicipality = :adNumberInMunicipality, "
-		    "adZipCode = :adZipCode, "
-		    "adState = :adState, nationality = :nationality, "
-		    "identifier = :identifier, registryCode = :registryCode, "
-		    "dbState = :dbState, dbEffectiveOVM = :dbEffectiveOVM, "
-		    "dbOpenAddressing = :dbOpenAddressing WHERE key = :key";
-	} else {
-		queryStr = "INSERT INTO account_info ("
-		    "key, dbID, dbType, ic, pnFirstName, pnMiddleName, "
-		    "pnLastName, pnLastNameAtBirth, firmName, biDate, biCity, "
-		    "biCounty, biState, adCity, adStreet, adNumberInStreet, "
-		    "adNumberInMunicipality, adZipCode, adState, nationality, "
-		    "identifier, registryCode, dbState, dbEffectiveOVM, "
-		    "dbOpenAddressing"
-		    ") VALUES ("
-		    ":key, :dbID, :dbType, :ic, :pnFirstName, :pnMiddleName, "
-		    ":pnLastName, :pnLastNameAtBirth, :firmName, :biDate, :biCity, "
-		    ":biCounty, :biState, :adCity, :adStreet, :adNumberInStreet, "
-		    ":adNumberInMunicipality, :adZipCode, :adState, :nationality, "
-		    ":identifier, :registryCode, :dbState, :dbEffectiveOVM, "
-		    ":dbOpenAddressing"
-		    ")";
-	}
+	QString queryStr = "INSERT OR REPLACE INTO account_info "
+	    "(key, dbID, dbType, ic, pnFirstName, pnMiddleName, "
+	    "pnLastName, pnLastNameAtBirth, firmName, biDate, biCity, "
+	    "biCounty, biState, adCity, adStreet, adNumberInStreet, "
+	    "adNumberInMunicipality, adZipCode, adState, nationality, "
+	    "identifier, registryCode, dbState, dbEffectiveOVM, "
+	    "dbOpenAddressing)"
+	    " VALUES "
+	    "(:key, :dbID, :dbType, :ic, :pnFirstName, :pnMiddleName, "
+	    ":pnLastName, :pnLastNameAtBirth, :firmName, :biDate, :biCity, "
+	    ":biCounty, :biState, :adCity, :adStreet, :adNumberInStreet, "
+	    ":adNumberInMunicipality, :adZipCode, :adState, :nationality, "
+	    ":identifier, :registryCode, :dbState, :dbEffectiveOVM, "
+	    ":dbOpenAddressing)";
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":key", key);
 	query.bindValue(":dbID", dbID);
 	query.bindValue(":dbType", dbType);
@@ -466,9 +349,7 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
 	}
-
 fail:
 	return false;
 }
@@ -485,65 +366,19 @@ bool AccountDb::insertUserIntoDb(const QString &key,
     const QString &caCity, const QString &caZipCode, const QString &caState)
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
-	bool update = true;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
-
-	queryStr = "SELECT count(*) "
-	    "FROM user_info WHERE key = :key";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":key", key);
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			if (query.value(0).toInt() != 0) {
-				update = true;
-			} else {
-				update = false;
-			}
-		}
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	if (update) {
-		queryStr = "UPDATE user_info "
-		    "SET userType = :userType, userPrivils = :userPrivils, "
-		    "pnFirstName = :pnFirstName, pnMiddleName = :pnMiddleName, "
-		    "pnLastName = :pnLastName, "
-		    "pnLastNameAtBirth = :pnLastNameAtBirth, "
-		    "adCity = :adCity, adStreet = :adStreet, "
-		    "adNumberInStreet = :adNumberInStreet, "
-		    "adNumberInMunicipality = :adNumberInMunicipality, "
-		    "adZipCode = :adZipCode, adState = :adState, "
-		    "biDate = :biDate, ic = :ic, "
-		    "firmName = :firmName, caStreet = :caStreet, "
-		    "caCity = :caCity, caZipCode = :caZipCode, "
-		    "caState = :caState WHERE key = :key";
-	} else {
-		queryStr = "INSERT INTO user_info ("
-		    "key, userType, userPrivils, pnFirstName, pnMiddleName, "
-		    "pnLastName, pnLastNameAtBirth, adCity, adStreet, "
-		    "adNumberInStreet, adNumberInMunicipality, adZipCode, "
-		    "adState, biDate, ic, firmName, caStreet, caCity, "
-		    "caZipCode, caState"
-		    ") VALUES ("
-		    ":key, :userType, :userPrivils, :pnFirstName, "
-		    ":pnMiddleName, :pnLastName, :pnLastNameAtBirth, :adCity, "
-		    ":adStreet, :adNumberInStreet, :adNumberInMunicipality, "
-		    ":adZipCode, :adState, :biDate, :ic, :firmName, :caStreet, "
-		    ":caCity, :caZipCode, :caState)";
-	}
+	QString queryStr = "INSERT OR REPLACE INTO user_info "
+	    "(key, userType, userPrivils, pnFirstName, pnMiddleName, "
+	    "pnLastName, pnLastNameAtBirth, adCity, adStreet, "
+	    "adNumberInStreet, adNumberInMunicipality, adZipCode, "
+	    "adState, biDate, ic, firmName, caStreet, caCity, "
+	    "caZipCode, caState)"
+	    " VALUES "
+	    "(:key, :userType, :userPrivils, :pnFirstName, "
+	    ":pnMiddleName, :pnLastName, :pnLastNameAtBirth, :adCity, "
+	    ":adStreet, :adNumberInStreet, :adNumberInMunicipality, "
+	    ":adZipCode, :adState, :biDate, :ic, :firmName, :caStreet, "
+	    ":caCity, :caZipCode, :caState)";
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -576,9 +411,7 @@ bool AccountDb::insertUserIntoDb(const QString &key,
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
 	}
-
 fail:
 	return false;
 }
@@ -586,19 +419,16 @@ fail:
 bool AccountDb::deleteAccountInfo(const QString &key)
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
+	QString queryStr = "DELETE FROM password_expiration_date "
+	    "WHERE key = :key";
 
-	queryStr = "DELETE FROM password_expiration_date WHERE key = :key";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":key", key);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -612,6 +442,7 @@ bool AccountDb::deleteAccountInfo(const QString &key)
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":key", key);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -620,29 +451,24 @@ bool AccountDb::deleteAccountInfo(const QString &key)
 	}
 
 	return true;
-
 fail:
 	return false;
 }
 
-QList<QString> AccountDb::getUserDataboxInfo(const QString &key) const
+QStringList AccountDb::getUserDataboxInfo(const QString &key) const
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
-	QList<QString> dataList;
+	QStringList dataList;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
-
-	queryStr = "SELECT dbType, dbEffectiveOVM, dbOpenAddressing "
+	QString queryStr = "SELECT dbType, dbEffectiveOVM, dbOpenAddressing "
 	    "FROM account_info WHERE key = :key";
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
@@ -652,19 +478,14 @@ QList<QString> AccountDb::getUserDataboxInfo(const QString &key) const
 		dataList.append(query.value(1).toString());
 		/* dbOpenAddressing */
 		dataList.append(query.value(2).toString());
-
 		return dataList;
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
 	}
-
-	return dataList;
-
 fail:
-	return QList<QString>();
+	return QStringList();
 }
 
 QString AccountDb::keyFromLogin(const QString &login)
