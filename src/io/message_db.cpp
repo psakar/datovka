@@ -530,15 +530,13 @@ fail:
 	return PartialEnvelopeData();
 }
 
-int MessageDb::msgMessageType(qint64 dmId) const
+short MessageDb::getMessageType(qint64 dmId) const
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	queryStr = "SELECT "
-	    "message_type"
-	    " FROM supplementary_message_data WHERE "
-	    "message_id = :dmId";
+	QString queryStr = "SELECT message_type "
+	    "FROM supplementary_message_data WHERE message_id = :dmId";
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -554,22 +552,18 @@ int MessageDb::msgMessageType(qint64 dmId) const
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 fail:
 	return -1;
 }
 
-bool MessageDb::msgsVerificationAttempted(qint64 dmId) const
+enum MessageDb::MsgVerificationResult
+    MessageDb::isMessageVerified(qint64 dmId) const
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	debugFuncCall();
+	QString queryStr = "SELECT is_verified FROM messages "
+	    "WHERE dmID = :dmId";
 
-	queryStr = "SELECT "
-	    "is_verified"
-	    " FROM messages WHERE "
-	    "dmID = :dmId";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -579,46 +573,18 @@ bool MessageDb::msgsVerificationAttempted(qint64 dmId) const
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		/* If no value is set then the conversion will fail. */
-		bool ret = ! query.value(0).isNull();
-		return ret;
+		if (query.value(0).isNull()) {
+			goto fail;
+		} else {
+			return (query.value(0).toBool()) ? MSG_SIGN_OK
+			    : MSG_SIGN_WRONG;
+		}
 	} else {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: %s.",
+		logErrorNL("Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
 	}
-
 fail:
-	return false;
-}
-
-bool MessageDb::msgsVerified(qint64 dmId) const
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT "
-	    "is_verified"
-	    " FROM messages WHERE "
-	    "dmID = :dmId";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		return query.value(0).toBool();
-	} else {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-fail:
-	return false;
+	return MSG_NO_PRESENT;
 }
 
 bool MessageDb::smsgdtLocallyRead(qint64 dmId) const
@@ -1129,30 +1095,29 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 	if (verSignature) {
 
 		html += "<h3>" + QObject::tr("Signature") + "</h3>";
+
 		/* Signature. */
-		if (!msgsVerificationAttempted(dmId)) {
-			/* Verification no attempted. */
-			html += strongAccountInfoLine(
-			    QObject::tr("Message signature"),
-			    QObject::tr("Not present"));
-			html += "<div>" +
-			    QObject::tr("Download the complete message in order to verify its signature.") +
-			    "</div>";
-		} else if (!msgsVerified(dmId)) {
+		bool verified = false;
+		QString verifiedText;
+		MessageDb::MsgVerificationResult vRes = isMessageVerified(dmId);
+
+		switch (vRes) {
+		case MessageDb::MSG_SIGN_WRONG:
 			html += strongAccountInfoLine(
 			    QObject::tr("Message signature"),
 			    QObject::tr("Invalid")  + " -- " +
 			    QObject::tr("Message signature and content "
 			        "do not correspond!"));
-		} else {
+			break;
+		case MessageDb::MSG_SIGN_OK:
 			html += strongAccountInfoLine(
 			    QObject::tr("Message signature"),
 			    QObject::tr("Valid"));
 			/* Check signing certificate. */
-			bool verified = msgCertValidAtDate(dmId,
+			verified = msgCertValidAtDate(dmId,
 			    msgsVerificationDate(dmId),
 			    !GlobInstcs::prefsPtr->checkCrl);
-			QString verifiedText = verified ?
+			verifiedText = verified ?
 			    QObject::tr("Valid") : QObject::tr("Invalid");
 			if (!GlobInstcs::prefsPtr->checkCrl) {
 				verifiedText += " (" +
@@ -1162,6 +1127,16 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 			}
 			html += strongAccountInfoLine(
 			    QObject::tr("Signing certificate"), verifiedText);
+			break;
+		default:
+			/* Verification no attempted. */
+			html += strongAccountInfoLine(
+			    QObject::tr("Message signature"),
+			    QObject::tr("Not present"));
+			html += "<div>" +
+			    QObject::tr("Download the complete message in order to verify its signature.") +
+			    "</div>";
+			break;
 		}
 
 		{
@@ -1701,99 +1676,6 @@ fail:
 	return QList<AttachmentEntry>();
 }
 
-int MessageDb::msgsStatusIfExists(qint64 dmId) const
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-	int ret = -1;
-	bool inSupplementary = false;
-
-	queryStr = "SELECT dmMessageStatus FROM messages WHERE dmID = :dmId";
-
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":dmId", dmId);
-
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			ret = query.value(0).toInt();
-		} else {
-			/* No error message, just return. */
-			goto fail;
-		}
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	/* Also check whether supplementary message data have been set. */
-	queryStr = "SELECT count(*) FROM supplementary_message_data WHERE "
-	    "message_id = :dmId";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		Q_ASSERT(query.value(0).toInt() < 2);
-		inSupplementary = (1 == query.value(0).toInt());
-	} else {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	if (inSupplementary) {
-		return ret;
-	} else {
-		/*
-		 * This should actually not happen, as the message was found
-		 * in messages table but not in supplementary_message_data
-		 * table.
-		 */
-		Q_ASSERT(0);
-	}
-
-fail:
-	return -1;
-}
-
-bool MessageDb::isDeliveryInfoRawDb(qint64 dmId) const
-{
-	QSqlQuery query(m_db);
-	QString queryStr;
-
-	queryStr = "SELECT count(*) FROM raw_delivery_info_data "
-	    "WHERE message_id = :dmId";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":dmId", dmId);
-
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		return 0 < query.value(0).toInt();
-	} else {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-fail:
-	return false;
-}
-
 bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
     const QString &dbIDSender, const QString &dmSender,
     const QString &dbIDRecipient, const QString &dmRecipient,
@@ -1853,7 +1735,7 @@ bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
 		return false;
 	}
 
-	return msgSetProcessState(dmId, UNSETTLED, true);
+	return setMessageProcessState(dmId, UNSETTLED);
 }
 
 bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
@@ -1974,7 +1856,7 @@ bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
 		goto fail;
 	}
 
-	return msgSetProcessState(dmId, UNSETTLED, true);
+	return setMessageProcessState(dmId, UNSETTLED);
 
 fail:
 	return false;
@@ -2105,30 +1987,27 @@ fail:
 	return false;
 }
 
-int MessageDb::messageState(qint64 dmId) const
+int MessageDb::getMessageStatus(qint64 dmId) const
 {
 	QSqlQuery query(m_db);
 
-	QString queryStr = "SELECT dmMessageStatus "
-	    "FROM messages WHERE dmID = :dmId";
+	QString queryStr =
+	    "SELECT dmMessageStatus FROM messages WHERE dmID = :dmId";
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
+		return -1;
 	}
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		return query.value(0).toInt();
 	} else {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: %s.",
+		logErrorNL("Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
+		return -1;
 	}
-
-fail:
-	return -1;
 }
 
 QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
@@ -2901,7 +2780,7 @@ QByteArray MessageDb::msgsMessageRaw(qint64 dmId) const
 	return QByteArray::fromBase64(msgsMessageBase64(dmId));
 }
 
-QByteArray MessageDb::msgsGetDeliveryInfoBase64(qint64 dmId) const
+QByteArray MessageDb::getDeliveryInfoBase64(qint64 dmId) const
 {
 	debugFuncCall();
 
@@ -3734,45 +3613,32 @@ fail:
 	return false;
 }
 
-bool MessageDb::msgSetProcessState(qint64 dmId, enum MessageProcessState state,
-    bool insert)
+bool MessageDb::setMessageProcessState(qint64 dmId,
+    enum MessageProcessState state)
 {
 	debugFuncCall();
 
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	if (insert) {
-		queryStr = "INSERT INTO process_state ("
-		    "message_id, state) VALUES (:dmId, :state)";
-	} else {
-		/*
-		queryStr = "UPDATE process_state SET state = :state WHERE "
-		    "message_id = :dmId";
-		*/
-		queryStr = "INSERT OR REPLACE INTO process_state ("
-		    "message_id, state) VALUES (:dmId, :state)";
-	}
+	QString queryStr = "INSERT OR REPLACE INTO process_state "
+	    "(message_id, state) VALUES (:dmId, :state)";
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
+		return false;
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":state", (int) state);
-	if (query.exec()) {
-		return true;
-	} else {
+	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
-		goto fail;
+		return false;
 	}
-
-fail:
-	return false;
+	return true;
 }
 
-int MessageDb::msgGetProcessState(qint64 dmId) const
+int MessageDb::getMessageProcessState(qint64 dmId) const
 {
 	debugFuncCall();
 
@@ -3796,7 +3662,6 @@ int MessageDb::msgGetProcessState(qint64 dmId) const
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 fail:
 	return -1;
 }

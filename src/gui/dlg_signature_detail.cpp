@@ -82,13 +82,23 @@ void DlgSignatureDetail::detail(const MessageDbSet &dbSet,
 		return;
 	}
 	QByteArray msgDER;
-	if (messageDb->msgsVerificationAttempted(msgId.dmId)) {
-		msgDER = messageDb->msgsMessageRaw(msgId.dmId);
-	}
-	QByteArray tstDER(messageDb->msgsTimestampRaw(msgId.dmId));
-	bool dbIsVerified = messageDb->msgsVerified(msgId.dmId);
+	bool isMsgVerified = false;
+	MessageDb::MsgVerificationResult vRes =
+	    messageDb->isMessageVerified(msgId.dmId);
 
-	DlgSignatureDetail dlg(msgDER, tstDER, true, dbIsVerified, parent);
+	switch (vRes) {
+	case MessageDb::MSG_SIGN_OK:
+		isMsgVerified = true;
+	case MessageDb::MSG_SIGN_WRONG:
+		msgDER = messageDb->msgsMessageRaw(msgId.dmId);
+		break;
+	default:
+		break;
+	}
+
+	QByteArray tstDER(messageDb->msgsTimestampRaw(msgId.dmId));
+
+	DlgSignatureDetail dlg(msgDER, tstDER, true, isMsgVerified, parent);
 	dlg.exec();
 }
 

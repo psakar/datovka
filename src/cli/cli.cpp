@@ -527,7 +527,7 @@ cli_error getDeliveryInfo(const QMap<QString,QVariant> &map,
 			return CLI_ERROR;
 		}
 
-		QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(
+		QByteArray base64 = messageDb->getDeliveryInfoBase64(
 		    map["dmID"].toLongLong());
 
 		if (base64.isEmpty()) {
@@ -1663,11 +1663,11 @@ int runService(const QString &lParam,
 			if (download == "no") {
 				needsISDS = false;
 			} else if (download == "ondemand") {
-				needsISDS=messageDb->msgsGetDeliveryInfoBase64(
+				needsISDS=messageDb->getDeliveryInfoBase64(
 				    serviceMap["dmID"].toLongLong()).isNull();
 			}
 		} else {
-			needsISDS = messageDb->msgsGetDeliveryInfoBase64(
+			needsISDS = messageDb->getDeliveryInfoBase64(
 			    serviceMap["dmID"].toLongLong()).isNull();
 		}
 	}

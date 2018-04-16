@@ -78,7 +78,7 @@ const QString &dzPrefix(const MessageDb *messageDb, qint64 dmId)
 		return unspecified;
 	}
 
-	switch (messageDb->msgMessageType(dmId)) {
+	switch (messageDb->getMessageType(dmId)) {
 	case MessageDb::TYPE_RECEIVED:
 		return received;
 		break;
