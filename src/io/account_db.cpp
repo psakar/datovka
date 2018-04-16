@@ -40,9 +40,7 @@ DbEntry::DbEntry(void)
 bool DbEntry::setValue(const QString &key, const QVariant &value)
 {
 	/* Don't perform any check against database table. */
-
 	this->insert(key, value);
-
 	return true;
 }
 
@@ -63,20 +61,14 @@ DbEntry AccountDb::accountEntry(const QString &key) const
 	QString queryStr;
 	DbEntry aEntry;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
-
 	queryStr = "SELECT ";
 	for (int i = 0; i < (accntinfTbl.knownAttrs.size() - 1); ++i) {
 		queryStr += accntinfTbl.knownAttrs[i].first + ", ";
 	}
 	queryStr += accntinfTbl.knownAttrs.last().first + " ";
 	queryStr += "FROM account_info WHERE key = :key";
+
 	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":key", key);
@@ -90,15 +82,11 @@ DbEntry AccountDb::accountEntry(const QString &key) const
 				    value);
 			}
 		}
-	} else {
-		logErrorNL("Cannot execute SQL query and/or read SQL data: "
-		    "%s.", query.lastError().text().toUtf8().constData());
-		goto fail;
+		return aEntry;
 	}
-
-	return aEntry;
-
 fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
 	return DbEntry();
 }
 
@@ -108,20 +96,14 @@ DbEntry AccountDb::userEntry(const QString &key) const
 	QString queryStr;
 	DbEntry uEntry;
 
-	if (!m_db.isOpen()) {
-		logErrorNL("%s", "Account database seems not to be open.");
-		goto fail;
-	}
-
 	queryStr = "SELECT ";
 	for (int i = 0; i < (userinfTbl.knownAttrs.size() - 1); ++i) {
 		queryStr += userinfTbl.knownAttrs[i].first + ", ";
 	}
 	queryStr += userinfTbl.knownAttrs.last().first + " ";
 	queryStr += "FROM user_info WHERE key = :key";
+
 	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
 	query.bindValue(":key", key);
@@ -135,15 +117,11 @@ DbEntry AccountDb::userEntry(const QString &key) const
 				    value);
 			}
 		}
-	} else {
-		logErrorNL("Cannot execute SQL query and/or read SQL data: "
-		    "%s.", query.lastError().text().toUtf8().constData());
-		goto fail;
+		return uEntry;
 	}
-
-	return uEntry;
-
 fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
 	return DbEntry();
 }
 
@@ -155,20 +133,16 @@ const QString AccountDb::dbId(const QString &key,
 	QString queryStr = "SELECT dbID FROM account_info WHERE key = :key";
 
 	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		return query.value(0).toString();
-	} else {
-		logErrorNL("Cannot execute SQL query and/or read SQL data: %s.",
-		    query.lastError().text().toUtf8().constData());
 	}
 fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
 	return defaultValue;
 }
 
@@ -182,11 +156,8 @@ const QString AccountDb::senderNameGuess(const QString &key,
 	    "pnLastName FROM account_info WHERE key = :key";
 
 	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
@@ -204,11 +175,10 @@ const QString AccountDb::senderNameGuess(const QString &key,
 		/* pnLastName */
 		name += " " + query.value(3).toString();
 		return name;
-	} else {
-		logErrorNL("Cannot execute SQL query and/or read SQL data: %s.",
-		    query.lastError().text().toUtf8().constData());
 	}
 fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
 	return defaultValue;
 }
 
@@ -220,22 +190,18 @@ const QString AccountDb::getPwdExpirFromDb(const QString &key) const
 	    "WHERE key = :key";
 
 	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive()) {
 		if (query.first() && query.isValid() &&
 		    !query.value(0).toString().isEmpty()) {
 			return query.value(0).toString();
 		}
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 	}
 fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
 	return QString();
 }
 
@@ -270,19 +236,17 @@ bool AccountDb::setPwdExpirIntoDb(const QString &key, const QString &date)
 	    "(key, expDate) VALUES (:key, :expDate)";
 
 	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
+		goto fail;
 	}
-
 	query.bindValue(":key", key);
 	query.bindValue(":expDate", date);
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
+	if (query.exec()) {
+		return true;
 	}
-	return true;
+fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
+	return false;
 }
 
 bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
@@ -314,11 +278,8 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
 	    ":dbOpenAddressing)";
 
 	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 	query.bindValue(":key", key);
 	query.bindValue(":dbID", dbID);
 	query.bindValue(":dbType", dbType);
@@ -346,11 +307,10 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
 	query.bindValue(":dbOpenAddressing", dbOpenAddressing);
 	if (query.exec()) {
 		return true;
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 	}
 fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
 	return false;
 }
 
@@ -381,11 +341,8 @@ bool AccountDb::insertUserIntoDb(const QString &key,
 	    ":caCity, :caZipCode, :caState)";
 
 	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 	query.bindValue(":key", key);
 	query.bindValue(":userType", userType);
 	query.bindValue(":userPrivils", userPrivils);
@@ -408,11 +365,10 @@ bool AccountDb::insertUserIntoDb(const QString &key,
 	query.bindValue(":caState", caState);
 	if (query.exec()) {
 		return true;
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 	}
 fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
 	return false;
 }
 
@@ -428,19 +384,18 @@ bool AccountDb::deleteAccountInfo(const QString &key)
 	foreach (const QString &table, tables) {
 		queryStr = "DELETE FROM " + table + " WHERE key = :key";
 		if (!query.prepare(queryStr)) {
-			logErrorNL("Cannot prepare SQL query: %s.",
-			    query.lastError().text().toUtf8().constData());
-			return false;
+			goto fail;
 		}
-
 		query.bindValue(":key", key);
 		if (!query.exec()) {
-			logErrorNL("Cannot execute SQL query: %s.",
-			    query.lastError().text().toUtf8().constData());
-			return false;
+			goto fail;
 		}
 	}
 	return true;
+fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
+	return false;
 }
 
 QStringList AccountDb::getUserDataboxInfo(const QString &key) const
@@ -452,11 +407,8 @@ QStringList AccountDb::getUserDataboxInfo(const QString &key) const
 	    "FROM account_info WHERE key = :key";
 
 	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
@@ -467,19 +419,16 @@ QStringList AccountDb::getUserDataboxInfo(const QString &key) const
 		/* dbOpenAddressing */
 		dataList.append(query.value(2).toString());
 		return dataList;
-	} else {
-		logErrorNL(
-		    "Cannot execute SQL query and/or read SQL data: %s.",
-		    query.lastError().text().toUtf8().constData());
 	}
 fail:
+	logErrorNL("Cannot prepare or execute SQL query: %s.",
+	    query.lastError().text().toUtf8().constData());
 	return QStringList();
 }
 
 QString AccountDb::keyFromLogin(const QString &login)
 {
 	Q_ASSERT(!login.isEmpty());
-
 	return login + QStringLiteral("___True");
 }
 
