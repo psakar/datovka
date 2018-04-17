@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _ACCOUNT_DB_H_
-#define _ACCOUNT_DB_H_
+#pragma once
 
 #include <QMap>
 #include <QString>
@@ -45,7 +44,7 @@ public:
 	/*!
 	 * @brief Set value.
 	 *
-	 * @param[in] key   Key string.
+	 * @param[in] key Key string.
 	 * @param[in] value Value to be stored.
 	 */
 	bool setValue(const QString &key, const QVariant &value);
@@ -61,7 +60,7 @@ public:
 	/*!
 	 * @brief Return stored value.
 	 *
-	 * @param[in] key          Key string.
+	 * @param[in] key  Key string.
 	 * @param[in] defaultValue Value to be returned if key not found.
 	 * @return Found value associated to key or defaultValue if such entry
 	 *     found.
@@ -101,9 +100,9 @@ public:
 	/*!
 	 * @brief Return data box identifier.
 	 *
-	 * @param[in] key          Key value.
+	 * @param[in] key Key value.
 	 * @param[in] defaultValue Value to be returned when nothing found.
-	 * @return Data-box identifier.
+	 * @return Databox identifier.
 	 */
 	const QString dbId(const QString &key,
 	    const QString &defaultValue = QString()) const;
@@ -111,7 +110,7 @@ public:
 	/*!
 	 * @brief Return sender name guess.
 	 *
-	 * @param[in] key          Key value.
+	 * @param[in] key Key value.
 	 * @param[in] defaultValue Value to be returned when nothing found.
 	 * @return Sender name.
 	 */
@@ -132,14 +131,14 @@ public:
 	 * @param[in] key Key value.
 	 * @param[in] days Amount of days to check the expiration.
 	 * @return Non-negative value if password expires within given amount
-	 *     of days. Negative value else.
+	 *                      of days. Negative value else.
 	 */
 	int pwdExpiresInDays(const QString &key, int days) const;
 
 	/*!
-	 * @brief Set password expiration information.
+	 * @brief Insert or update password expiration information in db.
 	 *
-	 * @param[in] key  Key value.
+	 * @param[in] key Key value.
 	 * @param[in] date Expiration date.
 	 * @return True on success.
 	 */
@@ -148,6 +147,31 @@ public:
 	/*!
 	 * @brief Insert account info into database.
 	 *
+	 * @param[in] key Key value.
+	 * @param[in] dbID Data box ID.
+	 * @param[in] dbType Data box type.
+	 * @param[in] ic Company IC.
+	 * @param[in] pnFirstName Given name.
+	 * @param[in] pnMiddleName Middle name.
+	 * @param[in] pnLastName Surname.
+	 * @param[in] pnLastNameAtBirth Surname at birth.
+	 * @param[in] firmName Company name.
+	 * @param[in] biDate Date of birth.
+	 * @param[in] biCity City of birth.
+	 * @param[in] biCounty Country of birth.
+	 * @param[in] biState State of birth.
+	 * @param[in] adCity City of residence.
+	 * @param[in] adStreet Street of residence.
+	 * @param[in] adNumberInStreet Number in street.
+	 * @param[in] adNumberInMunicipality Number in municipality.
+	 * @param[in] adZipCode Zip code.
+	 * @param[in] adState State of residence.
+	 * @param[in] nationality Nationality.
+	 * @param[in] identifier Indetifier.
+	 * @param[in] registryCode Registry code.
+	 * @param[in] dbState Databox state.
+	 * @param[in] dbEffectiveOVM Effective OVM.
+	 * @param[in] dbOpenAddressing Open addressing.
 	 * @return True on success.
 	 */
 	bool insertAccountIntoDb(const QString &key, const QString &dbID,
@@ -166,6 +190,26 @@ public:
 	/*!
 	 * @brief Insert user info into database.
 	 *
+	 * @param[in] key Key value.
+	 * @param[in] pnFirstName Given name.
+	 * @param[in] pnMiddleName Middle name.
+	 * @param[in] pnLastName Surname.
+	 * @param[in] pnLastNameAtBirth Surname at birth.
+	 * @param[in] adCity User city;
+	 * @param[in] adStreet User street.
+	 * @param[in] adNumberInStreet Number in street.
+	 * @param[in] adNumberInMunicipality Number in municipality.
+	 * @param[in] adZipCode User zip code.
+	 * @param[in] adState User state.
+	 * @param[in] biDate Date of birth.
+	 * @param[in] userType User type.
+	 * @param[in] userPrivils User privilegies.
+	 * @param[in] ic Company IC.
+	 * @param[in] firmName Company name.
+	 * @param[in] caStreet Company street.
+	 * @param[in] caCity Company city.
+	 * @param[in] caZipCode Company zip code.
+	 * @param[in] caState Company state.
 	 * @return True on success.
 	 */
 	bool insertUserIntoDb(const QString &key,
@@ -182,7 +226,7 @@ public:
 	    const QString &caState);
 
 	/*!
-	 * @brief delete account info from database.
+	 * @brief Delete account info from database.
 	 *
 	 * @param[in] key Key value.
 	 * @return True on success.
@@ -190,11 +234,13 @@ public:
 	bool deleteAccountInfo(const QString &key);
 
 	/*!
-	 * @brief Get data box information.
+	 * @brief Get data box info (dbType, dbEffectiveOVM, dbOpenAddressing).
 	 *
 	 * @param[in] key Key value.
+	 * @return List of info in order: dbType, dbEffectiveOVM and
+	 *                                dbOpenAddressing.
 	 */
-	QList<QString> getUserDataboxInfo(const QString &key) const;
+	QStringList getUserDataboxInfo(const QString &key) const;
 
 	/*!
 	 * @brief Return key used to access user entries in account database.
@@ -206,6 +252,7 @@ public:
 	QString keyFromLogin(const QString &login);
 
 protected:
+
 	/*!
 	 * @brief Returns list of tables.
 	 *
@@ -214,5 +261,3 @@ protected:
 	virtual
 	QList<class SQLiteTbl *> listOfTables(void) const Q_DECL_OVERRIDE;
 };
-
-#endif /* _ACCOUNT_DB_H_ */
