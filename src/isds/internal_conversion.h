@@ -25,6 +25,7 @@
 
 #include <cstdbool>
 #include <QDate>
+#include <QDateTime>
 #include <QString>
 
 #include "src/isds/types.h"
@@ -62,6 +63,23 @@ namespace Isds {
 	 * @param[in] date Date object.
 	 */
 	void toCDateCopy(struct tm **cDatePtr, const QDate &date);
+
+	/*!
+	 * @brief Converts date and time from struct timeval.
+	 *
+	 * @param[in] cDateTime Struct timeval containing date and time.
+	 * @return Datetime object, null datetime if NULL pointer was supplied.
+	 */
+	QDateTime dateTimeFromStructTimeval(struct timeval *cDateTime);
+
+	/*!
+	 * @brief Creates a struct timeval copy of the supplied QDateTime.
+	 *
+	 * @param[in,out] cDateTimePtr Address of pointer to struct tm.
+	 * @param[in] dateTime Date object.
+	 */
+	void toCDateTimeCopy(struct timeval **cDateTimePtr,
+	    const QDateTime &dateTime);
 
 	/*!
 	 * @brief Convert from long int.

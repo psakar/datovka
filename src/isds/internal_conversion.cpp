@@ -24,6 +24,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <sys/time.h> /* struct timeval */
 
 #include "src/isds/internal_conversion.h"
 
@@ -99,6 +100,54 @@ void Isds::toCDateCopy(struct tm **cDatePtr, const QDate &date)
 	(*cDatePtr)->tm_year = date.year() - 1900;
 	(*cDatePtr)->tm_mon = date.month() - 1;
 	(*cDatePtr)->tm_mday = date.day();
+}
+
+QDateTime Isds::dateTimeFromStructTimeval(struct timeval *cDateTime)
+{
+	QDateTime timeStamp;
+
+	if (cDateTime != NULL) {
+		/* TODO -- handle microseconds. */
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+		timeStamp.setSecsSinceEpoch(cDateTime->tv_sec);
+#else /* < Qt-5.8 */
+		timeStamp.setTime_t(cDateTime->tv_sec);
+#endif /* >= Qt-5.8 */
+	}
+
+	return timeStamp;
+}
+
+void Isds::toCDateTimeCopy(struct timeval **cDateTimePtr,
+    const QDateTime &dateTime)
+{
+	if (Q_UNLIKELY(cDateTimePtr == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+	if (dateTime.isNull()) {
+		if (*cDateTimePtr != NULL) {
+			/* Delete allocated. */
+			std::free(*cDateTimePtr); *cDateTimePtr = NULL;
+		}
+		return;
+	}
+	if (*cDateTimePtr == NULL) {
+		*cDateTimePtr =
+		    (struct timeval *)std::malloc(sizeof(**cDateTimePtr));
+		if (Q_UNLIKELY(*cDateTimePtr == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+	std::memset(*cDateTimePtr, 0, sizeof(**cDateTimePtr));
+
+	/* TODO -- handle microseconds. */
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 8, 0))
+	(*cDateTimePtr)->tv_sec = dateTime.toSecsSinceEpoch();
+#else /* < Qt-5.8 */
+	(*cDateTimePtr)->tv_sec = dateTime.toTime_t();
+#endif /* >= Qt-5.8 */
 }
 
 qint64 Isds::fromLongInt(const long int *cLongPtr)

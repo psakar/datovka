@@ -426,3 +426,92 @@ void dmState2libisdsMessageStatus(isds_message_status **tgt,
 		break;
 	}
 }
+
+enum Isds::Type::DmState Isds::Envelope::dmMessageStatus(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return Type::MS_NULL;
+	}
+
+	return libisdsMessageStatus2DmState(e->dmMessageStatus);
+}
+
+void Isds::Envelope::setDmMessageStatus(enum Type::DmState s)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	dmState2libisdsMessageStatus(&e->dmMessageStatus, s);
+}
+
+qint64 Isds::Envelope::dmAttachmentSize(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return -1;
+	}
+
+	return fromLongInt(e->dmAttachmentSize);
+}
+
+void Isds::Envelope::setDmAttachmentSize(qint64 as)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toLongInt(&e->dmAttachmentSize, as);
+}
+
+QDateTime Isds::Envelope::dmDeliveryTime(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QDateTime();
+	}
+
+	return dateTimeFromStructTimeval(e->dmDeliveryTime);
+}
+
+void Isds::Envelope::setDmDeliveryTime(const QDateTime &dt)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCDateTimeCopy(&e->dmDeliveryTime, dt);
+}
+
+
+QDateTime Isds::Envelope::dmAcceptanceTime(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QDateTime();
+	}
+
+	return dateTimeFromStructTimeval(e->dmAcceptanceTime);
+}
+
+void Isds::Envelope::setDmAcceptanceTime(const QDateTime &at)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCDateTimeCopy(&e->dmAcceptanceTime, at);
+}
