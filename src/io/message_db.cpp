@@ -590,11 +590,10 @@ fail:
 bool MessageDb::smsgdtLocallyRead(qint64 dmId) const
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	queryStr = "SELECT read_locally FROM supplementary_message_data "
-	    "WHERE "
-	    "message_id = :dmId";
+	QString queryStr = "SELECT read_locally "
+	    "FROM supplementary_message_data WHERE message_id = :dmId";
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -610,7 +609,6 @@ bool MessageDb::smsgdtLocallyRead(qint64 dmId) const
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 fail:
 	return false;
 }
@@ -618,11 +616,10 @@ fail:
 bool MessageDb::smsgdtSetLocallyRead(qint64 dmId, bool read)
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	queryStr = "UPDATE supplementary_message_data "
-	    "SET read_locally = :read WHERE "
-	    "message_id = :dmId";
+	QString queryStr = "UPDATE supplementary_message_data "
+	    "SET read_locally = :read WHERE message_id = :dmId";
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -637,7 +634,6 @@ bool MessageDb::smsgdtSetLocallyRead(qint64 dmId, bool read)
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 fail:
 	return false;
 }
@@ -645,11 +641,10 @@ fail:
 bool MessageDb::smsgdtSetAllReceivedLocallyRead(bool read)
 {
 	QSqlQuery query(m_db);
-	QString queryStr;
 
-	queryStr = "UPDATE supplementary_message_data "
-	    "SET read_locally = :read WHERE "
-	    "message_type = :message_type";
+	QString queryStr = "UPDATE supplementary_message_data "
+	    "SET read_locally = :read WHERE message_type = :message_type";
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -664,7 +659,6 @@ bool MessageDb::smsgdtSetAllReceivedLocallyRead(bool read)
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 fail:
 	return false;
 }
@@ -2629,43 +2623,13 @@ fail:
 bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
     int messageType)
 {
-	/* TODO -- The whole operation must fail or succeed. */
-
 	QSqlQuery query(m_db);
-	qint64 dbId = -1;
 	struct x509_crt *crt = NULL;
 
-	QString queryStr = "SELECT message_id FROM raw_message_data WHERE "
-	    "message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":message_id", dmId);
+	QString	queryStr = "INSERT OR REPLACE INTO raw_message_data "
+	    "(message_id, message_type, data) "
+	    "VALUES (:dmId, :message_type, :data)";
 
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			dbId = query.value(0).toLongLong();
-		} else {
-			dbId = -1;
-		}
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	if (-1 != dbId) {
-		queryStr = "UPDATE raw_message_data SET "
-		"data = :data, message_type = :message_type "
-		"WHERE message_id = :dbId";
-	} else {
-		queryStr = "INSERT INTO raw_message_data "
-		"(message_id, message_type, data) "
-		"VALUES (:dmId, :message_type, :data)";
-	}
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -2673,14 +2637,8 @@ bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":data", raw.toBase64());
-	/*
-	 * The 'message_type' entry in 'raw_message_data' seems not to be used
-	 * anywhere.
-	 */
 	query.bindValue(":message_type", messageType);
-	if (-1 != dbId) {
-		query.bindValue(":dbId", dbId);
-	}
+
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -2691,24 +2649,19 @@ bool MessageDb::msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
 	crt = raw_cms_signing_cert(raw.data(), raw.size());
 	if (NULL != crt) {
 		QByteArray crtDer;
-
 		void *der = NULL;
 		size_t derSize = 0;
 		if (0 == x509_crt_to_der(crt, &der, &derSize)) {
 			/* Method setRawData() does not copy the data! */
 			crtDer.setRawData((char *) der, derSize);
-
 			msgsInsertUpdateMessageCertBase64(dmId,
 			    crtDer.toBase64());
-
 			free(der); der = NULL; derSize = 0;
 		}
-
 		x509_crt_destroy(crt); crt = NULL;
 	}
 
 	return true;
-
 fail:
 	return false;
 }
@@ -3116,37 +3069,10 @@ bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
     const QByteArray &raw)
 {
 	QSqlQuery query(m_db);
-	qint64 dbId = -1;
 
-	QString queryStr = "SELECT message_id FROM raw_delivery_info_data "
-	    "WHERE message_id = :message_id";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-	query.bindValue(":message_id", dmId);
+	QString queryStr = "INSERT OR REPLACE INTO raw_delivery_info_data "
+	    "(message_id, data) VALUES (:dmId, :data)";
 
-	if (query.exec() && query.isActive()) {
-		query.first();
-		if (query.isValid()) {
-			dbId = query.value(0).toLongLong();
-		} else {
-			dbId = -1;
-		}
-	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		goto fail;
-	}
-
-	if (-1 != dbId) {
-		queryStr = "UPDATE raw_delivery_info_data SET "
-		    "data = :data WHERE message_id = :dbId";
-	} else {
-		queryStr = "INSERT INTO raw_delivery_info_data "
-		    "(message_id, data) VALUES (:dmId, :data)";
-	}
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -3154,10 +3080,6 @@ bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":data", raw.toBase64());
-	if (-1 != dbId) {
-		query.bindValue(":dbId", dbId);
-	}
-
 	if (query.exec()) {
 		return true;
 	} else {
@@ -3165,7 +3087,6 @@ bool MessageDb::msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-
 fail:
 	return false;
 }
