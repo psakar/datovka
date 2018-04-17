@@ -608,6 +608,9 @@ void setLibisdsHashContent(struct isds_hash *tgt, const Isds::Hash &src)
 	}
 	const QByteArray &data(src.value());
 	tgt->length = data.size();
+	if (tgt->length == 0) {
+		return;
+	}
 	tgt->value = std::malloc(tgt->length);
 	if (Q_UNLIKELY(tgt->value == NULL)) {
 		Q_ASSERT(0);
@@ -636,4 +639,480 @@ void Isds::Envelope::setDmHash(const Hash &h)
 	}
 
 	setLibisdsHashContent(e->hash, h);
+}
+
+QByteArray Isds::Envelope::dmQTimestamp(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY((e == NULL) ||
+	        (e->timestamp == NULL) || (e->timestamp_length == 0))) {
+		return QByteArray();
+	}
+
+	return QByteArray((const char *)e->timestamp, e->timestamp_length);
+}
+
+void Isds::Envelope::setDmQTimestamp(const QByteArray &ts)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (e->timestamp != NULL) {
+		std::free(e->timestamp); e->timestamp = NULL;
+	}
+	e->timestamp_length = ts.size();
+	if (e->timestamp_length == 0) {
+		return;
+	}
+	e->timestamp = std::malloc(e->timestamp_length);
+	if (Q_UNLIKELY(e->timestamp == NULL)) {
+		Q_ASSERT(0);
+		e->timestamp_length = 0;
+		return;
+	}
+	std::memcpy(e->timestamp, ts.constData(), e->timestamp_length);
+}
+
+QString Isds::Envelope::dmSenderOrgUnit(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmSenderOrgUnit);
+}
+
+void Isds::Envelope::setDmSenderOrgUnit(const QString &sou)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmSenderOrgUnit, sou);
+}
+
+qint64 Isds::Envelope::dmSenderOrgUnitNum(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return -1;
+	}
+
+	return fromLongInt(e->dmSenderOrgUnitNum);
+}
+
+void Isds::Envelope::setDmSenderOrgUnitNum(qint64 soun)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toLongInt(&e->dmSenderOrgUnitNum, soun);
+}
+
+QString Isds::Envelope::dbIDRecipient(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dbIDRecipient);
+}
+
+void Isds::Envelope::setDbIDRecipient(const QString &rbi)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dbIDRecipient, rbi);
+}
+
+QString Isds::Envelope::dmRecipientOrgUnit(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmRecipientOrgUnit);
+}
+
+void Isds::Envelope::setDmRecipientOrgUnit(const QString &rou)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmRecipientOrgUnit, rou);
+}
+
+qint64 Isds::Envelope::dmRecipientOrgUnitNum(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return -1;
+	}
+
+	return fromLongInt(e->dmRecipientOrgUnitNum);
+}
+
+void Isds::Envelope::setDmRecipientOrgUnitNum(qint64 &roun)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toLongInt(&e->dmRecipientOrgUnitNum, roun);
+}
+
+QString Isds::Envelope::dmToHands(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmToHands);
+}
+
+void Isds::Envelope::setDmToHands(const QString &th)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmToHands, th);
+}
+
+QString Isds::Envelope::dmAnnotation(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmAnnotation);
+}
+
+void Isds::Envelope::setDmAnnotation(const QString &a)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmAnnotation, a);
+}
+
+QString Isds::Envelope::dmRecipientRefNumber(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmRecipientRefNumber);
+}
+
+void Isds::Envelope::setDmRecipientRefNumber(const QString &rrn)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmRecipientRefNumber, rrn);
+}
+
+QString Isds::Envelope::dmSenderRefNumber(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmSenderRefNumber);
+}
+
+void Isds::Envelope::setDmSenderRefNumber(const QString &srn)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmSenderRefNumber, srn);
+}
+
+QString Isds::Envelope::dmRecipientIdent(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmRecipientIdent);
+}
+
+void Isds::Envelope::setDmRecipientIdent(const QString &ri)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmRecipientIdent, ri);
+}
+
+QString Isds::Envelope::dmSenderIdent(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmSenderIdent);
+}
+
+void Isds::Envelope::setDmSenderIdent(const QString &si)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmSenderIdent, si);
+}
+
+qint64 Isds::Envelope::dmLegalTitleLaw(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return -1;
+	}
+
+	return fromLongInt(e->dmLegalTitleLaw);
+}
+
+void Isds::Envelope::setDmLegalTitleLaw(qint64 l)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toLongInt(&e->dmLegalTitleLaw, l);
+}
+
+qint64 Isds::Envelope::dmLegalTitleYear(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return -1;
+	}
+
+	return fromLongInt(e->dmLegalTitleYear);
+}
+
+void Isds::Envelope::setDmLegalTitleYear(qint64 y)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toLongInt(&e->dmLegalTitleYear, y);
+}
+
+QString Isds::Envelope::dmLegalTitleSect(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmLegalTitleSect);
+}
+
+void Isds::Envelope::setDmLegalTitleSect(const QString &s)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmLegalTitleSect, s);
+}
+
+QString Isds::Envelope::dmLegalTitlePar(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmLegalTitlePar);
+}
+
+void Isds::Envelope::setDmLegalTitlePar(const QString &p)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmLegalTitlePar, p);
+}
+
+QString Isds::Envelope::dmLegalTitlePoint(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return QString();
+	}
+
+	return fromCStr(e->dmLegalTitlePoint);
+}
+
+void Isds::Envelope::setDmLegalTitlePoint(const QString &p)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toCStrCopy(&e->dmLegalTitlePoint, p);
+}
+
+enum Isds::Type::NilBool Isds::Envelope::dmPersonalDelivery(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return Type::BOOL_NULL;
+	}
+
+	return fromBool(e->dmPersonalDelivery);
+}
+
+void Isds::Envelope::setDmPersonalDelivery(enum Type::NilBool pd)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toBool(&e->dmPersonalDelivery, pd);
+}
+
+enum Isds::Type::NilBool Isds::Envelope::dmAllowSubstDelivery(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return Type::BOOL_NULL;
+	}
+
+	return fromBool(e->dmAllowSubstDelivery);
+}
+
+void Isds::Envelope::setDmAllowSubstDelivery(enum Type::NilBool sd)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toBool(&e->dmAllowSubstDelivery, sd);
+}
+
+enum Isds::Type::NilBool Isds::Envelope::dmOVM(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return Type::BOOL_NULL;
+	}
+
+	return fromBool(e->dmOVM);
+}
+
+void Isds::Envelope::dmOVM(enum Type::NilBool ovm)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toBool(&e->dmOVM, ovm);
+}
+
+enum Isds::Type::NilBool Isds::Envelope::dmPublishOwnID(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		return Type::BOOL_NULL;
+	}
+
+	return fromBool(e->dmPublishOwnID);
+}
+
+void Isds::Envelope::setDmPublishOwnID(enum Type::NilBool poi)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	toBool(&e->dmPublishOwnID, poi);
 }
