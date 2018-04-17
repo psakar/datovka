@@ -46,7 +46,7 @@ namespace Isds {
 
 		/* algorithm */
 		enum Type::HashAlg algorithm(void) const;
-		void setAlgorithm(enum Type::HashAlg &a);
+		void setAlgorithm(enum Type::HashAlg a);
 		/* __item */
 		QByteArray value(void) const;
 		void setValue(const QByteArray &v);

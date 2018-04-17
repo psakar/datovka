@@ -515,3 +515,125 @@ void Isds::Envelope::setDmAcceptanceTime(const QDateTime &at)
 
 	toCDateTimeCopy(&e->dmAcceptanceTime, at);
 }
+
+/*!
+ * @brief Converts user types.
+ */
+Isds::Type::HashAlg libisdsHashAlg2HashAlg(isds_hash_algorithm a)
+{
+	switch (a) {
+	case HASH_ALGORITHM_MD5: return Isds::Type::HA_MD5; break;
+	case HASH_ALGORITHM_SHA_1: return Isds::Type::HA_SHA_1; break;
+	case HASH_ALGORITHM_SHA_224: return Isds::Type::HA_SHA_224; break;
+	case HASH_ALGORITHM_SHA_256: return Isds::Type::HA_SHA_256; break;
+	case HASH_ALGORITHM_SHA_384: return Isds::Type::HA_SHA_384; break;
+	case HASH_ALGORITHM_SHA_512: return Isds::Type::HA_SHA_512; break;
+	default:
+		Q_ASSERT(0);
+		return Isds::Type::HA_UNKNOWN;
+		break;
+	}
+}
+
+/*!
+ * @brief Set hash according to the libisds hash structure.
+ */
+static
+void setHashContent(Isds::Hash &tgt, const struct isds_hash *src)
+{
+	if (Q_UNLIKELY(src == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	tgt.setAlgorithm(libisdsHashAlg2HashAlg(src->algorithm));
+	if (Q_UNLIKELY(tgt.algorithm() == Isds::Type::HA_UNKNOWN)) {
+		tgt.setValue(QByteArray());
+		return;
+	}
+	QByteArray data((const char *)src->value, src->length);
+	if (!data.isEmpty()) {
+		tgt.setValue(data);
+	} else {
+		tgt.setAlgorithm(Isds::Type::HA_UNKNOWN);
+		tgt.setValue(QByteArray());
+	}
+}
+
+Isds::Hash Isds::Envelope::dmHash(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY((e == NULL) || (e->hash == NULL))) {
+		return Hash();
+	}
+
+	Hash hash;
+	setHashContent(hash, e->hash);
+	return hash;
+}
+
+/*!
+ * @brief Converts user types.
+ */
+isds_hash_algorithm hashAlg2libisdsHashAlg(Isds::Type::HashAlg a)
+{
+	switch (a) {
+	case Isds::Type::HA_MD5: return HASH_ALGORITHM_MD5; break;
+	case Isds::Type::HA_SHA_1: return HASH_ALGORITHM_SHA_1; break;
+	case Isds::Type::HA_SHA_224: return HASH_ALGORITHM_SHA_224; break;
+	case Isds::Type::HA_SHA_256: return HASH_ALGORITHM_SHA_256; break;
+	case Isds::Type::HA_SHA_384: return HASH_ALGORITHM_SHA_384; break;
+	case Isds::Type::HA_SHA_512: return HASH_ALGORITHM_SHA_512; break;
+	default:
+		Q_ASSERT(0);
+		return HASH_ALGORITHM_MD5; /* TODO -- This value is clearly incorrect. */
+		break;
+	}
+}
+
+/*!
+ * @brief Set libisds hash structure according to the hash.
+ */
+static
+void setLibisdsHashContent(struct isds_hash *tgt, const Isds::Hash &src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	tgt->algorithm = hashAlg2libisdsHashAlg(src.algorithm());
+	if (tgt->value != NULL) {
+		std::free(tgt->value); tgt->value = NULL;
+	}
+	const QByteArray &data(src.value());
+	tgt->length = data.size();
+	tgt->value = std::malloc(tgt->length);
+	if (Q_UNLIKELY(tgt->value == NULL)) {
+		Q_ASSERT(0);
+		tgt->length = 0;
+		return;
+	}
+	std::memcpy(tgt->value, data.constData(), tgt->length);
+}
+
+void Isds::Envelope::setDmHash(const Hash &h)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	if (e->hash == NULL) {
+		e->hash = (struct isds_hash *)std::malloc(sizeof(*e->hash));
+		if (Q_UNLIKELY(e->hash == NULL)) {
+			Q_ASSERT(0);
+			return;
+		}
+		std::memset(e->hash, 0, sizeof(*e->hash));
+	}
+
+	setLibisdsHashContent(e->hash, h);
+}
