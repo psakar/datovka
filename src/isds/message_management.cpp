@@ -37,6 +37,52 @@
 #include "src/isds/internal_conversion.h"
 #include "src/isds/message_management.h"
 
+Isds::Hash::Hash(const Hash &other)
+    : m_alg(other.m_alg),
+    m_hash(other.m_hash)
+{
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Hash::Hash(Hash &&other) Q_DECL_NOEXCEPT
+    : m_alg(std::move(other.m_alg)),
+    m_hash(std::move(other.m_hash))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::Hash &Isds::Hash::operator=(const Hash &other) Q_DECL_NOTHROW
+{
+	m_alg = other.m_alg;
+	m_hash = other.m_hash;
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Hash &Isds::Hash::operator=(Hash &&other) Q_DECL_NOTHROW
+{
+	std::swap(m_alg, other.m_alg);
+	std::swap(m_hash, other.m_hash);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::Event::Event(const Event &other)
+    : m_time(other.m_time),
+    m_type(other.m_type),
+    m_descr(other.m_descr)
+{
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Event::Event(Event &&other) Q_DECL_NOEXCEPT
+    : m_time(std::move(other.m_time)),
+    m_type(std::move(other.m_type)),
+    m_descr(std::move(other.m_descr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 /*!
  * @brief Converts description to event.
  *
@@ -75,6 +121,24 @@ void Isds::Event::setDescr(const QString &d)
 	m_type = descr2event(m_descr);
 }
 
+Isds::Event &Isds::Event::operator=(const Event &other) Q_DECL_NOTHROW
+{
+	m_time = other.m_time;
+	m_type = other.m_type;
+	m_descr = other.m_descr;
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Event &Isds::Event::operator=(Event &&other) Q_DECL_NOTHROW
+{
+	std::swap(m_time, other.m_time);
+	std::swap(m_type, other.m_type);
+	std::swap(m_descr, other.m_descr);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 Isds::Envelope::Envelope(void)
     : m_dataPtr(NULL)
 {
@@ -88,6 +152,15 @@ Isds::Envelope::~Envelope(void)
 	}
 	isds_envelope_free(&e);
 }
+
+//Isds::Envelope::Envelope(const Envelope &other);
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Envelope::Envelope(Envelope &&other) Q_DECL_NOEXCEPT
+    : m_dataPtr(std::move(other.m_dataPtr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 qint64 Isds::Envelope::dmId(void) const
 {
@@ -1372,3 +1445,13 @@ QChar Isds::Envelope::dmType2Char(enum Type::DmType t)
 		return QChar();
 	}
 }
+
+//Envelope &operator=(const Envelope &other) Q_DECL_NOTHROW;
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Envelope &Isds::Envelope::operator=(Envelope &&other) Q_DECL_NOTHROW
+{
+	std::swap(m_dataPtr, other.m_dataPtr);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */

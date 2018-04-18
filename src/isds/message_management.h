@@ -44,12 +44,22 @@ namespace Isds {
 		    : m_alg(Type::HA_UNKNOWN), m_hash()
 		{ }
 
+		Hash(const Hash &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		Hash(Hash &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 		/* algorithm */
 		enum Type::HashAlg algorithm(void) const { return m_alg; }
 		void setAlgorithm(enum Type::HashAlg a) { m_alg = a; }
 		/* __item */
 		QByteArray value(void) const { return m_hash; }
 		void setValue(const QByteArray &v) { m_hash = v; }
+
+		Hash &operator=(const Hash &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		Hash &operator=(Hash &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 	private:
 		enum Type::HashAlg m_alg;
@@ -65,12 +75,22 @@ namespace Isds {
 		    : m_time(), m_type(Type::EV_UNKNOWN), m_descr()
 		{ }
 
+		Event(const Event &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		Event(Event &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 		QDateTime time(void) const { return m_time; }
 		void setTime(const QDateTime &t) { m_time = t; }
 		enum Type::Event type(void) const { return m_type; }
 		//void setType(enum Type::Event e); /* Type is determined from description. */
 		QString descr(void) const { return m_descr; }
 		void setDescr(const QString &d);
+
+		Event &operator=(const Event &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		Event &operator=(Event &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 	private:
 		QDateTime m_time; /* dmEventTime */
@@ -87,6 +107,11 @@ namespace Isds {
 	public:
 		Envelope(void);
 		~Envelope(void);
+
+		//Envelope(const Envelope &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		Envelope(Envelope &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 		/*
 		 * For convenience purposes. Message identifier consists only
@@ -221,6 +246,11 @@ namespace Isds {
 		enum Type::DmType char2DmType(QChar c);
 		static
 		QChar dmType2Char(enum Type::DmType t);
+
+		//Envelope &operator=(const Envelope &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		Envelope &operator=(Envelope &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 	private:
 		void *m_dataPtr;
