@@ -151,8 +151,20 @@ public:
 	 * @note See pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf.
 	 */
 	enum DmType {
-		MT_UNKNOWN = -1 /*!< Convenience value, converted from/to NULL. */
-		/* TODO */
+		MT_UNKNOWN = -1, /*!< Convenience value, converted from/to NULL. */
+		MT_I = 'I', /* Initiatory. */
+		MT_K = 'K', /* Commercial. */
+		MT_O = 'O', /* Commercial response paid by sender of initiatory. */
+		MT_V = 'V', /* Non-commercial government message. */
+		MT_A = 'A', /* Subsidised initiatory commercial, can pay a response. */
+		MT_B = 'B', /* Subsidised initiatory commercial, has already paid the response. */
+		MT_C = 'C', /* Subsidised initiatory commercial, response offer expired. */
+		MT_D = 'D', /* Externally subsidised initiatory commercial. */
+		MT_E = 'E', /* Stamp-prepaid commercial. */
+		MT_G = 'G', /* Sponsor-prepaid commercial. */
+		MT_X = 'X', /* Initiatory commercial, response offer expired. */
+		MT_Y = 'Y', /* Initiatory commercial, has already paid the response. */
+		MT_Z = 'Z'
 	};
 
 	/*!

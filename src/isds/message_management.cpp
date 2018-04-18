@@ -1269,6 +1269,29 @@ void Isds::Envelope::setDmAllowSubstDelivery(enum Type::NilBool sd)
 	toBool(&e->dmAllowSubstDelivery, sd);
 }
 
+QChar Isds::Envelope::dmType(void) const
+{
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY((e == NULL) || (e->dmType == NULL))) {
+		return QChar();
+	}
+
+	return QChar(*e->dmType);
+}
+
+void Isds::Envelope::setDmType(QChar t)
+{
+	intAllocMissingEnvelope(&m_dataPtr);
+	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
+	if (Q_UNLIKELY(e == NULL)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Libisds stores the value as a string. */
+	Isds::toCStrCopy(&e->dmType, t.isNull() ? QString() : QString(t));
+}
+
 enum Isds::Type::NilBool Isds::Envelope::dmOVM(void) const
 {
 	struct isds_envelope *e = (struct isds_envelope *)m_dataPtr;
@@ -1311,4 +1334,41 @@ void Isds::Envelope::setDmPublishOwnID(enum Type::NilBool poi)
 	}
 
 	toBool(&e->dmPublishOwnID, poi);
+}
+
+enum Isds::Type::DmType Isds::Envelope::char2DmType(QChar c)
+{
+	if (c.isNull()) {
+		return Type::MT_UNKNOWN;
+	}
+
+	switch (c.unicode()) {
+	case Isds::Type::MT_I:
+	case Isds::Type::MT_K:
+	case Isds::Type::MT_O:
+	case Isds::Type::MT_V:
+	case Isds::Type::MT_A:
+	case Isds::Type::MT_B:
+	case Isds::Type::MT_C:
+	case Isds::Type::MT_D:
+	case Isds::Type::MT_E:
+	case Isds::Type::MT_G:
+	case Isds::Type::MT_X:
+	case Isds::Type::MT_Y:
+	case Isds::Type::MT_Z:
+		return (Isds::Type::DmType)c.unicode();
+		break;
+	default:
+		return Type::MT_UNKNOWN;
+		break;
+	}
+}
+
+QChar Isds::Envelope::dmType2Char(enum Type::DmType t)
+{
+	if (t != Type::MT_UNKNOWN) {
+		return t;
+	} else {
+		return QChar();
+	}
 }
