@@ -45,11 +45,11 @@ namespace Isds {
 		{ }
 
 		/* algorithm */
-		enum Type::HashAlg algorithm(void) const;
-		void setAlgorithm(enum Type::HashAlg a);
+		enum Type::HashAlg algorithm(void) const { return m_alg; }
+		void setAlgorithm(enum Type::HashAlg a) { m_alg = a; }
 		/* __item */
-		QByteArray value(void) const;
-		void setValue(const QByteArray &v);
+		QByteArray value(void) const { return m_hash; }
+		void setValue(const QByteArray &v) { m_hash = v; }
 
 	private:
 		enum Type::HashAlg m_alg;
@@ -65,11 +65,11 @@ namespace Isds {
 		    : m_time(), m_type(Type::EV_UNKNOWN), m_descr()
 		{ }
 
-		QDateTime time(void) const;
-		void setTime(const QDateTime &t);
-		enum Type::Event type(void) const;
-		//void setType(enum Type::Event e);
-		QString descr(void) const;
+		QDateTime time(void) const { return m_time; }
+		void setTime(const QDateTime &t) { m_time = t; }
+		enum Type::Event type(void) const { return m_type; }
+		//void setType(enum Type::Event e); /* Type is determined from description. */
+		QString descr(void) const { return m_descr; }
 		void setDescr(const QString &d);
 
 	private:
@@ -146,7 +146,7 @@ namespace Isds {
 		void setDmQTimestamp(const QByteArray &ts);
 		/* dmEvents -- list of events the message has passed through. */
 		QList<Event> dmEvents(void) const;
-		void setDmEvents(const QList<Event> &e);
+		void setDmEvents(const QList<Event> &el);
 
 		/* dmSenderOrgUnit -- sender organisation unit, optional */
 		QString dmSenderOrgUnit(void) const;

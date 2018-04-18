@@ -251,7 +251,7 @@ void Isds::DbOwnerInfo::setDbID(const QString &bi)
  * @brief Converts data box types.
  */
 static
-Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt)
+enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt)
 {
 	if (bt == NULL) {
 		return Isds::Type::BT_NULL;
@@ -286,7 +286,7 @@ Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt)
  * @brief Converts data box types.
  */
 static
-void dbType2libisdsDbType(isds_DbType **btPtr, Isds::Type::DbType bt)
+void dbType2libisdsDbType(isds_DbType **btPtr, enum Isds::Type::DbType bt)
 {
 	if (Q_UNLIKELY(btPtr == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -538,7 +538,8 @@ Isds::Address Isds::DbOwnerInfo::address(void) const
  * @brief Set libisds address structure according to the address.
  */
 static
-void setLibisdsAddressContent(struct isds_Address *tgt, const Isds::Address &src)
+void setLibisdsAddressContent(struct isds_Address *tgt,
+    const Isds::Address &src)
 {
 	if (Q_UNLIKELY(tgt == NULL)) {
 		Q_ASSERT(0);
@@ -968,7 +969,7 @@ void Isds::DbUserInfo::setUserId(const QString &uid)
  * @brief Converts user types.
  */
 static
-Isds::Type::UserType libisdsUserType2UserType(const isds_UserType *ut)
+enum Isds::Type::UserType libisdsUserType2UserType(const isds_UserType *ut)
 {
 	if (ut == NULL) {
 		return Isds::Type::UT_NULL;
@@ -994,7 +995,8 @@ Isds::Type::UserType libisdsUserType2UserType(const isds_UserType *ut)
  * @brief Converts user types.
  */
 static
-void userType2libisdsUserType(isds_UserType **utPtr, Isds::Type::UserType ut)
+void userType2libisdsUserType(isds_UserType **utPtr,
+    enum Isds::Type::UserType ut)
 {
 	if (Q_UNLIKELY(utPtr == Q_NULLPTR)) {
 		Q_ASSERT(0);
