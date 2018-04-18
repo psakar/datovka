@@ -102,27 +102,27 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 		fileTypeStr = tr("acceptance info");
 		fileSufix = ".zfo";
 		fileNameformat = GlobInstcs::prefsPtr->deliveryFilenameFormat;
-		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
+		base64 = messageDb->getDeliveryInfoBase64(msgId.dmId);
 		break;
 	case ZFO_DELIV_ATTACH:
 		fileTypeStr = tr("acceptance info");
 		fileSufix = ".zfo";
 		fileNameformat =
 		    GlobInstcs::prefsPtr->deliveryFilenameFormatAllAttach;
-		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
+		base64 = messageDb->getDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_DELIVERY:
 		fileTypeStr = tr("acceptance info");
 		fileSufix = ".pdf";
 		fileNameformat = GlobInstcs::prefsPtr->deliveryFilenameFormat;
-		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
+		base64 = messageDb->getDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_DELIV_ATTACH:
 		fileTypeStr = tr("acceptance info");
 		fileSufix = ".pdf";
 		fileNameformat =
 		    GlobInstcs::prefsPtr->deliveryFilenameFormatAllAttach;
-		base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
+		base64 = messageDb->getDeliveryInfoBase64(msgId.dmId);
 		break;
 	case PDF_ENVELOPE:
 		fileTypeStr = tr("message envelope");

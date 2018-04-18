@@ -223,7 +223,7 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
 	}
 	const QString accountName(
 	    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName());
-	if (-1 != messageDb->msgsStatusIfExists(dmId)) {
+	if (-1 != messageDb->getMessageStatus(dmId)) {
 		resultDesc = QObject::tr("Message '%1' already exists in "
 		    "the local database, account '%2'.").
 		    arg(dmId).arg(accountName);
@@ -376,7 +376,7 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 	const QString accountName(
 	    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName());
 	if ((NULL == messageDb) ||
-	    (-1 == messageDb->msgsStatusIfExists(dmId))) {
+	    (-1 == messageDb->getMessageStatus(dmId))) {
 		/* Corresponding message does not exist in database. */
 		resultDesc = QObject::tr("This file (acceptance info) has not "
 		    "been inserted into database because there isn't any "
@@ -384,7 +384,7 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 		return TaskImportZfo::IMP_DB_MISSING_MSG;
 	}
 
-	if (messageDb->isDeliveryInfoRawDb(dmId)) {
+	if (!messageDb->getDeliveryInfoBase64(dmId).isEmpty()) {
 		resultDesc = QObject::tr("Acceptance info for message '%1' "
 		    "already exists in the local database, account '%2'.").
 		    arg(dmId).arg(accountName);

@@ -1298,15 +1298,14 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	ui->messageInfo->setReadOnly(true);
 
 	if (received) {
-		int msgState = messageDb->msgGetProcessState(msgId.dmId);
+		int msgState = messageDb->getMessageProcessState(msgId.dmId);
 
 		/* msgState is -1 if message is not in database */
 		if (msgState >= 0) {
 			ui->messageStateCombo->setCurrentIndex(msgState);
 		} else {
 			/* insert message state into database */
-			messageDb->msgSetProcessState(msgId.dmId, UNSETTLED,
-			    true);
+			messageDb->setMessageProcessState(msgId.dmId, UNSETTLED);
 			ui->messageStateCombo->setCurrentIndex(UNSETTLED);
 		}
 	} else {
@@ -6267,7 +6266,7 @@ void MainWindow::openDeliveryInfoExternally(void)
 		return;
 	}
 
-	QByteArray base64 = messageDb->msgsGetDeliveryInfoBase64(msgId.dmId);
+	QByteArray base64 = messageDb->getDeliveryInfoBase64(msgId.dmId);
 	if (base64.isEmpty()) {
 		DlgMsgBox::message(this, QMessageBox::Warning,
 		    tr("Datovka - Export error!"),
@@ -7023,7 +7022,7 @@ void MainWindow::messageItemsSetProcessStatus(
 			continue;
 		}
 
-		messageDb->msgSetProcessState(msgId.dmId, state, false);
+		messageDb->setMessageProcessState(msgId.dmId, state);
 
 		/*
 		 * Mark message as read without reloading

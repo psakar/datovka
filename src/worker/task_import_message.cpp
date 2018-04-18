@@ -98,7 +98,7 @@ enum TaskImportMessage::Result TaskImportMessage::importSingleMessage(
 	}
 
 	/* check if msg exists in target database */
-	if (-1 != dstDb->msgsStatusIfExists(mId.dmId)) {
+	if (-1 != dstDb->getMessageStatus(mId.dmId)) {
 		resultDesc = QObject::tr("Message '%1' already exists in "
 		    "database for this account.").arg(mId.dmId);
 		return TaskImportMessage::IMP_DB_EXISTS;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _MESSAGE_DB_H_
-#define _MESSAGE_DB_H_
+#pragma once
 
 #include <QDateTime>
 #include <QJsonDocument>
@@ -60,6 +59,15 @@ public:
 	enum MessageType {
 		TYPE_RECEIVED = 1, /*!< One is received. */
 		TYPE_SENT = 2 /*!< Two is sent. */
+	};
+
+	/*!
+	 * @brief Mesasge verification result.
+	 */
+	enum MsgVerificationResult {
+		MSG_NOT_PRESENT = 1, /*!< No complete message in db. */
+		MSG_SIG_OK = 2, /*!< Message was verified and signature is OK. */
+		MSG_SIG_BAD = 3  /*!< Message was verified and signature is bad. */
 	};
 
 	/*!
@@ -355,27 +363,17 @@ public:
 	 * @brief Return message type (sent or received).
 	 *
 	 * @param[in] dmId Message id.
-	 * @return Message type value, negative value on error.
+	 * @return Message type value, negative value -1 on error.
 	 */
-	int msgMessageType(qint64 dmId) const;
-
-	/*!
-	 * @brief Returns true if verification attempt was performed.
-	 *
-	 * @param[in] dmId  Message id.
-	 * @return True is message has been verified. False may be returned
-	 *     also on error.
-	 */
-	bool msgsVerificationAttempted(qint64 dmId) const;
+	int getMessageType(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns whether message is verified.
 	 *
-	 * @param[in] dmId  Message identifier.
-	 * @return True if message was verified successfully. False may be
-	 *     returned also on error.
+	 * @param[in] dmId Message identifier.
+	 * @return Return message sign verification status.
 	 */
-	bool msgsVerified(qint64 dmId) const;
+	enum MsgVerificationResult isMessageVerified(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns whether message was read locally.
@@ -454,24 +452,6 @@ public:
 	QList<AttachmentEntry> attachEntries(qint64 msgId) const;
 
 	/*!
-	 * @brief Check if any message with given id exists in database.
-	 *
-	 * @param[in] dmId  Message identifier.
-	 * @return Message status if message exists, on error or if message
-	 *     does not exist in database.
-	 */
-	int msgsStatusIfExists(qint64 dmId) const;
-
-	/*!
-	 * @brief Check if delivery info exists in the table.
-	 *
-	 * @param[in] dmId  Message identifier.
-	 * @return True if delivery information exist in database.
-	 *     Fail is also returned on error.
-	 */
-	bool isDeliveryInfoRawDb(qint64 dmId) const;
-
-	/*!
 	 * @brief Insert newly sent message into messages table.
 	 *
 	 * @return True on success.
@@ -532,12 +512,12 @@ public:
 	    enum MessageDirection msgDirect);
 
 	/*!
-	 * @brief Get message state.
+	 * @brief Get message status.
 	 *
-	 * @param[in] dmId  Message identifier.
-	 * @return Message state number or -1 on error.
+	 * @param[in] dmId Message identifier.
+	 * @return Message status number or -1 if message does not in database.
 	 */
-	int messageState(qint64 dmId) const;
+	int getMessageStatus(qint64 dmId) const;
 
 	/*!
 	 * @brief Update message envelope delivery information.
@@ -659,7 +639,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Empty byte array on error.
 	 */
-	QByteArray msgsGetDeliveryInfoBase64(qint64 dmId) const;
+	QByteArray getDeliveryInfoBase64(qint64 dmId) const;
 
 	/*!
 	 * @brief Insert/update raw (DER) delivery info into
@@ -733,11 +713,9 @@ public:
 	 *
 	 * @param[in] dmId    Message identifier.
 	 * @param[in] state   Message state to be set.
-	 * @param[in] insert  Whether to insert or update an information.
 	 * @return True if update/insert was successful.
 	 */
-	bool msgSetProcessState(qint64 dmId, enum MessageProcessState state,
-	    bool insert);
+	bool setMessageProcessState(qint64 dmId, enum MessageProcessState state);
 
 	/*!
 	 * @brief Get process state of received message.
@@ -745,7 +723,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Message processing state, -1 on error.
 	 */
-	int msgGetProcessState(qint64 dmId) const;
+	int getMessageProcessState(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns time stamp in raw (DER) format.
@@ -1134,5 +1112,3 @@ private:
 	friend class MessageDbSet;
 	friend class MessageDbSingle;
 };
-
-#endif /* _MESSAGE_DB_H_ */
