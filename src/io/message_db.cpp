@@ -530,7 +530,7 @@ fail:
 	return PartialEnvelopeData();
 }
 
-short MessageDb::getMessageType(qint64 dmId) const
+int MessageDb::getMessageType(qint64 dmId) const
 {
 	QSqlQuery query(m_db);
 
@@ -576,15 +576,15 @@ enum MessageDb::MsgVerificationResult
 		if (query.value(0).isNull()) {
 			goto fail;
 		} else {
-			return (query.value(0).toBool()) ? MSG_SIGN_OK
-			    : MSG_SIGN_WRONG;
+			return (query.value(0).toBool()) ? MSG_SIG_OK
+			    : MSG_SIG_BAD;
 		}
 	} else {
 		logErrorNL("Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
 	}
 fail:
-	return MSG_NO_PRESENT;
+	return MSG_NOT_PRESENT;
 }
 
 bool MessageDb::smsgdtLocallyRead(qint64 dmId) const
@@ -1096,14 +1096,14 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 		MessageDb::MsgVerificationResult vRes = isMessageVerified(dmId);
 
 		switch (vRes) {
-		case MessageDb::MSG_SIGN_WRONG:
+		case MessageDb::MSG_SIG_BAD:
 			html += strongAccountInfoLine(
 			    QObject::tr("Message signature"),
 			    QObject::tr("Invalid")  + " -- " +
 			    QObject::tr("Message signature and content "
 			        "do not correspond!"));
 			break;
-		case MessageDb::MSG_SIGN_OK:
+		case MessageDb::MSG_SIG_OK:
 			html += strongAccountInfoLine(
 			    QObject::tr("Message signature"),
 			    QObject::tr("Valid"));

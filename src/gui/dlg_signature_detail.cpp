@@ -87,12 +87,14 @@ void DlgSignatureDetail::detail(const MessageDbSet &dbSet,
 	    messageDb->isMessageVerified(msgId.dmId);
 
 	switch (vRes) {
-	case MessageDb::MSG_SIGN_OK:
+	case MessageDb::MSG_SIG_OK:
 		isMsgVerified = true;
-	case MessageDb::MSG_SIGN_WRONG:
+	case MessageDb::MSG_SIG_BAD:
 		msgDER = messageDb->msgsMessageRaw(msgId.dmId);
 		break;
 	default:
+		logWarningNL("No complete message '%s' in the database for signature verification.",
+		    QString::number(msgId.dmId).toUtf8().constData());
 		break;
 	}
 

@@ -65,9 +65,9 @@ public:
 	 * @brief Mesasge verification result.
 	 */
 	enum MsgVerificationResult {
-		MSG_NO_PRESENT = 1, /*!< No complete message in db. */
-		MSG_SIGN_OK = 2, /*!< Message was verified and sign is OK. */
-		MSG_SIGN_WRONG = 3  /*!< Message was verified and sign is wrong */
+		MSG_NOT_PRESENT = 1, /*!< No complete message in db. */
+		MSG_SIG_OK = 2, /*!< Message was verified and signature is OK. */
+		MSG_SIG_BAD = 3  /*!< Message was verified and signature is bad. */
 	};
 
 	/*!
@@ -365,7 +365,7 @@ public:
 	 * @param[in] dmId Message id.
 	 * @return Message type value, negative value -1 on error.
 	 */
-	short getMessageType(qint64 dmId) const;
+	int getMessageType(qint64 dmId) const;
 
 	/*!
 	 * @brief Returns whether message is verified.
