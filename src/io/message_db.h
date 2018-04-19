@@ -395,15 +395,12 @@ public:
 	/*!
 	 * @brief Return HTML formatted message description.
 	 *
-	 * @param[in]     dmId Message identifier.
-	 * @param[in]     showId Whether to also show the message id.
-	 * @param[in]     verSignature Whether to show verification details.
-	 * @param[in]     warnOld
+	 * @param[in] dmId Message identifier.
+	 * @param[in] verSignature Whether to show verification details.
 	 * @return HTML formatted string containing message information.
-	 *     Empty string is returned on error.
+	 *         Empty string is returned on error.
 	 */
-	QString descriptionHtml(qint64 dmId, bool showId = true,
-	    bool verSignature = true, bool warnOld = true) const;
+	QString descriptionHtml(qint64 dmId, bool verSignature = true) const;
 
 	/*!
 	 * @brief Return message envelope HTML to be used to generate a PDF.

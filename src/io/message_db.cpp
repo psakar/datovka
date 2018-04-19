@@ -822,8 +822,7 @@ fail:
 	return contactList;
 }
 
-QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
-    bool warnOld) const
+QString MessageDb::descriptionHtml(qint64 dmId, bool verSignature) const
 {
 	QString html;
 	QSqlQuery query(m_db);
@@ -831,16 +830,13 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 
 	html += indentDivStart;
 	html += "<h3>" + QObject::tr("Identification") + "</h3>";
-	if (showId) {
-		html += strongAccountInfoLine(QObject::tr("Message ID"),
-		    QString::number(dmId));
-	}
+	html += strongAccountInfoLine(QObject::tr("Message ID"),
+	    QString::number(dmId));
 
-	queryStr = "SELECT "
-	    "dmAnnotation, _dmType, dmSender, dmSenderAddress, "
+	queryStr = "SELECT dmAnnotation, _dmType, dmSender, dmSenderAddress, "
 	    "dmRecipient, dmRecipientAddress, dbIDSender, dbIDRecipient, "
-	    "dmSenderType "
-	    "FROM messages WHERE dmID = :dmId";
+	    "dmSenderType FROM messages WHERE dmID = :dmId";
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -969,7 +965,8 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 
 
 	html += "<h3>" + QObject::tr("Status") + "</h3>";
-	/* Status. */
+
+	/* Message Status. */
 	queryStr = "SELECT ";
 	for (int i = 0; i < (msgStatus.size() - 1); ++i) {
 		queryStr += msgStatus[i] + ", ";
@@ -1003,6 +1000,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	/* Events. */
 	queryStr = "SELECT "
 	    "dmEventTime, dmEventDescr"
@@ -1036,6 +1034,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	/* Attachments. */
 	queryStr = "SELECT COUNT(*) AS nrFiles "
 	    " FROM files WHERE "
@@ -1082,9 +1081,6 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 			goto fail;
 		}
 	}
-	if (warnOld) {
-		/* TODO */
-	}
 
 	if (verSignature) {
 
@@ -1100,8 +1096,8 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 			html += strongAccountInfoLine(
 			    QObject::tr("Message signature"),
 			    QObject::tr("Invalid")  + " -- " +
-			    QObject::tr("Message signature and content "
-			        "do not correspond!"));
+			    QObject::tr("Message signature and content do not correspond!")
+			    );
 			break;
 		case MessageDb::MSG_SIG_OK:
 			html += strongAccountInfoLine(
@@ -1115,9 +1111,8 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 			    QObject::tr("Valid") : QObject::tr("Invalid");
 			if (!GlobInstcs::prefsPtr->checkCrl) {
 				verifiedText += " (" +
-				    QObject::tr("Certificate revocation "
-				        "check is turned off!") +
-				    ")";
+				    QObject::tr("Certificate revocation check is turned off!")
+				    + ")";
 			}
 			html += strongAccountInfoLine(
 			    QObject::tr("Signing certificate"), verifiedText);
@@ -1169,13 +1164,10 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool showId, bool verSignature,
 				    "</div>";
 			}
 		}
-
 	}
 
 	html += divEnd;
-
 	return html;
-
 fail:
 	return QString();
 }
