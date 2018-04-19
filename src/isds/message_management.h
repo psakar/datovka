@@ -27,6 +27,7 @@
 #include <QDateTime>
 #include <QByteArray>
 #include <QList>
+#include <QScopedPointer>
 #include <QString>
 
 /*
@@ -256,56 +257,68 @@ namespace Isds {
 		void *m_dataPtr;
 	};
 
+	/*
+	 * https://stackoverflow.com/questions/25250171/how-to-use-the-qts-pimpl-idiom
+	 *
+	 * QScopedPtr -> std::unique_ptr ?
+	 */
+
+	class DocumentPrivate;
+
 	/*!
 	 * @brief Described in dmBaseTypes.xsd as type tFilesArray_dmFile.
 	 *     pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
 	 *     section 2.1 (CreateMessage).
 	 */
 	class Document {
+		Q_DECLARE_PRIVATE(Document)
+
 	public:
-		Document(void)
-		    : m_xml(false), m_binaryContent(), m_mimeType(),
-		    m_metaType(Type::FMT_UNKNOWN), m_fileGuid(), m_upFileGuid(),
-		    m_fileDescr(), m_format()
-		{ }
+		Document(void);
+		Document(const Document &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		Document(Document &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+		~Document(void);
 
-		bool isXml(void) const { return m_xml; } /* Inspired by libisds. */
+		Document &operator=(const Document &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		Document &operator=(Document &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
 
-		QByteArray binaryContent(void) const { return m_binaryContent; }
+		friend void swap(Document &first, Document &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+		bool isXml(void) const; /* Inspired by libisds. */
+
+		QByteArray binaryContent(void) const;
 		void setBinaryContent(const QByteArray &bc);
 
 		/* dmMimeType */
-		QString mimeType(void) const { return m_mimeType; }
-		void setMimeType(const QString &mt) { m_mimeType = mt; }
+		QString mimeType(void) const;
+		void setMimeType(const QString &mt);
 		/* dmFileMetaType */
-		enum Type::FileMetaType fileMetaType(void) const { return m_metaType; }
-		void setFileMetaType(enum Type::FileMetaType mt) { m_metaType = mt; }
+		enum Type::FileMetaType fileMetaType(void) const;
+		void setFileMetaType(enum Type::FileMetaType mt);
 		/* dmFileGuid */
-		QString fileGuid(void) const { return m_fileGuid; }
-		void setFileGuid(const QString &g) { m_fileGuid = g; }
+		QString fileGuid(void) const;
+		void setFileGuid(const QString &g);
 		/* dmUpFileGuid */
-		QString upFileGuid(void) const { return m_upFileGuid; }
-		void setUpFileGuid(const QString &ug) { m_upFileGuid = ug; }
+		QString upFileGuid(void) const;
+		void setUpFileGuid(const QString &ug);
 		/* dmFileDescr */
-		QString fileDescr(void) const { return m_fileDescr; }
-		void setFileDescr(const QString &fd) { m_fileDescr = fd; }
+		QString fileDescr(void) const;
+		void setFileDescr(const QString &fd);
 		/* dmFormat */
-		QString format(void) const { return m_format; }
-		void setFormat(const QString &f) { m_format = f; }
+		QString format(void) const;
+		void setFormat(const QString &f);
 
 	private:
-		bool m_xml; /*!< Inspired by libisds. Direct XML handling is not supported yet! */
-
-		QByteArray m_binaryContent;
-		// m_xmlContent;
-
-		QString m_mimeType; /* See pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf appendix 3. */
-		enum Type::FileMetaType m_metaType;
-		QString m_fileGuid; /* Optional message-local document identifier. */
-		QString m_upFileGuid; /* Optional reference to upper document. */
-		QString m_fileDescr; /* Mandatory document name. */
-		QString m_format; /* Optional. Can hold a form name for loading XML data from the dmXMLContent element. */
+		QScopedPointer<DocumentPrivate> d_ptr; // std::unique_ptr ?
 	};
+
+	void swap(Document &first, Document &second) Q_DECL_NOTHROW;
 
 	/*!
 	 * @Brief Described in dmBaseTypes.xsd as type tReturnedMessage.

@@ -1456,11 +1456,242 @@ Isds::Envelope &Isds::Envelope::operator=(Envelope &&other) Q_DECL_NOTHROW
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+/*!
+ * @brief PIMPL Document class.
+ */
+class Isds::DocumentPrivate {
+	//Q_DISABLE_COPY(DocumentPrivate)
+public:
+	DocumentPrivate(void)
+	    : m_xml(false), m_binaryContent(), m_mimeType(),
+	    m_metaType(Type::FMT_UNKNOWN), m_fileGuid(), m_upFileGuid(),
+	    m_fileDescr(), m_format()
+	{ }
+
+	DocumentPrivate &operator=(const DocumentPrivate &other) Q_DECL_NOTHROW
+	{
+		m_xml = other.m_xml;
+		m_binaryContent = other.m_binaryContent;
+		m_mimeType = other.m_mimeType;
+		m_metaType = other.m_metaType;
+		m_fileGuid = other.m_fileGuid;
+		m_upFileGuid = other.m_upFileGuid;
+		m_fileDescr = other.m_fileDescr;
+		m_format = other.m_format;
+
+		return *this;
+	}
+
+	bool m_xml; /*!< Inspired by libisds. Direct XML handling is not supported yet! */
+
+	QByteArray m_binaryContent;
+	// m_xmlContent;
+
+	QString m_mimeType; /* See pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf appendix 3. */
+	enum Type::FileMetaType m_metaType;
+	QString m_fileGuid; /* Optional message-local document identifier. */
+	QString m_upFileGuid; /* Optional reference to upper document. */
+	QString m_fileDescr; /* Mandatory document name. */
+	QString m_format; /* Optional. Can hold a form name for loading XML data from the dmXMLContent element. */
+};
+
+Isds::Document::Document(void)
+    : d_ptr(Q_NULLPTR)
+{
+}
+
+Isds::Document::Document(const Document &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) DocumentPrivate) : Q_NULLPTR)
+{
+	Q_D(Document);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
+}
+
+Isds::Document::Document(Document &&other) Q_DECL_NOEXCEPT
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
+{
+}
+
+Isds::Document::~Document(void)
+{
+}
+
+/*!
+ * @brief Ensures private document presence.
+ *
+ * @note Returns if private document could not be allocated.
+ */
+#define ensureDocumentPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			DocumentPrivate *p = new (std::nothrow) DocumentPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+Isds::Document &Isds::Document::operator=(const Document &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureDocumentPrivate(*this);
+	Q_D(Document);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Document &Isds::Document::operator=(Document &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(Isds::Document &first, Isds::Document &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+bool Isds::Document::isNull(void) const
+{
+	Q_D(const Document);
+	return d == Q_NULLPTR;
+}
+
+bool Isds::Document::isXml(void) const
+{
+	Q_D(const Document);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+	return d->m_xml;
+}
+
+QByteArray Isds::Document::binaryContent(void) const
+{
+	Q_D(const Document);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return QByteArray();
+	}
+	return d->m_binaryContent;
+}
+
 void Isds::Document::setBinaryContent(const QByteArray &bc)
 {
+	ensureDocumentPrivate();
+	Q_D(Document);
 	/* Should also delete XML content if it is present. */
-	m_binaryContent = bc;
-	m_xml = false;
+	d->m_binaryContent = bc;
+	d->m_xml = false;
+}
+
+QString Isds::Document::mimeType(void) const
+{
+	Q_D(const Document);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return QString();
+	}
+	return d->m_mimeType;
+}
+
+void Isds::Document::setMimeType(const QString &mt)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_mimeType = mt;
+}
+
+enum Isds::Type::FileMetaType Isds::Document::fileMetaType(void) const
+{
+	Q_D(const Document);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Isds::Type::FMT_UNKNOWN;
+	}
+	return d->m_metaType;
+}
+
+void Isds::Document::setFileMetaType(enum Type::FileMetaType mt)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_metaType = mt;
+}
+
+QString Isds::Document::fileGuid(void) const
+{
+	Q_D(const Document);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return QString();
+	}
+	return d->m_fileGuid;
+}
+
+void Isds::Document::setFileGuid(const QString &g)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_fileGuid = g;
+}
+
+QString Isds::Document::upFileGuid(void) const
+{
+	Q_D(const Document);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return QString();
+	}
+	return d->m_upFileGuid;
+}
+
+void Isds::Document::setUpFileGuid(const QString &ug)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_upFileGuid = ug;
+}
+
+QString Isds::Document::fileDescr(void) const
+{
+	Q_D(const Document);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return QString();
+	}
+	return d->m_fileDescr;
+}
+
+void Isds::Document::setFileDescr(const QString &fd)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_fileDescr = fd;
+}
+
+QString Isds::Document::format(void) const
+{
+	Q_D(const Document);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return QString();
+	}
+	return d->m_format;
+}
+
+void Isds::Document::setFormat(const QString &f)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_format = f;
 }
 
 Isds::Message::Message(void)
