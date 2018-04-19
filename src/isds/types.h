@@ -219,6 +219,20 @@ public:
 		EV_ACCEPTED_BY_RECIPIENT = 4, /* Before 11.2011, message has been delivered and accepted by recipient action. */
 		EV_UNDELIVERED_AV_CHECK = 8 /* Message didn't mass antivirus check, message has been rejected. */
 	};
+
+	/*!
+	 * @brief Attachment type.
+	 *
+	 * @note Mentioned in pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
+	 *     section 2.1.
+	 */
+	enum FileMetaType {
+		FMT_UNKNOWN = -1, /* Convenience value. */
+		FMT_MAIN, /* First in list of documents. */
+		FMT_ENCLOSURE, /* Attachment. */
+		FMT_SIGNATURE, /* Digital signature of another document. */
+		FMT_META /* Special XML data for ESS (records management service). */
+	};
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Type::Privileges)

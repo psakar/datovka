@@ -1455,3 +1455,24 @@ Isds::Envelope &Isds::Envelope::operator=(Envelope &&other) Q_DECL_NOTHROW
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::Document::setBinaryContent(const QByteArray &bc)
+{
+	/* Should also delete XML content if it is present. */
+	m_binaryContent = bc;
+	m_xml = false;
+}
+
+Isds::Message::Message(void)
+    : m_dataPtr(NULL)
+{
+}
+
+Isds::Message::~Message(void)
+{
+	struct isds_message *m = (struct isds_message *)m_dataPtr;
+	if (Q_UNLIKELY(m == NULL)) {
+		return;
+	}
+	isds_message_free(&m);
+}

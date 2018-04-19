@@ -256,4 +256,78 @@ namespace Isds {
 		void *m_dataPtr;
 	};
 
+	/*!
+	 * @brief Described in dmBaseTypes.xsd as type tFilesArray_dmFile.
+	 *     pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
+	 *     section 2.1 (CreateMessage).
+	 */
+	class Document {
+	public:
+		Document(void)
+		    : m_xml(false), m_binaryContent(), m_mimeType(),
+		    m_metaType(Type::FMT_UNKNOWN), m_fileGuid(), m_upFileGuid(),
+		    m_fileDescr(), m_format()
+		{ }
+
+		bool isXml(void) const { return m_xml; } /* Inspired by libisds. */
+
+		QByteArray binaryContent(void) const { return m_binaryContent; }
+		void setBinaryContent(const QByteArray &bc);
+
+		/* dmMimeType */
+		QString mimeType(void) const { return m_mimeType; }
+		void setMimeType(const QString &mt) { m_mimeType = mt; }
+		/* dmFileMetaType */
+		enum Type::FileMetaType fileMetaType(void) const { return m_metaType; }
+		void setFileMetaType(enum Type::FileMetaType mt) { m_metaType = mt; }
+		/* dmFileGuid */
+		QString fileGuid(void) const { return m_fileGuid; }
+		void setFileGuid(const QString &g) { m_fileGuid = g; }
+		/* dmUpFileGuid */
+		QString upFileGuid(void) const { return m_upFileGuid; }
+		void setUpFileGuid(const QString &ug) { m_upFileGuid = ug; }
+		/* dmFileDescr */
+		QString fileDescr(void) const { return m_fileDescr; }
+		void setFileDescr(const QString &fd) { m_fileDescr = fd; }
+		/* dmFormat */
+		QString format(void) const { return m_format; }
+		void setFormat(const QString &f) { m_format = f; }
+
+	private:
+		bool m_xml; /*!< Inspired by libisds. Direct XML handling is not supported yet! */
+
+		QByteArray m_binaryContent;
+		// m_xmlContent;
+
+		QString m_mimeType; /* See pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf appendix 3. */
+		enum Type::FileMetaType m_metaType;
+		QString m_fileGuid; /* Optional message-local document identifier. */
+		QString m_upFileGuid; /* Optional reference to upper document. */
+		QString m_fileDescr; /* Mandatory document name. */
+		QString m_format; /* Optional. Can hold a form name for loading XML data from the dmXMLContent element. */
+	};
+
+	/*!
+	 * @Brief Described in dmBaseTypes.xsd as type tReturnedMessage.
+	 *     pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
+	 *     section 2.1 (CreateMessage).
+	 */
+	class Message {
+	public:
+		Message(void);
+		~Message(void);
+
+		/* Raw message data. */
+		QByteArray raw(void) const;
+		void setRaw(const QByteArray &r);
+
+		Envelope envelope(void) const;
+		void setEnvelope(const Envelope &e);
+
+		QList<Document> documents(void) const;
+		void setDocuments(const QList<Document> &dl);
+
+	private:
+		void *m_dataPtr;
+	};
 }
