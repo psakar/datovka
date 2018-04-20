@@ -24,6 +24,7 @@
 #pragma once
 
 #include <cstdbool>
+#include <QByteArray>
 #include <QDate>
 #include <QDateTime>
 #include <QString>
@@ -31,6 +32,17 @@
 #include "src/isds/types.h"
 
 namespace Isds {
+
+	/*!
+	 * @brief Creates a C data copy from the supplied QBYteArray.
+	 *
+	 * @param[in,out] cDataPtr Pointer to C data.
+	 * @param[in,out] cSize Size value to be set.
+	 * @param[in] data Data object.
+	 * @return Tru on success, false on failure.
+	 */
+	bool toCDataCopy(void **cDataPtr, size_t *cSize,
+	    const QByteArray &data);
 
 	/*!
 	 * @brief Converts a C-string into QString.

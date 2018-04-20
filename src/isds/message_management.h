@@ -31,6 +31,12 @@
 #include <QString>
 
 /*
+ * https://stackoverflow.com/questions/25250171/how-to-use-the-qts-pimpl-idiom
+ *
+ * QScopedPtr -> std::unique_ptr ?
+ */
+
+/*
  * Structures originating from pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf.
  */
 
@@ -99,20 +105,31 @@ namespace Isds {
 		QString m_descr; /* dmEventDescr */
 	};
 
+	class EnvelopePrivate;
 	/*!
 	 * @brief Described in dmBaseTypes.xsd as group gMessageEnvelope
 	 *     pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
 	 *     section 2.1 (CreateMessage), section 2.4 (MessageDownload, SignedMessageDownload)
 	 */
 	class Envelope {
+		Q_DECLARE_PRIVATE(Envelope)
+
 	public:
 		Envelope(void);
-		~Envelope(void);
-
-		//Envelope(const Envelope &other);
+		Envelope(const Envelope &other);
 #ifdef Q_COMPILER_RVALUE_REFS
 		Envelope(Envelope &&other) Q_DECL_NOEXCEPT;
 #endif /* Q_COMPILER_RVALUE_REFS */
+		~Envelope(void);
+
+		Envelope &operator=(const Envelope &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		Envelope &operator=(Envelope &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		friend void swap(Envelope &first, Envelope &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
 
 		/*
 		 * For convenience purposes. Message identifier consists only
@@ -125,26 +142,44 @@ namespace Isds {
 		void setDmId(qint64 id);
 
 		/* dmID */
-		QString dmID(void) const;
+		const QString &dmID(void) const;
 		void setDmID(const QString &id);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmID(QString &&id);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dbIDSender -- sender box identifier, max. 7 characters */
-		QString dbIDSender(void) const;
+		const QString &dbIDSender(void) const;
 		void setDbIDSender(const QString &sbi);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbIDSender(QString &&sbi);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmSender -- sender name, max. 100 characters */
-		QString dmSender(void) const;
+		const QString &dmSender(void) const;
 		void setDmSender(const QString &sn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmSender(QString &&sn);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmSenderAddress -- sender address, max. 100 characters */
-		QString dmSenderAddress(void) const;
+		const QString &dmSenderAddress(void) const;
 		void setDmSenderAddress(const QString &sa);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmSenderAddress(QString &&sa);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmSenderType -- roughly specified sender box type */
 		enum Type::DbType dmSenderType(void) const;
 		void setDmSenderType(enum Type::DbType st);
 		/* dmRecipient -- recipient name, max. 100 characters */
-		QString dmRecipient(void) const;
+		const QString &dmRecipient(void) const;
 		void setDmRecipient(const QString &rn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmRecipient(QString &&rn);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmRecipientAddress -- recipient address, max. 100 characters */
-		QString dmRecipientAddress(void) const;
+		const QString &dmRecipientAddress(void) const;
 		void setDmRecipientAddress(const QString &ra);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmRecipientAddress(QString &&ra);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmAmbiguousRecipient -- optional, recipient has elevated OVM role */
 		enum Type::NilBool dmAmbiguousRecipient(void) const;
 		void setDmAmbiguousRecipient(enum Type::NilBool ar);
@@ -159,54 +194,96 @@ namespace Isds {
 		qint64 dmAttachmentSize(void) const;
 		void setDmAttachmentSize(qint64 as);
 		/* dmDeliveryTime */
-		QDateTime dmDeliveryTime(void) const;
+		const QDateTime &dmDeliveryTime(void) const;
 		void setDmDeliveryTime(const QDateTime &dt);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmDeliveryTime(QDateTime &&dt);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmAcceptanceTime */
-		QDateTime dmAcceptanceTime(void) const;
+		const QDateTime &dmAcceptanceTime(void) const;
 		void setDmAcceptanceTime(const QDateTime &at);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmAcceptanceTime(QDateTime &&at);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmHash */
-		Hash dmHash(void) const;
+		const Hash &dmHash(void) const;
 		void setDmHash(const Hash &h);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmHash(Hash &&h);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmQTimestamp -- qualified time stamp, optional */
-		QByteArray dmQTimestamp(void) const;
+		const QByteArray &dmQTimestamp(void) const;
 		void setDmQTimestamp(const QByteArray &ts);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmQTimestamp(QByteArray &&ts);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmEvents -- list of events the message has passed through. */
-		QList<Event> dmEvents(void) const;
+		const QList<Event> &dmEvents(void) const;
 		void setDmEvents(const QList<Event> &el);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmEvents(QList<Event> &&el);
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 		/* dmSenderOrgUnit -- sender organisation unit, optional */
-		QString dmSenderOrgUnit(void) const;
+		const QString &dmSenderOrgUnit(void) const;
 		void setDmSenderOrgUnit(const QString &sou);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmSenderOrgUnit(QString &&sou);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmSenderOrgUnitNum */
 		qint64 dmSenderOrgUnitNum(void) const;
 		void setDmSenderOrgUnitNum(qint64 soun);
 		/* dbIDRecipient -- recipient box identifier, max. 7 characters, mandatory */
-		QString dbIDRecipient(void) const;
+		const QString &dbIDRecipient(void) const;
 		void setDbIDRecipient(const QString &rbi);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbIDRecipient(QString &&rbi);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmRecipientOrgUnit -- recipient organisation unit, optional */
-		QString dmRecipientOrgUnit(void) const;
+		const QString &dmRecipientOrgUnit(void) const;
 		void setDmRecipientOrgUnit(const QString &rou);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmRecipientOrgUnit(QString &&rou);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmRecipientOrgUnitNum */
 		qint64 dmRecipientOrgUnitNum(void) const;
 		void setDmRecipientOrgUnitNum(qint64 &roun);
 		/* dmToHands -- optional */
-		QString dmToHands(void) const;
+		const QString &dmToHands(void) const;
 		void setDmToHands(const QString &th);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmToHands(QString &&th);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmAnnotation -- subject/title, mac 255 characters */
-		QString dmAnnotation(void) const;
+		const QString &dmAnnotation(void) const;
 		void setDmAnnotation(const QString &a);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmAnnotation(QString &&a);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmRecipientRefNumber -- recipient reference identifier, max. 50 characters, optional */
-		QString dmRecipientRefNumber(void) const;
+		const QString &dmRecipientRefNumber(void) const;
 		void setDmRecipientRefNumber(const QString &rrn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmRecipientRefNumber(QString &&rrn);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmSenderRefNumber -- sender reference identifier, max. 50 characters, optional */
-		QString dmSenderRefNumber(void) const;
+		const QString &dmSenderRefNumber(void) const;
 		void setDmSenderRefNumber(const QString &srn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmSenderRefNumber(QString &&srn);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmRecipientIdent -- CZ: spisova znacka, DE: Aktenzeichen, max. 50 characters, optional */
-		QString dmRecipientIdent(void) const;
+		const QString &dmRecipientIdent(void) const;
 		void setDmRecipientIdent(const QString &ri);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmRecipientIdent(QString &&ri);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmSenderIdent */
-		QString dmSenderIdent(void) const;
+		const QString &dmSenderIdent(void) const;
 		void setDmSenderIdent(const QString &si);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmSenderIdent(QString &&si);
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 		/* Act addressing. */
 		/* dmLegalTitleLaw */
@@ -216,14 +293,23 @@ namespace Isds {
 		qint64 dmLegalTitleYear(void) const;
 		void setDmLegalTitleYear(qint64 y);
 		/* dmLegalTitleSect */
-		QString dmLegalTitleSect(void) const;
+		const QString &dmLegalTitleSect(void) const;
 		void setDmLegalTitleSect(const QString &s);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmLegalTitleSect(QString &&s);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmLegalTitlePar */
-		QString dmLegalTitlePar(void) const;
+		const QString &dmLegalTitlePar(void) const;
 		void setDmLegalTitlePar(const QString &p);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmLegalTitlePar(QString &&p);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmLegalTitlePoint -- CZ: pismeno, DE: Buchstabe */
-		QString dmLegalTitlePoint(void) const;
+		const QString &dmLegalTitlePoint(void) const;
 		void setDmLegalTitlePoint(const QString &p);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmLegalTitlePoint(QString &&p);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmPersonalDelivery -- only for recipient or person with explicitly granted privileges */
 		enum Type::NilBool dmPersonalDelivery(void) const;
 		void setDmPersonalDelivery(enum Type::NilBool pd);
@@ -248,23 +334,13 @@ namespace Isds {
 		static
 		QChar dmType2Char(enum Type::DmType t);
 
-		//Envelope &operator=(const Envelope &other) Q_DECL_NOTHROW;
-#ifdef Q_COMPILER_RVALUE_REFS
-		Envelope &operator=(Envelope &&other) Q_DECL_NOTHROW;
-#endif /* Q_COMPILER_RVALUE_REFS */
-
 	private:
-		void *m_dataPtr;
+		QScopedPointer<EnvelopePrivate> d_ptr; // std::unique_ptr ?
 	};
 
-	/*
-	 * https://stackoverflow.com/questions/25250171/how-to-use-the-qts-pimpl-idiom
-	 *
-	 * QScopedPtr -> std::unique_ptr ?
-	 */
+	void swap(Envelope &first, Envelope &second) Q_DECL_NOTHROW;
 
 	class DocumentPrivate;
-
 	/*!
 	 * @brief Described in dmBaseTypes.xsd as type tFilesArray_dmFile.
 	 *     pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
@@ -292,14 +368,14 @@ namespace Isds {
 
 		bool isXml(void) const; /* Inspired by libisds. */
 
-		QByteArray binaryContent(void) const;
+		const QByteArray &binaryContent(void) const;
 		void setBinaryContent(const QByteArray &bc);
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setBinaryContent(QByteArray &&bc);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
 		/* dmMimeType */
-		QString mimeType(void) const;
+		const QString &mimeType(void) const;
 		void setMimeType(const QString &mt);
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setMimeType(QString &&mt);
@@ -308,25 +384,25 @@ namespace Isds {
 		enum Type::FileMetaType fileMetaType(void) const;
 		void setFileMetaType(enum Type::FileMetaType mt);
 		/* dmFileGuid */
-		QString fileGuid(void) const;
+		const QString &fileGuid(void) const;
 		void setFileGuid(const QString &g);
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setFileGuid(QString &&g);
 #endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmUpFileGuid */
-		QString upFileGuid(void) const;
+		const QString &upFileGuid(void) const;
 		void setUpFileGuid(const QString &ug);
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setUpFileGuid(QString &&ug);
 #endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmFileDescr */
-		QString fileDescr(void) const;
+		const QString &fileDescr(void) const;
 		void setFileDescr(const QString &fd);
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setFileDescr(QString &&fd);
 #endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmFormat */
-		QString format(void) const;
+		const QString &format(void) const;
 		void setFormat(const QString &f);
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setFormat(QString &&f);
@@ -343,15 +419,31 @@ namespace Isds {
 	Document libisds2document(const struct isds_document *id);
 	struct isds_document *document2libisds(const Document &doc);
 
+	class MessagePrivate;
 	/*!
 	 * @Brief Described in dmBaseTypes.xsd as type tReturnedMessage.
 	 *     pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
 	 *     section 2.1 (CreateMessage).
 	 */
 	class Message {
+		Q_DECLARE_PRIVATE(Message)
+
 	public:
 		Message(void);
+		Message(const Message &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		Message(Message &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
 		~Message(void);
+
+		Message &operator=(const Message &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		Message &operator=(Message &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		friend void swap(Message &first, Message &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
 
 		/* Raw message data. */
 		QByteArray raw(void) const;
@@ -363,7 +455,9 @@ namespace Isds {
 		QList<Document> documents(void) const;
 		void setDocuments(const QList<Document> &dl);
 
+		friend Message libisds2message(const struct isds_message *im);
+
 	private:
-		void *m_dataPtr;
+		QScopedPointer<MessagePrivate> d_ptr; // std::unique_ptr ?
 	};
 }

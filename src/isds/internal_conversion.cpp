@@ -28,6 +28,32 @@
 
 #include "src/isds/internal_conversion.h"
 
+bool Isds::toCDataCopy(void **cDataPtr, size_t *cSize, const QByteArray &data)
+{
+	if (Q_UNLIKELY((cDataPtr == Q_NULLPTR) || (cSize == NULL))) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (*cDataPtr != NULL) {
+		/* Delete already created. */
+		std::free(*cDataPtr); *cDataPtr = NULL;
+		*cSize = 0;
+	}
+	if (data.isNull() || (data.size() == 0)) {
+		return true;
+	}
+	/* Copy data content.*/
+	*cSize = data.size();
+	*cDataPtr = std::malloc(*cSize);
+	if (Q_UNLIKELY(*cDataPtr == NULL)) {
+		Q_ASSERT(0);
+		*cSize = 0;
+		return false;
+	}
+	std::memcpy(*cDataPtr, data.constData(), *cSize);
+	return true;
+}
+
 QString Isds::fromCStr(const char *cStr)
 {
 	if (cStr == NULL) {

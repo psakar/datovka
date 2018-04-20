@@ -233,6 +233,21 @@ public:
 		FMT_SIGNATURE, /* Digital signature of another document. */
 		FMT_META /* Special XML data for ESS (records management service). */
 	};
+
+	/*!
+	 * @brief Raw type. Convenience value, taken from libisds.
+	 */
+	enum RawType {
+		RT_UNKNOWN = -1, /* Convenience value. */
+		RT_INCOMING_MESSAGE,
+		RT_PLAIN_SIGNED_INCOMING_MESSAGE,
+		RT_CMS_SIGNED_INCOMING_MESSAGE,
+		RT_PLAIN_SIGNED_OUTGOING_MESSAGE,
+		RT_CMS_SIGNED_OUTGOING_MESSAGE,
+		RT_DELIVERYINFO,
+		RT_PLAIN_SIGNED_DELIVERYINFO,
+		RT_CMS_SIGNED_DELIVERYINFO
+	};
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Type::Privileges)
