@@ -1559,12 +1559,6 @@ Isds::Document &Isds::Document::operator=(Document &&other) Q_DECL_NOTHROW
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-void Isds::swap(Isds::Document &first, Isds::Document &second) Q_DECL_NOTHROW
-{
-	using std::swap;
-	swap(first.d_ptr, second.d_ptr);
-}
-
 bool Isds::Document::isNull(void) const
 {
 	Q_D(const Document);
@@ -1598,6 +1592,17 @@ void Isds::Document::setBinaryContent(const QByteArray &bc)
 	d->m_xml = false;
 }
 
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Document::setBinaryContent(QByteArray &&bc)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	/* Should also delete XML content if it is present. */
+	d->m_binaryContent = bc;
+	d->m_xml = false;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 QString Isds::Document::mimeType(void) const
 {
 	Q_D(const Document);
@@ -1613,6 +1618,15 @@ void Isds::Document::setMimeType(const QString &mt)
 	Q_D(Document);
 	d->m_mimeType = mt;
 }
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Document::setMimeType(QString &&mt)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_mimeType = mt;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 enum Isds::Type::FileMetaType Isds::Document::fileMetaType(void) const
 {
@@ -1646,6 +1660,15 @@ void Isds::Document::setFileGuid(const QString &g)
 	d->m_fileGuid = g;
 }
 
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Document::setFileGuid(QString &&g)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_fileGuid = g;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 QString Isds::Document::upFileGuid(void) const
 {
 	Q_D(const Document);
@@ -1661,6 +1684,15 @@ void Isds::Document::setUpFileGuid(const QString &ug)
 	Q_D(Document);
 	d->m_upFileGuid = ug;
 }
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Document::setUpFileGuid(QString &&ug)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_upFileGuid = ug;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 QString Isds::Document::fileDescr(void) const
 {
@@ -1678,6 +1710,15 @@ void Isds::Document::setFileDescr(const QString &fd)
 	d->m_fileDescr = fd;
 }
 
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Document::setFileDescr(QString &&fd)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_fileDescr = fd;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
 QString Isds::Document::format(void) const
 {
 	Q_D(const Document);
@@ -1692,6 +1733,139 @@ void Isds::Document::setFormat(const QString &f)
 	ensureDocumentPrivate();
 	Q_D(Document);
 	d->m_format = f;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Document::setFormat(QString &&f)
+{
+	ensureDocumentPrivate();
+	Q_D(Document);
+	d->m_format = f;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(Isds::Document &first, Isds::Document &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief Converts file meta type.
+ */
+static
+enum Isds::Type::FileMetaType libisdsFileMetaType2FileMetaType(
+    isds_FileMetaType ifmt)
+{
+	switch (ifmt) {
+	case FILEMETATYPE_MAIN: return Isds::Type::FMT_MAIN; break;
+	case FILEMETATYPE_ENCLOSURE: return Isds::Type::FMT_ENCLOSURE; break;
+	case FILEMETATYPE_SIGNATURE: return Isds::Type::FMT_SIGNATURE; break;
+	case FILEMETATYPE_META: return Isds::Type::FMT_META; break;
+	default:
+		return Isds::Type::FMT_UNKNOWN;
+		break;
+	}
+}
+
+Isds::Document Isds::libisds2document(const struct isds_document *id)
+{
+	if (Q_UNLIKELY(id == NULL)) {
+		Q_ASSERT(0);
+		return Document();
+	}
+
+	Document doc;
+
+	/* Does not support XML documents. */
+	if (id->is_xml) {
+		return doc;
+	}
+
+	doc.setBinaryContent(QByteArray((const char *)id->data, id->data_length));
+	doc.setMimeType(fromCStr(id->dmMimeType));
+	doc.setFileMetaType(libisdsFileMetaType2FileMetaType(id->dmFileMetaType));
+	doc.setFileGuid(fromCStr(id->dmFileGuid));
+	doc.setUpFileGuid(fromCStr(id->dmUpFileGuid));
+	doc.setFileDescr(fromCStr(id->dmFileDescr));
+	doc.setFormat(fromCStr(id->dmFormat));
+
+	return doc;
+}
+
+/*!
+ * @brief Converts file meta type.
+ */
+static
+isds_FileMetaType fileMetaType2libisdsFileMetaType(
+    enum Isds::Type::FileMetaType fmt)
+{
+	switch (fmt) {
+	case Isds::Type::FMT_MAIN: return FILEMETATYPE_MAIN; break;
+	case Isds::Type::FMT_ENCLOSURE: return FILEMETATYPE_ENCLOSURE; break;
+	case Isds::Type::FMT_SIGNATURE: return FILEMETATYPE_SIGNATURE; break;
+	case Isds::Type::FMT_META: return FILEMETATYPE_META; break;
+	default:
+		Q_ASSERT(0);
+		return FILEMETATYPE_MAIN; /* FIXME ? */
+		break;
+	}
+}
+
+struct isds_document *Isds::document2libisds(const Isds::Document &doc)
+{
+	if (Q_UNLIKELY(doc.isNull())) {
+		return NULL;
+	}
+
+	struct isds_document *idoc =
+	    (struct isds_document *)std::malloc(sizeof(*idoc));
+	if (Q_UNLIKELY(idoc == NULL)) {
+		Q_ASSERT(0);
+		return NULL;
+	}
+	std::memset(idoc, 0, sizeof(*idoc));
+
+	idoc->is_xml = doc.isXml();
+	if (Q_UNLIKELY(idoc->is_xml)) {
+		/* Does not support XML documents. */
+		goto fail;
+	}
+	//idoc->xml_node_list = NULL;
+	{
+		const QByteArray &data(doc.binaryContent());
+		if (data.size() > 0) {
+			idoc->data_length = data.size();
+			idoc->data = std::malloc(idoc->data_length);
+			if (Q_UNLIKELY(idoc->data == NULL)) {
+				Q_ASSERT(0);
+				goto fail;
+			}
+			std::memcpy(idoc->data, data.constData(), idoc->data_length);
+		}
+	}
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmMimeType, doc.mimeType()))) {
+		goto fail;
+	}
+	idoc->dmFileMetaType = fileMetaType2libisdsFileMetaType(doc.fileMetaType());
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmFileGuid, doc.fileGuid()))) {
+		goto fail;
+	}
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmUpFileGuid, doc.upFileGuid()))) {
+		goto fail;
+	}
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmFileDescr, doc.fileDescr()))) {
+		goto fail;
+	}
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmFormat, doc.format()))) {
+		goto fail;
+	}
+
+	return idoc;
+
+fail:
+	isds_document_free(&idoc);
+	return NULL;
 }
 
 Isds::Message::Message(void)

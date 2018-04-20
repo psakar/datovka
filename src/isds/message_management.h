@@ -294,31 +294,54 @@ namespace Isds {
 
 		QByteArray binaryContent(void) const;
 		void setBinaryContent(const QByteArray &bc);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setBinaryContent(QByteArray &&bc);
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 		/* dmMimeType */
 		QString mimeType(void) const;
 		void setMimeType(const QString &mt);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setMimeType(QString &&mt);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmFileMetaType */
 		enum Type::FileMetaType fileMetaType(void) const;
 		void setFileMetaType(enum Type::FileMetaType mt);
 		/* dmFileGuid */
 		QString fileGuid(void) const;
 		void setFileGuid(const QString &g);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setFileGuid(QString &&g);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmUpFileGuid */
 		QString upFileGuid(void) const;
 		void setUpFileGuid(const QString &ug);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setUpFileGuid(QString &&ug);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmFileDescr */
 		QString fileDescr(void) const;
 		void setFileDescr(const QString &fd);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setFileDescr(QString &&fd);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmFormat */
 		QString format(void) const;
 		void setFormat(const QString &f);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setFormat(QString &&f);
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		friend Document libisds2document(const struct isds_document *id);
 
 	private:
 		QScopedPointer<DocumentPrivate> d_ptr; // std::unique_ptr ?
 	};
 
 	void swap(Document &first, Document &second) Q_DECL_NOTHROW;
+
+	Document libisds2document(const struct isds_document *id);
+	struct isds_document *document2libisds(const Document &doc);
 
 	/*!
 	 * @Brief Described in dmBaseTypes.xsd as type tReturnedMessage.

@@ -45,8 +45,9 @@ namespace Isds {
 	 *
 	 * @param[in,out] cStrPtr Pointer to C string.
 	 * @param[in] str String object.
+	 * @return True on success, false in failure.
 	 */
-	void toCStrCopy(char **cStrPtr, const QString &str);
+	bool toCStrCopy(char **cStrPtr, const QString &str);
 
 	/*!
 	 * @brief Converts date from struct tm.

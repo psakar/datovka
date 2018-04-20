@@ -36,31 +36,32 @@ QString Isds::fromCStr(const char *cStr)
 	return QString(cStr);
 }
 
-void Isds::toCStrCopy(char **cStrPtr, const QString &str)
+bool Isds::toCStrCopy(char **cStrPtr, const QString &str)
 {
 	if (Q_UNLIKELY(cStrPtr == Q_NULLPTR)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 	if (*cStrPtr != NULL) {
 		/* Delete already allocated. */
 		std::free(*cStrPtr); *cStrPtr = NULL;
 	}
 	if (str.isNull()) {
-		return;
+		return true;
 	}
 	/* Copy string content. */
 	const char *utfStr = str.toUtf8().constData();
 	std::size_t utfStrLen = std::strlen(utfStr);
 	if (utfStr == Q_NULLPTR) {
-		return;
+		return true;
 	}
 	*cStrPtr = (char *)std::malloc(utfStrLen + 1);
 	if (Q_UNLIKELY(*cStrPtr == NULL)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 	std::memcpy(*cStrPtr, utfStr, utfStrLen + 1);
+	return true;
 }
 
 QDate Isds::dateFromStructTM(struct tm *cDate)
