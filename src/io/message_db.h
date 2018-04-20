@@ -606,14 +606,6 @@ public:
 	QList<qint64> getAllMessageIDs(enum MessageType messageType) const;
 
 	/*!
-	 * @brief Check whether whole message is stored in database.
-	 *
-	 * @param[in] dmId  Message identifier.
-	 * @return True if whole message exists.
-	 */
-	bool msgsStoredWhole(qint64 dmId) const;
-
-	/*!
 	 * @brief Get base64 encoded raw message data.
 	 *
 	 * @param[in] dmId  Message identifier.

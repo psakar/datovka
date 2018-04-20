@@ -206,7 +206,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 	 * If there is no raw message then all the attachments have been
 	 * stored when the message has been set.
 	 */
-	if (!messageDb->msgsStoredWhole(dmID)) {
+	if (!messageDb->msgsMessageBase64(dmID).isEmpty()) {
 		messageDb->flsDeleteMessageFiles(dmID);
 	}
 

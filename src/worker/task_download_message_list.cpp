@@ -297,7 +297,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 				 * (and status has changed) or is required by
 				 * downloadWhole in the settings.
 				 */
-				if (downloadWhole || messageDb->msgsStoredWhole(msgId.dmId)) {
+				if (downloadWhole || !messageDb->msgsMessageBase64(msgId.dmId).isEmpty()) {
 
 					TaskDownloadMessage *task =
 					    new (std::nothrow) TaskDownloadMessage(
