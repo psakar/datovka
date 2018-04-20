@@ -1281,7 +1281,7 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	}
 
 	/* Mark message locally read. */
-	if (!messageDb->smsgdtLocallyRead(msgId.dmId)) {
+	if (!messageDb->messageLocallyRead(msgId.dmId)) {
 		if (GlobInstcs::prefsPtr->messageMarkAsReadTimeout >= 0) {
 			qDebug() << "Starting timer to mark as read for message"
 			    << msgId.dmId;
@@ -1379,8 +1379,8 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 	}
 
 	/* Get message state from database and toggle the value. */
-	bool isRead = messageDb->smsgdtLocallyRead(msgId.dmId);
-	messageDb->smsgdtSetLocallyRead(msgId.dmId, !isRead);
+	bool isRead = messageDb->messageLocallyRead(msgId.dmId);
+	messageDb->setMessageLocallyRead(msgId.dmId, !isRead);
 
 	/*
 	 * Mark message as read without reloading
@@ -1537,7 +1537,7 @@ void MainWindow::viewSelectedMessage(void)
 		return;
 	}
 
-	QByteArray msgRaw(messageDb->msgsMessageRaw(msgId.dmId));
+	QByteArray msgRaw(messageDb->getCompleteMessageRaw(msgId.dmId));
 	if (msgRaw.isEmpty()) {
 
 		if (!messageMissingOfferDownload(msgId,
@@ -1554,7 +1554,7 @@ void MainWindow::viewSelectedMessage(void)
 			return;
 		}
 
-		msgRaw = messageDb->msgsMessageRaw(msgId.dmId);
+		msgRaw = messageDb->getCompleteMessageRaw(msgId.dmId);
 		if (msgRaw.isEmpty()) {
 			Q_ASSERT(0);
 			return;
@@ -2655,7 +2655,7 @@ void MainWindow::accountMarkReceivedProcessState(
 		return;
 	}
 
-	dbSet->msgSetAllReceivedProcessState(state);
+	dbSet->setReceivedMessagesProcessState(state);
 
 	/*
 	 * No need to reload account model.
@@ -4634,7 +4634,7 @@ void MainWindow::showSendMessageDialog(int action)
 				return;
 			}
 
-			if (!messageDb->msgsMessageBase64(msgId.dmId).isEmpty()) {
+			if (!messageDb->getCompleteMessageBase64(msgId.dmId).isEmpty()) {
 				if (!messageMissingOfferDownload(msgId,
 				    tr("Full message not present!"))) {
 					return;
@@ -5962,7 +5962,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 			return;
 		}
 
-		QByteArray base64 = messageDb->msgsMessageBase64(msgId.dmId);
+		QByteArray base64 = messageDb->getCompleteMessageBase64(msgId.dmId);
 		if (base64.isEmpty()) {
 
 			if (!messageMissingOfferDownload(msgId,
@@ -5980,7 +5980,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 				return;
 			}
 
-			base64 = messageDb->msgsMessageBase64(msgId.dmId);
+			base64 = messageDb->getCompleteMessageBase64(msgId.dmId);
 			if (base64.isEmpty()) {
 				Q_ASSERT(0);
 				return;
@@ -6058,7 +6058,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 		}
 
 		QList<MessageDb::FileData> attachList =
-		    messageDb->getFilesFromMessage(msgId.dmId);
+		    messageDb->getMessageAttachments(msgId.dmId);
 		if (attachList.isEmpty()) {
 
 			if (!messageMissingOfferDownload(msgId,
@@ -6076,7 +6076,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 				return;
 			}
 
-			attachList = messageDb->getFilesFromMessage(msgId.dmId);
+			attachList = messageDb->getMessageAttachments(msgId.dmId);
 			if (attachList.isEmpty()) {
 				Q_ASSERT(0);
 				return;
@@ -6189,7 +6189,7 @@ void MainWindow::openSelectedMessageExternally(void)
 		return;
 	}
 
-	QByteArray base64 = messageDb->msgsMessageBase64(msgId.dmId);
+	QByteArray base64 = messageDb->getCompleteMessageBase64(msgId.dmId);
 	if (base64.isEmpty()) {
 		DlgMsgBox::message(this, QMessageBox::Warning,
 		    tr("Datovka - Export error!"),
@@ -6372,7 +6372,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 		return;
 	}
 
-	QByteArray msgRaw(messageDb->msgsMessageRaw(msgId.dmId));
+	QByteArray msgRaw(messageDb->getCompleteMessageRaw(msgId.dmId));
 	if (msgRaw.isEmpty()) {
 
 		if (!messageMissingOfferDownload(msgId,
@@ -6389,7 +6389,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 			return;
 		}
 
-		msgRaw = messageDb->msgsMessageRaw(msgId.dmId);
+		msgRaw = messageDb->getCompleteMessageRaw(msgId.dmId);
 		if (msgRaw.isEmpty()) {
 			Q_ASSERT(0);
 			return;
@@ -6965,7 +6965,7 @@ void MainWindow::messageItemsSetReadStatus(
 			continue;
 		}
 
-		messageDb->smsgdtSetLocallyRead(msgId.dmId, read);
+		messageDb->setMessageLocallyRead(msgId.dmId, read);
 
 		/*
 		 * Mark message as read without reloading
@@ -7360,7 +7360,7 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 				continue;
 			}
 
-			tstData = messageDb->msgsTimestampRaw(mId.dmId);
+			tstData = messageDb->getMessageTimestampRaw(mId.dmId);
 			if (tstData.isEmpty()) {
 				errorMsgIds.append(mId);
 				continue;

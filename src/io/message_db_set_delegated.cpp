@@ -816,7 +816,7 @@ bool MessageDbSet::_sf_msgSetAllReceivedProcessState(
 		return false;
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgSetAllReceivedProcessState(state);
+	return this->first()->setReceivedMessagesProcessState(state);
 }
 
 bool MessageDbSet::_yrly_msgSetAllReceivedProcessState(
@@ -833,13 +833,13 @@ bool MessageDbSet::_yrly_msgSetAllReceivedProcessState(
 			return false;
 		}
 
-		ret = ret && db->msgSetAllReceivedProcessState(state);
+		ret = ret && db->setReceivedMessagesProcessState(state);
 	}
 
 	return ret;
 }
 
-bool MessageDbSet::msgSetAllReceivedProcessState(enum MessageProcessState state)
+bool MessageDbSet::setReceivedMessagesProcessState(enum MessageProcessState state)
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:

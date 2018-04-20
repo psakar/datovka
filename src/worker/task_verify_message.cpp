@@ -107,7 +107,7 @@ struct isds_hash *localMessageHash(MessageDb *messageDb, qint64 dmId)
 	memset(hashLocal, 0, sizeof(struct isds_hash));
 
 	MessageDb::MessageHash hashLocaldata(
-	    messageDb->msgsGetHashFromDb(dmId));
+	    messageDb->getMessageHash(dmId));
 
 	if (!hashLocaldata.isValid()) {
 		isds_hash_free(&hashLocal);

@@ -90,7 +90,7 @@ void DlgSignatureDetail::detail(const MessageDbSet &dbSet,
 	case MessageDb::MSG_SIG_OK:
 		isMsgVerified = true;
 	case MessageDb::MSG_SIG_BAD:
-		msgDER = messageDb->msgsMessageRaw(msgId.dmId);
+		msgDER = messageDb->getCompleteMessageRaw(msgId.dmId);
 		break;
 	default:
 		logWarningNL("No complete message '%s' in the database for signature verification.",
@@ -98,7 +98,7 @@ void DlgSignatureDetail::detail(const MessageDbSet &dbSet,
 		break;
 	}
 
-	QByteArray tstDER(messageDb->msgsTimestampRaw(msgId.dmId));
+	QByteArray tstDER(messageDb->getMessageTimestampRaw(msgId.dmId));
 
 	DlgSignatureDetail dlg(msgDER, tstDER, true, isMsgVerified, parent);
 	dlg.exec();

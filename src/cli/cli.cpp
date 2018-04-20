@@ -397,7 +397,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		}
 
 		QList<MessageDb::FileData> files =
-		    messageDb->getFilesFromMessage(map["dmID"].toLongLong());
+		    messageDb->getMessageAttachments(map["dmID"].toLongLong());
 
 		foreach (const MessageDb::FileData &file, files) {
 
@@ -444,7 +444,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 		}
 
 		QByteArray base64 =
-		    messageDb->msgsMessageBase64(map["dmID"].toLongLong());
+		    messageDb->getCompleteMessageBase64(map["dmID"].toLongLong());
 
 		if (base64.isEmpty()) {
 			errmsg = "Cannot export complete message to ZFO";
@@ -468,7 +468,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 	if (map.contains("markDownload")) {
 		if (map.value("markDownload").toString() == "yes") {
-			messageDb->smsgdtSetLocallyRead(
+			messageDb->setMessageLocallyRead(
 			    map["dmID"].toLongLong(), true);
 		}
 	}
@@ -1629,11 +1629,11 @@ int runService(const QString &lParam,
 			if (download == "no") {
 				needsISDS = false;
 			} else if (download == "ondemand") {
-				needsISDS = messageDb->msgsMessageBase64(
+				needsISDS = messageDb->getCompleteMessageBase64(
 				    serviceMap["dmID"].toLongLong()).isNull();
 			}
 		} else {
-			needsISDS = messageDb->msgsMessageBase64(
+			needsISDS = messageDb->getCompleteMessageBase64(
 			    serviceMap["dmID"].toLongLong()).isNull();
 		}
 	}

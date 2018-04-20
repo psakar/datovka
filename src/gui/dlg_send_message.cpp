@@ -782,7 +782,7 @@ void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 			m_ui->subjectLine->setText("Fwd: " + envData.dmAnnotation);
 		}
 
-		QByteArray msgBase64(messageDb->msgsMessageBase64(msgId.dmId));
+		QByteArray msgBase64(messageDb->getCompleteMessageBase64(msgId.dmId));
 		if (msgBase64.isEmpty()) {
 			continue;
 		}
@@ -964,7 +964,7 @@ void DlgSendMessage::fillContentFromTemplate(
 
 	/* fill attachments from template message */
 	QList<MessageDb::FileData> msgFileList =
-	    messageDb->getFilesFromMessage(msgId.dmId);
+	    messageDb->getMessageAttachments(msgId.dmId);
 
 	foreach (const MessageDb::FileData &fileData, msgFileList) {
 		m_attachModel.appendAttachmentEntry(fileData.dmEncodedContent,
