@@ -96,7 +96,7 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 		fileTypeStr = tr("message");
 		fileSufix = ".zfo";
 		fileNameformat = GlobInstcs::prefsPtr->messageFilenameFormat;
-		base64 = messageDb->msgsMessageBase64(msgId.dmId);
+		base64 = messageDb->getCompleteMessageBase64(msgId.dmId);
 		break;
 	case ZFO_DELIVERY:
 		fileTypeStr = tr("acceptance info");
@@ -251,7 +251,7 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 
 	// get list of attachments
 	QList<MessageDb::FileData> attachList(
-	    messageDb->getFilesFromMessage(msgId.dmId));
+	    messageDb->getMessageAttachments(msgId.dmId));
 	if (attachList.isEmpty()) {
 		errStr = tr("Complete message \"%1\" missing!").arg(msgID);
 		return EXP_NOT_MSG_DATA;
@@ -336,7 +336,7 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 
 	// get list of attachments
 	QList<MessageDb::FileData> attachList(
-	    messageDb->getFilesFromMessage(msgId.dmId));
+	    messageDb->getMessageAttachments(msgId.dmId));
 	if (attachList.isEmpty()) {
 		errStr = tr("Complete message \"%1\" missing!").arg(msgID);
 		return EXP_NOT_MSG_DATA;

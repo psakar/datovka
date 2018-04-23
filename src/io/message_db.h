@@ -381,7 +381,7 @@ public:
 	 * @param[in] dmId  Message id.
 	 * @retunrn False if not read or on failure.
 	 */
-	bool smsgdtLocallyRead(qint64 dmId) const;
+	bool messageLocallyRead(qint64 dmId) const;
 
 	/*!
 	 * @brief Set message read locally status.
@@ -390,20 +390,17 @@ public:
 	 * @param[in] read  New read status.
 	 * @return True on success.
 	 */
-	bool smsgdtSetLocallyRead(qint64 dmId, bool read = true);
+	bool setMessageLocallyRead(qint64 dmId, bool read = true);
 
 	/*!
 	 * @brief Return HTML formatted message description.
 	 *
-	 * @param[in]     dmId Message identifier.
-	 * @param[in]     showId Whether to also show the message id.
-	 * @param[in]     verSignature Whether to show verification details.
-	 * @param[in]     warnOld
+	 * @param[in] dmId Message identifier.
+	 * @param[in] verSignature Whether to show verification details.
 	 * @return HTML formatted string containing message information.
-	 *     Empty string is returned on error.
+	 *         Empty string is returned on error.
 	 */
-	QString descriptionHtml(qint64 dmId, bool showId = true,
-	    bool verSignature = true, bool warnOld = true) const;
+	QString descriptionHtml(qint64 dmId, bool verSignature = true) const;
 
 	/*!
 	 * @brief Return message envelope HTML to be used to generate a PDF.
@@ -441,7 +438,7 @@ public:
 	 * @param[in] msgId  Message identifier.
 	 * @return List of files and their attributes.
 	 */
-	QList<FileData> getFilesFromMessage(qint64 msgId) const;
+	QList<FileData> getMessageAttachments(qint64 msgId) const;
 
 	/*!
 	 * @brief Return list of attachment entries related to given message.
@@ -555,7 +552,7 @@ public:
 	 * @param[in] dmId Message identifier.
 	 * @return True on success.
 	 */
-	bool flsDeleteMessageFiles(qint64 dmId);
+	bool deleteMessageAttachments(qint64 dmId);
 
 	/*!
 	 * @brief Insert/update message hash into hashes table.
@@ -609,20 +606,20 @@ public:
 	QList<qint64> getAllMessageIDs(enum MessageType messageType) const;
 
 	/*!
-	 * @brief Check whether whole message is stored in database.
-	 *
-	 * @param[in] dmId  Message identifier.
-	 * @return True if whole message exists.
-	 */
-	bool msgsStoredWhole(qint64 dmId) const;
-
-	/*!
 	 * @brief Get base64 encoded raw message data.
 	 *
 	 * @param[in] dmId  Message identifier.
 	 * @return Empty byte array on error.
 	 */
-	QByteArray msgsMessageBase64(qint64 dmId) const;
+	QByteArray getCompleteMessageBase64(qint64 dmId) const;
+
+	/*!
+	 * @brief Check if complete message is in the database.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return True if complete message is in the database.
+	 */
+	bool isCompleteMessageInDb(qint64 dmId) const;
 
 	/*!
 	 * @brief Get message data in DER (raw) format.
@@ -630,7 +627,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Empty byte array on error.
 	 */
-	QByteArray msgsMessageRaw(qint64 dmId) const;
+	QByteArray getCompleteMessageRaw(qint64 dmId) const;
 
 	/*!
 	 * @brief Get base64-encoded delivery info from
@@ -669,7 +666,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Message hash structure.
 	 */
-	MessageHash msgsGetHashFromDb(qint64 dmId) const;
+	MessageHash getMessageHash(qint64 dmId) const;
 
 	/*!
 	 * @brief Delete all message records from db.
@@ -706,7 +703,7 @@ public:
 	 *                     False if verification failed.
 	 * @return True if update was successful.
 	 */
-	bool msgsSetVerified(qint64 dmId, bool verified);
+	bool setMessageVerified(qint64 dmId, bool verified);
 
 	/*!
 	 * @brief Set process state of received message.
@@ -732,7 +729,7 @@ public:
 	 * @return Qualified time stamp in DER format.
 	 *     Empty byte array on error.
 	 */
-	QByteArray msgsTimestampRaw(qint64 dmId) const;
+	QByteArray getMessageTimestampRaw(qint64 dmId) const;
 
 	/*!
 	 * @brief Return some additional filename entries as
@@ -896,7 +893,7 @@ protected: /* These function are used from within a database container. */
 	 * @param[in] state  Message state to be set.
 	 * @return True if operation successful.
 	 */
-	bool msgSetAllReceivedProcessState(enum MessageProcessState state);
+	bool setReceivedMessagesProcessState(enum MessageProcessState state);
 
 	/*!
 	 * @brief Set process state of received messages in given year.

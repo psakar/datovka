@@ -473,7 +473,7 @@ public: /* Database function that have been delegate to the container. */
 	 * @param[in] state  Message state to be set.
 	 * @return True if operation successful.
 	 */
-	bool msgSetAllReceivedProcessState(enum MessageProcessState state);
+	bool setReceivedMessagesProcessState(enum MessageProcessState state);
 
 	/*!
 	 * @brief Set process state of received messages in given year.

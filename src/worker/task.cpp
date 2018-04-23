@@ -206,8 +206,8 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 	 * If there is no raw message then all the attachments have been
 	 * stored when the message has been set.
 	 */
-	if (!messageDb->msgsStoredWhole(dmID)) {
-		messageDb->flsDeleteMessageFiles(dmID);
+	if (!messageDb->isCompleteMessageInDb(dmID)) {
+		messageDb->deleteMessageAttachments(dmID);
 	}
 
 	/* Get signed raw data from message and store to db. */
@@ -245,10 +245,10 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 		   "Verification of message '%" PRId64 "' returned: %d.",
 		   dmID, ret);
 		if (1 == ret) {
-			messageDb->msgsSetVerified(dmID, true);
+			messageDb->setMessageVerified(dmID, true);
 			/* TODO -- handle return error. */
 		} else if (0 == ret){
-			messageDb->msgsSetVerified(dmID, false);
+			messageDb->setMessageVerified(dmID, false);
 			/* TODO -- handle return error. */
 		} else {
 			/* TODO -- handle this error. */

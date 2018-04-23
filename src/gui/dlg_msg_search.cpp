@@ -452,7 +452,7 @@ void appendMsgToWidget(QTableWidget *tabWid,
 		        msgData.mId.deliveryTime);
 		if (Q_NULLPTR != messageDb) {
 			item->setToolTip(messageDb->descriptionHtml(
-			    msgData.mId.dmId, true, false, true));
+			    msgData.mId.dmId, false));
 		} else {
 			Q_ASSERT(0);
 		}
