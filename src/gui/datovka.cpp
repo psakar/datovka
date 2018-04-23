@@ -4634,7 +4634,7 @@ void MainWindow::showSendMessageDialog(int action)
 				return;
 			}
 
-			if (!messageDb->getCompleteMessageBase64(msgId.dmId).isEmpty()) {
+			if (!messageDb->isCompleteMessageInDb(msgId.dmId)) {
 				if (!messageMissingOfferDownload(msgId,
 				    tr("Full message not present!"))) {
 					return;

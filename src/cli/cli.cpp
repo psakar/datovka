@@ -1629,12 +1629,12 @@ int runService(const QString &lParam,
 			if (download == "no") {
 				needsISDS = false;
 			} else if (download == "ondemand") {
-				needsISDS = messageDb->getCompleteMessageBase64(
-				    serviceMap["dmID"].toLongLong()).isNull();
+				needsISDS = !messageDb->isCompleteMessageInDb(
+				    serviceMap["dmID"].toLongLong());
 			}
 		} else {
-			needsISDS = messageDb->getCompleteMessageBase64(
-			    serviceMap["dmID"].toLongLong()).isNull();
+			needsISDS = !messageDb->isCompleteMessageInDb(
+			    serviceMap["dmID"].toLongLong());
 		}
 	}
 

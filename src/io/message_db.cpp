@@ -2656,6 +2656,30 @@ fail:
 	return QByteArray();
 }
 
+bool MessageDb::isCompleteMessageInDb(qint64 dmId) const
+{
+	QSqlQuery query(m_db);
+	QString queryStr = "SELECT count(*) FROM raw_message_data "
+	    "WHERE message_id = :dmId";
+
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		goto fail;
+	}
+	query.bindValue(":dmId", dmId);
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toInt() != 0;
+	} else {
+		logErrorNL(
+		    "Cannot execute SQL query and/or read SQL data: %s.",
+		    query.lastError().text().toUtf8().constData());
+	}
+fail:
+	return false;
+}
+
 QByteArray MessageDb::getCompleteMessageRaw(qint64 dmId) const
 {
 	return QByteArray::fromBase64(getCompleteMessageBase64(dmId));

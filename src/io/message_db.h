@@ -614,6 +614,14 @@ public:
 	QByteArray getCompleteMessageBase64(qint64 dmId) const;
 
 	/*!
+	 * @brief Check if complete message is in the database.
+	 *
+	 * @param[in] dmId  Message identifier.
+	 * @return True if complete message is in the database.
+	 */
+	bool isCompleteMessageInDb(qint64 dmId) const;
+
+	/*!
 	 * @brief Get message data in DER (raw) format.
 	 *
 	 * @param[in] dmId  Message identifier.
