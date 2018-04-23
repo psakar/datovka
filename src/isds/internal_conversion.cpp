@@ -28,6 +28,14 @@
 
 #include "src/isds/internal_conversion.h"
 
+QByteArray Isds::fromCData(const void *cData, size_t cSize)
+{
+	if ((cData == NULL) || (cSize == 0)) {
+		return QByteArray();
+	}
+	return QByteArray((const char *)cData, cSize);
+}
+
 bool Isds::toCDataCopy(void **cDataPtr, size_t *cSize, const QByteArray &data)
 {
 	if (Q_UNLIKELY((cDataPtr == Q_NULLPTR) || (cSize == NULL))) {

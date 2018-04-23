@@ -34,12 +34,21 @@
 namespace Isds {
 
 	/*!
+	 * @brief Converts C data into QByteArray.
+	 *
+	 * @param[in] cData C data pointer.
+	 * @param[in] cSize Size of data.
+	 * @return Byte array object, null byte array if NULL pointer or zero size was supplied.
+	 */
+	QByteArray fromCData(const void *cData, size_t cSize);
+
+	/*!
 	 * @brief Creates a C data copy from the supplied QBYteArray.
 	 *
 	 * @param[in,out] cDataPtr Pointer to C data.
 	 * @param[in,out] cSize Size value to be set.
 	 * @param[in] data Data object.
-	 * @return Tru on success, false on failure.
+	 * @return True on success, false on failure.
 	 */
 	bool toCDataCopy(void **cDataPtr, size_t *cSize,
 	    const QByteArray &data);

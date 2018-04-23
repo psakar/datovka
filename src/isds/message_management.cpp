@@ -44,35 +44,267 @@ static const QDateTime nullDateTime;
 static const QList<Isds::Event> nullEventList;
 static const QString nullString;
 
-Isds::Hash::Hash(const Hash &other)
-    : m_alg(other.m_alg),
-    m_hash(other.m_hash)
+/*!
+ * @brief PIMPL Hash class.
+ */
+class Isds::HashPrivate {
+	//Q_DISABLE_COPY(HashPrivate)
+public:
+	HashPrivate(void)
+	    : m_alg(Type::HA_UNKNOWN), m_hash()
+	{ }
+
+	HashPrivate &operator=(const HashPrivate &other) Q_DECL_NOTHROW
+	{
+		m_alg = other.m_alg;
+		m_hash = other.m_hash;
+
+		return *this;
+	}
+
+	enum Type::HashAlg m_alg;
+	QByteArray m_hash;
+};
+
+Isds::Hash::Hash(void)
+    : d_ptr(Q_NULLPTR)
 {
+}
+
+Isds::Hash::Hash(const Hash &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) HashPrivate) : Q_NULLPTR)
+{
+	Q_D(Hash);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::Hash::Hash(Hash &&other) Q_DECL_NOEXCEPT
-    : m_alg(std::move(other.m_alg)),
-    m_hash(std::move(other.m_hash))
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
 {
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+Isds::Hash::~Hash(void)
+{
+}
+
+/*!
+ * @brief Ensures private hash presence.
+ *
+ * @note Returns if private hash could not be allocated.
+ */
+#define ensureHashPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			HashPrivate *p = new (std::nothrow) HashPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
 Isds::Hash &Isds::Hash::operator=(const Hash &other) Q_DECL_NOTHROW
 {
-	m_alg = other.m_alg;
-	m_hash = other.m_hash;
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureHashPrivate(*this);
+	Q_D(Hash);
+
+	*d = *other.d_func();
+
 	return *this;
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::Hash &Isds::Hash::operator=(Hash &&other) Q_DECL_NOTHROW
 {
-	std::swap(m_alg, other.m_alg);
-	std::swap(m_hash, other.m_hash);
+	swap(*this, other);
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::Hash::isNull(void) const
+{
+	Q_D(const Hash);
+	return d == Q_NULLPTR;
+}
+
+enum Isds::Type::HashAlg Isds::Hash::algorithm(void) const
+{
+	Q_D(const Hash);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::HA_UNKNOWN;
+	}
+
+	return d->m_alg;
+}
+
+void Isds::Hash::setAlgorithm(enum Type::HashAlg a)
+{
+	ensureHashPrivate();
+	Q_D(Hash);
+	d->m_alg = a;
+}
+
+QByteArray Isds::Hash::value(void) const
+{
+	Q_D(const Hash);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return QByteArray();
+	}
+
+	return d->m_hash;
+}
+
+void Isds::Hash::setValue(const QByteArray &v)
+{
+	ensureHashPrivate();
+	Q_D(Hash);
+	d->m_hash = v;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Hash::setValue(QByteArray &&v)
+{
+	ensureHashPrivate();
+	Q_D(Hash);
+	d->m_hash = v;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(Hash &first, Hash &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief Converts user types.
+ */
+static
+Isds::Type::HashAlg libisdsHashAlg2HashAlg(isds_hash_algorithm a)
+{
+	switch (a) {
+	case HASH_ALGORITHM_MD5: return Isds::Type::HA_MD5; break;
+	case HASH_ALGORITHM_SHA_1: return Isds::Type::HA_SHA_1; break;
+	case HASH_ALGORITHM_SHA_224: return Isds::Type::HA_SHA_224; break;
+	case HASH_ALGORITHM_SHA_256: return Isds::Type::HA_SHA_256; break;
+	case HASH_ALGORITHM_SHA_384: return Isds::Type::HA_SHA_384; break;
+	case HASH_ALGORITHM_SHA_512: return Isds::Type::HA_SHA_512; break;
+	default:
+		Q_ASSERT(0);
+		return Isds::Type::HA_UNKNOWN;
+		break;
+	}
+}
+
+/*!
+ * @brief Set hash according to the libisds hash structure.
+ */
+static
+void setHashContent(Isds::Hash &tgt, const struct isds_hash *src)
+{
+	if (Q_UNLIKELY(src == NULL)) {
+		return;
+	}
+
+	tgt.setAlgorithm(libisdsHashAlg2HashAlg(src->algorithm));
+	if (Q_UNLIKELY(tgt.algorithm() == Isds::Type::HA_UNKNOWN)) {
+		tgt.setValue(QByteArray());
+		return;
+	}
+	QByteArray data((const char *)src->value, src->length);
+	if (!data.isEmpty()) {
+		tgt.setValue(data);
+	} else {
+		tgt.setAlgorithm(Isds::Type::HA_UNKNOWN);
+		tgt.setValue(QByteArray());
+	}
+}
+
+Isds::Hash Isds::libisds2hash(const struct isds_hash *ih)
+{
+	Hash hash;
+	setHashContent(hash, ih);
+	return hash;
+}
+
+/*!
+ * @brief Converts user types.
+ */
+static
+isds_hash_algorithm hashAlg2libisdsHashAlg(Isds::Type::HashAlg a)
+{
+	switch (a) {
+	case Isds::Type::HA_MD5: return HASH_ALGORITHM_MD5; break;
+	case Isds::Type::HA_SHA_1: return HASH_ALGORITHM_SHA_1; break;
+	case Isds::Type::HA_SHA_224: return HASH_ALGORITHM_SHA_224; break;
+	case Isds::Type::HA_SHA_256: return HASH_ALGORITHM_SHA_256; break;
+	case Isds::Type::HA_SHA_384: return HASH_ALGORITHM_SHA_384; break;
+	case Isds::Type::HA_SHA_512: return HASH_ALGORITHM_SHA_512; break;
+	default:
+		Q_ASSERT(0);
+		return HASH_ALGORITHM_MD5; /* TODO -- This value is clearly incorrect. */
+		break;
+	}
+}
+
+/*!
+ * @brief Set libisds hash structure according to the hash.
+ */
+static
+bool setLibisdsHashContent(struct isds_hash *tgt, const Isds::Hash &src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	tgt->algorithm = hashAlg2libisdsHashAlg(src.algorithm());
+	if (tgt->value != NULL) {
+		std::free(tgt->value); tgt->value = NULL;
+	}
+	const QByteArray &data(src.value());
+	tgt->length = data.size();
+	if (tgt->length == 0) {
+		return true;
+	}
+	tgt->value = std::malloc(tgt->length);
+	if (Q_UNLIKELY(tgt->value == NULL)) {
+		Q_ASSERT(0);
+		tgt->length = 0;
+		return false;
+	}
+	std::memcpy(tgt->value, data.constData(), tgt->length);
+	return true;
+}
+
+struct isds_hash *Isds::hash2libisds(const Hash &h)
+{
+	if (Q_UNLIKELY(h.isNull())) {
+		return NULL;
+	}
+
+	struct isds_hash *ih = (struct isds_hash *)std::malloc(sizeof(*ih));
+	if (Q_UNLIKELY(ih == NULL)) {
+		Q_ASSERT(0);
+		return NULL;
+	}
+	if (Q_UNLIKELY(!setLibisdsHashContent(ih, h))) {
+		isds_hash_free(&ih);
+		return NULL;
+	}
+	return ih;
+}
 
 Isds::Event::Event(const Event &other)
     : m_time(other.m_time),
@@ -789,51 +1021,6 @@ void Isds::Envelope::setDmAcceptanceTime(QDateTime &&at)
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-/*!
- * @brief Converts user types.
- */
-static
-Isds::Type::HashAlg libisdsHashAlg2HashAlg(isds_hash_algorithm a)
-{
-	switch (a) {
-	case HASH_ALGORITHM_MD5: return Isds::Type::HA_MD5; break;
-	case HASH_ALGORITHM_SHA_1: return Isds::Type::HA_SHA_1; break;
-	case HASH_ALGORITHM_SHA_224: return Isds::Type::HA_SHA_224; break;
-	case HASH_ALGORITHM_SHA_256: return Isds::Type::HA_SHA_256; break;
-	case HASH_ALGORITHM_SHA_384: return Isds::Type::HA_SHA_384; break;
-	case HASH_ALGORITHM_SHA_512: return Isds::Type::HA_SHA_512; break;
-	default:
-		Q_ASSERT(0);
-		return Isds::Type::HA_UNKNOWN;
-		break;
-	}
-}
-
-/*!
- * @brief Set hash according to the libisds hash structure.
- */
-static
-void setHashContent(Isds::Hash &tgt, const struct isds_hash *src)
-{
-	if (Q_UNLIKELY(src == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	tgt.setAlgorithm(libisdsHashAlg2HashAlg(src->algorithm));
-	if (Q_UNLIKELY(tgt.algorithm() == Isds::Type::HA_UNKNOWN)) {
-		tgt.setValue(QByteArray());
-		return;
-	}
-	QByteArray data((const char *)src->value, src->length);
-	if (!data.isEmpty()) {
-		tgt.setValue(data);
-	} else {
-		tgt.setAlgorithm(Isds::Type::HA_UNKNOWN);
-		tgt.setValue(QByteArray());
-	}
-}
-
 const Isds::Hash &Isds::Envelope::dmHash(void) const
 {
 	Q_D(const Envelope);
@@ -841,55 +1028,6 @@ const Isds::Hash &Isds::Envelope::dmHash(void) const
 		return nullHash;
 	}
 	return d->m_dmHash;
-}
-
-/*!
- * @brief Converts user types.
- */
-static
-isds_hash_algorithm hashAlg2libisdsHashAlg(Isds::Type::HashAlg a)
-{
-	switch (a) {
-	case Isds::Type::HA_MD5: return HASH_ALGORITHM_MD5; break;
-	case Isds::Type::HA_SHA_1: return HASH_ALGORITHM_SHA_1; break;
-	case Isds::Type::HA_SHA_224: return HASH_ALGORITHM_SHA_224; break;
-	case Isds::Type::HA_SHA_256: return HASH_ALGORITHM_SHA_256; break;
-	case Isds::Type::HA_SHA_384: return HASH_ALGORITHM_SHA_384; break;
-	case Isds::Type::HA_SHA_512: return HASH_ALGORITHM_SHA_512; break;
-	default:
-		Q_ASSERT(0);
-		return HASH_ALGORITHM_MD5; /* TODO -- This value is clearly incorrect. */
-		break;
-	}
-}
-
-/*!
- * @brief Set libisds hash structure according to the hash.
- */
-static
-void setLibisdsHashContent(struct isds_hash *tgt, const Isds::Hash &src)
-{
-	if (Q_UNLIKELY(tgt == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	tgt->algorithm = hashAlg2libisdsHashAlg(src.algorithm());
-	if (tgt->value != NULL) {
-		std::free(tgt->value); tgt->value = NULL;
-	}
-	const QByteArray &data(src.value());
-	tgt->length = data.size();
-	if (tgt->length == 0) {
-		return;
-	}
-	tgt->value = std::malloc(tgt->length);
-	if (Q_UNLIKELY(tgt->value == NULL)) {
-		Q_ASSERT(0);
-		tgt->length = 0;
-		return;
-	}
-	std::memcpy(tgt->value, data.constData(), tgt->length);
 }
 
 void Isds::Envelope::setDmHash(const Hash &h)

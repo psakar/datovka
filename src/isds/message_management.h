@@ -42,36 +42,50 @@
 
 namespace Isds {
 
+	class HashPrivate;
 	/*!
 	 * @brief Described in dmBaseTypes.xsd as type tHash
 	 */
 	class Hash {
-	public:
-		Hash(void)
-		    : m_alg(Type::HA_UNKNOWN), m_hash()
-		{ }
+		Q_DECLARE_PRIVATE(Hash)
 
+	public:
+		Hash(void);
 		Hash(const Hash &other);
 #ifdef Q_COMPILER_RVALUE_REFS
 		Hash(Hash &&other) Q_DECL_NOEXCEPT;
 #endif /* Q_COMPILER_RVALUE_REFS */
-
-		/* algorithm */
-		enum Type::HashAlg algorithm(void) const { return m_alg; }
-		void setAlgorithm(enum Type::HashAlg a) { m_alg = a; }
-		/* __item */
-		QByteArray value(void) const { return m_hash; }
-		void setValue(const QByteArray &v) { m_hash = v; }
+		~Hash(void);
 
 		Hash &operator=(const Hash &other) Q_DECL_NOTHROW;
 #ifdef Q_COMPILER_RVALUE_REFS
 		Hash &operator=(Hash &&other) Q_DECL_NOTHROW;
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+		friend void swap(Hash &first, Hash &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+		/* algorithm */
+		enum Type::HashAlg algorithm(void) const;
+		void setAlgorithm(enum Type::HashAlg a);
+		/* __item */
+		QByteArray value(void) const;
+		void setValue(const QByteArray &v);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setValue(QByteArray &&v);
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		friend Hash libisds2hash(const struct isds_hash *ih);
+
 	private:
-		enum Type::HashAlg m_alg;
-		QByteArray m_hash;
+		QScopedPointer<HashPrivate> d_ptr; // std::unique_ptr ?
 	};
+
+	void swap(Hash &first, Hash &second) Q_DECL_NOTHROW;
+
+	Hash libisds2hash(const struct isds_hash *ih);
+	struct isds_hash *hash2libisds(const Hash &h);
 
 	/*!
 	 * @brief Described in dmBaseTypes.xsd as type tEvent.
