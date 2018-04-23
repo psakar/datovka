@@ -56,7 +56,7 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 
 	/* get signed raw data from message */
 	if (signedMsg) {
-		if (messageDb->msgsInsertUpdateDeliveryInfoRaw(dmID,
+		if (messageDb->insertOrReplaceDeliveryInfoRaw(dmID,
 		    QByteArray((char*)msg->raw, msg->raw_length))) {
 			logDebugLv0NL(
 			    "Raw delivery info of message '%" PRId64 "' was updated.",
@@ -73,7 +73,7 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 
 	while (0 != event) {
 		isds_event *item = (isds_event *) event->data;
-		messageDb->msgsInsertUpdateMessageEvent(dmID,
+		messageDb->insertOrUpdateMessageEvent(dmID,
 		    timevalToDbFormat(item->time),
 		    IsdsConversion::eventTypeToStr(*item->type) + QLatin1String(": "),
 		    item->description);
@@ -212,7 +212,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	/* Get signed raw data from message and store to db. */
 	if (signedMsg) {
-		if (messageDb->msgsInsertUpdateMessageRaw(dmID,
+		if (messageDb->insertOrReplaceCompleteMessageRaw(dmID,
 		        QByteArray((char*) msg->raw, msg->raw_length), 0)) {
 			logDebugLv0NL(
 			    "Raw data of message '%" PRId64 "' were updated.",
@@ -263,7 +263,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 		QByteArray hashValueBase64 = QByteArray((char *) hash->value,
 		    hash->length).toBase64();
-		if (messageDb->msgsInsertUpdateMessageHash(dmID,
+		if (messageDb->insertOrUpdateMessageHash(dmID,
 		        hashValueBase64,
 		        IsdsConversion::hashAlgToStr(hash->algorithm))) {
 			logDebugLv0NL("Hash of message '%" PRId64 "' stored.",
@@ -295,7 +295,7 @@ qdatovka_error Task::storeAttachments(MessageDb &messageDb, qint64 dmId,
 		    (char *)item->data, item->data_length).toBase64();
 
 		/* Insert/update file to db */
-		if (messageDb.msgsInsertUpdateMessageFile(dmId,
+		if (messageDb.insertOrUpdateMessageAttachment(dmId,
 		        item->dmFileDescr, item->dmUpFileGuid,
 		        item->dmFileGuid, item->dmMimeType, item->dmFormat,
 		        IsdsConversion::attachmentTypeToStr(item->dmFileMetaType),

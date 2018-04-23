@@ -357,7 +357,7 @@ public:
 	 *     mesageType, senderRefNumber.
 	 *     Returns empty vector in failure.
 	 */
-	PartialEnvelopeData msgsReplyData(qint64 dmId) const;
+	PartialEnvelopeData getMessageReplyData(qint64 dmId) const;
 
 	/*!
 	 * @brief Return message type (sent or received).
@@ -540,7 +540,7 @@ public:
 	 * @param[in] dmEncodedContentBase64  Base64-encoded file content.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageFile(qint64 dmId,
+	bool insertOrUpdateMessageAttachment(qint64 dmId,
 	    const QString &dmFileDescr, const QString &dmUpFileGuid,
 	    const QString &dmFileGuid, const QString &dmMimeType,
 	    const QString &dmFormat, const QString &dmFileMetaType,
@@ -562,7 +562,7 @@ public:
 	 * @param[in] algorithm    Algorithm identifier.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageHash(qint64 dmId,
+	bool insertOrUpdateMessageHash(qint64 dmId,
 	    const QByteArray &valueBase64, const QString &algorithm);
 
 	/*!
@@ -574,7 +574,7 @@ public:
 	 * @param[in] dmEventDescr  Event description.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageEvent(qint64 dmId,
+	bool insertOrUpdateMessageEvent(qint64 dmId,
 	    const QString &dmEventTime, const QString &dmEventType,
 	    const QString &dmEventDescr);
 
@@ -587,7 +587,7 @@ public:
 	 * @param[in] messageType  Message type.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateMessageRaw(qint64 dmId, const QByteArray &raw,
+	bool insertOrReplaceCompleteMessageRaw(qint64 dmId, const QByteArray &raw,
 	    int messageType);
 
 	/*!
@@ -646,7 +646,7 @@ public:
 	 * @param[in] raw   Raw (in DER format) delivery information.
 	 * @return True on success.
 	 */
-	bool msgsInsertUpdateDeliveryInfoRaw(qint64 dmId,
+	bool insertOrReplaceDeliveryInfoRaw(qint64 dmId,
 	    const QByteArray &raw);
 
 	/*!
@@ -684,7 +684,7 @@ public:
 	 * @return String list containing sender, recipient, annotation, ...
 	 *    Empty list is returned on error.
 	 */
-	QStringList getMsgForHtmlExport(qint64 dmId) const;
+	QStringList getMessageForHtmlExport(qint64 dmId) const;
 
 	/*!
 	 * @brief Return some message items for export correspondence to csv.
@@ -693,7 +693,7 @@ public:
 	 * @return String containing message status, message type, ...
 	 *    Empty list is returned on error.
 	 */
-	QStringList getMsgForCsvExport(qint64 dmId) const;
+	QStringList getMessageForCsvExport(qint64 dmId) const;
 
 	/*!
 	 * @brief Set the verification result.
@@ -1082,7 +1082,7 @@ private:
 	 * @brief msgId  Message identifier.
 	 * @return Stored json document data. Returns empty document on error.
 	 */
-	QJsonDocument smsgdCustomData(qint64 msgId) const;
+	QJsonDocument getMessageCustomData(qint64 msgId) const;
 
 	/*!
 	 * @brief Check whether message signature was valid at given date

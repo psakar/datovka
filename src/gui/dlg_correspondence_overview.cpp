@@ -171,7 +171,7 @@ QString DlgCorrespondenceOverview::msgCsvEntry(
 	    mId.deliveryTime);
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
-	QStringList messageItems(messageDb->getMsgForCsvExport(mId.dmId));
+	QStringList messageItems(messageDb->getMessageForCsvExport(mId.dmId));
 	if (messageItems.empty()) {
 		return QString();
 	}
@@ -275,7 +275,7 @@ QString DlgCorrespondenceOverview::msgHtmlEntry(const QString &userName,
 	    mId.deliveryTime);
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
-	QStringList messageItems(messageDb->getMsgForHtmlExport(mId.dmId));
+	QStringList messageItems(messageDb->getMessageForHtmlExport(mId.dmId));
 	if (messageItems.empty()) {
 		return QString();
 	}
