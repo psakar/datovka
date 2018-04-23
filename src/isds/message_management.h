@@ -70,7 +70,7 @@ namespace Isds {
 		enum Type::HashAlg algorithm(void) const;
 		void setAlgorithm(enum Type::HashAlg a);
 		/* __item */
-		QByteArray value(void) const;
+		const QByteArray &value(void) const;
 		void setValue(const QByteArray &v);
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setValue(QByteArray &&v);
@@ -87,37 +87,53 @@ namespace Isds {
 	Hash libisds2hash(const struct isds_hash *ih);
 	struct isds_hash *hash2libisds(const Hash &h);
 
+	class EventPrivate;
 	/*!
 	 * @brief Described in dmBaseTypes.xsd as type tEvent.
 	 */
 	class Event {
-	public:
-		Event(void)
-		    : m_time(), m_type(Type::EV_UNKNOWN), m_descr()
-		{ }
+		Q_DECLARE_PRIVATE(Event)
 
+	public:
+		Event(void);
 		Event(const Event &other);
 #ifdef Q_COMPILER_RVALUE_REFS
 		Event(Event &&other) Q_DECL_NOEXCEPT;
 #endif /* Q_COMPILER_RVALUE_REFS */
-
-		QDateTime time(void) const { return m_time; }
-		void setTime(const QDateTime &t) { m_time = t; }
-		enum Type::Event type(void) const { return m_type; }
-		//void setType(enum Type::Event e); /* Type is determined from description. */
-		QString descr(void) const { return m_descr; }
-		void setDescr(const QString &d);
+		~Event(void);
 
 		Event &operator=(const Event &other) Q_DECL_NOTHROW;
 #ifdef Q_COMPILER_RVALUE_REFS
 		Event &operator=(Event &&other) Q_DECL_NOTHROW;
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+		friend void swap(Event &first, Event &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+		const QDateTime &time(void) const;
+		void setTime(const QDateTime &t);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setTime(QDateTime &&t);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		enum Type::Event type(void) const;
+		//void setType(enum Type::Event e); /* Type is determined from description. */
+		const QString &descr(void) const;
+		void setDescr(const QString &descr);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDescr(QString &&descr);
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		friend Event libisds2event(const struct isds_event *ie);
+
 	private:
-		QDateTime m_time; /* dmEventTime */
-		enum Type::Event m_type; /* Inspired by libisds. */
-		QString m_descr; /* dmEventDescr */
+		QScopedPointer<EventPrivate> d_ptr; // std::unique_ptr ?
 	};
+
+	void swap(Event &first, Event &second) Q_DECL_NOTHROW;
+
+	Event libisds2event(const struct isds_event *ie);
+	struct isds_event *event2libisds(const Event &e);
 
 	class EnvelopePrivate;
 	/*!
@@ -337,7 +353,7 @@ namespace Isds {
 		/* Outgoing messages only. */
 		/* dmOVM */
 		enum Type::NilBool dmOVM(void) const;
-		void dmOVM(enum Type::NilBool ovm);
+		void setDmOVM(enum Type::NilBool ovm);
 		/* dmPublishOwnID */
 		enum Type::NilBool dmPublishOwnID(void) const;
 		void setDmPublishOwnID(enum Type::NilBool poi);

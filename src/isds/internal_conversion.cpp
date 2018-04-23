@@ -153,26 +153,26 @@ QDateTime Isds::dateTimeFromStructTimeval(struct timeval *cDateTime)
 	return timeStamp;
 }
 
-void Isds::toCDateTimeCopy(struct timeval **cDateTimePtr,
+bool Isds::toCDateTimeCopy(struct timeval **cDateTimePtr,
     const QDateTime &dateTime)
 {
 	if (Q_UNLIKELY(cDateTimePtr == Q_NULLPTR)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 	if (dateTime.isNull()) {
 		if (*cDateTimePtr != NULL) {
 			/* Delete allocated. */
 			std::free(*cDateTimePtr); *cDateTimePtr = NULL;
 		}
-		return;
+		return true;
 	}
 	if (*cDateTimePtr == NULL) {
 		*cDateTimePtr =
 		    (struct timeval *)std::malloc(sizeof(**cDateTimePtr));
 		if (Q_UNLIKELY(*cDateTimePtr == NULL)) {
 			Q_ASSERT(0);
-			return;
+			return false;
 		}
 	}
 	std::memset(*cDateTimePtr, 0, sizeof(**cDateTimePtr));
@@ -183,6 +183,7 @@ void Isds::toCDateTimeCopy(struct timeval **cDateTimePtr,
 #else /* < Qt-5.8 */
 	(*cDateTimePtr)->tv_sec = dateTime.toTime_t();
 #endif /* >= Qt-5.8 */
+	return true;
 }
 
 qint64 Isds::fromLongInt(const long int *cLongPtr)

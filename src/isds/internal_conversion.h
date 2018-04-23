@@ -99,8 +99,9 @@ namespace Isds {
 	 *
 	 * @param[in,out] cDateTimePtr Address of pointer to struct tm.
 	 * @param[in] dateTime Date object.
+	 * @return True on success, false in failure.
 	 */
-	void toCDateTimeCopy(struct timeval **cDateTimePtr,
+	bool toCDateTimeCopy(struct timeval **cDateTimePtr,
 	    const QDateTime &dateTime);
 
 	/*!

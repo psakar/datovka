@@ -155,11 +155,11 @@ void Isds::Hash::setAlgorithm(enum Type::HashAlg a)
 	d->m_alg = a;
 }
 
-QByteArray Isds::Hash::value(void) const
+const QByteArray &Isds::Hash::value(void) const
 {
 	Q_D(const Hash);
 	if (Q_UNLIKELY(d == Q_NULLPTR)) {
-		return QByteArray();
+		return nullByteArray;
 	}
 
 	return d->m_hash;
@@ -306,21 +306,147 @@ struct isds_hash *Isds::hash2libisds(const Hash &h)
 	return ih;
 }
 
-Isds::Event::Event(const Event &other)
-    : m_time(other.m_time),
-    m_type(other.m_type),
-    m_descr(other.m_descr)
+/*!
+ * @brief PIMPL Event class.
+ */
+class Isds::EventPrivate {
+	//Q_DISABLE_COPY(EventPrivate)
+public:
+	EventPrivate(void)
+	    : m_time(), m_type(Type::EV_UNKNOWN), m_descr()
+	{ }
+
+	EventPrivate &operator=(const EventPrivate &other) Q_DECL_NOTHROW
+	{
+		m_time = other.m_time;
+		m_type = other.m_type;
+		m_descr = other.m_descr;
+
+		return *this;
+	}
+
+	QDateTime m_time; /* dmEventTime */
+	enum Type::Event m_type; /* Inspired by libisds. */
+	QString m_descr; /* dmEventDescr */
+};
+
+Isds::Event::Event(void)
+    : d_ptr(Q_NULLPTR)
 {
+}
+
+Isds::Event::Event(const Event &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) EventPrivate) : Q_NULLPTR)
+{
+	Q_D(Event);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::Event::Event(Event &&other) Q_DECL_NOEXCEPT
-    : m_time(std::move(other.m_time)),
-    m_type(std::move(other.m_type)),
-    m_descr(std::move(other.m_descr))
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
 {
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::Event::~Event(void)
+{
+}
+
+/*!
+ * @brief Ensures private event presence.
+ *
+ * @note Returns if private event could not be allocated.
+ */
+#define ensureEventPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			EventPrivate *p = new (std::nothrow) EventPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+Isds::Event &Isds::Event::operator=(const Event &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureEventPrivate(*this);
+	Q_D(Event);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Event &Isds::Event::operator=(Event &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::Event::isNull(void) const
+{
+	Q_D(const Event);
+	return d == Q_NULLPTR;
+}
+
+const QDateTime &Isds::Event::time(void) const
+{
+	Q_D(const Event);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDateTime;
+	}
+
+	return d->m_time;
+}
+
+void Isds::Event::setTime(const QDateTime &t)
+{
+	ensureEventPrivate();
+	Q_D(Event);
+	d->m_time = t;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Event::setTime(QDateTime &&t)
+{
+	ensureEventPrivate();
+	Q_D(Event);
+	d->m_time = t;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+enum Isds::Type::Event Isds::Event::type(void) const
+{
+	Q_D(const Event);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::EV_UNKNOWN;
+	}
+
+	return d->m_type;
+}
+
+const QString &Isds::Event::descr(void) const
+{
+	Q_D(const Event);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_descr;
+}
 
 /*!
  * @brief Converts description to event.
@@ -354,29 +480,136 @@ enum Isds::Type::Event descr2event(const QString &d)
 	return Isds::Type::EV_UNKNOWN;
 }
 
-void Isds::Event::setDescr(const QString &d)
+void Isds::Event::setDescr(const QString &descr)
 {
-	m_descr = d;
-	m_type = descr2event(m_descr);
-}
-
-Isds::Event &Isds::Event::operator=(const Event &other) Q_DECL_NOTHROW
-{
-	m_time = other.m_time;
-	m_type = other.m_type;
-	m_descr = other.m_descr;
-	return *this;
+	ensureEventPrivate();
+	Q_D(Event);
+	d->m_descr = descr;
+	d->m_type = descr2event(d->m_descr);
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
-Isds::Event &Isds::Event::operator=(Event &&other) Q_DECL_NOTHROW
+void Isds::Event::setDescr(QString &&descr)
 {
-	std::swap(m_time, other.m_time);
-	std::swap(m_type, other.m_type);
-	std::swap(m_descr, other.m_descr);
-	return *this;
+	ensureEventPrivate();
+	Q_D(Event);
+	d->m_descr = descr;
+	d->m_type = descr2event(d->m_descr);
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(Event &first, Event &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief Set event according to the libisds event structure.
+ */
+static
+void setEventContent(Isds::Event &tgt, const struct isds_event *src)
+{
+	if (Q_UNLIKELY(src == NULL)) {
+		return;
+	}
+
+	tgt.setTime(Isds::dateTimeFromStructTimeval(src->time));
+	//tgt.setType();
+	tgt.setDescr(Isds::fromCStr(src->description));
+}
+
+Isds::Event Isds::libisds2event(const struct isds_event *ie)
+{
+	Event event;
+	setEventContent(event, ie);
+	return event;
+}
+
+/*!
+ * @brief Converts event type.
+ */
+static
+bool event2libisdsEvent(isds_event_type **tgt, enum Isds::Type::Event src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (src == Isds::Type::EV_UNKNOWN) {
+		if (*tgt != NULL) {
+			std::free(*tgt); *tgt = NULL;
+		}
+		return true;
+	}
+	if (*tgt == NULL) {
+		*tgt = (isds_event_type *)std::malloc(sizeof(**tgt));
+		if (Q_UNLIKELY(*tgt == NULL)) {
+			Q_ASSERT(0);
+			return false;
+		}
+	}
+	switch (src) {
+	/* case Isds::Type::EV_UNKNOWN: Same as deafult. */
+	case Isds::Type::EV_ENTERED: **tgt = EVENT_ENTERED_SYSTEM; break;
+	case Isds::Type::EV_DELIVERED: **tgt = EVENT_DELIVERED; break;
+	case Isds::Type::EV_ACCEPTED_LOGIN: **tgt = EVENT_ACCEPTED_BY_RECIPIENT; break;
+	case Isds::Type::EV_PRIMARY_LOGIN: **tgt = EVENT_PRIMARY_LOGIN; break;
+	case Isds::Type::EV_ENTRUSTED_LOGIN: **tgt = EVENT_ENTRUSTED_LOGIN; break;
+	case Isds::Type::EV_SYSCERT_LOGIN: **tgt = EVENT_SYSCERT_LOGIN; break;
+	case Isds::Type::EV_ACCEPTED_FICTION: **tgt = EVENT_ACCEPTED_BY_FICTION; break;
+	case Isds::Type::EV_UNDELIVERABLE: **tgt = EVENT_UNDELIVERABLE; break;
+	case Isds::Type::EV_ACCEPTED_BY_RECIPIENT: **tgt = EVENT_COMMERCIAL_ACCEPTED; break;
+	/* case Isds::Type::EV_UNDELIVERED_AV_CHECK: Unknown to libisds. */
+	default:
+		**tgt = EVENT_UKNOWN;
+		break;
+	}
+
+	return true;
+}
+
+/*!
+ * @brief Set libisds event structure according to the event.
+ */
+static
+bool setLibisdsEventContent(struct isds_event *tgt, const Isds::Event &src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	if (Q_UNLIKELY(!Isds::toCDateTimeCopy(&tgt->time, src.time()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!event2libisdsEvent(&tgt->type, src.type()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->description, src.descr()))) {
+		return false;
+	}
+
+	return true;
+}
+
+struct isds_event *Isds::event2libisds(const Event &e)
+{
+	if (Q_UNLIKELY(e.isNull())) {
+		return NULL;
+	}
+
+	struct isds_event *ie = (struct isds_event *)std::malloc(sizeof(*ie));
+	if (Q_UNLIKELY(ie == NULL)) {
+		Q_ASSERT(0);
+		return NULL;
+	}
+	if (Q_UNLIKELY(!setLibisdsEventContent(ie, e))) {
+		isds_event_free(&ie);
+		return NULL;
+	}
+	return ie;
+}
 
 class Isds::EnvelopePrivate {
 	//Q_DISABLE_COPY(EnvelopePrivate)
@@ -1071,22 +1304,6 @@ void Isds::Envelope::setDmQTimestamp(QByteArray &&ts)
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-/*!
- * @brief Set event according to the libisds event structure.
- */
-static
-void setEventContent(Isds::Event &tgt, const struct isds_event *src)
-{
-	if (Q_UNLIKELY(src == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	tgt.setTime(Isds::dateTimeFromStructTimeval(src->time));
-	//tgt.setType();
-	tgt.setDescr(Isds::fromCStr(src->description));
-}
-
 const QList<Isds::Event> &Isds::Envelope::dmEvents(void) const
 {
 	Q_D(const Envelope);
@@ -1094,63 +1311,6 @@ const QList<Isds::Event> &Isds::Envelope::dmEvents(void) const
 		return nullEventList;
 	}
 	return d->m_dmEvents;
-}
-
-/*!
- * @brief Converts event type.
- */
-static
-void event2libisdsEvent(isds_event_type **tgt, enum Isds::Type::Event src)
-{
-	if (Q_UNLIKELY(tgt == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-	if (src == Isds::Type::EV_UNKNOWN) {
-		if (*tgt != NULL) {
-			std::free(*tgt); *tgt = NULL;
-		}
-		return;
-	}
-	if (*tgt == NULL) {
-		*tgt = (isds_event_type *)std::malloc(sizeof(**tgt));
-		if (Q_UNLIKELY(*tgt == NULL)) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-	switch (src) {
-	/* case Isds::Type::EV_UNKNOWN: Same as deafult. */
-	case Isds::Type::EV_ENTERED: **tgt = EVENT_ENTERED_SYSTEM; break;
-	case Isds::Type::EV_DELIVERED: **tgt = EVENT_DELIVERED; break;
-	case Isds::Type::EV_ACCEPTED_LOGIN: **tgt = EVENT_ACCEPTED_BY_RECIPIENT; break;
-	case Isds::Type::EV_PRIMARY_LOGIN: **tgt = EVENT_PRIMARY_LOGIN; break;
-	case Isds::Type::EV_ENTRUSTED_LOGIN: **tgt = EVENT_ENTRUSTED_LOGIN; break;
-	case Isds::Type::EV_SYSCERT_LOGIN: **tgt = EVENT_SYSCERT_LOGIN; break;
-	case Isds::Type::EV_ACCEPTED_FICTION: **tgt = EVENT_ACCEPTED_BY_FICTION; break;
-	case Isds::Type::EV_UNDELIVERABLE: **tgt = EVENT_UNDELIVERABLE; break;
-	case Isds::Type::EV_ACCEPTED_BY_RECIPIENT: **tgt = EVENT_COMMERCIAL_ACCEPTED; break;
-	/* case Isds::Type::EV_UNDELIVERED_AV_CHECK: Unknown to libisds. */
-	default:
-		**tgt = EVENT_UKNOWN;
-		break;
-	}
-}
-
-/*!
- * @brief Set libisds event structure according to the event.
- */
-static
-void setLibisdsEventContent(struct isds_event *tgt, const Isds::Event &src)
-{
-	if (Q_UNLIKELY(tgt == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	Isds::toCDateTimeCopy(&tgt->time, src.time());
-	event2libisdsEvent(&tgt->type, src.type());
-	Isds::toCStrCopy(&tgt->description, src.descr());
 }
 
 void Isds::Envelope::setDmEvents(const QList<Event> &el)
@@ -1590,7 +1750,7 @@ enum Isds::Type::NilBool Isds::Envelope::dmOVM(void) const
 	return d->m_dmOVM;
 }
 
-void Isds::Envelope::dmOVM(enum Type::NilBool ovm)
+void Isds::Envelope::setDmOVM(enum Type::NilBool ovm)
 {
 	ensureEnvelopePrivate();
 	Q_D(Envelope);
