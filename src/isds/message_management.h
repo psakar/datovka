@@ -76,7 +76,7 @@ namespace Isds {
 		void setValue(QByteArray &&v);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-		friend Hash libisds2hash(const struct isds_hash *ih);
+		friend Hash libisds2hash(const struct isds_hash *ih, bool *ok);
 
 	private:
 		QScopedPointer<HashPrivate> d_ptr; // std::unique_ptr ?
@@ -84,7 +84,7 @@ namespace Isds {
 
 	void swap(Hash &first, Hash &second) Q_DECL_NOTHROW;
 
-	Hash libisds2hash(const struct isds_hash *ih);
+	Hash libisds2hash(const struct isds_hash *ih, bool *ok = Q_NULLPTR);
 	struct isds_hash *hash2libisds(const Hash &h);
 
 	class EventPrivate;
@@ -124,7 +124,7 @@ namespace Isds {
 		void setDescr(QString &&descr);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-		friend Event libisds2event(const struct isds_event *ie);
+		friend Event libisds2event(const struct isds_event *ie, bool *ok);
 
 	private:
 		QScopedPointer<EventPrivate> d_ptr; // std::unique_ptr ?
@@ -132,7 +132,7 @@ namespace Isds {
 
 	void swap(Event &first, Event &second) Q_DECL_NOTHROW;
 
-	Event libisds2event(const struct isds_event *ie);
+	Event libisds2event(const struct isds_event *ie, bool *ok = Q_NULLPTR);
 	struct isds_event *event2libisds(const Event &e);
 
 	class EnvelopePrivate;
@@ -277,7 +277,7 @@ namespace Isds {
 #endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmRecipientOrgUnitNum */
 		qint64 dmRecipientOrgUnitNum(void) const;
-		void setDmRecipientOrgUnitNum(qint64 &roun);
+		void setDmRecipientOrgUnitNum(qint64 roun);
 		/* dmToHands -- optional */
 		const QString &dmToHands(void) const;
 		void setDmToHands(const QString &th);
@@ -364,11 +364,16 @@ namespace Isds {
 		static
 		QChar dmType2Char(enum Type::DmType t);
 
+		friend Envelope libisds2envelope(const struct isds_envelope *ie, bool *ok);
+
 	private:
 		QScopedPointer<EnvelopePrivate> d_ptr; // std::unique_ptr ?
 	};
 
 	void swap(Envelope &first, Envelope &second) Q_DECL_NOTHROW;
+
+	Envelope libisds2envelope(const struct isds_envelope *ie, bool *ok = Q_NULLPTR);
+	struct isds_envelope *envelope2libisds(const Envelope &env);
 
 	class DocumentPrivate;
 	/*!

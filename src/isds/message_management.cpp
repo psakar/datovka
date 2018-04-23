@@ -211,16 +211,16 @@ Isds::Type::HashAlg libisdsHashAlg2HashAlg(isds_hash_algorithm a)
  * @brief Set hash according to the libisds hash structure.
  */
 static
-void setHashContent(Isds::Hash &tgt, const struct isds_hash *src)
+bool setHashContent(Isds::Hash &tgt, const struct isds_hash *src)
 {
 	if (Q_UNLIKELY(src == NULL)) {
-		return;
+		return true;
 	}
 
 	tgt.setAlgorithm(libisdsHashAlg2HashAlg(src->algorithm));
 	if (Q_UNLIKELY(tgt.algorithm() == Isds::Type::HA_UNKNOWN)) {
 		tgt.setValue(QByteArray());
-		return;
+		return false;
 	}
 	QByteArray data((const char *)src->value, src->length);
 	if (!data.isEmpty()) {
@@ -229,12 +229,16 @@ void setHashContent(Isds::Hash &tgt, const struct isds_hash *src)
 		tgt.setAlgorithm(Isds::Type::HA_UNKNOWN);
 		tgt.setValue(QByteArray());
 	}
+	return true;
 }
 
-Isds::Hash Isds::libisds2hash(const struct isds_hash *ih)
+Isds::Hash Isds::libisds2hash(const struct isds_hash *ih, bool *ok)
 {
 	Hash hash;
-	setHashContent(hash, ih);
+	bool ret = setHashContent(hash, ih);
+	if (ok != Q_NULLPTR) {
+		*ok = ret;
+	}
 	return hash;
 }
 
@@ -508,21 +512,25 @@ void Isds::swap(Event &first, Event &second) Q_DECL_NOTHROW
  * @brief Set event according to the libisds event structure.
  */
 static
-void setEventContent(Isds::Event &tgt, const struct isds_event *src)
+bool setEventContent(Isds::Event &tgt, const struct isds_event *src)
 {
 	if (Q_UNLIKELY(src == NULL)) {
-		return;
+		return true;
 	}
 
 	tgt.setTime(Isds::dateTimeFromStructTimeval(src->time));
 	//tgt.setType();
 	tgt.setDescr(Isds::fromCStr(src->description));
+	return true;
 }
 
-Isds::Event Isds::libisds2event(const struct isds_event *ie)
+Isds::Event Isds::libisds2event(const struct isds_event *ie, bool *ok)
 {
 	Event event;
-	setEventContent(event, ie);
+	bool ret = setEventContent(event, ie);
+	if (ok != Q_NULLPTR) {
+		*ok = ret;
+	}
 	return event;
 }
 
@@ -823,32 +831,6 @@ const QString &Isds::Envelope::dmID(void) const
 	return d->m_dmID;
 }
 
-/*!
- * @brief Allocates libisds envelope structure.
- *
- * @param[in,out] dataPtr Pointer to pointer holding the structure.
- */
-static
-void intAllocMissingEnvelope(void **dataPtr)
-{
-	if (Q_UNLIKELY(dataPtr == Q_NULLPTR)) {
-		Q_ASSERT(0);
-		return;
-	}
-	if (*dataPtr != NULL) {
-		/* Already allocated. */
-		return;
-	}
-	struct isds_envelope *e =
-	    (struct isds_envelope *)std::malloc(sizeof(*e));
-	if (Q_UNLIKELY(e == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-	std::memset(e, 0, sizeof(*e));
-	*dataPtr = e;
-}
-
 void Isds::Envelope::setDmID(const QString &id)
 {
 	ensureEnvelopePrivate();
@@ -939,41 +921,6 @@ void Isds::Envelope::setDmSenderAddress(QString &&sa)
 	d->m_dmSenderAddress = sa;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
-
-/*!
- * @brief Converts data box types.
- */
-static
-enum Isds::Type::DbType long2DbType(const long int *bt)
-{
-	if (bt == NULL) {
-		return Isds::Type::BT_NULL;
-	}
-
-	switch (*bt) {
-	case Isds::Type::BT_SYSTEM: return Isds::Type::BT_SYSTEM; break;
-	case Isds::Type::BT_OVM: return Isds::Type::BT_OVM; break;
-	case Isds::Type::BT_OVM_NOTAR: return Isds::Type::BT_OVM_NOTAR; break;
-	case Isds::Type::BT_OVM_EXEKUT: return Isds::Type::BT_OVM_EXEKUT; break;
-	case Isds::Type::BT_OVM_REQ: return Isds::Type::BT_OVM_REQ; break;
-	case Isds::Type::BT_OVM_FO: return Isds::Type::BT_OVM_FO; break;
-	case Isds::Type::BT_OVM_PFO: return Isds::Type::BT_OVM_PFO; break;
-	case Isds::Type::BT_OVM_PO: return Isds::Type::BT_OVM_PO; break;
-	case Isds::Type::BT_PO: return Isds::Type::BT_PO; break;
-	case Isds::Type::BT_PO_ZAK: return Isds::Type::BT_PO_ZAK; break;
-	case Isds::Type::BT_PO_REQ: return Isds::Type::BT_PO_REQ; break;
-	case Isds::Type::BT_PFO: return Isds::Type::BT_PFO; break;
-	case Isds::Type::BT_PFO_ADVOK: return Isds::Type::BT_PFO_ADVOK; break;
-	case Isds::Type::BT_PFO_DANPOR: return Isds::Type::BT_PFO_DANPOR; break;
-	case Isds::Type::BT_PFO_INSSPR: return Isds::Type::BT_PFO_INSSPR; break;
-	case Isds::Type::BT_PFO_AUDITOR: return Isds::Type::BT_PFO_AUDITOR; break;
-	case Isds::Type::BT_FO: return Isds::Type::BT_FO; break;
-	default:
-		Q_ASSERT(0);
-		return Isds::Type::BT_SYSTEM; /* FIXME */
-		break;
-	}
-}
 
 /*!
  * @brief Converts data box types.
@@ -1099,34 +1046,6 @@ void Isds::Envelope::setDmOrdinal(quint64 o)
 	ensureEnvelopePrivate();
 	Q_D(Envelope);
 	d->m_dmOrdinal = o;
-}
-
-/*!
- * @brief Converts message status.
- */
-static
-enum Isds::Type::DmState libisdsMessageStatus2DmState(
-    const isds_message_status *ms)
-{
-	if (ms == NULL) {
-		return Isds::Type::MS_NULL;
-	}
-
-	switch (*ms) {
-	case MESSAGESTATE_SENT: return Isds::Type::MS_POSTED; break;
-	case MESSAGESTATE_STAMPED: return Isds::Type::MS_STAMPED; break;
-	case MESSAGESTATE_INFECTED: return Isds::Type::MS_INFECTED; break;
-	case MESSAGESTATE_DELIVERED: return Isds::Type::MS_DELIVERED; break;
-	case MESSAGESTATE_SUBSTITUTED: return Isds::Type::MS_ACCEPTED_FICT; break;
-	case MESSAGESTATE_RECEIVED: return Isds::Type::MS_ACCEPTED; break;
-	case MESSAGESTATE_READ: return Isds::Type::MS_READ; break;
-	case MESSAGESTATE_UNDELIVERABLE: return Isds::Type::MS_UNDELIVERABLE; break;
-	case MESSAGESTATE_REMOVED: return Isds::Type::MS_REMOVED; break;
-	case MESSAGESTATE_IN_SAFE: return Isds::Type::MS_IN_VAULT; break;
-	default:
-		return Isds::Type::MS_NULL;
-		break;
-	}
 }
 
 /*!
@@ -1429,7 +1348,7 @@ qint64 Isds::Envelope::dmRecipientOrgUnitNum(void) const
 	return d->m_dmRecipientOrgUnitNum;
 }
 
-void Isds::Envelope::setDmRecipientOrgUnitNum(qint64 &roun)
+void Isds::Envelope::setDmRecipientOrgUnitNum(qint64 roun)
 {
 	ensureEnvelopePrivate();
 	Q_D(Envelope);
@@ -1817,6 +1736,174 @@ void Isds::swap(Envelope &first, Envelope &second) Q_DECL_NOTHROW
 }
 
 /*!
+ * @brief Converts data box types.
+ */
+static
+enum Isds::Type::DbType long2DbType(const long int *bt)
+{
+	if (bt == NULL) {
+		return Isds::Type::BT_NULL;
+	}
+
+	switch (*bt) {
+	case Isds::Type::BT_SYSTEM: return Isds::Type::BT_SYSTEM; break;
+	case Isds::Type::BT_OVM: return Isds::Type::BT_OVM; break;
+	case Isds::Type::BT_OVM_NOTAR: return Isds::Type::BT_OVM_NOTAR; break;
+	case Isds::Type::BT_OVM_EXEKUT: return Isds::Type::BT_OVM_EXEKUT; break;
+	case Isds::Type::BT_OVM_REQ: return Isds::Type::BT_OVM_REQ; break;
+	case Isds::Type::BT_OVM_FO: return Isds::Type::BT_OVM_FO; break;
+	case Isds::Type::BT_OVM_PFO: return Isds::Type::BT_OVM_PFO; break;
+	case Isds::Type::BT_OVM_PO: return Isds::Type::BT_OVM_PO; break;
+	case Isds::Type::BT_PO: return Isds::Type::BT_PO; break;
+	case Isds::Type::BT_PO_ZAK: return Isds::Type::BT_PO_ZAK; break;
+	case Isds::Type::BT_PO_REQ: return Isds::Type::BT_PO_REQ; break;
+	case Isds::Type::BT_PFO: return Isds::Type::BT_PFO; break;
+	case Isds::Type::BT_PFO_ADVOK: return Isds::Type::BT_PFO_ADVOK; break;
+	case Isds::Type::BT_PFO_DANPOR: return Isds::Type::BT_PFO_DANPOR; break;
+	case Isds::Type::BT_PFO_INSSPR: return Isds::Type::BT_PFO_INSSPR; break;
+	case Isds::Type::BT_PFO_AUDITOR: return Isds::Type::BT_PFO_AUDITOR; break;
+	case Isds::Type::BT_FO: return Isds::Type::BT_FO; break;
+	default:
+		Q_ASSERT(0);
+		return Isds::Type::BT_SYSTEM; /* FIXME */
+		break;
+	}
+}
+
+/*!
+ * @brief Converts message status.
+ */
+static
+enum Isds::Type::DmState libisdsMessageStatus2DmState(
+    const isds_message_status *ms)
+{
+	if (ms == NULL) {
+		return Isds::Type::MS_NULL;
+	}
+
+	switch (*ms) {
+	case MESSAGESTATE_SENT: return Isds::Type::MS_POSTED; break;
+	case MESSAGESTATE_STAMPED: return Isds::Type::MS_STAMPED; break;
+	case MESSAGESTATE_INFECTED: return Isds::Type::MS_INFECTED; break;
+	case MESSAGESTATE_DELIVERED: return Isds::Type::MS_DELIVERED; break;
+	case MESSAGESTATE_SUBSTITUTED: return Isds::Type::MS_ACCEPTED_FICT; break;
+	case MESSAGESTATE_RECEIVED: return Isds::Type::MS_ACCEPTED; break;
+	case MESSAGESTATE_READ: return Isds::Type::MS_READ; break;
+	case MESSAGESTATE_UNDELIVERABLE: return Isds::Type::MS_UNDELIVERABLE; break;
+	case MESSAGESTATE_REMOVED: return Isds::Type::MS_REMOVED; break;
+	case MESSAGESTATE_IN_SAFE: return Isds::Type::MS_IN_VAULT; break;
+	default:
+		return Isds::Type::MS_NULL;
+		break;
+	}
+}
+
+/*!
+ * @brief Converts event list.
+ */
+static
+QList<Isds::Event> libisds2eventList(const struct isds_list *item,
+    bool *ok = Q_NULLPTR)
+{
+	QList<Isds::Event> eventList;
+
+	while (item != NULL) {
+		const struct isds_event *ev = (struct isds_event *)item->data;
+
+		if (ev != NULL) {
+			bool iOk = false;
+			eventList.append(Isds::libisds2event(ev, &iOk));
+			if (!iOk) {
+				if (ok != Q_NULLPTR) {
+					*ok = false;
+				}
+				return QList<Isds::Event>();
+			}
+		}
+
+		item = item->next;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return eventList;
+}
+
+Isds::Envelope Isds::libisds2envelope(const struct isds_envelope *ie, bool *ok)
+{
+	if (Q_UNLIKELY(ie == NULL)) {
+		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Envelope();
+	}
+
+	bool iOk = false;
+	Envelope env;
+
+	env.setDmID(fromCStr(ie->dmID));
+	env.setDbIDSender(fromCStr(ie->dbIDSender));
+	env.setDmSender(fromCStr(ie->dmSender));
+	env.setDmSenderAddress(fromCStr(ie->dmSenderAddress));
+	env.setDmSenderType(long2DbType(ie->dmSenderType));
+	env.setDmRecipient(fromCStr(ie->dmRecipient));
+	env.setDmRecipientAddress(fromCStr(ie->dmRecipientAddress));
+	env.setDmAmbiguousRecipient(fromBool(ie->dmAmbiguousRecipient));
+
+	env.setDmOrdinal((ie->dmOrdinal != NULL) ? *ie->dmOrdinal : 0); /* FIXME */
+	env.setDmMessageStatus(libisdsMessageStatus2DmState(ie->dmMessageStatus));
+	env.setDmAttachmentSize(fromLongInt(ie->dmAttachmentSize));
+	env.setDmDeliveryTime(dateTimeFromStructTimeval(ie->dmDeliveryTime));
+	env.setDmAcceptanceTime(dateTimeFromStructTimeval(ie->dmAcceptanceTime));
+	env.setDmHash(libisds2hash(ie->hash, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	env.setDmQTimestamp(fromCData(ie->timestamp, ie->timestamp_length));
+	env.setDmEvents(libisds2eventList(ie->events, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+
+	env.setDmSenderOrgUnit(fromCStr(ie->dmSenderOrgUnit));
+	env.setDmSenderOrgUnitNum(fromLongInt(ie->dmSenderOrgUnitNum));
+	env.setDbIDRecipient(fromCStr(ie->dbIDRecipient));
+	env.setDmRecipientOrgUnit(fromCStr(ie->dmRecipientOrgUnit));
+	env.setDmRecipientOrgUnitNum(fromLongInt(ie->dmRecipientOrgUnitNum));
+	env.setDmToHands(fromCStr(ie->dmToHands));
+	env.setDmAnnotation(fromCStr(ie->dmAnnotation));
+	env.setDmRecipientRefNumber(fromCStr(ie->dmRecipientRefNumber));
+	env.setDmSenderRefNumber(fromCStr(ie->dmSenderRefNumber));
+	env.setDmRecipientIdent(fromCStr(ie->dmRecipientIdent));
+	env.setDmSenderIdent(fromCStr(ie->dmSenderIdent));
+
+	env.setDmLegalTitleLaw(fromLongInt(ie->dmLegalTitleLaw));
+	env.setDmLegalTitleYear(fromLongInt(ie->dmLegalTitleYear));
+	env.setDmLegalTitleSect(fromCStr(ie->dmLegalTitleSect));
+	env.setDmLegalTitlePar(fromCStr(ie->dmLegalTitlePar));
+	env.setDmLegalTitlePoint(fromCStr(ie->dmLegalTitlePoint));
+	env.setDmPersonalDelivery(fromBool(ie->dmPersonalDelivery));
+	env.setDmAllowSubstDelivery(fromBool(ie->dmAllowSubstDelivery));
+	env.setDmType((ie->dmType != NULL) ? QChar(*ie->dmType) : QChar());
+
+	env.setDmOVM(fromBool(ie->dmOVM));
+	env.setDmPublishOwnID(fromBool(ie->dmPublishOwnID));
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return env;
+
+fail:
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return Envelope();
+}
+
+/*!
  * @brief PIMPL Document class.
  */
 class Isds::DocumentPrivate {
@@ -2174,7 +2261,7 @@ isds_FileMetaType fileMetaType2libisdsFileMetaType(
 	}
 }
 
-struct isds_document *Isds::document2libisds(const Isds::Document &doc)
+struct isds_document *Isds::document2libisds(const Document &doc)
 {
 	if (Q_UNLIKELY(doc.isNull())) {
 		return NULL;
