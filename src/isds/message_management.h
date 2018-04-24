@@ -85,7 +85,7 @@ namespace Isds {
 	void swap(Hash &first, Hash &second) Q_DECL_NOTHROW;
 
 	Hash libisds2hash(const struct isds_hash *ih, bool *ok = Q_NULLPTR);
-	struct isds_hash *hash2libisds(const Hash &h);
+	struct isds_hash *hash2libisds(const Hash &h, bool *ok = Q_NULLPTR);
 
 	class EventPrivate;
 	/*!
@@ -133,7 +133,7 @@ namespace Isds {
 	void swap(Event &first, Event &second) Q_DECL_NOTHROW;
 
 	Event libisds2event(const struct isds_event *ie, bool *ok = Q_NULLPTR);
-	struct isds_event *event2libisds(const Event &e);
+	struct isds_event *event2libisds(const Event &e, bool *ok = Q_NULLPTR);
 
 	class EnvelopePrivate;
 	/*!
@@ -373,7 +373,7 @@ namespace Isds {
 	void swap(Envelope &first, Envelope &second) Q_DECL_NOTHROW;
 
 	Envelope libisds2envelope(const struct isds_envelope *ie, bool *ok = Q_NULLPTR);
-	struct isds_envelope *envelope2libisds(const Envelope &env);
+	struct isds_envelope *envelope2libisds(const Envelope &env, bool *ok = Q_NULLPTR);
 
 	class DocumentPrivate;
 	/*!

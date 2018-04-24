@@ -194,27 +194,28 @@ qint64 Isds::fromLongInt(const long int *cLongPtr)
 	return *cLongPtr;
 }
 
-void Isds::toLongInt(long int **cLongPtr, qint64 i)
+bool Isds::toLongInt(long int **cLongPtr, qint64 i)
 {
 	if (Q_UNLIKELY(cLongPtr == Q_NULLPTR)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 	if (i < 0) {
 		if (*cLongPtr != NULL) {
 			std::free(*cLongPtr); *cLongPtr = NULL;
 		}
-		return;
+		return true;
 	}
 	if (*cLongPtr == NULL) {
 		*cLongPtr = (long int*)std::malloc(sizeof(**cLongPtr));
 		if (Q_UNLIKELY(*cLongPtr == NULL)) {
 			Q_ASSERT(0);
-			return;
+			return false;
 		}
 	}
 
 	**cLongPtr = i;
+	return true;
 }
 
 enum Isds::Type::NilBool Isds::fromBool(const _Bool *cBoolPtr)
@@ -228,26 +229,27 @@ enum Isds::Type::NilBool Isds::fromBool(const _Bool *cBoolPtr)
 	}
 }
 
-void Isds::toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool)
+bool Isds::toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool)
 {
 	if (Q_UNLIKELY(cBoolPtr == NULL)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 
 	if (nilBool == Type::BOOL_NULL) {
 		if (*cBoolPtr != NULL) {
 			std::free(*cBoolPtr); *cBoolPtr = NULL;
 		}
-		return;
+		return true;
 	}
 	if (*cBoolPtr == NULL) {
 		*cBoolPtr = (_Bool *)std::malloc(sizeof(**cBoolPtr));
 		if (Q_UNLIKELY(*cBoolPtr == NULL)) {
 			Q_ASSERT(0);
-			return;
+			return false;
 		}
 	}
 
 	**cBoolPtr = (nilBool == Type::BOOL_TRUE);
+	return true;
 }

@@ -119,8 +119,9 @@ namespace Isds {
 	 *
 	 * @param[in,out] cLongPtr Pointer to long int.
 	 * @param[in] i Integerer.
+	 * @return True on success, false in failure.
 	 */
-	void toLongInt(long int **cLongPtr, qint64 i);
+	bool toLongInt(long int **cLongPtr, qint64 i);
 
 	/*!
 	 * @brief Converts internal pointer to bool.
@@ -135,6 +136,7 @@ namespace Isds {
 	 *
 	 * @param[in,out] cBoolPtr Bool pointer to be set.
 	 * @param[in] nilBool Nullable bool value.
+	 * @return True on success, false in failure.
 	 */
-	void toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool);
+	bool toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool);
 }

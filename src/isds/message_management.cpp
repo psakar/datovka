@@ -292,20 +292,32 @@ bool setLibisdsHashContent(struct isds_hash *tgt, const Isds::Hash &src)
 	return true;
 }
 
-struct isds_hash *Isds::hash2libisds(const Hash &h)
+struct isds_hash *Isds::hash2libisds(const Hash &h, bool *ok)
 {
 	if (Q_UNLIKELY(h.isNull())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
 		return NULL;
 	}
 
 	struct isds_hash *ih = (struct isds_hash *)std::malloc(sizeof(*ih));
 	if (Q_UNLIKELY(ih == NULL)) {
 		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
 		return NULL;
 	}
 	if (Q_UNLIKELY(!setLibisdsHashContent(ih, h))) {
 		isds_hash_free(&ih);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
 		return NULL;
+	}
+	if (ok != Q_NULLPTR) {
+		*ok = true;
 	}
 	return ih;
 }
@@ -538,7 +550,8 @@ Isds::Event Isds::libisds2event(const struct isds_event *ie, bool *ok)
  * @brief Converts event type.
  */
 static
-bool event2libisdsEvent(isds_event_type **tgt, enum Isds::Type::Event src)
+bool eventType2libisdsEventType(isds_event_type **tgt,
+    enum Isds::Type::Event src)
 {
 	if (Q_UNLIKELY(tgt == NULL)) {
 		Q_ASSERT(0);
@@ -591,7 +604,7 @@ bool setLibisdsEventContent(struct isds_event *tgt, const Isds::Event &src)
 	if (Q_UNLIKELY(!Isds::toCDateTimeCopy(&tgt->time, src.time()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!event2libisdsEvent(&tgt->type, src.type()))) {
+	if (Q_UNLIKELY(!eventType2libisdsEventType(&tgt->type, src.type()))) {
 		return false;
 	}
 	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->description, src.descr()))) {
@@ -601,20 +614,32 @@ bool setLibisdsEventContent(struct isds_event *tgt, const Isds::Event &src)
 	return true;
 }
 
-struct isds_event *Isds::event2libisds(const Event &e)
+struct isds_event *Isds::event2libisds(const Event &e, bool *ok)
 {
 	if (Q_UNLIKELY(e.isNull())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
 		return NULL;
 	}
 
 	struct isds_event *ie = (struct isds_event *)std::malloc(sizeof(*ie));
 	if (Q_UNLIKELY(ie == NULL)) {
 		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
 		return NULL;
 	}
 	if (Q_UNLIKELY(!setLibisdsEventContent(ie, e))) {
 		isds_event_free(&ie);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
 		return NULL;
+	}
+	if (ok != Q_NULLPTR) {
+		*ok = true;
 	}
 	return ie;
 }
@@ -626,7 +651,7 @@ public:
 	    : m_dmID(), m_dbIDSender(), m_dmSender(), m_dmSenderAddress(),
 	    m_dmSenderType(Type::BT_NULL), m_dmRecipient(),
 	    m_dmRecipientAddress(), m_dmAmbiguousRecipient(Type::BOOL_NULL),
-	    m_dmOrdinal(-1), m_dmMessageStatus(Type::MS_NULL),
+	    m_dmOrdinal(0), m_dmMessageStatus(Type::MS_NULL),
 	    m_dmAttachmentSize(-1), m_dmDeliveryTime(), m_dmAcceptanceTime(),
 	    m_dmHash(), m_dmQTimestamp(), m_dmEvents(), m_dmSenderOrgUnit(),
 	    m_dmSenderOrgUnitNum(-1), m_dbIDRecipient(), m_dmRecipientOrgUnit(),
@@ -697,7 +722,7 @@ public:
 	QString m_dmRecipientAddress;
 	enum Type::NilBool m_dmAmbiguousRecipient;
 
-	quint64 m_dmOrdinal;
+	quint64 m_dmOrdinal; /* Values start at 1. 0 is treated as NULL. */
 	enum Type::DmState m_dmMessageStatus;
 	qint64 m_dmAttachmentSize;
 	QDateTime m_dmDeliveryTime;
@@ -922,34 +947,6 @@ void Isds::Envelope::setDmSenderAddress(QString &&sa)
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-/*!
- * @brief Converts data box types.
- */
-static
-void dbType2long(long int **btPtr, enum Isds::Type::DbType bt)
-{
-	if (Q_UNLIKELY(btPtr == Q_NULLPTR)) {
-		Q_ASSERT(0);
-		return;
-	}
-	if (*btPtr == NULL) {
-		*btPtr = (long int *)std::malloc(sizeof(**btPtr));
-		if (Q_UNLIKELY(btPtr == NULL)) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-	switch (bt) {
-	case Isds::Type::BT_NULL:
-		Q_ASSERT(0);
-		std::free(*btPtr); *btPtr = NULL;
-		break;
-	default:
-		**btPtr = bt;
-		break;
-	}
-}
-
 enum Isds::Type::DbType Isds::Envelope::dmSenderType(void) const
 {
 	Q_D(const Envelope);
@@ -1046,49 +1043,6 @@ void Isds::Envelope::setDmOrdinal(quint64 o)
 	ensureEnvelopePrivate();
 	Q_D(Envelope);
 	d->m_dmOrdinal = o;
-}
-
-/*!
- * @brief Converts message status.
- */
-static
-void dmState2libisdsMessageStatus(isds_message_status **tgt,
-    enum Isds::Type::DmState src)
-{
-	if (Q_UNLIKELY(tgt == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-	if (src == Isds::Type::MS_NULL) {
-		if (*tgt != NULL) {
-			std::free(*tgt); *tgt = NULL;
-		}
-		return;
-	}
-	if (*tgt == NULL) {
-		*tgt = (isds_message_status *)std::malloc(sizeof(**tgt));
-		if (Q_UNLIKELY(*tgt == NULL)) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-	switch (src) {
-	/* case Isds::Type::MS_NULL: Same as default. */
-	case Isds::Type::MS_POSTED: **tgt = MESSAGESTATE_SENT; break;
-	case Isds::Type::MS_STAMPED: **tgt = MESSAGESTATE_STAMPED; break;
-	case Isds::Type::MS_INFECTED: **tgt = MESSAGESTATE_INFECTED; break;
-	case Isds::Type::MS_DELIVERED: **tgt = MESSAGESTATE_DELIVERED; break;
-	case Isds::Type::MS_ACCEPTED_FICT: **tgt = MESSAGESTATE_SUBSTITUTED; break;
-	case Isds::Type::MS_ACCEPTED: **tgt = MESSAGESTATE_RECEIVED; break;
-	case Isds::Type::MS_READ: **tgt = MESSAGESTATE_READ; break;
-	case Isds::Type::MS_UNDELIVERABLE: **tgt = MESSAGESTATE_UNDELIVERABLE; break;
-	case Isds::Type::MS_REMOVED: **tgt = MESSAGESTATE_REMOVED; break;
-	case Isds::Type::MS_IN_VAULT: **tgt = MESSAGESTATE_IN_SAFE; break;
-	default:
-		Q_ASSERT(0);
-		std::free(*tgt); *tgt = NULL;
-		break;
-	}
 }
 
 enum Isds::Type::DmState Isds::Envelope::dmMessageStatus(void) const
@@ -1852,7 +1806,7 @@ Isds::Envelope Isds::libisds2envelope(const struct isds_envelope *ie, bool *ok)
 	env.setDmRecipientAddress(fromCStr(ie->dmRecipientAddress));
 	env.setDmAmbiguousRecipient(fromBool(ie->dmAmbiguousRecipient));
 
-	env.setDmOrdinal((ie->dmOrdinal != NULL) ? *ie->dmOrdinal : 0); /* FIXME */
+	env.setDmOrdinal((ie->dmOrdinal != NULL) ? *ie->dmOrdinal : 0); /* FIXME ? */
 	env.setDmMessageStatus(libisdsMessageStatus2DmState(ie->dmMessageStatus));
 	env.setDmAttachmentSize(fromLongInt(ie->dmAttachmentSize));
 	env.setDmDeliveryTime(dateTimeFromStructTimeval(ie->dmDeliveryTime));
@@ -1901,6 +1855,252 @@ fail:
 		*ok = true;
 	}
 	return Envelope();
+}
+
+/*!
+ * @brief Converts data box types.
+ */
+static
+bool dbType2long(long int **btPtr, enum Isds::Type::DbType bt)
+{
+	if (Q_UNLIKELY(btPtr == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (*btPtr == NULL) {
+		*btPtr = (long int *)std::malloc(sizeof(**btPtr));
+		if (Q_UNLIKELY(btPtr == NULL)) {
+			Q_ASSERT(0);
+			return false;
+		}
+	}
+	switch (bt) {
+	case Isds::Type::BT_NULL:
+		std::free(*btPtr); *btPtr = NULL;
+		break;
+	default:
+		**btPtr = bt;
+		break;
+	}
+
+	return true;
+}
+
+/*!
+ * @brief Creates a unsigned long int from supplied number.
+ *
+ * @note Zero causes the pointer to be set to NULL.
+ *
+ * @param[in,out] cULongPtr Pointer to unsigned long int.
+ * @param[in] u Unsigned integerer.
+ * @return True on success, false in failure.
+ */
+bool toLongUInt(unsigned long int **cULongPtr, quint64 u)
+{
+	if (Q_UNLIKELY(cULongPtr == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (u == 0) {
+		if (*cULongPtr != NULL) {
+			std::free(*cULongPtr); *cULongPtr = NULL;
+		}
+		return true;
+	}
+	if (*cULongPtr == NULL) {
+		*cULongPtr = (unsigned long int*)std::malloc(sizeof(**cULongPtr));
+		if (Q_UNLIKELY(*cULongPtr == NULL)) {
+			Q_ASSERT(0);
+			return false;
+		}
+	}
+
+	**cULongPtr = u;
+	return true;
+}
+
+/*!
+ * @brief Converts message status.
+ */
+static
+bool dmState2libisdsMessageStatus(isds_message_status **tgt,
+    enum Isds::Type::DmState src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (src == Isds::Type::MS_NULL) {
+		if (*tgt != NULL) {
+			std::free(*tgt); *tgt = NULL;
+		}
+		return true;
+	}
+	if (*tgt == NULL) {
+		*tgt = (isds_message_status *)std::malloc(sizeof(**tgt));
+		if (Q_UNLIKELY(*tgt == NULL)) {
+			Q_ASSERT(0);
+			return false;
+		}
+	}
+	switch (src) {
+	case Isds::Type::MS_NULL:
+		std::free(*tgt); *tgt = NULL;
+		break;
+	case Isds::Type::MS_POSTED: **tgt = MESSAGESTATE_SENT; break;
+	case Isds::Type::MS_STAMPED: **tgt = MESSAGESTATE_STAMPED; break;
+	case Isds::Type::MS_INFECTED: **tgt = MESSAGESTATE_INFECTED; break;
+	case Isds::Type::MS_DELIVERED: **tgt = MESSAGESTATE_DELIVERED; break;
+	case Isds::Type::MS_ACCEPTED_FICT: **tgt = MESSAGESTATE_SUBSTITUTED; break;
+	case Isds::Type::MS_ACCEPTED: **tgt = MESSAGESTATE_RECEIVED; break;
+	case Isds::Type::MS_READ: **tgt = MESSAGESTATE_READ; break;
+	case Isds::Type::MS_UNDELIVERABLE: **tgt = MESSAGESTATE_UNDELIVERABLE; break;
+	case Isds::Type::MS_REMOVED: **tgt = MESSAGESTATE_REMOVED; break;
+	case Isds::Type::MS_IN_VAULT: **tgt = MESSAGESTATE_IN_SAFE; break;
+	default:
+		Q_ASSERT(0);
+		std::free(*tgt); *tgt = NULL;
+		return false;
+		break;
+	}
+
+	return true;
+}
+
+/*!
+ * @brief Converts event list.
+ */
+static
+struct isds_list *eventList2libisds(const QList<Isds::Event> &el,
+    bool *ok = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(el.isEmpty())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_list *iel = NULL;
+	struct isds_list *lastItem = NULL;
+	foreach (const Isds::Event &ev, el) {
+		struct isds_list *item =
+		    (struct isds_list *)std::malloc(sizeof(*item));
+		if (Q_UNLIKELY(item == NULL)) {
+			Q_ASSERT(0);
+			goto fail;
+		}
+		std::memset(item, 0, sizeof(*item));
+
+		bool iOk = false;
+		struct isds_event *iev = Isds::event2libisds(ev, &iOk);
+		if (Q_UNLIKELY(!iOk)) {
+			std::free(item); item = NULL;
+			goto fail;
+		}
+
+		/* Set list item. */
+		item->next = NULL;
+		item->data = iev;
+		item->destructor = (void (*)(void **))isds_event_free;
+
+		/* Append item. */
+		if (lastItem == NULL) {
+			iel = item;
+		} else {
+			lastItem->next = item;
+		}
+		lastItem = item;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return iel;
+
+fail:
+	isds_list_free(&iel);
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return NULL;
+}
+
+struct isds_envelope *Isds::envelope2libisds(const Envelope &env, bool *ok)
+{
+	if (Q_UNLIKELY(env.isNull())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_envelope *ienv =
+	    (struct isds_envelope *)std::malloc(sizeof(*ienv));
+	if (Q_UNLIKELY(ienv == NULL)) {
+		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return NULL;
+	}
+	std::memset(ienv, 0, sizeof(*ienv));
+
+	bool iOk = false;
+
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmID, env.dmID()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dbIDSender, env.dbIDSender()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmSender, env.dmSender()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmSenderAddress, env.dmSenderAddress()))) { goto fail; }
+	if (Q_UNLIKELY(!dbType2long(&ienv->dmSenderType, env.dmSenderType()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmRecipient, env.dmRecipient()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmRecipientAddress, env.dmRecipientAddress()))) { goto fail; }
+	if (Q_UNLIKELY(!toBool(&ienv->dmAmbiguousRecipient, env.dmAmbiguousRecipient()))) { goto fail; }
+
+	if (Q_UNLIKELY(!toLongUInt(&ienv->dmOrdinal, env.dmOrdinal()))) { goto fail; }
+	if (Q_UNLIKELY(!dmState2libisdsMessageStatus(&ienv->dmMessageStatus, env.dmMessageStatus()))) { goto fail; }
+	if (Q_UNLIKELY(!toLongInt(&ienv->dmAttachmentSize, env.dmAttachmentSize()))) { goto fail; }
+	if (Q_UNLIKELY(!toCDateTimeCopy(&ienv->dmDeliveryTime, env.dmDeliveryTime()))) { goto fail; }
+	if (Q_UNLIKELY(!toCDateTimeCopy(&ienv->dmAcceptanceTime, env.dmAcceptanceTime()))) { goto fail; }
+	ienv->hash = hash2libisds(env.dmHash(), &iOk); if (Q_UNLIKELY(!iOk)) { goto fail; }
+	if (Q_UNLIKELY(!toCDataCopy(&ienv->timestamp, &ienv->timestamp_length, env.dmQTimestamp()))) { goto fail; }
+	ienv->events = eventList2libisds(env.dmEvents(), &iOk); if (Q_UNLIKELY(!iOk)) { goto fail; }
+
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmSenderOrgUnit, env.dmSenderOrgUnit()))) { goto fail; }
+	if (Q_UNLIKELY(!toLongInt(&ienv->dmSenderOrgUnitNum, env.dmSenderOrgUnitNum()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dbIDRecipient, env.dbIDRecipient()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmRecipientOrgUnit, env.dmRecipientOrgUnit()))) { goto fail; }
+	if (Q_UNLIKELY(!toLongInt(&ienv->dmRecipientOrgUnitNum, env.dmRecipientOrgUnitNum()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmToHands, env.dmToHands()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmAnnotation, env.dmAnnotation()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmRecipientRefNumber, env.dmRecipientRefNumber()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmSenderRefNumber, env.dmSenderRefNumber()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmRecipientIdent, env.dmRecipientIdent()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmSenderIdent, env.dmSenderIdent()))) { goto fail; }
+
+	if (Q_UNLIKELY(!toLongInt(&ienv->dmLegalTitleLaw, env.dmLegalTitleLaw()))) { goto fail; }
+	if (Q_UNLIKELY(!toLongInt(&ienv->dmLegalTitleYear, env.dmLegalTitleYear()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmLegalTitleSect, env.dmLegalTitleSect()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmLegalTitlePar, env.dmLegalTitlePar()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmLegalTitlePoint, env.dmLegalTitlePoint()))) { goto fail; }
+	if (Q_UNLIKELY(!toBool(&ienv->dmPersonalDelivery, env.dmPersonalDelivery()))) { goto fail; }
+	if (Q_UNLIKELY(!toBool(&ienv->dmAllowSubstDelivery, env.dmAllowSubstDelivery()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmType, QString(env.dmType())))) { goto fail; }
+
+	if (Q_UNLIKELY(!toBool(&ienv->dmOVM, env.dmOVM()))) { goto fail; }
+	if (Q_UNLIKELY(!toBool(&ienv->dmPublishOwnID, env.dmPublishOwnID()))) { goto fail; }
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return ienv;
+
+fail:
+	isds_envelope_free(&ienv);
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return NULL;
 }
 
 /*!
