@@ -520,4 +520,6 @@ namespace Isds {
 
 	Message libisds2message(const struct isds_message *im,
 	    bool *ok = Q_NULLPTR);
+	struct isds_message *message2libisds(const Message &m,
+	    bool *ok = Q_NULLPTR);
 }

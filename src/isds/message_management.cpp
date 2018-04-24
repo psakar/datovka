@@ -2791,13 +2791,13 @@ void Isds::swap(Message &first, Message &second) Q_DECL_NOTHROW
  * @brief Converts raw type.
  */
 static
-enum Isds::Type::RawType libisdsRawType2RawType(isds_raw_type irc,
+enum Isds::Type::RawType libisdsRawType2RawType(isds_raw_type irt,
     bool *ok = Q_NULLPTR)
 {
 	bool iOk = true;
 	enum Isds::Type::RawType type = Isds::Type::RT_UNKNOWN;
 
-	switch (irc) {
+	switch (irt) {
 	case RAWTYPE_INCOMING_MESSAGE: type = Isds::Type::RT_INCOMING_MESSAGE; break;
 	case RAWTYPE_PLAIN_SIGNED_INCOMING_MESSAGE: type = Isds::Type::RT_PLAIN_SIGNED_INCOMING_MESSAGE; break;
 	case RAWTYPE_CMS_SIGNED_INCOMING_MESSAGE: type = Isds::Type::RT_CMS_SIGNED_INCOMING_MESSAGE; break;
@@ -2889,4 +2889,138 @@ fail:
 		*ok = true;
 	}
 	return Message();
+}
+
+/*!
+ * @brief Converts raw type.
+ */
+static
+isds_raw_type rawType2libisdsRawType(enum Isds::Type::RawType rc,
+    bool *ok = Q_NULLPTR)
+{
+	bool iOk = true;
+	isds_raw_type type = RAWTYPE_INCOMING_MESSAGE; /* FIXME ? */
+
+	switch (rc) {
+	case Isds::Type::RT_INCOMING_MESSAGE: type = RAWTYPE_INCOMING_MESSAGE; break;
+	case Isds::Type::RT_PLAIN_SIGNED_INCOMING_MESSAGE: type = RAWTYPE_PLAIN_SIGNED_INCOMING_MESSAGE; break;
+	case Isds::Type::RT_CMS_SIGNED_INCOMING_MESSAGE: type = RAWTYPE_CMS_SIGNED_INCOMING_MESSAGE; break;
+	case Isds::Type::RT_PLAIN_SIGNED_OUTGOING_MESSAGE: type = RAWTYPE_PLAIN_SIGNED_OUTGOING_MESSAGE; break;
+	case Isds::Type::RT_CMS_SIGNED_OUTGOING_MESSAGE: type = RAWTYPE_CMS_SIGNED_OUTGOING_MESSAGE; break;
+	case Isds::Type::RT_DELIVERYINFO: type = RAWTYPE_DELIVERYINFO; break;
+	case Isds::Type::RT_PLAIN_SIGNED_DELIVERYINFO: type = RAWTYPE_PLAIN_SIGNED_DELIVERYINFO; break;
+	case Isds::Type::RT_CMS_SIGNED_DELIVERYINFO: type = RAWTYPE_CMS_SIGNED_DELIVERYINFO; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return type;
+}
+
+/*!
+ * @brief Converts document list.
+ */
+static
+struct isds_list *documentList2libisds(const QList<Isds::Document> &dl,
+    bool *ok = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(dl.isEmpty())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_list *iel = NULL;
+	struct isds_list *lastItem = NULL;
+	foreach (const Isds::Document &doc, dl) {
+		struct isds_list *item =
+		    (struct isds_list *)std::malloc(sizeof(*item));
+		if (Q_UNLIKELY(item == NULL)) {
+			Q_ASSERT(0);
+			goto fail;
+		}
+		std::memset(item, 0, sizeof(*item));
+
+		bool iOk = false;
+		struct isds_document *idoc = Isds::document2libisds(doc, &iOk);
+		if (Q_UNLIKELY(!iOk)) {
+			std::free(item); item = NULL;
+			goto fail;
+		}
+
+		/* Set list item. */
+		item->next = NULL;
+		item->data = idoc;
+		item->destructor = (void (*)(void **))isds_event_free;
+
+		/* Append item. */
+		if (lastItem == NULL) {
+			iel = item;
+		} else {
+			lastItem->next = item;
+		}
+		lastItem = item;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return iel;
+
+fail:
+	isds_list_free(&iel);
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return NULL;
+}
+
+struct isds_message *Isds::message2libisds(const Message &m, bool *ok)
+{
+	if (Q_UNLIKELY(m.isNull())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_message *im =
+	    (struct isds_message *)std::malloc(sizeof(*im));
+	if (Q_UNLIKELY(im == NULL)) {
+		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return NULL;
+	}
+	std::memset(im, 0, sizeof(*im));
+
+	bool iOk = false;
+
+	if (Q_UNLIKELY(!toCDataCopy(&im->raw, &im->raw_length, m.raw()))) { goto fail; }
+	im->raw_type = rawType2libisdsRawType(m.rawType(), &iOk);
+	if (Q_UNLIKELY(!iOk)) { goto fail; }
+	//im->xml = NULL;
+	im->envelope = envelope2libisds(m.envelope(), &iOk);
+	if (Q_UNLIKELY(!iOk)) { goto fail; }
+	im->documents = documentList2libisds(m.documents(), &iOk);
+	if (Q_UNLIKELY(!iOk)) { goto fail; }
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return im;
+
+fail:
+	isds_message_free(&im);
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return NULL;
 }
