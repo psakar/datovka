@@ -38,9 +38,11 @@
 #include "src/isds/message_management.h"
 
 /* Null objects - for convenience. */
+static const Isds::Envelope nullEnvelope;
 static const Isds::Hash nullHash;
 static const QByteArray nullByteArray;
 static const QDateTime nullDateTime;
+static const QList<Isds::Document> nullDocumentList;
 static const QList<Isds::Event> nullEventList;
 static const QString nullString;
 
@@ -191,20 +193,29 @@ void Isds::swap(Hash &first, Hash &second) Q_DECL_NOTHROW
  * @brief Converts user types.
  */
 static
-Isds::Type::HashAlg libisdsHashAlg2HashAlg(isds_hash_algorithm a)
+Isds::Type::HashAlg libisdsHashAlg2HashAlg(isds_hash_algorithm a,
+    bool *ok = Q_NULLPTR)
 {
+	bool iOk = true;
+	enum Isds::Type::HashAlg alg = Isds::Type::HA_UNKNOWN;
+
 	switch (a) {
-	case HASH_ALGORITHM_MD5: return Isds::Type::HA_MD5; break;
-	case HASH_ALGORITHM_SHA_1: return Isds::Type::HA_SHA_1; break;
-	case HASH_ALGORITHM_SHA_224: return Isds::Type::HA_SHA_224; break;
-	case HASH_ALGORITHM_SHA_256: return Isds::Type::HA_SHA_256; break;
-	case HASH_ALGORITHM_SHA_384: return Isds::Type::HA_SHA_384; break;
-	case HASH_ALGORITHM_SHA_512: return Isds::Type::HA_SHA_512; break;
+	case HASH_ALGORITHM_MD5: alg = Isds::Type::HA_MD5; break;
+	case HASH_ALGORITHM_SHA_1: alg = Isds::Type::HA_SHA_1; break;
+	case HASH_ALGORITHM_SHA_224: alg = Isds::Type::HA_SHA_224; break;
+	case HASH_ALGORITHM_SHA_256: alg = Isds::Type::HA_SHA_256; break;
+	case HASH_ALGORITHM_SHA_384: alg = Isds::Type::HA_SHA_384; break;
+	case HASH_ALGORITHM_SHA_512: alg = Isds::Type::HA_SHA_512; break;
 	default:
 		Q_ASSERT(0);
-		return Isds::Type::HA_UNKNOWN;
+		iOk = false;
 		break;
 	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return alg;
 }
 
 /*!
@@ -217,8 +228,10 @@ bool setHashContent(Isds::Hash &tgt, const struct isds_hash *src)
 		return true;
 	}
 
-	tgt.setAlgorithm(libisdsHashAlg2HashAlg(src->algorithm));
-	if (Q_UNLIKELY(tgt.algorithm() == Isds::Type::HA_UNKNOWN)) {
+	bool iOk = false;
+
+	tgt.setAlgorithm(libisdsHashAlg2HashAlg(src->algorithm, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
 		tgt.setValue(QByteArray());
 		return false;
 	}
@@ -246,20 +259,29 @@ Isds::Hash Isds::libisds2hash(const struct isds_hash *ih, bool *ok)
  * @brief Converts user types.
  */
 static
-isds_hash_algorithm hashAlg2libisdsHashAlg(Isds::Type::HashAlg a)
+isds_hash_algorithm hashAlg2libisdsHashAlg(Isds::Type::HashAlg a,
+    bool *ok = Q_NULLPTR)
 {
+	bool iOk = true;
+	isds_hash_algorithm alg = HASH_ALGORITHM_MD5; /* TODO -- This value is clearly incorrect. */
+
 	switch (a) {
-	case Isds::Type::HA_MD5: return HASH_ALGORITHM_MD5; break;
-	case Isds::Type::HA_SHA_1: return HASH_ALGORITHM_SHA_1; break;
-	case Isds::Type::HA_SHA_224: return HASH_ALGORITHM_SHA_224; break;
-	case Isds::Type::HA_SHA_256: return HASH_ALGORITHM_SHA_256; break;
-	case Isds::Type::HA_SHA_384: return HASH_ALGORITHM_SHA_384; break;
-	case Isds::Type::HA_SHA_512: return HASH_ALGORITHM_SHA_512; break;
+	case Isds::Type::HA_MD5: alg = HASH_ALGORITHM_MD5; break;
+	case Isds::Type::HA_SHA_1: alg = HASH_ALGORITHM_SHA_1; break;
+	case Isds::Type::HA_SHA_224: alg = HASH_ALGORITHM_SHA_224; break;
+	case Isds::Type::HA_SHA_256: alg = HASH_ALGORITHM_SHA_256; break;
+	case Isds::Type::HA_SHA_384: alg = HASH_ALGORITHM_SHA_384; break;
+	case Isds::Type::HA_SHA_512: alg = HASH_ALGORITHM_SHA_512; break;
 	default:
 		Q_ASSERT(0);
-		return HASH_ALGORITHM_MD5; /* TODO -- This value is clearly incorrect. */
+		iOk = false;
 		break;
 	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return alg;
 }
 
 /*!
@@ -273,7 +295,12 @@ bool setLibisdsHashContent(struct isds_hash *tgt, const Isds::Hash &src)
 		return false;
 	}
 
-	tgt->algorithm = hashAlg2libisdsHashAlg(src.algorithm());
+	bool iOk = false;
+
+	tgt->algorithm = hashAlg2libisdsHashAlg(src.algorithm(), &iOk);
+	if (Q_UNLIKELY(!iOk)) {
+		return false;
+	}
 	if (tgt->value != NULL) {
 		std::free(tgt->value); tgt->value = NULL;
 	}
@@ -1729,27 +1756,38 @@ enum Isds::Type::DbType long2DbType(const long int *bt)
  */
 static
 enum Isds::Type::DmState libisdsMessageStatus2DmState(
-    const isds_message_status *ms)
+    const isds_message_status *ms, bool *ok = Q_NULLPTR)
 {
 	if (ms == NULL) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
 		return Isds::Type::MS_NULL;
 	}
 
+	bool iOk = true;
+	enum Isds::Type::DmState state = Isds::Type::MS_NULL;
+
 	switch (*ms) {
-	case MESSAGESTATE_SENT: return Isds::Type::MS_POSTED; break;
-	case MESSAGESTATE_STAMPED: return Isds::Type::MS_STAMPED; break;
-	case MESSAGESTATE_INFECTED: return Isds::Type::MS_INFECTED; break;
-	case MESSAGESTATE_DELIVERED: return Isds::Type::MS_DELIVERED; break;
-	case MESSAGESTATE_SUBSTITUTED: return Isds::Type::MS_ACCEPTED_FICT; break;
-	case MESSAGESTATE_RECEIVED: return Isds::Type::MS_ACCEPTED; break;
-	case MESSAGESTATE_READ: return Isds::Type::MS_READ; break;
-	case MESSAGESTATE_UNDELIVERABLE: return Isds::Type::MS_UNDELIVERABLE; break;
-	case MESSAGESTATE_REMOVED: return Isds::Type::MS_REMOVED; break;
-	case MESSAGESTATE_IN_SAFE: return Isds::Type::MS_IN_VAULT; break;
+	case MESSAGESTATE_SENT: state = Isds::Type::MS_POSTED; break;
+	case MESSAGESTATE_STAMPED: state = Isds::Type::MS_STAMPED; break;
+	case MESSAGESTATE_INFECTED: state = Isds::Type::MS_INFECTED; break;
+	case MESSAGESTATE_DELIVERED: state = Isds::Type::MS_DELIVERED; break;
+	case MESSAGESTATE_SUBSTITUTED: state = Isds::Type::MS_ACCEPTED_FICT; break;
+	case MESSAGESTATE_RECEIVED: state = Isds::Type::MS_ACCEPTED; break;
+	case MESSAGESTATE_READ: state = Isds::Type::MS_READ; break;
+	case MESSAGESTATE_UNDELIVERABLE: state = Isds::Type::MS_UNDELIVERABLE; break;
+	case MESSAGESTATE_REMOVED: state = Isds::Type::MS_REMOVED; break;
+	case MESSAGESTATE_IN_SAFE: state = Isds::Type::MS_IN_VAULT; break;
 	default:
-		return Isds::Type::MS_NULL;
+		iOk = false;
 		break;
 	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return state;
 }
 
 /*!
@@ -1807,7 +1845,10 @@ Isds::Envelope Isds::libisds2envelope(const struct isds_envelope *ie, bool *ok)
 	env.setDmAmbiguousRecipient(fromBool(ie->dmAmbiguousRecipient));
 
 	env.setDmOrdinal((ie->dmOrdinal != NULL) ? *ie->dmOrdinal : 0); /* FIXME ? */
-	env.setDmMessageStatus(libisdsMessageStatus2DmState(ie->dmMessageStatus));
+	env.setDmMessageStatus(libisdsMessageStatus2DmState(ie->dmMessageStatus, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
 	env.setDmAttachmentSize(fromLongInt(ie->dmAttachmentSize));
 	env.setDmDeliveryTime(dateTimeFromStructTimeval(ie->dmDeliveryTime));
 	env.setDmAcceptanceTime(dateTimeFromStructTimeval(ie->dmAcceptanceTime));
@@ -2404,42 +2445,66 @@ void Isds::swap(Document &first, Document &second) Q_DECL_NOTHROW
  */
 static
 enum Isds::Type::FileMetaType libisdsFileMetaType2FileMetaType(
-    isds_FileMetaType ifmt)
+    isds_FileMetaType ifmt, bool *ok = Q_NULLPTR)
 {
+	bool iOk = true;
+	enum Isds::Type::FileMetaType type = Isds::Type::FMT_UNKNOWN;
+
 	switch (ifmt) {
-	case FILEMETATYPE_MAIN: return Isds::Type::FMT_MAIN; break;
-	case FILEMETATYPE_ENCLOSURE: return Isds::Type::FMT_ENCLOSURE; break;
-	case FILEMETATYPE_SIGNATURE: return Isds::Type::FMT_SIGNATURE; break;
-	case FILEMETATYPE_META: return Isds::Type::FMT_META; break;
+	case FILEMETATYPE_MAIN: type = Isds::Type::FMT_MAIN; break;
+	case FILEMETATYPE_ENCLOSURE: type = Isds::Type::FMT_ENCLOSURE; break;
+	case FILEMETATYPE_SIGNATURE: type = Isds::Type::FMT_SIGNATURE; break;
+	case FILEMETATYPE_META: type = Isds::Type::FMT_META; break;
 	default:
-		return Isds::Type::FMT_UNKNOWN;
+		iOk = false;
 		break;
 	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return type;
 }
 
-Isds::Document Isds::libisds2document(const struct isds_document *id)
+Isds::Document Isds::libisds2document(const struct isds_document *id, bool *ok)
 {
 	if (Q_UNLIKELY(id == NULL)) {
 		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
 		return Document();
 	}
 
+	bool iOk = false;
 	Document doc;
 
 	/* Does not support XML documents. */
 	if (id->is_xml) {
-		return doc;
+		goto fail;
 	}
 
 	doc.setBinaryContent(QByteArray((const char *)id->data, id->data_length));
 	doc.setMimeType(fromCStr(id->dmMimeType));
-	doc.setFileMetaType(libisdsFileMetaType2FileMetaType(id->dmFileMetaType));
+	doc.setFileMetaType(libisdsFileMetaType2FileMetaType(id->dmFileMetaType, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
 	doc.setFileGuid(fromCStr(id->dmFileGuid));
 	doc.setUpFileGuid(fromCStr(id->dmUpFileGuid));
 	doc.setFileDescr(fromCStr(id->dmFileDescr));
 	doc.setFormat(fromCStr(id->dmFormat));
 
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
 	return doc;
+
+fail:
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return Document();
 }
 
 /*!
@@ -2447,23 +2512,34 @@ Isds::Document Isds::libisds2document(const struct isds_document *id)
  */
 static
 isds_FileMetaType fileMetaType2libisdsFileMetaType(
-    enum Isds::Type::FileMetaType fmt)
+    enum Isds::Type::FileMetaType fmt, bool *ok = Q_NULLPTR)
 {
+	bool iOk = true;
+	isds_FileMetaType type = FILEMETATYPE_MAIN; /* FIXME ? */
+
 	switch (fmt) {
-	case Isds::Type::FMT_MAIN: return FILEMETATYPE_MAIN; break;
-	case Isds::Type::FMT_ENCLOSURE: return FILEMETATYPE_ENCLOSURE; break;
-	case Isds::Type::FMT_SIGNATURE: return FILEMETATYPE_SIGNATURE; break;
-	case Isds::Type::FMT_META: return FILEMETATYPE_META; break;
+	case Isds::Type::FMT_MAIN: type = FILEMETATYPE_MAIN; break;
+	case Isds::Type::FMT_ENCLOSURE: type = FILEMETATYPE_ENCLOSURE; break;
+	case Isds::Type::FMT_SIGNATURE: type = FILEMETATYPE_SIGNATURE; break;
+	case Isds::Type::FMT_META: type = FILEMETATYPE_META; break;
 	default:
 		Q_ASSERT(0);
-		return FILEMETATYPE_MAIN; /* FIXME ? */
+		iOk = false;
 		break;
 	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return type;
 }
 
-struct isds_document *Isds::document2libisds(const Document &doc)
+struct isds_document *Isds::document2libisds(const Document &doc, bool *ok)
 {
 	if (Q_UNLIKELY(doc.isNull())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
 		return NULL;
 	}
 
@@ -2471,9 +2547,14 @@ struct isds_document *Isds::document2libisds(const Document &doc)
 	    (struct isds_document *)std::malloc(sizeof(*idoc));
 	if (Q_UNLIKELY(idoc == NULL)) {
 		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
 		return NULL;
 	}
 	std::memset(idoc, 0, sizeof(*idoc));
+
+	bool iOk = false;
 
 	idoc->is_xml = doc.isXml();
 	if (Q_UNLIKELY(idoc->is_xml)) {
@@ -2482,43 +2563,330 @@ struct isds_document *Isds::document2libisds(const Document &doc)
 	}
 	//idoc->xml_node_list = NULL;
 	if (Q_UNLIKELY(!toCDataCopy(&idoc->data, &idoc->data_length,
-	                   doc.binaryContent()))) {
-		goto fail;
-	}
-	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmMimeType, doc.mimeType()))) {
-		goto fail;
-	}
-	idoc->dmFileMetaType = fileMetaType2libisdsFileMetaType(doc.fileMetaType());
-	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmFileGuid, doc.fileGuid()))) {
-		goto fail;
-	}
-	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmUpFileGuid, doc.upFileGuid()))) {
-		goto fail;
-	}
-	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmFileDescr, doc.fileDescr()))) {
-		goto fail;
-	}
-	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmFormat, doc.format()))) {
-		goto fail;
-	}
+	                   doc.binaryContent()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmMimeType, doc.mimeType()))) { goto fail; }
+	idoc->dmFileMetaType = fileMetaType2libisdsFileMetaType(doc.fileMetaType(), &iOk);
+	if (Q_UNLIKELY(!iOk)) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmFileGuid, doc.fileGuid()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmUpFileGuid, doc.upFileGuid()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmFileDescr, doc.fileDescr()))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&idoc->dmFormat, doc.format()))) { goto fail; }
 
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
 	return idoc;
 
 fail:
 	isds_document_free(&idoc);
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
 	return NULL;
 }
 
+/*!
+ * @brief PIMPL Message class.
+ */
+class Isds::MessagePrivate {
+	//Q_DISABLE_COPY(MessagePrivate)
+public:
+	MessagePrivate(void)
+	    : m_raw(), m_rawType(Type::RT_UNKNOWN), m_envelope(), m_documents()
+	{ }
+
+	MessagePrivate &operator=(const MessagePrivate &other) Q_DECL_NOTHROW
+	{
+		m_raw = other.m_raw;
+		m_rawType = other.m_rawType;
+		// m_xml
+		m_envelope = other.m_envelope;
+		m_documents = other.m_documents;
+
+		return *this;
+	}
+
+	QByteArray m_raw;
+	enum Type::RawType m_rawType;
+	// m_xml; /* Does not support direct XML access yet. */
+
+	Envelope m_envelope;
+	QList<Document> m_documents;
+};
+
 Isds::Message::Message(void)
-    : m_dataPtr(NULL)
+    : d_ptr(Q_NULLPTR)
 {
 }
 
-Isds::Message::~Message(void)
+Isds::Message::Message(const Message &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) MessagePrivate) : Q_NULLPTR)
 {
-	struct isds_message *m = (struct isds_message *)m_dataPtr;
-	if (Q_UNLIKELY(m == NULL)) {
+	Q_D(Message);
+	if (d == Q_NULLPTR) {
 		return;
 	}
-	isds_message_free(&m);
+
+	*d = *other.d_func();
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Message::Message(Message &&other) Q_DECL_NOEXCEPT
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::Message::~Message(void)
+{
+}
+
+/*!
+ * @brief Ensures private message presence.
+ *
+ * @note Returns if private message could not be allocated.
+ */
+#define ensureMessagePrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			MessagePrivate *p = new (std::nothrow) MessagePrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+Isds::Message &Isds::Message::operator=(const Message &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureMessagePrivate(*this);
+	Q_D(Message);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::Message &Isds::Message::operator=(Message &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::Message::isNull(void) const
+{
+	Q_D(const Message);
+	return d == Q_NULLPTR;
+}
+
+const QByteArray &Isds::Message::raw(void) const
+{
+	Q_D(const Message);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullByteArray;
+	}
+
+	return d->m_raw;
+}
+
+void Isds::Message::setRaw(const QByteArray &r)
+{
+	ensureMessagePrivate();
+	Q_D(Message);
+	d->m_raw = r;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Message::setRaw(QByteArray &&r)
+{
+	ensureMessagePrivate();
+	Q_D(Message);
+	d->m_raw = r;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+enum Isds::Type::RawType Isds::Message::rawType(void) const
+{
+	Q_D(const Message);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Isds::Type::RT_UNKNOWN;
+	}
+
+	return d->m_rawType;
+}
+
+void Isds::Message::setRawType(enum Type::RawType t)
+{
+	ensureMessagePrivate();
+	Q_D(Message);
+	d->m_rawType = t;
+}
+
+const Isds::Envelope &Isds::Message::envelope(void) const
+{
+	Q_D(const Message);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullEnvelope;
+	}
+
+	return d->m_envelope;
+}
+
+void Isds::Message::setEnvelope(const Envelope &e)
+{
+	ensureMessagePrivate();
+	Q_D(Message);
+	d->m_envelope = e;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Message::setEnvelope(Envelope &&e)
+{
+	ensureMessagePrivate();
+	Q_D(Message);
+	d->m_envelope = e;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QList<Isds::Document> &Isds::Message::documents(void) const
+{
+	Q_D(const Message);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDocumentList;
+	}
+
+	return d->m_documents;
+}
+
+void Isds::Message::setDocuments(const QList<Document> &dl)
+{
+	ensureMessagePrivate();
+	Q_D(Message);
+	d->m_documents = dl;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Message::setDocuments(QList<Document> &&dl)
+{
+	ensureMessagePrivate();
+	Q_D(Message);
+	d->m_documents = dl;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(Message &first, Message &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief Converts raw type.
+ */
+static
+enum Isds::Type::RawType libisdsRawType2RawType(isds_raw_type irc,
+    bool *ok = Q_NULLPTR)
+{
+	bool iOk = true;
+	enum Isds::Type::RawType type = Isds::Type::RT_UNKNOWN;
+
+	switch (irc) {
+	case RAWTYPE_INCOMING_MESSAGE: type = Isds::Type::RT_INCOMING_MESSAGE; break;
+	case RAWTYPE_PLAIN_SIGNED_INCOMING_MESSAGE: type = Isds::Type::RT_PLAIN_SIGNED_INCOMING_MESSAGE; break;
+	case RAWTYPE_CMS_SIGNED_INCOMING_MESSAGE: type = Isds::Type::RT_CMS_SIGNED_INCOMING_MESSAGE; break;
+	case RAWTYPE_PLAIN_SIGNED_OUTGOING_MESSAGE: type = Isds::Type::RT_PLAIN_SIGNED_OUTGOING_MESSAGE; break;
+	case RAWTYPE_CMS_SIGNED_OUTGOING_MESSAGE: type = Isds::Type::RT_CMS_SIGNED_OUTGOING_MESSAGE; break;
+	case RAWTYPE_DELIVERYINFO: type = Isds::Type::RT_DELIVERYINFO; break;
+	case RAWTYPE_PLAIN_SIGNED_DELIVERYINFO: type = Isds::Type::RT_PLAIN_SIGNED_DELIVERYINFO; break;
+	case RAWTYPE_CMS_SIGNED_DELIVERYINFO: type = Isds::Type::RT_CMS_SIGNED_DELIVERYINFO; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return type;
+}
+
+/*!
+ * @brief Converts document list.
+ */
+static
+QList<Isds::Document> libisds2documentList(const struct isds_list *item,
+    bool *ok = Q_NULLPTR)
+{
+	QList<Isds::Document> documentList;
+
+	while (item != NULL) {
+		const struct isds_document *doc =
+		    (struct isds_document *)item->data;
+
+		if (doc != NULL) {
+			bool iOk = false;
+			documentList.append(Isds::libisds2document(doc, &iOk));
+			if (!iOk) {
+				if (ok != Q_NULLPTR) {
+					*ok = false;
+				}
+				return QList<Isds::Document>();
+			}
+		}
+
+		item = item->next;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return documentList;
+}
+
+Isds::Message Isds::libisds2message(const struct isds_message *im, bool *ok)
+{
+	if (Q_UNLIKELY(im == NULL)) {
+		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Message();
+	}
+
+	bool iOk = false;
+	Message m;
+
+	m.setRaw(fromCData(im->raw, im->raw_length));
+	m.setRawType(libisdsRawType2RawType(im->raw_type, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	//m.setXml();
+	m.setEnvelope(libisds2envelope(im->envelope, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	m.setDocuments(libisds2documentList(im->documents, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return m;
+
+fail:
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return Message();
 }

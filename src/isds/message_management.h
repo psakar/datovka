@@ -124,7 +124,8 @@ namespace Isds {
 		void setDescr(QString &&descr);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-		friend Event libisds2event(const struct isds_event *ie, bool *ok);
+		friend Event libisds2event(const struct isds_event *ie,
+		    bool *ok);
 
 	private:
 		QScopedPointer<EventPrivate> d_ptr; // std::unique_ptr ?
@@ -364,7 +365,8 @@ namespace Isds {
 		static
 		QChar dmType2Char(enum Type::DmType t);
 
-		friend Envelope libisds2envelope(const struct isds_envelope *ie, bool *ok);
+		friend Envelope libisds2envelope(const struct isds_envelope *ie,
+		    bool *ok);
 
 	private:
 		QScopedPointer<EnvelopePrivate> d_ptr; // std::unique_ptr ?
@@ -372,8 +374,10 @@ namespace Isds {
 
 	void swap(Envelope &first, Envelope &second) Q_DECL_NOTHROW;
 
-	Envelope libisds2envelope(const struct isds_envelope *ie, bool *ok = Q_NULLPTR);
-	struct isds_envelope *envelope2libisds(const Envelope &env, bool *ok = Q_NULLPTR);
+	Envelope libisds2envelope(const struct isds_envelope *ie,
+	    bool *ok = Q_NULLPTR);
+	struct isds_envelope *envelope2libisds(const Envelope &env,
+	    bool *ok = Q_NULLPTR);
 
 	class DocumentPrivate;
 	/*!
@@ -443,7 +447,8 @@ namespace Isds {
 		void setFormat(QString &&f);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-		friend Document libisds2document(const struct isds_document *id);
+		friend Document libisds2document(const struct isds_document *id,
+		    bool *ok);
 
 	private:
 		QScopedPointer<DocumentPrivate> d_ptr; // std::unique_ptr ?
@@ -451,8 +456,10 @@ namespace Isds {
 
 	void swap(Document &first, Document &second) Q_DECL_NOTHROW;
 
-	Document libisds2document(const struct isds_document *id);
-	struct isds_document *document2libisds(const Document &doc);
+	Document libisds2document(const struct isds_document *id,
+	    bool *ok = Q_NULLPTR);
+	struct isds_document *document2libisds(const Document &doc,
+	    bool *ok = Q_NULLPTR);
 
 	class MessagePrivate;
 	/*!
@@ -481,18 +488,36 @@ namespace Isds {
 		bool isNull(void) const;
 
 		/* Raw message data. */
-		QByteArray raw(void) const;
+		const QByteArray &raw(void) const;
 		void setRaw(const QByteArray &r);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setRaw(QByteArray &&r);
+#endif /* Q_COMPILER_RVALUE_REFS */
 
-		Envelope envelope(void) const;
+		enum Type::RawType rawType(void) const;
+		void setRawType(enum Type::RawType t);
+
+		const Envelope &envelope(void) const;
 		void setEnvelope(const Envelope &e);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setEnvelope(Envelope &&e);
+#endif /* Q_COMPILER_RVALUE_REFS */
 
-		QList<Document> documents(void) const;
+		const QList<Document> &documents(void) const;
 		void setDocuments(const QList<Document> &dl);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDocuments(QList<Document> &&dl);
+#endif /* Q_COMPILER_RVALUE_REFS */
 
-		friend Message libisds2message(const struct isds_message *im);
+		friend Message libisds2message(const struct isds_message *im,
+		    bool *ok);
 
 	private:
 		QScopedPointer<MessagePrivate> d_ptr; // std::unique_ptr ?
 	};
+
+	void swap(Message &first, Message &second) Q_DECL_NOTHROW;
+
+	Message libisds2message(const struct isds_message *im,
+	    bool *ok = Q_NULLPTR);
 }
