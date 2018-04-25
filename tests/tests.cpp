@@ -29,6 +29,7 @@
 #include "tests/test_db_container.h"
 #include "tests/test_db_single.h"
 #include "tests/test_isds_login.h"
+#include "tests/test_isds_message.h"
 #include "tests/test_message_db_set.h"
 #include "tests/test_task_downloads.h"
 #include "tests/test_task_send_message.h"
@@ -90,6 +91,10 @@ int main(int argc, char *argv[])
 #if defined TEST_TASK_DOWNLOADS
 	status |= testThisClassAndDelete(newTestTaskDownloads(msgId), argc, argv);
 #endif /* defined TEST_TASK_DOWNLOADS */
+
+#if defined TEST_ISDS_MESSAGE
+	status |= testThisClassAndDelete(newTestIsdsMessage(), argc, argv);
+#endif /* defined TEST_ISDS_MESSAGE */
 
 #if defined TEST_VERSION
 	status |= testThisClassAndDelete(newTestVersion(), argc, argv);
