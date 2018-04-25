@@ -33,7 +33,7 @@
 #include <isds.h>
 #include <utility> /* std::move */
 
-#include "src/isds/box_management.h"
+#include "src/isds/box_interface.h"
 #include "src/isds/internal_conversion.h"
 
 Isds::Address::Address(const Address &other)

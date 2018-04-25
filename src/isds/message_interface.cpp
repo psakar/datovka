@@ -35,7 +35,7 @@
 #include <utility> /* std::move */
 
 #include "src/isds/internal_conversion.h"
-#include "src/isds/message_management.h"
+#include "src/isds/message_interface.h"
 
 /* Null objects - for convenience. */
 static const Isds::Envelope nullEnvelope;
