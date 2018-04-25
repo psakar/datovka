@@ -64,6 +64,12 @@ public:
 		return *this;
 	}
 
+	bool operator==(const HashPrivate &other) const
+	{
+		return (m_alg == other.m_alg) &&
+		    (m_hash == other.m_hash);
+	}
+
 	enum Type::HashAlg m_alg;
 	QByteArray m_hash;
 };
@@ -133,6 +139,18 @@ Isds::Hash &Isds::Hash::operator=(Hash &&other) Q_DECL_NOTHROW
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::Hash::operator==(const Hash &other) const
+{
+	Q_D(const Hash);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
 
 bool Isds::Hash::isNull(void) const
 {
@@ -368,6 +386,13 @@ public:
 		return *this;
 	}
 
+	bool operator==(const EventPrivate &other) const
+	{
+		return (m_time == other.m_time) &&
+		    (m_type == other.m_type) &&
+		    (m_descr == other.m_descr);
+	}
+
 	QDateTime m_time; /* dmEventTime */
 	enum Type::Event m_type; /* Inspired by libisds. */
 	QString m_descr; /* dmEventDescr */
@@ -438,6 +463,18 @@ Isds::Event &Isds::Event::operator=(Event &&other) Q_DECL_NOTHROW
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::Event::operator==(const Event &other) const
+{
+	Q_D(const Event);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
 
 bool Isds::Event::isNull(void) const
 {
@@ -740,6 +777,51 @@ public:
 		return *this;
 	}
 
+	bool operator==(const EnvelopePrivate &other) const
+	{
+		return (m_dmID == other.m_dmID) &&
+		    (m_dbIDSender == other.m_dbIDSender) &&
+		    (m_dmSender == other.m_dmSender) &&
+		    (m_dmSenderAddress == other.m_dmSenderAddress) &&
+		    (m_dmSenderType == other.m_dmSenderType) &&
+		    (m_dmRecipient == other.m_dmRecipient) &&
+		    (m_dmRecipientAddress == other.m_dmRecipientAddress) &&
+		    (m_dmAmbiguousRecipient == other.m_dmAmbiguousRecipient) &&
+
+		    (m_dmOrdinal == other.m_dmOrdinal) &&
+		    (m_dmMessageStatus == other.m_dmMessageStatus) &&
+		    (m_dmAttachmentSize == other.m_dmAttachmentSize) &&
+		    (m_dmDeliveryTime == other.m_dmDeliveryTime) &&
+		    (m_dmAcceptanceTime == other.m_dmAcceptanceTime) &&
+		    (m_dmHash == other.m_dmHash) &&
+		    (m_dmQTimestamp == other.m_dmQTimestamp) &&
+		    (m_dmEvents == other.m_dmEvents) &&
+
+		    (m_dmSenderOrgUnit == other.m_dmSenderOrgUnit) &&
+		    (m_dmSenderOrgUnitNum == other.m_dmSenderOrgUnitNum) &&
+		    (m_dbIDRecipient == other.m_dbIDRecipient) &&
+		    (m_dmRecipientOrgUnit == other.m_dmRecipientOrgUnit) &&
+		    (m_dmRecipientOrgUnitNum == other.m_dmRecipientOrgUnitNum) &&
+		    (m_dmToHands == other.m_dmToHands) &&
+		    (m_dmAnnotation == other.m_dmAnnotation) &&
+		    (m_dmRecipientRefNumber == other.m_dmRecipientRefNumber) &&
+		    (m_dmSenderRefNumber == other.m_dmSenderRefNumber) &&
+		    (m_dmRecipientIdent == other.m_dmRecipientIdent) &&
+		    (m_dmSenderIdent == other.m_dmSenderIdent) &&
+
+		    (m_dmLegalTitleLaw == other.m_dmLegalTitleLaw) &&
+		    (m_dmLegalTitleYear == other.m_dmLegalTitleYear) &&
+		    (m_dmLegalTitleSect == other.m_dmLegalTitleSect) &&
+		    (m_dmLegalTitlePar == other.m_dmLegalTitlePar) &&
+		    (m_dmLegalTitlePoint == other.m_dmLegalTitlePoint) &&
+		    (m_dmPersonalDelivery == other.m_dmPersonalDelivery) &&
+		    (m_dmAllowSubstDelivery == other.m_dmAllowSubstDelivery) &&
+		    (m_dmType == other.m_dmType) &&
+
+		    (m_dmOVM == other.m_dmOVM) &&
+		    (m_dmPublishOwnID == other.m_dmPublishOwnID);
+	}
+
 	QString m_dmID;
 	QString m_dbIDSender;
 	QString m_dmSender;
@@ -850,6 +932,18 @@ Isds::Envelope &Isds::Envelope::operator=(Envelope &&other) Q_DECL_NOTHROW
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::Envelope::operator==(const Envelope &other) const
+{
+	Q_D(const Envelope);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
 
 bool Isds::Envelope::isNull(void) const
 {
@@ -2170,6 +2264,18 @@ public:
 		return *this;
 	}
 
+	bool operator==(const DocumentPrivate &other) const
+	{
+		return (m_binaryContent == other.m_binaryContent) &&
+		//    (m_xmlContent == other.m_xmlContent) &&
+		    (m_mimeType == other.m_mimeType) &&
+		    (m_metaType == other.m_metaType) &&
+		    (m_fileGuid == other.m_fileGuid) &&
+		    (m_upFileGuid == other.m_upFileGuid) &&
+		    (m_fileDescr == other.m_fileDescr) &&
+		    (m_format == other.m_format);
+	}
+
 	bool m_xml; /*!< Inspired by libisds. Direct XML handling is not supported yet! */
 
 	QByteArray m_binaryContent;
@@ -2248,6 +2354,18 @@ Isds::Document &Isds::Document::operator=(Document &&other) Q_DECL_NOTHROW
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::Document::operator==(const Document &other) const
+{
+	Q_D(const Document);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
 
 bool Isds::Document::isNull(void) const
 {
@@ -2606,6 +2724,15 @@ public:
 		return *this;
 	}
 
+	bool operator==(const MessagePrivate &other) const
+	{
+		return (m_raw == other.m_raw) &&
+		    (m_rawType == other.m_rawType) &&
+		//    (m_xml == other.m_xml) &&
+		    (m_envelope == other.m_envelope) &&
+		    (m_documents == other.m_documents);
+	}
+
 	QByteArray m_raw;
 	enum Type::RawType m_rawType;
 	// m_xml; /* Does not support direct XML access yet. */
@@ -2679,6 +2806,18 @@ Isds::Message &Isds::Message::operator=(Message &&other) Q_DECL_NOTHROW
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::Message::operator==(const Message &other) const
+{
+	Q_D(const Message);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
 
 bool Isds::Message::isNull(void) const
 {

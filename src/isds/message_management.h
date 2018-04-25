@@ -62,6 +62,8 @@ namespace Isds {
 		Hash &operator=(Hash &&other) Q_DECL_NOTHROW;
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+		bool operator==(const Hash &other) const;
+
 		friend void swap(Hash &first, Hash &second) Q_DECL_NOTHROW;
 
 		bool isNull(void) const;
@@ -106,6 +108,8 @@ namespace Isds {
 #ifdef Q_COMPILER_RVALUE_REFS
 		Event &operator=(Event &&other) Q_DECL_NOTHROW;
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const Event &other) const;
 
 		friend void swap(Event &first, Event &second) Q_DECL_NOTHROW;
 
@@ -157,6 +161,8 @@ namespace Isds {
 #ifdef Q_COMPILER_RVALUE_REFS
 		Envelope &operator=(Envelope &&other) Q_DECL_NOTHROW;
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const Envelope &other) const;
 
 		friend void swap(Envelope &first, Envelope &second) Q_DECL_NOTHROW;
 
@@ -401,6 +407,8 @@ namespace Isds {
 		Document &operator=(Document &&other) Q_DECL_NOTHROW;
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+		bool operator==(const Document &other) const;
+
 		friend void swap(Document &first, Document &second) Q_DECL_NOTHROW;
 
 		bool isNull(void) const;
@@ -482,6 +490,8 @@ namespace Isds {
 #ifdef Q_COMPILER_RVALUE_REFS
 		Message &operator=(Message &&other) Q_DECL_NOTHROW;
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const Message &other) const;
 
 		friend void swap(Message &first, Message &second) Q_DECL_NOTHROW;
 
