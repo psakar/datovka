@@ -88,9 +88,6 @@ namespace Isds {
 
 	void swap(Hash &first, Hash &second) Q_DECL_NOTHROW;
 
-	Hash libisds2hash(const struct isds_hash *ih, bool *ok = Q_NULLPTR);
-	struct isds_hash *hash2libisds(const Hash &h, bool *ok = Q_NULLPTR);
-
 	class EventPrivate;
 	/*!
 	 * @brief Described in dmBaseTypes.xsd as type tEvent.
@@ -138,9 +135,6 @@ namespace Isds {
 	};
 
 	void swap(Event &first, Event &second) Q_DECL_NOTHROW;
-
-	Event libisds2event(const struct isds_event *ie, bool *ok = Q_NULLPTR);
-	struct isds_event *event2libisds(const Event &e, bool *ok = Q_NULLPTR);
 
 	class EnvelopePrivate;
 	/*!
@@ -382,11 +376,6 @@ namespace Isds {
 
 	void swap(Envelope &first, Envelope &second) Q_DECL_NOTHROW;
 
-	Envelope libisds2envelope(const struct isds_envelope *ie,
-	    bool *ok = Q_NULLPTR);
-	struct isds_envelope *envelope2libisds(const Envelope &env,
-	    bool *ok = Q_NULLPTR);
-
 	class DocumentPrivate;
 	/*!
 	 * @brief Described in dmBaseTypes.xsd as type tFilesArray_dmFile.
@@ -466,11 +455,6 @@ namespace Isds {
 
 	void swap(Document &first, Document &second) Q_DECL_NOTHROW;
 
-	Document libisds2document(const struct isds_document *id,
-	    bool *ok = Q_NULLPTR);
-	struct isds_document *document2libisds(const Document &doc,
-	    bool *ok = Q_NULLPTR);
-
 	class MessagePrivate;
 	/*!
 	 * @Brief Described in dmBaseTypes.xsd as type tReturnedMessage.
@@ -530,8 +514,4 @@ namespace Isds {
 
 	void swap(Message &first, Message &second) Q_DECL_NOTHROW;
 
-	Message libisds2message(const struct isds_message *im,
-	    bool *ok = Q_NULLPTR);
-	struct isds_message *message2libisds(const Message &m,
-	    bool *ok = Q_NULLPTR);
 }

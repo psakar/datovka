@@ -31,6 +31,7 @@
 #include <isds.h>
 #include <QFile>
 
+#include "src/isds/message_conversion.h"
 #include "src/isds/message_functions.h"
 #include "src/log/log.h"
 
