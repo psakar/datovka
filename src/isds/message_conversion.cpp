@@ -183,6 +183,8 @@ struct isds_hash *Isds::hash2libisds(const Hash &h, bool *ok)
 		}
 		return NULL;
 	}
+	std::memset(ih, 0, sizeof(*ih));
+
 	if (Q_UNLIKELY(!setLibisdsHashContent(ih, h))) {
 		isds_hash_free(&ih);
 		if (ok != Q_NULLPTR) {
@@ -307,6 +309,8 @@ struct isds_event *Isds::event2libisds(const Event &e, bool *ok)
 		}
 		return NULL;
 	}
+	std::memset(ie, 0, sizeof(*ie));
+
 	if (Q_UNLIKELY(!setLibisdsEventContent(ie, e))) {
 		isds_event_free(&ie);
 		if (ok != Q_NULLPTR) {
@@ -554,7 +558,8 @@ bool toLongUInt(unsigned long int **cULongPtr, quint64 u)
 		return true;
 	}
 	if (*cULongPtr == NULL) {
-		*cULongPtr = (unsigned long int*)std::malloc(sizeof(**cULongPtr));
+		*cULongPtr =
+		    (unsigned long int*)std::malloc(sizeof(**cULongPtr));
 		if (Q_UNLIKELY(*cULongPtr == NULL)) {
 			Q_ASSERT(0);
 			return false;

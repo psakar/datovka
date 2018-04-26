@@ -84,8 +84,9 @@ bool Isds::toCStrCopy(char **cStrPtr, const QString &str)
 		return true;
 	}
 	/* Copy string content. */
-	const char *utfStr = str.toUtf8().constData();
-	std::size_t utfStrLen = std::strlen(utfStr);
+	QByteArray strBytes(str.toUtf8()); /* Must not be deleted before memcpy. */
+	const char *utfStr = strBytes.constData();
+	size_t utfStrLen = std::strlen(utfStr);
 	if (utfStr == Q_NULLPTR) {
 		return true;
 	}
@@ -94,7 +95,10 @@ bool Isds::toCStrCopy(char **cStrPtr, const QString &str)
 		Q_ASSERT(0);
 		return false;
 	}
-	std::memcpy(*cStrPtr, utfStr, utfStrLen + 1);
+	if (utfStrLen > 0) {
+		std::memcpy(*cStrPtr, utfStr, utfStrLen);
+	}
+	(*cStrPtr)[utfStrLen] = '\0';
 	return true;
 }
 
