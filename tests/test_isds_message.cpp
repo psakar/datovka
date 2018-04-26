@@ -56,7 +56,9 @@ private slots:
 
 	void compare(void);
 
-	void conversionChain(void);
+	void conversionChainMessage(void);
+
+	void conversionChainDeliveryInfo(void);
 
 private:
 	const QString msgPath;
@@ -128,7 +130,7 @@ void TestIsdsMessage::compare(void)
 	QVERIFY(message02 != Isds::Message());
 }
 
-void TestIsdsMessage::conversionChain(void)
+void TestIsdsMessage::conversionChainMessage(void)
 {
 	Isds::Message message01;
 	struct isds_message *im01 = NULL;
@@ -137,9 +139,44 @@ void TestIsdsMessage::conversionChain(void)
 
 	message01 = Isds::messageFromFile(msgPath, Isds::LT_MESSAGE);
 	QVERIFY(!message01.isNull());
-	im01 = Isds::message2libisds(message01);
+	bool ok = false;
+	im01 = Isds::message2libisds(message01, &ok);
+	QVERIFY(ok);
 	QVERIFY(!message01.isNull());
 	QVERIFY(im01 != NULL);
+
+	ok = false;
+	Isds::Message message02 = Isds::libisds2message(im01, &ok);
+	QVERIFY(ok);
+	QVERIFY(!message02.isNull());
+
+	QVERIFY(message01 == message02);
+
+	isds_message_free(&im01);
+	QVERIFY(im01 == NULL);
+}
+
+void TestIsdsMessage::conversionChainDeliveryInfo(void)
+{
+	Isds::Message message01;
+	struct isds_message *im01 = NULL;
+	QVERIFY(message01.isNull());
+	QVERIFY(im01 == NULL);
+
+	message01 = Isds::messageFromFile(delInfoPath, Isds::LT_DELIVERY);
+	QVERIFY(!message01.isNull());
+	bool ok = false;
+	im01 = Isds::message2libisds(message01, &ok);
+	QVERIFY(ok);
+	QVERIFY(!message01.isNull());
+	QVERIFY(im01 != NULL);
+
+	ok = false;
+	Isds::Message message02 = Isds::libisds2message(im01, &ok);
+	QVERIFY(ok);
+	QVERIFY(!message02.isNull());
+
+	QVERIFY(message01 == message02);
 
 	isds_message_free(&im01);
 	QVERIFY(im01 == NULL);
