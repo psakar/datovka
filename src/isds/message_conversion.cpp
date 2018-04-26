@@ -1069,7 +1069,7 @@ struct isds_list *documentList2libisds(const QList<Isds::Document> &dl,
 		/* Set list item. */
 		item->next = NULL;
 		item->data = idoc;
-		item->destructor = (void (*)(void **))isds_event_free;
+		item->destructor = (void (*)(void **))isds_document_free;
 
 		/* Append item. */
 		if (lastItem == NULL) {
