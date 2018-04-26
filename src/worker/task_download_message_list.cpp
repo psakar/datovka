@@ -479,7 +479,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 
 	while (0 != event) {
 		isds_event *item = (isds_event *) event->data;
-		messageDb->msgsInsertUpdateMessageEvent(dmID,
+		messageDb->insertOrUpdateMessageEvent(dmID,
 		    timevalToDbFormat(item->time),
 		    IsdsConversion::eventTypeToStr(*item->type) + QLatin1String(": "),
 		    item->description);

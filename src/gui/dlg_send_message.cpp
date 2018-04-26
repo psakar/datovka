@@ -777,7 +777,7 @@ void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 		/* If only a single message if forwarded. */
 		if (msgIds.size() == 1) {
 			MessageDb::PartialEnvelopeData envData(
-			    messageDb->msgsReplyData(msgId.dmId));
+			    messageDb->getMessageReplyData(msgId.dmId));
 
 			m_ui->subjectLine->setText("Fwd: " + envData.dmAnnotation);
 		}
@@ -812,7 +812,7 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
 	MessageDb::PartialEnvelopeData envData =
-	    messageDb->msgsReplyData(msgId.dmId);
+	    messageDb->getMessageReplyData(msgId.dmId);
 	m_dmType = envData.dmType;
 	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
@@ -889,7 +889,7 @@ void DlgSendMessage::fillContentFromTemplate(
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
 	MessageDb::PartialEnvelopeData envData =
-	    messageDb->msgsReplyData(msgId.dmId);
+	    messageDb->getMessageReplyData(msgId.dmId);
 	m_dmType = envData.dmType;
 	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
 
