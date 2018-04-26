@@ -141,6 +141,11 @@ bool Isds::Hash::operator==(const Hash &other) const
 	return *d == *other.d_func();
 }
 
+bool Isds::Hash::operator!=(const Hash &other) const
+{
+	return !operator==(other);
+}
+
 bool Isds::Hash::isNull(void) const
 {
 	Q_D(const Hash);
@@ -303,6 +308,11 @@ bool Isds::Event::operator==(const Event &other) const
 	}
 
 	return *d == *other.d_func();
+}
+
+bool Isds::Event::operator!=(const Event &other) const
+{
+	return !operator==(other);
 }
 
 bool Isds::Event::isNull(void) const
@@ -648,6 +658,11 @@ bool Isds::Envelope::operator==(const Envelope &other) const
 	}
 
 	return *d == *other.d_func();
+}
+
+bool Isds::Envelope::operator!=(const Envelope &other) const
+{
+	return !operator==(other);
 }
 
 bool Isds::Envelope::isNull(void) const
@@ -1644,6 +1659,11 @@ bool Isds::Document::operator==(const Document &other) const
 	return *d == *other.d_func();
 }
 
+bool Isds::Document::operator!=(const Document &other) const
+{
+	return !operator==(other);
+}
+
 bool Isds::Document::isNull(void) const
 {
 	Q_D(const Document);
@@ -1949,6 +1969,11 @@ bool Isds::Message::operator==(const Message &other) const
 	}
 
 	return *d == *other.d_func();
+}
+
+bool Isds::Message::operator!=(const Message &other) const
+{
+	return !operator==(other);
 }
 
 bool Isds::Message::isNull(void) const

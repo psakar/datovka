@@ -21,10 +21,19 @@
  * the two.
  */
 
+#if defined(__APPLE__) || defined(__clang__)
+#  define __USE_C99_MATH
+#  define _Bool bool
+#else /* !__APPLE__ */
+#  include <cstdbool>
+#endif /* __APPLE__ */
+
+#include <isds.h>
 #include <QString>
 #include <QtTest/QtTest>
 
 #include "src/global.h"
+#include "src/isds/message_conversion.h"
 #include "src/isds/message_functions.h"
 #include "src/isds/message_interface.h"
 #include "src/log/log.h"
@@ -44,6 +53,10 @@ private slots:
 	void nullResponse(void);
 
 	void loadZfo(void);
+
+	void compare(void);
+
+	void conversionChain(void);
 
 private:
 	const QString msgPath;
@@ -86,13 +99,6 @@ void TestIsdsMessage::nullResponse(void)
 
 void TestIsdsMessage::loadZfo(void)
 {
-	Isds::Message message01, message02;
-	QVERIFY(message01.isNull());
-	QVERIFY(message02.isNull());
-	QVERIFY(message01 == message01);
-	QVERIFY(message01 == message02);
-	QVERIFY(message02 == message02);
-
 	QVERIFY(!Isds::messageFromFile(msgPath, Isds::LT_ANY).isNull());
 	QVERIFY(!Isds::messageFromFile(msgPath, Isds::LT_MESSAGE).isNull());
 	QVERIFY(Isds::messageFromFile(msgPath, Isds::LT_DELIVERY).isNull());
@@ -100,6 +106,43 @@ void TestIsdsMessage::loadZfo(void)
 	QVERIFY(!Isds::messageFromFile(delInfoPath, Isds::LT_ANY).isNull());
 	QVERIFY(Isds::messageFromFile(delInfoPath, Isds::LT_MESSAGE).isNull());
 	QVERIFY(!Isds::messageFromFile(delInfoPath, Isds::LT_DELIVERY).isNull());
+}
+
+void TestIsdsMessage::compare(void)
+{
+	Isds::Message message01, message02;
+	QVERIFY(message01.isNull());
+	QVERIFY(message02.isNull());
+	QVERIFY(message01 == message01);
+	QVERIFY(message01 == message02);
+	QVERIFY(message02 == message02);
+
+	message01 = Isds::messageFromFile(msgPath, Isds::LT_MESSAGE);
+	QVERIFY(!message01.isNull());
+	QVERIFY(message01 == message01);
+	QVERIFY(message01 != Isds::Message());
+
+	message02 = Isds::messageFromFile(delInfoPath, Isds::LT_DELIVERY);
+	QVERIFY(!message02.isNull());
+	QVERIFY(message02 == message02);
+	QVERIFY(message02 != Isds::Message());
+}
+
+void TestIsdsMessage::conversionChain(void)
+{
+	Isds::Message message01;
+	struct isds_message *im01 = NULL;
+	QVERIFY(message01.isNull());
+	QVERIFY(im01 == NULL);
+
+	message01 = Isds::messageFromFile(msgPath, Isds::LT_MESSAGE);
+	QVERIFY(!message01.isNull());
+	im01 = Isds::message2libisds(message01);
+	QVERIFY(!message01.isNull());
+	QVERIFY(im01 != NULL);
+
+	isds_message_free(&im01);
+	QVERIFY(im01 == NULL);
 }
 
 void TestIsdsMessage::cleanupTestCase(void)
