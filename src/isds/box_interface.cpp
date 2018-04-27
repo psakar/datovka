@@ -36,97 +36,546 @@
 #include "src/isds/box_interface.h"
 #include "src/isds/internal_conversion.h"
 
-Isds::Address::Address(const Address &other)
-    : m_adCity(other.m_adCity),
-    m_adDistrict(other.m_adDistrict),
-    m_adStreet(other.m_adStreet),
-    m_adNumberInStreet(other.m_adNumberInStreet),
-    m_adNumberInMunicipality(other.m_adNumberInMunicipality),
-    m_adZipCode(other.m_adZipCode),
-    m_adState(other.m_adState),
-    m_adAMCode(other.m_adAMCode)
+/* Null objects - for convenience. */
+static const QDate nullDate;
+static const QString nullString;
+
+/*!
+ * @brief PIMPL Address class.
+ */
+class Isds::AddressPrivate {
+	//Q_DISABLE_COPY(AddressPrivate)
+public:
+	AddressPrivate(void)
+	    : m_adCity()/*, m_adDistrict() */, m_adStreet(),
+	    m_adNumberInStreet(), m_adNumberInMunicipality(),
+	    m_adZipCode(), m_adState()/*, m_adAMCode(-1) */
+	{ }
+
+	AddressPrivate &operator=(const AddressPrivate &other) Q_DECL_NOTHROW
+	{
+		m_adCity = other.m_adCity;
+		//m_adDistrict = other.m_adDistrict;
+		m_adStreet = other.m_adStreet;
+		m_adNumberInStreet = other.m_adNumberInStreet;
+		m_adNumberInMunicipality = other.m_adNumberInMunicipality;
+		m_adZipCode = other.m_adZipCode;
+		m_adState = other.m_adState;
+		//m_adAMCode = other.m_adAMCode;
+
+		return *this;
+	}
+
+	bool operator==(const AddressPrivate &other) const
+	{
+		return (m_adCity == other.m_adCity) &&
+		//    (m_adDistrict == other.m_adDistrict) &&
+		    (m_adStreet == other.m_adStreet) &&
+		    (m_adNumberInStreet == other.m_adNumberInStreet) &&
+		    (m_adNumberInMunicipality == other.m_adNumberInMunicipality) &&
+		    (m_adZipCode == other.m_adZipCode) &&
+		    (m_adState == other.m_adState);
+		//    (m_adAMCode == other.m_adAMCode);
+	}
+
+	QString m_adCity;
+	//QString m_adDistrict; /* Not present in libisds-0.10.7. Optional, used in extended structure versions. */
+	QString m_adStreet;
+	QString m_adNumberInStreet;
+	QString m_adNumberInMunicipality;
+	QString m_adZipCode;
+	QString m_adState;
+	//qint64 m_adAMCode; /*
+	//                    * Not present in libisds-0.10.7.
+	//                    * AM (adresni misto) code according to RUIAN (Registr uzemni identifikace, adres a nemovitosti)
+	//                    * It's a number code.
+	//                    * Optional, used in extended structure versions.
+	//                    */
+};
+
+Isds::Address::Address(void)
+    : d_ptr(Q_NULLPTR)
 {
+}
+
+Isds::Address::Address(const Address &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) AddressPrivate) : Q_NULLPTR)
+{
+	Q_D(Address);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::Address::Address(Address &&other) Q_DECL_NOEXCEPT
-    : m_adCity(std::move(other.m_adCity)),
-    m_adDistrict(std::move(other.m_adDistrict)),
-    m_adStreet(std::move(other.m_adStreet)),
-    m_adNumberInStreet(std::move(other.m_adNumberInStreet)),
-    m_adNumberInMunicipality(std::move(other.m_adNumberInMunicipality)),
-    m_adZipCode(std::move(other.m_adZipCode)),
-    m_adState(std::move(other.m_adState)),
-    m_adAMCode(std::move(other.m_adAMCode))
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
 {
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+Isds::Address::~Address(void)
+{
+}
+
+/*!
+ * @brief Ensures private address presence.
+ *
+ * @note Returns if private hash could not be allocated.
+ */
+#define ensureAddressPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			AddressPrivate *p = new (std::nothrow) AddressPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
 Isds::Address &Isds::Address::operator=(const Address &other) Q_DECL_NOTHROW
 {
-	m_adCity = other.m_adCity;
-	m_adDistrict = other.m_adDistrict;
-	m_adStreet = other.m_adStreet;
-	m_adNumberInStreet = other.m_adNumberInStreet;
-	m_adNumberInMunicipality = other.m_adNumberInMunicipality;
-	m_adZipCode = other.m_adZipCode;
-	m_adState = other.m_adState;
-	m_adAMCode = other.m_adAMCode;
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureAddressPrivate(*this);
+	Q_D(Address);
+
+	*d = *other.d_func();
+
 	return *this;
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::Address &Isds::Address::operator=(Address &&other) Q_DECL_NOTHROW
 {
-	std::swap(m_adCity, other.m_adCity);
-	std::swap(m_adDistrict, other.m_adDistrict);
-	std::swap(m_adStreet, other.m_adStreet);
-	std::swap(m_adNumberInStreet, other.m_adNumberInStreet);
-	std::swap(m_adNumberInMunicipality, other.m_adNumberInMunicipality);
-	std::swap(m_adZipCode, other.m_adZipCode);
-	std::swap(m_adState, other.m_adState);
-	std::swap(m_adAMCode, other.m_adAMCode);
+	swap(*this, other);
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-Isds::BirthInfo::BirthInfo(const BirthInfo &other)
-    : m_biDate(other.m_biDate),
-    m_biCity(other.m_biCity),
-    m_biCounty(other.m_biCounty),
-    m_biState(other.m_biState)
+bool Isds::Address::operator==(const Address &other) const
 {
+	Q_D(const Address);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::Address::operator!=(const Address &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::Address::isNull(void) const
+{
+	Q_D(const Address);
+	return d == Q_NULLPTR;
+}
+
+const QString &Isds::Address::city(void) const
+{
+	Q_D(const Address);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_adCity;
+}
+
+void Isds::Address::setCity(const QString &c)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adCity = c;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Address::setCity(QString &&c)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adCity = c;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::Address::street(void) const
+{
+	Q_D(const Address);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_adStreet;
+}
+
+void Isds::Address::setStreet(const QString &s)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adStreet = s;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Address::setStreet(QString &&s)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adStreet = s;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::Address::numberInStreet(void) const
+{
+	Q_D(const Address);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_adNumberInStreet;
+}
+
+void Isds::Address::setNumberInStreet(const QString &nis)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adNumberInStreet = nis;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Address::setNumberInStreet(QString &&nis)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adNumberInStreet = nis;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::Address::numberInMunicipality(void) const
+{
+	Q_D(const Address);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_adNumberInMunicipality;
+}
+
+void Isds::Address::setNumberInMunicipality(const QString &nim)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adNumberInMunicipality = nim;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Address::setNumberInMunicipality(QString &&nim)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adNumberInMunicipality = nim;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::Address::zipCode(void) const
+{
+	Q_D(const Address);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_adZipCode;
+}
+
+void Isds::Address::setZipCode(const QString &zc)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adZipCode = zc;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Address::setZipCode(QString &&zc)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adZipCode = zc;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::Address::state(void) const
+{
+	Q_D(const Address);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_adState;
+}
+
+void Isds::Address::setState(const QString &s)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adState = s;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::Address::setState(QString &&s)
+{
+	ensureAddressPrivate();
+	Q_D(Address);
+	d->m_adState = s;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(Address &first, Address &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief PIMPL BirthInfo class.
+ */
+class Isds::BirthInfoPrivate {
+	//Q_DISABLE_COPY(BirthInfoPrivate)
+public:
+	BirthInfoPrivate(void)
+	    : m_biDate(), m_biCity(), m_biCounty(), m_biState()
+	{ }
+
+	BirthInfoPrivate &operator=(const BirthInfoPrivate &other) Q_DECL_NOTHROW
+	{
+		m_biDate = other.m_biDate;
+		m_biCity = other.m_biCity;
+		m_biCounty = other.m_biCounty;
+		m_biState = other.m_biState;
+
+		return *this;
+	}
+
+	bool operator==(const BirthInfoPrivate &other) const
+	{
+		return (m_biDate == other.m_biDate) &&
+		    (m_biCity == other.m_biCity) &&
+		    (m_biCounty == other.m_biCounty) &&
+		    (m_biState == other.m_biState);
+	}
+
+	QDate m_biDate;
+	QString m_biCity;
+	QString m_biCounty;
+	QString m_biState;
+};
+
+Isds::BirthInfo::BirthInfo(void)
+    : d_ptr(Q_NULLPTR)
+{
+}
+
+Isds::BirthInfo::BirthInfo(const BirthInfo &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) BirthInfoPrivate) : Q_NULLPTR)
+{
+	Q_D(BirthInfo);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::BirthInfo::BirthInfo(BirthInfo &&other) Q_DECL_NOEXCEPT
-    : m_biDate(std::move(other.m_biDate)),
-    m_biCity(std::move(other.m_biCity)),
-    m_biCounty(std::move(other.m_biCounty)),
-    m_biState(std::move(other.m_biState))
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
 {
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+Isds::BirthInfo::~BirthInfo(void)
+{
+}
+
+/*!
+ * @brief Ensures private birth info presence.
+ *
+ * @note Returns if private hash could not be allocated.
+ */
+#define ensureBirthInfoPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			BirthInfoPrivate *p = new (std::nothrow) BirthInfoPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
 Isds::BirthInfo &Isds::BirthInfo::operator=(const BirthInfo &other) Q_DECL_NOTHROW
 {
-	m_biDate = other.m_biDate;
-	m_biCity = other.m_biCity;
-	m_biCounty = other.m_biCounty;
-	m_biState = other.m_biState;
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureBirthInfoPrivate(*this);
+	Q_D(BirthInfo);
+
+	*d = *other.d_func();
+
 	return *this;
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::BirthInfo &Isds::BirthInfo::operator=(BirthInfo &&other) Q_DECL_NOTHROW
 {
-	std::swap(m_biDate, other.m_biDate);
-	std::swap(m_biCity, other.m_biCity);
-	std::swap(m_biCounty, other.m_biCounty);
-	std::swap(m_biState, other.m_biState);
+	swap(*this, other);
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::BirthInfo::operator==(const BirthInfo &other) const
+{
+	Q_D(const BirthInfo);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::BirthInfo::operator!=(const BirthInfo &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::BirthInfo::isNull(void) const
+{
+	Q_D(const BirthInfo);
+	return d == Q_NULLPTR;
+}
+
+const QDate &Isds::BirthInfo::date(void) const
+{
+	Q_D(const BirthInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDate;
+	}
+
+	return d->m_biDate;
+}
+
+void Isds::BirthInfo::setDate(const QDate &bd)
+{
+	ensureBirthInfoPrivate();
+	Q_D(BirthInfo);
+	d->m_biDate = bd;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::BirthInfo::setDate(QDate &&bd)
+{
+	ensureBirthInfoPrivate();
+	Q_D(BirthInfo);
+	d->m_biDate = bd;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::BirthInfo::city(void) const
+{
+	Q_D(const BirthInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_biCity;
+}
+
+void Isds::BirthInfo::setCity(const QString &c)
+{
+	ensureBirthInfoPrivate();
+	Q_D(BirthInfo);
+	d->m_biCity = c;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::BirthInfo::setCity(QString &&c)
+{
+	ensureBirthInfoPrivate();
+	Q_D(BirthInfo);
+	d->m_biCity = c;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::BirthInfo::county(void) const
+{
+	Q_D(const BirthInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_biCounty;
+}
+
+void Isds::BirthInfo::setCounty(const QString &c)
+{
+	ensureBirthInfoPrivate();
+	Q_D(BirthInfo);
+	d->m_biCounty = c;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::BirthInfo::setCounty(QString &&c)
+{
+	ensureBirthInfoPrivate();
+	Q_D(BirthInfo);
+	d->m_biCounty = c;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::BirthInfo::state(void) const
+{
+	Q_D(const BirthInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_biState;
+}
+
+void Isds::BirthInfo::setState(const QString &s)
+{
+	ensureBirthInfoPrivate();
+	Q_D(BirthInfo);
+	d->m_biState = s;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::BirthInfo::setState(QString &&s)
+{
+	ensureBirthInfoPrivate();
+	Q_D(BirthInfo);
+	d->m_biState = s;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(BirthInfo &first, BirthInfo &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
 
 Isds::PersonName::PersonName(const PersonName &other)
     : m_pnFirstName(other.m_pnFirstName),
@@ -501,27 +950,6 @@ void Isds::DbOwnerInfo::setBirthInfo(const BirthInfo &bi)
 	toCStrCopy(&boi->birthInfo->biState, bi.state());
 }
 
-/*!
- * @brief Set address according to the libisds address structure.
- */
-static
-void setAddressContent(Isds::Address &tgt, const struct isds_Address *src)
-{
-	if (Q_UNLIKELY(src == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	tgt.setCity(Isds::fromCStr(src->adCity));
-	tgt.setDistrict(Isds::fromCStr(src->adDistrict));
-	tgt.setStreet(Isds::fromCStr(src->adStreet));
-	tgt.setNumberInStreet(Isds::fromCStr(src->adNumberInStreet));
-	tgt.setNumberInMunicipality(Isds::fromCStr(src->adNumberInMunicipality));
-	tgt.setZipCode(Isds::fromCStr(src->adZipCode));
-	tgt.setState(Isds::fromCStr(src->adState));
-	tgt.setAmCode(Isds::fromLongInt(src->adCode));
-}
-
 Isds::Address Isds::DbOwnerInfo::address(void) const
 {
 	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
@@ -532,28 +960,6 @@ Isds::Address Isds::DbOwnerInfo::address(void) const
 	Address address;
 	setAddressContent(address, boi->address);
 	return address;
-}
-
-/*!
- * @brief Set libisds address structure according to the address.
- */
-static
-void setLibisdsAddressContent(struct isds_Address *tgt,
-    const Isds::Address &src)
-{
-	if (Q_UNLIKELY(tgt == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	Isds::toCStrCopy(&tgt->adCity, src.city());
-	Isds::toCStrCopy(&tgt->adDistrict, src.district());
-	Isds::toCStrCopy(&tgt->adStreet, src.street());
-	Isds::toCStrCopy(&tgt->adNumberInStreet, src.numberInStreet());
-	Isds::toCStrCopy(&tgt->adNumberInMunicipality, src.numberInMunicipality());
-	Isds::toCStrCopy(&tgt->adZipCode, src.zipCode());
-	Isds::toCStrCopy(&tgt->adState, src.state());
-	Isds::toLongInt(&tgt->adCode, src.amCode());
 }
 
 void Isds::DbOwnerInfo::setAddress(const Address &a)

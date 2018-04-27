@@ -114,24 +114,24 @@ QDate Isds::dateFromStructTM(struct tm *cDate)
 	return QDate(year, month, day);
 }
 
-void Isds::toCDateCopy(struct tm **cDatePtr, const QDate &date)
+bool Isds::toCDateCopy(struct tm **cDatePtr, const QDate &date)
 {
 	if (Q_UNLIKELY(cDatePtr == Q_NULLPTR)) {
 		Q_ASSERT(0);
-		return;
+		return false;
 	}
 	if (date.isNull()) {
 		if (*cDatePtr != NULL) {
 			/* Delete allocated. */
 			std::free(*cDatePtr); *cDatePtr = NULL;
 		}
-		return;
+		return true;
 	}
 	if (*cDatePtr == NULL) {
 		*cDatePtr = (struct tm *)std::malloc(sizeof(**cDatePtr));
 		if (Q_UNLIKELY(*cDatePtr == NULL)) {
 			Q_ASSERT(0);
-			return;
+			return false;
 		}
 	}
 	std::memset(*cDatePtr, 0, sizeof(**cDatePtr));
@@ -139,6 +139,7 @@ void Isds::toCDateCopy(struct tm **cDatePtr, const QDate &date)
 	(*cDatePtr)->tm_year = date.year() - 1900;
 	(*cDatePtr)->tm_mon = date.month() - 1;
 	(*cDatePtr)->tm_mday = date.day();
+	return true;
 }
 
 QDateTime Isds::dateTimeFromStructTimeval(struct timeval *cDateTime)
