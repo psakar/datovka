@@ -227,3 +227,93 @@ struct isds_BirthInfo *Isds::birthInfo2libisds(const BirthInfo &bi, bool *ok)
 	}
 	return ibi;
 }
+
+/*!
+ * @brief Set person name according to the libisds person name structure.
+ */
+static
+bool setPersonNameContent(Isds::PersonName &tgt,
+    const struct isds_PersonName *src)
+{
+	if (Q_UNLIKELY(src == NULL)) {
+		return true;
+	}
+
+	tgt.setFirstName(Isds::fromCStr(src->pnFirstName));
+	tgt.setMiddleName(Isds::fromCStr(src->pnMiddleName));
+	tgt.setLastName(Isds::fromCStr(src->pnLastName));
+	tgt.setLastNameAtBirth(Isds::fromCStr(src->pnLastNameAtBirth));
+	return true;
+}
+
+Isds::PersonName Isds::libisds2personName(const struct isds_PersonName *ipn,
+    bool *ok)
+{
+	PersonName personName;
+	bool ret = setPersonNameContent(personName, ipn);
+	if (ok != Q_NULLPTR) {
+		*ok = ret;
+	}
+	return personName;
+}
+
+/*!
+ * @brief Set libisds person name structure according to the person name.
+ */
+static
+bool setLibisdsPersonNameContent(struct isds_PersonName *tgt,
+    const Isds::PersonName &src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->pnFirstName, src.firstName()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->pnMiddleName, src.middleName()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->pnLastName, src.lastName()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->pnLastNameAtBirth, src.lastNameAtBirth()))) {
+		return false;
+	}
+
+	return true;
+}
+
+struct isds_PersonName *Isds::personName2libisds(const PersonName &pn, bool *ok)
+{
+	if (Q_UNLIKELY(pn.isNull())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_PersonName *ipn =
+	    (struct isds_PersonName *)std::malloc(sizeof(*ipn));
+	if (Q_UNLIKELY(ipn == NULL)) {
+		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return NULL;
+	}
+	std::memset(ipn, 0, sizeof(*ipn));
+
+	if (Q_UNLIKELY(!setLibisdsPersonNameContent(ipn, pn))) {
+		isds_PersonName_free(&ipn);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return NULL;
+	}
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return ipn;
+}

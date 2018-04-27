@@ -37,4 +37,9 @@ namespace Isds {
 	struct isds_BirthInfo *birthInfo2libisds(const BirthInfo &bi,
 	    bool *ok = Q_NULLPTR);
 
+	PersonName libisds2personName(const struct isds_PersonName *ipn,
+	    bool *ok = Q_NULLPTR);
+	struct isds_PersonName *personName2libisds(const PersonName &pn,
+	    bool *ok = Q_NULLPTR);
+
 }

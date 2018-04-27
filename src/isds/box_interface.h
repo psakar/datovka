@@ -164,7 +164,7 @@ namespace Isds {
 		void setState(QString &&s);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-		friend BirthInfo libisds2address(
+		friend BirthInfo libisds2birthInfo(
 		    const struct isds_BirthInfo *ibi, bool *ok);
 
 	private:
@@ -173,6 +173,7 @@ namespace Isds {
 
 	void swap(BirthInfo &first, BirthInfo &second) Q_DECL_NOTHROW;
 
+	class PersonNamePrivate;
 	/*!
 	 * @brief Exists as name element group gPersonName (dbTypes.xsd).
 	 *     // DbOwnerInfo, DbUserInfo
@@ -180,41 +181,61 @@ namespace Isds {
 	 * pril_3/WS_ISDS_Sprava_datovych_schranek.pdf (section 1.6)
 	 */
 	class PersonName {
-	public:
-		PersonName(void)
-		    : m_pnFirstName(), m_pnMiddleName(), m_pnLastName(),
-		    m_pnLastNameAtBirth()
-		{ }
+		Q_DECLARE_PRIVATE(PersonName)
 
+	public:
+		PersonName(void);
 		PersonName(const PersonName &other);
 #ifdef Q_COMPILER_RVALUE_REFS
 		PersonName(PersonName &&other) Q_DECL_NOEXCEPT;
 #endif /* Q_COMPILER_RVALUE_REFS */
-
-		/* pnFirstName */
-		QString firstName(void) const { return m_pnFirstName; }
-		void setFirstName(const QString &fn) { m_pnFirstName = fn; }
-		/* pnMiddleName */
-		QString middleName(void) const { return m_pnMiddleName; }
-		void setMiddleName(const QString &mn) { m_pnMiddleName = mn; }
-		/* pnLastName */
-		QString lastName(void) const { return m_pnLastName; }
-		void setLastName(const QString &ln) { m_pnLastName = ln; }
-		/* pnLastNameAtBirth */
-		QString lastNameAtBirth(void) const { return m_pnLastNameAtBirth; }
-		void setLastNameAtBirth(const QString &lnab) { m_pnLastNameAtBirth = lnab; }
+		~PersonName(void);
 
 		PersonName &operator=(const PersonName &other) Q_DECL_NOTHROW;
 #ifdef Q_COMPILER_RVALUE_REFS
 		PersonName &operator=(PersonName &&other) Q_DECL_NOTHROW;
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+		bool operator==(const PersonName &other) const;
+		bool operator!=(const PersonName &other) const;
+
+		friend void swap(PersonName &first, PersonName &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+		/* pnFirstName */
+		const QString &firstName(void) const;
+		void setFirstName(const QString &fn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setFirstName(QString &&fn);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* pnMiddleName */
+		const QString &middleName(void) const;
+		void setMiddleName(const QString &mn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setMiddleName(QString &&mn);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* pnLastName */
+		const QString &lastName(void) const;
+		void setLastName(const QString &ln);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setLastName(QString &&ln);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* pnLastNameAtBirth */
+		const QString &lastNameAtBirth(void) const;
+		void setLastNameAtBirth(const QString &lnab);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setLastNameAtBirth(QString &&lnab);
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		friend PersonName libisds2personName(
+		    const struct isds_PersonName *ipn, bool *ok);
+
 	private:
-		QString m_pnFirstName;
-		QString m_pnMiddleName;
-		QString m_pnLastName;
-		QString m_pnLastNameAtBirth;
+		QScopedPointer<PersonNamePrivate> d_ptr; // std::unique_ptr ?
 	};
+
+	void swap(PersonName &first, PersonName &second) Q_DECL_NOTHROW;
 
 	/*!
 	 * @brief Exists as type tDbOwnerInfo (dbTypes.xsd).

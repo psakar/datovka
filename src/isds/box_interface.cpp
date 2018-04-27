@@ -577,43 +577,239 @@ void Isds::swap(BirthInfo &first, BirthInfo &second) Q_DECL_NOTHROW
 	swap(first.d_ptr, second.d_ptr);
 }
 
-Isds::PersonName::PersonName(const PersonName &other)
-    : m_pnFirstName(other.m_pnFirstName),
-    m_pnMiddleName(other.m_pnMiddleName),
-    m_pnLastName(other.m_pnLastName),
-    m_pnLastNameAtBirth(other.m_pnLastNameAtBirth)
+/*!
+ * @brief PIMPL PersonName class.
+ */
+class Isds::PersonNamePrivate {
+	//Q_DISABLE_COPY(PersonNamePrivate)
+public:
+	PersonNamePrivate(void)
+	    : m_pnFirstName(), m_pnMiddleName(), m_pnLastName(),
+	    m_pnLastNameAtBirth()
+	{ }
+
+	PersonNamePrivate &operator=(const PersonNamePrivate &other) Q_DECL_NOTHROW
+	{
+		m_pnFirstName = other.m_pnFirstName;
+		m_pnMiddleName = other.m_pnMiddleName;
+		m_pnLastName = other.m_pnLastName;
+		m_pnLastNameAtBirth = other.m_pnLastNameAtBirth;
+
+		return *this;
+	}
+
+	bool operator==(const PersonNamePrivate &other) const
+	{
+		return (m_pnFirstName == other.m_pnFirstName) &&
+		    (m_pnMiddleName == other.m_pnMiddleName) &&
+		    (m_pnLastName == other.m_pnLastName) &&
+		    (m_pnLastNameAtBirth == other.m_pnLastNameAtBirth);
+	}
+
+	QString m_pnFirstName;
+	QString m_pnMiddleName;
+	QString m_pnLastName;
+	QString m_pnLastNameAtBirth;
+};
+
+Isds::PersonName::PersonName(void)
+    : d_ptr(Q_NULLPTR)
 {
+}
+
+Isds::PersonName::PersonName(const PersonName &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) PersonNamePrivate) : Q_NULLPTR)
+{
+	Q_D(PersonName);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::PersonName::PersonName(PersonName &&other) Q_DECL_NOEXCEPT
-    : m_pnFirstName(std::move(other.m_pnFirstName)),
-    m_pnMiddleName(std::move(other.m_pnMiddleName)),
-    m_pnLastName(std::move(other.m_pnLastName)),
-    m_pnLastNameAtBirth(std::move(other.m_pnLastNameAtBirth))
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
 {
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+Isds::PersonName::~PersonName(void)
+{
+}
+
+/*!
+ * @brief Ensures private person name presence.
+ *
+ * @note Returns if private hash could not be allocated.
+ */
+#define ensurePersonNamePrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			PersonNamePrivate *p = new (std::nothrow) PersonNamePrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
 Isds::PersonName &Isds::PersonName::operator=(const PersonName &other) Q_DECL_NOTHROW
 {
-	m_pnFirstName = other.m_pnFirstName;
-	m_pnMiddleName = other.m_pnMiddleName;
-	m_pnLastName = other.m_pnLastName;
-	m_pnLastNameAtBirth = other.m_pnLastNameAtBirth;
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensurePersonNamePrivate(*this);
+	Q_D(PersonName);
+
+	*d = *other.d_func();
+
 	return *this;
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::PersonName &Isds::PersonName::operator=(PersonName &&other) Q_DECL_NOTHROW
 {
-	std::swap(m_pnFirstName, other.m_pnFirstName);
-	std::swap(m_pnMiddleName, other.m_pnMiddleName);
-	std::swap(m_pnLastName, other.m_pnLastName);
-	std::swap(m_pnLastNameAtBirth, other.m_pnLastNameAtBirth);
+	swap(*this, other);
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::PersonName::operator==(const PersonName &other) const
+{
+	Q_D(const PersonName);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::PersonName::operator!=(const PersonName &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::PersonName::isNull(void) const
+{
+	Q_D(const PersonName);
+	return d == Q_NULLPTR;
+}
+
+const QString &Isds::PersonName::firstName(void) const
+{
+	Q_D(const PersonName);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_pnFirstName;
+}
+
+void Isds::PersonName::setFirstName(const QString &fn)
+{
+	ensurePersonNamePrivate();
+	Q_D(PersonName);
+	d->m_pnFirstName = fn;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::PersonName::setFirstName(QString &&fn)
+{
+	ensurePersonNamePrivate();
+	Q_D(PersonName);
+	d->m_pnFirstName = fn;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::PersonName::middleName(void) const
+{
+	Q_D(const PersonName);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_pnMiddleName;
+}
+
+void Isds::PersonName::setMiddleName(const QString &mn)
+{
+	ensurePersonNamePrivate();
+	Q_D(PersonName);
+	d->m_pnMiddleName = mn;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::PersonName::setMiddleName(QString &&mn)
+{
+	ensurePersonNamePrivate();
+	Q_D(PersonName);
+	d->m_pnMiddleName = mn;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::PersonName::lastName(void) const
+{
+	Q_D(const PersonName);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_pnLastName;
+}
+
+void Isds::PersonName::setLastName(const QString &ln)
+{
+	ensurePersonNamePrivate();
+	Q_D(PersonName);
+	d->m_pnLastName = ln;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::PersonName::setLastName(QString &&ln)
+{
+	ensurePersonNamePrivate();
+	Q_D(PersonName);
+	d->m_pnLastName = ln;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::PersonName::lastNameAtBirth(void) const
+{
+	Q_D(const PersonName);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_pnLastNameAtBirth;
+}
+
+void Isds::PersonName::setLastNameAtBirth(const QString &lnab)
+{
+	ensurePersonNamePrivate();
+	Q_D(PersonName);
+	d->m_pnLastNameAtBirth = lnab;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::PersonName::setLastNameAtBirth(QString &&lnab)
+{
+	ensurePersonNamePrivate();
+	Q_D(PersonName);
+	d->m_pnLastNameAtBirth = lnab;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(PersonName &first, PersonName &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
 
 Isds::DbOwnerInfo::DbOwnerInfo(void)
     : m_dataPtr(NULL)
@@ -818,24 +1014,6 @@ void Isds::DbOwnerInfo::setIc(const QString &ic)
 	toCStrCopy(&boi->ic, ic);
 }
 
-/*!
- * @brief Set person name according to the libisds person name structure.
- */
-static
-void setPersonNameContent(Isds::PersonName &tgt,
-    const struct isds_PersonName *src)
-{
-	if (Q_UNLIKELY(src == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	tgt.setFirstName(Isds::fromCStr(src->pnFirstName));
-	tgt.setMiddleName(Isds::fromCStr(src->pnMiddleName));
-	tgt.setLastName(Isds::fromCStr(src->pnLastName));
-	tgt.setLastNameAtBirth(Isds::fromCStr(src->pnLastNameAtBirth));
-}
-
 Isds::PersonName Isds::DbOwnerInfo::personName(void) const
 {
 	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
@@ -846,24 +1024,6 @@ Isds::PersonName Isds::DbOwnerInfo::personName(void) const
 	PersonName personName;
 	setPersonNameContent(personName, boi->personName);
 	return personName;
-}
-
-/*!
- * @brief Set libisds person name structure according to the person name.
- */
-static
-void setLibisdsPersonNameContent(struct isds_PersonName *tgt,
-    const Isds::PersonName &src)
-{
-	if (Q_UNLIKELY(tgt == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	Isds::toCStrCopy(&tgt->pnFirstName, src.firstName());
-	Isds::toCStrCopy(&tgt->pnMiddleName, src.middleName());
-	Isds::toCStrCopy(&tgt->pnLastName, src.lastName());
-	Isds::toCStrCopy(&tgt->pnLastNameAtBirth, src.lastNameAtBirth());
 }
 
 void Isds::DbOwnerInfo::setPersonName(const PersonName &pn)
