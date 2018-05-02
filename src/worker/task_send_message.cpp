@@ -115,6 +115,8 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 0);
 
 	enum TaskSendMessage::Result ret = SM_ERR;
+	qint64 dmId = -1;
+	struct isds_message *isdsMessage = NULL;
 	isds_error status;
 	struct isds_ctx *session = NULL;
 	QString isdsError, isdsLongError;
@@ -130,10 +132,17 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 40);
 
+	isdsMessage = Isds::message2libisds(message, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert lo libisds message.");
+		ret = SM_ERR;
+		goto fail;
+	}
+
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
 
-	status = isds_send_message(session, Isds::message2libisds(message, &ok));
+	status = isds_send_message(session, isdsMessage);
 	if (IE_SUCCESS != status) {
 		isdsError = isds_error(status);
 		isdsLongError = isdsLongMessage(session);
@@ -147,9 +156,25 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 70);
 
 	{
-		MessageDb *messageDb = dbSet.accessMessageDb(
-		    message.envelope().dmDeliveryTime(), true);
-		if (0 == messageDb) {
+		/*
+		 * Some values have to be retrieved from libisds structure
+		 * after the message has been sent.
+		 */
+		{
+			bool ok = false;
+			dmId = QString(isdsMessage->envelope->dmID).toLongLong(&ok);
+			if (!ok) {
+				Q_ASSERT(0);
+				dmId = -1;
+			}
+		}
+
+		QDateTime deliveryTime(
+		    timevalToDateTime(isdsMessage->envelope->dmDeliveryTime));
+
+		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime,
+		    true);
+		if (Q_NULLPTR == messageDb) {
 			Q_ASSERT(0);
 			ret = SM_DB_INS_ERR;
 			goto fail;
@@ -160,14 +185,13 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		const QString senderName(
 		    GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
 
-		if (!messageDb->msgsInsertNewlySentMessageEnvelope(
-		        message.envelope().dmId(), dbId,
+		if (!messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
 		        senderName, message.envelope().dbIDRecipient(),
 		        recipientName, recipientAddress,
 		        message.envelope().dmAnnotation())) {
 			logErrorNL(
 			    "Cannot insert newly sent message '%" PRId64 "' into database.",
-			    message.envelope().dmId());
+			    dmId);
 			ret = SM_DB_INS_ERR;
 			goto fail;
 		}
@@ -175,8 +199,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		emit GlobInstcs::msgProcEmitterPtr->progressChange(
 		    progressLabel, 80);
 
-		//Task::storeAttachments(*messageDb, message.envelope().dmId(),
-		//    message.documents());
+		//Task::storeAttachments(*messageDb, dmId, message.documents());
 
 		emit GlobInstcs::msgProcEmitterPtr->progressChange(
 		    progressLabel, 90);
@@ -187,11 +210,13 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 100);
 
 fail:
+	isds_message_free(&isdsMessage);
+
 	if (0 != resultData) {
 		resultData->result = ret;
 		resultData->dbIDRecipient = message.envelope().dbIDRecipient();
 		resultData->recipientName = recipientName;
-		resultData->dmId = message.envelope().dmId();
+		resultData->dmId = dmId;
 		resultData->isPDZ = isPDZ;
 		resultData->errInfo =
 		    (!isdsError.isEmpty() || !isdsLongError.isEmpty()) ?
