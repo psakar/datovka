@@ -37,6 +37,9 @@
 #include "src/isds/internal_conversion.h"
 
 /* Null objects - for convenience. */
+static const Isds::Address nullAddress;
+static const Isds::BirthInfo nullBirthInfo;
+static const Isds::PersonName nullPersonName;
 static const QDate nullDate;
 static const QString nullString;
 
@@ -123,7 +126,7 @@ Isds::Address::~Address(void)
 /*!
  * @brief Ensures private address presence.
  *
- * @note Returns if private hash could not be allocated.
+ * @note Returns if private address could not be allocated.
  */
 #define ensureAddressPrivate(_x_) \
 	do { \
@@ -408,7 +411,7 @@ Isds::BirthInfo::~BirthInfo(void)
 /*!
  * @brief Ensures private birth info presence.
  *
- * @note Returns if private hash could not be allocated.
+ * @note Returns if private birth info could not be allocated.
  */
 #define ensureBirthInfoPrivate(_x_) \
 	do { \
@@ -642,7 +645,7 @@ Isds::PersonName::~PersonName(void)
 /*!
  * @brief Ensures private person name presence.
  *
- * @note Returns if private hash could not be allocated.
+ * @note Returns if private person name could not be allocated.
  */
 #define ensurePersonNamePrivate(_x_) \
 	do { \
@@ -811,554 +814,526 @@ void Isds::swap(PersonName &first, PersonName &second) Q_DECL_NOTHROW
 	swap(first.d_ptr, second.d_ptr);
 }
 
-Isds::DbOwnerInfo::DbOwnerInfo(void)
-    : m_dataPtr(NULL)
-{
-}
+/*!
+ * @brief PIMPL DbOwnerInfo class.
+ */
+class Isds::DbOwnerInfoPrivate {
+	//Q_DISABLE_COPY(DbOwnerInfoPrivate)
+public:
+	DbOwnerInfoPrivate(void)
+	    : m_dbID(), m_dbType(Type::BT_NULL), m_ic(), m_personName(),
+	    m_firmName(), m_birthInfo(), m_address(), m_nationality(),
+	    m_email(), m_telNumber(), m_identifier(), m_registryCode(),
+	    m_dbState(Type::BS_ERROR),
+	    m_dbEffectiveOVM(Type::BOOL_NULL),
+	    m_dbOpenAddressing(Type::BOOL_NULL)
+	{ }
 
-Isds::DbOwnerInfo::~DbOwnerInfo(void)
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return;
+	DbOwnerInfoPrivate &operator=(const DbOwnerInfoPrivate &other) Q_DECL_NOTHROW
+	{
+		m_dbID = other.m_dbID;
+		m_dbType = other.m_dbType;
+		m_ic = other.m_ic;
+		m_personName = other.m_personName;
+		m_firmName = other.m_firmName;
+		m_birthInfo = other.m_birthInfo;
+		m_address = other.m_address;
+		m_nationality = other.m_nationality;
+		m_email = other.m_email;
+		m_telNumber = other.m_telNumber;
+		m_identifier = other.m_identifier;
+		m_registryCode = other.m_registryCode;
+		m_dbState = other.m_dbState;
+		m_dbEffectiveOVM = other.m_dbEffectiveOVM;
+		m_dbOpenAddressing = other.m_dbOpenAddressing;
+
+		return *this;
 	}
-	isds_DbOwnerInfo_free(&boi);
+
+	bool operator==(const DbOwnerInfoPrivate &other) const
+	{
+		return (m_dbID == other.m_dbID) &&
+		    (m_dbType == other.m_dbType) &&
+		    (m_ic == other.m_ic) &&
+		    (m_personName == other.m_personName) &&
+		    (m_firmName == other.m_firmName) &&
+		    (m_birthInfo == other.m_birthInfo) &&
+		    (m_address == other.m_address) &&
+		    (m_nationality == other.m_nationality) &&
+		    (m_email == other.m_email) &&
+		    (m_telNumber == other.m_telNumber) &&
+		    (m_identifier == other.m_identifier) &&
+		    (m_registryCode == other.m_registryCode) &&
+		    (m_dbState == other.m_dbState) &&
+		    (m_dbEffectiveOVM == other.m_dbEffectiveOVM) &&
+		    (m_dbOpenAddressing == other.m_dbOpenAddressing);
+	}
+
+	QString m_dbID;
+	enum Type::DbType m_dbType;
+	QString m_ic;
+	PersonName m_personName;
+	QString m_firmName;
+	BirthInfo m_birthInfo;
+	Address m_address;
+	QString m_nationality;
+	QString m_email;
+	QString m_telNumber;
+	QString m_identifier;
+	QString m_registryCode;
+	enum Type::DbState m_dbState;
+	enum Type::NilBool m_dbEffectiveOVM;
+	enum Type::NilBool m_dbOpenAddressing;
+};
+
+Isds::DbOwnerInfo::DbOwnerInfo(void)
+    : d_ptr(Q_NULLPTR)
+{
 }
 
 Isds::DbOwnerInfo::DbOwnerInfo(const DbOwnerInfo &other)
-    : m_dataPtr(NULL)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) DbOwnerInfoPrivate) : Q_NULLPTR)
 {
-	if (other.m_dataPtr != NULL) {
-		m_dataPtr = isds_DbOwnerInfo_duplicate(
-		    (const struct isds_DbOwnerInfo *)other.m_dataPtr);
-		if (Q_UNLIKELY(m_dataPtr = NULL)) {
-			Q_ASSERT(0);
-		}
+	Q_D(DbOwnerInfo);
+	if (d == Q_NULLPTR) {
+		return;
 	}
+
+	*d = *other.d_func();
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::DbOwnerInfo::DbOwnerInfo(DbOwnerInfo &&other) Q_DECL_NOEXCEPT
-    : m_dataPtr(std::move(other.m_dataPtr))
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
 {
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-QString Isds::DbOwnerInfo::dbID(void) const
+Isds::DbOwnerInfo::~DbOwnerInfo(void)
 {
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return QString();
-	}
-
-	return fromCStr(boi->dbID);
 }
 
 /*!
- * @brief Allocates libisds DbOwnerInfo structure.
+ * @brief Ensures private box owner info info presence.
  *
- * @param[in,out] dataPtr Pointer to pointer holding the structure.
+ * @note Returns if private box owner info could not be allocated.
  */
-static
-void intAllocMissingDbOwnerInfo(void **dataPtr)
-{
-	if (Q_UNLIKELY(dataPtr == Q_NULLPTR)) {
-		Q_ASSERT(0);
-		return;
-	}
-	if (*dataPtr != NULL) {
-		/* Already allocated. */
-		return;
-	}
-	struct isds_DbOwnerInfo *boi =
-	    (struct isds_DbOwnerInfo *)std::malloc(sizeof(*boi));
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-	std::memset(boi, 0, sizeof(*boi));
-	*dataPtr = boi;
-}
-
-void Isds::DbOwnerInfo::setDbID(const QString &bi)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toCStrCopy(&boi->dbID, bi);
-}
-
-/*!
- * @brief Converts data box types.
- */
-static
-enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt)
-{
-	if (bt == NULL) {
-		return Isds::Type::BT_NULL;
-	}
-
-	switch (*bt) {
-	case DBTYPE_SYSTEM: return Isds::Type::BT_SYSTEM; break;
-	case DBTYPE_OVM: return Isds::Type::BT_OVM; break;
-	case DBTYPE_OVM_NOTAR: return Isds::Type::BT_OVM_NOTAR; break;
-	case DBTYPE_OVM_EXEKUT: return Isds::Type::BT_OVM_EXEKUT; break;
-	case DBTYPE_OVM_REQ: return Isds::Type::BT_OVM_REQ; break;
-	case DBTYPE_OVM_FO: return Isds::Type::BT_OVM_FO; break;
-	case DBTYPE_OVM_PFO: return Isds::Type::BT_OVM_PFO; break;
-	case DBTYPE_OVM_PO: return Isds::Type::BT_OVM_PO; break;
-	case DBTYPE_PO: return Isds::Type::BT_PO; break;
-	case DBTYPE_PO_ZAK: return Isds::Type::BT_PO_ZAK; break;
-	case DBTYPE_PO_REQ: return Isds::Type::BT_PO_REQ; break;
-	case DBTYPE_PFO: return Isds::Type::BT_PFO; break;
-	case DBTYPE_PFO_ADVOK: return Isds::Type::BT_PFO_ADVOK; break;
-	case DBTYPE_PFO_DANPOR: return Isds::Type::BT_PFO_DANPOR; break;
-	case DBTYPE_PFO_INSSPR: return Isds::Type::BT_PFO_INSSPR; break;
-	case DBTYPE_PFO_AUDITOR: return Isds::Type::BT_PFO_AUDITOR; break;
-	case DBTYPE_FO: return Isds::Type::BT_FO; break;
-	default:
-		Q_ASSERT(0);
-		return Isds::Type::BT_SYSTEM; /* FIXME */
-		break;
-	}
-}
-
-/*!
- * @brief Converts data box types.
- */
-static
-void dbType2libisdsDbType(isds_DbType **btPtr, enum Isds::Type::DbType bt)
-{
-	if (Q_UNLIKELY(btPtr == Q_NULLPTR)) {
-		Q_ASSERT(0);
-		return;
-	}
-	if (*btPtr == NULL) {
-		*btPtr = (isds_DbType *)std::malloc(sizeof(**btPtr));
-		if (Q_UNLIKELY(*btPtr == NULL)) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-	switch (bt) {
-	/* case Isds::Type::BT_NULL: Same as default. */
-	case Isds::Type::BT_SYSTEM: **btPtr = DBTYPE_SYSTEM; break;
-	case Isds::Type::BT_OVM: **btPtr = DBTYPE_OVM; break;
-	case Isds::Type::BT_OVM_NOTAR: **btPtr = DBTYPE_OVM_NOTAR; break;
-	case Isds::Type::BT_OVM_EXEKUT: **btPtr = DBTYPE_OVM_EXEKUT; break;
-	case Isds::Type::BT_OVM_REQ: **btPtr = DBTYPE_OVM_REQ; break;
-	case Isds::Type::BT_OVM_FO: **btPtr = DBTYPE_OVM_FO; break;
-	case Isds::Type::BT_OVM_PFO: **btPtr = DBTYPE_OVM_PFO; break;
-	case Isds::Type::BT_OVM_PO: **btPtr = DBTYPE_OVM_PO; break;
-	case Isds::Type::BT_PO: **btPtr = DBTYPE_PO; break;
-	case Isds::Type::BT_PO_ZAK: **btPtr = DBTYPE_PO_ZAK; break;
-	case Isds::Type::BT_PO_REQ: **btPtr = DBTYPE_PO_REQ; break;
-	case Isds::Type::BT_PFO: **btPtr = DBTYPE_PFO; break;
-	case Isds::Type::BT_PFO_ADVOK: **btPtr = DBTYPE_PFO_ADVOK; break;
-	case Isds::Type::BT_PFO_DANPOR: **btPtr = DBTYPE_PFO_DANPOR; break;
-	case Isds::Type::BT_PFO_INSSPR: **btPtr = DBTYPE_PFO_INSSPR; break;
-	case Isds::Type::BT_PFO_AUDITOR: **btPtr = DBTYPE_PFO_AUDITOR; break;
-	case Isds::Type::BT_FO: **btPtr = DBTYPE_FO; break;
-	default:
-		Q_ASSERT(0);
-		std::free(*btPtr); *btPtr = NULL;
-		break;
-	}
-}
-
-enum Isds::Type::DbType Isds::DbOwnerInfo::dbType(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return Type::BT_NULL;
-	}
-
-	return libisdsDbType2DbType(boi->dbType);
-}
-
-void Isds::DbOwnerInfo::setDbType(enum Type::DbType bt)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	dbType2libisdsDbType(&boi->dbType, bt);
-}
-
-QString Isds::DbOwnerInfo::ic(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return QString();
-	}
-
-	return fromCStr(boi->ic);
-}
-
-void Isds::DbOwnerInfo::setIc(const QString &ic)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toCStrCopy(&boi->ic, ic);
-}
-
-Isds::PersonName Isds::DbOwnerInfo::personName(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY((boi == NULL) || (boi->personName == NULL))) {
-		return PersonName();
-	}
-
-	PersonName personName;
-	setPersonNameContent(personName, boi->personName);
-	return personName;
-}
-
-void Isds::DbOwnerInfo::setPersonName(const PersonName &pn)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	if (boi->personName == NULL) {
-		boi->personName =
-		    (struct isds_PersonName *)std::malloc(sizeof(*boi->personName));
-		if (Q_UNLIKELY(boi->personName == NULL)) {
-			Q_ASSERT(0);
-			return;
-		}
-		std::memset(boi->personName, 0, sizeof(*boi->personName));
-	}
-
-	setLibisdsPersonNameContent(boi->personName, pn);
-}
-
-QString Isds::DbOwnerInfo::firmName(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return QString();
-	}
-
-	return fromCStr(boi->firmName);
-}
-
-void Isds::DbOwnerInfo::setFirmName(const QString &fn)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toCStrCopy(&boi->firmName, fn);
-}
-
-Isds::BirthInfo Isds::DbOwnerInfo::birthInfo(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY((boi == NULL) || (boi->birthInfo == NULL))) {
-		return BirthInfo();
-	}
-
-	BirthInfo birthInfo;
-	birthInfo.setDate(dateFromStructTM(boi->birthInfo->biDate));
-	birthInfo.setCity(fromCStr(boi->birthInfo->biCity));
-	birthInfo.setCounty(fromCStr(boi->birthInfo->biCounty));
-	birthInfo.setState(fromCStr(boi->birthInfo->biState));
-	return birthInfo;
-}
-
-void Isds::DbOwnerInfo::setBirthInfo(const BirthInfo &bi)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	if (boi->birthInfo == NULL) {
-		boi->birthInfo =
-		    (struct isds_BirthInfo *)std::malloc(sizeof(*boi->birthInfo));
-		if (Q_UNLIKELY(boi->birthInfo == NULL)) {
-			Q_ASSERT(0);
-			return;
-		}
-		std::memset(boi->birthInfo, 0, sizeof(*boi->birthInfo));
-	}
-
-	toCDateCopy(&boi->birthInfo->biDate, bi.date());
-	toCStrCopy(&boi->birthInfo->biCity, bi.city());
-	toCStrCopy(&boi->birthInfo->biCounty, bi.county());
-	toCStrCopy(&boi->birthInfo->biState, bi.state());
-}
-
-Isds::Address Isds::DbOwnerInfo::address(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY((boi == NULL) || (boi->address == NULL))) {
-		return Address();
-	}
-
-	Address address;
-	setAddressContent(address, boi->address);
-	return address;
-}
-
-void Isds::DbOwnerInfo::setAddress(const Address &a)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	if (boi->address == NULL) {
-		boi->address =
-		    (struct isds_Address *)std::malloc(sizeof(*boi->address));
-		if (Q_UNLIKELY(boi->address == NULL)) {
-			Q_ASSERT(0);
-			return;
-		}
-		std::memset(boi->address, 0, sizeof(*boi->address));
-	}
-
-	setLibisdsAddressContent(boi->address, a);
-}
-
-QString Isds::DbOwnerInfo::nationality(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return QString();
-	}
-
-	return fromCStr(boi->nationality);
-}
-
-void Isds::DbOwnerInfo::setNationality(const QString &n)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toCStrCopy(&boi->nationality, n);
-}
-
-QString Isds::DbOwnerInfo::email(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return QString();
-	}
-
-	return fromCStr(boi->email);
-}
-
-void Isds::DbOwnerInfo::setEmail(const QString &e)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toCStrCopy(&boi->email, e);
-}
-
-QString Isds::DbOwnerInfo::telNumber(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return QString();
-	}
-
-	return fromCStr(boi->telNumber);
-}
-
-void Isds::DbOwnerInfo::setTelNumber(const QString &tn)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toCStrCopy(&boi->telNumber, tn);
-}
-
-QString Isds::DbOwnerInfo::identifier(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return QString();
-	}
-
-	return fromCStr(boi->identifier);
-}
-
-void Isds::DbOwnerInfo::setIdentifier(const QString &i) {
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toCStrCopy(&boi->identifier, i);
-}
-
-QString Isds::DbOwnerInfo::registryCode(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return QString();
-	}
-
-	return fromCStr(boi->registryCode);
-}
-
-void Isds::DbOwnerInfo::setRegistryCode(const QString &rc)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toCStrCopy(&boi->registryCode, rc);
-}
-
-enum Isds::Type::DbState Isds::DbOwnerInfo::dbState(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY((boi == NULL) || (boi->dbState == NULL))) {
-		return Type::BS_ERROR;
-	}
-
-	switch (*boi->dbState) {
-	case 1: return Type::BS_ACCESSIBLE; break;
-	case 2: return Type::BS_TEMP_INACCESSIBLE; break;
-	case 3: return Type::BS_NOT_YET_ACCESSIBLE; break;
-	case 4: return Type::BS_PERM_INACCESSIBLE; break;
-	case 5: return Type::BS_REMOVED; break;
-	case 6: return Type::BS_TEMP_UNACCESSIBLE_LAW; break;
-	default:
-		Q_ASSERT(0);
-		return Type::BS_ERROR;
-		break;
-	}
-}
-
-void Isds::DbOwnerInfo::setDbState(enum Type::DbState bs)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	if (bs == Type::BS_ERROR) {
-		if (boi->dbState != NULL) {
-			std::free(boi->dbState); boi->dbState = NULL;
-		}
-	} else {
-		toLongInt(&boi->dbState, bs);
-	}
-}
-
-enum Isds::Type::NilBool Isds::DbOwnerInfo::dbEffectiveOVM(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return Type::BOOL_NULL;
-	}
-
-	return fromBool(boi->dbEffectiveOVM);
-}
-
-void Isds::DbOwnerInfo::setDbEffectiveOVM(enum Type::NilBool eo)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toBool(&boi->dbEffectiveOVM, eo);
-}
-
-enum Isds::Type::NilBool Isds::DbOwnerInfo::dbOpenAddressing(void) const
-{
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		return Type::BOOL_NULL;
-	}
-
-	return fromBool(boi->dbOpenAddressing);
-}
-
-void Isds::DbOwnerInfo::setDbOpenAddressing(enum Type::NilBool oa)
-{
-	intAllocMissingDbOwnerInfo(&m_dataPtr);
-	struct isds_DbOwnerInfo *boi = (struct isds_DbOwnerInfo *)m_dataPtr;
-	if (Q_UNLIKELY(boi == NULL)) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	toBool(&boi->dbOpenAddressing, oa);
-}
+#define ensureDbOwnerInfoPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			DbOwnerInfoPrivate *p = new (std::nothrow) DbOwnerInfoPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
 
 Isds::DbOwnerInfo &Isds::DbOwnerInfo::operator=(const DbOwnerInfo &other) Q_DECL_NOTHROW
 {
-	if (m_dataPtr != NULL) {
-		isds_DbOwnerInfo_free((struct isds_DbOwnerInfo **)&m_dataPtr);
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
 	}
+	ensureDbOwnerInfoPrivate(*this);
+	Q_D(DbOwnerInfo);
 
-	if (other.m_dataPtr != NULL) {
-		m_dataPtr = isds_DbOwnerInfo_duplicate(
-		    (const struct isds_DbOwnerInfo *)other.m_dataPtr);
-		if (Q_UNLIKELY(m_dataPtr = NULL)) {
-			Q_ASSERT(0);
-		}
-	}
+	*d = *other.d_func();
+
 	return *this;
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
 Isds::DbOwnerInfo &Isds::DbOwnerInfo::operator=(DbOwnerInfo &&other) Q_DECL_NOTHROW
 {
-	std::swap(m_dataPtr, other.m_dataPtr);
+	swap(*this, other);
 	return *this;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::DbOwnerInfo::operator==(const DbOwnerInfo &other) const
+{
+	Q_D(const DbOwnerInfo);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::DbOwnerInfo::operator!=(const DbOwnerInfo &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::DbOwnerInfo::isNull(void) const
+{
+	Q_D(const DbOwnerInfo);
+	return d == Q_NULLPTR;
+}
+
+const QString &Isds::DbOwnerInfo::dbID(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_dbID;
+}
+
+void Isds::DbOwnerInfo::setDbID(const QString &bi)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_dbID = bi;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setDbID(QString &&bi)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_dbID = bi;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+enum Isds::Type::DbType Isds::DbOwnerInfo::dbType(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BT_NULL;
+	}
+
+	return d->m_dbType;
+}
+
+void Isds::DbOwnerInfo::setDbType(enum Type::DbType bt)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_dbType = bt;
+}
+
+const QString &Isds::DbOwnerInfo::ic(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_ic;
+}
+
+void Isds::DbOwnerInfo::setIc(const QString &ic)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_ic = ic;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setIc(QString &&ic)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_ic = ic;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const Isds::PersonName &Isds::DbOwnerInfo::personName(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullPersonName;
+	}
+
+	return d->m_personName;
+}
+
+void Isds::DbOwnerInfo::setPersonName(const PersonName &pn)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_personName = pn;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setPersonName(PersonName &&pn)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_personName = pn;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::DbOwnerInfo::firmName(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_firmName;
+}
+
+void Isds::DbOwnerInfo::setFirmName(const QString &fn)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_firmName = fn;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setFirmName(QString &&fn)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_firmName = fn;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const Isds::BirthInfo &Isds::DbOwnerInfo::birthInfo(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullBirthInfo;
+	}
+
+	return d->m_birthInfo;
+}
+
+void Isds::DbOwnerInfo::setBirthInfo(const BirthInfo &bi)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_birthInfo = bi;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setBirthInfo(BirthInfo &&bi)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_birthInfo = bi;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const Isds::Address &Isds::DbOwnerInfo::address(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullAddress;
+	}
+
+	return d->m_address;
+}
+
+void Isds::DbOwnerInfo::setAddress(const Address &a)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_address = a;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setAddress(Address &&a)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_address = a;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::DbOwnerInfo::nationality(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_nationality;
+}
+
+void Isds::DbOwnerInfo::setNationality(const QString &n)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_nationality = n;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setNationality(QString &&n)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_nationality = n;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::DbOwnerInfo::email(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_email;
+}
+
+void Isds::DbOwnerInfo::setEmail(const QString &e)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_email = e;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setEmail(QString &&e)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_email = e;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::DbOwnerInfo::telNumber(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_telNumber;
+}
+
+void Isds::DbOwnerInfo::setTelNumber(const QString &tn)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_telNumber = tn;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setTelNumber(QString &&tn)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_telNumber = tn;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::DbOwnerInfo::identifier(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_identifier;
+}
+
+void Isds::DbOwnerInfo::setIdentifier(const QString &i)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_identifier = i;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setIdentifier(QString &&i)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_identifier = i;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::DbOwnerInfo::registryCode(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_registryCode;
+}
+
+void Isds::DbOwnerInfo::setRegistryCode(const QString &rc)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_registryCode = rc;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::DbOwnerInfo::setRegistryCode(QString &&rc)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_registryCode = rc;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+enum Isds::Type::DbState Isds::DbOwnerInfo::dbState(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BS_ERROR;
+	}
+
+	return d->m_dbState;
+}
+
+void Isds::DbOwnerInfo::setDbState(enum Type::DbState bs)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_dbState = bs;
+}
+
+enum Isds::Type::NilBool Isds::DbOwnerInfo::dbEffectiveOVM(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BOOL_NULL;
+	}
+
+	return d->m_dbEffectiveOVM;
+}
+
+void Isds::DbOwnerInfo::setDbEffectiveOVM(enum Type::NilBool eo)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_dbEffectiveOVM = eo;
+}
+
+enum Isds::Type::NilBool Isds::DbOwnerInfo::dbOpenAddressing(void) const
+{
+	Q_D(const DbOwnerInfo);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BOOL_NULL;
+	}
+
+	return d->m_dbOpenAddressing;
+}
+
+void Isds::DbOwnerInfo::setDbOpenAddressing(enum Type::NilBool oa)
+{
+	ensureDbOwnerInfoPrivate();
+	Q_D(DbOwnerInfo);
+	d->m_dbOpenAddressing = oa;
+}
+
+void Isds::swap(DbOwnerInfo &first, DbOwnerInfo &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
 
 Isds::DbUserInfo::DbUserInfo(void)
     : m_dataPtr(NULL)

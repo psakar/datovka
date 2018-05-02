@@ -42,4 +42,9 @@ namespace Isds {
 	struct isds_PersonName *personName2libisds(const PersonName &pn,
 	    bool *ok = Q_NULLPTR);
 
+	DbOwnerInfo libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
+	    bool *ok = Q_NULLPTR);
+	struct isds_DbOwnerInfo *dbOwnerInfo2libisds(const DbOwnerInfo &doi,
+	    bool *ok = Q_NULLPTR);
+
 }

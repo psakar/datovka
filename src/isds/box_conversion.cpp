@@ -317,3 +317,327 @@ struct isds_PersonName *Isds::personName2libisds(const PersonName &pn, bool *ok)
 	}
 	return ipn;
 }
+
+/*!
+ * @brief Converts data box types.
+ */
+static
+enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt,
+    bool *ok = Q_NULLPTR)
+{
+	bool iOk = true;
+	enum Isds::Type::DbType type = Isds::Type::BT_NULL;
+
+	if (bt == NULL) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::Type::BT_NULL;
+	}
+
+	switch (*bt) {
+	case DBTYPE_SYSTEM: type = Isds::Type::BT_SYSTEM; break;
+	case DBTYPE_OVM: type = Isds::Type::BT_OVM; break;
+	case DBTYPE_OVM_NOTAR: type = Isds::Type::BT_OVM_NOTAR; break;
+	case DBTYPE_OVM_EXEKUT: type = Isds::Type::BT_OVM_EXEKUT; break;
+	case DBTYPE_OVM_REQ: type = Isds::Type::BT_OVM_REQ; break;
+	case DBTYPE_OVM_FO: type = Isds::Type::BT_OVM_FO; break;
+	case DBTYPE_OVM_PFO: type = Isds::Type::BT_OVM_PFO; break;
+	case DBTYPE_OVM_PO: type = Isds::Type::BT_OVM_PO; break;
+	case DBTYPE_PO: type = Isds::Type::BT_PO; break;
+	case DBTYPE_PO_ZAK: type = Isds::Type::BT_PO_ZAK; break;
+	case DBTYPE_PO_REQ: type = Isds::Type::BT_PO_REQ; break;
+	case DBTYPE_PFO: type = Isds::Type::BT_PFO; break;
+	case DBTYPE_PFO_ADVOK: type = Isds::Type::BT_PFO_ADVOK; break;
+	case DBTYPE_PFO_DANPOR: type = Isds::Type::BT_PFO_DANPOR; break;
+	case DBTYPE_PFO_INSSPR: type = Isds::Type::BT_PFO_INSSPR; break;
+	case DBTYPE_PFO_AUDITOR: type = Isds::Type::BT_PFO_AUDITOR; break;
+	case DBTYPE_FO: type = Isds::Type::BT_FO; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		type = Isds::Type::BT_SYSTEM; /* FIXME */
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return type;
+}
+
+/*!
+ * @brief Converts data box accessibility state.
+ */
+static
+enum Isds::Type::DbState long2DbState(const long int *bs, bool *ok = Q_NULLPTR)
+{
+	if (bs == NULL) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::Type::BS_ERROR;
+	}
+
+	bool iOk = true;
+	enum Isds::Type::DbState state = Isds::Type::BS_ERROR;
+
+	switch (*bs) {
+	case Isds::Type::BS_ERROR: state = Isds::Type::BS_ERROR; break;
+	case Isds::Type::BS_ACCESSIBLE: state = Isds::Type::BS_ACCESSIBLE; break;
+	case Isds::Type::BS_TEMP_INACCESSIBLE: state = Isds::Type::BS_TEMP_INACCESSIBLE; break;
+	case Isds::Type::BS_NOT_YET_ACCESSIBLE: state = Isds::Type::BS_NOT_YET_ACCESSIBLE; break;
+	case Isds::Type::BS_PERM_INACCESSIBLE: state = Isds::Type::BS_PERM_INACCESSIBLE; break;
+	case Isds::Type::BS_REMOVED: state = Isds::Type::BS_REMOVED; break;
+	case Isds::Type::BS_TEMP_UNACCESSIBLE_LAW: state = Isds::Type::BS_TEMP_UNACCESSIBLE_LAW; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		state = Isds::Type::BS_ERROR;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return state;
+}
+
+Isds::DbOwnerInfo Isds::libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
+    bool *ok)
+{
+	if (Q_UNLIKELY(idoi == Q_NULLPTR)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return DbOwnerInfo();
+	}
+
+	bool iOk = false;
+	DbOwnerInfo ownerInfo;
+
+	ownerInfo.setDbID(Isds::fromCStr(idoi->dbID));
+	ownerInfo.setDbType(libisdsDbType2DbType(idoi->dbType, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	ownerInfo.setIc(Isds::fromCStr(idoi->ic));
+	ownerInfo.setPersonName(libisds2personName(idoi->personName, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	ownerInfo.setFirmName(Isds::fromCStr(idoi->firmName));
+	ownerInfo.setBirthInfo(libisds2birthInfo(idoi->birthInfo, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	ownerInfo.setAddress(libisds2address(idoi->address, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	ownerInfo.setNationality(Isds::fromCStr(idoi->nationality));
+	ownerInfo.setEmail(Isds::fromCStr(idoi->email));
+	ownerInfo.setTelNumber(Isds::fromCStr(idoi->telNumber));
+	ownerInfo.setIdentifier(Isds::fromCStr(idoi->identifier));
+	ownerInfo.setRegistryCode(Isds::fromCStr(idoi->registryCode));
+	ownerInfo.setDbState(long2DbState(idoi->dbState, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	ownerInfo.setDbEffectiveOVM(fromBool(idoi->dbEffectiveOVM));
+	ownerInfo.setDbOpenAddressing(fromBool(idoi->dbOpenAddressing));
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return ownerInfo;
+
+fail:
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return DbOwnerInfo();
+}
+
+/*!
+ * @brief Converts data box types.
+ */
+static
+bool dbType2libisdsDbType(isds_DbType **tgt, enum Isds::Type::DbType src)
+{
+	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (src == Isds::Type::BT_NULL) {
+		if (*tgt != NULL) {
+			std::free(*tgt); *tgt = NULL;
+		}
+		return true;
+	}
+	if (*tgt == NULL) {
+		*tgt = (isds_DbType *)std::malloc(sizeof(**tgt));
+		if (Q_UNLIKELY(*tgt == NULL)) {
+			Q_ASSERT(0);
+			return false;
+		}
+	}
+	switch (src) {
+	case Isds::Type::BT_NULL:
+		std::free(*tgt); *tgt = NULL;
+		break;
+	case Isds::Type::BT_SYSTEM: **tgt = DBTYPE_SYSTEM; break;
+	case Isds::Type::BT_OVM: **tgt = DBTYPE_OVM; break;
+	case Isds::Type::BT_OVM_NOTAR: **tgt = DBTYPE_OVM_NOTAR; break;
+	case Isds::Type::BT_OVM_EXEKUT: **tgt = DBTYPE_OVM_EXEKUT; break;
+	case Isds::Type::BT_OVM_REQ: **tgt = DBTYPE_OVM_REQ; break;
+	case Isds::Type::BT_OVM_FO: **tgt = DBTYPE_OVM_FO; break;
+	case Isds::Type::BT_OVM_PFO: **tgt = DBTYPE_OVM_PFO; break;
+	case Isds::Type::BT_OVM_PO: **tgt = DBTYPE_OVM_PO; break;
+	case Isds::Type::BT_PO: **tgt = DBTYPE_PO; break;
+	case Isds::Type::BT_PO_ZAK: **tgt = DBTYPE_PO_ZAK; break;
+	case Isds::Type::BT_PO_REQ: **tgt = DBTYPE_PO_REQ; break;
+	case Isds::Type::BT_PFO: **tgt = DBTYPE_PFO; break;
+	case Isds::Type::BT_PFO_ADVOK: **tgt = DBTYPE_PFO_ADVOK; break;
+	case Isds::Type::BT_PFO_DANPOR: **tgt = DBTYPE_PFO_DANPOR; break;
+	case Isds::Type::BT_PFO_INSSPR: **tgt = DBTYPE_PFO_INSSPR; break;
+	case Isds::Type::BT_PFO_AUDITOR: **tgt = DBTYPE_PFO_AUDITOR; break;
+	case Isds::Type::BT_FO: **tgt = DBTYPE_FO; break;
+	default:
+		Q_ASSERT(0);
+		std::free(*tgt); *tgt = NULL;
+		return false;
+		break;
+	}
+
+	return true;
+}
+
+/*!
+ * @brief Converts data box accessibility state.
+ */
+static
+bool dbState2long(long int **tgt, enum Isds::Type::DbState src)
+{
+	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (*tgt == NULL) {
+		*tgt = (long int *)std::malloc(sizeof(**tgt));
+		if (Q_UNLIKELY(tgt == NULL)) {
+			Q_ASSERT(0);
+			return false;
+		}
+	}
+	switch (src) {
+	case Isds::Type::BS_ERROR:
+		std::free(*tgt); *tgt = NULL;
+		break;
+	default:
+		**tgt = src;
+		break;
+	}
+
+	return true;
+}
+
+/*!
+ * @brief Set libisds box owner info structure according to the owner info.
+ */
+static
+bool setLibisdsDbOwnerInfoContent(struct isds_DbOwnerInfo *tgt,
+    const Isds::DbOwnerInfo &src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	bool iOk = false;
+
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->dbID, src.dbID()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!dbType2libisdsDbType(&tgt->dbType, src.dbType()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->ic, src.ic()))) {
+		return false;
+	}
+	tgt->personName = Isds::personName2libisds(src.personName(), &iOk);
+	if (Q_UNLIKELY(!iOk)) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->firmName, src.firmName()))) {
+		return false;
+	}
+	tgt->birthInfo = Isds::birthInfo2libisds(src.birthInfo(), &iOk);
+	if (Q_UNLIKELY(!iOk)) {
+		return false;
+	}
+	tgt->address = Isds::address2libisds(src.address(), &iOk);
+	if (Q_UNLIKELY(!iOk)) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->nationality, src.nationality()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->email, src.email()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->telNumber, src.telNumber()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->identifier, src.identifier()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->registryCode, src.registryCode()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!dbState2long(&tgt->dbState, src.dbState()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!toBool(&tgt->dbEffectiveOVM, src.dbEffectiveOVM()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!toBool(&tgt->dbOpenAddressing, src.dbOpenAddressing()))) {
+		return false;
+	}
+
+	return true;
+}
+
+struct isds_DbOwnerInfo *Isds::dbOwnerInfo2libisds(const DbOwnerInfo &doi,
+    bool *ok)
+{
+	if (Q_UNLIKELY(doi.isNull())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_DbOwnerInfo *idoi =
+	    (struct isds_DbOwnerInfo *)std::malloc(sizeof(*idoi));
+	if (Q_UNLIKELY(idoi == NULL)) {
+		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return NULL;
+	}
+	std::memset(idoi, 0, sizeof(*idoi));
+
+	if (Q_UNLIKELY(!setLibisdsDbOwnerInfoContent(idoi, doi))) {
+		isds_DbOwnerInfo_free(&idoi);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return NULL;
+	}
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return idoi;
+}

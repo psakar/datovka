@@ -61,31 +61,39 @@ QVariant Isds::nilBool2Variant(enum Type::NilBool b)
 	}
 }
 
-enum Isds::Type::DbType Isds::long2DbType(long int bt)
+enum Isds::Type::DbType Isds::long2DbType(long int bt, bool *ok)
 {
+	bool iOk = true;
+	enum Type::DbType type = Type::BT_SYSTEM;
+
 	switch (bt) {
-	case Type::BT_SYSTEM: return Type::BT_SYSTEM; break;
-	case Type::BT_OVM: return Type::BT_OVM; break;
-	case Type::BT_OVM_NOTAR: return Type::BT_OVM_NOTAR; break;
-	case Type::BT_OVM_EXEKUT: return Type::BT_OVM_EXEKUT; break;
-	case Type::BT_OVM_REQ: return Type::BT_OVM_REQ; break;
-	case Type::BT_OVM_FO: return Type::BT_OVM_FO; break;
-	case Type::BT_OVM_PFO: return Type::BT_OVM_PFO; break;
-	case Type::BT_OVM_PO: return Type::BT_OVM_PO; break;
-	case Type::BT_PO: return Type::BT_PO; break;
-	case Type::BT_PO_ZAK: return Type::BT_PO_ZAK; break;
-	case Type::BT_PO_REQ: return Type::BT_PO_REQ; break;
-	case Type::BT_PFO: return Type::BT_PFO; break;
-	case Type::BT_PFO_ADVOK: return Type::BT_PFO_ADVOK; break;
-	case Type::BT_PFO_DANPOR: return Type::BT_PFO_DANPOR; break;
-	case Type::BT_PFO_INSSPR: return Type::BT_PFO_INSSPR; break;
-	case Type::BT_PFO_AUDITOR: return Type::BT_PFO_AUDITOR; break;
-	case Type::BT_FO: return Type::BT_FO; break;
+	case Type::BT_SYSTEM: type = Type::BT_SYSTEM; break;
+	case Type::BT_OVM: type = Type::BT_OVM; break;
+	case Type::BT_OVM_NOTAR: type = Type::BT_OVM_NOTAR; break;
+	case Type::BT_OVM_EXEKUT: type = Type::BT_OVM_EXEKUT; break;
+	case Type::BT_OVM_REQ: type = Type::BT_OVM_REQ; break;
+	case Type::BT_OVM_FO: type = Type::BT_OVM_FO; break;
+	case Type::BT_OVM_PFO: type = Type::BT_OVM_PFO; break;
+	case Type::BT_OVM_PO: type = Type::BT_OVM_PO; break;
+	case Type::BT_PO: type = Type::BT_PO; break;
+	case Type::BT_PO_ZAK: type = Type::BT_PO_ZAK; break;
+	case Type::BT_PO_REQ: type = Type::BT_PO_REQ; break;
+	case Type::BT_PFO: type = Type::BT_PFO; break;
+	case Type::BT_PFO_ADVOK: type = Type::BT_PFO_ADVOK; break;
+	case Type::BT_PFO_DANPOR: type = Type::BT_PFO_DANPOR; break;
+	case Type::BT_PFO_INSSPR: type = Type::BT_PFO_INSSPR; break;
+	case Type::BT_PFO_AUDITOR: type = Type::BT_PFO_AUDITOR; break;
+	case Type::BT_FO: type = Type::BT_FO; break;
 	default:
 		Q_ASSERT(0);
-		return Type::BT_SYSTEM; /* FIXME */
+		iOk = false;
 		break;
 	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return type;
 }
 
 enum Isds::Type::DbType Isds::variant2DbType(const QVariant &v)
