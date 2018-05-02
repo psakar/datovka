@@ -32,6 +32,7 @@
 
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
+#include "src/isds/message_interface.h"
 #include "src/models/data_box_contacts_model.h"
 #include "src/models/files_model.h"
 #include "src/worker/task.h"
@@ -293,7 +294,7 @@ private:
 	 * @param[out] envelope Envelope to be set.
 	 * @return True on success.
 	 */
-	bool buildEnvelope(IsdsEnvelope &envelope) const;
+	bool buildEnvelope(Isds::Envelope &envelope) const;
 
 	/*!
 	 * @brief Appends attachments to list of document descriptors.
@@ -301,7 +302,7 @@ private:
 	 * @param[out] documents List to append data to.
 	 * @return True on success.
 	 */
-	bool buildDocuments(QList<IsdsDocument> &documents) const;
+	bool buildDocuments(QList<Isds::Document> &documents) const;
 
 	/*!
 	 * @brief Send message via standard ISDS interface for third party apps.
