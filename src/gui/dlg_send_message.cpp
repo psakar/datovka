@@ -1265,7 +1265,7 @@ bool DlgSendMessage::buildEnvelope(Isds::Envelope &envelope) const
 		}
 	}
 
-	envelope.setDmType(dmType);
+	envelope.setDmType(Isds::Envelope::dmType2Char(dmType));
 	envelope.setDmOVM(m_dbEffectiveOVM ?
 	    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
 	envelope.setDmPublishOwnID((m_ui->dmPublishOwnID->isChecked()) ?
@@ -1293,6 +1293,8 @@ bool DlgSendMessage::buildDocuments(QList<Isds::Document> &documents) const
 		 * FILEMETATYPE_MAIN. Remaining documents have
 		 * FILEMETATYPE_ENCLOSURE.
 		 */
+		document.setFileMetaType((row == 0) ?
+		    Isds::Type::FMT_MAIN : Isds::Type::FMT_ENCLOSURE);
 
 		/*
 		 * Since 2011 Mime Type can be empty and MIME type will
