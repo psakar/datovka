@@ -254,8 +254,13 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 			}
 
 			/* Store envelope in new location. */
-			Task::storeEnvelope(msgDirect, dbSet,
-			    message->envelope);
+			bool ok = false;
+			Isds::Envelope env = Isds::libisds2envelope(message->envelope, &ok);
+			if (!ok) {
+				logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
+				return DM_ERR;
+			}
+			Task::storeMessageEnvelope(msgDirect, dbSet, env);
 		}
 		/* Update message delivery time. */
 		mId.deliveryTime = newDeliveryTime;

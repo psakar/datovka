@@ -134,7 +134,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	isdsMessage = Isds::message2libisds(message, &ok);
 	if (!ok) {
-		logErrorNL("%s", "Cannot convert lo libisds message.");
+		logErrorNL("%s", "Cannot convert message to libisds message.");
 		ret = SM_ERR;
 		goto fail;
 	}

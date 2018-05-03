@@ -83,6 +83,49 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 	return Q_SUCCESS;
 }
 
+qdatovka_error Task::storeMessageEnvelope(enum MessageDirection msgDirect,
+    MessageDbSet &dbSet, const Isds::Envelope &envelope)
+{
+	debugFuncCall();
+
+	qint64 dmId = envelope.dmId();
+	QDateTime deliveryTime = envelope.dmDeliveryTime();
+	/* Allow invalid delivery time. */
+	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
+	Q_ASSERT(0 != messageDb);
+
+	/* insert message envelope in db */
+	if (messageDb->insertMessageEnvelope(envelope, "tRecord", msgDirect)) {
+		logDebugLv0NL("Stored envelope of message '%" PRId64 "' into database.",
+		    dmId);
+		return Q_SUCCESS;
+	} else {
+		logErrorNL("Storing envelope of message '%" PRId64 "' failed.",
+		    dmId);
+		return Q_GLOBAL_ERROR;
+	}
+}
+
+qdatovka_error Task::updateMessageEnvelope(enum MessageDirection msgDirect,
+    MessageDb &messageDb, const Isds::Envelope &envelope)
+{
+	debugFuncCall();
+
+	/* Update message envelope in db. */
+	if (messageDb.updateMessageEnvelope(envelope, "tReturnedMessage",
+	    msgDirect)) {
+		logDebugLv0NL(
+		    "Updated envelope of message '%" PRId64 "' in database.",
+		    envelope.dmId());
+		return Q_SUCCESS;
+	} else {
+		logErrorNL("Updating envelope of message '%" PRId64 "' failed.",
+		    envelope.dmId());
+		return Q_GLOBAL_ERROR;
+	}
+}
+
+
 qdatovka_error Task::storeEnvelope(enum MessageDirection msgDirect,
     MessageDbSet &dbSet, const struct isds_envelope *envel)
 {
@@ -226,7 +269,14 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 30);
 
-	if (Q_SUCCESS == updateEnvelope(msgDirect, *messageDb, envel)) {
+	bool ok = false;
+	Isds::Envelope env = Isds::libisds2envelope(envel, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert lo libisds envelope.");
+		return Q_GLOBAL_ERROR;
+	}
+
+	if (Q_SUCCESS == updateMessageEnvelope(msgDirect, *messageDb, env)) {
 		logDebugLv0NL("Envelope of message '%" PRId64 "' updated.",
 		    dmID);
 	} else {
@@ -311,83 +361,4 @@ qdatovka_error Task::storeAttachments(MessageDb &messageDb, qint64 dmId,
 	}
 
 	return Q_SUCCESS;
-}
-
-qdatovka_error Task::updateEnvelope(enum MessageDirection msgDirect,
-    MessageDb &messageDb, const struct isds_envelope *envel)
-{
-	debugFuncCall();
-
-	if (NULL == envel) {
-		Q_ASSERT(0);
-		return Q_GLOBAL_ERROR;
-	}
-
-	qint64 dmId = -1;
-	{
-		bool ok = false;
-		dmId = QString(envel->dmID).toLongLong(&ok);
-		if (!ok) {
-			return Q_GLOBAL_ERROR;
-		}
-	}
-
-	/* Update message envelope in db. */
-	if (messageDb.msgsUpdateMessageEnvelope(dmId,
-	    "tReturnedMessage",
-	    envel->dbIDSender,
-	    envel->dmSender,
-	    envel->dmSenderAddress,
-	    envel->dmSenderType ?
-	        (int) *envel->dmSenderType : 0,
-	    envel->dmRecipient,
-	    envel->dmRecipientAddress,
-	    envel->dmAmbiguousRecipient ?
-	        QString::number(*envel->dmAmbiguousRecipient) : QString(),
-	    envel->dmSenderOrgUnit,
-	    (envel->dmSenderOrgUnitNum && *envel->dmSenderOrgUnitNum) ?
-	        QString::number(*envel->dmSenderOrgUnitNum) : QString(),
-	    envel->dbIDRecipient,
-	    envel->dmRecipientOrgUnit,
-	    (envel->dmRecipientOrgUnitNum && *envel->dmRecipientOrgUnitNum) ?
-	        QString::number(*envel->dmRecipientOrgUnitNum) : QString(),
-	    envel->dmToHands,
-	    envel->dmAnnotation,
-	    envel->dmRecipientRefNumber,
-	    envel->dmSenderRefNumber,
-	    envel->dmRecipientIdent,
-	    envel->dmSenderIdent,
-	    envel->dmLegalTitleLaw ?
-	        QString::number(*envel->dmLegalTitleLaw) : QString(),
-	    envel->dmLegalTitleYear ?
-	        QString::number(*envel->dmLegalTitleYear) : QString(),
-	    envel->dmLegalTitleSect,
-	    envel->dmLegalTitlePar,
-	    envel->dmLegalTitlePoint,
-	    envel->dmPersonalDelivery ?
-	        *envel->dmPersonalDelivery : false,
-	    envel->dmAllowSubstDelivery ?
-	        *envel->dmAllowSubstDelivery : false,
-	    envel->timestamp ?
-	        QByteArray((char *) envel->timestamp,
-	            envel->timestamp_length).toBase64() : QByteArray(),
-	    envel->dmDeliveryTime ?
-	        timevalToDbFormat(envel->dmDeliveryTime) : QString(),
-	    envel->dmAcceptanceTime ?
-	        timevalToDbFormat(envel->dmAcceptanceTime) : QString(),
-	    envel->dmMessageStatus ?
-	        IsdsConversion::msgStatusIsdsToDbRepr(*envel->dmMessageStatus) : 0,
-	    envel->dmAttachmentSize ?
-	        (int) *envel->dmAttachmentSize : 0,
-	    envel->dmType,
-	    msgDirect)) {
-		logDebugLv0NL(
-		    "Updated envelope of message '%" PRId64 "' in database.",
-		    dmId);
-		return Q_SUCCESS;
-	} else {
-		logErrorNL("Updating envelope of message '%" PRId64 "' failed.",
-		    dmId);
-		return Q_GLOBAL_ERROR;
-	}
 }

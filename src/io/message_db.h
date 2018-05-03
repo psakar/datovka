@@ -33,6 +33,9 @@
 #include <QVector>
 
 #include "src/common.h"
+#include "src/isds/message_interface.h"
+#include "src/isds/message_functions.h"
+#include "src/isds/message_conversion.h"
 #include "src/datovka_shared/io/sqlite/db.h"
 
 #define INVALID_YEAR "inv"
@@ -459,36 +462,33 @@ public:
 	    const QString &dmRecipientAddress, const QString &dmAnnotation);
 
 	/*!
+	 * @brief Insert message envelope into database.
+	 *
+	 * @param[in] envelope Message envelope structure.
+	 * @param[in] _origin Internal download identifier.
+	 * @param[in] msgDirect Message orientation.
+	 * @return True on success.
+	 */
+	bool insertMessageEnvelope(const Isds::Envelope &envelope,
+	    const QString &_origin, enum MessageDirection msgDirect);
+
+	/*!
+	 * @brief Update message envelope in database.
+	 *
+	 * @param[in] envelope Message envelope structure.
+	 * @param[in] _origin Internal download identifier.
+	 * @param[in] msgDirect Message orientation.
+	 * @return True on success.
+	 */
+	bool updateMessageEnvelope(const Isds::Envelope &envelope,
+	    const QString &_origin, enum MessageDirection msgDirect);
+
+	/*!
 	 * @brief Insert message envelope into messages table.
 	 *
 	 * @return True on success.
 	 */
 	bool msgsInsertMessageEnvelope(qint64 dmId,
-	    const QString &_origin, const QString &dbIDSender,
-	    const QString &dmSender, const QString &dmSenderAddress,
-	    int dmSenderType, const QString &dmRecipient,
-	    const QString &dmRecipientAddress,
-	    const QString &dmAmbiguousRecipient,
-	    const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
-	    const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
-	    const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
-	    const QString &dmAnnotation, const QString &dmRecipientRefNumber,
-	    const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
-	    const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
-	    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
-	    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
-	    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-	    const QByteArray &dmQTimestampBase64,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    int dmMessageStatus, int dmAttachmentSize, const QString &_dmType,
-	    enum MessageDirection msgDirect);
-
-	/*!
-	 * @brief Update message envelope into messages table.
-	 *
-	 * @return True on success.
-	 */
-	bool msgsUpdateMessageEnvelope(qint64 dmId,
 	    const QString &_origin, const QString &dbIDSender,
 	    const QString &dmSender, const QString &dmSenderAddress,
 	    int dmSenderType, const QString &dmRecipient,

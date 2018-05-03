@@ -256,10 +256,20 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
 	}
 
 	/* Store envelope and message. */
-	if ((Q_SUCCESS != Task::storeEnvelope(direct, *(acnt.messageDbSet),
-	                      message->envelope)) ||
+	bool ok = false;
+	Isds::Envelope envel = Isds::libisds2envelope(message->envelope, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
+		return TaskImportZfo::IMP_ERR;
+	}
+
+	/* TODO - remove the line below */
+	//if ((Q_SUCCESS != Task::storeEnvelope(direct, *(acnt.messageDbSet), message->envelope)) ||
+
+	if ((Q_SUCCESS != Task::storeMessageEnvelope(direct,
+	        *(acnt.messageDbSet), envel)) ||
 	    (Q_SUCCESS != Task::storeMessage(true, direct, *(acnt.messageDbSet),
-	                      message, ""))) {
+	        message, ""))) {
 		resultDesc = QObject::tr("File has not been imported because "
 		    "an error was detected during insertion process.");
 		return TaskImportZfo::IMP_DB_INS_ERR;

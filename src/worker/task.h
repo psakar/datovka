@@ -108,6 +108,30 @@ protected:
 	    const struct isds_message *msg);
 
 	/*!
+	 * @brief Store message envelope into database.
+	 *
+	 * @param[in]     msgDirect Received or sent message.
+	 * @param[in,out] dbSet     Database container.
+	 * @param[in]     envel     Message envelope structure.
+	 * @return Error state.
+	 */
+	static
+	qdatovka_error storeMessageEnvelope(enum MessageDirection msgDirect,
+	    MessageDbSet &dbSet, const Isds::Envelope &envelope);
+
+	/*!
+	 * @brief Update message envelope in databse.
+	 *
+	 * @param[in]     msgDirect Received or sent message.
+	 * @param[in,out] messageDb Database.
+	 * @param[in]     envel     Message envelope structure.
+	 * @return True on success.
+	 */
+	static
+	qdatovka_error updateMessageEnvelope(enum MessageDirection msgDirect,
+	    MessageDb &messageDb, const Isds::Envelope &envelope);
+
+	/*!
 	 * @brief Store envelope into database.
 	 *
 	 * @param[in]     msgDirect Received or sent message.
@@ -147,18 +171,6 @@ protected:
 	static
 	qdatovka_error storeAttachments(MessageDb &messageDb, qint64 dmId,
 	    const struct isds_list *documents);
-
-	/*!
-	 * @brief Update message envelope.
-	 *
-	 * @param[in]     msgDirect Received or sent message.
-	 * @param[in,out] messageDb Database.
-	 * @param[in]     envel     Message envelope.
-	 * @return True on success.
-	 */
-	static
-	qdatovka_error updateEnvelope(enum MessageDirection msgDirect,
-	    MessageDb &messageDb, const struct isds_envelope *envel);
 
 private:
 //	/*!
