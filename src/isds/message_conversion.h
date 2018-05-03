@@ -25,27 +25,35 @@
 
 #include "src/isds/message_interface.h"
 
+extern "C" {
+	struct isds_hash;
+	struct isds_event;
+	struct isds_envelope;
+	struct isds_document;
+	struct isds_message;
+}
+
 namespace Isds {
 
-	Hash libisds2hash(const struct isds_hash *ih, bool *ok = Q_NULLPTR);
-	struct isds_hash *hash2libisds(const Hash &h, bool *ok = Q_NULLPTR);
+	Hash libisds2hash(const struct ::isds_hash *ih, bool *ok = Q_NULLPTR);
+	struct ::isds_hash *hash2libisds(const Hash &h, bool *ok = Q_NULLPTR);
 
-	Event libisds2event(const struct isds_event *ie, bool *ok = Q_NULLPTR);
-	struct isds_event *event2libisds(const Event &e, bool *ok = Q_NULLPTR);
+	Event libisds2event(const struct ::isds_event *ie, bool *ok = Q_NULLPTR);
+	struct ::isds_event *event2libisds(const Event &e, bool *ok = Q_NULLPTR);
 
-	Envelope libisds2envelope(const struct isds_envelope *ie,
+	Envelope libisds2envelope(const struct ::isds_envelope *ie,
 	    bool *ok = Q_NULLPTR);
-	struct isds_envelope *envelope2libisds(const Envelope &env,
-	    bool *ok = Q_NULLPTR);
-
-	Document libisds2document(const struct isds_document *id,
-	    bool *ok = Q_NULLPTR);
-	struct isds_document *document2libisds(const Document &doc,
+	struct ::isds_envelope *envelope2libisds(const Envelope &env,
 	    bool *ok = Q_NULLPTR);
 
-	Message libisds2message(const struct isds_message *im,
+	Document libisds2document(const struct ::isds_document *id,
 	    bool *ok = Q_NULLPTR);
-	struct isds_message *message2libisds(const Message &m,
+	struct ::isds_document *document2libisds(const Document &doc,
+	    bool *ok = Q_NULLPTR);
+
+	Message libisds2message(const struct ::isds_message *im,
+	    bool *ok = Q_NULLPTR);
+	struct ::isds_message *message2libisds(const Message &m,
 	    bool *ok = Q_NULLPTR);
 
 }
