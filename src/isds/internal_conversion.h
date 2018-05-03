@@ -139,4 +139,24 @@ namespace Isds {
 	 * @return True on success, false in failure.
 	 */
 	bool toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool);
+
+	/*!
+	 * @brief Converts string to non-negative integer.
+	 *
+	 * @param[in]  str String containing non-negative number.
+	 * @param[out] ok Set to true if string contains non-negative number.
+	 * @return Non-negative number if string contains a non-negative number.
+	 *     -1 if string is empty or on error.
+	 */
+	qint64 string2NonNegativeLong(const QString &str, bool *ok);
+
+	/*!
+	 * @brief Converts integer to string. Negative values result in null
+	 *     string.
+	 *
+	 * @param[in] num Number to be converted to string.
+	 * @return String with decimal number representation.
+	 *     Null string if supplied value is negative.
+	 */
+	QString nonNegativeLong2String(qint64 num);
 }

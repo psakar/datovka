@@ -176,6 +176,17 @@ namespace Isds {
 		 */
 		qint64 dmId(void) const;
 		void setDmId(qint64 id);
+		/*
+		 * Convenience methods for number to string conversion.
+		 */
+		QString dmSenderOrgUnitNumStr(void) const;
+		bool setDmSenderOrgUnitNumStr(const QString &soun);
+		QString dmRecipientOrgUnitNumStr(void) const;
+		bool setDmRecipientOrgUnitNumStr(const QString &roun);
+		QString dmLegalTitleLawStr(void) const;
+		bool setDmLegalTitleLawStr(const QString &l);
+		QString dmLegalTitleYearStr(void) const;
+		bool setDmLegalTitleYearStr(const QString &y);
 
 		/* dmID */
 		const QString &dmID(void) const;
