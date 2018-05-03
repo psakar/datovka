@@ -152,6 +152,7 @@ QDateTime Isds::dateTimeFromStructTimeval(struct timeval *cDateTime)
 #else /* < Qt-5.8 */
 		timeStamp.setTime_t(cDateTime->tv_sec);
 #endif /* >= Qt-5.8 */
+		timeStamp = timeStamp.addMSecs(cDateTime->tv_usec / 1000);
 	}
 
 	return timeStamp;
@@ -187,6 +188,7 @@ bool Isds::toCDateTimeCopy(struct timeval **cDateTimePtr,
 #else /* < Qt-5.8 */
 	(*cDateTimePtr)->tv_sec = dateTime.toTime_t();
 #endif /* >= Qt-5.8 */
+	(*cDateTimePtr)->tv_usec = dateTime.time().msec() * 1000;
 	return true;
 }
 
