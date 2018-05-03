@@ -264,9 +264,6 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
 		return TaskImportZfo::IMP_ERR;
 	}
 
-	/* TODO - remove the line below */
-	//if ((Q_SUCCESS != Task::storeEnvelope(direct, *(acnt.messageDbSet), message->envelope)) ||
-
 	if ((Q_SUCCESS != Task::storeMessageEnvelope(direct,
 	        *(acnt.messageDbSet), envel)) ||
 	    (Q_SUCCESS != Task::storeMessage(true, direct, *(acnt.messageDbSet),
