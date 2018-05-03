@@ -736,7 +736,8 @@ struct isds_envelope *Isds::envelope2libisds(const Envelope &env, bool *ok)
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmLegalTitlePoint, env.dmLegalTitlePoint()))) { goto fail; }
 	if (Q_UNLIKELY(!toBool(&ienv->dmPersonalDelivery, env.dmPersonalDelivery()))) { goto fail; }
 	if (Q_UNLIKELY(!toBool(&ienv->dmAllowSubstDelivery, env.dmAllowSubstDelivery()))) { goto fail; }
-	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmType, QString(env.dmType())))) { goto fail; }
+	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmType,
+	                   (!env.dmType().isNull()) ? QString(env.dmType()) : QString()))) { goto fail; }
 
 	if (Q_UNLIKELY(!toBool(&ienv->dmOVM, env.dmOVM()))) { goto fail; }
 	if (Q_UNLIKELY(!toBool(&ienv->dmPublishOwnID, env.dmPublishOwnID()))) { goto fail; }
@@ -1023,8 +1024,10 @@ isds_raw_type rawType2libisdsRawType(enum Isds::Type::RawType rc,
 	case Isds::Type::RT_PLAIN_SIGNED_DELIVERYINFO: type = RAWTYPE_PLAIN_SIGNED_DELIVERYINFO; break;
 	case Isds::Type::RT_CMS_SIGNED_DELIVERYINFO: type = RAWTYPE_CMS_SIGNED_DELIVERYINFO; break;
 	default:
-		Q_ASSERT(0);
-		iOk = false;
+		/*
+		 * This code does not generate any error here, as the used
+		 * values are ignored when taken as input of libisds.
+		 */
 		break;
 	}
 
