@@ -24,6 +24,7 @@
 #include <QPair>
 #include <utility> /* std::move */
 
+#include "src/isds/internal_conversion.h"
 #include "src/isds/message_interface.h"
 
 /* Null objects - for convenience. */
@@ -673,19 +674,78 @@ bool Isds::Envelope::isNull(void) const
 
 qint64 Isds::Envelope::dmId(void) const
 {
-	Q_D(const Envelope);
-	if (Q_UNLIKELY(d == Q_NULLPTR)) {
-		return -1;
-	}
-
 	bool ok = false;
-	qint64 id = d->m_dmID.toLongLong(&ok);
+	qint64 id = string2NonNegativeLong(dmID(), &ok);
 	return ok ? id : -1;
 }
 
 void Isds::Envelope::setDmId(qint64 id)
 {
-	setDmID((id >= 0) ? QString::number(id) : QString());
+	setDmID(nonNegativeLong2String(id));
+}
+
+QString Isds::Envelope::dmSenderOrgUnitNumStr(void) const
+{
+	return nonNegativeLong2String(dmSenderOrgUnitNum());
+}
+
+bool Isds::Envelope::setDmSenderOrgUnitNumStr(const QString &soun)
+{
+	bool ok = false;
+	qint64 num = string2NonNegativeLong(soun, &ok);
+	if (!ok) {
+		return false;
+	}
+	setDmSenderOrgUnitNum(num);
+	return true;
+}
+
+QString Isds::Envelope::dmRecipientOrgUnitNumStr(void) const
+{
+	return nonNegativeLong2String(dmRecipientOrgUnitNum());
+}
+
+bool Isds::Envelope::setDmRecipientOrgUnitNumStr(const QString &roun)
+{
+	bool ok = false;
+	qint64 num = string2NonNegativeLong(roun, &ok);
+	if (!ok) {
+		return false;
+	}
+	setDmRecipientOrgUnitNum(num);
+	return true;
+}
+
+QString Isds::Envelope::dmLegalTitleLawStr(void) const
+{
+	return nonNegativeLong2String(dmLegalTitleLaw());
+}
+
+bool Isds::Envelope::setDmLegalTitleLawStr(const QString &l)
+{
+	bool ok = false;
+	qint64 num = string2NonNegativeLong(l, &ok);
+	if (!ok) {
+		return false;
+	}
+	setDmLegalTitleLaw(num);
+	return true;
+}
+
+QString Isds::Envelope::dmLegalTitleYearStr(void) const
+{
+	return nonNegativeLong2String(dmLegalTitleYear());
+}
+
+bool Isds::Envelope::setDmLegalTitleYearStr(const QString &y)
+{
+	bool ok = false;
+	qint64 num = string2NonNegativeLong(y, &ok);
+	if (!ok) {
+		return false;
+	}
+	setDmLegalTitleYear(num);
+	return true;
 }
 
 const QString &Isds::Envelope::dmID(void) const

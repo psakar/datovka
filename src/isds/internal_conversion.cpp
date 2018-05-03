@@ -257,3 +257,32 @@ bool Isds::toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool)
 	**cBoolPtr = (nilBool == Type::BOOL_TRUE);
 	return true;
 }
+
+qint64 Isds::string2NonNegativeLong(const QString &str, bool *ok)
+{
+	if (str.isEmpty()) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return -1;
+	}
+
+	bool iOk = false;
+	qint64 num = str.toLongLong(&iOk);
+	if ((!iOk) || (num < 0)) {
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return -1;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return num;
+}
+
+QString Isds::nonNegativeLong2String(qint64 num)
+{
+	return (num >= 0) ? QString::number(num) : QString();
+}
