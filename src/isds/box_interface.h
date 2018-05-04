@@ -354,33 +354,59 @@ namespace Isds {
 
 	void swap(DbOwnerInfo &first, DbOwnerInfo &second) Q_DECL_NOTHROW;
 
+	class DbUserInfoPrivate;
 	/*!
 	 * @brief Exists as type tDbUserInfo, tDbUserInfoExt (dbTypes.xsd).
 	 *
 	 * pril_3/WS_ISDS_Sprava_datovych_schranek.pdf (section 1.6.2)
 	 */
 	class DbUserInfo {
+		Q_DECLARE_PRIVATE(DbUserInfo)
+
 	public:
 		DbUserInfo(void);
-		~DbUserInfo(void);
-
 		DbUserInfo(const DbUserInfo &other);
 #ifdef Q_COMPILER_RVALUE_REFS
 		DbUserInfo(DbUserInfo &&other) Q_DECL_NOEXCEPT;
 #endif /* Q_COMPILER_RVALUE_REFS */
+		~DbUserInfo(void);
+
+		DbUserInfo &operator=(const DbUserInfo &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		DbUserInfo &operator=(DbUserInfo &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const DbUserInfo &other) const;
+		bool operator!=(const DbUserInfo &other) const;
+
+		friend void swap(DbUserInfo &first, DbUserInfo &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
 
 		/* pnFirstName, pnMiddleName, pnLastName, pnLastNameAtBirth */
-		PersonName personName(void) const;
+		const PersonName &personName(void) const;
 		void setPersonName(const PersonName &pn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setPersonName(PersonName &&pn);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* adCity, adStreet, adNumberInStreet, adNumberInMunicipality, adZipCode, adState */
-		Address address(void) const;
+		const Address &address(void) const;
 		void setAddress(const Address &a);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setAddress(Address &&a);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* biDate */
-		QDate biDate(void) const;
-		void setBiDate(const QDate &d);
+		const QDate &biDate(void) const;
+		void setBiDate(const QDate &bd);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setBiDate(QDate &&bd);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* userID */
-		QString userID(void) const;
+		const QString &userID(void) const;
 		void setUserId(const QString &uid);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setUserId(QString &&uid);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* userType */
 		enum Type::UserType userType(void) const;
 		void setUserType(enum Type::UserType ut);
@@ -388,34 +414,51 @@ namespace Isds {
 		Type::Privileges userPrivils(void) const;
 		void setUserPrivils(Type::Privileges p);
 		/* ic */
-		QString ic(void) const;
+		const QString &ic(void) const;
 		void setIc(const QString &ic);
-		/* firmName */
-		QString firmName(void) const;
-		void setFirmName(const QString &fn);
-		/* caStreet */
-		QString caStreet(void) const;
-		void setCaStreet(const QString &cs);
-		/* caCity */
-		QString caCity(void) const;
-		void setCaCity(const QString &cc);
-		/* caZipCode */
-		QString caZipCode(void) const;
-		void setCaZipCode(const QString &cz);
-		/* caState */
-		QString caState(void) const;
-		void setCaState(const QString &cs);
-		/* AIFOTicket -- Optional, tDbUsersArray (dbTypes.xsd). */
-		QString aifoTicket(void) const;
-		void setAifoTicket(const QString &at);
-
-		DbUserInfo &operator=(const DbUserInfo &other) Q_DECL_NOTHROW;
 #ifdef Q_COMPILER_RVALUE_REFS
-		DbUserInfo &operator=(DbUserInfo &&other) Q_DECL_NOTHROW;
+		void setIc(QString &&ic);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* firmName */
+		const QString &firmName(void) const;
+		void setFirmName(const QString &fn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setFirmName(QString &&fn);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* caStreet */
+		const QString &caStreet(void) const;
+		void setCaStreet(const QString &cs);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setCaStreet(QString &&cs);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* caCity */
+		const QString &caCity(void) const;
+		void setCaCity(const QString &cc);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setCaCity(QString &&cc);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* caZipCode */
+		const QString &caZipCode(void) const;
+		void setCaZipCode(const QString &cz);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setCaZipCode(QString &&cz);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* caState */
+		const QString &caState(void) const;
+		void setCaState(const QString &cs);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setCaState(QString &&cs);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+		friend DbUserInfo libisds2dbOwnerInfo(
+		    const struct isds_DbUserInfo *idoi, bool *ok);
+
 	private:
+		QScopedPointer<DbUserInfoPrivate> d_ptr; // std::unique_ptr ?
+
 		void *m_dataPtr;
 	};
+
+	void swap(DbUserInfo &first, DbUserInfo &second) Q_DECL_NOTHROW;
 
 }

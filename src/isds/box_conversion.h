@@ -25,26 +25,39 @@
 
 #include "src/isds/box_interface.h"
 
+extern "C" {
+	struct isds_Address;
+	struct isds_BirthInfo;
+	struct isds_PersonName;
+	struct isds_DbOwnerInfo;
+	struct isds_DbUserInfo;
+}
+
 namespace Isds {
 
-	Address libisds2address(const struct isds_Address *ia,
+	Address libisds2address(const struct ::isds_Address *ia,
 	    bool *ok = Q_NULLPTR);
-	struct isds_Address *address2libisds(const Address &a,
-	    bool *ok = Q_NULLPTR);
-
-	BirthInfo libisds2birthInfo(const struct isds_BirthInfo *ibi,
-	    bool *ok = Q_NULLPTR);
-	struct isds_BirthInfo *birthInfo2libisds(const BirthInfo &bi,
+	struct ::isds_Address *address2libisds(const Address &a,
 	    bool *ok = Q_NULLPTR);
 
-	PersonName libisds2personName(const struct isds_PersonName *ipn,
+	BirthInfo libisds2birthInfo(const struct ::isds_BirthInfo *ibi,
 	    bool *ok = Q_NULLPTR);
-	struct isds_PersonName *personName2libisds(const PersonName &pn,
+	struct ::isds_BirthInfo *birthInfo2libisds(const BirthInfo &bi,
 	    bool *ok = Q_NULLPTR);
 
-	DbOwnerInfo libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
+	PersonName libisds2personName(const struct ::isds_PersonName *ipn,
 	    bool *ok = Q_NULLPTR);
-	struct isds_DbOwnerInfo *dbOwnerInfo2libisds(const DbOwnerInfo &doi,
+	struct ::isds_PersonName *personName2libisds(const PersonName &pn,
+	    bool *ok = Q_NULLPTR);
+
+	DbOwnerInfo libisds2dbOwnerInfo(const struct ::isds_DbOwnerInfo *idoi,
+	    bool *ok = Q_NULLPTR);
+	struct ::isds_DbOwnerInfo *dbOwnerInfo2libisds(const DbOwnerInfo &doi,
+	    bool *ok = Q_NULLPTR);
+
+	DbUserInfo libisds2dbUserInfo(const struct ::isds_DbUserInfo *idui,
+	    bool *ok = Q_NULLPTR);
+	struct ::isds_DbUserInfo *dbUserInfo2libisds(const DbUserInfo &dui,
 	    bool *ok = Q_NULLPTR);
 
 }

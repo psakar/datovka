@@ -325,15 +325,15 @@ static
 enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt,
     bool *ok = Q_NULLPTR)
 {
-	bool iOk = true;
-	enum Isds::Type::DbType type = Isds::Type::BT_NULL;
-
 	if (bt == NULL) {
 		if (ok != Q_NULLPTR) {
 			*ok = true;
 		}
 		return Isds::Type::BT_NULL;
 	}
+
+	bool iOk = true;
+	enum Isds::Type::DbType type = Isds::Type::BT_NULL;
 
 	switch (*bt) {
 	case DBTYPE_SYSTEM: type = Isds::Type::BT_SYSTEM; break;
@@ -640,4 +640,287 @@ struct isds_DbOwnerInfo *Isds::dbOwnerInfo2libisds(const DbOwnerInfo &doi,
 		*ok = true;
 	}
 	return idoi;
+}
+
+/*!
+ * @brief Converts user types.
+ */
+static
+enum Isds::Type::UserType libisdsUserType2UserType(const isds_UserType *ut,
+    bool *ok = Q_NULLPTR)
+{
+	if (ut == NULL) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::Type::UT_NULL;
+	}
+
+	bool iOk = true;
+	enum Isds::Type::UserType type = Isds::Type::UT_NULL;
+
+	switch (*ut) {
+	case USERTYPE_PRIMARY: type = Isds::Type::UT_PRIMARY; break;
+	case USERTYPE_ENTRUSTED: type = Isds::Type::UT_ENTRUSTED; break;
+	case USERTYPE_ADMINISTRATOR: type = Isds::Type::UT_ADMINISTRATOR; break;
+	case USERTYPE_OFFICIAL: type = Isds::Type::UT_OFFICIAL; break;
+	case USERTYPE_OFFICIAL_CERT: type = Isds::Type::UT_OFFICIAL_CERT; break;
+	case USERTYPE_LIQUIDATOR: type = Isds::Type::UT_LIQUIDATOR; break;
+	case USERTYPE_RECEIVER: type = Isds::Type::UT_RECEIVER; break;
+	case USERTYPE_GUARDIAN: type = Isds::Type::UT_GUARDIAN; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		type = Isds::Type::UT_NULL;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return type;
+}
+
+/*!
+ * @brief Converts privileges.
+ */
+static
+Isds::Type::Privileges long2Privileges(long int *ip)
+{
+	if (ip == NULL) {
+		return Isds::Type::PRIVIL_NONE;
+	}
+
+	const qint64 privNum = *ip;
+	Isds::Type::Privileges privileges = Isds::Type::PRIVIL_NONE;
+	if (privNum & Isds::Type::PRIVIL_READ_NON_PERSONAL) {
+		privileges |= Isds::Type::PRIVIL_READ_NON_PERSONAL;
+	}
+	if (privNum & Isds::Type::PRIVIL_READ_ALL) {
+		privileges |= Isds::Type::PRIVIL_READ_ALL;
+	}
+	if (privNum & Isds::Type::PRIVIL_CREATE_DM) {
+		privileges |= Isds::Type::PRIVIL_CREATE_DM;
+	}
+	if (privNum & Isds::Type::PRIVIL_VIEW_INFO) {
+		privileges |= Isds::Type::PRIVIL_VIEW_INFO;
+	}
+	if (privNum & Isds::Type::PRIVIL_SEARCH_DB) {
+		privileges |= Isds::Type::PRIVIL_SEARCH_DB;
+	}
+	if (privNum & Isds::Type::PRIVIL_OWNER_ADM) {
+		privileges |= Isds::Type::PRIVIL_OWNER_ADM;
+	}
+	if (privNum & Isds::Type::PRIVIL_READ_VAULT) {
+		privileges |= Isds::Type::PRIVIL_READ_VAULT;
+	}
+	if (privNum & Isds::Type::PRIVIL_ERASE_VAULT) {
+		privileges |= Isds::Type::PRIVIL_ERASE_VAULT;
+	}
+	return privileges;
+}
+
+Isds::DbUserInfo Isds::libisds2dbUserInfo(const struct isds_DbUserInfo *idui,
+    bool *ok)
+{
+	if (Q_UNLIKELY(idui == Q_NULLPTR)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return DbUserInfo();
+	}
+
+	bool iOk = false;
+	DbUserInfo userInfo;
+
+	userInfo.setPersonName(libisds2personName(idui->personName, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	userInfo.setAddress(libisds2address(idui->address, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	userInfo.setBiDate(dateFromStructTM(idui->biDate));
+	userInfo.setUserId(fromCStr(idui->userID));
+	userInfo.setUserType(libisdsUserType2UserType(idui->userType, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	userInfo.setUserPrivils(long2Privileges(idui->userPrivils));
+	userInfo.setIc(fromCStr(idui->ic));
+	userInfo.setFirmName(fromCStr(idui->firmName));
+	userInfo.setCaStreet(fromCStr(idui->caStreet));
+	userInfo.setCaCity(fromCStr(idui->caCity));
+	userInfo.setCaZipCode(fromCStr(idui->caZipCode));
+	userInfo.setCaState(fromCStr(idui->caState));
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return userInfo;
+
+fail:
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return DbUserInfo();
+}
+
+/*!
+ * @brief Converts user types.
+ */
+static
+bool userType2libisdsUserType(isds_UserType **tgt,
+    enum Isds::Type::UserType src)
+{
+	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (src == Isds::Type::UT_NULL) {
+		if (*tgt != NULL) {
+			std::free(*tgt); *tgt = NULL;
+		}
+		return true;
+	}
+	if (*tgt == NULL) {
+		*tgt = (isds_UserType *)std::malloc(sizeof(**tgt));
+		if (Q_UNLIKELY(*tgt == NULL)) {
+			Q_ASSERT(0);
+			return false;
+		}
+	}
+	switch (src) {
+	case Isds::Type::UT_NULL:
+		std::free(*tgt); *tgt = NULL;
+		break;
+	case Isds::Type::UT_PRIMARY: **tgt = USERTYPE_PRIMARY; break;
+	case Isds::Type::UT_ENTRUSTED: **tgt = USERTYPE_ENTRUSTED; break;
+	case Isds::Type::UT_ADMINISTRATOR: **tgt = USERTYPE_ADMINISTRATOR; break;
+	case Isds::Type::UT_OFFICIAL: **tgt = USERTYPE_OFFICIAL; break;
+	case Isds::Type::UT_OFFICIAL_CERT: **tgt = USERTYPE_OFFICIAL_CERT; break;
+	case Isds::Type::UT_LIQUIDATOR: **tgt = USERTYPE_LIQUIDATOR; break;
+	case Isds::Type::UT_RECEIVER: **tgt = USERTYPE_RECEIVER; break;
+	case Isds::Type::UT_GUARDIAN: **tgt = USERTYPE_GUARDIAN; break;
+	default:
+		Q_ASSERT(0);
+		std::free(*tgt); *tgt = NULL;
+		return false;
+		break;
+	}
+
+	return true;
+}
+
+/*!
+ * @brief Converts privileges.
+ */
+static
+bool privileges2long(long int **tgt, Isds::Type::Privileges src)
+{
+	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
+	}
+	if (*tgt == NULL) {
+		*tgt = (long int *)std::malloc(sizeof(**tgt));
+		if (Q_UNLIKELY(tgt == NULL)) {
+			Q_ASSERT(0);
+			return false;
+		}
+	}
+
+	**tgt = src;
+	return true;
+}
+
+/*!
+ * @brief Set libisds box user info structure according to the user info.
+ */
+static
+bool setLibisdsDbUserInfoContent(struct isds_DbUserInfo *tgt,
+    const Isds::DbUserInfo &src)
+{
+	if (Q_UNLIKELY(tgt == NULL)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	bool iOk = false;
+
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->userID, src.userID()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!userType2libisdsUserType(&tgt->userType, src.userType()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!privileges2long(&tgt->userPrivils, src.userPrivils()))) {
+		return false;
+	}
+	tgt->personName = personName2libisds(src.personName(), &iOk);
+	if (Q_UNLIKELY(!iOk)) {
+		return false;
+	}
+	tgt->address = address2libisds(src.address(), &iOk);
+	if (Q_UNLIKELY(!iOk)) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCDateCopy(&tgt->biDate, src.biDate()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->ic, src.ic()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->firmName, src.firmName()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->caStreet, src.caStreet()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->caCity, src.caCity()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->caZipCode, src.caZipCode()))) {
+		return false;
+	}
+	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->caState, src.caState()))) {
+		return false;
+	}
+
+	return true;
+}
+
+struct isds_DbUserInfo *Isds::dbUserInfo2libisds(const DbUserInfo &dui,
+    bool *ok)
+{
+	if (Q_UNLIKELY(dui.isNull())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_DbUserInfo *idui =
+	    (struct isds_DbUserInfo *)std::malloc(sizeof(*idui));
+	if (Q_UNLIKELY(idui == NULL)) {
+		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return NULL;
+	}
+	std::memset(idui, 0, sizeof(*idui));
+
+	if (Q_UNLIKELY(!setLibisdsDbUserInfoContent(idui, dui))) {
+		isds_DbUserInfo_free(&idui);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return NULL;
+	}
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return idui;
 }
