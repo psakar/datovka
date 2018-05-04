@@ -34,30 +34,19 @@
 #include "src/worker/task.h"
 
 qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
-    const struct isds_message *msg)
+    const Isds::Message &msg)
 {
-	if (NULL == msg) {
-		Q_ASSERT(0);
-		return Q_GLOBAL_ERROR;
-	}
+	debugFuncCall();
 
-	const struct isds_envelope *envel = msg->envelope;
-
-	if (NULL == envel) {
-		Q_ASSERT(0);
-		return Q_GLOBAL_ERROR;
-	}
-
-	qint64 dmID = QString(envel->dmID).toLongLong();
-	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	qint64 dmID = msg.envelope().dmId();
+	QDateTime deliveryTime = msg.envelope().dmDeliveryTime();
 	Q_ASSERT(deliveryTime.isValid());
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	Q_ASSERT(0 != messageDb);
 
 	/* get signed raw data from message */
 	if (signedMsg) {
-		if (messageDb->insertOrReplaceDeliveryInfoRaw(dmID,
-		    QByteArray((char*)msg->raw, msg->raw_length))) {
+		if (messageDb->insertOrReplaceDeliveryInfoRaw(dmID, msg.raw())) {
 			logDebugLv0NL(
 			    "Raw delivery info of message '%" PRId64 "' was updated.",
 			    dmID);
@@ -68,16 +57,9 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 		}
 	}
 
-	const struct isds_list *event;
-	event = envel->events;
-
-	while (0 != event) {
-		isds_event *item = (isds_event *) event->data;
-		messageDb->insertOrUpdateMessageEvent(dmID,
-		    timevalToDbFormat(item->time),
-		    IsdsConversion::eventTypeToStr(*item->type) + QLatin1String(": "),
-		    item->description);
-		event = event->next;
+	QList<Isds::Event> events = msg.envelope().dmEvents();
+	foreach (const Isds::Event &event, events) {
+		messageDb->insertOrUpdateMessageEvent(dmID, event);
 	}
 
 	return Q_SUCCESS;
@@ -90,7 +72,7 @@ qdatovka_error Task::storeMessageEnvelope(enum MessageDirection msgDirect,
 
 	qint64 dmId = envelope.dmId();
 	QDateTime deliveryTime = envelope.dmDeliveryTime();
-	/* Allow invalid delivery time. */
+	Q_ASSERT(deliveryTime.isValid());
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	Q_ASSERT(0 != messageDb);
 

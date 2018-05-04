@@ -258,30 +258,6 @@ QString IsdsConversion::dmTypeToText(const QString &val)
 	}
 }
 
-const QString &IsdsConversion::eventTypeToStr(int val)
-{
-	static const QString ev0("EV0"), ev1("EV1"), ev2("EV2"), ev3("EV3"),
-	    ev4("EV4"), ev5("EV5"), ev11("EV11"), ev12("EV12"), ev13("EV13");
-	static const QString invalid;
-
-	switch (val) {
-	case EVENT_ACCEPTED_BY_RECIPIENT: return ev4; break;
-	case EVENT_ACCEPTED_BY_FICTION: return ev2; break;
-	case EVENT_UNDELIVERABLE: return ev3; break;
-	case EVENT_COMMERCIAL_ACCEPTED: return ev1; break;
-	case EVENT_ENTERED_SYSTEM: return ev0; break;
-	case EVENT_DELIVERED: return ev5; break;
-	case EVENT_PRIMARY_LOGIN: return ev11; break;
-	case EVENT_ENTRUSTED_LOGIN: return ev12; break;
-	case EVENT_SYSCERT_LOGIN: return ev13; break;
-	case EVENT_UKNOWN:
-	default:
-		logWarningNL("Unknown event type value '%d'.", val);
-		return invalid;
-		break;
-	}
-}
-
 #define STR_MD5 "MD5"
 #define STR_SHA_1 "SHA-1"
 #define STR_SHA_224 "SHA-224"

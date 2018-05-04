@@ -2416,8 +2416,7 @@ fail:
 }
 
 bool MessageDb::insertOrUpdateMessageEvent(qint64 dmId,
-    const QString &dmEventTime, const QString &dmEventType,
-    const QString &dmEventDescr)
+    const Isds::Event &event)
 {
 	QSqlQuery query(m_db);
 	int eventId = -1;
@@ -2430,7 +2429,7 @@ bool MessageDb::insertOrUpdateMessageEvent(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
-	query.bindValue(":dmEventTime", dmEventTime);
+	query.bindValue(":dmEventTime", qDateTimeToDbFormat(event.time()));
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -2457,8 +2456,8 @@ bool MessageDb::insertOrUpdateMessageEvent(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":dmEventTime", dmEventTime);
-	query.bindValue(":dmEventDescr", dmEventType + dmEventDescr);
+	query.bindValue(":dmEventTime", qDateTimeToDbFormat(event.time()));
+	query.bindValue(":dmEventDescr", event.descr());
 	if (-1 != eventId) {
 		query.bindValue(":eventId", eventId);
 	}

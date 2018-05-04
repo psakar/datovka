@@ -425,8 +425,15 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 		}
 	}
 
+	bool ok = false;
+	Isds::Message msg = Isds::libisds2message(message, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds message to message.");
+		return IMP_ERR;
+	}
+
 	if (Q_SUCCESS !=
-	    Task::storeDeliveryInfo(true, *(acnt.messageDbSet), message)) {
+	    Task::storeDeliveryInfo(true, *(acnt.messageDbSet), msg)) {
 		resultDesc = QObject::tr("File has not been imported because "
 		    "an error was detected during insertion process.");
 		return TaskImportZfo::IMP_DB_INS_ERR;

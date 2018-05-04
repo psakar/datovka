@@ -105,7 +105,7 @@ protected:
 	 */
 	static
 	qdatovka_error storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
-	    const struct isds_message *msg);
+	    const Isds::Message &msg);
 
 	/*!
 	 * @brief Store message envelope into database.

@@ -541,17 +541,13 @@ public:
 	    const QByteArray &valueBase64, const QString &algorithm);
 
 	/*!
-	 * @brief Insert/update message events into events table.
+	 * @brief Insert/update message event into events table.
 	 *
-	 * @param[in] dmId          Message identifier.
-	 * @param[in] dmEventTime   Event time in database format.
-	 * @param[in] dmEventType   Event type identifier.
-	 * @param[in] dmEventDescr  Event description.
+	 * @param[in] dmId  Message identifier.
+	 * @param[in] event Event stucture.
 	 * @return True on success.
 	 */
-	bool insertOrUpdateMessageEvent(qint64 dmId,
-	    const QString &dmEventTime, const QString &dmEventType,
-	    const QString &dmEventDescr);
+	bool insertOrUpdateMessageEvent(qint64 dmId, const Isds::Event &event);
 
 	/*!
 	 * @brief Insert/update raw (DER) message data into raw_message_data
@@ -562,8 +558,8 @@ public:
 	 * @param[in] messageType  Message type.
 	 * @return True on success.
 	 */
-	bool insertOrReplaceCompleteMessageRaw(qint64 dmId, const QByteArray &raw,
-	    int messageType);
+	bool insertOrReplaceCompleteMessageRaw(qint64 dmId,
+	    const QByteArray &raw, int messageType);
 
 	/*!
 	 * @brief Return all IDs of messages without attachment.

@@ -494,16 +494,16 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 		    dmID);
 	}
 
-	const struct isds_list *event;
-	event = envel->events;
+	bool ok = false;
+	Isds::Envelope env = Isds::libisds2envelope(envel, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
+		return DL_ERR;
+	}
+	QList<Isds::Event> events = env.dmEvents();
 
-	while (0 != event) {
-		isds_event *item = (isds_event *) event->data;
-		messageDb->insertOrUpdateMessageEvent(dmID,
-		    timevalToDbFormat(item->time),
-		    IsdsConversion::eventTypeToStr(*item->type) + QLatin1String(": "),
-		    item->description);
-		event = event->next;
+	foreach (const Isds::Event &event, events) {
+		messageDb->insertOrUpdateMessageEvent(dmID, event);
 	}
 
 	return DL_SUCCESS;
