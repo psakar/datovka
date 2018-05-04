@@ -24,29 +24,26 @@
 #include <cinttypes>
 
 #include "src/crypto/crypto_funcs.h"
-#include "src/global.h"
-#include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task.h"
 
 qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
-    const Isds::Message &msg)
+    const Isds::Message &message)
 {
 	debugFuncCall();
 
-	qint64 dmID = msg.envelope().dmId();
-	QDateTime deliveryTime = msg.envelope().dmDeliveryTime();
+	qint64 dmID = message.envelope().dmId();
+	QDateTime deliveryTime = message.envelope().dmDeliveryTime();
 	Q_ASSERT(deliveryTime.isValid());
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	Q_ASSERT(0 != messageDb);
 
 	/* get signed raw data from message */
 	if (signedMsg) {
-		if (messageDb->insertOrReplaceDeliveryInfoRaw(dmID, msg.raw())) {
+		if (messageDb->insertOrReplaceDeliveryInfoRaw(dmID, message.raw())) {
 			logDebugLv0NL(
 			    "Raw delivery info of message '%" PRId64 "' was updated.",
 			    dmID);
@@ -57,7 +54,7 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 		}
 	}
 
-	QList<Isds::Event> events = msg.envelope().dmEvents();
+	QList<Isds::Event> events = message.envelope().dmEvents();
 	foreach (const Isds::Event &event, events) {
 		messageDb->insertOrUpdateMessageEvent(dmID, event);
 	}
@@ -76,7 +73,6 @@ qdatovka_error Task::storeMessageEnvelope(enum MessageDirection msgDirect,
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	Q_ASSERT(0 != messageDb);
 
-	/* insert message envelope in db */
 	if (messageDb->insertMessageEnvelope(envelope, "tRecord", msgDirect)) {
 		logDebugLv0NL("Stored envelope of message '%" PRId64 "' into database.",
 		    dmId);
@@ -93,7 +89,6 @@ qdatovka_error Task::updateMessageEnvelope(enum MessageDirection msgDirect,
 {
 	debugFuncCall();
 
-	/* Update message envelope in db. */
 	if (messageDb.updateMessageEnvelope(envelope, "tReturnedMessage",
 	    msgDirect)) {
 		logDebugLv0NL(
@@ -109,36 +104,12 @@ qdatovka_error Task::updateMessageEnvelope(enum MessageDirection msgDirect,
 
 qdatovka_error Task::storeMessage(bool signedMsg,
     enum MessageDirection msgDirect, MessageDbSet &dbSet,
-    const struct isds_message *msg, const QString &progressLabel)
+    const Isds::Message &message, const QString &progressLabel)
 {
 	debugFuncCall();
 
-	if (!signedMsg) {
-		Q_ASSERT(0); /* Only signed messages can be downloaded. */
-		return Q_GLOBAL_ERROR;
-	}
-
-	if (NULL == msg) {
-		Q_ASSERT(0);
-		return Q_GLOBAL_ERROR;
-	}
-
-	const struct isds_envelope *envel = msg->envelope;
-
-	if (NULL == envel) {
-		Q_ASSERT(0);
-		return Q_GLOBAL_ERROR;
-	}
-
-	qint64 dmID = -1;
-	{
-		bool ok = false;
-		dmID = QString(envel->dmID).toLongLong(&ok);
-		if (!ok) {
-			return Q_GLOBAL_ERROR;
-		}
-	}
-	QDateTime deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
+	qint64 dmID = message.envelope().dmId();
+	QDateTime deliveryTime = message.envelope().dmDeliveryTime();
 	Q_ASSERT(deliveryTime.isValid());
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	Q_ASSERT(0 != messageDb);
@@ -153,8 +124,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	/* Get signed raw data from message and store to db. */
 	if (signedMsg) {
-		if (messageDb->insertOrReplaceCompleteMessageRaw(dmID,
-		        QByteArray((char*) msg->raw, msg->raw_length), 0)) {
+		if (messageDb->insertOrReplaceCompleteMessageRaw(dmID, message.raw(), 0)) {
 			logDebugLv0NL(
 			    "Raw data of message '%" PRId64 "' were updated.",
 			    dmID);
@@ -167,14 +137,8 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 30);
 
-	bool ok = false;
-	Isds::Envelope env = Isds::libisds2envelope(envel, &ok);
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert lo libisds envelope.");
-		return Q_GLOBAL_ERROR;
-	}
-
-	if (Q_SUCCESS == updateMessageEnvelope(msgDirect, *messageDb, env)) {
+	if (Q_SUCCESS == updateMessageEnvelope(msgDirect, *messageDb,
+	    message.envelope())) {
 		logDebugLv0NL("Envelope of message '%" PRId64 "' updated.",
 		    dmID);
 	} else {
@@ -186,8 +150,8 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	if (signedMsg) {
 		/* Verify message signature. */
-		int ret = raw_msg_verify_signature(msg->raw,
-		    msg->raw_length, 1,
+		int ret = raw_msg_verify_signature(message.raw(),
+		    message.raw().length(), 1,
 		    GlobInstcs::prefsPtr->checkCrl ? 1 : 0);
 		logDebugLv0NL(
 		   "Verification of message '%" PRId64 "' returned: %d.",
@@ -205,57 +169,34 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 60);
 
-	/* insert/update hash into db */
-	if (NULL != envel->hash) {
-		const struct isds_hash *hash = envel->hash;
-
-		QByteArray hashValueBase64 = QByteArray((char *) hash->value,
-		    hash->length).toBase64();
-		if (messageDb->insertOrUpdateMessageHash(dmID,
-		        hashValueBase64,
-		        IsdsConversion::hashAlgToStr(hash->algorithm))) {
-			logDebugLv0NL("Hash of message '%" PRId64 "' stored.",
-			    dmID);
-		} else {
-			logErrorNL(
-			    "Storing hash of message '%" PRId64 "' failed.",
-			    dmID);
-		}
+	if (messageDb->insertOrUpdateMessageHash(dmID,
+	    message.envelope().dmHash())) {
+		logDebugLv0NL("Hash of message '%" PRId64 "' stored.", dmID);
+	} else {
+		logErrorNL("Storing hash of message '%" PRId64 "' failed.", dmID);
 	}
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 70);
 
-	/* Insert/update all attachment files */
-	storeAttachments(*messageDb, dmID, msg->documents);
+	storeAttachments(*messageDb, dmID, message.documents());
 
 	return Q_SUCCESS;
 }
 
 qdatovka_error Task::storeAttachments(MessageDb &messageDb, qint64 dmId,
-    const struct isds_list *documents)
+    const QList<Isds::Document> &documents)
 {
-	const struct isds_list *file = documents;
+	debugFuncCall();
 
-	while (NULL != file) {
-		const isds_document *item = (isds_document *) file->data;
-
-		QByteArray dmEncodedContentBase64 = QByteArray(
-		    (char *)item->data, item->data_length).toBase64();
-
-		/* Insert/update file to db */
-		if (messageDb.insertOrUpdateMessageAttachment(dmId,
-		        item->dmFileDescr, item->dmUpFileGuid,
-		        item->dmFileGuid, item->dmMimeType, item->dmFormat,
-		        IsdsConversion::attachmentTypeToStr(item->dmFileMetaType),
-		        dmEncodedContentBase64)) {
+	foreach (const Isds::Document &document, documents) {
+		if (messageDb.insertOrUpdateMessageAttachment(dmId, document)) {
 			logDebugLv0NL(
 			    "Attachment file '%s' was stored into database.",
-			    item->dmFileDescr);
+			    document.fileDescr());
 		} else {
 			logErrorNL("Storing attachment file '%s' failed.",
-			    item->dmFileDescr);
+			    document.fileDescr());
 		}
-		file = file->next;
 	}
 
 	return Q_SUCCESS;

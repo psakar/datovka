@@ -99,13 +99,13 @@ protected:
 	 *
 	 * @param[in]     signedMsg Whether to store signed message;
 	 *                          must be true.
-	 * @param[in,out] dbSet     Database container.
-	 * @param[in]     msg       Message.
+	 * @param[in,out] dbSet   Database container.
+	 * @param[in]     message Message structure.
 	 * @return Error state.
 	 */
 	static
 	qdatovka_error storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
-	    const Isds::Message &msg);
+	    const Isds::Message &message);
 
 	/*!
 	 * @brief Store message envelope into database.
@@ -146,31 +146,30 @@ protected:
 	/*!
 	 * @brief Store message into database.
 	 *
-	 * @param[in]     signedMsg     Whether to store signed message;
-	 *                              must be true.
-	 * @param[in]     msgDirect     Received or sent message.
-	 * @param[in,out] dbSet         Database container.
-	 * @param[in]     msg           Message.
+	 * @param[in]     signedMsg Whether to store signed message;
+	 *                          must be true.
+	 * @param[in]     msgDirect Received or sent message.
+	 * @param[in,out] dbSet     Database container.
+	 * @param[in]     message   Message structure.
 	 * @param[in]     progressLabel Progress-bar label.
 	 * @return Error state.
 	 */
 	static
 	qdatovka_error storeMessage(bool signedMsg,
-	    enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const struct isds_message *msg,
-	    const QString &progressLabel);
+	    enum MessageDirection msgDirect, MessageDbSet &dbSet,
+	    const Isds::Message &message, const QString &progressLabel);
 
 	/*!
 	 * @brief Store attachments into database.
 	 *
 	 * @param[in,out] messageDb Database.
-	 * @param[in]     dmId      Message identifier.
-	 * @param[in]     documents Attachments.
+	 * @param[in] dmId Message identifier.
+	 * @param[in] documents Attachment list.
 	 * @return Error state.
 	 */
 	static
 	qdatovka_error storeAttachments(MessageDb &messageDb, qint64 dmId,
-	    const struct isds_list *documents);
+	    const QList<Isds::Document> &documents);
 
 private:
 //	/*!

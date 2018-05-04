@@ -242,6 +242,13 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		return DM_ISDS_ERROR;
 	}
 
+	bool ok = false;
+	Isds::Message msg = Isds::libisds2message(message, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds message to message.");
+		return DM_ERR;
+	}
+
 	{
 		QString secKeyBeforeDownload(dbSet.secondaryKey(mId.deliveryTime));
 		QDateTime newDeliveryTime(timevalToDateTime(
@@ -263,21 +270,14 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 			}
 
 			/* Store envelope in new location. */
-			bool ok = false;
-			Isds::Envelope env = Isds::libisds2envelope(message->envelope, &ok);
-			if (!ok) {
-				logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
-				return DM_ERR;
-			}
-			Task::storeMessageEnvelope(msgDirect, dbSet, env);
+			Task::storeMessageEnvelope(msgDirect, dbSet, msg.envelope());
 		}
 		/* Update message delivery time. */
 		mId.deliveryTime = newDeliveryTime;
 	}
 
 	/* Store the message. */
-	Task::storeMessage(signedMsg, msgDirect, dbSet, message,
-	    progressLabel);
+	Task::storeMessage(signedMsg, msgDirect, dbSet, msg, progressLabel);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 90);
 

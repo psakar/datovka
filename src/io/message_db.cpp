@@ -2265,10 +2265,7 @@ fail:
 }
 
 bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
-    const QString &dmFileDescr, const QString &dmUpFileGuid,
-    const QString &dmFileGuid, const QString &dmMimeType,
-    const QString &dmFormat, const QString &dmFileMetaType,
-    const QByteArray &dmEncodedContentBase64)
+    const Isds::Document &document)
 {
 	QSqlQuery query(m_db);
 	int fileId = -1;
@@ -2283,9 +2280,9 @@ bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
-	query.bindValue(":dmFileDescr", dmFileDescr);
-	query.bindValue(":dmMimeType", dmMimeType);
-	query.bindValue(":dmEncodedContent", dmEncodedContentBase64);
+	query.bindValue(":dmFileDescr", document.fileDescr());
+	query.bindValue(":dmMimeType", document.mimeType());
+	query.bindValue(":dmEncodedContent", document.binaryContent().toBase64());
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -2321,13 +2318,13 @@ bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
-	query.bindValue(":_dmFileDescr", dmFileDescr);
-	query.bindValue(":_dmUpFileGuid", dmUpFileGuid);
-	query.bindValue(":_dmFileGuid", dmFileGuid);
-	query.bindValue(":_dmMimeType", dmMimeType);
-	query.bindValue(":_dmFormat", dmFormat);
-	query.bindValue(":_dmFileMetaType", dmFileMetaType);
-	query.bindValue(":dmEncodedContent", dmEncodedContentBase64);
+	query.bindValue(":_dmFileDescr", document.fileDescr());
+	query.bindValue(":_dmUpFileGuid", document.upFileGuid());
+	query.bindValue(":_dmFileGuid", document.fileGuid());
+	query.bindValue(":_dmMimeType", document.mimeType());
+	query.bindValue(":_dmFormat", document.format());
+	query.bindValue(":_dmFileMetaType", document.fileMetaType());
+	query.bindValue(":dmEncodedContent", document.binaryContent().toBase64());
 	if (-1 != fileId) {
 		query.bindValue(":fileId", fileId);
 	}
@@ -2363,7 +2360,7 @@ fail:
 }
 
 bool MessageDb::insertOrUpdateMessageHash(qint64 dmId,
-    const QByteArray &valueBase64, const QString &algorithm)
+     const Isds::Hash &hash)
 {
 	QSqlQuery query(m_db);
 	int hashId= -1;
@@ -2400,8 +2397,8 @@ bool MessageDb::insertOrUpdateMessageHash(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":value", valueBase64);
-	query.bindValue(":algorithm", algorithm);
+	query.bindValue(":value", hash.value().toBase64());
+	query.bindValue(":algorithm", IsdsConversion::hashAlgToStr(hash.algorithm()));
 	if (-1 != hashId) {
 		query.bindValue(":hashId", hashId);
 	}

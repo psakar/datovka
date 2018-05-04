@@ -199,7 +199,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		emit GlobInstcs::msgProcEmitterPtr->progressChange(
 		    progressLabel, 80);
 
-		Task::storeAttachments(*messageDb, dmId, isdsMessage->documents);
+		Task::storeAttachments(*messageDb, dmId, message.documents());
 
 		emit GlobInstcs::msgProcEmitterPtr->progressChange(
 		    progressLabel, 90);

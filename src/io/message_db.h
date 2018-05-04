@@ -506,20 +506,12 @@ public:
 	/*!
 	 * @brief Insert/update message files into files table.
 	 *
-	 * @param[in] dmId                    Message identifier.
-	 * @param[in] dmFileDescr             File name.
-	 * @param[in] dmUpFileGuid
-	 * @param[in] dmMimeType
-	 * @param[in] dmFormat
-	 * @param[in] dmFileMetaType
-	 * @param[in] dmEncodedContentBase64  Base64-encoded file content.
+	 * @param[in] dmId Message identifier.
+	 * @param[in] document Document structure.
 	 * @return True on success.
 	 */
 	bool insertOrUpdateMessageAttachment(qint64 dmId,
-	    const QString &dmFileDescr, const QString &dmUpFileGuid,
-	    const QString &dmFileGuid, const QString &dmMimeType,
-	    const QString &dmFormat, const QString &dmFileMetaType,
-	    const QByteArray &dmEncodedContentBase64);
+	    const Isds::Document &document);
 
 	/*!
 	 * @brief Delete all files related to message with given id.
@@ -532,13 +524,11 @@ public:
 	/*!
 	 * @brief Insert/update message hash into hashes table.
 	 *
-	 * @param[in] dmId         Message identifier.
-	 * @param[in] valueBase64  Base64-encoded hash value.
-	 * @param[in] algorithm    Algorithm identifier.
+	 * @param[in] dmId Message identifier.
+	 * @param[in] hash Hash structure.
 	 * @return True on success.
 	 */
-	bool insertOrUpdateMessageHash(qint64 dmId,
-	    const QByteArray &valueBase64, const QString &algorithm);
+	bool insertOrUpdateMessageHash(qint64 dmId, const Isds::Hash &hash);
 
 	/*!
 	 * @brief Insert/update message event into events table.
