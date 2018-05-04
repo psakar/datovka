@@ -430,6 +430,32 @@ void Isds::Event::setDescr(QString &&descr)
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+const QString &Isds::Event::type2string(enum Type::Event type)
+{
+	static const QString ev0("EV0"), ev1("EV1"), ev2("EV2"), ev3("EV3"),
+	    ev4("EV4"), ev5("EV5"), ev8("EV8"), ev11("EV11"), ev12("EV12"),
+	    ev13("EV13");
+	static const QString invalid;
+
+	switch (type) {
+	case Type::EV_ENTERED: return ev0; break;
+	case Type::EV_DELIVERED: return ev5; break;
+	case Type::EV_ACCEPTED_LOGIN: return ev1; break;
+	case Type::EV_PRIMARY_LOGIN: return ev11; break;
+	case Type::EV_ENTRUSTED_LOGIN: return ev12; break;
+	case Type::EV_SYSCERT_LOGIN: return ev13; break;
+	case Type::EV_ACCEPTED_FICTION: return ev2; break;
+	case Type::EV_UNDELIVERABLE: return ev3; break;
+	case Type::EV_ACCEPTED_BY_RECIPIENT: return ev4; break;
+	case Type::EV_UNDELIVERED_AV_CHECK: return ev8; break;
+	case Type::EV_UNKNOWN:
+	default:
+		//logWarningNL("Unknown event type value '%d'.", type);
+		return invalid;
+		break;
+	}
+}
+
 void Isds::swap(Event &first, Event &second) Q_DECL_NOTHROW
 {
 	using std::swap;

@@ -134,6 +134,10 @@ namespace Isds {
 		void setDescr(QString &&descr);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+		/* Converts even type to string. */
+		static
+		const QString &type2string(enum Type::Event type);
+
 		friend Event libisds2event(const struct isds_event *ie,
 		    bool *ok);
 
