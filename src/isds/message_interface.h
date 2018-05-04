@@ -116,13 +116,18 @@ namespace Isds {
 
 		bool isNull(void) const;
 
+		/*
+		 * Convenience method. Sets type and descrpition from full text.
+		 */
+		void setFromText(const QString &t);
+
 		const QDateTime &time(void) const;
 		void setTime(const QDateTime &t);
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setTime(QDateTime &&t);
 #endif /* Q_COMPILER_RVALUE_REFS */
 		enum Type::Event type(void) const;
-		//void setType(enum Type::Event e); /* Type is determined from description. */
+		void setType(enum Type::Event et); /* Type should be determined from description. */
 		const QString &descr(void) const;
 		void setDescr(const QString &descr);
 #ifdef Q_COMPILER_RVALUE_REFS

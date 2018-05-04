@@ -199,6 +199,45 @@ struct isds_hash *Isds::hash2libisds(const Hash &h, bool *ok)
 }
 
 /*!
+ * @brief Converts event type.
+ */
+static
+enum Isds::Type::Event libisdsEventType2EventType(isds_event_type *src,
+    bool *ok = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(src == NULL)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::Type::EV_UNKNOWN;
+	}
+
+	bool iOk = true;
+	enum Isds::Type::Event event = Isds::Type::EV_UNKNOWN;
+
+	switch (*src) {
+	case EVENT_UKNOWN: event = Isds::Type::EV_UNKNOWN; break;
+	case EVENT_ENTERED_SYSTEM: event = Isds::Type::EV_ENTERED; break;
+	case EVENT_DELIVERED: event = Isds::Type::EV_DELIVERED; break;
+	case EVENT_ACCEPTED_BY_RECIPIENT: event = Isds::Type::EV_ACCEPTED_LOGIN; break;
+	case EVENT_PRIMARY_LOGIN: event = Isds::Type::EV_PRIMARY_LOGIN; break;
+	case EVENT_ENTRUSTED_LOGIN: event = Isds::Type::EV_ENTRUSTED_LOGIN; break;
+	case EVENT_SYSCERT_LOGIN: event = Isds::Type::EV_SYSCERT_LOGIN; break;
+	case EVENT_ACCEPTED_BY_FICTION: event = Isds::Type::EV_ACCEPTED_FICTION; break;
+	case EVENT_UNDELIVERABLE: event = Isds::Type::EV_UNDELIVERABLE; break;
+	case EVENT_COMMERCIAL_ACCEPTED: event = Isds::Type::EV_ACCEPTED_BY_RECIPIENT; break;
+	default:
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return event;
+}
+
+/*!
  * @brief Set event according to the libisds event structure.
  */
 static
@@ -208,8 +247,13 @@ bool setEventContent(Isds::Event &tgt, const struct isds_event *src)
 		return true;
 	}
 
+	bool iOk = false;
+
 	tgt.setTime(Isds::dateTimeFromStructTimeval(src->time));
-	//tgt.setType();
+	tgt.setType(libisdsEventType2EventType(src->type, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		return false;
+	}
 	tgt.setDescr(Isds::fromCStr(src->description));
 	return true;
 }

@@ -322,6 +322,45 @@ bool Isds::Event::isNull(void) const
 	return d == Q_NULLPTR;
 }
 
+/*!
+ * @brief Converts description to event.
+ *
+ * @note Libisds does not know all events listed in the documentation.
+ */
+static
+enum Isds::Type::Event descr2event(const QString &d)
+{
+	typedef QPair<QString, Isds::Type::Event> EventPair;
+
+	static const QList<EventPair> pairs({
+	    {"EV0:", Isds::Type::EV_ENTERED},
+	    {"EV5:", Isds::Type::EV_DELIVERED},
+	    {"EV1:", Isds::Type::EV_ACCEPTED_LOGIN},
+	    {"EV11:", Isds::Type::EV_PRIMARY_LOGIN},
+	    {"EV12:", Isds::Type::EV_ENTRUSTED_LOGIN},
+	    {"EV13:", Isds::Type::EV_SYSCERT_LOGIN},
+	    {"EV2:", Isds::Type::EV_ACCEPTED_FICTION},
+	    {"EV3:", Isds::Type::EV_UNDELIVERABLE},
+	    {"EV4:", Isds::Type::EV_ACCEPTED_BY_RECIPIENT},
+	    {"EV8:", Isds::Type::EV_UNDELIVERED_AV_CHECK}
+	});
+
+	fprintf(stdout, "AAA '%s'\n", d.toUtf8().constData());
+
+	foreach (const EventPair &pair, pairs) {
+		if (d.startsWith(pair.first)) {
+			return pair.second;
+		}
+	}
+
+	return Isds::Type::EV_UNKNOWN;
+}
+
+void Isds::Event::setFromText(const QString &t)
+{
+	Q_UNUSED(t); /* TODO */
+}
+
 const QDateTime &Isds::Event::time(void) const
 {
 	Q_D(const Event);
@@ -358,6 +397,13 @@ enum Isds::Type::Event Isds::Event::type(void) const
 	return d->m_type;
 }
 
+void Isds::Event::setType(enum Type::Event et)
+{
+	ensureEventPrivate();
+	Q_D(Event);
+	d->m_type = et;
+}
+
 const QString &Isds::Event::descr(void) const
 {
 	Q_D(const Event);
@@ -368,44 +414,11 @@ const QString &Isds::Event::descr(void) const
 	return d->m_descr;
 }
 
-/*!
- * @brief Converts description to event.
- *
- * #note Libisds does not know all events listed in the documentation.
- */
-static
-enum Isds::Type::Event descr2event(const QString &d)
-{
-	typedef QPair<QString, Isds::Type::Event> EventPair;
-
-	static const QList<EventPair> pairs({
-	    {"EV0:", Isds::Type::EV_ENTERED},
-	    {"EV5:", Isds::Type::EV_DELIVERED},
-	    {"EV1:", Isds::Type::EV_ACCEPTED_LOGIN},
-	    {"EV11:", Isds::Type::EV_PRIMARY_LOGIN},
-	    {"EV12:", Isds::Type::EV_ENTRUSTED_LOGIN},
-	    {"EV13:", Isds::Type::EV_SYSCERT_LOGIN},
-	    {"EV2:", Isds::Type::EV_ACCEPTED_FICTION},
-	    {"EV3:", Isds::Type::EV_UNDELIVERABLE},
-	    {"EV4:", Isds::Type::EV_ACCEPTED_BY_RECIPIENT},
-	    {"EV8:", Isds::Type::EV_UNDELIVERED_AV_CHECK}
-	});
-
-	foreach (const EventPair &pair, pairs) {
-		if (d.startsWith(pair.first)) {
-			return pair.second;
-		}
-	}
-
-	return Isds::Type::EV_UNKNOWN;
-}
-
 void Isds::Event::setDescr(const QString &descr)
 {
 	ensureEventPrivate();
 	Q_D(Event);
 	d->m_descr = descr;
-	d->m_type = descr2event(d->m_descr);
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
@@ -414,7 +427,6 @@ void Isds::Event::setDescr(QString &&descr)
 	ensureEventPrivate();
 	Q_D(Event);
 	d->m_descr = descr;
-	d->m_type = descr2event(d->m_descr);
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
