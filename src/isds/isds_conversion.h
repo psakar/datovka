@@ -95,6 +95,15 @@ public:
 	QString dmTypeToText(const QString &val);
 
 	/*!
+	 * @brief Convert event type to string.
+	 *
+	 * @param[in] val Event type value as used by libisds.
+	 * @return Event string (not the description).
+	 */
+	static
+	const QString &eventTypeToStr(int val);
+
+	/*!
 	 * @brief Return hash algorithm string identifier.
 	 *
 	 * @param[in] val Hash algorithm value as used by libisds.

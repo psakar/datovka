@@ -2398,7 +2398,8 @@ bool MessageDb::insertOrUpdateMessageHash(qint64 dmId,
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":value", hash.value().toBase64());
-	query.bindValue(":algorithm", IsdsConversion::hashAlgToStr(hash.algorithm()));
+	query.bindValue(":algorithm",
+	    IsdsConversion::hashAlgToStr(hash.algorithm()));
 	if (-1 != hashId) {
 		query.bindValue(":hashId", hashId);
 	}
@@ -2452,9 +2453,12 @@ bool MessageDb::insertOrUpdateMessageEvent(qint64 dmId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":dmEventTime", qDateTimeToDbFormat(event.time()));
-	query.bindValue(":dmEventDescr", event.descr());
+	query.bindValue(":dmEventDescr",
+	    IsdsConversion::eventTypeToStr(event.type()) + QLatin1String(": ")
+	    + event.descr());
 	if (-1 != eventId) {
 		query.bindValue(":eventId", eventId);
 	}
