@@ -2456,9 +2456,8 @@ bool MessageDb::insertOrUpdateMessageEvent(qint64 dmId,
 
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":dmEventTime", qDateTimeToDbFormat(event.time()));
-	query.bindValue(":dmEventDescr",
-	    IsdsConversion::eventTypeToStr(event.type()) + QLatin1String(": ")
-	    + event.descr());
+	query.bindValue(":dmEventDescr", Isds::Event::type2string(event.type())
+	    + QLatin1String(": ") + event.descr());
 	if (-1 != eventId) {
 		query.bindValue(":eventId", eventId);
 	}
