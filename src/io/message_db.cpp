@@ -442,9 +442,9 @@ fail:
 	return QList<SntEntry>();
 }
 
-MessageDb::PartialEnvelopeData MessageDb::getMessageReplyData(qint64 dmId) const
+const Isds::Envelope MessageDb::getMessageReplyData(qint64 dmId) const
 {
-	PartialEnvelopeData envData;
+	Isds::Envelope envData;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT dbIDSender, dmSender, dmSenderAddress, "
 	    "dmSenderType, dbIDRecipient, dmRecipient, dmRecipientAddress, "
@@ -463,27 +463,30 @@ MessageDb::PartialEnvelopeData MessageDb::getMessageReplyData(qint64 dmId) const
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		envData.dbIDSender = query.value(0).toString();
-		envData.dmSender = query.value(1).toString();
-		envData.dmSenderAddress = query.value(2).toString();
-		envData.dmSenderType = query.value(3).toString();
-		envData.dbIDRecipient = query.value(4).toString();
-		envData.dmRecipient = query.value(5).toString();
-		envData.dmRecipientAddress = query.value(6).toString();
-		envData.dmAnnotation = query.value(7).toString();
-		envData.dmSenderRefNumber = query.value(8).toString();
-		envData.dmSenderIdent = query.value(9).toString();
-		envData.dmRecipientRefNumber = query.value(10).toString();
-		envData.dmRecipientIdent = query.value(11).toString();
-		envData.dmToHands = query.value(12).toString();
-		envData.dmPersonalDelivery = query.value(13).toBool();
-		envData.dmAllowSubstDelivery = query.value(14).toBool();
-		envData.dmLegalTitleLaw = query.value(15).toString();
-		envData.dmLegalTitleYear = query.value(16).toString();
-		envData.dmLegalTitleSect = query.value(17).toString();
-		envData.dmLegalTitlePar = query.value(18).toString();
-		envData.dmLegalTitlePoint = query.value(19).toString();
-		envData.dmType = query.value(20).toString();
+		envData.setDbIDSender(query.value(0).toString());
+		envData.setDmSender(query.value(1).toString());
+		envData.setDmSenderAddress(query.value(2).toString());
+		envData.setDmSenderType(
+		    (Isds::Type::DbType) query.value(3).toInt());
+		envData.setDbIDRecipient(query.value(4).toString());
+		envData.setDmRecipient(query.value(5).toString());
+		envData.setDmRecipientAddress(query.value(6).toString());
+		envData.setDmAnnotation(query.value(7).toString());
+		envData.setDmSenderRefNumber(query.value(8).toString());
+		envData.setDmSenderIdent(query.value(9).toString());
+		envData.setDmRecipientRefNumber(query.value(10).toString());
+		envData.setDmRecipientIdent(query.value(11).toString());
+		envData.setDmToHands(query.value(12).toString());
+		envData.setDmPersonalDelivery(query.value(13).toBool() ?
+		    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
+		envData.setDmAllowSubstDelivery(query.value(14).toBool()
+		    ? Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
+		envData.setDmLegalTitleLawStr(query.value(15).toString());
+		envData.setDmLegalTitleYearStr(query.value(16).toString());
+		envData.setDmLegalTitleSect(query.value(17).toString());
+		envData.setDmLegalTitlePar(query.value(18).toString());
+		envData.setDmLegalTitlePoint(query.value(19).toString());
+		envData.setDmType(query.value(20).toChar());
 		return envData;
 	} else {
 		logErrorNL(
@@ -491,7 +494,7 @@ MessageDb::PartialEnvelopeData MessageDb::getMessageReplyData(qint64 dmId) const
 		    query.lastError().text().toUtf8().constData());
 	}
 fail:
-	return PartialEnvelopeData();
+	return Isds::Envelope();
 }
 
 int MessageDb::getMessageType(qint64 dmId) const

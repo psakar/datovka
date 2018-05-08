@@ -283,31 +283,6 @@ public:
 		}
 	};
 
-	class PartialEnvelopeData {
-	public:
-		QString dbIDSender;
-		QString dmSender;
-		QString dmSenderAddress;
-		QString dmSenderType;
-		QString dbIDRecipient;
-		QString dmRecipient;
-		QString dmRecipientAddress;
-		QString dmAnnotation;
-		QString dmSenderRefNumber;
-		QString dmSenderIdent;
-		QString dmRecipientRefNumber;
-		QString dmRecipientIdent;
-		QString dmToHands;
-		bool dmPersonalDelivery;
-		bool dmAllowSubstDelivery;
-		QString dmLegalTitleLaw;
-		QString dmLegalTitleYear;
-		QString dmLegalTitleSect;
-		QString dmLegalTitlePar;
-		QString dmLegalTitlePoint;
-		QString dmType;
-	};
-
 	class ContactEntry {
 	public:
 		qint64 dmId; /*!< Message id. */
@@ -353,14 +328,12 @@ public:
 	explicit MessageDb(const QString &connectionName);
 
 	/*!
-	 * @brief Generate information for reply dialogue.
+	 * @brief Get message envelope info for reply/forward dialogue.
 	 *
 	 * @param[in] dmId  Message id.
-	 * @return Vector containing title, senderId, sender, senderAddress,
-	 *     mesageType, senderRefNumber.
-	 *     Returns empty vector in failure.
+	 * @return Message envelope structure. Returns empty structure if failure.
 	 */
-	PartialEnvelopeData getMessageReplyData(qint64 dmId) const;
+	const Isds::Envelope getMessageReplyData(qint64 dmId) const;
 
 	/*!
 	 * @brief Return message type (sent or received).

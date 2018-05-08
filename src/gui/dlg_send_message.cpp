@@ -777,10 +777,10 @@ void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 
 		/* If only a single message if forwarded. */
 		if (msgIds.size() == 1) {
-			MessageDb::PartialEnvelopeData envData(
+			Isds::Envelope envData(
 			    messageDb->getMessageReplyData(msgId.dmId));
 
-			m_ui->subjectLine->setText("Fwd: " + envData.dmAnnotation);
+			m_ui->subjectLine->setText("Fwd: " + envData.dmAnnotation());
 		}
 
 		QByteArray msgBase64(messageDb->getCompleteMessageBase64(msgId.dmId));
@@ -812,27 +812,27 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
-	MessageDb::PartialEnvelopeData envData =
+	const Isds::Envelope envData =
 	    messageDb->getMessageReplyData(msgId.dmId);
-	m_dmType = envData.dmType;
-	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
+	m_dmType = envData.dmType();
+	m_dmSenderRefNumber = envData.dmRecipientRefNumber();
 
-	m_ui->subjectLine->setText("Re: " + envData.dmAnnotation);
+	m_ui->subjectLine->setText("Re: " + envData.dmAnnotation());
 
-	if (!envData.dmSenderRefNumber.isEmpty()) {
-		m_ui->dmRecipientRefNumber->setText(envData.dmSenderRefNumber);
+	if (!envData.dmSenderRefNumber().isEmpty()) {
+		m_ui->dmRecipientRefNumber->setText(envData.dmSenderRefNumber());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmSenderIdent.isEmpty()) {
-		m_ui->dmRecipientIdent->setText(envData.dmSenderIdent);
+	if (!envData.dmSenderIdent().isEmpty()) {
+		m_ui->dmRecipientIdent->setText(envData.dmSenderIdent());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmRecipientRefNumber.isEmpty()) {
-		m_ui->dmSenderRefNumber->setText(envData.dmRecipientRefNumber);
+	if (!envData.dmRecipientRefNumber().isEmpty()) {
+		m_ui->dmSenderRefNumber->setText(envData.dmRecipientRefNumber());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmRecipientIdent.isEmpty()) {
-		m_ui->dmSenderIdent->setText(envData.dmRecipientIdent);
+	if (!envData.dmRecipientIdent().isEmpty()) {
+		m_ui->dmSenderIdent->setText(envData.dmRecipientIdent());
 		hideOptionalForm = false;
 	}
 
@@ -844,7 +844,7 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 
 	bool pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDSender);
+		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDSender());
 		m_ui->payReplyCheckBox->setEnabled(true);
 		m_ui->payReplyCheckBox->show();
 	} else {
@@ -867,8 +867,8 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 		pdz = true;
 	}
 
-	m_recipTableModel.appendData(envData.dbIDSender, -1, envData.dmSender,
-	    envData.dmSenderAddress, QString(), pdz);
+	m_recipTableModel.appendData(envData.dbIDSender(), -1, envData.dmSender(),
+	    envData.dmSenderAddress(), QString(), pdz);
 }
 
 void DlgSendMessage::fillContentFromTemplate(
@@ -889,56 +889,56 @@ void DlgSendMessage::fillContentFromTemplate(
 	    m_dbSet->accessMessageDb(msgId.deliveryTime, false);
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
-	MessageDb::PartialEnvelopeData envData =
+	const Isds::Envelope envData =
 	    messageDb->getMessageReplyData(msgId.dmId);
-	m_dmType = envData.dmType;
-	m_dmSenderRefNumber = envData.dmRecipientRefNumber;
+	m_dmType = envData.dmType();
+	m_dmSenderRefNumber = envData.dmRecipientRefNumber();
 
-	m_ui->subjectLine->setText(envData.dmAnnotation);
+	m_ui->subjectLine->setText(envData.dmAnnotation());
 
 	/* Fill in optional fields.  */
-	if (!envData.dmSenderRefNumber.isEmpty()) {
-		m_ui->dmSenderRefNumber->setText(envData.dmSenderRefNumber);
+	if (!envData.dmSenderRefNumber().isEmpty()) {
+		m_ui->dmSenderRefNumber->setText(envData.dmSenderRefNumber());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmSenderIdent.isEmpty()) {
-		m_ui->dmSenderIdent->setText(envData.dmSenderIdent);
+	if (!envData.dmSenderIdent().isEmpty()) {
+		m_ui->dmSenderIdent->setText(envData.dmSenderIdent());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmRecipientRefNumber.isEmpty()) {
-		m_ui->dmRecipientRefNumber->setText(envData.dmRecipientRefNumber);
+	if (!envData.dmRecipientRefNumber().isEmpty()) {
+		m_ui->dmRecipientRefNumber->setText(envData.dmRecipientRefNumber());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmRecipientIdent.isEmpty()) {
-		m_ui->dmRecipientIdent->setText(envData.dmRecipientIdent);
+	if (!envData.dmRecipientIdent().isEmpty()) {
+		m_ui->dmRecipientIdent->setText(envData.dmRecipientIdent());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmToHands.isEmpty()) {
-		m_ui->dmToHands->setText(envData.dmToHands);
+	if (!envData.dmToHands().isEmpty()) {
+		m_ui->dmToHands->setText(envData.dmToHands());
 		hideOptionalForm = false;
 	}
 	/* set check boxes */
-	m_ui->dmPersonalDelivery->setChecked(envData.dmPersonalDelivery);
-	m_ui->dmAllowSubstDelivery->setChecked(envData.dmAllowSubstDelivery);
+	m_ui->dmPersonalDelivery->setChecked(envData.dmPersonalDelivery());
+	m_ui->dmAllowSubstDelivery->setChecked(envData.dmAllowSubstDelivery());
 	/* fill optional LegalTitle - Law, year, ... */
-	if (!envData.dmLegalTitleLaw.isEmpty()) {
-		m_ui->dmLegalTitleLaw->setText(envData.dmLegalTitleLaw);
+	if (!envData.dmLegalTitleLawStr().isEmpty()) {
+		m_ui->dmLegalTitleLaw->setText(envData.dmLegalTitleLawStr());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmLegalTitleYear.isEmpty()) {
-		m_ui->dmLegalTitleYear->setText(envData.dmLegalTitleYear);
+	if (!envData.dmLegalTitleYearStr().isEmpty()) {
+		m_ui->dmLegalTitleYear->setText(envData.dmLegalTitleYearStr());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmLegalTitleSect.isEmpty()) {
-		m_ui->dmLegalTitleSect->setText(envData.dmLegalTitleSect);
+	if (!envData.dmLegalTitleSect().isEmpty()) {
+		m_ui->dmLegalTitleSect->setText(envData.dmLegalTitleSect());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmLegalTitlePar.isEmpty()) {
-		m_ui->dmLegalTitlePar->setText(envData.dmLegalTitlePar);
+	if (!envData.dmLegalTitlePar().isEmpty()) {
+		m_ui->dmLegalTitlePar->setText(envData.dmLegalTitlePar());
 		hideOptionalForm = false;
 	}
-	if (!envData.dmLegalTitlePoint.isEmpty()) {
-		m_ui->dmLegalTitlePoint->setText(envData.dmLegalTitlePoint);
+	if (!envData.dmLegalTitlePoint().isEmpty()) {
+		m_ui->dmLegalTitlePoint->setText(envData.dmLegalTitlePoint());
 		hideOptionalForm = false;
 	}
 
@@ -947,7 +947,7 @@ void DlgSendMessage::fillContentFromTemplate(
 
 	bool pdz;
 	if (!m_dbEffectiveOVM) {
-		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDRecipient);
+		pdz = !queryISDSBoxEOVM(m_userName, envData.dbIDRecipient());
 		m_ui->payReplyCheckBox->setEnabled(true);
 		m_ui->payReplyCheckBox->show();
 	} else {
@@ -957,10 +957,10 @@ void DlgSendMessage::fillContentFromTemplate(
 	}
 
 	/* message is received -> recipient == sender */
-	if (m_boxId != envData.dbIDRecipient) {
-		m_recipTableModel.appendData(envData.dbIDRecipient, -1,
-		    envData.dmRecipient, envData.dmRecipientAddress, QString(),
-		    pdz);
+	if (m_boxId != envData.dbIDRecipient()) {
+		m_recipTableModel.appendData(envData.dbIDRecipient(), -1,
+		    envData.dmRecipient(), envData.dmRecipientAddress(),
+		    QString(), pdz);
 	}
 
 	/* fill attachments from template message */
