@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,14 +21,12 @@
  * the two.
  */
 
-#ifndef _TASK_H_
-#define _TASK_H_
+#pragma once
 
 #include <QRunnable>
 #include <QString>
 
 #include "src/common.h" // qdatovka_error, enum MessageDirection
-#include "src/io/message_db.h" // MessageDb::MsgId
 #include "src/io/message_db_set.h"
 
 /*!
@@ -53,7 +51,7 @@
 
 /*!
  * @brief This class contains generic functions that can be used in derived
- *     classes.
+ *        classes.
  */
 class Task : public QRunnable {
 public:
@@ -65,9 +63,6 @@ public:
 		/*!
 		 * @brief Constructors.
 		 */
-//		AccountDescr(void)
-//		    : userName(), messageDbSet(0)
-//		{ }
 		AccountDescr(const QString &uN, class MessageDbSet *mDS)
 		    : userName(uN), messageDbSet(mDS)
 		{ }
@@ -95,12 +90,11 @@ public:
 protected:
 
 	/*!
-	 * @brief Store message delivery information into database.
+	 * @brief Store message delivery info into database.
 	 *
-	 * @param[in]     signedMsg Whether to store signed message;
-	 *                          must be true.
-	 * @param[in,out] dbSet   Database container.
-	 * @param[in]     message Message structure.
+	 * @param[in] signedMsg Whether to store signed message must be true.
+	 * @param[in,out] dbSet Database container.
+	 * @param[in] message Message structure.
 	 * @return Error state.
 	 */
 	static
@@ -110,9 +104,9 @@ protected:
 	/*!
 	 * @brief Store message envelope into database.
 	 *
-	 * @param[in]     msgDirect Received or sent message.
-	 * @param[in,out] dbSet     Database container.
-	 * @param[in]     envel     Message envelope structure.
+	 * @param[in] msgDirect Received or sent message.
+	 * @param[in,out] dbSet Database container.
+	 * @param[in] envelope  Message envelope structure.
 	 * @return Error state.
 	 */
 	static
@@ -120,11 +114,11 @@ protected:
 	    MessageDbSet &dbSet, const Isds::Envelope &envelope);
 
 	/*!
-	 * @brief Update message envelope in databse.
+	 * @brief Update message envelope in database.
 	 *
-	 * @param[in]     msgDirect Received or sent message.
-	 * @param[in,out] messageDb Database.
-	 * @param[in]     envel     Message envelope structure.
+	 * @param[in] msgDirect Received or sent message.
+	 * @param[in,out] messageDb Database container.
+	 * @param[in] envelope Message envelope structure.
 	 * @return True on success.
 	 */
 	static
@@ -132,26 +126,13 @@ protected:
 	    MessageDb &messageDb, const Isds::Envelope &envelope);
 
 	/*!
-	 * @brief Store envelope into database.
+	 * @brief Store complete message into database.
 	 *
-	 * @param[in]     msgDirect Received or sent message.
-	 * @param[in,out] dbSet     Database container.
-	 * @param[in]     envel     Message envelope.
-	 * @return Error state.
-	 */
-	static
-	qdatovka_error storeEnvelope(enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const struct isds_envelope *envel);
-
-	/*!
-	 * @brief Store message into database.
-	 *
-	 * @param[in]     signedMsg Whether to store signed message;
-	 *                          must be true.
-	 * @param[in]     msgDirect Received or sent message.
-	 * @param[in,out] dbSet     Database container.
-	 * @param[in]     message   Message structure.
-	 * @param[in]     progressLabel Progress-bar label.
+	 * @param[in] signedMsg Whether to store signed message must be true.
+	 * @param[in] msgDirect Received or sent message.
+	 * @param[in,out] dbSet Database container.
+	 * @param[in] message   Message structure.
+	 * @param[in] progressLabel Progress-bar label.
 	 * @return Error state.
 	 */
 	static
@@ -170,13 +151,4 @@ protected:
 	static
 	qdatovka_error storeAttachments(MessageDb &messageDb, qint64 dmId,
 	    const QList<Isds::Document> &documents);
-
-private:
-//	/*!
-//	 * Disable copy and assignment.
-//	 */
-//	Task(const Task &);
-//	Task &operator=(const Task &);
 };
-
-#endif /* _TASK_H_ */

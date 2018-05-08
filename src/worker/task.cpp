@@ -24,7 +24,6 @@
 #include <cinttypes>
 
 #include "src/crypto/crypto_funcs.h"
-#include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
@@ -39,7 +38,7 @@ qdatovka_error Task::storeDeliveryInfo(bool signedMsg, MessageDbSet &dbSet,
 	QDateTime deliveryTime = message.envelope().dmDeliveryTime();
 	Q_ASSERT(deliveryTime.isValid());
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
-	Q_ASSERT(0 != messageDb);
+	Q_ASSERT(Q_NULLPTR != messageDb);
 
 	/* get signed raw data from message */
 	if (signedMsg) {
@@ -69,9 +68,8 @@ qdatovka_error Task::storeMessageEnvelope(enum MessageDirection msgDirect,
 
 	qint64 dmId = envelope.dmId();
 	QDateTime deliveryTime = envelope.dmDeliveryTime();
-	Q_ASSERT(deliveryTime.isValid());
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
-	Q_ASSERT(0 != messageDb);
+	Q_ASSERT(Q_NULLPTR != messageDb);
 
 	if (messageDb->insertMessageEnvelope(envelope, "tRecord", msgDirect)) {
 		logDebugLv0NL("Stored envelope of message '%" PRId64 "' into database.",
@@ -112,7 +110,7 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 	QDateTime deliveryTime = message.envelope().dmDeliveryTime();
 	Q_ASSERT(deliveryTime.isValid());
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
-	Q_ASSERT(0 != messageDb);
+	Q_ASSERT(Q_NULLPTR != messageDb);
 
 	/*
 	 * If there is no raw message then all the attachments have been
@@ -124,7 +122,8 @@ qdatovka_error Task::storeMessage(bool signedMsg,
 
 	/* Get signed raw data from message and store to db. */
 	if (signedMsg) {
-		if (messageDb->insertOrReplaceCompleteMessageRaw(dmID, message.raw(), 0)) {
+		if (messageDb->insertOrReplaceCompleteMessageRaw(dmID,
+		    message.raw(), 0)) {
 			logDebugLv0NL(
 			    "Raw data of message '%" PRId64 "' were updated.",
 			    dmID);
