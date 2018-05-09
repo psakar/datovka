@@ -1599,68 +1599,6 @@ fail:
 	return QList<AttachmentEntry>();
 }
 
-bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
-    const QString &dbIDSender, const QString &dmSender,
-    const QString &dbIDRecipient, const QString &dmRecipient,
-    const QString &dmRecipientAddress, const QString &dmAnnotation)
-{
-	QSqlQuery query(m_db);
-
-	QString queryStr = "INSERT INTO messages ("
-	    "dmID, dbIDSender, dmSender, "
-	    "dmRecipient, dbIDRecipient, dmRecipientAddress, dmAnnotation, "
-	    "dmPersonalDelivery, dmMessageStatus "
-	    ") VALUES (:dmId, :dbIDSender, :dmSender, "
-	    ":dmRecipient, :dbIDRecipient, :dmRecipientAddress, :dmAnnotation, "
-	    ":dmPersonalDelivery, :dmMessageStatus)";
-
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-
-	query.bindValue(":dmId", dmId);
-	query.bindValue(":dbIDSender", dbIDSender);
-	query.bindValue(":dmSender", dmSender);
-	query.bindValue(":dmRecipient", dmRecipient);
-	query.bindValue(":dmRecipientAddress", dmRecipientAddress);
-	query.bindValue(":dbIDRecipient", dbIDRecipient);
-	query.bindValue(":dmAnnotation", dmAnnotation);
-	query.bindValue(":dmPersonalDelivery", 0);
-	query.bindValue(":dmMessageStatus", 1);
-
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-
-	queryStr = "INSERT INTO supplementary_message_data ("
-	    "message_id, message_type, read_locally, download_date, "
-	    "custom_data) VALUES (:dmId, :message_type, :read_locally, "
-	    ":download_date, :custom_data)";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-	query.bindValue(":dmId", dmId);
-	query.bindValue(":message_type", TYPE_SENT);
-	query.bindValue(":read_locally", true);
-	query.bindValue(":download_date",
-	    qDateTimeToDbFormat(QDateTime::currentDateTime()));
-	query.bindValue(":custom_data", "null");
-
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-
-	return setMessageProcessState(dmId, UNSETTLED);
-}
-
 bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
     const QString &_origin, enum MessageDirection msgDirect)
 {
@@ -1748,10 +1686,11 @@ bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmId", envelope.dmId());
 	if (MSG_RECEIVED == msgDirect) {
 		query.bindValue(":message_type", TYPE_RECEIVED);
+		query.bindValue(":read_locally", false);
 	} else {
 		query.bindValue(":message_type", TYPE_SENT);
+		query.bindValue(":read_locally", true);
 	}
-	query.bindValue(":read_locally", false);
 	query.bindValue(":download_date",
 	    qDateTimeToDbFormat(QDateTime::currentDateTime()));
 	query.bindValue(":custom_data", "null");

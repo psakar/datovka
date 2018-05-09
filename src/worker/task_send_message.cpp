@@ -155,23 +155,10 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 70);
 
+	/* Store sent message to database */
 	{
-		/*
-		 * Some values have to be retrieved from libisds structure
-		 * after the message has been sent.
-		 */
-		{
-			bool ok = false;
-			dmId = QString(isdsMessage->envelope->dmID).toLongLong(&ok);
-			if (!ok) {
-				Q_ASSERT(0);
-				dmId = -1;
-			}
-		}
-
 		QDateTime deliveryTime(
 		    timevalToDateTime(isdsMessage->envelope->dmDeliveryTime));
-
 		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime,
 		    true);
 		if (Q_NULLPTR == messageDb) {
@@ -180,15 +167,27 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 			goto fail;
 		}
 
-		const QString acntDbKey(AccountDb::keyFromLogin(userName));
-		const QString dbId(GlobInstcs::accntDbPtr->dbId(acntDbKey));
-		const QString senderName(
-		    GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
+		/* Get sent message ID */
+		dmId = QString(isdsMessage->envelope->dmID).toLongLong(&ok);
+		if (!ok) {
+			Q_ASSERT(0);
+			ret = SM_DB_INS_ERR;
+			goto fail;
+		}
 
-		if (!messageDb->msgsInsertNewlySentMessageEnvelope(dmId, dbId,
-		        senderName, message.envelope().dbIDRecipient(),
-		        recipientName, recipientAddress,
-		        message.envelope().dmAnnotation())) {
+		const QString acntDbKey(AccountDb::keyFromLogin(userName));
+
+		/* Insert message envelope into database */
+		Isds::Envelope envelope = message.envelope();
+		envelope.setDmId(dmId);
+		envelope.setDbIDSender(GlobInstcs::accntDbPtr->dbId(acntDbKey));
+		envelope.setDmSender(GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
+		envelope.setDmRecipient(recipientName);
+		envelope.setDmRecipientAddress(recipientAddress);
+		envelope.setDmMessageStatus(Isds::Type::MS_POSTED);
+
+		if (!messageDb->insertMessageEnvelope(envelope,
+		    QString(), MessageDirection::MSG_SENT)) {
 			logErrorNL(
 			    "Cannot insert newly sent message '%" PRId64 "' into database.",
 			    dmId);
@@ -199,6 +198,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		emit GlobInstcs::msgProcEmitterPtr->progressChange(
 		    progressLabel, 80);
 
+		/* Insert message attachments into database */
 		Task::storeAttachments(*messageDb, dmId, message.documents());
 
 		emit GlobInstcs::msgProcEmitterPtr->progressChange(

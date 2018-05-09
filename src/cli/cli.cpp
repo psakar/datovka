@@ -1054,10 +1054,6 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 			    QString(sent_message->envelope->dmID).toLongLong();
 			const QString acntDbKey(AccountDb::keyFromLogin(
 			    map["username"].toString()));
-			const QString dbIDSender(
-			    GlobInstcs::accntDbPtr->dbId(acntDbKey));
-			const QString dmSender(
-			    GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
 			QDateTime deliveryTime = timevalToDateTime(
 			    sent_message->envelope->dmDeliveryTime);
 			MessageDb *messageDb =
@@ -1069,10 +1065,19 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 				    + map["username"].toString();
 				qDebug() << CLI_PREFIX << errmsg;
 			} else {
-				messageDb->msgsInsertNewlySentMessageEnvelope(
-				    dmId, dbIDSender, dmSender, recipientId,
-				    "Databox ID: " + recipientId, "unknown",
-				    map["dmAnnotation"].toString());
+				bool ok = false;
+				Isds::Envelope envelope =
+				    Isds::libisds2envelope(sent_message->envelope, &ok);
+				envelope.setDmId(dmId);
+				envelope.setDbIDSender(GlobInstcs::accntDbPtr->dbId(acntDbKey));
+				envelope.setDmSender(GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
+				envelope.setDbIDRecipient(recipientId);
+				envelope.setDmRecipient("Databox ID: " + recipientId);
+				envelope.setDmRecipientAddress("unknown");
+				envelope.setDmAnnotation(map["dmAnnotation"].toString());
+				envelope.setDmMessageStatus(Isds::Type::MS_POSTED);
+				messageDb->insertMessageEnvelope(envelope,
+				     QString(), MessageDirection::MSG_SENT);
 			}
 			qDebug() << CLI_PREFIX << "message has been sent"
 			    << QString(sent_message->envelope->dmID);

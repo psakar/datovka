@@ -406,16 +406,6 @@ public:
 	QList<AttachmentEntry> attachEntries(qint64 msgId) const;
 
 	/*!
-	 * @brief Insert newly sent message into messages table.
-	 *
-	 * @return True on success.
-	 */
-	bool msgsInsertNewlySentMessageEnvelope(qint64 dmId,
-	    const QString &dbIDSender, const QString &dmSender,
-	    const QString &dbIDRecipient, const QString &dmRecipient,
-	    const QString &dmRecipientAddress, const QString &dmAnnotation);
-
-	/*!
 	 * @brief Insert message envelope into database.
 	 *
 	 * @param[in] envelope Message envelope structure.
