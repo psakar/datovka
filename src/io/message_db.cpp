@@ -2965,9 +2965,11 @@ fail:
 	return false;
 }
 
-MessageDb::MessageHash MessageDb::getMessageHash(qint64 dmId) const
+const Isds::Hash MessageDb::getMessageHash(qint64 dmId) const
 {
 	QSqlQuery query(m_db);
+	Isds::Hash hash;
+
 	QString queryStr = "SELECT value, _algorithm FROM hashes WHERE "
 	    "message_id = :dmId";
 
@@ -2980,15 +2982,19 @@ MessageDb::MessageHash MessageDb::getMessageHash(qint64 dmId) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
-			return MessageHash(query.value(0).toByteArray(),
-			    query.value(1).toString());
+			hash.setValue(QByteArray::fromBase64(
+			    query.value(0).toByteArray()));
+			hash.setAlgorithm((Isds::Type::HashAlg)
+			    IsdsConversion::hashAlgStrToInt(
+			    query.value(1).toString()));
+			return hash;
 		}
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 	}
 fail:
-	return MessageHash();
+	return Isds::Hash();
 }
 
 bool MessageDb::msgsDeleteMessageData(qint64 dmId) const

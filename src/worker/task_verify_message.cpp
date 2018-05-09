@@ -87,59 +87,18 @@ void TaskVerifyMessage::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-/*!
- * @brief Returns hash of local message.
- *
- * @param[in] messageDb Message database.
- * @param[in] dmId      Message identifier.
- * @return Pointer to hash structure or NULL on error.
- */
-static
-struct isds_hash *localMessageHash(MessageDb *messageDb, qint64 dmId)
-{
-	Q_ASSERT(0 != messageDb);
-
-	struct isds_hash *hashLocal = NULL;
-	hashLocal = (struct isds_hash *) malloc(sizeof(struct isds_hash));
-	if (NULL == hashLocal) {
-		return NULL;
-	}
-	memset(hashLocal, 0, sizeof(struct isds_hash));
-
-	MessageDb::MessageHash hashLocaldata(
-	    messageDb->getMessageHash(dmId));
-
-	if (!hashLocaldata.isValid()) {
-		isds_hash_free(&hashLocal);
-		return NULL;
-	}
-
-	QByteArray rawHash = QByteArray::fromBase64(hashLocaldata.valueBase64);
-	hashLocal->length = (size_t) rawHash.size();
-	hashLocal->algorithm = (isds_hash_algorithm) IsdsConversion::hashAlgStrToInt(
-	    hashLocaldata.alg);
-	hashLocal->value = malloc(hashLocal->length);
-	if (NULL == hashLocal->value) {
-		isds_hash_free(&hashLocal);
-		return NULL;
-	}
-	memcpy(hashLocal->value, rawHash.data(), hashLocal->length);
-
-	return hashLocal;
-}
-
 enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
     const QString &userName, MessageDbSet *dbSet, const MessageDb::MsgId &msgId,
     QString &error, QString &longError)
 {
 	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(0 != dbSet);
+	Q_ASSERT(Q_NULLPTR != dbSet);
 	Q_ASSERT(msgId.dmId >= 0);
 	Q_ASSERT(msgId.deliveryTime.isValid());
 
 	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
 	    false);
-	if (0 == messageDb) {
+	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
 		return VERIFY_ERR;
 	}
@@ -150,6 +109,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 		return VERIFY_ERR;
 	}
 
+	/* Get message hash from isds */
 	struct isds_hash *hashIsds = NULL;
 	isds_error status = isds_download_message_hash(session,
 	    QString::number(msgId.dmId).toUtf8().constData(), &hashIsds);
@@ -161,11 +121,11 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 		isds_hash_free(&hashIsds);
 		return VERIFY_ISDS_ERR;
 	}
-
 	Q_ASSERT(NULL != hashIsds);
 
-	struct isds_hash *hashLocal = localMessageHash(messageDb, msgId.dmId);
-	if (NULL == hashLocal) {
+	/* Get message hash from local database */
+	const Isds::Hash hashDb = messageDb->getMessageHash(msgId.dmId);
+	if (hashDb.isNull()) {
 		logErrorNL(
 		    "Error obtaining hash of message '%" PRId64 "' from local database.",
 		    msgId.dmId);
@@ -173,6 +133,16 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 		return VERIFY_SQL_ERR;
 	}
 
+	bool ok = false;
+	struct isds_hash *hashLocal = Isds::hash2libisds(hashDb, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert hash to libisds hash.");
+		isds_hash_free(&hashIsds);
+		isds_hash_free(&hashLocal);
+		return VERIFY_SQL_ERR;
+	}
+
+	/* Compare both hashes */
 	status = isds_hash_cmp(hashIsds, hashLocal);
 
 	isds_hash_free(&hashIsds);

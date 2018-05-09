@@ -301,25 +301,6 @@ public:
 		QString dmSender;
 	};
 
-	class MessageHash {
-	public:
-		QByteArray valueBase64; /*!< Base-64 encoded hash value. */
-		QString alg; /*!< Algorithm identifier. */
-
-		MessageHash(void)
-		    : valueBase64(), alg()
-		{ }
-
-		MessageHash(const QByteArray &b64, const QString &a)
-		    : valueBase64(b64), alg(a)
-		{ }
-
-		bool isValid(void)
-		{
-			return (!valueBase64.isEmpty()) && (!alg.isEmpty());
-		}
-	};
-
 	/*!
 	 * @brief Constructor.
 	 *
@@ -595,12 +576,12 @@ public:
 	    const QString &senderName);
 
 	/*!
-	 * @brief Return hash of message from db.
+	 * @brief Return hash data of message from db.
 	 *
 	 * @param[in] dmId  Message identifier.
 	 * @return Message hash structure.
 	 */
-	MessageHash getMessageHash(qint64 dmId) const;
+	const Isds::Hash getMessageHash(qint64 dmId) const;
 
 	/*!
 	 * @brief Delete all message records from db.
