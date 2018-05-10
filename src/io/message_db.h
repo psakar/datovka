@@ -230,31 +230,6 @@ public:
 	};
 
 	/*!
-	 * @brief File entry data.
-	 */
-	class FileData {
-	public:
-		QString dmFileDescr; /*!< File name. */
-		QByteArray dmEncodedContent; /*!< Base64-encoded file content. */
-
-		FileData(void)
-		    : dmFileDescr(), dmEncodedContent()
-		{ }
-		FileData(const QString &fileDescr,
-		    const QByteArray &encodedContent)
-		    :  dmFileDescr(fileDescr), dmEncodedContent(encodedContent)
-		{ }
-		~FileData(void)
-		{ }
-
-		bool isValid(void) const
-		{
-			return (!dmFileDescr.isEmpty()) &&
-			    (!dmEncodedContent.isEmpty());
-		}
-	};
-
-	/*!
 	 * @brief Attachment data used to fill attachment model.
 	 */
 	class AttachmentEntry {
@@ -390,12 +365,12 @@ public:
 	QString deliveryInfoHtmlToPdf(qint64 dmId) const;
 
 	/*!
-	 * @brief Return fileList related to given message.
+	 * @brief Return attachments related to given message.
 	 *
 	 * @param[in] msgId  Message identifier.
-	 * @return List of files and their attributes.
+	 * @return List of attachment structure.
 	 */
-	QList<FileData> getMessageAttachments(qint64 msgId) const;
+	QList<Isds::Document> getMessageAttachments(qint64 msgId) const;
 
 	/*!
 	 * @brief Return list of attachment entries related to given message.

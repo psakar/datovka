@@ -1530,12 +1530,13 @@ fail:
 	return QString();
 }
 
-QList<MessageDb::FileData> MessageDb::getMessageAttachments(qint64 msgId) const
+QList<Isds::Document> MessageDb::getMessageAttachments(qint64 msgId) const
 {
 	QSqlQuery query(m_db);
-	QList<FileData> retList;
-	QString queryStr = "SELECT _dmFileDescr, dmEncodedContent FROM files "
-	    "WHERE message_id = :msgId";
+	QList<Isds::Document> documents;
+	QString queryStr = "SELECT _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
+	    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent "
+	    "FROM files WHERE message_id = :msgId";
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -1546,17 +1547,25 @@ QList<MessageDb::FileData> MessageDb::getMessageAttachments(qint64 msgId) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
-			retList.append(FileData(query.value(0).toString(),
-			    query.value(1).toByteArray()));
+			Isds::Document document;
+			document.setFileDescr(query.value(0).toString());
+			document.setUpFileGuid(query.value(1).toString());
+			document.setFileGuid(query.value(2).toString());
+			document.setMimeType(query.value(3).toString());
+			document.setFormat(query.value(4).toString());
+			document.setFileMetaType((Isds::Type::FileMetaType)
+			    query.value(5).toInt());
+			document.setBinaryContent(query.value(6).toByteArray());
+			documents.append(document);
 			query.next();
 		}
-		return retList;
+		return documents;
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 	}
 fail:
-	return QList<FileData>();
+	return QList<Isds::Document>();
 }
 
 QList<MessageDb::AttachmentEntry> MessageDb::attachEntries(qint64 msgId) const

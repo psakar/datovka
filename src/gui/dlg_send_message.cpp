@@ -964,12 +964,12 @@ void DlgSendMessage::fillContentFromTemplate(
 	}
 
 	/* fill attachments from template message */
-	QList<MessageDb::FileData> msgFileList =
+	QList<Isds::Document> msgFileList =
 	    messageDb->getMessageAttachments(msgId.dmId);
 
-	foreach (const MessageDb::FileData &fileData, msgFileList) {
-		m_attachModel.appendAttachmentEntry(fileData.dmEncodedContent,
-		    fileData.dmFileDescr);
+	foreach (const Isds::Document &file, msgFileList) {
+		m_attachModel.appendAttachmentEntry(file.binaryContent(),
+		    file.fileDescr());
 	}
 }
 

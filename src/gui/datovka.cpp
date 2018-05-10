@@ -6057,7 +6057,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 			return;
 		}
 
-		QList<MessageDb::FileData> attachList =
+		QList<Isds::Document> attachList =
 		    messageDb->getMessageAttachments(msgId.dmId);
 		if (attachList.isEmpty()) {
 
@@ -6083,12 +6083,12 @@ void MainWindow::sendAllAttachmentsEmail(void)
 			}
 		}
 
-		foreach (const MessageDb::FileData &attach, attachList) {
-			Q_ASSERT(!attach.dmFileDescr.isEmpty());
-			Q_ASSERT(!attach.dmEncodedContent.isEmpty());
+		foreach (const Isds::Document &attach, attachList) {
+			Q_ASSERT(!attach.fileDescr().isEmpty());
+			Q_ASSERT(!attach.binaryContent().isEmpty());
 
 			addAttachmentToEmailMessage(emailMessage,
-			    attach.dmFileDescr, attach.dmEncodedContent,
+			    attach.fileDescr(), attach.binaryContent(),
 			    boundary);
 		}
 	}

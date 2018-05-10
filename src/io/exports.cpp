@@ -250,7 +250,7 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 	    messageDb->msgsGetAdditionalFilenameEntry(msgId.dmId);
 
 	// get list of attachments
-	QList<MessageDb::FileData> attachList(
+	QList<Isds::Document> attachList(
 	    messageDb->getMessageAttachments(msgId.dmId));
 	if (attachList.isEmpty()) {
 		errStr = tr("Complete message \"%1\" missing!").arg(msgID);
@@ -258,8 +258,8 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 	}
 
 	// save attachments to target folder
-	foreach (const MessageDb::FileData &attach, attachList) {
-		QString attName(attach.dmFileDescr);
+	foreach (const Isds::Document &attach, attachList) {
+		QString attName(attach.fileDescr());
 		if (attName.isEmpty()) {
 			Q_ASSERT(0);
 			errStr = tr("Some files of message \"%1\" were not saved to disk!")
@@ -274,8 +274,7 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 
 		/* Don't create subdirectories. */
 
-		QByteArray data(
-		    QByteArray::fromBase64(attach.dmEncodedContent));
+		QByteArray data(QByteArray::fromBase64(attach.binaryContent()));
 
 		// save file to disk
 		if (WF_SUCCESS !=
@@ -335,7 +334,7 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 	}
 
 	// get list of attachments
-	QList<MessageDb::FileData> attachList(
+	QList<Isds::Document> attachList(
 	    messageDb->getMessageAttachments(msgId.dmId));
 	if (attachList.isEmpty()) {
 		errStr = tr("Complete message \"%1\" missing!").arg(msgID);
@@ -343,8 +342,8 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 	}
 
 	// save attachments to target folder
-	foreach (const MessageDb::FileData &attach, attachList) {
-		QString attName(attach.dmFileDescr);
+	foreach (const Isds::Document &attach, attachList) {
+		QString attName(attach.fileDescr());
 		if (attName.isEmpty()) {
 			Q_ASSERT(0);
 			errStr = tr("Some files of message \"%1\" were not saved to disk!")
@@ -360,8 +359,7 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 		/* Recursively create subdirectories. */
 		createDirStructureRecursive(attName);
 
-		QByteArray data(
-		    QByteArray::fromBase64(attach.dmEncodedContent));
+		QByteArray data(QByteArray::fromBase64(attach.binaryContent()));
 
 		// save file to disk
 		if (WF_SUCCESS !=
@@ -375,12 +373,12 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 		if (GlobInstcs::prefsPtr->deliveryInfoForEveryFile) {
 			if (GlobInstcs::prefsPtr->allAttachmentsSaveZfoDelinfo) {
 				exportAs(0, dbSet, Exports::ZFO_DELIV_ATTACH,
-				    targetPath, attach.dmFileDescr, userName,
+				    targetPath, attach.fileDescr(), userName,
 				    dbId, msgId, false, lastPath, errStr);
 			}
 			if (GlobInstcs::prefsPtr->allAttachmentsSavePdfDelinfo) {
 				exportAs(0, dbSet, Exports::PDF_DELIV_ATTACH,
-				    targetPath, attach.dmFileDescr, userName,
+				    targetPath, attach.fileDescr(), userName,
 				    dbId, msgId, false, lastPath, errStr);
 			}
 		}
