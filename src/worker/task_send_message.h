@@ -29,119 +29,8 @@
 #include <QString>
 
 #include "src/io/message_db_set.h"
+#include "src/isds/message_interface.h"
 #include "src/worker/task.h"
-
-/*!
- * @brief Ersatz structure for isds_envelope.
- */
-class IsdsEnvelope {
-public:
-	/*!
-	 * @brief Constructor.
-	 */
-	IsdsEnvelope(void)
-	    : dmID(),
-	    dbIDRecipient(),
-	    dmToHands(),
-	    dmAnnotation(),
-	    dmRecipientRefNumber(),
-	    dmSenderRefNumber(),
-	    dmRecipientIdent(),
-	    dmSenderIdent(),
-	    _using_dmLegalTitleLaw(false),
-	    dmLegalTitleLaw(0),
-	    _using_dmLegalTitleYear(false),
-	    dmLegalTitleYear(0),
-	    dmLegalTitleSect(),
-	    dmLegalTitlePar(),
-	    dmLegalTitlePoint(),
-	    dmPersonalDelivery(false),
-	    dmAllowSubstDelivery(false),
-	    dmType(),
-	    dmOVM(false),
-	    dmPublishOwnID(false)
-	{
-	}
-
-	/* The commented members are not used when sending a message. */
-
-	QString dmID;
-//    char *dbIDSender;
-//    char *dmSender;
-//    char *dmSenderAddress;
-//    long int *dmSenderType;
-//    char *dmRecipient;
-//    char *dmRecipientAddress;
-//    _Bool *dmAmbiguousRecipient;
-//    unsigned long int *dmOrdinal;
-//    isds_message_status *dmMessageStatus;
-//    long int *dmAttachmentSize;
-//    struct timeval *dmDeliveryTime;
-//    struct timeval *dmAcceptanceTime;
-//    struct isds_hash *hash;
-//    void *timestamp;
-//    size_t timestamp_length;
-//    struct isds_list *events;
-//    char *dmSenderOrgUnit;
-//    long int *dmSenderOrgUnitNum;
-	QString dbIDRecipient;
-//    char *dmRecipientOrgUnit;
-//    long int *dmRecipientOrgUnitNum;
-	QString dmToHands;
-	QString dmAnnotation;
-	QString dmRecipientRefNumber;
-	QString dmSenderRefNumber;
-	QString dmRecipientIdent;
-	QString dmSenderIdent;
-
-	bool _using_dmLegalTitleLaw;
-	long int dmLegalTitleLaw;
-	bool _using_dmLegalTitleYear;
-	long int dmLegalTitleYear;
-	QString dmLegalTitleSect;
-	QString dmLegalTitlePar;
-	QString dmLegalTitlePoint;
-	bool dmPersonalDelivery;
-	bool dmAllowSubstDelivery;
-	QString dmType;
-	bool dmOVM;
-	bool dmPublishOwnID;
-};
-
-/*!
- * @brief Ersatz structure for isds_document.
- */
-class IsdsDocument {
-public:
-	/*!
-	 * @brief Constructor.
-	 */
-	IsdsDocument(void)
-	    : isXml(false),
-	    data(),
-	    dmMimeType(),
-	    dmFileDescr()
-	{
-	}
-
-	bool isXml;
-	QByteArray data;
-	QString dmMimeType;
-	QString dmFileDescr;
-};
-
-/*!
- * @brief Ersatz structure for isds_message.
- */
-class IsdsMessage {
-	/*
-	 * Most of the content of the original structure is ignored as it
-	 * is not needed when composing and sending a message.
-	 */
-public:
-	IsdsEnvelope envelope; /*!< Message envelope. */
-	QList<IsdsDocument> documents; /*!< List of documents. */
-};
 
 /*!
  * @brief Task describing sending message.
@@ -193,7 +82,7 @@ public:
 	 */
 	explicit TaskSendMessage(const QString &userName,
 	    MessageDbSet *dbSet, const QString &transactId,
-	    const IsdsMessage &message,
+	    const Isds::Message &message,
 	    const QString &recipientName, const QString &recipientAddress,
 	    bool isPDZ);
 
@@ -227,14 +116,14 @@ private:
 	 */
 	static
 	enum Result sendMessage(const QString &userName, MessageDbSet &dbSet,
-	    struct isds_message *message, const QString &recipientName,
+	    const Isds::Message &message, const QString &recipientName,
 	    const QString &recipientAddress, bool isPDZ,
 	    const QString &progressLabel, ResultData *result);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	const QString m_transactId; /*!< Unique transaction identifier. */
-	const IsdsMessage m_message; /*!< Message to be sent. */
+	const Isds::Message m_message; /*!< Message to be sent. */
 	const QString m_recipientName; /*!< Message recipient name. */
 	const QString m_recipientAddress; /*!< Message recipient address. */
 	const bool m_isPDZ; /*!< True if message is a PDZ. */

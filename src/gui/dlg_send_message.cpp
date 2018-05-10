@@ -45,6 +45,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
@@ -1216,104 +1217,99 @@ bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,
 	return ret;
 }
 
-bool DlgSendMessage::buildEnvelope(IsdsEnvelope &envelope) const
+bool DlgSendMessage::buildEnvelope(Isds::Envelope &envelope) const
 {
-	QString dmType;
+	Isds::Type::DmType dmType = Isds::Type::MT_UNKNOWN;
 
 	/* Set mandatory fields of envelope. */
-	envelope.dmID.clear();
-	envelope.dmAnnotation = m_ui->subjectLine->text();
+	envelope.setDmAnnotation(m_ui->subjectLine->text());
 
 	/* Set optional fields. */
-	envelope.dmSenderIdent = m_ui->dmSenderIdent->text();
-	envelope.dmRecipientIdent = m_ui->dmRecipientIdent->text();
-	envelope.dmSenderRefNumber = m_ui->dmSenderRefNumber->text();
-	envelope.dmRecipientRefNumber = m_ui->dmRecipientRefNumber->text();
-	envelope._using_dmLegalTitleLaw =
-	    !m_ui->dmLegalTitleLaw->text().isEmpty();
-	if (envelope._using_dmLegalTitleLaw) {
-		envelope.dmLegalTitleLaw =
-		    m_ui->dmLegalTitleLaw->text().toLong();
+	envelope.setDmSenderIdent(m_ui->dmSenderIdent->text());
+	envelope.setDmRecipientIdent(m_ui->dmRecipientIdent->text());
+	envelope.setDmSenderRefNumber(m_ui->dmSenderRefNumber->text());
+	envelope.setDmRecipientRefNumber(m_ui->dmRecipientRefNumber->text());
+	if (!m_ui->dmLegalTitleLaw->text().isEmpty()) {
+		envelope.setDmLegalTitleLaw(m_ui->dmLegalTitleLaw->text().toLongLong());
 	}
-	envelope._using_dmLegalTitleYear =
-	    !m_ui->dmLegalTitleYear->text().isEmpty();
-	if (envelope._using_dmLegalTitleYear) {
-		envelope.dmLegalTitleYear =
-		    m_ui->dmLegalTitleYear->text().toLong();
+	if (!m_ui->dmLegalTitleYear->text().isEmpty()) {
+		envelope.setDmLegalTitleYear(m_ui->dmLegalTitleYear->text().toLongLong());
 	}
-	envelope.dmLegalTitleSect = m_ui->dmLegalTitleSect->text();
-	envelope.dmLegalTitlePar = m_ui->dmLegalTitlePar->text();
-	envelope.dmLegalTitlePoint = m_ui->dmLegalTitlePoint->text();
-	envelope.dmPersonalDelivery = m_ui->dmPersonalDelivery->isChecked();
+	envelope.setDmLegalTitleSect(m_ui->dmLegalTitleSect->text());
+	envelope.setDmLegalTitlePar(m_ui->dmLegalTitlePar->text());
+	envelope.setDmLegalTitlePoint(m_ui->dmLegalTitlePoint->text());
+	envelope.setDmPersonalDelivery(m_ui->dmPersonalDelivery->isChecked() ?
+	    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
 
 	/* Only OVM can change. */
 	if (IsdsConversion::boxTypeStrToInt(m_dbType) > DBTYPE_OVM_REQ) {
-		envelope.dmAllowSubstDelivery = true;
+		envelope.setDmAllowSubstDelivery(Isds::Type::BOOL_TRUE);
 	} else {
-		envelope.dmAllowSubstDelivery =
-		    m_ui->dmAllowSubstDelivery->isChecked();
+		envelope.setDmAllowSubstDelivery(
+		   m_ui->dmAllowSubstDelivery->isChecked() ?
+		   Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
 	}
 
 	if (m_dmType == QStringLiteral(DMTYPE_INIT)) {
 		if (m_ui->payRecipient->isChecked()) {
-			dmType = QStringLiteral(DMTYPE_RESP);
+			dmType = Isds::Type::MT_O;
 		} else {
-			dmType = QStringLiteral(DMTYPE_COMM);
+			dmType = Isds::Type::MT_K;
 		}
 		if (!m_dmSenderRefNumber.isEmpty()) {
-			envelope.dmRecipientRefNumber = m_dmSenderRefNumber;
+			envelope.setDmRecipientRefNumber(m_dmSenderRefNumber);
 		}
 	} else {
 		if (m_ui->payReplyCheckBox->isChecked()) {
-			dmType = QStringLiteral(DMTYPE_INIT);
+			dmType = Isds::Type::MT_I;
 		}
 	}
 
-	envelope.dmType = dmType;
-
-	envelope.dmOVM = m_dbEffectiveOVM;
-
-	envelope.dmPublishOwnID = m_ui->dmPublishOwnID->isChecked();
+	envelope.setDmType(Isds::Envelope::dmType2Char(dmType));
+	envelope.setDmOVM(m_dbEffectiveOVM ?
+	    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
+	envelope.setDmPublishOwnID((m_ui->dmPublishOwnID->isChecked()) ?
+	    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
 
 	return true;
 }
 
-bool DlgSendMessage::buildDocuments(QList<IsdsDocument> &documents) const
+bool DlgSendMessage::buildDocuments(QList<Isds::Document> &documents) const
 {
 	/* Load attachments. */
 	for (int row = 0; row < m_attachModel.rowCount(); ++row) {
-		IsdsDocument document;
+		Isds::Document document;
 		QModelIndex index;
-
-		document.isXml = false;
 
 		index = m_attachModel.index(row, DbFlsTblModel::FNAME_COL);
 		if (!index.isValid()) {
 			Q_ASSERT(0);
 			continue;
 		}
-		document.dmFileDescr = index.data().toString();
+		document.setFileDescr(index.data().toString());
 
 		/*
 		 * First document must have dmFileMetaType set to
 		 * FILEMETATYPE_MAIN. Remaining documents have
 		 * FILEMETATYPE_ENCLOSURE.
 		 */
+		document.setFileMetaType((row == 0) ?
+		    Isds::Type::FMT_MAIN : Isds::Type::FMT_ENCLOSURE);
 
 		/*
 		 * Since 2011 Mime Type can be empty and MIME type will
 		 * be filled up on the ISDS server. It allows sending files
 		 * with special mime types without recognition by application.
 		 */
-		document.dmMimeType = QStringLiteral("");
+		document.setMimeType(QStringLiteral(""));
 
 		index = m_attachModel.index(row, DbFlsTblModel::CONTENT_COL);
 		if (!index.isValid()) {
 			Q_ASSERT(0);
 			continue;
 		}
-		document.data = QByteArray::fromBase64(
-		    index.data(Qt::DisplayRole).toByteArray());
+		document.setBinaryContent(QByteArray::fromBase64(
+		    index.data(Qt::DisplayRole).toByteArray()));
 
 		documents.append(document);
 	}
@@ -1353,14 +1349,18 @@ void DlgSendMessage::sendMessageISDS(
 		}
 	}
 
-	IsdsMessage message;
+	QList<Isds::Document> documents;
+	Isds::Envelope envelope;
+	Isds::Message message;
 
 	/* Attach envelope and attachment files to message structure. */
-	if (!buildDocuments(message.documents)) {
+	if (!buildDocuments(documents)) {
 		infoText = tr("An error occurred while loading attachments into message.");
 		goto finish;
 	}
-	if (!buildEnvelope(message.envelope)) {
+	message.setDocuments(documents);
+
+	if (!buildEnvelope(envelope)) {
 		infoText = tr("An error occurred during message envelope creation.");
 		goto finish;
 	}
@@ -1384,12 +1384,10 @@ void DlgSendMessage::sendMessageISDS(
 	for (int i = 0; i < recipEntries.size(); ++i) {
 		const BoxContactsModel::PartialEntry &e(recipEntries.at(i));
 
-		/* Clear fields. */
-		message.envelope.dmID.clear();
-
 		/* Set new recipient. */
-		message.envelope.dbIDRecipient = e.id;
-		message.envelope.dmToHands = m_ui->dmToHands->text();
+		envelope.setDbIDRecipient(e.id);
+		envelope.setDmToHands(m_ui->dmToHands->text());
+		message.setEnvelope(envelope);
 
 		TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
 		    m_userName, m_dbSet, taskIdentifiers.at(i), message,
