@@ -274,7 +274,7 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 
 		/* Don't create subdirectories. */
 
-		QByteArray data(QByteArray::fromBase64(attach.binaryContent()));
+		const QByteArray &data(attach.binaryContent());
 
 		// save file to disk
 		if (WF_SUCCESS !=
@@ -359,7 +359,7 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 		/* Recursively create subdirectories. */
 		createDirStructureRecursive(attName);
 
-		QByteArray data(QByteArray::fromBase64(attach.binaryContent()));
+		const QByteArray &data(attach.binaryContent());
 
 		// save file to disk
 		if (WF_SUCCESS !=

@@ -201,9 +201,11 @@ void TestIsdsMessage::testMessageContent(const Isds::Message &message) const
 		QVERIFY(docs[0].fileDescr() == "test_01.txt");
 		QVERIFY(docs[0].binaryContent().size() == 8);
 		QVERIFY(docs[0].binaryContent() == "test 01\n");
+		QVERIFY(docs[0].base64Content() == "dGVzdCAwMQo=");
 		QVERIFY(docs[1].fileDescr() == "test_02.txt");
 		QVERIFY(docs[1].binaryContent().size() == 8);
 		QVERIFY(docs[1].binaryContent() == "test 02\n");
+		QVERIFY(docs[1].base64Content() == "dGVzdCAwMgo=");
 	}
 }
 

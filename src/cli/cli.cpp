@@ -411,8 +411,8 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 			fileName = path + QDir::separator() + fileName;
 
-			QByteArray data = QByteArray::fromBase64(file.binaryContent());
-			enum WriteFileState ret = writeFile(fileName, data);
+			enum WriteFileState ret =
+			    writeFile(fileName, file.binaryContent());
 			if (WF_SUCCESS == ret) {
 				qDebug() << CLI_PREFIX << "Save file" <<
 				    fileName << "of message" <<

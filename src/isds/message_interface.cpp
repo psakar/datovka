@@ -1777,6 +1777,25 @@ bool Isds::Document::isXml(void) const
 	return d->m_xml;
 }
 
+QString Isds::Document::base64Content(void) const
+{
+	const QByteArray &content(binaryContent());
+	if (!content.isNull()) {
+		return QString::fromUtf8(content.toBase64());
+	} else {
+		return QString();
+	}
+}
+
+void Isds::Document::setBase64Content(const QString &ec)
+{
+	QByteArray content;
+	if (!ec.isNull()) {
+		content = QByteArray::fromBase64(ec.toUtf8());
+	}
+	setBinaryContent(content);
+}
+
 const QByteArray &Isds::Document::binaryContent(void) const
 {
 	Q_D(const Document);

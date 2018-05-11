@@ -1555,7 +1555,7 @@ QList<Isds::Document> MessageDb::getMessageAttachments(qint64 msgId) const
 			document.setFormat(query.value(4).toString());
 			document.setFileMetaType((Isds::Type::FileMetaType)
 			    query.value(5).toInt());
-			document.setBinaryContent(query.value(6).toByteArray());
+			document.setBase64Content(query.value(6).toString());
 			documents.append(document);
 			query.next();
 		}

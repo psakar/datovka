@@ -428,6 +428,12 @@ namespace Isds {
 
 		bool isNull(void) const;
 
+		/*
+		 * Convenience method. Access content as base64-encoded string.
+		 */
+		QString base64Content(void) const;
+		void setBase64Content(const QString &ec);
+
 		bool isXml(void) const; /* Inspired by libisds. */
 
 		const QByteArray &binaryContent(void) const;

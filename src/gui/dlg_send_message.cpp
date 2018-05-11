@@ -968,8 +968,8 @@ void DlgSendMessage::fillContentFromTemplate(
 	    messageDb->getMessageAttachments(msgId.dmId);
 
 	foreach (const Isds::Document &file, msgFileList) {
-		m_attachModel.appendAttachmentEntry(file.binaryContent(),
-		    file.fileDescr());
+		m_attachModel.appendAttachmentEntry(
+		    file.base64Content().toUtf8(), file.fileDescr());
 	}
 }
 
