@@ -41,29 +41,75 @@ QVariant Isds::nilBool2Variant(enum Type::NilBool b)
 	}
 }
 
+enum Isds::Type::DmState Isds::long2DmState(long int ms)
+{
+	switch (ms) {
+	case Type::MS_NULL: return Type::MS_NULL; break;
+	case Type::MS_POSTED: return Type::MS_POSTED; break;
+	case Type::MS_STAMPED: return Type::MS_STAMPED; break;
+	case Type::MS_INFECTED: return Type::MS_INFECTED; break;
+	case Type::MS_DELIVERED: return Type::MS_DELIVERED; break;
+	case Type::MS_ACCEPTED_FICT: return Type::MS_ACCEPTED_FICT; break;
+	case Type::MS_ACCEPTED: return Type::MS_ACCEPTED; break;
+	case Type::MS_READ: return Type::MS_READ; break;
+	case Type::MS_UNDELIVERABLE: return Type::MS_UNDELIVERABLE; break;
+	case Type::MS_REMOVED: return Type::MS_REMOVED; break;
+	case Type::MS_IN_VAULT: return Type::MS_IN_VAULT; break;
+	default:
+		Q_ASSERT(0);
+		return Type::MS_NULL;
+		break;
+	}
+}
+
+enum Isds::Type::DmState Isds::variant2DmState(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::MS_NULL;
+	}
+
+	bool ok = false;
+	long int num = v.toLongLong(&ok);
+	if (Q_UNLIKELY(!ok)) {
+		Q_ASSERT(0);
+		return Type::MS_NULL;
+	}
+
+	return long2DmState(num);
+}
+
+QVariant Isds::dmState2Variant(enum Type::DmState ms)
+{
+	if (ms == Type::MS_NULL) {
+		return QVariant();
+	} else {
+		return QVariant((int)ms);
+	}
+}
+
 enum Isds::Type::DbType Isds::long2DbType(long int bt)
 {
 	switch (bt) {
-	case Isds::Type::BT_SYSTEM: return Isds::Type::BT_SYSTEM; break;
-	case Isds::Type::BT_OVM: return Isds::Type::BT_OVM; break;
-	case Isds::Type::BT_OVM_NOTAR: return Isds::Type::BT_OVM_NOTAR; break;
-	case Isds::Type::BT_OVM_EXEKUT: return Isds::Type::BT_OVM_EXEKUT; break;
-	case Isds::Type::BT_OVM_REQ: return Isds::Type::BT_OVM_REQ; break;
-	case Isds::Type::BT_OVM_FO: return Isds::Type::BT_OVM_FO; break;
-	case Isds::Type::BT_OVM_PFO: return Isds::Type::BT_OVM_PFO; break;
-	case Isds::Type::BT_OVM_PO: return Isds::Type::BT_OVM_PO; break;
-	case Isds::Type::BT_PO: return Isds::Type::BT_PO; break;
-	case Isds::Type::BT_PO_ZAK: return Isds::Type::BT_PO_ZAK; break;
-	case Isds::Type::BT_PO_REQ: return Isds::Type::BT_PO_REQ; break;
-	case Isds::Type::BT_PFO: return Isds::Type::BT_PFO; break;
-	case Isds::Type::BT_PFO_ADVOK: return Isds::Type::BT_PFO_ADVOK; break;
-	case Isds::Type::BT_PFO_DANPOR: return Isds::Type::BT_PFO_DANPOR; break;
-	case Isds::Type::BT_PFO_INSSPR: return Isds::Type::BT_PFO_INSSPR; break;
-	case Isds::Type::BT_PFO_AUDITOR: return Isds::Type::BT_PFO_AUDITOR; break;
-	case Isds::Type::BT_FO: return Isds::Type::BT_FO; break;
+	case Type::BT_SYSTEM: return Type::BT_SYSTEM; break;
+	case Type::BT_OVM: return Type::BT_OVM; break;
+	case Type::BT_OVM_NOTAR: return Type::BT_OVM_NOTAR; break;
+	case Type::BT_OVM_EXEKUT: return Type::BT_OVM_EXEKUT; break;
+	case Type::BT_OVM_REQ: return Type::BT_OVM_REQ; break;
+	case Type::BT_OVM_FO: return Type::BT_OVM_FO; break;
+	case Type::BT_OVM_PFO: return Type::BT_OVM_PFO; break;
+	case Type::BT_OVM_PO: return Type::BT_OVM_PO; break;
+	case Type::BT_PO: return Type::BT_PO; break;
+	case Type::BT_PO_ZAK: return Type::BT_PO_ZAK; break;
+	case Type::BT_PO_REQ: return Type::BT_PO_REQ; break;
+	case Type::BT_PFO: return Type::BT_PFO; break;
+	case Type::BT_PFO_ADVOK: return Type::BT_PFO_ADVOK; break;
+	case Type::BT_PFO_DANPOR: return Type::BT_PFO_DANPOR; break;
+	case Type::BT_PFO_INSSPR: return Type::BT_PFO_INSSPR; break;
+	case Type::BT_PFO_AUDITOR: return Type::BT_PFO_AUDITOR; break;
+	case Type::BT_FO: return Type::BT_FO; break;
 	default:
 		Q_ASSERT(0);
-		return Isds::Type::BT_SYSTEM; /* FIXME */
+		return Type::BT_SYSTEM; /* FIXME */
 		break;
 	}
 }
@@ -135,7 +181,7 @@ enum Isds::Type::FileMetaType Isds::variant2FileMetaType(const QVariant &v)
 		return Type::FMT_UNKNOWN;
 	}
 
-	return Isds::str2FileMetaType(v.toString());
+	return str2FileMetaType(v.toString());
 }
 
 QVariant Isds::fileMetaType2Variant(enum Type::FileMetaType fmt)
@@ -144,5 +190,5 @@ QVariant Isds::fileMetaType2Variant(enum Type::FileMetaType fmt)
 		return QVariant();
 	}
 
-	return QVariant(Isds::fileMetaType2str(fmt));
+	return QVariant(fileMetaType2str(fmt));
 }

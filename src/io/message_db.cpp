@@ -1610,6 +1610,13 @@ bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
 {
 	QSqlQuery query(m_db);
 
+	if (Q_UNLIKELY(envelope.dmId() < 0)) {
+		Q_ASSERT(0);
+		logErrorNL("%s",
+		    "Cannot insert envelope data with invalid identifier.");
+		return false;
+	}
+
 	QString queryStr = "INSERT INTO messages ("
 	    "dmID, _origin, dbIDSender, dmSender, "
 	    "dmSenderAddress, dmSenderType, dmRecipient, "
@@ -1648,7 +1655,7 @@ bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmSenderType", Isds::dbType2Variant(envelope.dmSenderType()));
 	query.bindValue(":dmRecipient", envelope.dmRecipient());
 	query.bindValue(":dmRecipientAddress", envelope.dmRecipientAddress());
-	query.bindValue(":dmAmbiguousRecipient", envelope.dmAmbiguousRecipient());
+	query.bindValue(":dmAmbiguousRecipient", Isds::nilBool2Variant(envelope.dmAmbiguousRecipient()));
 	query.bindValue(":dmSenderOrgUnit", envelope.dmSenderOrgUnit());
 	query.bindValue(":dmSenderOrgUnitNum", envelope.dmSenderOrgUnitNumStr());
 	query.bindValue(":dbIDRecipient", envelope.dbIDRecipient());
@@ -1670,7 +1677,7 @@ bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmQTimestamp", envelope.dmQTimestamp().toBase64());
 	query.bindValue(":dmDeliveryTime", qDateTimeToDbFormat(envelope.dmDeliveryTime()));
 	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
-	query.bindValue(":dmMessageStatus", envelope.dmMessageStatus());
+	query.bindValue(":dmMessageStatus", Isds::dmState2Variant(envelope.dmMessageStatus()));
 	query.bindValue(":dmAttachmentSize", envelope.dmAttachmentSize());
 	query.bindValue(":_dmType", envelope.dmType());
 
@@ -1761,7 +1768,7 @@ bool MessageDb::updateMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmSenderType", Isds::dbType2Variant(envelope.dmSenderType()));
 	query.bindValue(":dmRecipient", envelope.dmRecipient());
 	query.bindValue(":dmRecipientAddress", envelope.dmRecipientAddress());
-	query.bindValue(":dmAmbiguousRecipient", envelope.dmAmbiguousRecipient());
+	query.bindValue(":dmAmbiguousRecipient", Isds::nilBool2Variant(envelope.dmAmbiguousRecipient()));
 	query.bindValue(":dmSenderOrgUnit", envelope.dmSenderOrgUnit());
 	query.bindValue(":dmSenderOrgUnitNum", envelope.dmSenderOrgUnitNumStr());
 	query.bindValue(":dbIDRecipient", envelope.dbIDRecipient());
@@ -1783,7 +1790,7 @@ bool MessageDb::updateMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmQTimestamp", envelope.dmQTimestamp().toBase64());
 	query.bindValue(":dmDeliveryTime", qDateTimeToDbFormat(envelope.dmDeliveryTime()));
 	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
-	query.bindValue(":dmMessageStatus", envelope.dmMessageStatus());
+	query.bindValue(":dmMessageStatus", Isds::dmState2Variant(envelope.dmMessageStatus()));
 	query.bindValue(":dmAttachmentSize", envelope.dmAttachmentSize());
 	query.bindValue(":_dmType", envelope.dmType());
 
