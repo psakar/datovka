@@ -6088,7 +6088,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 			Q_ASSERT(!attach.binaryContent().isEmpty());
 
 			addAttachmentToEmailMessage(emailMessage,
-			    attach.fileDescr(), attach.binaryContent(),
+			    attach.fileDescr(), attach.base64Content().toUtf8(),
 			    boundary);
 		}
 	}
