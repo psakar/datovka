@@ -41,15 +41,6 @@ private:
 
 public:
 	/*!
-	 * @brief Return attachment type as string.
-	 *
-	 * @param[in] val Attachment type value as used by libisds.
-	 * @return Attachment type description.
-	 */
-	static
-	const QString &attachmentTypeToStr(int val);
-
-	/*!
 	 * @brief Convert data box state to localised text
 	 *
 	 * @param[in] val Data box status value as used by libisds.

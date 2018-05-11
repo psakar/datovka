@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <QString>
 #include <QVariant>
 
 #include "src/isds/types.h"
@@ -35,5 +36,10 @@ namespace Isds {
 	enum Type::DbType long2DbType(long int bt);
 	enum Type::DbType variant2DbType(const QVariant &v);
 	QVariant dbType2Variant(enum Type::DbType bt);
+
+	enum Type::FileMetaType str2FileMetaType(const QString &s);
+	const QString &fileMetaType2str(enum Type::FileMetaType fmt);
+	enum Type::FileMetaType variant2FileMetaType(const QVariant &v);
+	QVariant fileMetaType2Variant(enum Type::FileMetaType fmt);
 
 }

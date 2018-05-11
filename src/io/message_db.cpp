@@ -1551,8 +1551,7 @@ QList<Isds::Document> MessageDb::getMessageAttachments(qint64 msgId) const
 			document.setFileGuid(query.value(2).toString());
 			document.setMimeType(query.value(3).toString());
 			document.setFormat(query.value(4).toString());
-			document.setFileMetaType((Isds::Type::FileMetaType)
-			    query.value(5).toInt());
+			document.setFileMetaType(Isds::variant2FileMetaType(query.value(5)));
 			document.setBase64Content(query.value(6).toString());
 			documents.append(document);
 			query.next();
@@ -2272,7 +2271,7 @@ bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
 	query.bindValue(":_dmFileGuid", document.fileGuid());
 	query.bindValue(":_dmMimeType", document.mimeType());
 	query.bindValue(":_dmFormat", document.format());
-	query.bindValue(":_dmFileMetaType", document.fileMetaType());
+	query.bindValue(":_dmFileMetaType", Isds::fileMetaType2Variant(document.fileMetaType()));
 	query.bindValue(":dmEncodedContent", document.binaryContent().toBase64());
 	if (-1 != fileId) {
 		query.bindValue(":fileId", fileId);

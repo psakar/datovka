@@ -25,24 +25,6 @@
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 
-const QString &IsdsConversion::attachmentTypeToStr(int val)
-{
-	static const QString main("main"), encl("encl"), sign("sign"),
-	    meta("meta");
-	static const QString invalid;
-
-	switch (val) {
-	case FILEMETATYPE_MAIN: return main; break;
-	case FILEMETATYPE_ENCLOSURE: return encl; break;
-	case FILEMETATYPE_SIGNATURE: return sign; break;
-	case FILEMETATYPE_META: return sign; break;
-	default:
-		logWarningNL("Unknown attachment type value '%d'.", val);
-		return invalid;
-		break;
-	}
-}
-
 QString IsdsConversion::boxStateToText(int val)
 {
 	switch (val) {

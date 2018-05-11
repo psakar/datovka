@@ -92,3 +92,57 @@ QVariant Isds::dbType2Variant(enum Type::DbType bt)
 		return QVariant((int)bt);
 	}
 }
+
+static const QString strMain("main"), strEncl("encl"), strSign("sign"), strMeta("meta");
+static const QString strNull;
+
+enum Isds::Type::FileMetaType Isds::str2FileMetaType(const QString &s)
+{
+	if (s.isNull()) {
+		return Type::FMT_UNKNOWN;
+	} else if (s == strMain) {
+		return Type::FMT_MAIN;
+	} else if (s == strEncl) {
+		return Type::FMT_ENCLOSURE;
+	} else if (s == strSign) {
+		return Type::FMT_SIGNATURE;
+	} else if (s == strMeta) {
+		return Type::FMT_META;
+	} else {
+		Q_ASSERT(0);
+		return Type::FMT_UNKNOWN;
+	}
+}
+
+const QString &Isds::fileMetaType2str(enum Type::FileMetaType fmt)
+{
+	switch (fmt) {
+	case Type::FMT_UNKNOWN: return strNull; break;
+	case Type::FMT_MAIN: return strMain; break;
+	case Type::FMT_ENCLOSURE: return strEncl; break;
+	case Type::FMT_SIGNATURE: return strSign; break;
+	case Type::FMT_META: return strMeta; break;
+	default:
+		Q_ASSERT(0);
+		return strNull;
+		break;
+	}
+}
+
+enum Isds::Type::FileMetaType Isds::variant2FileMetaType(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::FMT_UNKNOWN;
+	}
+
+	return Isds::str2FileMetaType(v.toString());
+}
+
+QVariant Isds::fileMetaType2Variant(enum Type::FileMetaType fmt)
+{
+	if (fmt == Type::FMT_UNKNOWN) {
+		return QVariant();
+	}
+
+	return QVariant(Isds::fileMetaType2str(fmt));
+}
