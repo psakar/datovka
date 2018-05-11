@@ -191,10 +191,10 @@ qdatovka_error Task::storeAttachments(MessageDb &messageDb, qint64 dmId,
 		if (messageDb.insertOrUpdateMessageAttachment(dmId, document)) {
 			logDebugLv0NL(
 			    "Attachment file '%s' was stored into database.",
-			    document.fileDescr());
+			    document.fileDescr().toUtf8().constData());
 		} else {
 			logErrorNL("Storing attachment file '%s' failed.",
-			    document.fileDescr());
+			    document.fileDescr().toUtf8().constData());
 		}
 	}
 
