@@ -35,6 +35,7 @@
 
 #include "src/isds/internal_conversion.h"
 #include "src/isds/message_conversion.h"
+#include "src/isds/type_conversion.h"
 
 /*!
  * @brief Converts user types.
@@ -372,35 +373,13 @@ struct isds_event *Isds::event2libisds(const Event &e, bool *ok)
  * @brief Converts data box types.
  */
 static
-enum Isds::Type::DbType long2DbType(const long int *bt)
+enum Isds::Type::DbType longPtr2DbType(const long int *bt)
 {
 	if (bt == NULL) {
 		return Isds::Type::BT_NULL;
 	}
 
-	switch (*bt) {
-	case Isds::Type::BT_SYSTEM: return Isds::Type::BT_SYSTEM; break;
-	case Isds::Type::BT_OVM: return Isds::Type::BT_OVM; break;
-	case Isds::Type::BT_OVM_NOTAR: return Isds::Type::BT_OVM_NOTAR; break;
-	case Isds::Type::BT_OVM_EXEKUT: return Isds::Type::BT_OVM_EXEKUT; break;
-	case Isds::Type::BT_OVM_REQ: return Isds::Type::BT_OVM_REQ; break;
-	case Isds::Type::BT_OVM_FO: return Isds::Type::BT_OVM_FO; break;
-	case Isds::Type::BT_OVM_PFO: return Isds::Type::BT_OVM_PFO; break;
-	case Isds::Type::BT_OVM_PO: return Isds::Type::BT_OVM_PO; break;
-	case Isds::Type::BT_PO: return Isds::Type::BT_PO; break;
-	case Isds::Type::BT_PO_ZAK: return Isds::Type::BT_PO_ZAK; break;
-	case Isds::Type::BT_PO_REQ: return Isds::Type::BT_PO_REQ; break;
-	case Isds::Type::BT_PFO: return Isds::Type::BT_PFO; break;
-	case Isds::Type::BT_PFO_ADVOK: return Isds::Type::BT_PFO_ADVOK; break;
-	case Isds::Type::BT_PFO_DANPOR: return Isds::Type::BT_PFO_DANPOR; break;
-	case Isds::Type::BT_PFO_INSSPR: return Isds::Type::BT_PFO_INSSPR; break;
-	case Isds::Type::BT_PFO_AUDITOR: return Isds::Type::BT_PFO_AUDITOR; break;
-	case Isds::Type::BT_FO: return Isds::Type::BT_FO; break;
-	default:
-		Q_ASSERT(0);
-		return Isds::Type::BT_SYSTEM; /* FIXME */
-		break;
-	}
+	return Isds::long2DbType(*bt);
 }
 
 /*!
@@ -491,7 +470,7 @@ Isds::Envelope Isds::libisds2envelope(const struct isds_envelope *ie, bool *ok)
 	env.setDbIDSender(fromCStr(ie->dbIDSender));
 	env.setDmSender(fromCStr(ie->dmSender));
 	env.setDmSenderAddress(fromCStr(ie->dmSenderAddress));
-	env.setDmSenderType(long2DbType(ie->dmSenderType));
+	env.setDmSenderType(longPtr2DbType(ie->dmSenderType));
 	env.setDmRecipient(fromCStr(ie->dmRecipient));
 	env.setDmRecipientAddress(fromCStr(ie->dmRecipientAddress));
 	env.setDmAmbiguousRecipient(fromBool(ie->dmAmbiguousRecipient));
@@ -554,7 +533,7 @@ fail:
  * @brief Converts data box types.
  */
 static
-bool dbType2long(long int **btPtr, enum Isds::Type::DbType bt)
+bool dbType2longPtr(long int **btPtr, enum Isds::Type::DbType bt)
 {
 	if (Q_UNLIKELY(btPtr == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -747,7 +726,7 @@ struct isds_envelope *Isds::envelope2libisds(const Envelope &env, bool *ok)
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dbIDSender, env.dbIDSender()))) { goto fail; }
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmSender, env.dmSender()))) { goto fail; }
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmSenderAddress, env.dmSenderAddress()))) { goto fail; }
-	if (Q_UNLIKELY(!dbType2long(&ienv->dmSenderType, env.dmSenderType()))) { goto fail; }
+	if (Q_UNLIKELY(!dbType2longPtr(&ienv->dmSenderType, env.dmSenderType()))) { goto fail; }
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmRecipient, env.dmRecipient()))) { goto fail; }
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmRecipientAddress, env.dmRecipientAddress()))) { goto fail; }
 	if (Q_UNLIKELY(!toBool(&ienv->dmAmbiguousRecipient, env.dmAmbiguousRecipient()))) { goto fail; }
