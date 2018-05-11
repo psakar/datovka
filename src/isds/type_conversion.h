@@ -29,6 +29,9 @@
 
 namespace Isds {
 
+	enum Type::NilBool variant2NilBool(const QVariant &v);
+	QVariant nilBool2Variant(enum Type::NilBool b);
+
 	enum Type::DbType long2DbType(long int bt);
 	enum Type::DbType variant2DbType(const QVariant &v);
 	QVariant dbType2Variant(enum Type::DbType bt);

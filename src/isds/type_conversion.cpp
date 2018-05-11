@@ -23,6 +23,24 @@
 
 #include "src/isds/type_conversion.h"
 
+enum Isds::Type::NilBool Isds::variant2NilBool(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::BOOL_NULL;
+	}
+
+	return v.toBool() ? Type::BOOL_TRUE : Type::BOOL_FALSE;
+}
+
+QVariant Isds::nilBool2Variant(enum Type::NilBool b)
+{
+	if (b == Type::BOOL_NULL) {
+		return QVariant();
+	} else {
+		return QVariant(b == Type::BOOL_TRUE);
+	}
+}
+
 enum Isds::Type::DbType Isds::long2DbType(long int bt)
 {
 	switch (bt) {

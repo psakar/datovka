@@ -477,10 +477,8 @@ const Isds::Envelope MessageDb::getMessageReplyData(qint64 dmId) const
 		envData.setDmRecipientRefNumber(query.value(10).toString());
 		envData.setDmRecipientIdent(query.value(11).toString());
 		envData.setDmToHands(query.value(12).toString());
-		envData.setDmPersonalDelivery(query.value(13).toBool() ?
-		    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
-		envData.setDmAllowSubstDelivery(query.value(14).toBool()
-		    ? Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
+		envData.setDmPersonalDelivery(Isds::variant2NilBool(query.value(13)));
+		envData.setDmAllowSubstDelivery(Isds::variant2NilBool(query.value(14)));
 		envData.setDmLegalTitleLawStr(query.value(15).toString());
 		envData.setDmLegalTitleYearStr(query.value(16).toString());
 		envData.setDmLegalTitleSect(query.value(17).toString());
@@ -1668,8 +1666,8 @@ bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmLegalTitleSect", envelope.dmLegalTitleSect());
 	query.bindValue(":dmLegalTitlePar", envelope.dmLegalTitlePar());
 	query.bindValue(":dmLegalTitlePoint", envelope.dmLegalTitlePoint());
-	query.bindValue(":dmPersonalDelivery", envelope.dmPersonalDelivery());
-	query.bindValue(":dmAllowSubstDelivery", envelope.dmAllowSubstDelivery());
+	query.bindValue(":dmPersonalDelivery", Isds::nilBool2Variant(envelope.dmPersonalDelivery()));
+	query.bindValue(":dmAllowSubstDelivery", Isds::nilBool2Variant(envelope.dmAllowSubstDelivery()));
 	query.bindValue(":dmQTimestamp", envelope.dmQTimestamp().toBase64());
 	query.bindValue(":dmDeliveryTime", qDateTimeToDbFormat(envelope.dmDeliveryTime()));
 	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
@@ -1781,8 +1779,8 @@ bool MessageDb::updateMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmLegalTitleSect", envelope.dmLegalTitleSect());
 	query.bindValue(":dmLegalTitlePar", envelope.dmLegalTitlePar());
 	query.bindValue(":dmLegalTitlePoint", envelope.dmLegalTitlePoint());
-	query.bindValue(":dmPersonalDelivery", envelope.dmPersonalDelivery());
-	query.bindValue(":dmAllowSubstDelivery", envelope.dmAllowSubstDelivery());
+	query.bindValue(":dmPersonalDelivery", Isds::nilBool2Variant(envelope.dmPersonalDelivery()));
+	query.bindValue(":dmAllowSubstDelivery", Isds::nilBool2Variant(envelope.dmAllowSubstDelivery()));
 	query.bindValue(":dmQTimestamp", envelope.dmQTimestamp().toBase64());
 	query.bindValue(":dmDeliveryTime", qDateTimeToDbFormat(envelope.dmDeliveryTime()));
 	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
