@@ -29,6 +29,7 @@
 #include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db_set.h"
+#include "src/isds/message_interface.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "tests/test_message_db_set.h"
@@ -244,24 +245,41 @@ void TestMessageDbSet::writeEnvelope(void)
 	db = m_dbSet01->accessMessageDb(dateTime, true);
 	QVERIFY(db != NULL);
 
-	ret = db->msgsInsertMessageEnvelope(1,
-	    QLatin1String("_origin"), QLatin1String("dbIDSender"),
-	    QLatin1String("dmSender"), QLatin1String("dmSenderAddress"),
-	    0, QLatin1String("dmRecipient"),
-	    QLatin1String("dmRecipientAddress"),
-	    QLatin1String("dmAmbiguousRecipient"),
-	    QLatin1String("dmSenderOrgUnit"), QLatin1String("dmSenderOrgUnitNum"),
-	    QLatin1String("dbIDRecipient"), QLatin1String("dmRecipientOrgUnit"),
-	    QLatin1String("dmRecipientOrgUnitNum"), QLatin1String("dmToHands"),
-	    QLatin1String("dmAnnotation"), QLatin1String("dmRecipientRefNumber"),
-	    QLatin1String("dmSenderRefNumber"), QLatin1String("dmRecipientIdent"),
-	    QLatin1String("dmSenderIdent"), QLatin1String("dmLegalTitleLaw"),
-	    QLatin1String("dmLegalTitleYear"), QLatin1String("dmLegalTitleSect"),
-	    QLatin1String("dmLegalTitlePar"), QLatin1String("dmLegalTitlePoint"),
-	    false, false,
-	    QByteArray(),
-	    timevalToDbFormat(&tv), timevalToDbFormat(&tv),
-	    0, 0, QLatin1String("_dmType"),
+	Isds::Envelope env;
+	env.setDmId(1);
+	env.setDbIDSender(QLatin1String("dbIDSender"));
+	env.setDmSender(QLatin1String("dmSender"));
+	env.setDmSenderAddress(QLatin1String("dmSenderAddress"));
+	env.setDmSenderType(Isds::Type::BT_SYSTEM);
+	env.setDmRecipient(QLatin1String("dmRecipient"));
+	env.setDmRecipientAddress(QLatin1String("dmRecipientAddress"));
+	env.setDmAmbiguousRecipient(Isds::Type::BOOL_NULL);
+	env.setDmSenderOrgUnit(QLatin1String("dmSenderOrgUnit"));
+	env.setDmSenderOrgUnitNum(2);
+	env.setDbIDRecipient(QLatin1String("dbIDRecipient"));
+	env.setDmRecipientOrgUnit(QLatin1String("dmRecipientOrgUnit"));
+	env.setDmRecipientOrgUnitNum(3);
+	env.setDmToHands(QLatin1String("dmToHands"));
+	env.setDmAnnotation(QLatin1String("dmAnnotation"));
+	env.setDmRecipientRefNumber(QLatin1String("dmRecipientRefNumber"));
+	env.setDmSenderRefNumber(QLatin1String("dmSenderRefNumber"));
+	env.setDmRecipientIdent(QLatin1String("dmRecipientIdent"));
+	env.setDmSenderIdent(QLatin1String("dmSenderIdent"));
+	env.setDmLegalTitleLaw(4);
+	env.setDmLegalTitleYear(5);
+	env.setDmLegalTitleSect(QLatin1String("dmLegalTitleSect"));
+	env.setDmLegalTitlePar(QLatin1String("dmLegalTitlePar"));
+	env.setDmLegalTitlePoint(QLatin1String("dmLegalTitlePoint"));
+	env.setDmPersonalDelivery(Isds::Type::BOOL_NULL);
+	env.setDmAllowSubstDelivery(Isds::Type::BOOL_NULL);
+	//env.setDmQTimestamp(QByteArray());
+	env.setDmDeliveryTime(dateTime);
+	env.setDmAcceptanceTime(dateTime);
+	env.setDmMessageStatus(Isds::Type::MS_POSTED);
+	//env.setDmAttachmentSize(-1);
+	env.setDmType(Isds::Envelope::dmType2Char(Isds::Type::MT_K));
+
+	ret = db->insertMessageEnvelope(env, QLatin1String("_origin"),
 	    MSG_RECEIVED);
 	QVERIFY(ret);
 	QVERIFY(m_dbSet01->fileNames().size() == 1);
@@ -270,24 +288,7 @@ void TestMessageDbSet::writeEnvelope(void)
 	db = m_dbSet02->accessMessageDb(dateTime, true);
 	QVERIFY(db != NULL);
 
-	ret = db->msgsInsertMessageEnvelope(1,
-	    QLatin1String("_origin"), QLatin1String("dbIDSender"),
-	    QLatin1String("dmSender"), QLatin1String("dmSenderAddress"),
-	    0, QLatin1String("dmRecipient"),
-	    QLatin1String("dmRecipientAddress"),
-	    QLatin1String("dmAmbiguousRecipient"),
-	    QLatin1String("dmSenderOrgUnit"), QLatin1String("dmSenderOrgUnitNum"),
-	    QLatin1String("dbIDRecipient"), QLatin1String("dmRecipientOrgUnit"),
-	    QLatin1String("dmRecipientOrgUnitNum"), QLatin1String("dmToHands"),
-	    QLatin1String("dmAnnotation"), QLatin1String("dmRecipientRefNumber"),
-	    QLatin1String("dmSenderRefNumber"), QLatin1String("dmRecipientIdent"),
-	    QLatin1String("dmSenderIdent"), QLatin1String("dmLegalTitleLaw"),
-	    QLatin1String("dmLegalTitleYear"), QLatin1String("dmLegalTitleSect"),
-	    QLatin1String("dmLegalTitlePar"), QLatin1String("dmLegalTitlePoint"),
-	    false, false,
-	    QByteArray(),
-	    timevalToDbFormat(&tv), timevalToDbFormat(&tv),
-	    0, 0, QLatin1String("_dmType"),
+	ret = db->insertMessageEnvelope(env, QLatin1String("_origin"),
 	    MSG_RECEIVED);
 	QVERIFY(ret);
 	QVERIFY(m_dbSet02->fileNames().size() == 3);

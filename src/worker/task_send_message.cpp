@@ -138,6 +138,11 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		ret = SM_ERR;
 		goto fail;
 	}
+	if (isdsMessage == NULL) {
+		logErrorNL("%s", "Cannot send null message.");
+		ret = SM_ERR;
+		goto fail;
+	}
 
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
@@ -212,7 +217,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 fail:
 	isds_message_free(&isdsMessage);
 
-	if (0 != resultData) {
+	if (Q_NULLPTR != resultData) {
 		resultData->result = ret;
 		resultData->dbIDRecipient = message.envelope().dbIDRecipient();
 		resultData->recipientName = recipientName;
