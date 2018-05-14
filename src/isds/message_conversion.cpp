@@ -373,13 +373,16 @@ struct isds_event *Isds::event2libisds(const Event &e, bool *ok)
  * @brief Converts data box types.
  */
 static
-enum Isds::Type::DbType longPtr2DbType(const long int *bt)
+enum Isds::Type::DbType longPtr2DbType(const long int *bt, bool *ok = Q_NULLPTR)
 {
 	if (bt == NULL) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
 		return Isds::Type::BT_NULL;
 	}
 
-	return Isds::long2DbType(*bt);
+	return Isds::long2DbType(*bt, ok);
 }
 
 /*!
@@ -470,7 +473,10 @@ Isds::Envelope Isds::libisds2envelope(const struct isds_envelope *ie, bool *ok)
 	env.setDbIDSender(fromCStr(ie->dbIDSender));
 	env.setDmSender(fromCStr(ie->dmSender));
 	env.setDmSenderAddress(fromCStr(ie->dmSenderAddress));
-	env.setDmSenderType(longPtr2DbType(ie->dmSenderType));
+	env.setDmSenderType(longPtr2DbType(ie->dmSenderType, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
 	env.setDmRecipient(fromCStr(ie->dmRecipient));
 	env.setDmRecipientAddress(fromCStr(ie->dmRecipientAddress));
 	env.setDmAmbiguousRecipient(fromBool(ie->dmAmbiguousRecipient));
