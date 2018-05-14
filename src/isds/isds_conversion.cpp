@@ -247,41 +247,6 @@ QString IsdsConversion::dmTypeToText(const QString &val)
 #define STR_SHA_384 "SHA-384"
 #define STR_SHA_512 "SHA-512"
 
-const QString &IsdsConversion::hashAlgToStr(int val)
-{
-	static const QString md5(STR_MD5), sha1(STR_SHA_1), sha224(STR_SHA_224),
-	    sha256(STR_SHA_256), sha384(STR_SHA_384), sha512(STR_SHA_512);
-	static const QString invalid;
-
-	switch (val) {
-	case HASH_ALGORITHM_MD5: return md5; break;
-	case HASH_ALGORITHM_SHA_1: return sha1; break;
-	case HASH_ALGORITHM_SHA_224: return sha224; break;
-	case HASH_ALGORITHM_SHA_256: return sha256; break;
-	case HASH_ALGORITHM_SHA_384: return sha384; break;
-	case HASH_ALGORITHM_SHA_512: return sha512; break;
-	default:
-		logWarningNL("Unknown hash algorithm value '%d'.", val);
-		return invalid;
-		break;
-	}
-}
-
-int IsdsConversion::hashAlgStrToInt(const QString &val)
-{
-	if (val == QLatin1String(STR_MD5)) return HASH_ALGORITHM_MD5;
-	else if (val == QLatin1String(STR_SHA_1)) return HASH_ALGORITHM_SHA_1;
-	else if (val == QLatin1String(STR_SHA_224)) return HASH_ALGORITHM_SHA_224;
-	else if (val == QLatin1String(STR_SHA_256)) return HASH_ALGORITHM_SHA_256;
-	else if (val == QLatin1String(STR_SHA_384)) return HASH_ALGORITHM_SHA_384;
-	else if (val == QLatin1String(STR_SHA_512)) return HASH_ALGORITHM_SHA_512;
-	else {
-		logWarningNL("Unknown hash algorithm '%s'.",
-		    val.toUtf8().constData());
-		return HASH_ALGORITHM_MD5;
-	}
-}
-
 int IsdsConversion::msgStatusIsdsToDbRepr(int val)
 {
 	switch (val) {

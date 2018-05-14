@@ -86,24 +86,6 @@ public:
 	QString dmTypeToText(const QString &val);
 
 	/*!
-	 * @brief Return hash algorithm string identifier.
-	 *
-	 * @param[in] val Hash algorithm value as used by libisds.
-	 * @return Hash algorithm type string.
-	 */
-	static
-	const QString &hashAlgToStr(int val);
-
-	/*!
-	 * @brief Converts hash algorithm type string to int as used by libisds.
-	 *
-	 * @param[in] val Hash algorithm string.
-	 * @return Hash algorithm type integer value.
-	 */
-	static
-	int hashAlgStrToInt(const QString &val);
-
-	/*!
 	 * @brief Converts libisds message state to database value as used by
 	 *     Datovka.
 	 *

@@ -2353,8 +2353,7 @@ bool MessageDb::insertOrUpdateMessageHash(qint64 dmId,
 	}
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":value", hash.value().toBase64());
-	query.bindValue(":algorithm",
-	    IsdsConversion::hashAlgToStr(hash.algorithm()));
+	query.bindValue(":algorithm", Isds::hashAlg2Variant(hash.algorithm()));
 	if (-1 != hashId) {
 		query.bindValue(":hashId", hashId);
 	}
@@ -2936,9 +2935,7 @@ const Isds::Hash MessageDb::getMessageHash(qint64 dmId) const
 		if (query.isValid()) {
 			hash.setValue(QByteArray::fromBase64(
 			    query.value(0).toByteArray()));
-			hash.setAlgorithm((Isds::Type::HashAlg)
-			    IsdsConversion::hashAlgStrToInt(
-			    query.value(1).toString()));
+			hash.setAlgorithm(Isds::variant2HashAlg(query.value(1)));
 			return hash;
 		}
 	} else {

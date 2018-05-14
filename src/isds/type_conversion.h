@@ -33,16 +33,21 @@ namespace Isds {
 	enum Type::NilBool variant2NilBool(const QVariant &v);
 	QVariant nilBool2Variant(enum Type::NilBool b);
 
-	enum Type::DmState long2DmState(long int ms);
-	enum Type::DmState variant2DmState(const QVariant &v);
-	QVariant dmState2Variant(enum Type::DmState ms);
-
 	enum Type::DbType long2DbType(long int bt);
 	enum Type::DbType variant2DbType(const QVariant &v);
 	QVariant dbType2Variant(enum Type::DbType bt);
 
+	enum Type::DmState long2DmState(long int ms);
+	enum Type::DmState variant2DmState(const QVariant &v);
+	QVariant dmState2Variant(enum Type::DmState ms);
+
+	enum Type::HashAlg str2HashAlg(const QString &s);
+	const QString &hashAlg2Str(enum Type::HashAlg ha);
+	enum Type::HashAlg variant2HashAlg(const QVariant &v);
+	QVariant hashAlg2Variant(enum Type::HashAlg ha);
+
 	enum Type::FileMetaType str2FileMetaType(const QString &s);
-	const QString &fileMetaType2str(enum Type::FileMetaType fmt);
+	const QString &fileMetaType2Str(enum Type::FileMetaType fmt);
 	enum Type::FileMetaType variant2FileMetaType(const QVariant &v);
 	QVariant fileMetaType2Variant(enum Type::FileMetaType fmt);
 
