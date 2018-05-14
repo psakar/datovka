@@ -212,19 +212,11 @@ QString tmBirthToDbFormat(const struct tm *t)
 	return ret;
 }
 
-
-/* ========================================================================= */
-/*
- * Converts date to format to be stored in database.
- */
 QString qDateTimeToDbFormat(const QDateTime &dateTime)
-/* ========================================================================= */
 {
-	QString ret = dateTime.toString(dbDateTimeFormat) + "000";
-
-	return ret;
+	return (!dateTime.isNull() && dateTime.isValid()) ?
+	    dateTime.toString(dbDateTimeFormat) + "000"  : QString();
 }
-
 
 /* ========================================================================= */
 /*

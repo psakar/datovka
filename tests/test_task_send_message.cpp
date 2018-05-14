@@ -28,6 +28,8 @@
 #include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/message_interface.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
@@ -52,7 +54,7 @@ private slots:
 
 private:
 	static
-	IsdsMessage buildMessage(const QString &recipBox);
+	Isds::Message buildMessage(const QString &recipBox);
 
 	const bool m_testing; /*!< Testing account. */
 	const enum MessageDbSet::Organisation m_organisation; /*!< Database organisation. */
@@ -249,7 +251,7 @@ void TestTaskSendMessage::sendMessage(void)
 
 	/* Sending empty message must fail. */
 	task = new (::std::nothrow) TaskSendMessage(m_sender.userName,
-	    m_senderDbSet, transactionId, IsdsMessage(), recipientName,
+	    m_senderDbSet, transactionId, Isds::Message(), recipientName,
 	    recipientAddress, isPDZ);
 	QVERIFY(task != Q_NULLPTR);
 	task->setAutoDelete(false);
@@ -277,20 +279,28 @@ void TestTaskSendMessage::sendMessage(void)
 	delete task; task = Q_NULLPTR;
 }
 
-IsdsMessage TestTaskSendMessage::buildMessage(const QString &recipBox)
+Isds::Message TestTaskSendMessage::buildMessage(const QString &recipBox)
 {
-	IsdsMessage msg;
+	Isds::Envelope env;
+	QList<Isds::Document> docs;
+	Isds::Message msg;
 
 	QString dateTime(QDateTime::currentDateTimeUtc().toString(Qt::ISODate));
 
-	msg.envelope.dbIDRecipient = recipBox;
-	msg.envelope.dmAnnotation = QLatin1String("sending-test-") + dateTime;
+	env.setDbIDRecipient(recipBox);
+	env.setDmAnnotation(QLatin1String("sending-test-") + dateTime);
 
-	IsdsDocument document;
-	document.dmFileDescr = QLatin1String("priloha.txt");
-	document.data = QString("Priloha vygenerovana %1.").arg(dateTime).toUtf8();
+	{
+		Isds::Document doc;
+		doc.setFileDescr(QLatin1String("priloha.txt"));
+		doc.setFileMetaType(Isds::Type::FMT_MAIN);
+		doc.setMimeType(QStringLiteral(""));
+		doc.setBinaryContent(QString("Priloha vygenerovana %1.").arg(dateTime).toUtf8());
+		docs.append(doc);
+	}
 
-	msg.documents.append(document);
+	msg.setEnvelope(env);
+	msg.setDocuments(docs);
 
 	return msg;
 }

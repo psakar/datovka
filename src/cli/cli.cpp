@@ -115,13 +115,6 @@ const QString createErrorMsg(const QString &msg)
 }
 
 /* ========================================================================= */
-static void isds_document_free_void(void **document)
-/* ========================================================================= */
-{
-	isds_document_free((struct isds_document **) document);
-}
-
-/* ========================================================================= */
 bool checkAttributeIfExists(const QString &service, const QString &attribute)
 /* ========================================================================= */
 {
@@ -396,12 +389,12 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 			return CLI_ERROR;
 		}
 
-		QList<MessageDb::FileData> files =
+		QList<Isds::Document> files =
 		    messageDb->getMessageAttachments(map["dmID"].toLongLong());
 
-		foreach (const MessageDb::FileData &file, files) {
+		foreach (const Isds::Document &file, files) {
 
-			QString fileName = file.dmFileDescr;
+			QString fileName = file.fileDescr();
 			if (fileName.isEmpty()) {
 				errmsg = "Cannot save file because name "
 				    "of file missing";
@@ -409,7 +402,7 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 				return CLI_ERROR;
 			}
 
-			if (file.dmEncodedContent.isEmpty()) {
+			if (file.binaryContent().isEmpty()) {
 				errmsg = "Cannot save file " + fileName +
 				    "because file content missing";
 				qDebug() << CLI_PREFIX << errmsg;
@@ -418,8 +411,8 @@ cli_error getMsg(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 
 			fileName = path + QDir::separator() + fileName;
 
-			QByteArray data = QByteArray::fromBase64(file.dmEncodedContent);
-			enum WriteFileState ret = writeFile(fileName, data);
+			enum WriteFileState ret =
+			    writeFile(fileName, file.binaryContent());
 			if (WF_SUCCESS == ret) {
 				qDebug() << CLI_PREFIX << "Save file" <<
 				    fileName << "of message" <<
@@ -687,14 +680,10 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 }
 
 /* ========================================================================= */
-static
-struct isds_list *buildDocuments(const QStringList &filePaths)
+QList<Isds::Document> buildDocuments(const QStringList &filePaths)
 /* ========================================================================= */
 {
-	struct isds_document *document = NULL; /* Attachment. */
-	struct isds_list *documents = NULL; /* Attachment list (entry). */
-	struct isds_list *last = NULL; /* No need to free it explicitly. */
-
+	QList<Isds::Document> documents;
 	bool mainFile = true;
 
 	foreach (const QString &filePath, filePaths) {
@@ -703,6 +692,8 @@ struct isds_list *buildDocuments(const QStringList &filePaths)
 			continue;
 		}
 
+		Isds::Document document;
+
 		QFileInfo fi(filePath);
 		if (!fi.isReadable() || !fi.isFile()) {
 			logErrorNL(CLI_PREFIX "Wrong file name '%s' or file is missing.",
@@ -710,39 +701,10 @@ struct isds_list *buildDocuments(const QStringList &filePaths)
 			goto fail;
 		}
 
-		document = (struct isds_document *)
-		    malloc(sizeof(struct isds_document));
-		if (NULL == document) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
-		memset(document, 0, sizeof(struct isds_document));
-
-		// TODO - document is binary document only -> is_xml = false;
-		document->is_xml = false;
-
-		QString name = fi.fileName();
-		document->dmFileDescr = strdup(name.toUtf8().constData());
-		if (NULL == document->dmFileDescr) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
-
-		if (mainFile) {
-			document->dmFileMetaType = FILEMETATYPE_MAIN;
-			mainFile = false;
-		} else {
-			document->dmFileMetaType = FILEMETATYPE_ENCLOSURE;
-		}
-
-		document->dmMimeType = strdup("");
-		if (NULL == document->dmMimeType) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		document.setFileDescr(fi.fileName());
+		document.setFileMetaType(mainFile ?
+		    Isds::Type::FMT_MAIN : Isds::Type::FMT_ENCLOSURE);
+		document.setMimeType(QStringLiteral(""));
 
 		QFile file(QDir::fromNativeSeparators(filePath));
 		if (file.exists()) {
@@ -752,238 +714,100 @@ struct isds_list *buildDocuments(const QStringList &filePaths)
 				goto fail;
 			}
 		}
-		QByteArray bytes = file.readAll();
-		document->data_length = bytes.size();
-		document->data = malloc(bytes.size());
-		if (NULL == document->data) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
-		memcpy(document->data, bytes.data(), document->data_length);
 
-		/* Add document on the list of document. */
-		struct isds_list *newListItem = (struct isds_list *)
-		    malloc(sizeof(struct isds_list));
-		if (NULL == newListItem) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
-		newListItem->data = document; document = NULL;
-		newListItem->next = NULL;
-		newListItem->destructor = isds_document_free_void;
-		if (last == NULL) {
-			documents = last = newListItem;
-		} else {
-			last->next = newListItem;
-			last = newListItem;
-		}
-
+		document.setBinaryContent(file.readAll());
+		documents.append(document);
+		mainFile = false;
 	}
 
 	return documents;
-
 fail:
-	isds_document_free(&document);
-	isds_list_free(&documents);
-	return NULL;
+	return QList<Isds::Document>();
 }
 
 /* ========================================================================= */
-struct isds_envelope *buildEnvelope(const QMap <QString, QVariant> &map)
+Isds::Envelope buildEnvelope(const QMap <QString, QVariant> &map)
 /* ========================================================================= */
 {
-	struct isds_envelope *envelope = NULL; /* Message envelope. */
+	Isds::Envelope envelope;
 
-	envelope = (struct isds_envelope *)
-	    malloc(sizeof(struct isds_envelope));
-	if (envelope == NULL) {
-		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
-		goto fail;
-	}
-	memset(envelope, 0, sizeof(struct isds_envelope));
+	envelope.setDmAnnotation(map["dmAnnotation"].toString());
 
-	/* Set mandatory fields of envelope. */
-	envelope->dmID = NULL;
-	envelope->dmAnnotation = strdup(
-	    map["dmAnnotation"].toString().toUtf8().constData());
-	if (NULL == envelope->dmAnnotation) {
-		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
-		goto fail;
-	}
-
-	/* Set optional fields. */
 	if (map.contains("dmSenderIdent")) {
-		envelope->dmSenderIdent = strdup(
-		    map["dmSenderIdent"].toString().toUtf8().constData());
-		if (NULL == envelope->dmSenderIdent) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		envelope.setDmSenderIdent(map["dmSenderIdent"].toString());
 	}
 
 	if (map.contains("dmRecipientIdent")) {
-		envelope->dmRecipientIdent = strdup(
-		    map["dmRecipientIdent"].toString().toUtf8().constData());
-		if (NULL == envelope->dmRecipientIdent) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		envelope.setDmRecipientIdent(
+		    map["dmRecipientIdent"].toString());
 	}
 
 	if (map.contains("dmSenderRefNumber")) {
-		envelope->dmSenderRefNumber = strdup(
-		    map["dmSenderRefNumber"].toString().toUtf8().constData());
-		if (NULL == envelope->dmSenderRefNumber) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		envelope.setDmSenderRefNumber(
+		     map["dmSenderRefNumber"].toString());
 	}
 
 	if (map.contains("dmRecipientRefNumber")) {
-		envelope->dmRecipientRefNumber = strdup(
-		    map["dmRecipientRefNumber"].toString().toUtf8().constData());
-		if (NULL == envelope->dmRecipientRefNumber) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		envelope.setDmRecipientRefNumber(
+		    map["dmRecipientRefNumber"].toString());
 	}
 
 	if (map.contains("dmToHands")) {
-		envelope->dmToHands = strdup(
-		    map["dmToHands"].toString().toUtf8().constData());
-		if (NULL == envelope->dmToHands) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		envelope.setDmToHands(map["dmToHands"].toString());
 	}
 
 	if (map.contains("dmLegalTitleLaw")) {
-		envelope->dmLegalTitleLaw =
-		    (long int *) malloc(sizeof(long int));
-		if (NULL == envelope->dmLegalTitleLaw) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
-		*envelope->dmLegalTitleLaw =
-		    map["dmLegalTitleLaw"].toLongLong();
-	} else {
-		envelope->dmLegalTitleLaw = NULL;
+		envelope.setDmLegalTitleLaw(
+		    map["dmLegalTitleLaw"].toLongLong());
 	}
 
 	if (map.contains("dmLegalTitleYear")) {
-		envelope->dmLegalTitleYear =
-		    (long int *) malloc(sizeof(long int));
-		if (NULL == envelope->dmLegalTitleYear) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
-		*envelope->dmLegalTitleYear =
-		    map["dmLegalTitleYear"].toLongLong();
-	} else {
-		envelope->dmLegalTitleYear = NULL;
+		envelope.setDmLegalTitleYear(
+		    map["dmLegalTitleYear"].toLongLong());
 	}
 
 	if (map.contains("dmLegalTitleSect")) {
-		envelope->dmLegalTitleSect = strdup(
-		    map["dmLegalTitleSect"].toString().toUtf8().constData());
-		if (NULL == envelope->dmLegalTitleSect) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		envelope.setDmLegalTitleSect(
+		    map["dmLegalTitleSect"].toString());
 	}
 
 	if (map.contains("dmLegalTitlePar")) {
-		envelope->dmLegalTitlePar = strdup(
-		    map["dmLegalTitlePar"].toString().toUtf8().constData());
-		if (NULL == envelope->dmLegalTitlePar) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		envelope.setDmLegalTitlePar(map["dmLegalTitlePar"].toString());
 	}
 
 	if (map.contains("dmLegalTitlePoint")) {
-		envelope->dmLegalTitlePoint = strdup(
-		    map["dmLegalTitlePoint"].toString().toUtf8().constData());
-		if (NULL == envelope->dmLegalTitlePoint) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		envelope.setDmLegalTitlePoint(
+		    map["dmLegalTitlePoint"].toString());
+	}
+
+	if (map.contains("dmPersonalDelivery")) {
+		envelope.setDmPersonalDelivery(
+		    map["dmPersonalDelivery"].toString() != "0" ?
+		    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
+	}
+
+	if (map.contains("dmAllowSubstDelivery")) {
+		envelope.setDmAllowSubstDelivery(
+		    map["dmAllowSubstDelivery"].toString() != "0" ?
+		    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
 	}
 
 	if (map.contains("dmType")) {
-		envelope->dmType = strdup(
-		    map["dmType"].toString().toUtf8().constData());
-		if (NULL == envelope->dmType) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto fail;
-		}
+		envelope.setDmType(map["dmType"].toChar());
 	}
 
-	envelope->dmPersonalDelivery = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == envelope->dmPersonalDelivery) {
-		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
-		goto fail;
-	}
-	if (map.contains("dmPersonalDelivery")) {
-		*envelope->dmPersonalDelivery =
-		    map["dmPersonalDelivery"].toString() != "0";
-	} else {
-		*envelope->dmPersonalDelivery = false;
-	}
-
-	envelope->dmAllowSubstDelivery = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == envelope->dmAllowSubstDelivery) {
-		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
-		goto fail;
-	}
-	if (map.contains("dmAllowSubstDelivery")) {
-		*envelope->dmAllowSubstDelivery =
-		    map["dmAllowSubstDelivery"].toString() != "0";
-	} else {
-		*envelope->dmAllowSubstDelivery = true;
-	}
-
-	envelope->dmOVM = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == envelope->dmOVM) {
-		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
-		goto fail;
-	}
 	if (map.contains("dmOVM")) {
-		*envelope->dmOVM = map["dmOVM"].toString() != "0";
-	} else {
-		*envelope->dmOVM = true;
+		envelope.setDmOVM(map["dmOVM"].toString() != "0" ?
+		    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
 	}
 
-	envelope->dmPublishOwnID = (_Bool *) malloc(sizeof(_Bool));
-	if (NULL == envelope->dmPublishOwnID) {
-		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
-		goto fail;
-	}
 	if (map.contains("dmPublishOwnID")) {
-		*envelope->dmPublishOwnID =
-		    map["dmPublishOwnID"].toString() != "0";
-	} else {
-		*envelope->dmPublishOwnID = false;
+		envelope.setDmPublishOwnID(
+		    map["dmPublishOwnID"].toString() != "0" ?
+		    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
 	}
 
 	return envelope;
-
-fail:
-	isds_envelope_free(&envelope);
-	return NULL;
 }
 
 /* ========================================================================= */
@@ -991,51 +815,25 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
     MessageDbSet *msgDbSet, QString &errmsg)
 /* ========================================================================= */
 {
-	isds_error status = IE_ERROR;
-	cli_error ret = CLI_ERROR;
-	QStringList sendID;
-
 	qDebug() << CLI_PREFIX << "creating a new message...";
 
-	/* Sent message. */
-	struct isds_message *sent_message = NULL;
+	isds_error status = IE_ERROR;
+	struct isds_message *isdsMessage = NULL;
+	cli_error ret = CLI_ERROR;
+	QStringList sendID;
+	bool ok = false;
 
-	sent_message = (struct isds_message *)
-	    malloc(sizeof(struct isds_message));
-	if (sent_message == NULL) {
-		logErrorNL(CLI_PREFIX "%s", "Memory allocation failed.");
-		goto finish;
-	}
-	memset(sent_message, 0, sizeof(struct isds_message));
-
-	/* Attach envelope and attachment files to message structure. */
-	sent_message->documents =
-	    buildDocuments(map["dmAttachment"].toStringList());
-	if (NULL == sent_message->documents) {
-		goto finish;
-	}
-	sent_message->envelope = buildEnvelope(map);
-	if (NULL == sent_message->envelope) {
-		goto finish;
-	}
+	Isds::Envelope evelope = buildEnvelope(map);
+	Isds::Message message;
+	message.setDocuments(buildDocuments(map["dmAttachment"].toStringList()));
 
 	foreach (const QString &recipientId, map.value("dbIDRecipient").toStringList()) {
 
 		logInfo(CLI_PREFIX "Sending message to '%s'.\n",
 		    recipientId.toUtf8().constData());
 
-		if (NULL != sent_message->envelope->dbIDRecipient) {
-			free(sent_message->envelope->dbIDRecipient);
-			sent_message->envelope->dbIDRecipient = NULL;
-		}
-
-		sent_message->envelope->dbIDRecipient =
-		    strdup(recipientId.toUtf8().constData());
-		if (NULL == sent_message->envelope->dbIDRecipient) {
-			logErrorNL(CLI_PREFIX "%s",
-			    "Memory allocation failed.");
-			goto finish;
-		}
+		evelope.setDbIDRecipient(recipientId);
+		message.setEnvelope(evelope);
 
 		struct isds_ctx *session =
 		    GlobInstcs::isdsSessionsPtr->session(map["username"].toString());
@@ -1045,21 +843,23 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 			goto finish;
 		}
 
-		status = isds_send_message(session, sent_message);
+		isdsMessage = Isds::message2libisds(message, &ok);
+		if (!ok) {
+			ret = CLI_ERROR;
+			goto finish;
+		}
+
+		status = isds_send_message(session, isdsMessage);
 		QString err = isdsLongMessage(session);
 
 		if (IE_SUCCESS == status) {
 			/* Store new message into database. */
 			qint64 dmId =
-			    QString(sent_message->envelope->dmID).toLongLong();
+			    QString(isdsMessage->envelope->dmID).toLongLong();
 			const QString acntDbKey(AccountDb::keyFromLogin(
 			    map["username"].toString()));
-			const QString dbIDSender(
-			    GlobInstcs::accntDbPtr->dbId(acntDbKey));
-			const QString dmSender(
-			    GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
 			QDateTime deliveryTime = timevalToDateTime(
-			    sent_message->envelope->dmDeliveryTime);
+			    isdsMessage->envelope->dmDeliveryTime);
 			MessageDb *messageDb =
 			    msgDbSet->accessMessageDb(deliveryTime, true);
 			if (messageDb == NULL) {
@@ -1069,14 +869,23 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 				    + map["username"].toString();
 				qDebug() << CLI_PREFIX << errmsg;
 			} else {
-				messageDb->msgsInsertNewlySentMessageEnvelope(
-				    dmId, dbIDSender, dmSender, recipientId,
-				    "Databox ID: " + recipientId, "unknown",
-				    map["dmAnnotation"].toString());
+				bool ok = false;
+				Isds::Envelope envelope =
+				    Isds::libisds2envelope(isdsMessage->envelope, &ok);
+				envelope.setDmId(dmId);
+				envelope.setDbIDSender(GlobInstcs::accntDbPtr->dbId(acntDbKey));
+				envelope.setDmSender(GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
+				envelope.setDbIDRecipient(recipientId);
+				envelope.setDmRecipient("Databox ID: " + recipientId);
+				envelope.setDmRecipientAddress("unknown");
+				envelope.setDmAnnotation(map["dmAnnotation"].toString());
+				envelope.setDmMessageStatus(Isds::Type::MS_POSTED);
+				messageDb->insertMessageEnvelope(envelope,
+				     QString(), MessageDirection::MSG_SENT);
 			}
 			qDebug() << CLI_PREFIX << "message has been sent"
-			    << QString(sent_message->envelope->dmID);
-			sendID.append(sent_message->envelope->dmID);
+			    << QString(isdsMessage->envelope->dmID);
+			sendID.append(isdsMessage->envelope->dmID);
 			ret = CLI_SUCCESS;
 		} else {
 			errmsg = "Error while sending message! ISDS says: "
@@ -1088,10 +897,8 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 	}
 
 	printDataToStdOut(sendID);
-
 finish:
-	isds_message_free(&sent_message);
-
+	isds_message_free(&isdsMessage);
 	return ret;
 }
 

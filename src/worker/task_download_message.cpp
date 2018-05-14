@@ -117,6 +117,8 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadDeliveryInfo(
 	debugFuncCall();
 
 	isds_error status;
+	bool ok = false;
+	Isds::Message msg;
 
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
@@ -154,7 +156,14 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadDeliveryInfo(
 
 	Q_ASSERT(NULL != message);
 
-	if (Q_SUCCESS != Task::storeDeliveryInfo(signedMsg, dbSet, message)) {
+	msg = Isds::libisds2message(message, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds message to message.");
+		res =  DM_ERR;
+		goto fail;
+	}
+
+	if (Q_SUCCESS != Task::storeDeliveryInfo(signedMsg, dbSet, msg)) {
 		res = DM_DB_INS_ERR;
 		goto fail;
 	}
@@ -233,6 +242,13 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		return DM_ISDS_ERROR;
 	}
 
+	bool ok = false;
+	Isds::Message msg = Isds::libisds2message(message, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds message to message.");
+		return DM_ERR;
+	}
+
 	{
 		QString secKeyBeforeDownload(dbSet.secondaryKey(mId.deliveryTime));
 		QDateTime newDeliveryTime(timevalToDateTime(
@@ -254,16 +270,14 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 			}
 
 			/* Store envelope in new location. */
-			Task::storeEnvelope(msgDirect, dbSet,
-			    message->envelope);
+			Task::storeMessageEnvelope(msgDirect, dbSet, msg.envelope());
 		}
 		/* Update message delivery time. */
 		mId.deliveryTime = newDeliveryTime;
 	}
 
 	/* Store the message. */
-	Task::storeMessage(signedMsg, msgDirect, dbSet, message,
-	    progressLabel);
+	Task::storeMessage(signedMsg, msgDirect, dbSet, msg, progressLabel);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 90);
 

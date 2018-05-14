@@ -31,6 +31,7 @@
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/message_conversion.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
@@ -256,10 +257,17 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
 	}
 
 	/* Store envelope and message. */
-	if ((Q_SUCCESS != Task::storeEnvelope(direct, *(acnt.messageDbSet),
-	                      message->envelope)) ||
+	bool ok = false;
+	Isds::Message msg = Isds::libisds2message(message, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds message to message.");
+		return TaskImportZfo::IMP_ERR;
+	}
+
+	if ((Q_SUCCESS != Task::storeMessageEnvelope(direct,
+	        *(acnt.messageDbSet), msg.envelope())) ||
 	    (Q_SUCCESS != Task::storeMessage(true, direct, *(acnt.messageDbSet),
-	                      message, ""))) {
+	        msg, ""))) {
 		resultDesc = QObject::tr("File has not been imported because "
 		    "an error was detected during insertion process.");
 		return TaskImportZfo::IMP_DB_INS_ERR;
@@ -417,8 +425,15 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 		}
 	}
 
+	bool ok = false;
+	Isds::Message msg = Isds::libisds2message(message, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds message to message.");
+		return IMP_ERR;
+	}
+
 	if (Q_SUCCESS !=
-	    Task::storeDeliveryInfo(true, *(acnt.messageDbSet), message)) {
+	    Task::storeDeliveryInfo(true, *(acnt.messageDbSet), msg)) {
 		resultDesc = QObject::tr("File has not been imported because "
 		    "an error was detected during insertion process.");
 		return TaskImportZfo::IMP_DB_INS_ERR;

@@ -52,6 +52,7 @@
 #include "src/io/dbs.h"
 #include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
+#include "src/isds/type_conversion.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 
@@ -442,9 +443,9 @@ fail:
 	return QList<SntEntry>();
 }
 
-MessageDb::PartialEnvelopeData MessageDb::getMessageReplyData(qint64 dmId) const
+const Isds::Envelope MessageDb::getMessageReplyData(qint64 dmId) const
 {
-	PartialEnvelopeData envData;
+	Isds::Envelope envData;
 	QSqlQuery query(m_db);
 	QString queryStr = "SELECT dbIDSender, dmSender, dmSenderAddress, "
 	    "dmSenderType, dbIDRecipient, dmRecipient, dmRecipientAddress, "
@@ -463,27 +464,27 @@ MessageDb::PartialEnvelopeData MessageDb::getMessageReplyData(qint64 dmId) const
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		envData.dbIDSender = query.value(0).toString();
-		envData.dmSender = query.value(1).toString();
-		envData.dmSenderAddress = query.value(2).toString();
-		envData.dmSenderType = query.value(3).toString();
-		envData.dbIDRecipient = query.value(4).toString();
-		envData.dmRecipient = query.value(5).toString();
-		envData.dmRecipientAddress = query.value(6).toString();
-		envData.dmAnnotation = query.value(7).toString();
-		envData.dmSenderRefNumber = query.value(8).toString();
-		envData.dmSenderIdent = query.value(9).toString();
-		envData.dmRecipientRefNumber = query.value(10).toString();
-		envData.dmRecipientIdent = query.value(11).toString();
-		envData.dmToHands = query.value(12).toString();
-		envData.dmPersonalDelivery = query.value(13).toBool();
-		envData.dmAllowSubstDelivery = query.value(14).toBool();
-		envData.dmLegalTitleLaw = query.value(15).toString();
-		envData.dmLegalTitleYear = query.value(16).toString();
-		envData.dmLegalTitleSect = query.value(17).toString();
-		envData.dmLegalTitlePar = query.value(18).toString();
-		envData.dmLegalTitlePoint = query.value(19).toString();
-		envData.dmType = query.value(20).toString();
+		envData.setDbIDSender(query.value(0).toString());
+		envData.setDmSender(query.value(1).toString());
+		envData.setDmSenderAddress(query.value(2).toString());
+		envData.setDmSenderType(Isds::variant2DbType(query.value(3)));
+		envData.setDbIDRecipient(query.value(4).toString());
+		envData.setDmRecipient(query.value(5).toString());
+		envData.setDmRecipientAddress(query.value(6).toString());
+		envData.setDmAnnotation(query.value(7).toString());
+		envData.setDmSenderRefNumber(query.value(8).toString());
+		envData.setDmSenderIdent(query.value(9).toString());
+		envData.setDmRecipientRefNumber(query.value(10).toString());
+		envData.setDmRecipientIdent(query.value(11).toString());
+		envData.setDmToHands(query.value(12).toString());
+		envData.setDmPersonalDelivery(Isds::variant2NilBool(query.value(13)));
+		envData.setDmAllowSubstDelivery(Isds::variant2NilBool(query.value(14)));
+		envData.setDmLegalTitleLawStr(query.value(15).toString());
+		envData.setDmLegalTitleYearStr(query.value(16).toString());
+		envData.setDmLegalTitleSect(query.value(17).toString());
+		envData.setDmLegalTitlePar(query.value(18).toString());
+		envData.setDmLegalTitlePoint(query.value(19).toString());
+		envData.setDmType((!query.value(20).isNull()) ? query.value(20).toChar() : QChar());
 		return envData;
 	} else {
 		logErrorNL(
@@ -491,7 +492,7 @@ MessageDb::PartialEnvelopeData MessageDb::getMessageReplyData(qint64 dmId) const
 		    query.lastError().text().toUtf8().constData());
 	}
 fail:
-	return PartialEnvelopeData();
+	return Isds::Envelope();
 }
 
 int MessageDb::getMessageType(qint64 dmId) const
@@ -1527,12 +1528,13 @@ fail:
 	return QString();
 }
 
-QList<MessageDb::FileData> MessageDb::getMessageAttachments(qint64 msgId) const
+QList<Isds::Document> MessageDb::getMessageAttachments(qint64 msgId) const
 {
 	QSqlQuery query(m_db);
-	QList<FileData> retList;
-	QString queryStr = "SELECT _dmFileDescr, dmEncodedContent FROM files "
-	    "WHERE message_id = :msgId";
+	QList<Isds::Document> documents;
+	QString queryStr = "SELECT _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
+	    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent "
+	    "FROM files WHERE message_id = :msgId";
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
@@ -1543,17 +1545,24 @@ QList<MessageDb::FileData> MessageDb::getMessageAttachments(qint64 msgId) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
-			retList.append(FileData(query.value(0).toString(),
-			    query.value(1).toByteArray()));
+			Isds::Document document;
+			document.setFileDescr(query.value(0).toString());
+			document.setUpFileGuid(query.value(1).toString());
+			document.setFileGuid(query.value(2).toString());
+			document.setMimeType(query.value(3).toString());
+			document.setFormat(query.value(4).toString());
+			document.setFileMetaType(Isds::variant2FileMetaType(query.value(5)));
+			document.setBase64Content(query.value(6).toString());
+			documents.append(document);
 			query.next();
 		}
-		return retList;
+		return documents;
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 	}
 fail:
-	return QList<FileData>();
+	return QList<Isds::Document>();
 }
 
 QList<MessageDb::AttachmentEntry> MessageDb::attachEntries(qint64 msgId) const
@@ -1596,89 +1605,17 @@ fail:
 	return QList<AttachmentEntry>();
 }
 
-bool MessageDb::msgsInsertNewlySentMessageEnvelope(qint64 dmId,
-    const QString &dbIDSender, const QString &dmSender,
-    const QString &dbIDRecipient, const QString &dmRecipient,
-    const QString &dmRecipientAddress, const QString &dmAnnotation)
+bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
+    const QString &_origin, enum MessageDirection msgDirect)
 {
 	QSqlQuery query(m_db);
 
-	QString queryStr = "INSERT INTO messages ("
-	    "dmID, dbIDSender, dmSender, "
-	    "dmRecipient, dbIDRecipient, dmRecipientAddress, dmAnnotation, "
-	    "dmPersonalDelivery, dmMessageStatus "
-	    ") VALUES (:dmId, :dbIDSender, :dmSender, "
-	    ":dmRecipient, :dbIDRecipient, :dmRecipientAddress, :dmAnnotation, "
-	    ":dmPersonalDelivery, :dmMessageStatus)";
-
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+	if (Q_UNLIKELY(envelope.dmId() < 0)) {
+		Q_ASSERT(0);
+		logErrorNL("%s",
+		    "Cannot insert envelope data with invalid identifier.");
 		return false;
 	}
-
-	query.bindValue(":dmId", dmId);
-	query.bindValue(":dbIDSender", dbIDSender);
-	query.bindValue(":dmSender", dmSender);
-	query.bindValue(":dmRecipient", dmRecipient);
-	query.bindValue(":dmRecipientAddress", dmRecipientAddress);
-	query.bindValue(":dbIDRecipient", dbIDRecipient);
-	query.bindValue(":dmAnnotation", dmAnnotation);
-	query.bindValue(":dmPersonalDelivery", 0);
-	query.bindValue(":dmMessageStatus", 1);
-
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-
-	queryStr = "INSERT INTO supplementary_message_data ("
-	    "message_id, message_type, read_locally, download_date, "
-	    "custom_data) VALUES (:dmId, :message_type, :read_locally, "
-	    ":download_date, :custom_data)";
-	if (!query.prepare(queryStr)) {
-		logErrorNL("Cannot prepare SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-	query.bindValue(":dmId", dmId);
-	query.bindValue(":message_type", TYPE_SENT);
-	query.bindValue(":read_locally", true);
-	query.bindValue(":download_date",
-	    qDateTimeToDbFormat(QDateTime::currentDateTime()));
-	query.bindValue(":custom_data", "null");
-
-	if (!query.exec()) {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
-		return false;
-	}
-
-	return setMessageProcessState(dmId, UNSETTLED);
-}
-
-bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
-    const QString &_origin, const QString &dbIDSender,
-    const QString &dmSender, const QString &dmSenderAddress,
-    int dmSenderType, const QString &dmRecipient,
-    const QString &dmRecipientAddress,
-    const QString &dmAmbiguousRecipient,
-    const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
-    const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
-    const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
-    const QString &dmAnnotation, const QString &dmRecipientRefNumber,
-    const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
-    const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
-    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
-    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
-    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-    const QByteArray &dmQTimestampBase64, const QString &dmDeliveryTime,
-    const QString &dmAcceptanceTime, int dmMessageStatus,
-    int dmAttachmentSize, const QString &_dmType,
-    enum MessageDirection msgDirect)
-{
-	QSqlQuery query(m_db);
 
 	QString queryStr = "INSERT INTO messages ("
 	    "dmID, _origin, dbIDSender, dmSender, "
@@ -1710,39 +1647,39 @@ bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":dmId", dmId);
+	query.bindValue(":dmId", envelope.dmId());
 	query.bindValue(":_origin", _origin);
-	query.bindValue(":dbIDSender", dbIDSender);
-	query.bindValue(":dmSender", dmSender);
-	query.bindValue(":dmSenderAddress", dmSenderAddress);
-	query.bindValue(":dmSenderType", dmSenderType);
-	query.bindValue(":dmRecipient", dmRecipient);
-	query.bindValue(":dmRecipientAddress", dmRecipientAddress);
-	query.bindValue(":dmAmbiguousRecipient", dmAmbiguousRecipient);
-	query.bindValue(":dmSenderOrgUnit", dmSenderOrgUnit);
-	query.bindValue(":dmSenderOrgUnitNum", dmSenderOrgUnitNum);
-	query.bindValue(":dbIDRecipient", dbIDRecipient);
-	query.bindValue(":dmRecipientOrgUnit", dmRecipientOrgUnit);
-	query.bindValue(":dmRecipientOrgUnitNum", dmRecipientOrgUnitNum);
-	query.bindValue(":dmToHands", dmToHands);
-	query.bindValue(":dmAnnotation", dmAnnotation);
-	query.bindValue(":dmRecipientRefNumber", dmRecipientRefNumber);
-	query.bindValue(":dmSenderRefNumber", dmSenderRefNumber);
-	query.bindValue(":dmRecipientIdent", dmRecipientIdent);
-	query.bindValue(":dmSenderIdent", dmSenderIdent);
-	query.bindValue(":dmLegalTitleLaw", dmLegalTitleLaw);
-	query.bindValue(":dmLegalTitleYear", dmLegalTitleYear);
-	query.bindValue(":dmLegalTitleSect", dmLegalTitleSect);
-	query.bindValue(":dmLegalTitlePar", dmLegalTitlePar);
-	query.bindValue(":dmLegalTitlePoint", dmLegalTitlePoint);
-	query.bindValue(":dmPersonalDelivery", dmPersonalDelivery);
-	query.bindValue(":dmAllowSubstDelivery", dmAllowSubstDelivery);
-	query.bindValue(":dmQTimestamp", dmQTimestampBase64);
-	query.bindValue(":dmDeliveryTime", dmDeliveryTime);
-	query.bindValue(":dmAcceptanceTime", dmAcceptanceTime);
-	query.bindValue(":dmMessageStatus", dmMessageStatus);
-	query.bindValue(":dmAttachmentSize", dmAttachmentSize);
-	query.bindValue(":_dmType", _dmType);
+	query.bindValue(":dbIDSender", envelope.dbIDSender());
+	query.bindValue(":dmSender", envelope.dmSender());
+	query.bindValue(":dmSenderAddress", envelope.dmSenderAddress());
+	query.bindValue(":dmSenderType", Isds::dbType2Variant(envelope.dmSenderType()));
+	query.bindValue(":dmRecipient", envelope.dmRecipient());
+	query.bindValue(":dmRecipientAddress", envelope.dmRecipientAddress());
+	query.bindValue(":dmAmbiguousRecipient", Isds::nilBool2Variant(envelope.dmAmbiguousRecipient()));
+	query.bindValue(":dmSenderOrgUnit", envelope.dmSenderOrgUnit());
+	query.bindValue(":dmSenderOrgUnitNum", envelope.dmSenderOrgUnitNumStr());
+	query.bindValue(":dbIDRecipient", envelope.dbIDRecipient());
+	query.bindValue(":dmRecipientOrgUnit", envelope.dmRecipientOrgUnit());
+	query.bindValue(":dmRecipientOrgUnitNum", envelope.dmRecipientOrgUnitNumStr());
+	query.bindValue(":dmToHands", envelope.dmToHands());
+	query.bindValue(":dmAnnotation", envelope.dmAnnotation());
+	query.bindValue(":dmRecipientRefNumber", envelope.dmRecipientRefNumber());
+	query.bindValue(":dmSenderRefNumber", envelope.dmSenderRefNumber());
+	query.bindValue(":dmRecipientIdent", envelope.dmRecipientIdent());
+	query.bindValue(":dmSenderIdent", envelope.dmSenderIdent());
+	query.bindValue(":dmLegalTitleLaw", envelope.dmLegalTitleLawStr());
+	query.bindValue(":dmLegalTitleYear", envelope.dmLegalTitleYearStr());
+	query.bindValue(":dmLegalTitleSect", envelope.dmLegalTitleSect());
+	query.bindValue(":dmLegalTitlePar", envelope.dmLegalTitlePar());
+	query.bindValue(":dmLegalTitlePoint", envelope.dmLegalTitlePoint());
+	query.bindValue(":dmPersonalDelivery", Isds::nilBool2Variant(envelope.dmPersonalDelivery()));
+	query.bindValue(":dmAllowSubstDelivery", Isds::nilBool2Variant(envelope.dmAllowSubstDelivery()));
+	query.bindValue(":dmQTimestamp", envelope.dmQTimestamp().toBase64());
+	query.bindValue(":dmDeliveryTime", qDateTimeToDbFormat(envelope.dmDeliveryTime()));
+	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
+	query.bindValue(":dmMessageStatus", Isds::dmState2Variant(envelope.dmMessageStatus()));
+	query.bindValue(":dmAttachmentSize", Isds::nonNegativeLong2Variant(envelope.dmAttachmentSize()));
+	query.bindValue(":_dmType", (!envelope.dmType().isNull()) ? envelope.dmType() : QVariant());
 
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -1759,13 +1696,14 @@ bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":dmId", dmId);
+	query.bindValue(":dmId", envelope.dmId());
 	if (MSG_RECEIVED == msgDirect) {
 		query.bindValue(":message_type", TYPE_RECEIVED);
+		query.bindValue(":read_locally", false);
 	} else {
 		query.bindValue(":message_type", TYPE_SENT);
+		query.bindValue(":read_locally", true);
 	}
-	query.bindValue(":read_locally", false);
 	query.bindValue(":download_date",
 	    qDateTimeToDbFormat(QDateTime::currentDateTime()));
 	query.bindValue(":custom_data", "null");
@@ -1776,31 +1714,13 @@ bool MessageDb::msgsInsertMessageEnvelope(qint64 dmId,
 		goto fail;
 	}
 
-	return setMessageProcessState(dmId, UNSETTLED);
-
+	return setMessageProcessState(envelope.dmId(), UNSETTLED);
 fail:
 	return false;
 }
 
-bool MessageDb::msgsUpdateMessageEnvelope(qint64 dmId,
-    const QString &_origin, const QString &dbIDSender,
-    const QString &dmSender, const QString &dmSenderAddress,
-    int dmSenderType, const QString &dmRecipient,
-    const QString &dmRecipientAddress,
-    const QString &dmAmbiguousRecipient,
-    const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
-    const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
-    const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
-    const QString &dmAnnotation, const QString &dmRecipientRefNumber,
-    const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
-    const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
-    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
-    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
-    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-    const QByteArray &dmQTimestampBase64, const QString &dmDeliveryTime,
-    const QString &dmAcceptanceTime, int dmMessageStatus,
-    int dmAttachmentSize, const QString &_dmType,
-    enum MessageDirection msgDirect)
+bool MessageDb::updateMessageEnvelope(const Isds::Envelope &envelope,
+    const QString &_origin, enum MessageDirection msgDirect)
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "UPDATE messages SET "
@@ -1834,44 +1754,46 @@ bool MessageDb::msgsUpdateMessageEnvelope(qint64 dmId,
 	    "dmMessageStatus = :dmMessageStatus, "
 	    "dmAttachmentSize = :dmAttachmentSize, "
 	    "_dmType = :_dmType WHERE dmID = :dmId";
+
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":dmId", dmId);
+	query.bindValue(":dmId", envelope.dmId());
 	query.bindValue(":_origin", _origin);
-	query.bindValue(":dbIDSender", dbIDSender);
-	query.bindValue(":dmSender", dmSender);
-	query.bindValue(":dmSenderAddress", dmSenderAddress);
-	query.bindValue(":dmSenderType", dmSenderType);
-	query.bindValue(":dmRecipient", dmRecipient);
-	query.bindValue(":dmRecipientAddress", dmRecipientAddress);
-	query.bindValue(":dmAmbiguousRecipient", dmAmbiguousRecipient);
-	query.bindValue(":dmSenderOrgUnit", dmSenderOrgUnit);
-	query.bindValue(":dmSenderOrgUnitNum", dmSenderOrgUnitNum);
-	query.bindValue(":dbIDRecipient", dbIDRecipient);
-	query.bindValue(":dmRecipientOrgUnit", dmRecipientOrgUnit);
-	query.bindValue(":dmRecipientOrgUnitNum", dmRecipientOrgUnitNum);
-	query.bindValue(":dmToHands", dmToHands);
-	query.bindValue(":dmAnnotation", dmAnnotation);
-	query.bindValue(":dmRecipientRefNumber", dmRecipientRefNumber);
-	query.bindValue(":dmSenderRefNumber", dmSenderRefNumber);
-	query.bindValue(":dmRecipientIdent", dmRecipientIdent);
-	query.bindValue(":dmSenderIdent", dmSenderIdent);
-	query.bindValue(":dmLegalTitleLaw", dmLegalTitleLaw);
-	query.bindValue(":dmLegalTitleYear", dmLegalTitleYear);
-	query.bindValue(":dmLegalTitleSect", dmLegalTitleSect);
-	query.bindValue(":dmLegalTitlePar", dmLegalTitlePar);
-	query.bindValue(":dmLegalTitlePoint", dmLegalTitlePoint);
-	query.bindValue(":dmPersonalDelivery", dmPersonalDelivery);
-	query.bindValue(":dmAllowSubstDelivery", dmAllowSubstDelivery);
-	query.bindValue(":dmQTimestamp", dmQTimestampBase64);
-	query.bindValue(":dmDeliveryTime", dmDeliveryTime);
-	query.bindValue(":dmAcceptanceTime", dmAcceptanceTime);
-	query.bindValue(":dmMessageStatus", dmMessageStatus);
-	query.bindValue(":dmAttachmentSize", dmAttachmentSize);
-	query.bindValue(":_dmType", _dmType);
+	query.bindValue(":dbIDSender", envelope.dbIDSender());
+	query.bindValue(":dmSender", envelope.dmSender());
+	query.bindValue(":dmSenderAddress", envelope.dmSenderAddress());
+	query.bindValue(":dmSenderType", Isds::dbType2Variant(envelope.dmSenderType()));
+	query.bindValue(":dmRecipient", envelope.dmRecipient());
+	query.bindValue(":dmRecipientAddress", envelope.dmRecipientAddress());
+	query.bindValue(":dmAmbiguousRecipient", Isds::nilBool2Variant(envelope.dmAmbiguousRecipient()));
+	query.bindValue(":dmSenderOrgUnit", envelope.dmSenderOrgUnit());
+	query.bindValue(":dmSenderOrgUnitNum", envelope.dmSenderOrgUnitNumStr());
+	query.bindValue(":dbIDRecipient", envelope.dbIDRecipient());
+	query.bindValue(":dmRecipientOrgUnit", envelope.dmRecipientOrgUnit());
+	query.bindValue(":dmRecipientOrgUnitNum", envelope.dmRecipientOrgUnitNumStr());
+	query.bindValue(":dmToHands", envelope.dmToHands());
+	query.bindValue(":dmAnnotation", envelope.dmAnnotation());
+	query.bindValue(":dmRecipientRefNumber", envelope.dmRecipientRefNumber());
+	query.bindValue(":dmSenderRefNumber", envelope.dmSenderRefNumber());
+	query.bindValue(":dmRecipientIdent", envelope.dmRecipientIdent());
+	query.bindValue(":dmSenderIdent", envelope.dmSenderIdent());
+	query.bindValue(":dmLegalTitleLaw", envelope.dmLegalTitleLawStr());
+	query.bindValue(":dmLegalTitleYear", envelope.dmLegalTitleYearStr());
+	query.bindValue(":dmLegalTitleSect", envelope.dmLegalTitleSect());
+	query.bindValue(":dmLegalTitlePar", envelope.dmLegalTitlePar());
+	query.bindValue(":dmLegalTitlePoint", envelope.dmLegalTitlePoint());
+	query.bindValue(":dmPersonalDelivery", Isds::nilBool2Variant(envelope.dmPersonalDelivery()));
+	query.bindValue(":dmAllowSubstDelivery", Isds::nilBool2Variant(envelope.dmAllowSubstDelivery()));
+	query.bindValue(":dmQTimestamp", envelope.dmQTimestamp().toBase64());
+	query.bindValue(":dmDeliveryTime", qDateTimeToDbFormat(envelope.dmDeliveryTime()));
+	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
+	query.bindValue(":dmMessageStatus", Isds::dmState2Variant(envelope.dmMessageStatus()));
+	query.bindValue(":dmAttachmentSize", Isds::nonNegativeLong2Variant(envelope.dmAttachmentSize()));
+	query.bindValue(":_dmType", (!envelope.dmType().isNull()) ? envelope.dmType() : QVariant());
+
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -1886,7 +1808,7 @@ bool MessageDb::msgsUpdateMessageEnvelope(qint64 dmId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":dmId", dmId);
+	query.bindValue(":dmId", envelope.dmId());
 	if (MSG_RECEIVED == msgDirect) {
 		query.bindValue(":message_type", TYPE_RECEIVED);
 	} else {
@@ -2298,10 +2220,7 @@ fail:
 }
 
 bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
-    const QString &dmFileDescr, const QString &dmUpFileGuid,
-    const QString &dmFileGuid, const QString &dmMimeType,
-    const QString &dmFormat, const QString &dmFileMetaType,
-    const QByteArray &dmEncodedContentBase64)
+    const Isds::Document &document)
 {
 	QSqlQuery query(m_db);
 	int fileId = -1;
@@ -2316,9 +2235,9 @@ bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
-	query.bindValue(":dmFileDescr", dmFileDescr);
-	query.bindValue(":dmMimeType", dmMimeType);
-	query.bindValue(":dmEncodedContent", dmEncodedContentBase64);
+	query.bindValue(":dmFileDescr", document.fileDescr());
+	query.bindValue(":dmMimeType", document.mimeType());
+	query.bindValue(":dmEncodedContent", document.base64Content());
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -2354,13 +2273,13 @@ bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
-	query.bindValue(":_dmFileDescr", dmFileDescr);
-	query.bindValue(":_dmUpFileGuid", dmUpFileGuid);
-	query.bindValue(":_dmFileGuid", dmFileGuid);
-	query.bindValue(":_dmMimeType", dmMimeType);
-	query.bindValue(":_dmFormat", dmFormat);
-	query.bindValue(":_dmFileMetaType", dmFileMetaType);
-	query.bindValue(":dmEncodedContent", dmEncodedContentBase64);
+	query.bindValue(":_dmFileDescr", document.fileDescr());
+	query.bindValue(":_dmUpFileGuid", document.upFileGuid());
+	query.bindValue(":_dmFileGuid", document.fileGuid());
+	query.bindValue(":_dmMimeType", document.mimeType());
+	query.bindValue(":_dmFormat", document.format());
+	query.bindValue(":_dmFileMetaType", Isds::fileMetaType2Variant(document.fileMetaType()));
+	query.bindValue(":dmEncodedContent", document.base64Content());
 	if (-1 != fileId) {
 		query.bindValue(":fileId", fileId);
 	}
@@ -2396,7 +2315,7 @@ fail:
 }
 
 bool MessageDb::insertOrUpdateMessageHash(qint64 dmId,
-    const QByteArray &valueBase64, const QString &algorithm)
+     const Isds::Hash &hash)
 {
 	QSqlQuery query(m_db);
 	int hashId= -1;
@@ -2433,8 +2352,8 @@ bool MessageDb::insertOrUpdateMessageHash(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":value", valueBase64);
-	query.bindValue(":algorithm", algorithm);
+	query.bindValue(":value", hash.base64Value());
+	query.bindValue(":algorithm", Isds::hashAlg2Variant(hash.algorithm()));
 	if (-1 != hashId) {
 		query.bindValue(":hashId", hashId);
 	}
@@ -2449,8 +2368,7 @@ fail:
 }
 
 bool MessageDb::insertOrUpdateMessageEvent(qint64 dmId,
-    const QString &dmEventTime, const QString &dmEventType,
-    const QString &dmEventDescr)
+    const Isds::Event &event)
 {
 	QSqlQuery query(m_db);
 	int eventId = -1;
@@ -2463,7 +2381,7 @@ bool MessageDb::insertOrUpdateMessageEvent(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":message_id", dmId);
-	query.bindValue(":dmEventTime", dmEventTime);
+	query.bindValue(":dmEventTime", qDateTimeToDbFormat(event.time()));
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -2489,9 +2407,11 @@ bool MessageDb::insertOrUpdateMessageEvent(qint64 dmId,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
+
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":dmEventTime", dmEventTime);
-	query.bindValue(":dmEventDescr", dmEventType + dmEventDescr);
+	query.bindValue(":dmEventTime", qDateTimeToDbFormat(event.time()));
+	query.bindValue(":dmEventDescr", Isds::Event::type2string(event.type())
+	    + QLatin1String(": ") + event.descr());
 	if (-1 != eventId) {
 		query.bindValue(":eventId", eventId);
 	}
@@ -2996,9 +2916,11 @@ fail:
 	return false;
 }
 
-MessageDb::MessageHash MessageDb::getMessageHash(qint64 dmId) const
+const Isds::Hash MessageDb::getMessageHash(qint64 dmId) const
 {
 	QSqlQuery query(m_db);
+	Isds::Hash hash;
+
 	QString queryStr = "SELECT value, _algorithm FROM hashes WHERE "
 	    "message_id = :dmId";
 
@@ -3011,15 +2933,16 @@ MessageDb::MessageHash MessageDb::getMessageHash(qint64 dmId) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
-			return MessageHash(query.value(0).toByteArray(),
-			    query.value(1).toString());
+			hash.setBase64Value(query.value(0).toString());
+			hash.setAlgorithm(Isds::variant2HashAlg(query.value(1)));
+			return hash;
 		}
 	} else {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 	}
 fail:
-	return MessageHash();
+	return Isds::Hash();
 }
 
 bool MessageDb::msgsDeleteMessageData(qint64 dmId) const

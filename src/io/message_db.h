@@ -33,6 +33,9 @@
 #include <QVector>
 
 #include "src/common.h"
+#include "src/isds/message_interface.h"
+#include "src/isds/message_functions.h"
+#include "src/isds/message_conversion.h"
 #include "src/datovka_shared/io/sqlite/db.h"
 
 #define INVALID_YEAR "inv"
@@ -227,31 +230,6 @@ public:
 	};
 
 	/*!
-	 * @brief File entry data.
-	 */
-	class FileData {
-	public:
-		QString dmFileDescr; /*!< File name. */
-		QByteArray dmEncodedContent; /*!< Base64-encoded file content. */
-
-		FileData(void)
-		    : dmFileDescr(), dmEncodedContent()
-		{ }
-		FileData(const QString &fileDescr,
-		    const QByteArray &encodedContent)
-		    :  dmFileDescr(fileDescr), dmEncodedContent(encodedContent)
-		{ }
-		~FileData(void)
-		{ }
-
-		bool isValid(void) const
-		{
-			return (!dmFileDescr.isEmpty()) &&
-			    (!dmEncodedContent.isEmpty());
-		}
-	};
-
-	/*!
 	 * @brief Attachment data used to fill attachment model.
 	 */
 	class AttachmentEntry {
@@ -280,31 +258,6 @@ public:
 		}
 	};
 
-	class PartialEnvelopeData {
-	public:
-		QString dbIDSender;
-		QString dmSender;
-		QString dmSenderAddress;
-		QString dmSenderType;
-		QString dbIDRecipient;
-		QString dmRecipient;
-		QString dmRecipientAddress;
-		QString dmAnnotation;
-		QString dmSenderRefNumber;
-		QString dmSenderIdent;
-		QString dmRecipientRefNumber;
-		QString dmRecipientIdent;
-		QString dmToHands;
-		bool dmPersonalDelivery;
-		bool dmAllowSubstDelivery;
-		QString dmLegalTitleLaw;
-		QString dmLegalTitleYear;
-		QString dmLegalTitleSect;
-		QString dmLegalTitlePar;
-		QString dmLegalTitlePoint;
-		QString dmType;
-	};
-
 	class ContactEntry {
 	public:
 		qint64 dmId; /*!< Message id. */
@@ -323,25 +276,6 @@ public:
 		QString dmSender;
 	};
 
-	class MessageHash {
-	public:
-		QByteArray valueBase64; /*!< Base-64 encoded hash value. */
-		QString alg; /*!< Algorithm identifier. */
-
-		MessageHash(void)
-		    : valueBase64(), alg()
-		{ }
-
-		MessageHash(const QByteArray &b64, const QString &a)
-		    : valueBase64(b64), alg(a)
-		{ }
-
-		bool isValid(void)
-		{
-			return (!valueBase64.isEmpty()) && (!alg.isEmpty());
-		}
-	};
-
 	/*!
 	 * @brief Constructor.
 	 *
@@ -350,14 +284,12 @@ public:
 	explicit MessageDb(const QString &connectionName);
 
 	/*!
-	 * @brief Generate information for reply dialogue.
+	 * @brief Get message envelope info for reply/forward dialogue.
 	 *
 	 * @param[in] dmId  Message id.
-	 * @return Vector containing title, senderId, sender, senderAddress,
-	 *     mesageType, senderRefNumber.
-	 *     Returns empty vector in failure.
+	 * @return Message envelope structure. Returns empty structure if failure.
 	 */
-	PartialEnvelopeData getMessageReplyData(qint64 dmId) const;
+	const Isds::Envelope getMessageReplyData(qint64 dmId) const;
 
 	/*!
 	 * @brief Return message type (sent or received).
@@ -433,12 +365,12 @@ public:
 	QString deliveryInfoHtmlToPdf(qint64 dmId) const;
 
 	/*!
-	 * @brief Return fileList related to given message.
+	 * @brief Return attachments related to given message.
 	 *
 	 * @param[in] msgId  Message identifier.
-	 * @return List of files and their attributes.
+	 * @return List of attachment structure.
 	 */
-	QList<FileData> getMessageAttachments(qint64 msgId) const;
+	QList<Isds::Document> getMessageAttachments(qint64 msgId) const;
 
 	/*!
 	 * @brief Return list of attachment entries related to given message.
@@ -449,64 +381,26 @@ public:
 	QList<AttachmentEntry> attachEntries(qint64 msgId) const;
 
 	/*!
-	 * @brief Insert newly sent message into messages table.
+	 * @brief Insert message envelope into database.
 	 *
+	 * @param[in] envelope Message envelope structure.
+	 * @param[in] _origin Internal download identifier.
+	 * @param[in] msgDirect Message orientation.
 	 * @return True on success.
 	 */
-	bool msgsInsertNewlySentMessageEnvelope(qint64 dmId,
-	    const QString &dbIDSender, const QString &dmSender,
-	    const QString &dbIDRecipient, const QString &dmRecipient,
-	    const QString &dmRecipientAddress, const QString &dmAnnotation);
+	bool insertMessageEnvelope(const Isds::Envelope &envelope,
+	    const QString &_origin, enum MessageDirection msgDirect);
 
 	/*!
-	 * @brief Insert message envelope into messages table.
+	 * @brief Update message envelope in database.
 	 *
+	 * @param[in] envelope Message envelope structure.
+	 * @param[in] _origin Internal download identifier.
+	 * @param[in] msgDirect Message orientation.
 	 * @return True on success.
 	 */
-	bool msgsInsertMessageEnvelope(qint64 dmId,
-	    const QString &_origin, const QString &dbIDSender,
-	    const QString &dmSender, const QString &dmSenderAddress,
-	    int dmSenderType, const QString &dmRecipient,
-	    const QString &dmRecipientAddress,
-	    const QString &dmAmbiguousRecipient,
-	    const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
-	    const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
-	    const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
-	    const QString &dmAnnotation, const QString &dmRecipientRefNumber,
-	    const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
-	    const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
-	    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
-	    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
-	    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-	    const QByteArray &dmQTimestampBase64,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    int dmMessageStatus, int dmAttachmentSize, const QString &_dmType,
-	    enum MessageDirection msgDirect);
-
-	/*!
-	 * @brief Update message envelope into messages table.
-	 *
-	 * @return True on success.
-	 */
-	bool msgsUpdateMessageEnvelope(qint64 dmId,
-	    const QString &_origin, const QString &dbIDSender,
-	    const QString &dmSender, const QString &dmSenderAddress,
-	    int dmSenderType, const QString &dmRecipient,
-	    const QString &dmRecipientAddress,
-	    const QString &dmAmbiguousRecipient,
-	    const QString &dmSenderOrgUnit, const QString &dmSenderOrgUnitNum,
-	    const QString &dbIDRecipient, const QString &dmRecipientOrgUnit,
-	    const QString &dmRecipientOrgUnitNum, const QString &dmToHands,
-	    const QString &dmAnnotation, const QString &dmRecipientRefNumber,
-	    const QString &dmSenderRefNumber, const QString &dmRecipientIdent,
-	    const QString &dmSenderIdent, const QString &dmLegalTitleLaw,
-	    const QString &dmLegalTitleYear, const QString &dmLegalTitleSect,
-	    const QString &dmLegalTitlePar, const QString &dmLegalTitlePoint,
-	    bool dmPersonalDelivery, bool dmAllowSubstDelivery,
-	    const QByteArray &dmQTimestampBase64,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    int dmMessageStatus, int dmAttachmentSize, const QString &_dmType,
-	    enum MessageDirection msgDirect);
+	bool updateMessageEnvelope(const Isds::Envelope &envelope,
+	    const QString &_origin, enum MessageDirection msgDirect);
 
 	/*!
 	 * @brief Get message status.
@@ -531,20 +425,12 @@ public:
 	/*!
 	 * @brief Insert/update message files into files table.
 	 *
-	 * @param[in] dmId                    Message identifier.
-	 * @param[in] dmFileDescr             File name.
-	 * @param[in] dmUpFileGuid
-	 * @param[in] dmMimeType
-	 * @param[in] dmFormat
-	 * @param[in] dmFileMetaType
-	 * @param[in] dmEncodedContentBase64  Base64-encoded file content.
+	 * @param[in] dmId Message identifier.
+	 * @param[in] document Document structure.
 	 * @return True on success.
 	 */
 	bool insertOrUpdateMessageAttachment(qint64 dmId,
-	    const QString &dmFileDescr, const QString &dmUpFileGuid,
-	    const QString &dmFileGuid, const QString &dmMimeType,
-	    const QString &dmFormat, const QString &dmFileMetaType,
-	    const QByteArray &dmEncodedContentBase64);
+	    const Isds::Document &document);
 
 	/*!
 	 * @brief Delete all files related to message with given id.
@@ -557,26 +443,20 @@ public:
 	/*!
 	 * @brief Insert/update message hash into hashes table.
 	 *
-	 * @param[in] dmId         Message identifier.
-	 * @param[in] valueBase64  Base64-encoded hash value.
-	 * @param[in] algorithm    Algorithm identifier.
+	 * @param[in] dmId Message identifier.
+	 * @param[in] hash Hash structure.
 	 * @return True on success.
 	 */
-	bool insertOrUpdateMessageHash(qint64 dmId,
-	    const QByteArray &valueBase64, const QString &algorithm);
+	bool insertOrUpdateMessageHash(qint64 dmId, const Isds::Hash &hash);
 
 	/*!
-	 * @brief Insert/update message events into events table.
+	 * @brief Insert/update message event into events table.
 	 *
-	 * @param[in] dmId          Message identifier.
-	 * @param[in] dmEventTime   Event time in database format.
-	 * @param[in] dmEventType   Event type identifier.
-	 * @param[in] dmEventDescr  Event description.
+	 * @param[in] dmId  Message identifier.
+	 * @param[in] event Event stucture.
 	 * @return True on success.
 	 */
-	bool insertOrUpdateMessageEvent(qint64 dmId,
-	    const QString &dmEventTime, const QString &dmEventType,
-	    const QString &dmEventDescr);
+	bool insertOrUpdateMessageEvent(qint64 dmId, const Isds::Event &event);
 
 	/*!
 	 * @brief Insert/update raw (DER) message data into raw_message_data
@@ -587,8 +467,8 @@ public:
 	 * @param[in] messageType  Message type.
 	 * @return True on success.
 	 */
-	bool insertOrReplaceCompleteMessageRaw(qint64 dmId, const QByteArray &raw,
-	    int messageType);
+	bool insertOrReplaceCompleteMessageRaw(qint64 dmId,
+	    const QByteArray &raw, int messageType);
 
 	/*!
 	 * @brief Return all IDs of messages without attachment.
@@ -661,12 +541,12 @@ public:
 	    const QString &senderName);
 
 	/*!
-	 * @brief Return hash of message from db.
+	 * @brief Return hash data of message from db.
 	 *
 	 * @param[in] dmId  Message identifier.
 	 * @return Message hash structure.
 	 */
-	MessageHash getMessageHash(qint64 dmId) const;
+	const Isds::Hash getMessageHash(qint64 dmId) const;
 
 	/*!
 	 * @brief Delete all message records from db.

@@ -41,15 +41,6 @@ private:
 
 public:
 	/*!
-	 * @brief Return attachment type as string.
-	 *
-	 * @param[in] val Attachment type value as used by libisds.
-	 * @return Attachment type description.
-	 */
-	static
-	const QString &attachmentTypeToStr(int val);
-
-	/*!
 	 * @brief Convert data box state to localised text
 	 *
 	 * @param[in] val Data box status value as used by libisds.
@@ -93,33 +84,6 @@ public:
 	 */
 	static
 	QString dmTypeToText(const QString &val);
-
-	/*!
-	 * @brief Convert event type to string.
-	 *
-	 * @param[in] val Event type value as used by libisds.
-	 * @return Event string (not the description).
-	 */
-	static
-	const QString &eventTypeToStr(int val);
-
-	/*!
-	 * @brief Return hash algorithm string identifier.
-	 *
-	 * @param[in] val Hash algorithm value as used by libisds.
-	 * @return Hash algorithm type string.
-	 */
-	static
-	const QString &hashAlgToStr(int val);
-
-	/*!
-	 * @brief Converts hash algorithm type string to int as used by libisds.
-	 *
-	 * @param[in] val Hash algorithm string.
-	 * @return Hash algorithm type integer value.
-	 */
-	static
-	int hashAlgStrToInt(const QString &val);
 
 	/*!
 	 * @brief Converts libisds message state to database value as used by

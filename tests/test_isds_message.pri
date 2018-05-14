@@ -14,6 +14,7 @@ SOURCES += \
 	$${top_srcdir}src/isds/message_conversion.cpp \
 	$${top_srcdir}src/isds/message_functions.cpp \
 	$${top_srcdir}src/isds/message_interface.cpp \
+	$${top_srcdir}src/isds/type_conversion.cpp \
 	$${top_srcdir}tests/test_isds_message.cpp
 
 HEADERS += \
@@ -21,5 +22,6 @@ HEADERS += \
 	$${top_srcdir}src/isds/message_conversion.h \
 	$${top_srcdir}src/isds/message_functions.h \
 	$${top_srcdir}src/isds/message_interface.h \
+	$${top_srcdir}src/isds/type_conversion.h \
 	$${top_srcdir}src/isds/types.h \
 	$${top_srcdir}tests/test_isds_message.h

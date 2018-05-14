@@ -25,24 +25,6 @@
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 
-const QString &IsdsConversion::attachmentTypeToStr(int val)
-{
-	static const QString main("main"), encl("encl"), sign("sign"),
-	    meta("meta");
-	static const QString invalid;
-
-	switch (val) {
-	case FILEMETATYPE_MAIN: return main; break;
-	case FILEMETATYPE_ENCLOSURE: return encl; break;
-	case FILEMETATYPE_SIGNATURE: return sign; break;
-	case FILEMETATYPE_META: return sign; break;
-	default:
-		logWarningNL("Unknown attachment type value '%d'.", val);
-		return invalid;
-		break;
-	}
-}
-
 QString IsdsConversion::boxStateToText(int val)
 {
 	switch (val) {
@@ -255,72 +237,6 @@ QString IsdsConversion::dmTypeToText(const QString &val)
 		    val[0].toLatin1());
 		return QString();
 		break;
-	}
-}
-
-const QString &IsdsConversion::eventTypeToStr(int val)
-{
-	static const QString ev0("EV0"), ev1("EV1"), ev2("EV2"), ev3("EV3"),
-	    ev4("EV4"), ev5("EV5"), ev11("EV11"), ev12("EV12"), ev13("EV13");
-	static const QString invalid;
-
-	switch (val) {
-	case EVENT_ACCEPTED_BY_RECIPIENT: return ev4; break;
-	case EVENT_ACCEPTED_BY_FICTION: return ev2; break;
-	case EVENT_UNDELIVERABLE: return ev3; break;
-	case EVENT_COMMERCIAL_ACCEPTED: return ev1; break;
-	case EVENT_ENTERED_SYSTEM: return ev0; break;
-	case EVENT_DELIVERED: return ev5; break;
-	case EVENT_PRIMARY_LOGIN: return ev11; break;
-	case EVENT_ENTRUSTED_LOGIN: return ev12; break;
-	case EVENT_SYSCERT_LOGIN: return ev13; break;
-	case EVENT_UKNOWN:
-	default:
-		logWarningNL("Unknown event type value '%d'.", val);
-		return invalid;
-		break;
-	}
-}
-
-#define STR_MD5 "MD5"
-#define STR_SHA_1 "SHA-1"
-#define STR_SHA_224 "SHA-224"
-#define STR_SHA_256 "SHA-256"
-#define STR_SHA_384 "SHA-384"
-#define STR_SHA_512 "SHA-512"
-
-const QString &IsdsConversion::hashAlgToStr(int val)
-{
-	static const QString md5(STR_MD5), sha1(STR_SHA_1), sha224(STR_SHA_224),
-	    sha256(STR_SHA_256), sha384(STR_SHA_384), sha512(STR_SHA_512);
-	static const QString invalid;
-
-	switch (val) {
-	case HASH_ALGORITHM_MD5: return md5; break;
-	case HASH_ALGORITHM_SHA_1: return sha1; break;
-	case HASH_ALGORITHM_SHA_224: return sha224; break;
-	case HASH_ALGORITHM_SHA_256: return sha256; break;
-	case HASH_ALGORITHM_SHA_384: return sha384; break;
-	case HASH_ALGORITHM_SHA_512: return sha512; break;
-	default:
-		logWarningNL("Unknown hash algorithm value '%d'.", val);
-		return invalid;
-		break;
-	}
-}
-
-int IsdsConversion::hashAlgStrToInt(const QString &val)
-{
-	if (val == QLatin1String(STR_MD5)) return HASH_ALGORITHM_MD5;
-	else if (val == QLatin1String(STR_SHA_1)) return HASH_ALGORITHM_SHA_1;
-	else if (val == QLatin1String(STR_SHA_224)) return HASH_ALGORITHM_SHA_224;
-	else if (val == QLatin1String(STR_SHA_256)) return HASH_ALGORITHM_SHA_256;
-	else if (val == QLatin1String(STR_SHA_384)) return HASH_ALGORITHM_SHA_384;
-	else if (val == QLatin1String(STR_SHA_512)) return HASH_ALGORITHM_SHA_512;
-	else {
-		logWarningNL("Unknown hash algorithm '%s'.",
-		    val.toUtf8().constData());
-		return HASH_ALGORITHM_MD5;
 	}
 }
 

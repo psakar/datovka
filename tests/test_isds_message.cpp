@@ -61,6 +61,8 @@ private slots:
 	void conversionChainDeliveryInfo(void);
 
 private:
+	void testMessageContent(const Isds::Message &message) const;
+
 	const QString msgPath;
 	const QString delInfoPath;
 };
@@ -145,10 +147,14 @@ void TestIsdsMessage::conversionChainMessage(void)
 	QVERIFY(!message01.isNull());
 	QVERIFY(im01 != NULL);
 
+	testMessageContent(message01);
+
 	ok = false;
 	Isds::Message message02 = Isds::libisds2message(im01, &ok);
 	QVERIFY(ok);
 	QVERIFY(!message02.isNull());
+
+	testMessageContent(message02);
 
 	QVERIFY(message01 == message02);
 
@@ -180,6 +186,27 @@ void TestIsdsMessage::conversionChainDeliveryInfo(void)
 
 	isds_message_free(&im01);
 	QVERIFY(im01 == NULL);
+}
+
+void TestIsdsMessage::testMessageContent(const Isds::Message &message) const
+{
+	QVERIFY(!message.isNull());
+
+	QVERIFY(message.envelope().dmId() == 6452235LL);
+	QVERIFY(message.envelope().dmAnnotation() == "test 2018-04-25 001");
+
+	{
+		const QList<Isds::Document> &docs(message.documents());
+		QVERIFY(docs.size() == 2);
+		QVERIFY(docs[0].fileDescr() == "test_01.txt");
+		QVERIFY(docs[0].binaryContent().size() == 8);
+		QVERIFY(docs[0].binaryContent() == "test 01\n");
+		QVERIFY(docs[0].base64Content() == "dGVzdCAwMQo=");
+		QVERIFY(docs[1].fileDescr() == "test_02.txt");
+		QVERIFY(docs[1].binaryContent().size() == 8);
+		QVERIFY(docs[1].binaryContent() == "test 02\n");
+		QVERIFY(docs[1].base64Content() == "dGVzdCAwMgo=");
+	}
 }
 
 void TestIsdsMessage::cleanupTestCase(void)

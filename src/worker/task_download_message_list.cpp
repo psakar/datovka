@@ -265,7 +265,14 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		/* Message is NOT in db (-1), -> insert */
 		if (-1 == dmDbMsgStatus) {
 
-			Task::storeEnvelope(msgDirect, dbSet, item->envelope);
+			bool ok = false;
+			Isds::Envelope env = Isds::libisds2envelope(item->envelope, &ok);
+			if (!ok) {
+				logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
+				return DL_ERR;
+			}
+			Task::storeMessageEnvelope(msgDirect, dbSet, env);
+
 			if (downloadWhole) {
 				TaskDownloadMessage *task =
 				    new (std::nothrow) TaskDownloadMessage(
@@ -289,8 +296,14 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 			if (dmNewMsgStatus != dmDbMsgStatus) {
 				/* Update envelope */
-				Task::updateEnvelope(msgDirect, *messageDb,
-				    item->envelope);
+				bool ok = false;
+				Isds::Envelope env = Isds::libisds2envelope(item->envelope, &ok);
+				if (!ok) {
+					logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
+					return DL_ERR;
+				}
+				Task::updateMessageEnvelope(msgDirect,
+				    *messageDb, env);
 
 				/*
 				 * Download whole message again if exists in db
@@ -459,7 +472,14 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 		 * we get proper data from ISDS rather than storing potentially
 		 * guessed values.
 		 */
-		Task::updateEnvelope(msgDirect, *messageDb, envel);
+		bool ok = false;
+		Isds::Envelope env = Isds::libisds2envelope(envel, &ok);
+		if (!ok) {
+			logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
+			return DL_ERR;
+		}
+		Task::updateMessageEnvelope(msgDirect, *messageDb, env);
+
 	} else if (messageDb->msgsUpdateMessageState(dmID,
 	    dmDeliveryTime, dmAcceptanceTime,
 	    envel->dmMessageStatus ?
@@ -474,16 +494,16 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 		    dmID);
 	}
 
-	const struct isds_list *event;
-	event = envel->events;
+	bool ok = false;
+	Isds::Envelope env = Isds::libisds2envelope(envel, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
+		return DL_ERR;
+	}
+	QList<Isds::Event> events = env.dmEvents();
 
-	while (0 != event) {
-		isds_event *item = (isds_event *) event->data;
-		messageDb->insertOrUpdateMessageEvent(dmID,
-		    timevalToDbFormat(item->time),
-		    IsdsConversion::eventTypeToStr(*item->type) + QLatin1String(": "),
-		    item->description);
-		event = event->next;
+	foreach (const Isds::Event &event, events) {
+		messageDb->insertOrUpdateMessageEvent(dmID, event);
 	}
 
 	return DL_SUCCESS;
