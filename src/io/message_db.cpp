@@ -1679,7 +1679,7 @@ bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
 	query.bindValue(":dmMessageStatus", Isds::dmState2Variant(envelope.dmMessageStatus()));
 	query.bindValue(":dmAttachmentSize", envelope.dmAttachmentSize());
-	query.bindValue(":_dmType", envelope.dmType());
+	query.bindValue(":_dmType", (!envelope.dmType().isNull()) ? envelope.dmType() : QVariant());
 
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -1792,7 +1792,7 @@ bool MessageDb::updateMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
 	query.bindValue(":dmMessageStatus", Isds::dmState2Variant(envelope.dmMessageStatus()));
 	query.bindValue(":dmAttachmentSize", envelope.dmAttachmentSize());
-	query.bindValue(":_dmType", envelope.dmType());
+	query.bindValue(":_dmType", (!envelope.dmType().isNull()) ? envelope.dmType() : QVariant());
 
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
@@ -2237,7 +2237,7 @@ bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
 	query.bindValue(":message_id", dmId);
 	query.bindValue(":dmFileDescr", document.fileDescr());
 	query.bindValue(":dmMimeType", document.mimeType());
-	query.bindValue(":dmEncodedContent", document.binaryContent().toBase64());
+	query.bindValue(":dmEncodedContent", document.base64Content());
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -2279,7 +2279,7 @@ bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
 	query.bindValue(":_dmMimeType", document.mimeType());
 	query.bindValue(":_dmFormat", document.format());
 	query.bindValue(":_dmFileMetaType", Isds::fileMetaType2Variant(document.fileMetaType()));
-	query.bindValue(":dmEncodedContent", document.binaryContent().toBase64());
+	query.bindValue(":dmEncodedContent", document.base64Content());
 	if (-1 != fileId) {
 		query.bindValue(":fileId", fileId);
 	}
