@@ -71,10 +71,16 @@ namespace Isds {
 
 		bool isNull(void) const;
 
+		/*
+		 * Convenience method. Access value as base64-encoded string.
+		 */
+		QString base64Value(void) const;
+		void setBase64Value(const QString &ev);
+
 		/* algorithm */
 		enum Type::HashAlg algorithm(void) const;
 		void setAlgorithm(enum Type::HashAlg a);
-		/* __item */
+		/* __item (binary representation) */
 		const QByteArray &value(void) const;
 		void setValue(const QByteArray &v);
 #ifdef Q_COMPILER_RVALUE_REFS

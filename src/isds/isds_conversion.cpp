@@ -240,13 +240,6 @@ QString IsdsConversion::dmTypeToText(const QString &val)
 	}
 }
 
-#define STR_MD5 "MD5"
-#define STR_SHA_1 "SHA-1"
-#define STR_SHA_224 "SHA-224"
-#define STR_SHA_256 "SHA-256"
-#define STR_SHA_384 "SHA-384"
-#define STR_SHA_512 "SHA-512"
-
 int IsdsConversion::msgStatusIsdsToDbRepr(int val)
 {
 	switch (val) {

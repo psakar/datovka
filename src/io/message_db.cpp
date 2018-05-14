@@ -484,7 +484,7 @@ const Isds::Envelope MessageDb::getMessageReplyData(qint64 dmId) const
 		envData.setDmLegalTitleSect(query.value(17).toString());
 		envData.setDmLegalTitlePar(query.value(18).toString());
 		envData.setDmLegalTitlePoint(query.value(19).toString());
-		envData.setDmType(query.value(20).toChar());
+		envData.setDmType((!query.value(20).isNull()) ? query.value(20).toChar() : QChar());
 		return envData;
 	} else {
 		logErrorNL(
@@ -2352,7 +2352,7 @@ bool MessageDb::insertOrUpdateMessageHash(qint64 dmId,
 		goto fail;
 	}
 	query.bindValue(":dmId", dmId);
-	query.bindValue(":value", hash.value().toBase64());
+	query.bindValue(":value", hash.base64Value());
 	query.bindValue(":algorithm", Isds::hashAlg2Variant(hash.algorithm()));
 	if (-1 != hashId) {
 		query.bindValue(":hashId", hashId);
@@ -2933,8 +2933,7 @@ const Isds::Hash MessageDb::getMessageHash(qint64 dmId) const
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
-			hash.setValue(QByteArray::fromBase64(
-			    query.value(0).toByteArray()));
+			hash.setBase64Value(query.value(0).toString());
 			hash.setAlgorithm(Isds::variant2HashAlg(query.value(1)));
 			return hash;
 		}

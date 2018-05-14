@@ -153,6 +153,25 @@ bool Isds::Hash::isNull(void) const
 	return d == Q_NULLPTR;
 }
 
+QString Isds::Hash::base64Value(void) const
+{
+	const QByteArray &v(value());
+	if (!v.isNull()) {
+		return QString::fromUtf8(v.toBase64());
+	} else {
+		return QString();
+	}
+}
+
+void Isds::Hash::setBase64Value(const QString &ev)
+{
+	QByteArray v;
+	if (!ev.isNull()) {
+		v = QByteArray::fromBase64(ev.toUtf8());
+	}
+	setValue(v);
+}
+
 enum Isds::Type::HashAlg Isds::Hash::algorithm(void) const
 {
 	Q_D(const Hash);
