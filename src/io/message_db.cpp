@@ -1678,7 +1678,7 @@ bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmDeliveryTime", qDateTimeToDbFormat(envelope.dmDeliveryTime()));
 	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
 	query.bindValue(":dmMessageStatus", Isds::dmState2Variant(envelope.dmMessageStatus()));
-	query.bindValue(":dmAttachmentSize", envelope.dmAttachmentSize());
+	query.bindValue(":dmAttachmentSize", Isds::nonNegativeLong2Variant(envelope.dmAttachmentSize()));
 	query.bindValue(":_dmType", (!envelope.dmType().isNull()) ? envelope.dmType() : QVariant());
 
 	if (!query.exec()) {
@@ -1791,7 +1791,7 @@ bool MessageDb::updateMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dmDeliveryTime", qDateTimeToDbFormat(envelope.dmDeliveryTime()));
 	query.bindValue(":dmAcceptanceTime", qDateTimeToDbFormat(envelope.dmAcceptanceTime()));
 	query.bindValue(":dmMessageStatus", Isds::dmState2Variant(envelope.dmMessageStatus()));
-	query.bindValue(":dmAttachmentSize", envelope.dmAttachmentSize());
+	query.bindValue(":dmAttachmentSize", Isds::nonNegativeLong2Variant(envelope.dmAttachmentSize()));
 	query.bindValue(":_dmType", (!envelope.dmType().isNull()) ? envelope.dmType() : QVariant());
 
 	if (!query.exec()) {

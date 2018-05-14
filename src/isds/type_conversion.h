@@ -30,6 +30,11 @@
 
 namespace Isds {
 
+	/* Negative values are converted to null variant. */
+	qint64 variant2nonNegativeLong(const QVariant &v);
+	/* Null variant is converted to -1. */
+	QVariant nonNegativeLong2Variant(qint64 i);
+
 	enum Type::NilBool variant2NilBool(const QVariant &v);
 	QVariant nilBool2Variant(enum Type::NilBool b);
 

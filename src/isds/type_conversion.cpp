@@ -23,6 +23,26 @@
 
 #include "src/isds/type_conversion.h"
 
+qint64 Isds::variant2nonNegativeLong(const QVariant &v)
+{
+	if (v.isNull()) {
+		return -1;
+	}
+
+	bool ok = false;
+	qint64 num = v.toLongLong(&ok);
+	if ((!ok) || (num < 0)) {
+		return -1;
+	}
+
+	return num;
+}
+
+QVariant Isds::nonNegativeLong2Variant(qint64 i)
+{
+	return (i >= 0) ? QVariant(i) : QVariant();
+}
+
 enum Isds::Type::NilBool Isds::variant2NilBool(const QVariant &v)
 {
 	if (v.isNull()) {
