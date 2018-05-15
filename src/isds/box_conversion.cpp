@@ -34,6 +34,7 @@
 
 #include "src/isds/box_conversion.h"
 #include "src/isds/internal_conversion.h"
+#include "src/isds/type_conversion.h"
 
 /*!
  * @brief Set address according to the libisds address structure.
@@ -370,7 +371,8 @@ enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt,
  * @brief Converts data box accessibility state.
  */
 static
-enum Isds::Type::DbState long2DbState(const long int *bs, bool *ok = Q_NULLPTR)
+enum Isds::Type::DbState longPtr2DbState(const long int *bs,
+    bool *ok = Q_NULLPTR)
 {
 	if (bs == NULL) {
 		if (ok != Q_NULLPTR) {
@@ -379,28 +381,7 @@ enum Isds::Type::DbState long2DbState(const long int *bs, bool *ok = Q_NULLPTR)
 		return Isds::Type::BS_ERROR;
 	}
 
-	bool iOk = true;
-	enum Isds::Type::DbState state = Isds::Type::BS_ERROR;
-
-	switch (*bs) {
-	case Isds::Type::BS_ERROR: state = Isds::Type::BS_ERROR; break;
-	case Isds::Type::BS_ACCESSIBLE: state = Isds::Type::BS_ACCESSIBLE; break;
-	case Isds::Type::BS_TEMP_INACCESSIBLE: state = Isds::Type::BS_TEMP_INACCESSIBLE; break;
-	case Isds::Type::BS_NOT_YET_ACCESSIBLE: state = Isds::Type::BS_NOT_YET_ACCESSIBLE; break;
-	case Isds::Type::BS_PERM_INACCESSIBLE: state = Isds::Type::BS_PERM_INACCESSIBLE; break;
-	case Isds::Type::BS_REMOVED: state = Isds::Type::BS_REMOVED; break;
-	case Isds::Type::BS_TEMP_UNACCESSIBLE_LAW: state = Isds::Type::BS_TEMP_UNACCESSIBLE_LAW; break;
-	default:
-		Q_ASSERT(0);
-		iOk = false;
-		state = Isds::Type::BS_ERROR;
-		break;
-	}
-
-	if (ok != Q_NULLPTR) {
-		*ok = iOk;
-	}
-	return state;
+	return Isds::long2DbState(*bs, ok);
 }
 
 Isds::DbOwnerInfo Isds::libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
@@ -440,7 +421,7 @@ Isds::DbOwnerInfo Isds::libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
 	ownerInfo.setTelNumber(Isds::fromCStr(idoi->telNumber));
 	ownerInfo.setIdentifier(Isds::fromCStr(idoi->identifier));
 	ownerInfo.setRegistryCode(Isds::fromCStr(idoi->registryCode));
-	ownerInfo.setDbState(long2DbState(idoi->dbState, &iOk));
+	ownerInfo.setDbState(longPtr2DbState(idoi->dbState, &iOk));
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
@@ -517,7 +498,7 @@ bool dbType2libisdsDbType(isds_DbType **tgt, enum Isds::Type::DbType src)
  * @brief Converts data box accessibility state.
  */
 static
-bool dbState2long(long int **tgt, enum Isds::Type::DbState src)
+bool dbState2longPtr(long int **tgt, enum Isds::Type::DbState src)
 {
 	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -595,7 +576,7 @@ bool setLibisdsDbOwnerInfoContent(struct isds_DbOwnerInfo *tgt,
 	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->registryCode, src.registryCode()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!dbState2long(&tgt->dbState, src.dbState()))) {
+	if (Q_UNLIKELY(!dbState2longPtr(&tgt->dbState, src.dbState()))) {
 		return false;
 	}
 	if (Q_UNLIKELY(!toBool(&tgt->dbEffectiveOVM, src.dbEffectiveOVM()))) {
@@ -685,39 +666,13 @@ enum Isds::Type::UserType libisdsUserType2UserType(const isds_UserType *ut,
  * @brief Converts privileges.
  */
 static
-Isds::Type::Privileges long2Privileges(long int *ip)
+Isds::Type::Privileges longPtr2Privileges(long int *ip)
 {
 	if (ip == NULL) {
 		return Isds::Type::PRIVIL_NONE;
 	}
 
-	const qint64 privNum = *ip;
-	Isds::Type::Privileges privileges = Isds::Type::PRIVIL_NONE;
-	if (privNum & Isds::Type::PRIVIL_READ_NON_PERSONAL) {
-		privileges |= Isds::Type::PRIVIL_READ_NON_PERSONAL;
-	}
-	if (privNum & Isds::Type::PRIVIL_READ_ALL) {
-		privileges |= Isds::Type::PRIVIL_READ_ALL;
-	}
-	if (privNum & Isds::Type::PRIVIL_CREATE_DM) {
-		privileges |= Isds::Type::PRIVIL_CREATE_DM;
-	}
-	if (privNum & Isds::Type::PRIVIL_VIEW_INFO) {
-		privileges |= Isds::Type::PRIVIL_VIEW_INFO;
-	}
-	if (privNum & Isds::Type::PRIVIL_SEARCH_DB) {
-		privileges |= Isds::Type::PRIVIL_SEARCH_DB;
-	}
-	if (privNum & Isds::Type::PRIVIL_OWNER_ADM) {
-		privileges |= Isds::Type::PRIVIL_OWNER_ADM;
-	}
-	if (privNum & Isds::Type::PRIVIL_READ_VAULT) {
-		privileges |= Isds::Type::PRIVIL_READ_VAULT;
-	}
-	if (privNum & Isds::Type::PRIVIL_ERASE_VAULT) {
-		privileges |= Isds::Type::PRIVIL_ERASE_VAULT;
-	}
-	return privileges;
+	return Isds::long2Privileges((qint64)*ip);
 }
 
 Isds::DbUserInfo Isds::libisds2dbUserInfo(const struct isds_DbUserInfo *idui,
@@ -747,7 +702,7 @@ Isds::DbUserInfo Isds::libisds2dbUserInfo(const struct isds_DbUserInfo *idui,
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
-	userInfo.setUserPrivils(long2Privileges(idui->userPrivils));
+	userInfo.setUserPrivils(longPtr2Privileges(idui->userPrivils));
 	userInfo.setIc(fromCStr(idui->ic));
 	userInfo.setFirmName(fromCStr(idui->firmName));
 	userInfo.setCaStreet(fromCStr(idui->caStreet));
@@ -817,7 +772,7 @@ bool userType2libisdsUserType(isds_UserType **tgt,
  * @brief Converts privileges.
  */
 static
-bool privileges2long(long int **tgt, Isds::Type::Privileges src)
+bool privileges2longPtr(long int **tgt, Isds::Type::Privileges src)
 {
 	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -855,7 +810,7 @@ bool setLibisdsDbUserInfoContent(struct isds_DbUserInfo *tgt,
 	if (Q_UNLIKELY(!userType2libisdsUserType(&tgt->userType, src.userType()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!privileges2long(&tgt->userPrivils, src.userPrivils()))) {
+	if (Q_UNLIKELY(!privileges2longPtr(&tgt->userPrivils, src.userPrivils()))) {
 		return false;
 	}
 	tgt->personName = personName2libisds(src.personName(), &iOk);

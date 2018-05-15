@@ -96,14 +96,14 @@ enum Isds::Type::DbType Isds::long2DbType(long int bt, bool *ok)
 	return type;
 }
 
-enum Isds::Type::DbType Isds::variant2DbType(const QVariant &v)
+enum Isds::Type::DbType Isds::intVariant2DbType(const QVariant &v)
 {
 	if (v.isNull()) {
 		return Type::BT_NULL;
 	}
 
 	bool ok = false;
-	long int num = v.toLongLong(&ok);
+	qint64 num = v.toLongLong(&ok);
 	if (Q_UNLIKELY(!ok)) {
 		Q_ASSERT(0);
 		return Type::BT_NULL;
@@ -112,13 +112,219 @@ enum Isds::Type::DbType Isds::variant2DbType(const QVariant &v)
 	return long2DbType(num);
 }
 
-QVariant Isds::dbType2Variant(enum Type::DbType bt)
+QVariant Isds::dbType2IntVariant(enum Type::DbType bt)
 {
 	if (bt == Type::BT_NULL) {
 		return QVariant();
 	} else {
 		return QVariant((int)bt);
 	}
+}
+
+static const QString strNull;
+
+/*
+ * OVM_MAIN is a special value introduced in git version of libisds.
+ * It appears not to be included in officially released source packages.
+ * TODO -- Check the function of OVM_MAIN.
+ */
+static const QString strOvmMain("OVM_MAIN"); /* hlavni schranky */
+static const QString strSystem("SYSTEM"),
+    strOvm("OVM"), strOvmNotar("OVM_NOTAR"), strOvmExekut("OVM_EXEKUT"),
+    strOvmReq("OVM_REQ"), strOvmFo("OVM_FO"), strOvmPfo("OVM_PFO"),
+    strOvmPo("OVM_PO"), strPo("PO"), strPoZak("PO_ZAK"), strPoReq("PO_REQ"),
+    strPfo("PFO"), strPfoAdvok("PFO_ADVOK"), strPfoDanpor("PFO_DANPOR"),
+    strPfoInsspr("PFO_INSSPR"), strPfoAuditor("PFO_AUDITOR"), strFo("FO");
+
+enum Isds::Type::DbType Isds::str2DbType(const QString &s)
+{
+	if (s.isNull()) {
+		return Type::BT_NULL;
+	} else if (s == strSystem) {
+		return Type::BT_SYSTEM;
+	} else if (s == strOvm) {
+		return Type::BT_OVM;
+	} else if (s == strOvmNotar) {
+		return Type::BT_OVM_NOTAR;
+	} else if (s == strOvmExekut) {
+		return Type::BT_OVM_EXEKUT;
+	} else if (s == strOvmReq) {
+		return Type::BT_OVM_REQ;
+	} else if (s == strOvmFo) {
+		return Type::BT_OVM_FO;
+	} else if (s == strOvmPfo) {
+		return Type::BT_OVM_PFO;
+	} else if (s == strOvmPo) {
+		return Type::BT_OVM_PO;
+	} else if (s == strPo) {
+		return Type::BT_PO;
+	} else if (s == strPoZak) {
+		return Type::BT_PO_ZAK;
+	} else if (s == strPoReq) {
+		return Type::BT_PO_REQ;
+	} else if (s == strPfo) {
+		return Type::BT_PFO;
+	} else if (s == strPfoAdvok) {
+		return Type::BT_PFO_ADVOK;
+	} else if (s == strPfoDanpor) {
+		return Type::BT_PFO_DANPOR;
+	} else if (s == strPfoInsspr) {
+		return Type::BT_PFO_INSSPR;
+	} else if (s == strPfoAuditor) {
+		return Type::BT_PFO_AUDITOR;
+	} else if (s == strFo) {
+		return Type::BT_FO;
+	} else {
+		Q_ASSERT(0);
+		return Type::BT_NULL;
+	}
+}
+
+const QString &Isds::dbType2Str(enum Type::DbType bt)
+{
+	switch (bt) {
+	case Type::BT_NULL: return strNull; break;
+	case Type::BT_SYSTEM: return strSystem; break;
+	case Type::BT_OVM: return strOvm; break;
+	case Type::BT_OVM_NOTAR: return strOvmNotar; break;
+	case Type::BT_OVM_EXEKUT: return strOvmExekut; break;
+	case Type::BT_OVM_REQ: return strOvmReq; break;
+	case Type::BT_OVM_FO: return strOvmFo; break;
+	case Type::BT_OVM_PFO: return strOvmPfo; break;
+	case Type::BT_OVM_PO: return strOvmPo; break;
+	case Type::BT_PO: return strPo; break;
+	case Type::BT_PO_ZAK: return strPoZak; break;
+	case Type::BT_PO_REQ: return strPoReq; break;
+	case Type::BT_PFO: return strPfo; break;
+	case Type::BT_PFO_ADVOK: return strPfoAdvok; break;
+	case Type::BT_PFO_DANPOR: return strPfoDanpor; break;
+	case Type::BT_PFO_INSSPR: return strPfoInsspr; break;
+	case Type::BT_PFO_AUDITOR: return strPfoAuditor; break;
+	case Type::BT_FO: return strFo; break;
+	default:
+		Q_ASSERT(0);
+		return strNull;
+		break;
+	}
+}
+
+enum Isds::Type::DbType Isds::strVariant2DbType(const QVariant &v)
+{
+	if (!v.isNull()) {
+		return str2DbType(v.toString());
+	} else {
+		return Type::BT_NULL;
+	}
+}
+
+QVariant Isds::dbType2StrVariant(enum Type::DbType bt)
+{
+	if (bt != Type::BT_NULL) {
+		return QVariant(dbType2Str(bt));
+	} else {
+		return QVariant();
+	}
+}
+
+enum Isds::Type::DbState Isds::long2DbState(long int bs, bool *ok)
+{
+	bool iOk = true;
+	enum Type::DbState state = Type::BS_ERROR;
+
+	switch (bs) {
+	case Type::BS_ERROR: state = Type::BS_ERROR; break;
+	case Type::BS_ACCESSIBLE: state = Type::BS_ACCESSIBLE; break;
+	case Type::BS_TEMP_INACCESSIBLE: state = Type::BS_TEMP_INACCESSIBLE; break;
+	case Type::BS_NOT_YET_ACCESSIBLE: state = Type::BS_NOT_YET_ACCESSIBLE; break;
+	case Type::BS_PERM_INACCESSIBLE: state = Type::BS_PERM_INACCESSIBLE; break;
+	case Type::BS_REMOVED: state = Type::BS_REMOVED; break;
+	case Type::BS_TEMP_UNACCESSIBLE_LAW: state = Type::BS_TEMP_UNACCESSIBLE_LAW; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return state;
+}
+
+enum Isds::Type::DbState Isds::variant2DbState(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::BS_ERROR;
+	}
+
+	bool ok = false;
+	qint64 num = v.toLongLong(&ok);
+	if (Q_UNLIKELY(!ok)) {
+		Q_ASSERT(0);
+		return Type::BS_ERROR;
+	}
+
+	return long2DbState(num);
+}
+
+QVariant Isds::dbState2Variant(enum Type::DbState bs)
+{
+	if (bs != Type::BS_ERROR) {
+		return QVariant((int)bs);
+	} else {
+		return QVariant();
+	}
+}
+
+Isds::Type::Privileges Isds::long2Privileges(long int p)
+{
+	Type::Privileges privileges = Type::PRIVIL_NONE;
+	if (p & Type::PRIVIL_READ_NON_PERSONAL) {
+		privileges |= Type::PRIVIL_READ_NON_PERSONAL;
+	}
+	if (p & Type::PRIVIL_READ_ALL) {
+		privileges |= Type::PRIVIL_READ_ALL;
+	}
+	if (p & Type::PRIVIL_CREATE_DM) {
+		privileges |= Type::PRIVIL_CREATE_DM;
+	}
+	if (p & Type::PRIVIL_VIEW_INFO) {
+		privileges |= Type::PRIVIL_VIEW_INFO;
+	}
+	if (p & Type::PRIVIL_SEARCH_DB) {
+		privileges |= Type::PRIVIL_SEARCH_DB;
+	}
+	if (p & Type::PRIVIL_OWNER_ADM) {
+		privileges |= Type::PRIVIL_OWNER_ADM;
+	}
+	if (p & Type::PRIVIL_READ_VAULT) {
+		privileges |= Type::PRIVIL_READ_VAULT;
+	}
+	if (p & Type::PRIVIL_ERASE_VAULT) {
+		privileges |= Type::PRIVIL_ERASE_VAULT;
+	}
+	return privileges;
+}
+
+Isds::Type::Privileges Isds::variant2Privileges(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::PRIVIL_NONE;
+	}
+
+	bool ok = false;
+	qint64 num = v.toLongLong(&ok);
+	if (Q_UNLIKELY(!ok)) {
+		Q_ASSERT(0);
+		return Type::PRIVIL_NONE;
+	}
+
+	return long2Privileges(num);
+}
+
+QVariant Isds::privileges2Variant(Type::Privileges p)
+{
+	return QVariant((int)p);
 }
 
 enum Isds::Type::DmState Isds::long2DmState(long int ms)
@@ -149,7 +355,7 @@ enum Isds::Type::DmState Isds::variant2DmState(const QVariant &v)
 	}
 
 	bool ok = false;
-	long int num = v.toLongLong(&ok);
+	qint64 num = v.toLongLong(&ok);
 	if (Q_UNLIKELY(!ok)) {
 		Q_ASSERT(0);
 		return Type::MS_NULL;
@@ -167,7 +373,72 @@ QVariant Isds::dmState2Variant(enum Type::DmState ms)
 	}
 }
 
-static const QString strNull;
+static const QString strPu("PRIMARY_USER"), strEu("ENTRUSTED_USER"),
+    strA("ADMINISTRATOR"), strOu("OFFICIAL_USER"), strOcu("OFFICIAL_CERT_USER"),
+    strL("LIQUIDATOR"), strR("RECEIVER"), strG("GUARDIAN");
+
+enum Isds::Type::UserType Isds::str2UserType(const QString &s)
+{
+	if (s.isNull()) {
+		return Type::UT_NULL;
+	} else if (s == strPu) {
+		return Type::UT_PRIMARY;
+	} else if (s == strEu) {
+		return Type::UT_ENTRUSTED;
+	} else if (s == strA) {
+		return Type::UT_ADMINISTRATOR;
+	} else if (s == strOu) {
+		return Type::UT_OFFICIAL;
+	} else if (s == strOcu) {
+		return Type::UT_OFFICIAL_CERT;
+	} else if (s == strL) {
+		return Type::UT_LIQUIDATOR;
+	} else if (s == strR) {
+		return Type::UT_RECEIVER;
+	} else if (s == strG) {
+		return Type::UT_GUARDIAN;
+	} else {
+		Q_ASSERT(0);
+		return Type::UT_NULL;
+	}
+}
+
+const QString &Isds::userType2Str(enum Type::UserType ut)
+{
+	switch (ut) {
+	case Type::UT_NULL: return strNull; break;
+	case Type::UT_PRIMARY: return strPu; break;
+	case Type::UT_ENTRUSTED: return strEu; break;
+	case Type::UT_ADMINISTRATOR: return strA; break;
+	case Type::UT_OFFICIAL: return strOu; break;
+	case Type::UT_OFFICIAL_CERT: return strOcu; break;
+	case Type::UT_LIQUIDATOR: return strL; break;
+	case Type::UT_RECEIVER: return strR; break;
+	case Type::UT_GUARDIAN: return strG; break;
+	default:
+		Q_ASSERT(0);
+		return strNull;
+		break;
+	}
+}
+
+enum Isds::Type::UserType Isds::variant2UserType(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::UT_NULL;
+	}
+
+	return str2UserType(v.toString());
+}
+
+QVariant Isds::userType2Variant(enum Type::UserType ut)
+{
+	if (ut == Type::UT_NULL) {
+		return QVariant();
+	}
+
+	return QVariant(userType2Str(ut));
+}
 
 static const QString strMd5("MD5"), strSha1("SHA-1"), strSha224("SHA-224"),
     strSha256("SHA-256"), strSha384("SHA-384"), strSha512("SHA-512");

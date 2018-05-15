@@ -39,12 +39,29 @@ namespace Isds {
 	QVariant nilBool2Variant(enum Type::NilBool b);
 
 	enum Type::DbType long2DbType(long int bt, bool *ok = Q_NULLPTR);
-	enum Type::DbType variant2DbType(const QVariant &v);
-	QVariant dbType2Variant(enum Type::DbType bt);
+	enum Type::DbType intVariant2DbType(const QVariant &v);
+	QVariant dbType2IntVariant(enum Type::DbType bt);
+	enum Type::DbType str2DbType(const QString &s);
+	const QString &dbType2Str(enum Type::DbType bt);
+	enum Type::DbType strVariant2DbType(const QVariant &v);
+	QVariant dbType2StrVariant(enum Type::DbType bt);
+
+	enum Type::DbState long2DbState(long int bs, bool *ok = Q_NULLPTR);
+	enum Type::DbState variant2DbState(const QVariant &v);
+	QVariant dbState2Variant(enum Type::DbState bs);
+
+	Type::Privileges long2Privileges(long int p);
+	Type::Privileges variant2Privileges(const QVariant &v);
+	QVariant privileges2Variant(Type::Privileges p);
 
 	enum Type::DmState long2DmState(long int ms);
 	enum Type::DmState variant2DmState(const QVariant &v);
 	QVariant dmState2Variant(enum Type::DmState ms);
+
+	enum Type::UserType str2UserType(const QString &s);
+	const QString &userType2Str(enum Type::UserType ut);
+	enum Type::UserType variant2UserType(const QVariant &v);
+	QVariant userType2Variant(enum Type::UserType ut);
 
 	enum Type::HashAlg str2HashAlg(const QString &s);
 	const QString &hashAlg2Str(enum Type::HashAlg ha);

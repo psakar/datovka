@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,18 +21,16 @@
  * the two.
  */
 
-
 #include <time.h>
 #include <QDateTime>
 #include <QString>
 
-#include "dbs.h"
-
+#include "src/io/dbs.h"
 
 /*!
  * @brief Date/time format stored in db.
  *
- * @note Old implementation of datovka is likely to contain a bug.
+ * @note Old implementation of Datovka is likely to contain a bug.
  * Milliseconds are probably stored as microseconds.
  */
 static
@@ -46,13 +44,7 @@ const QString dbDateFormat("yyyy-MM-dd");
 static
 const QString dbDateIsoFormat("yyyy-MM-ddThh:mm:ss.zzzZ");
 
-
-/* ========================================================================= */
-/*
- * Converts date from database format into desired format if possible.
- */
 QDateTime dateTimeFromDbFormat(const QString &dateTimeDbStr)
-/* ========================================================================= */
 {
 	QDateTime dateTime = QDateTime::fromString(dateTimeDbStr,
 	    dbDateTimeFormat);
@@ -71,14 +63,14 @@ QDateTime dateTimeFromDbFormat(const QString &dateTimeDbStr)
 	return dateTime;
 }
 
+QString qDateTimeToDbFormat(const QDateTime &dateTime)
+{
+	return (!dateTime.isNull()) ?
+	    dateTime.toString(dbDateTimeFormat) + QStringLiteral("000") : QString();
+}
 
-/* ========================================================================= */
-/*
- * Converts date from database format into desired format if possible.
- */
 QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
     const QString &tgtFmt)
-/* ========================================================================= */
 {
 	QDateTime dateTime = dateTimeFromDbFormat(dateTimeDbStr);
 
@@ -89,24 +81,17 @@ QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Converts date from database format into desired format if possible.
- */
 QDate dateFromDbFormat(const QString &dateDbStr)
-/* ========================================================================= */
 {
 	return QDate::fromString(dateDbStr, dbDateFormat);
 }
 
+QString qDateToDbFormat(const QDate &date)
+{
+	return (!date.isNull()) ? date.toString(dbDateFormat) : QString();
+}
 
-/* ========================================================================= */
-/*
- * Converts date from database format into desired format if possible.
- */
 QString dateStrFromDbFormat(const QString &dateDbStr, const QString &tgtFmt)
-/* ========================================================================= */
 {
 	QDate date = dateFromDbFormat(dateDbStr);
 
@@ -117,13 +102,7 @@ QString dateStrFromDbFormat(const QString &dateDbStr, const QString &tgtFmt)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Converts time to format to be stored in database.
- */
 QString timevalToDbFormat(const struct timeval *tv)
-/* ========================================================================= */
 {
 	if (NULL == tv) {
 		Q_ASSERT(0);
@@ -141,12 +120,7 @@ QString timevalToDbFormat(const struct timeval *tv)
 	return ret;
 }
 
-/* ========================================================================= */
-/*
- * Converts time to QDateTime.
- */
 QDateTime timevalToDateTime(const struct timeval *tv)
-/* ========================================================================= */
 {
 	QDateTime timeStamp;
 
@@ -157,13 +131,7 @@ QDateTime timevalToDateTime(const struct timeval *tv)
 	return timeStamp;
 }
 
-
-/* ========================================================================= */
-/*
- * Converts date format to be stored in database.
- */
 QString tmToDbFormat(const struct tm *t)
-/* ========================================================================= */
 {
 	QString ret;
 
@@ -182,12 +150,7 @@ QString tmToDbFormat(const struct tm *t)
 	return ret;
 }
 
-/* ========================================================================= */
-/*
- * Converts date format to be stored in database.
- */
 QString tmBirthToDbFormat(const struct tm *t)
-/* ========================================================================= */
 {
 	QString ret;
 
@@ -212,30 +175,13 @@ QString tmBirthToDbFormat(const struct tm *t)
 	return ret;
 }
 
-QString qDateTimeToDbFormat(const QDateTime &dateTime)
-{
-	return (!dateTime.isNull() && dateTime.isValid()) ?
-	    dateTime.toString(dbDateTimeFormat) + "000"  : QString();
-}
-
-/* ========================================================================= */
-/*
- * Converts iso datetime to format to be stored in database.
- */
 QString fromIsoDatetimetoDbformat(const QString &dateTimeStr)
-/* ========================================================================= */
 {
 	QDateTime dateTime = QDateTime::fromString(dateTimeStr, dbDateIsoFormat);
 	return dateTime.toString(dbDateTimeFormat);
 }
 
-
-/* ========================================================================= */
-/*
- * Converts iso datetime to datetime.
- */
 QDateTime fromIsoDatetimetoDateTime(const QString &dateTimeStr)
-/* ========================================================================= */
 {
 	return QDateTime::fromString(dateTimeStr, dbDateIsoFormat);
 }
