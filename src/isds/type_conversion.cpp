@@ -96,7 +96,7 @@ enum Isds::Type::DbType Isds::long2DbType(long int bt, bool *ok)
 	return type;
 }
 
-enum Isds::Type::DbType Isds::variant2DbType(const QVariant &v)
+enum Isds::Type::DbType Isds::intVariant2DbType(const QVariant &v)
 {
 	if (v.isNull()) {
 		return Type::BT_NULL;
@@ -112,12 +112,117 @@ enum Isds::Type::DbType Isds::variant2DbType(const QVariant &v)
 	return long2DbType(num);
 }
 
-QVariant Isds::dbType2Variant(enum Type::DbType bt)
+QVariant Isds::dbType2IntVariant(enum Type::DbType bt)
 {
 	if (bt == Type::BT_NULL) {
 		return QVariant();
 	} else {
 		return QVariant((int)bt);
+	}
+}
+
+static const QString strNull;
+
+/*
+ * OVM_MAIN is a special value introduced in git version of libisds.
+ * It appears not to be included in officially released source packages.
+ * TODO -- Check the function of OVM_MAIN.
+ */
+static const QString strOvmMain("OVM_MAIN"); /* hlavni schranky */
+static const QString strSystem("SYSTEM"),
+    strOvm("OVM"), strOvmNotar("OVM_NOTAR"), strOvmExekut("OVM_EXEKUT"),
+    strOvmReq("OVM_REQ"), strOvmFo("OVM_FO"), strOvmPfo("OVM_PFO"),
+    strOvmPo("OVM_PO"), strPo("PO"), strPoZak("PO_ZAK"), strPoReq("PO_REQ"),
+    strPfo("PFO"), strPfoAdvok("PFO_ADVOK"), strPfoDanpor("PFO_DANPOR"),
+    strPfoInsspr("PFO_INSSPR"), strPfoAuditor("PFO_AUDITOR"), strFo("FO");
+
+enum Isds::Type::DbType Isds::str2DbType(const QString &s)
+{
+	if (s.isNull()) {
+		return Type::BT_NULL;
+	} else if (s == strSystem) {
+		return Type::BT_SYSTEM;
+	} else if (s == strOvm) {
+		return Type::BT_OVM;
+	} else if (s == strOvmNotar) {
+		return Type::BT_OVM_NOTAR;
+	} else if (s == strOvmExekut) {
+		return Type::BT_OVM_EXEKUT;
+	} else if (s == strOvmReq) {
+		return Type::BT_OVM_REQ;
+	} else if (s == strOvmFo) {
+		return Type::BT_OVM_FO;
+	} else if (s == strOvmPfo) {
+		return Type::BT_OVM_PFO;
+	} else if (s == strOvmPo) {
+		return Type::BT_OVM_PO;
+	} else if (s == strPo) {
+		return Type::BT_PO;
+	} else if (s == strPoZak) {
+		return Type::BT_PO_ZAK;
+	} else if (s == strPoReq) {
+		return Type::BT_PO_REQ;
+	} else if (s == strPfo) {
+		return Type::BT_PFO;
+	} else if (s == strPfoAdvok) {
+		return Type::BT_PFO_ADVOK;
+	} else if (s == strPfoDanpor) {
+		return Type::BT_PFO_DANPOR;
+	} else if (s == strPfoInsspr) {
+		return Type::BT_PFO_INSSPR;
+	} else if (s == strPfoAuditor) {
+		return Type::BT_PFO_AUDITOR;
+	} else if (s == strFo) {
+		return Type::BT_FO;
+	} else {
+		Q_ASSERT(0);
+		return Type::BT_NULL;
+	}
+}
+
+const QString &Isds::dbType2Str(enum Type::DbType bt)
+{
+	switch (bt) {
+	case Type::BT_NULL: return strNull; break;
+	case Type::BT_SYSTEM: return strSystem; break;
+	case Type::BT_OVM: return strOvm; break;
+	case Type::BT_OVM_NOTAR: return strOvmNotar; break;
+	case Type::BT_OVM_EXEKUT: return strOvmExekut; break;
+	case Type::BT_OVM_REQ: return strOvmReq; break;
+	case Type::BT_OVM_FO: return strOvmFo; break;
+	case Type::BT_OVM_PFO: return strOvmPfo; break;
+	case Type::BT_OVM_PO: return strOvmPo; break;
+	case Type::BT_PO: return strPo; break;
+	case Type::BT_PO_ZAK: return strPoZak; break;
+	case Type::BT_PO_REQ: return strPoReq; break;
+	case Type::BT_PFO: return strPfo; break;
+	case Type::BT_PFO_ADVOK: return strPfoAdvok; break;
+	case Type::BT_PFO_DANPOR: return strPfoDanpor; break;
+	case Type::BT_PFO_INSSPR: return strPfoInsspr; break;
+	case Type::BT_PFO_AUDITOR: return strPfoAuditor; break;
+	case Type::BT_FO: return strFo; break;
+	default:
+		Q_ASSERT(0);
+		return strNull;
+		break;
+	}
+}
+
+enum Isds::Type::DbType Isds::strVariant2DbType(const QVariant &v)
+{
+	if (!v.isNull()) {
+		return str2DbType(v.toString());
+	} else {
+		return Type::BT_NULL;
+	}
+}
+
+QVariant Isds::dbType2StrVariant(enum Type::DbType bt)
+{
+	if (bt != Type::BT_NULL) {
+		return QVariant(dbType2Str(bt));
+	} else {
+		return QVariant();
 	}
 }
 
@@ -267,8 +372,6 @@ QVariant Isds::dmState2Variant(enum Type::DmState ms)
 		return QVariant((int)ms);
 	}
 }
-
-static const QString strNull;
 
 static const QString strPu("PRIMARY_USER"), strEu("ENTRUSTED_USER"),
     strA("ADMINISTRATOR"), strOu("OFFICIAL_USER"), strOcu("OFFICIAL_CERT_USER"),

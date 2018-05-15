@@ -467,7 +467,7 @@ const Isds::Envelope MessageDb::getMessageReplyData(qint64 dmId) const
 		envData.setDbIDSender(query.value(0).toString());
 		envData.setDmSender(query.value(1).toString());
 		envData.setDmSenderAddress(query.value(2).toString());
-		envData.setDmSenderType(Isds::variant2DbType(query.value(3)));
+		envData.setDmSenderType(Isds::intVariant2DbType(query.value(3)));
 		envData.setDbIDRecipient(query.value(4).toString());
 		envData.setDmRecipient(query.value(5).toString());
 		envData.setDmRecipientAddress(query.value(6).toString());
@@ -1652,7 +1652,7 @@ bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dbIDSender", envelope.dbIDSender());
 	query.bindValue(":dmSender", envelope.dmSender());
 	query.bindValue(":dmSenderAddress", envelope.dmSenderAddress());
-	query.bindValue(":dmSenderType", Isds::dbType2Variant(envelope.dmSenderType()));
+	query.bindValue(":dmSenderType", Isds::dbType2IntVariant(envelope.dmSenderType()));
 	query.bindValue(":dmRecipient", envelope.dmRecipient());
 	query.bindValue(":dmRecipientAddress", envelope.dmRecipientAddress());
 	query.bindValue(":dmAmbiguousRecipient", Isds::nilBool2Variant(envelope.dmAmbiguousRecipient()));
@@ -1765,7 +1765,7 @@ bool MessageDb::updateMessageEnvelope(const Isds::Envelope &envelope,
 	query.bindValue(":dbIDSender", envelope.dbIDSender());
 	query.bindValue(":dmSender", envelope.dmSender());
 	query.bindValue(":dmSenderAddress", envelope.dmSenderAddress());
-	query.bindValue(":dmSenderType", Isds::dbType2Variant(envelope.dmSenderType()));
+	query.bindValue(":dmSenderType", Isds::dbType2IntVariant(envelope.dmSenderType()));
 	query.bindValue(":dmRecipient", envelope.dmRecipient());
 	query.bindValue(":dmRecipientAddress", envelope.dmRecipientAddress());
 	query.bindValue(":dmAmbiguousRecipient", Isds::nilBool2Variant(envelope.dmAmbiguousRecipient()));
