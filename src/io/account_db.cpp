@@ -336,7 +336,7 @@ bool AccountDb::insertAccountIntoDb(const QString &key,
 	query.bindValue(":key", key);
 	query.bindValue(":dbID", dbOwnerInfo.dbID());
 	/* TODO - missing conversion into dbType */
-	query.bindValue(":dbType", Isds::dbType2Variant(dbOwnerInfo.dbType()));
+	query.bindValue(":dbType", Isds::dbType2StrVariant(dbOwnerInfo.dbType()));
 	query.bindValue(":ic", dbOwnerInfo.ic());
 	query.bindValue(":pnFirstName", dbOwnerInfo.personName().firstName());
 	query.bindValue(":pnMiddleName", dbOwnerInfo.personName().middleName());
@@ -359,7 +359,8 @@ bool AccountDb::insertAccountIntoDb(const QString &key,
 	query.bindValue(":nationality", dbOwnerInfo.nationality());
 	query.bindValue(":identifier", dbOwnerInfo.identifier());
 	query.bindValue(":registryCode", dbOwnerInfo.registryCode());
-	query.bindValue(":dbState", dbOwnerInfo.dbState());
+	query.bindValue(":dbState",
+	    Isds::dbState2Variant(dbOwnerInfo.dbState()));
 	query.bindValue(":dbEffectiveOVM",
 	    Isds::nilBool2Variant(dbOwnerInfo.dbEffectiveOVM()));
 	query.bindValue(":dbOpenAddressing",
@@ -404,10 +405,9 @@ bool AccountDb::insertUserIntoDb(const QString &key,
 		goto fail;
 	}
 	query.bindValue(":key", key);
-	/* TODO - missing conversion into dbType */
-	query.bindValue(":userType", dbUserInfo.userType());
-	/* TODO - missing conversion into userPrivils */
-	query.bindValue(":userPrivils", (int) dbUserInfo.userPrivils());
+	query.bindValue(":userType", Isds::userType2Str(dbUserInfo.userType()));
+	query.bindValue(":userPrivils",
+	    Isds::privileges2Variant(dbUserInfo.userPrivils()));
 	query.bindValue(":ic", dbUserInfo.ic());
 	query.bindValue(":pnFirstName", dbUserInfo.personName().firstName());
 	query.bindValue(":pnMiddleName", dbUserInfo.personName().middleName());
@@ -502,8 +502,7 @@ const Isds::DbOwnerInfo AccountDb::getOwnerInfo(const QString &key) const
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		dbOwnerInfo.setDbID(query.value(0).toString());
-		/* TODO - missing conversion into dbType */
-		dbOwnerInfo.setDbType(Isds::variant2DbType(query.value(1)));
+		dbOwnerInfo.setDbType(Isds::strVariant2DbType(query.value(1)));
 		dbOwnerInfo.setIc(query.value(2).toString());
 		personName.setFirstName(query.value(3).toString());
 		personName.setMiddleName(query.value(4).toString());
@@ -526,8 +525,7 @@ const Isds::DbOwnerInfo AccountDb::getOwnerInfo(const QString &key) const
 		dbOwnerInfo.setNationality(query.value(18).toString());
 		dbOwnerInfo.setIdentifier(query.value(19).toString());
 		dbOwnerInfo.setRegistryCode(query.value(20).toString());
-		/* TODO - missing conversion into dbState */
-		dbOwnerInfo.setDbState((Isds::Type::DbState)(query.value(21).toInt()));
+		dbOwnerInfo.setDbState(Isds::variant2DbState(query.value(21)));
 		dbOwnerInfo.setDbEffectiveOVM(
 		    Isds::variant2NilBool(query.value(22)));
 		dbOwnerInfo.setDbOpenAddressing(

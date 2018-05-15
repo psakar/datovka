@@ -465,7 +465,7 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	const Isds::DbOwnerInfo dbOwnerInfo(
 	    GlobInstcs::accntDbPtr->getOwnerInfo(acntDbKey));
 	if (!dbOwnerInfo.isNull()) {
-		m_dbType = Isds::dbType2Variant(dbOwnerInfo.dbType()).toString();
+		m_dbType = Isds::dbType2Str(dbOwnerInfo.dbType());
 		m_dbEffectiveOVM = Isds::nilBool2Variant(
 		    dbOwnerInfo.dbEffectiveOVM()).toBool();
 		m_dbOpenAddressing = Isds::nilBool2Variant(

@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DBS_H_
-#define _DBS_H_
+#pragma once
 
 #include <QDate>
 #include <QDateTime>
@@ -90,5 +89,3 @@ QString fromIsoDatetimetoDbformat(const QString &dateTimeStr);
  * @brief Converts ISO datetime to datetime.
  */
 QDateTime fromIsoDatetimetoDateTime(const QString &dateTimeStr);
-
-#endif /* _DBS_H_ */
