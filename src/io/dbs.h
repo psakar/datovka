@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,15 +21,12 @@
  * the two.
  */
 
-
 #ifndef _DBS_H_
 #define _DBS_H_
-
 
 #include <QDate>
 #include <QDateTime>
 #include <QString>
-
 
 /*!
  * @brief Converts date and time from database format into desired format if
@@ -37,6 +34,10 @@
  */
 QDateTime dateTimeFromDbFormat(const QString &dateTimeDbStr);
 
+/*!
+ * @brief Converts date and time to format to be stored in database.
+ */
+QString qDateTimeToDbFormat(const QDateTime &dateTime);
 
 /*!
  * @brief Converts date and time from database format into desired format if
@@ -45,18 +46,20 @@ QDateTime dateTimeFromDbFormat(const QString &dateTimeDbStr);
 QString dateTimeStrFromDbFormat(const QString &dateTimeDbStr,
     const QString &tgtFmt);
 
-
 /*!
  * @brief Converts date from database format into desired format if possible.
  */
 QDate dateFromDbFormat(const QString &dateDbStr);
 
+/*!
+ * @brief Converts date to format to be stored in database.
+ */
+QString qDateToDbFormat(const QDate &date);
 
 /*!
  * @brief Converts date from database format into desired format if possible.
  */
 QString dateStrFromDbFormat(const QString &dateDbStr, const QString &tgtFmt);
-
 
 /*!
  * @brief Converts time to format to be stored in database.
@@ -73,25 +76,18 @@ QDateTime timevalToDateTime(const struct timeval *tv);
  */
 QString tmToDbFormat(const struct tm *t);
 
-
 /*!
  * @brief Converts date format to be stored in database.
  */
 QString tmBirthToDbFormat(const struct tm *t);
 
-
 /*!
- * @brief Converts date to format to be stored in database.
- */
-QString qDateTimeToDbFormat(const QDateTime &dateTime);
-
-/*!
- * @brief Converts iso datetime to format to be stored in database.
+ * @brief Converts ISO datetime to format to be stored in database.
  */
 QString fromIsoDatetimetoDbformat(const QString &dateTimeStr);
 
 /*!
- * @brief Converts iso datetime to datetime.
+ * @brief Converts ISO datetime to datetime.
  */
 QDateTime fromIsoDatetimetoDateTime(const QString &dateTimeStr);
 
