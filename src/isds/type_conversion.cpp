@@ -219,6 +219,73 @@ QVariant Isds::dmState2Variant(enum Type::DmState ms)
 
 static const QString strNull;
 
+static const QString strPu("PRIMARY_USER"), strEu("ENTRUSTED_USER"),
+    strA("ADMINISTRATOR"), strOu("OFFICIAL_USER"), strOcu("OFFICIAL_CERT_USER"),
+    strL("LIQUIDATOR"), strR("RECEIVER"), strG("GUARDIAN");
+
+enum Isds::Type::UserType Isds::str2UserType(const QString &s)
+{
+	if (s.isNull()) {
+		return Type::UT_NULL;
+	} else if (s == strPu) {
+		return Type::UT_PRIMARY;
+	} else if (s == strEu) {
+		return Type::UT_ENTRUSTED;
+	} else if (s == strA) {
+		return Type::UT_ADMINISTRATOR;
+	} else if (s == strOu) {
+		return Type::UT_OFFICIAL;
+	} else if (s == strOcu) {
+		return Type::UT_OFFICIAL_CERT;
+	} else if (s == strL) {
+		return Type::UT_LIQUIDATOR;
+	} else if (s == strR) {
+		return Type::UT_RECEIVER;
+	} else if (s == strG) {
+		return Type::UT_GUARDIAN;
+	} else {
+		Q_ASSERT(0);
+		return Type::UT_NULL;
+	}
+}
+
+const QString &Isds::userType2Str(enum Type::UserType ut)
+{
+	switch (ut) {
+	case Type::UT_NULL: return strNull; break;
+	case Type::UT_PRIMARY: return strPu; break;
+	case Type::UT_ENTRUSTED: return strEu; break;
+	case Type::UT_ADMINISTRATOR: return strA; break;
+	case Type::UT_OFFICIAL: return strOu; break;
+	case Type::UT_OFFICIAL_CERT: return strOcu; break;
+	case Type::UT_LIQUIDATOR: return strL; break;
+	case Type::UT_RECEIVER: return strR; break;
+	case Type::UT_GUARDIAN: return strG; break;
+	default:
+		Q_ASSERT(0);
+		return strNull;
+		break;
+	}
+}
+
+enum Isds::Type::UserType Isds::variant2UserType(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::UT_NULL;
+	}
+
+	return str2UserType(v.toString());
+}
+
+QVariant Isds::userType2Variant(enum Type::UserType ut)
+{
+	if (ut == Type::UT_NULL) {
+		return QVariant();
+	}
+
+	return QVariant(userType2Str(ut));
+}
+
 static const QString strMd5("MD5"), strSha1("SHA-1"), strSha224("SHA-224"),
     strSha256("SHA-256"), strSha384("SHA-384"), strSha512("SHA-512");
 
