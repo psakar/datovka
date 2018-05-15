@@ -34,6 +34,7 @@
 
 #include "src/isds/box_conversion.h"
 #include "src/isds/internal_conversion.h"
+#include "src/isds/type_conversion.h"
 
 /*!
  * @brief Set address according to the libisds address structure.
@@ -370,7 +371,8 @@ enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt,
  * @brief Converts data box accessibility state.
  */
 static
-enum Isds::Type::DbState long2DbState(const long int *bs, bool *ok = Q_NULLPTR)
+enum Isds::Type::DbState longPtr2DbState(const long int *bs,
+    bool *ok = Q_NULLPTR)
 {
 	if (bs == NULL) {
 		if (ok != Q_NULLPTR) {
@@ -379,28 +381,7 @@ enum Isds::Type::DbState long2DbState(const long int *bs, bool *ok = Q_NULLPTR)
 		return Isds::Type::BS_ERROR;
 	}
 
-	bool iOk = true;
-	enum Isds::Type::DbState state = Isds::Type::BS_ERROR;
-
-	switch (*bs) {
-	case Isds::Type::BS_ERROR: state = Isds::Type::BS_ERROR; break;
-	case Isds::Type::BS_ACCESSIBLE: state = Isds::Type::BS_ACCESSIBLE; break;
-	case Isds::Type::BS_TEMP_INACCESSIBLE: state = Isds::Type::BS_TEMP_INACCESSIBLE; break;
-	case Isds::Type::BS_NOT_YET_ACCESSIBLE: state = Isds::Type::BS_NOT_YET_ACCESSIBLE; break;
-	case Isds::Type::BS_PERM_INACCESSIBLE: state = Isds::Type::BS_PERM_INACCESSIBLE; break;
-	case Isds::Type::BS_REMOVED: state = Isds::Type::BS_REMOVED; break;
-	case Isds::Type::BS_TEMP_UNACCESSIBLE_LAW: state = Isds::Type::BS_TEMP_UNACCESSIBLE_LAW; break;
-	default:
-		Q_ASSERT(0);
-		iOk = false;
-		state = Isds::Type::BS_ERROR;
-		break;
-	}
-
-	if (ok != Q_NULLPTR) {
-		*ok = iOk;
-	}
-	return state;
+	return Isds::long2DbState(*bs, ok);
 }
 
 Isds::DbOwnerInfo Isds::libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
@@ -440,7 +421,7 @@ Isds::DbOwnerInfo Isds::libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
 	ownerInfo.setTelNumber(Isds::fromCStr(idoi->telNumber));
 	ownerInfo.setIdentifier(Isds::fromCStr(idoi->identifier));
 	ownerInfo.setRegistryCode(Isds::fromCStr(idoi->registryCode));
-	ownerInfo.setDbState(long2DbState(idoi->dbState, &iOk));
+	ownerInfo.setDbState(longPtr2DbState(idoi->dbState, &iOk));
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
@@ -517,7 +498,7 @@ bool dbType2libisdsDbType(isds_DbType **tgt, enum Isds::Type::DbType src)
  * @brief Converts data box accessibility state.
  */
 static
-bool dbState2long(long int **tgt, enum Isds::Type::DbState src)
+bool dbState2longPtr(long int **tgt, enum Isds::Type::DbState src)
 {
 	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -595,7 +576,7 @@ bool setLibisdsDbOwnerInfoContent(struct isds_DbOwnerInfo *tgt,
 	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->registryCode, src.registryCode()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!dbState2long(&tgt->dbState, src.dbState()))) {
+	if (Q_UNLIKELY(!dbState2longPtr(&tgt->dbState, src.dbState()))) {
 		return false;
 	}
 	if (Q_UNLIKELY(!toBool(&tgt->dbEffectiveOVM, src.dbEffectiveOVM()))) {

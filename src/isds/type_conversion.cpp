@@ -121,6 +121,56 @@ QVariant Isds::dbType2Variant(enum Type::DbType bt)
 	}
 }
 
+enum Isds::Type::DbState Isds::long2DbState(long int bs, bool *ok)
+{
+	bool iOk = true;
+	enum Type::DbState state = Type::BS_ERROR;
+
+	switch (bs) {
+	case Type::BS_ERROR: state = Type::BS_ERROR; break;
+	case Type::BS_ACCESSIBLE: state = Type::BS_ACCESSIBLE; break;
+	case Type::BS_TEMP_INACCESSIBLE: state = Type::BS_TEMP_INACCESSIBLE; break;
+	case Type::BS_NOT_YET_ACCESSIBLE: state = Type::BS_NOT_YET_ACCESSIBLE; break;
+	case Type::BS_PERM_INACCESSIBLE: state = Type::BS_PERM_INACCESSIBLE; break;
+	case Type::BS_REMOVED: state = Type::BS_REMOVED; break;
+	case Type::BS_TEMP_UNACCESSIBLE_LAW: state = Type::BS_TEMP_UNACCESSIBLE_LAW; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return state;
+}
+
+enum Isds::Type::DbState Isds::variant2DbState(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::BS_ERROR;
+	}
+
+	bool ok = false;
+	long int num = v.toLongLong(&ok);
+	if (Q_UNLIKELY(!ok)) {
+		Q_ASSERT(0);
+		return Type::BS_ERROR;
+	}
+
+	return long2DbState(num);
+}
+
+QVariant Isds::dbState2Variant(enum Type::DbState bs)
+{
+	if (bs != Type::BS_ERROR) {
+		return QVariant((int)bs);
+	} else {
+		return QVariant();
+	}
+}
+
 enum Isds::Type::DmState Isds::long2DmState(long int ms)
 {
 	switch (ms) {

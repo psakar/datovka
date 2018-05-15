@@ -42,6 +42,10 @@ namespace Isds {
 	enum Type::DbType variant2DbType(const QVariant &v);
 	QVariant dbType2Variant(enum Type::DbType bt);
 
+	enum Type::DbState long2DbState(long int bs, bool *ok = Q_NULLPTR);
+	enum Type::DbState variant2DbState(const QVariant &v);
+	QVariant dbState2Variant(enum Type::DbState bs);
+
 	enum Type::DmState long2DmState(long int ms);
 	enum Type::DmState variant2DmState(const QVariant &v);
 	QVariant dmState2Variant(enum Type::DmState ms);
