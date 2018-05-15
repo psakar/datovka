@@ -27,7 +27,7 @@
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/isds_conversion.h"
+#include "src/isds/box_conversion.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_owner_info.h"
@@ -73,9 +73,7 @@ bool TaskDownloadOwnerInfo::downloadOwnerInfo(const QString &userName,
 	}
 
 	struct isds_DbOwnerInfo *ownerInfo = NULL;
-
 	isds_error status = isds_GetOwnerInfoFromLogin(session, &ownerInfo);
-
 	if (IE_SUCCESS != status) {
 		logErrorNL(
 		    "Downloading owner information for account '%s' returned '%d': '%s'.",
@@ -89,58 +87,17 @@ bool TaskDownloadOwnerInfo::downloadOwnerInfo(const QString &userName,
 
 	Q_ASSERT(NULL != ownerInfo);
 
-	QString birthDate;
-	if ((NULL != ownerInfo->birthInfo) &&
-	    (NULL != ownerInfo->birthInfo->biDate)) {
-		birthDate = tmBirthToDbFormat(ownerInfo->birthInfo->biDate);
+	Isds::DbOwnerInfo dbOwnerInfo;
+	bool ok = false;
+	dbOwnerInfo = Isds::libisds2dbOwnerInfo(ownerInfo, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds dbOwnerInfo to dbOwnerInfo.");
+		isds_DbOwnerInfo_free(&ownerInfo);
+		return false;
 	}
-
-	int ic = 0;
-	if (NULL != ownerInfo->ic) {
-		ic = QString(ownerInfo->ic).toInt();
-	}
-
-	bool ret = GlobInstcs::accntDbPtr->insertAccountIntoDb(
-	    AccountDb::keyFromLogin(userName),
-	    ownerInfo->dbID,
-	    IsdsConversion::boxTypeToStr(*ownerInfo->dbType),
-	    ic,
-	    ownerInfo->personName ?
-	        ownerInfo->personName->pnFirstName : NULL,
-	    ownerInfo->personName ?
-	        ownerInfo->personName->pnMiddleName : NULL,
-	    ownerInfo->personName ?
-	        ownerInfo->personName->pnLastName : NULL,
-	    ownerInfo->personName ?
-	        ownerInfo->personName->pnLastNameAtBirth : NULL,
-	    ownerInfo->firmName,
-	    birthDate,
-	    ownerInfo->birthInfo ?
-	        ownerInfo->birthInfo->biCity : NULL,
-	    ownerInfo->birthInfo ?
-	        ownerInfo->birthInfo->biCounty : NULL,
-	    ownerInfo->birthInfo ?
-	        ownerInfo->birthInfo->biState : NULL,
-	    ownerInfo->address ?
-	        ownerInfo->address->adCity : NULL,
-	    ownerInfo->address ?
-	        ownerInfo->address->adStreet : NULL,
-	    ownerInfo->address ?
-	        ownerInfo->address->adNumberInStreet : NULL,
-	    ownerInfo->address ?
-	        ownerInfo->address->adNumberInMunicipality : NULL,
-	    ownerInfo->address ?
-	        ownerInfo->address->adZipCode : NULL,
-	    ownerInfo->address ?
-	        ownerInfo->address->adState : NULL,
-	    ownerInfo->nationality,
-	    ownerInfo->identifier,
-	    ownerInfo->registryCode,
-	    (int) *ownerInfo->dbState,
-	    *ownerInfo->dbEffectiveOVM,
-	    *ownerInfo->dbOpenAddressing);
 
 	isds_DbOwnerInfo_free(&ownerInfo);
 
-	return ret;
+	return GlobInstcs::accntDbPtr->insertAccountIntoDb(
+	    AccountDb::keyFromLogin(userName), dbOwnerInfo);
 }

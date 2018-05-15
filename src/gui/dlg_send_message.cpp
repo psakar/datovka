@@ -45,6 +45,7 @@
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
+#include "src/isds/type_conversion.h"
 #include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
@@ -461,12 +462,14 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	m_boxId = GlobInstcs::accntDbPtr->dbId(acntDbKey);
 	Q_ASSERT(!m_boxId.isEmpty());
 	m_senderName = GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey);
-	const QList<QString> accountData(
-	    GlobInstcs::accntDbPtr->getUserDataboxInfo(acntDbKey));
-	if (!accountData.isEmpty()) {
-		m_dbType = accountData.at(0);
-		m_dbEffectiveOVM = (accountData.at(1) == "1");
-		m_dbOpenAddressing = (accountData.at(2) == "1");
+	const Isds::DbOwnerInfo dbOwnerInfo(
+	    GlobInstcs::accntDbPtr->getOwnerInfo(acntDbKey));
+	if (!dbOwnerInfo.isNull()) {
+		m_dbType = Isds::dbType2Variant(dbOwnerInfo.dbType()).toString();
+		m_dbEffectiveOVM = Isds::nilBool2Variant(
+		    dbOwnerInfo.dbEffectiveOVM()).toBool();
+		m_dbOpenAddressing = Isds::nilBool2Variant(
+		    dbOwnerInfo.dbOpenAddressing()).toBool();
 	}
 	if (GlobInstcs::prefsPtr->useGlobalPaths) {
 		m_lastAttAddPath =

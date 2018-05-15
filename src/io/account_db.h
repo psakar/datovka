@@ -28,6 +28,7 @@
 #include <QVariant>
 
 #include "src/datovka_shared/io/sqlite/db_single.h"
+#include "src/isds/box_interface.h"
 
 /*!
  * @brief Information obtained from database. It is structured only by the
@@ -148,82 +149,21 @@ public:
 	 * @brief Insert account info into database.
 	 *
 	 * @param[in] key Key value.
-	 * @param[in] dbID Data box ID.
-	 * @param[in] dbType Data box type.
-	 * @param[in] ic Company IC.
-	 * @param[in] pnFirstName Given name.
-	 * @param[in] pnMiddleName Middle name.
-	 * @param[in] pnLastName Surname.
-	 * @param[in] pnLastNameAtBirth Surname at birth.
-	 * @param[in] firmName Company name.
-	 * @param[in] biDate Date of birth.
-	 * @param[in] biCity City of birth.
-	 * @param[in] biCounty Country of birth.
-	 * @param[in] biState State of birth.
-	 * @param[in] adCity City of residence.
-	 * @param[in] adStreet Street of residence.
-	 * @param[in] adNumberInStreet Number in street.
-	 * @param[in] adNumberInMunicipality Number in municipality.
-	 * @param[in] adZipCode Zip code.
-	 * @param[in] adState State of residence.
-	 * @param[in] nationality Nationality.
-	 * @param[in] identifier Indetifier.
-	 * @param[in] registryCode Registry code.
-	 * @param[in] dbState Databox state.
-	 * @param[in] dbEffectiveOVM Effective OVM.
-	 * @param[in] dbOpenAddressing Open addressing.
+	 * @param[in] dbOwnerInfo Owner info structure.
 	 * @return True on success.
 	 */
-	bool insertAccountIntoDb(const QString &key, const QString &dbID,
-	    const QString &dbType, int ic, const QString &pnFirstName,
-	    const QString &pnMiddleName, const QString &pnLastName,
-	    const QString &pnLastNameAtBirth, const QString &firmName,
-	    const QString &biDate, const QString &biCity,
-	    const QString &biCounty, const QString &biState,
-	    const QString &adCity, const QString &adStreet,
-	    const QString &adNumberInStreet,
-	    const QString &adNumberInMunicipality, const QString &adZipCode,
-	    const QString &adState, const QString &nationality,
-	    const QString &identifier, const QString &registryCode,
-	    int dbState, bool dbEffectiveOVM, bool dbOpenAddressing);
+	bool insertAccountIntoDb(const QString &key,
+	    const Isds::DbOwnerInfo &dbOwnerInfo);
 
 	/*!
 	 * @brief Insert user info into database.
 	 *
 	 * @param[in] key Key value.
-	 * @param[in] pnFirstName Given name.
-	 * @param[in] pnMiddleName Middle name.
-	 * @param[in] pnLastName Surname.
-	 * @param[in] pnLastNameAtBirth Surname at birth.
-	 * @param[in] adCity User city;
-	 * @param[in] adStreet User street.
-	 * @param[in] adNumberInStreet Number in street.
-	 * @param[in] adNumberInMunicipality Number in municipality.
-	 * @param[in] adZipCode User zip code.
-	 * @param[in] adState User state.
-	 * @param[in] biDate Date of birth.
-	 * @param[in] userType User type.
-	 * @param[in] userPrivils User privilegies.
-	 * @param[in] ic Company IC.
-	 * @param[in] firmName Company name.
-	 * @param[in] caStreet Company street.
-	 * @param[in] caCity Company city.
-	 * @param[in] caZipCode Company zip code.
-	 * @param[in] caState Company state.
+	 * @param[in] dbUserInfo User info structure.
 	 * @return True on success.
 	 */
 	bool insertUserIntoDb(const QString &key,
-	    const QString &userType, int userPrivils,
-	    const QString &pnFirstName, const QString &pnMiddleName,
-	    const QString &pnLastName, const QString &pnLastNameAtBirth,
-	    const QString &adCity, const QString &adStreet,
-	    const QString &adNumberInStreet,
-	    const QString &adNumberInMunicipality, const QString &adZipCode,
-	    const QString &adState,
-	    const QString &biDate,
-	    int ic, const QString &firmName, const QString &caStreet,
-	    const QString &caCity, const QString &caZipCode,
-	    const QString &caState);
+	    const Isds::DbUserInfo &dbUserInfo);
 
 	/*!
 	 * @brief Delete account info from database.
@@ -234,13 +174,12 @@ public:
 	bool deleteAccountInfo(const QString &key);
 
 	/*!
-	 * @brief Get data box info (dbType, dbEffectiveOVM, dbOpenAddressing).
+	 * @brief Get account/owner info from database.
 	 *
 	 * @param[in] key Key value.
-	 * @return List of info in order: dbType, dbEffectiveOVM and
-	 *                                dbOpenAddressing.
+	 * @return DbOwnerInfo structure - account info.
 	 */
-	QStringList getUserDataboxInfo(const QString &key) const;
+	const Isds::DbOwnerInfo getOwnerInfo(const QString &key) const;
 
 	/*!
 	 * @brief Return key used to access user entries in account database.
