@@ -103,7 +103,7 @@ enum Isds::Type::DbType Isds::variant2DbType(const QVariant &v)
 	}
 
 	bool ok = false;
-	long int num = v.toLongLong(&ok);
+	qint64 num = v.toLongLong(&ok);
 	if (Q_UNLIKELY(!ok)) {
 		Q_ASSERT(0);
 		return Type::BT_NULL;
@@ -153,7 +153,7 @@ enum Isds::Type::DbState Isds::variant2DbState(const QVariant &v)
 	}
 
 	bool ok = false;
-	long int num = v.toLongLong(&ok);
+	qint64 num = v.toLongLong(&ok);
 	if (Q_UNLIKELY(!ok)) {
 		Q_ASSERT(0);
 		return Type::BS_ERROR;
@@ -169,6 +169,57 @@ QVariant Isds::dbState2Variant(enum Type::DbState bs)
 	} else {
 		return QVariant();
 	}
+}
+
+Isds::Type::Privileges Isds::long2Privileges(long int p)
+{
+	Type::Privileges privileges = Type::PRIVIL_NONE;
+	if (p & Type::PRIVIL_READ_NON_PERSONAL) {
+		privileges |= Type::PRIVIL_READ_NON_PERSONAL;
+	}
+	if (p & Type::PRIVIL_READ_ALL) {
+		privileges |= Type::PRIVIL_READ_ALL;
+	}
+	if (p & Type::PRIVIL_CREATE_DM) {
+		privileges |= Type::PRIVIL_CREATE_DM;
+	}
+	if (p & Type::PRIVIL_VIEW_INFO) {
+		privileges |= Type::PRIVIL_VIEW_INFO;
+	}
+	if (p & Type::PRIVIL_SEARCH_DB) {
+		privileges |= Type::PRIVIL_SEARCH_DB;
+	}
+	if (p & Type::PRIVIL_OWNER_ADM) {
+		privileges |= Type::PRIVIL_OWNER_ADM;
+	}
+	if (p & Type::PRIVIL_READ_VAULT) {
+		privileges |= Type::PRIVIL_READ_VAULT;
+	}
+	if (p & Type::PRIVIL_ERASE_VAULT) {
+		privileges |= Type::PRIVIL_ERASE_VAULT;
+	}
+	return privileges;
+}
+
+Isds::Type::Privileges Isds::variant2Privileges(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::PRIVIL_NONE;
+	}
+
+	bool ok = false;
+	qint64 num = v.toLongLong(&ok);
+	if (Q_UNLIKELY(!ok)) {
+		Q_ASSERT(0);
+		return Type::PRIVIL_NONE;
+	}
+
+	return long2Privileges(num);
+}
+
+QVariant Isds::privileges2Variant(Type::Privileges p)
+{
+	return QVariant((int)p);
 }
 
 enum Isds::Type::DmState Isds::long2DmState(long int ms)
@@ -199,7 +250,7 @@ enum Isds::Type::DmState Isds::variant2DmState(const QVariant &v)
 	}
 
 	bool ok = false;
-	long int num = v.toLongLong(&ok);
+	qint64 num = v.toLongLong(&ok);
 	if (Q_UNLIKELY(!ok)) {
 		Q_ASSERT(0);
 		return Type::MS_NULL;

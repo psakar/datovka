@@ -666,39 +666,13 @@ enum Isds::Type::UserType libisdsUserType2UserType(const isds_UserType *ut,
  * @brief Converts privileges.
  */
 static
-Isds::Type::Privileges long2Privileges(long int *ip)
+Isds::Type::Privileges longPtr2Privileges(long int *ip)
 {
 	if (ip == NULL) {
 		return Isds::Type::PRIVIL_NONE;
 	}
 
-	const qint64 privNum = *ip;
-	Isds::Type::Privileges privileges = Isds::Type::PRIVIL_NONE;
-	if (privNum & Isds::Type::PRIVIL_READ_NON_PERSONAL) {
-		privileges |= Isds::Type::PRIVIL_READ_NON_PERSONAL;
-	}
-	if (privNum & Isds::Type::PRIVIL_READ_ALL) {
-		privileges |= Isds::Type::PRIVIL_READ_ALL;
-	}
-	if (privNum & Isds::Type::PRIVIL_CREATE_DM) {
-		privileges |= Isds::Type::PRIVIL_CREATE_DM;
-	}
-	if (privNum & Isds::Type::PRIVIL_VIEW_INFO) {
-		privileges |= Isds::Type::PRIVIL_VIEW_INFO;
-	}
-	if (privNum & Isds::Type::PRIVIL_SEARCH_DB) {
-		privileges |= Isds::Type::PRIVIL_SEARCH_DB;
-	}
-	if (privNum & Isds::Type::PRIVIL_OWNER_ADM) {
-		privileges |= Isds::Type::PRIVIL_OWNER_ADM;
-	}
-	if (privNum & Isds::Type::PRIVIL_READ_VAULT) {
-		privileges |= Isds::Type::PRIVIL_READ_VAULT;
-	}
-	if (privNum & Isds::Type::PRIVIL_ERASE_VAULT) {
-		privileges |= Isds::Type::PRIVIL_ERASE_VAULT;
-	}
-	return privileges;
+	return Isds::long2Privileges((qint64)*ip);
 }
 
 Isds::DbUserInfo Isds::libisds2dbUserInfo(const struct isds_DbUserInfo *idui,
@@ -728,7 +702,7 @@ Isds::DbUserInfo Isds::libisds2dbUserInfo(const struct isds_DbUserInfo *idui,
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
-	userInfo.setUserPrivils(long2Privileges(idui->userPrivils));
+	userInfo.setUserPrivils(longPtr2Privileges(idui->userPrivils));
 	userInfo.setIc(fromCStr(idui->ic));
 	userInfo.setFirmName(fromCStr(idui->firmName));
 	userInfo.setCaStreet(fromCStr(idui->caStreet));
@@ -798,7 +772,7 @@ bool userType2libisdsUserType(isds_UserType **tgt,
  * @brief Converts privileges.
  */
 static
-bool privileges2long(long int **tgt, Isds::Type::Privileges src)
+bool privileges2longPtr(long int **tgt, Isds::Type::Privileges src)
 {
 	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -836,7 +810,7 @@ bool setLibisdsDbUserInfoContent(struct isds_DbUserInfo *tgt,
 	if (Q_UNLIKELY(!userType2libisdsUserType(&tgt->userType, src.userType()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!privileges2long(&tgt->userPrivils, src.userPrivils()))) {
+	if (Q_UNLIKELY(!privileges2longPtr(&tgt->userPrivils, src.userPrivils()))) {
 		return false;
 	}
 	tgt->personName = personName2libisds(src.personName(), &iOk);
