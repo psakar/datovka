@@ -402,29 +402,6 @@ QString IsdsConversion::senderTypeStrToText(const QString &val)
 	}
 }
 
-const QString &IsdsConversion::userTypeToStr(int val)
-{
-	static const QString pu(STR_PRIMARY_USER), eu(STR_ENTRUSTED_USER),
-	    a(STR_ADMINISTRATOR), l(STR_LIQUIDATOR), ou("OFFICIAL_USER"),
-	    ocu("OFFICIAL_CERT_USER"), r(STR_RECEIVER), g(STR_GUARDIAN);
-	static const QString invalid;
-
-	switch (val) {
-	case USERTYPE_PRIMARY: return pu; break;
-	case USERTYPE_ENTRUSTED: return eu; break;
-	case USERTYPE_ADMINISTRATOR: return a; break;
-	case USERTYPE_LIQUIDATOR: return l; break;
-	case USERTYPE_OFFICIAL: return ou; break;
-	case USERTYPE_OFFICIAL_CERT: return ocu; break;
-	case USERTYPE_RECEIVER: return r; break;
-	case USERTYPE_GUARDIAN: return g; break;
-	default:
-		logWarningNL("Unknown user type value '%d'.", val);
-		return invalid;
-		break;
-	}
-}
-
 QString IsdsConversion::userPrivilsToText(int val)
 {
 	QString privStr;
