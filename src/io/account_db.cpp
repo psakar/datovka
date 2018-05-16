@@ -28,6 +28,7 @@
 #include <QSqlRecord>
 
 #include "src/io/account_db.h"
+#include "src/io/dbs.h"
 #include "src/io/db_tables.h"
 #include "src/isds/type_conversion.h"
 #include "src/log/log.h"
@@ -335,7 +336,6 @@ bool AccountDb::insertAccountIntoDb(const QString &key,
 	}
 	query.bindValue(":key", key);
 	query.bindValue(":dbID", dbOwnerInfo.dbID());
-	/* TODO - missing conversion into dbType */
 	query.bindValue(":dbType", Isds::dbType2StrVariant(dbOwnerInfo.dbType()));
 	query.bindValue(":ic", dbOwnerInfo.ic());
 	query.bindValue(":pnFirstName", dbOwnerInfo.personName().firstName());
@@ -344,7 +344,7 @@ bool AccountDb::insertAccountIntoDb(const QString &key,
 	query.bindValue(":pnLastNameAtBirth",
 	    dbOwnerInfo.personName().lastNameAtBirth());
 	query.bindValue(":firmName", dbOwnerInfo.firmName());
-	query.bindValue(":biDate", dbOwnerInfo.birthInfo().date());
+	query.bindValue(":biDate", qDateToDbFormat(dbOwnerInfo.birthInfo().date()));
 	query.bindValue(":biCity", dbOwnerInfo.birthInfo().city());
 	query.bindValue(":biCounty", dbOwnerInfo.birthInfo().county());
 	query.bindValue(":biState", dbOwnerInfo.birthInfo().state());
@@ -415,7 +415,7 @@ bool AccountDb::insertUserIntoDb(const QString &key,
 	query.bindValue(":pnLastNameAtBirth",
 	    dbUserInfo.personName().lastNameAtBirth());
 	query.bindValue(":firmName", dbUserInfo.firmName());
-	query.bindValue(":biDate", dbUserInfo.biDate());
+	query.bindValue(":biDate", qDateToDbFormat(dbUserInfo.biDate()));
 	query.bindValue(":adCity", dbUserInfo.address().city());
 	query.bindValue(":adStreet", dbUserInfo.address().street());
 	query.bindValue(":adNumberInStreet",
@@ -510,7 +510,7 @@ const Isds::DbOwnerInfo AccountDb::getOwnerInfo(const QString &key) const
 		personName.setLastNameAtBirth(query.value(6).toString());
 		dbOwnerInfo.setPersonName(personName);
 		dbOwnerInfo.setFirmName(query.value(7).toString());
-		biInfo.setDate(query.value(8).toDate());
+		biInfo.setDate(dateFromDbFormat(query.value(8).toString()));
 		biInfo.setCity(query.value(9).toString());
 		biInfo.setCounty(query.value(10).toString());
 		biInfo.setState(query.value(11).toString());
