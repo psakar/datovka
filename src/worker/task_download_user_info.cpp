@@ -27,7 +27,7 @@
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/isds_conversion.h"
+#include "src/isds/box_conversion.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_user_info.h"
@@ -73,9 +73,7 @@ bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
 	}
 
 	struct isds_DbUserInfo *userInfo = NULL;
-
 	isds_error status = isds_GetUserInfoFromLogin(session, &userInfo);
-
 	if (IE_SUCCESS != status) {
 		logErrorNL(
 		    "Downloading user information for account '%s' returned '%d': '%s'.",
@@ -89,32 +87,16 @@ bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
 
 	Q_ASSERT(NULL != userInfo);
 
-	bool ret = GlobInstcs::accntDbPtr->insertUserIntoDb(
-	    AccountDb::keyFromLogin(userName),
-	    IsdsConversion::userTypeToStr(*userInfo->userType),
-	    (int) *userInfo->userPrivils,
-	    userInfo->personName ? userInfo->personName->pnFirstName : NULL,
-	    userInfo->personName ? userInfo->personName->pnMiddleName : NULL,
-	    userInfo->personName ? userInfo->personName->pnLastName : NULL,
-	    userInfo->personName ?
-	        userInfo->personName->pnLastNameAtBirth : NULL,
-	    userInfo->address ? userInfo->address->adCity : NULL,
-	    userInfo->address ? userInfo->address->adStreet : NULL,
-	    userInfo->address ? userInfo->address->adNumberInStreet : NULL,
-	    userInfo->address ?
-	        userInfo->address->adNumberInMunicipality : NULL,
-	    userInfo->address ? userInfo->address->adZipCode : NULL,
-	    userInfo->address ? userInfo->address->adState : NULL,
-	    userInfo->biDate ? tmBirthToDbFormat(userInfo->biDate) : NULL,
-	    userInfo->ic ? QString(userInfo->ic).toInt() : 0,
-	    userInfo->firmName,
-	    userInfo->caStreet,
-	    userInfo->caCity,
-	    userInfo->caZipCode,
-	    userInfo->caState
-	    );
+	bool ok = false;
+	Isds::DbUserInfo dbUserInfo(Isds::libisds2dbUserInfo(userInfo, &ok));
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert libisds dbUserInfo to dbUserInfo.");
+		isds_DbUserInfo_free(&userInfo);
+		return false;
+	}
 
 	isds_DbUserInfo_free(&userInfo);
 
-	return ret;
+	return GlobInstcs::accntDbPtr->insertUserIntoDb(
+	    AccountDb::keyFromLogin(userName), dbUserInfo);
 }

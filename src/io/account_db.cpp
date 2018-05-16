@@ -28,7 +28,9 @@
 #include <QSqlRecord>
 
 #include "src/io/account_db.h"
+#include "src/io/dbs.h"
 #include "src/io/db_tables.h"
+#include "src/isds/type_conversion.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 
@@ -301,16 +303,8 @@ fail:
 	return false;
 }
 
-bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
-    const QString &dbType, int ic, const QString &pnFirstName,
-    const QString &pnMiddleName, const QString &pnLastName,
-    const QString &pnLastNameAtBirth, const QString &firmName,
-    const QString &biDate, const QString &biCity, const QString &biCounty,
-    const QString &biState, const QString &adCity, const QString &adStreet,
-    const QString &adNumberInStreet, const QString &adNumberInMunicipality,
-    const QString &adZipCode,const QString &adState,const QString &nationality,
-    const QString &identifier, const QString &registryCode,
-    int dbState, bool dbEffectiveOVM, bool dbOpenAddressing)
+bool AccountDb::insertAccountIntoDb(const QString &key,
+    const Isds::DbOwnerInfo &dbOwnerInfo)
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -341,30 +335,36 @@ bool AccountDb::insertAccountIntoDb(const QString &key, const QString &dbID,
 		goto fail;
 	}
 	query.bindValue(":key", key);
-	query.bindValue(":dbID", dbID);
-	query.bindValue(":dbType", dbType);
-	query.bindValue(":ic", ic);
-	query.bindValue(":pnFirstName", pnFirstName);
-	query.bindValue(":pnMiddleName", pnMiddleName);
-	query.bindValue(":pnLastName", pnLastName);
-	query.bindValue(":pnLastNameAtBirth", pnLastNameAtBirth);
-	query.bindValue(":firmName", firmName);
-	query.bindValue(":biDate", biDate);
-	query.bindValue(":biCity", biCity);
-	query.bindValue(":biCounty", biCounty);
-	query.bindValue(":biState", biState);
-	query.bindValue(":adCity", adCity);
-	query.bindValue(":adStreet", adStreet);
-	query.bindValue(":adNumberInStreet", adNumberInStreet);
-	query.bindValue(":adNumberInMunicipality", adNumberInMunicipality);
-	query.bindValue(":adZipCode", adZipCode);
-	query.bindValue(":adState", adState);
-	query.bindValue(":nationality", nationality);
-	query.bindValue(":identifier", identifier);
-	query.bindValue(":registryCode", registryCode);
-	query.bindValue(":dbState", dbState);
-	query.bindValue(":dbEffectiveOVM", dbEffectiveOVM);
-	query.bindValue(":dbOpenAddressing", dbOpenAddressing);
+	query.bindValue(":dbID", dbOwnerInfo.dbID());
+	query.bindValue(":dbType", Isds::dbType2StrVariant(dbOwnerInfo.dbType()));
+	query.bindValue(":ic", dbOwnerInfo.ic());
+	query.bindValue(":pnFirstName", dbOwnerInfo.personName().firstName());
+	query.bindValue(":pnMiddleName", dbOwnerInfo.personName().middleName());
+	query.bindValue(":pnLastName", dbOwnerInfo.personName().lastName());
+	query.bindValue(":pnLastNameAtBirth",
+	    dbOwnerInfo.personName().lastNameAtBirth());
+	query.bindValue(":firmName", dbOwnerInfo.firmName());
+	query.bindValue(":biDate", qDateToDbFormat(dbOwnerInfo.birthInfo().date()));
+	query.bindValue(":biCity", dbOwnerInfo.birthInfo().city());
+	query.bindValue(":biCounty", dbOwnerInfo.birthInfo().county());
+	query.bindValue(":biState", dbOwnerInfo.birthInfo().state());
+	query.bindValue(":adCity", dbOwnerInfo.address().city());
+	query.bindValue(":adStreet", dbOwnerInfo.address().street());
+	query.bindValue(":adNumberInStreet",
+	    dbOwnerInfo.address().numberInStreet());
+	query.bindValue(":adNumberInMunicipality",
+	    dbOwnerInfo.address().numberInMunicipality());
+	query.bindValue(":adZipCode", dbOwnerInfo.address().zipCode());
+	query.bindValue(":adState", dbOwnerInfo.address().state());
+	query.bindValue(":nationality", dbOwnerInfo.nationality());
+	query.bindValue(":identifier", dbOwnerInfo.identifier());
+	query.bindValue(":registryCode", dbOwnerInfo.registryCode());
+	query.bindValue(":dbState",
+	    Isds::dbState2Variant(dbOwnerInfo.dbState()));
+	query.bindValue(":dbEffectiveOVM",
+	    Isds::nilBool2Variant(dbOwnerInfo.dbEffectiveOVM()));
+	query.bindValue(":dbOpenAddressing",
+	    Isds::nilBool2Variant(dbOwnerInfo.dbOpenAddressing()));
 	if (query.exec()) {
 		return true;
 	} else {
@@ -376,15 +376,7 @@ fail:
 }
 
 bool AccountDb::insertUserIntoDb(const QString &key,
-    const QString &userType, int userPrivils,
-    const QString &pnFirstName, const QString &pnMiddleName,
-    const QString &pnLastName, const QString &pnLastNameAtBirth,
-    const QString &adCity, const QString &adStreet,
-    const QString &adNumberInStreet, const QString &adNumberInMunicipality,
-    const QString &adZipCode,const QString &adState,
-    const QString &biDate,
-    int ic, const QString &firmName, const QString &caStreet,
-    const QString &caCity, const QString &caZipCode, const QString &caState)
+    const Isds::DbUserInfo &dbUserInfo)
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -413,25 +405,29 @@ bool AccountDb::insertUserIntoDb(const QString &key,
 		goto fail;
 	}
 	query.bindValue(":key", key);
-	query.bindValue(":userType", userType);
-	query.bindValue(":userPrivils", userPrivils);
-	query.bindValue(":ic", ic);
-	query.bindValue(":pnFirstName", pnFirstName);
-	query.bindValue(":pnMiddleName", pnMiddleName);
-	query.bindValue(":pnLastName", pnLastName);
-	query.bindValue(":pnLastNameAtBirth", pnLastNameAtBirth);
-	query.bindValue(":firmName", firmName);
-	query.bindValue(":biDate", biDate);
-	query.bindValue(":adCity", adCity);
-	query.bindValue(":adStreet", adStreet);
-	query.bindValue(":adNumberInStreet", adNumberInStreet);
-	query.bindValue(":adNumberInMunicipality", adNumberInMunicipality);
-	query.bindValue(":adZipCode", adZipCode);
-	query.bindValue(":adState", adState);
-	query.bindValue(":caStreet", caStreet);
-	query.bindValue(":caCity", caCity);
-	query.bindValue(":caZipCode", caZipCode);
-	query.bindValue(":caState", caState);
+	query.bindValue(":userType", Isds::userType2Str(dbUserInfo.userType()));
+	query.bindValue(":userPrivils",
+	    Isds::privileges2Variant(dbUserInfo.userPrivils()));
+	query.bindValue(":ic", dbUserInfo.ic());
+	query.bindValue(":pnFirstName", dbUserInfo.personName().firstName());
+	query.bindValue(":pnMiddleName", dbUserInfo.personName().middleName());
+	query.bindValue(":pnLastName", dbUserInfo.personName().lastName());
+	query.bindValue(":pnLastNameAtBirth",
+	    dbUserInfo.personName().lastNameAtBirth());
+	query.bindValue(":firmName", dbUserInfo.firmName());
+	query.bindValue(":biDate", qDateToDbFormat(dbUserInfo.biDate()));
+	query.bindValue(":adCity", dbUserInfo.address().city());
+	query.bindValue(":adStreet", dbUserInfo.address().street());
+	query.bindValue(":adNumberInStreet",
+	    dbUserInfo.address().numberInStreet());
+	query.bindValue(":adNumberInMunicipality",
+	    dbUserInfo.address().numberInMunicipality());
+	query.bindValue(":adZipCode", dbUserInfo.address().zipCode());
+	query.bindValue(":adState", dbUserInfo.address().state());
+	query.bindValue(":caStreet", dbUserInfo.caStreet());
+	query.bindValue(":caCity", dbUserInfo.caCity());
+	query.bindValue(":caZipCode", dbUserInfo.caZipCode());
+	query.bindValue(":caState", dbUserInfo.caState());
 	if (query.exec()) {
 		return true;
 	} else {
@@ -475,18 +471,26 @@ fail:
 	return false;
 }
 
-QStringList AccountDb::getUserDataboxInfo(const QString &key) const
+const Isds::DbOwnerInfo AccountDb::getOwnerInfo(const QString &key) const
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
-	QStringList dataList;
+	Isds::Address address;
+	Isds::BirthInfo biInfo;
+	Isds::DbOwnerInfo dbOwnerInfo;
+	Isds::PersonName personName;
 
 	if (!m_db.isOpen()) {
 		logErrorNL("%s", "Account database seems not to be open.");
 		goto fail;
 	}
 
-	queryStr = "SELECT dbType, dbEffectiveOVM, dbOpenAddressing "
+	queryStr = "SELECT "
+	    "dbID, dbType, ic, pnFirstName, pnMiddleName, pnLastName, "
+	    "pnLastNameAtBirth, firmName, biDate, biCity, biCounty, biState, "
+	    "adCity, adStreet, adNumberInStreet, adNumberInMunicipality, "
+	    "adZipCode, adState, nationality, identifier, registryCode, "
+	    "dbState, dbEffectiveOVM, dbOpenAddressing "
 	    "FROM account_info WHERE key = :key";
 
 	if (!query.prepare(queryStr)) {
@@ -497,19 +501,42 @@ QStringList AccountDb::getUserDataboxInfo(const QString &key) const
 	query.bindValue(":key", key);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		/* dbType */
-		dataList.append(query.value(0).toString());
-		/* dbEffectiveOVM */
-		dataList.append(query.value(1).toString());
-		/* dbOpenAddressing */
-		dataList.append(query.value(2).toString());
-		return dataList;
+		dbOwnerInfo.setDbID(query.value(0).toString());
+		dbOwnerInfo.setDbType(Isds::strVariant2DbType(query.value(1)));
+		dbOwnerInfo.setIc(query.value(2).toString());
+		personName.setFirstName(query.value(3).toString());
+		personName.setMiddleName(query.value(4).toString());
+		personName.setLastName(query.value(5).toString());
+		personName.setLastNameAtBirth(query.value(6).toString());
+		dbOwnerInfo.setPersonName(personName);
+		dbOwnerInfo.setFirmName(query.value(7).toString());
+		biInfo.setDate(dateFromDbFormat(query.value(8).toString()));
+		biInfo.setCity(query.value(9).toString());
+		biInfo.setCounty(query.value(10).toString());
+		biInfo.setState(query.value(11).toString());
+		dbOwnerInfo.setBirthInfo(biInfo);
+		address.setCity(query.value(12).toString());
+		address.setStreet(query.value(13).toString());
+		address.setNumberInStreet(query.value(14).toString());
+		address.setNumberInMunicipality(query.value(15).toString());
+		address.setZipCode(query.value(16).toString());
+		address.setState(query.value(17).toString());
+		dbOwnerInfo.setAddress(address);
+		dbOwnerInfo.setNationality(query.value(18).toString());
+		dbOwnerInfo.setIdentifier(query.value(19).toString());
+		dbOwnerInfo.setRegistryCode(query.value(20).toString());
+		dbOwnerInfo.setDbState(Isds::variant2DbState(query.value(21)));
+		dbOwnerInfo.setDbEffectiveOVM(
+		    Isds::variant2NilBool(query.value(22)));
+		dbOwnerInfo.setDbOpenAddressing(
+		    Isds::variant2NilBool(query.value(23)));
+		return dbOwnerInfo;
 	} else {
 		logErrorNL("Cannot execute SQL query and/or read SQL data: "
 		    "%s.", query.lastError().text().toUtf8().constData());
 	}
 fail:
-	return QStringList();
+	return Isds::DbOwnerInfo();
 }
 
 QString AccountDb::keyFromLogin(const QString &login)

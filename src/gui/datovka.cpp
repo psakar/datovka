@@ -85,6 +85,7 @@
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
 #include "src/isds/isds_conversion.h"
+#include "src/isds/type_conversion.h"
 #include "src/model_interaction/account_interaction.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/records_management/gui/dlg_records_management.h"
@@ -4931,17 +4932,15 @@ void MainWindow::findDatabox(void)
 	}
 
 	/* Method connectToIsds() acquires account information. */
-	const QList<QString> accountData(
-	    GlobInstcs::accntDbPtr->getUserDataboxInfo(
-	        AccountDb::keyFromLogin(userName)));
-
-	if (accountData.isEmpty()) {
+	const Isds::DbOwnerInfo dbOwnerInfo(GlobInstcs::accntDbPtr->getOwnerInfo(
+	    AccountDb::keyFromLogin(userName)));
+	if (dbOwnerInfo.isNull()) {
 		return;
 	}
 
-	QString dbType = accountData.at(0);
-	bool dbEffectiveOVM = (accountData.at(1) == "1") ? true : false;
-	bool dbOpenAddressing = (accountData.at(2) == "1") ? true : false;
+	QString dbType(Isds::dbType2Str(dbOwnerInfo.dbType()));
+	bool dbEffectiveOVM = (dbOwnerInfo.dbEffectiveOVM() == Isds::Type::BOOL_TRUE);
+	bool dbOpenAddressing = (dbOwnerInfo.dbOpenAddressing() == Isds::Type::BOOL_TRUE);
 
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
 	    .arg((*GlobInstcs::acntMapPtr)[userName].accountName()));
