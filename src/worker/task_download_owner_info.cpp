@@ -87,9 +87,8 @@ bool TaskDownloadOwnerInfo::downloadOwnerInfo(const QString &userName,
 
 	Q_ASSERT(NULL != ownerInfo);
 
-	Isds::DbOwnerInfo dbOwnerInfo;
 	bool ok = false;
-	dbOwnerInfo = Isds::libisds2dbOwnerInfo(ownerInfo, &ok);
+	Isds::DbOwnerInfo dbOwnerInfo(Isds::libisds2dbOwnerInfo(ownerInfo, &ok));
 	if (!ok) {
 		logErrorNL("%s", "Cannot convert libisds dbOwnerInfo to dbOwnerInfo.");
 		isds_DbOwnerInfo_free(&ownerInfo);

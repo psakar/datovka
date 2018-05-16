@@ -466,10 +466,8 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 	    GlobInstcs::accntDbPtr->getOwnerInfo(acntDbKey));
 	if (!dbOwnerInfo.isNull()) {
 		m_dbType = Isds::dbType2Str(dbOwnerInfo.dbType());
-		m_dbEffectiveOVM = Isds::nilBool2Variant(
-		    dbOwnerInfo.dbEffectiveOVM()).toBool();
-		m_dbOpenAddressing = Isds::nilBool2Variant(
-		    dbOwnerInfo.dbOpenAddressing()).toBool();
+		m_dbEffectiveOVM = (dbOwnerInfo.dbEffectiveOVM() == Isds::Type::BOOL_TRUE);
+		m_dbOpenAddressing = (dbOwnerInfo.dbOpenAddressing() == Isds::Type::BOOL_TRUE);
 	}
 	if (GlobInstcs::prefsPtr->useGlobalPaths) {
 		m_lastAttAddPath =

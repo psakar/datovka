@@ -87,9 +87,8 @@ bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
 
 	Q_ASSERT(NULL != userInfo);
 
-	Isds::DbUserInfo dbUserInfo;
 	bool ok = false;
-	dbUserInfo = Isds::libisds2dbUserInfo(userInfo, &ok);
+	Isds::DbUserInfo dbUserInfo(Isds::libisds2dbUserInfo(userInfo, &ok));
 	if (!ok) {
 		logErrorNL("%s", "Cannot convert libisds dbUserInfo to dbUserInfo.");
 		isds_DbUserInfo_free(&userInfo);

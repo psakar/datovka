@@ -4938,11 +4938,9 @@ void MainWindow::findDatabox(void)
 		return;
 	}
 
-	QString dbType = Isds::dbType2Str(dbOwnerInfo.dbType());
-	bool dbEffectiveOVM = Isds::nilBool2Variant(
-	    dbOwnerInfo.dbEffectiveOVM()).toBool();
-	bool dbOpenAddressing = Isds::nilBool2Variant(
-	    dbOwnerInfo.dbOpenAddressing()).toBool();
+	QString dbType(Isds::dbType2Str(dbOwnerInfo.dbType()));
+	bool dbEffectiveOVM = (dbOwnerInfo.dbEffectiveOVM() == Isds::Type::BOOL_TRUE);
+	bool dbOpenAddressing = (dbOwnerInfo.dbOpenAddressing() == Isds::Type::BOOL_TRUE);
 
 	showStatusTextWithTimeout(tr("Find databoxes from account \"%1\".")
 	    .arg((*GlobInstcs::acntMapPtr)[userName].accountName()));
