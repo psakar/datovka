@@ -27,43 +27,19 @@
 
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/box_conversion.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_search_owner.h"
 
-TaskSearchOwner::SoughtOwnerInfo::SoughtOwnerInfo(const QString &_id,
-    enum BoxType _type, const QString &_ic, const QString &_firstName,
-    const QString &_lastName, const QString &_firmName,
-    const QString &_zipCode)
-    : id(_id),
-    type(_type),
-    ic(_ic),
-    firstName(_firstName),
-    lastName(_lastName),
-    firmName(_firmName),
-    zipCode(_zipCode)
-{
-}
-
-TaskSearchOwner::BoxEntry::BoxEntry(const QString &i, int t, const QString &n,
-    const QString &ad, const QString &zc, bool &ovm)
-    : id(i),
-    type(t),
-    name(n),
-    address(ad),
-    zipCode(zc),
-    effectiveOVM(ovm)
-{
-}
-
 TaskSearchOwner::TaskSearchOwner(const QString &userName,
-    const SoughtOwnerInfo &soughtInfo)
+    const Isds::DbOwnerInfo &dbOwnerInfo)
     : m_result(SO_ERROR),
     m_isdsError(),
     m_isdsLongError(),
     m_foundBoxes(),
     m_userName(userName),
-    m_soughtInfo(soughtInfo)
+    m_dbOwnerInfo(dbOwnerInfo)
 {
 	Q_ASSERT(!m_userName.isEmpty());
 }
@@ -80,7 +56,7 @@ void TaskSearchOwner::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_result = isdsSearch(m_userName, m_soughtInfo, m_foundBoxes,
+	m_result = isdsSearch(m_userName, m_dbOwnerInfo, m_foundBoxes,
 	    m_isdsError, m_isdsLongError);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
@@ -91,166 +67,21 @@ void TaskSearchOwner::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-/*!
- * @brief Convert box type from task to libisds enum.
- *
- * @param[in] type Task enum type representation.
- * @return Libisds enum representation.
- */
 static
-isds_DbType convertType(enum TaskSearchOwner::BoxType type)
+void isdsBoxes2dbOwnerInfoList(const struct isds_list *isdsFoundBoxes,
+    QList<Isds::DbOwnerInfo> &foundBoxes)
 {
-	switch (type) {
-	case TaskSearchOwner::BT_OVM:
-		return DBTYPE_OVM;
-		break;
-	case TaskSearchOwner::BT_PO:
-		return DBTYPE_PO;
-		break;
-	case TaskSearchOwner::BT_PFO:
-		return DBTYPE_PFO;
-		break;
-	case TaskSearchOwner::BT_FO:
-		return DBTYPE_FO;
-		break;
-	default:
-		Q_ASSERT(0);
-		return DBTYPE_OVM;
-		break;
-	}
-}
-
-/*!
- * @brief Creates a new owner info structure used for data box searching.
- *
- * @param[in] soughtInfo Sought data.
- * @return Newly allocated structure set according to input.
- */
-static
-struct isds_DbOwnerInfo *ownerInfoFromSoughtInfo(
-    const TaskSearchOwner::SoughtOwnerInfo &soughtInfo)
-{
-	struct isds_PersonName *personName = NULL;
-	struct isds_Address *address = NULL;
-	struct isds_DbOwnerInfo *ownerInfo = NULL;
-
-	personName = isds_PersonName_create(soughtInfo.firstName, QString(),
-	    soughtInfo.lastName, soughtInfo.lastName);
-	if (NULL == personName) {
-		goto fail;
-	}
-
-	address = isds_Address_create(QString(), QString(), QString(),
-	    QString(), soughtInfo.zipCode, QString());
-	if (NULL == address) {
-		goto fail;
-	}
-
-	ownerInfo = isds_DbOwnerInfo_createConsume(soughtInfo.id,
-	    convertType(soughtInfo.type), soughtInfo.ic, personName,
-	    soughtInfo.firmName, NULL, address, QString(), QString(),
-	    QString(), QString(), QString(), 0, false, false);
-	if (NULL != ownerInfo) {
-		personName = NULL;
-		address = NULL;
-	} else {
-		goto fail;
-	}
-
-	return ownerInfo;
-
-fail:
-	isds_PersonName_free(&personName);
-	isds_Address_free(&address);
-	isds_DbOwnerInfo_free(&ownerInfo);
-	return NULL;
-}
-
-/*!
- * @brief Adds entries from libisds list into antry list.
- *
- * @param[out] boxList List of boxes to append data to.
- * @param[in]  boxes List of boxes to copy data from.
- */
-static
-void appendBoxEntries(QList<TaskSearchOwner::BoxEntry> &foundBoxes,
-    const struct isds_list *boxes)
-{
-	while (boxes != NULL) {
-		const struct isds_DbOwnerInfo *found =
-		    (struct isds_DbOwnerInfo *)boxes->data;
-
-		if ((found->dbID == NULL) || (found->dbType == NULL)) {
+	bool ok = false;
+	while (isdsFoundBoxes != NULL) {
+		const struct isds_DbOwnerInfo *isdsFoundBox =
+		    (struct isds_DbOwnerInfo *)isdsFoundBoxes->data;
+		Isds::DbOwnerInfo ds = Isds::libisds2dbOwnerInfo(isdsFoundBox, &ok);
+		if (!ok) {
+			logErrorNL("%s", "Cannot convert libisds dbOwnerInfo to dbOwnerInfo.");
 			continue;
 		}
-
-		QString name;
-		switch (*found->dbType) {
-		case DBTYPE_FO:
-			if (found->personName != NULL) {
-				name = QString(found->personName->pnFirstName) +
-				    " " + QString(found->personName->pnLastName);
-			}
-			break;
-		case DBTYPE_PFO:
-			if (found->personName != NULL) {
-				QString firmName(found->firmName);
-				if (firmName.isEmpty() || (firmName == " ")) {
-					if (found->personName != NULL) {
-						name = QString(found->personName->pnFirstName) +
-						    " " + QString(found->personName->pnLastName);
-					}
-				} else {
-					name = QString(found->firmName);
-				}
-			}
-			break;
-		default:
-			break;
-		}
-		if (name.isEmpty()) { /* Defaults. */
-			name = QString(found->firmName);
-		}
-
-		QString address, zipCode;
-		if (found->address != NULL) {
-			QString street(found->address->adStreet);
-			QString adNumberInStreet(found->address->adNumberInStreet);
-			QString adNumberInMunicipality(found->address->adNumberInMunicipality);
-
-			if (street.isEmpty() || (street == " ")) {
-				address = QString(found->address->adCity);
-			} else {
-				address = street;
-				if (adNumberInStreet.isEmpty() ||
-				    (adNumberInStreet == " ")) {
-					address += + " " +
-					    adNumberInMunicipality +
-					    ", " + QString(found->address->adCity);
-				} else if (adNumberInMunicipality.isEmpty() ||
-				           (adNumberInMunicipality == " ")) {
-					address += + " " +
-					    adNumberInStreet +
-					    ", " + QString(found->address->adCity);
-				} else {
-					address += + " "+
-					    adNumberInMunicipality
-					    + "/" +
-					    adNumberInStreet +
-					", " + QString(found->address->adCity);
-				}
-			}
-
-			zipCode = QString(found->address->adZipCode);
-		}
-
-		bool ovm = (found->dbEffectiveOVM != NULL) ? (*found->dbEffectiveOVM) : false;
-
-		foundBoxes.append(TaskSearchOwner::BoxEntry(
-		    QString(found->dbID), *found->dbType, name, address,
-		    zipCode, ovm));
-
-		boxes = boxes->next;
+		foundBoxes.append(ds);
+		isdsFoundBoxes = isdsFoundBoxes->next;
 	}
 }
 
@@ -289,9 +120,9 @@ enum TaskSearchOwner::Result convertError(int status)
 	}
 }
 
-enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(
-    const QString &userName, const SoughtOwnerInfo &soughtInfo,
-    QList<BoxEntry> &foundBoxes, QString &error, QString &longError)
+enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(const QString &userName,
+    const Isds::DbOwnerInfo &dbOwnerInfo, QList<Isds::DbOwnerInfo> &foundBoxes,
+    QString &error, QString &longError)
 {
 	isds_error status = IE_ERROR;
 
@@ -301,20 +132,22 @@ enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(
 		return SO_ERROR;
 	}
 
-	struct isds_list *iFoundBoxes = NULL;
-
-	struct isds_DbOwnerInfo *info = ownerInfoFromSoughtInfo(soughtInfo);
-	if (info == NULL) {
+	bool ok = false;
+	struct isds_list *isdsFoundBoxes = NULL;
+	struct isds_DbOwnerInfo *isdsDbOwnerInfo =
+	    Isds::dbOwnerInfo2libisds(dbOwnerInfo, &ok);
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert dbOwnerInfo to libisds dbOwnerInfo.");
 		return SO_ERROR;
 	}
 
-	status = isds_FindDataBox(session, info, &iFoundBoxes);
+	status = isds_FindDataBox(session, isdsDbOwnerInfo, &isdsFoundBoxes);
 
-	isds_DbOwnerInfo_free(&info);
+	isds_DbOwnerInfo_free(&isdsDbOwnerInfo);
 
-	if (iFoundBoxes != NULL) {
-		appendBoxEntries(foundBoxes, iFoundBoxes);
-		isds_list_free(&iFoundBoxes);
+	if (isdsFoundBoxes != NULL) {
+		isdsBoxes2dbOwnerInfoList(isdsFoundBoxes, foundBoxes);
+		isds_list_free(&isdsFoundBoxes);
 	}
 
 	if (IE_SUCCESS != status) {

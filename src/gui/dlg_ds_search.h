@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_DS_SEARCH_H_
-#define _DLG_DS_SEARCH_H_
+#pragma once
 
 #include <QDialog>
 #include <QItemSelection>
@@ -234,20 +233,6 @@ private:
 	void searchDataBoxFulltextThread(void);
 
 	/*!
-	 * @brief Encapsulates query.
-	 *
-	 * @param[in] boxId Data box identifier.
-	 * @param[in] boxTye Type of sought data box.
-	 * @param[in] ic Identifier number.
-	 * @param[in] name Name to search for.
-	 * @param[in] zipCode ZIP code.
-	 * @return Search result.
-	 */
-	SearchResult queryBoxNormal(const QString &boxId,
-	    enum TaskSearchOwner::BoxType boxType, const QString &ic,
-	    const QString &name, const QString &zipCode);
-
-	/*!
 	 * @brief Display message about search result.
 	 *
 	 * @param[in] searchResult Search task result code.
@@ -323,5 +308,3 @@ private:
 
 	bool m_showInfoLabel; /*!< Controls the notification about limited search results. */
 };
-
-#endif /* DLG_DS_SEARCH_H */

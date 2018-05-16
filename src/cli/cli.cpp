@@ -34,6 +34,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/isds_helper.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/type_conversion.h"
 #include "src/log/log.h"
 #include "src/model_interaction/account_interaction.h"
 #include "src/worker/task_download_message.h"
@@ -629,50 +630,50 @@ cli_error getOwnerInfo(const QMap <QString, QVariant> &map, QString &errmsg)
 cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 /* ========================================================================= */
 {
-	const QString username = map["username"].toString();
-
 	qDebug() << CLI_PREFIX << "find info about databox from username"
-	    <<  username;
+	    <<  map["username"].toString();
 
-	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
-
-	/* set type of search databox */
-	QString dbTypeTmp = map.value("dbType").toString();
-	if (dbTypeTmp == DB_FO) {
-		boxType = TaskSearchOwner::BT_FO;
-	} else if (dbTypeTmp == DB_PFO) {
-		boxType = TaskSearchOwner::BT_PFO;
-	} else if (dbTypeTmp == DB_PO) {
-		boxType = TaskSearchOwner::BT_PO;
-	} else {
-		boxType = TaskSearchOwner::BT_OVM;
-	}
-
-	TaskSearchOwner::SoughtOwnerInfo soughtInfo(
-	    map.contains("dbID") ? map.value("dbID").toString() : QString(),
-	    boxType,
-	    map.contains("ic") ? map.value("ic").toString() : QString(),
-	    map.contains("pnFirstName") ? map.value("pnFirstName").toString() : QString(),
-	    map.contains("pnLastName") ? map.value("pnLastName").toString() : QString(),
-	    map.contains("firmName") ? map.value("firmName").toString() : QString(),
-	    map.contains("adZipCode") ? map.value("adZipCode").toString() : QString());
-
-	QList<TaskSearchOwner::BoxEntry> foundBoxes;
+	Isds::Address address;
+	Isds::DbOwnerInfo dbOwnerInfo;
+	Isds::PersonName personName;
+	QList<Isds::DbOwnerInfo> foundBoxes;
 	QString errMsg;
 	QString longErrMsg;
+
+	dbOwnerInfo.setDbID(map.contains("dbID") ?
+	    map.value("dbID").toString() : QString());
+	dbOwnerInfo.setDbType(Isds::strVariant2DbType(map.value("dbType")));
+	dbOwnerInfo.setIc(map.contains("ic") ?
+	    map.value("ic").toString() : QString());
+	personName.setFirstName(map.contains("pnFirstName") ?
+	    map.value("pnFirstName").toString() : QString());
+	personName.setLastName(map.contains("pnLastName") ?
+	    map.value("pnLastName").toString() : QString());
+	dbOwnerInfo.setPersonName(personName);
+	dbOwnerInfo.setFirmName(map.contains("firmName") ?
+	    map.value("firmName").toString() : QString());
+	address.setZipCode(map.contains("adZipCode") ?
+	    map.value("adZipCode").toString() : QString());
+	dbOwnerInfo.setAddress(address);
+
 	enum TaskSearchOwner::Result result = TaskSearchOwner::isdsSearch(
-	    username, soughtInfo, foundBoxes, errMsg, longErrMsg);
+	    map["username"].toString(), dbOwnerInfo, foundBoxes, errMsg,
+	    longErrMsg);
 
 	if (TaskSearchOwner::SO_SUCCESS != result) {
 		errmsg = longErrMsg;
 		return CLI_ERROR;
 	}
 
-	foreach (const TaskSearchOwner::BoxEntry &entry, foundBoxes) {
+	foreach (const Isds::DbOwnerInfo &box, foundBoxes) {
 		QStringList contact;
-		contact.append(entry.id);
-		contact.append("|" + entry.name + "|" + entry.address +
-		    "|" + entry.zipCode);
+		contact.append(box.dbID());
+		contact.append("|");
+		contact.append(Isds::createOwnerName(box));
+		contact.append("|");
+		contact.append(Isds::createOwnerAddressWithoutIc(box.address()));
+		contact.append("|");
+		contact.append(box.address().zipCode());
 		printDataToStdOut(contact);
 	}
 

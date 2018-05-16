@@ -546,26 +546,80 @@ void DlgDsSearch::checkInputFieldsFulltext(void)
 
 DlgDsSearch::SearchResult DlgDsSearch::searchDataBoxNormal(void)
 {
-	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
+	enum Isds::Type::DbType boxType = Isds::Type::BT_OVM;
 	switch (m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
 	case CBOX_TYPE_FO:
-		boxType = TaskSearchOwner::BT_FO;
+		boxType = Isds::Type::BT_FO;
 		break;
 	case CBOX_TYPE_PFO:
-		boxType = TaskSearchOwner::BT_PFO;
+		boxType = Isds::Type::BT_PFO;
 		break;
 	case CBOX_TYPE_PO:
-		boxType = TaskSearchOwner::BT_PO;
+		boxType = Isds::Type::BT_PO;
 		break;
 	case CBOX_TYPE_OVM:
 	default:
-		boxType = TaskSearchOwner::BT_OVM;
+		boxType = Isds::Type::BT_OVM;
 		break;
 	}
 
-	return queryBoxNormal(m_ui->iDLineEdit->text(), boxType,
-	    m_ui->iCLineEdit->text(), m_ui->nameLineEdit->text(),
-	    m_ui->pscLineEdit->text());
+	m_ui->contactTableView->setEnabled(false);
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
+
+	m_ui->searchResultText->setText(totalFoundStr(0));
+
+	Isds::Address address;
+	Isds::DbOwnerInfo dbOwnerInfo;
+	Isds::PersonName personName;
+
+	dbOwnerInfo.setDbID(m_ui->iDLineEdit->text());
+	dbOwnerInfo.setDbType(boxType);
+	dbOwnerInfo.setIc(m_ui->iCLineEdit->text());
+	personName.setFirstName(m_ui->nameLineEdit->text());
+	personName.setLastName(m_ui->nameLineEdit->text());
+	dbOwnerInfo.setPersonName(personName);
+	dbOwnerInfo.setFirmName(m_ui->nameLineEdit->text());
+	address.setZipCode(m_ui->pscLineEdit->text());
+	dbOwnerInfo.setAddress(address);
+
+	TaskSearchOwner *task = new (std::nothrow) TaskSearchOwner(m_userName,
+	    dbOwnerInfo);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		m_ui->contactTableView->setEnabled(true);
+		return SearchResult(TaskSearchOwner::SO_ERROR, QString());
+	}
+	task->setAutoDelete(false);
+	GlobInstcs::workPoolPtr->runSingle(task);
+
+	enum TaskSearchOwner::Result taskResult = task->m_result;
+	QString longErrMsg(task->m_isdsLongError);
+	QList<Isds::DbOwnerInfo> foundBoxes(task->m_foundBoxes);
+
+	delete task; task = Q_NULLPTR;
+
+	if (taskResult != TaskSearchOwner::SO_SUCCESS) {
+		return SearchResult(taskResult, longErrMsg);
+	}
+
+	bool selectFirstRow = m_contactTableModel.rowCount() == 0;
+	m_contactTableModel.appendData(foundBoxes);
+
+	m_ui->searchResultText->setText(totalFoundStr(foundBoxes.size()));
+
+	if (m_contactTableModel.rowCount() > 0) {
+		m_ui->contactTableView->selectColumn(
+		    BoxContactsModel::CHECKBOX_COL);
+		if (selectFirstRow) {
+			m_ui->contactTableView->selectRow(0);
+		}
+	}
+
+	m_ui->contactTableView->setEnabled(true);
+
+	//m_ui->contactTableView->resizeColumnsToContents();
+
+	return SearchResult(taskResult, QString());
 }
 
 DlgDsSearch::SearchResultFt DlgDsSearch::searchDataBoxFulltext(void)
@@ -615,58 +669,6 @@ DlgDsSearch::SearchResultFt DlgDsSearch::searchDataBoxFulltext(void)
 void DlgDsSearch::searchDataBoxFulltextThread(void)
 {
 	m_fulltextThread.start();
-}
-
-DlgDsSearch::SearchResult DlgDsSearch::queryBoxNormal(const QString &boxId,
-    enum TaskSearchOwner::BoxType boxType, const QString &ic,
-    const QString &name, const QString &zipCode)
-{
-	m_ui->contactTableView->setEnabled(false);
-	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
-
-	m_ui->searchResultText->setText(totalFoundStr(0));
-
-	TaskSearchOwner::SoughtOwnerInfo soughtInfo(boxId, boxType, ic, name,
-	    name, name, zipCode);
-
-	TaskSearchOwner *task = new (std::nothrow) TaskSearchOwner(m_userName,
-	    soughtInfo);
-	if (Q_UNLIKELY(task == Q_NULLPTR)) {
-		Q_ASSERT(0);
-		m_ui->contactTableView->setEnabled(true);
-		return SearchResult(TaskSearchOwner::SO_ERROR, QString());
-	}
-	task->setAutoDelete(false);
-	GlobInstcs::workPoolPtr->runSingle(task);
-
-	enum TaskSearchOwner::Result taskResult = task->m_result;
-	QString longErrMsg(task->m_isdsLongError);
-	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
-
-	delete task; task = Q_NULLPTR;
-
-	if (taskResult != TaskSearchOwner::SO_SUCCESS) {
-		return SearchResult(taskResult, longErrMsg);
-	}
-
-	bool selectFirstRow = m_contactTableModel.rowCount() == 0;
-	m_contactTableModel.appendData(foundBoxes);
-
-	m_ui->searchResultText->setText(totalFoundStr(foundBoxes.size()));
-
-	if (m_contactTableModel.rowCount() > 0) {
-		m_ui->contactTableView->selectColumn(
-		    BoxContactsModel::CHECKBOX_COL);
-		if (selectFirstRow) {
-			m_ui->contactTableView->selectRow(0);
-		}
-	}
-
-	m_ui->contactTableView->setEnabled(true);
-
-	//m_ui->contactTableView->resizeColumnsToContents();
-
-	return SearchResult(taskResult, QString());
 }
 
 void DlgDsSearch::displaySearchResult(const SearchResult &searchResult)
