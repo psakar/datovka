@@ -461,7 +461,4 @@ namespace Isds {
 
 	void swap(DbUserInfo &first, DbUserInfo &second) Q_DECL_NOTHROW;
 
-	/* Create full owner name and full owner address without IC */
-	QString createOwnerName(const Isds::DbOwnerInfo &dbOwnerInfo);
-	QString createOwnerAddressWithoutIc(const Isds::Address &address);
 }

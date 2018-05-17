@@ -34,6 +34,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/isds_helper.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/to_text_conversion.h"
 #include "src/isds/type_conversion.h"
 #include "src/log/log.h"
 #include "src/model_interaction/account_interaction.h"
@@ -669,9 +670,9 @@ cli_error findDatabox(const QMap <QString, QVariant> &map, QString &errmsg)
 		QStringList contact;
 		contact.append(box.dbID());
 		contact.append("|");
-		contact.append(Isds::createOwnerName(box));
+		contact.append(Isds::textOwnerName(box));
 		contact.append("|");
-		contact.append(Isds::createOwnerAddressWithoutIc(box.address()));
+		contact.append(Isds::textAddressWithoutIc(box.address()));
 		contact.append("|");
 		contact.append(box.address().zipCode());
 		printDataToStdOut(contact);

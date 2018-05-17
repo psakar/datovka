@@ -44,6 +44,7 @@
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
+#include "src/isds/box_interface.h"
 #include "src/isds/isds_conversion.h"
 #include "src/isds/type_conversion.h"
 #include "src/isds/types.h"
