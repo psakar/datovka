@@ -36,6 +36,7 @@ SOURCES += \
 	$${top_srcdir}src/io/message_db.cpp \
 	$${top_srcdir}src/io/message_db_set.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
+	$${top_srcdir}src/isds/box_interface.cpp \
 	$${top_srcdir}src/isds/internal_conversion.cpp \
 	$${top_srcdir}src/isds/isds_conversion.cpp \
 	$${top_srcdir}src/isds/message_conversion.cpp \
@@ -77,6 +78,7 @@ HEADERS += \
 	$${top_srcdir}src/io/message_db.h \
 	$${top_srcdir}src/io/message_db_set.h \
 	$${top_srcdir}src/io/tag_db.h \
+	$${top_srcdir}src/isds/box_interface.h \
 	$${top_srcdir}src/isds/internal_conversion.h \
 	$${top_srcdir}src/isds/isds_conversion.h \
 	$${top_srcdir}src/isds/message_conversion.h \
