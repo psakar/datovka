@@ -1212,7 +1212,7 @@ bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,
 
 	if (foundBoxes.count() == 1) {
 		const Isds::DbOwnerInfo &box(foundBoxes.constFirst());
-		ret = Isds::nilBool2Variant(box.dbEffectiveOVM()).toBool();
+		ret = (box.dbEffectiveOVM() == Isds::Type::BOOL_TRUE);
 	}
 
 	return ret;
