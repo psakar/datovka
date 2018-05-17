@@ -44,6 +44,7 @@
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
+#include "src/isds/box_interface.h"
 #include "src/isds/isds_conversion.h"
 #include "src/isds/type_conversion.h"
 #include "src/isds/types.h"
@@ -1193,26 +1194,25 @@ bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,
 {
 	bool ret = false;
 
-	TaskSearchOwner::SoughtOwnerInfo soughtInfo(
-	    boxId, TaskSearchOwner::BT_FO, QString(), QString(), QString(),
-	    QString(), QString());
+	Isds::DbOwnerInfo dbOwnerInfo;
+	dbOwnerInfo.setDbID(boxId);
+	dbOwnerInfo.setDbType(Isds::Type::BT_FO);
 
 	TaskSearchOwner *task =
-	    new (std::nothrow) TaskSearchOwner(userName, soughtInfo);
+	    new (std::nothrow) TaskSearchOwner(userName, dbOwnerInfo);
 	if (Q_UNLIKELY(task == Q_NULLPTR)) {
 		return false;
 	}
 	task->setAutoDelete(false);
 	GlobInstcs::workPoolPtr->runSingle(task);
 
-	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
+	const QList<Isds::DbOwnerInfo> foundBoxes(task->m_foundBoxes);
 
 	delete task; task = Q_NULLPTR;
 
-	if (foundBoxes.size() == 1) {
-		const TaskSearchOwner::BoxEntry &entry(foundBoxes.first());
-
-		ret = entry.effectiveOVM;
+	if (foundBoxes.count() == 1) {
+		const Isds::DbOwnerInfo &box(foundBoxes.constFirst());
+		ret = (box.dbEffectiveOVM() == Isds::Type::BOOL_TRUE);
 	}
 
 	return ret;

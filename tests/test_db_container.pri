@@ -30,7 +30,10 @@ SOURCES += \
 	$${top_srcdir}src/io/message_db_set.cpp \
 	$${top_srcdir}src/io/message_db_set_container.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
+	$${top_srcdir}src/isds/internal_conversion.cpp \
 	$${top_srcdir}src/isds/isds_conversion.cpp \
+	$${top_srcdir}src/isds/message_interface.cpp \
+	$${top_srcdir}src/isds/type_conversion.cpp \
 	$${top_srcdir}src/models/files_model.cpp \
 	$${top_srcdir}src/models/messages_model.cpp \
 	$${top_srcdir}src/models/table_model.cpp \
@@ -57,7 +60,11 @@ HEADERS += \
 	$${top_srcdir}src/io/message_db_set.h \
 	$${top_srcdir}src/io/message_db_set_container.h \
 	$${top_srcdir}src/io/tag_db.h \
+	$${top_srcdir}src/isds/internal_conversion.h \
 	$${top_srcdir}src/isds/isds_conversion.h \
+	$${top_srcdir}src/isds/message_interface.h \
+	$${top_srcdir}src/isds/type_conversion.h \
+	$${top_srcdir}src/isds/types.h \
 	$${top_srcdir}src/models/files_model.h \
 	$${top_srcdir}src/models/messages_model.h \
 	$${top_srcdir}src/models/table_model.h \

@@ -28,6 +28,8 @@
 #include "src/global.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/box_interface.h"
+#include "src/isds/types.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/views/table_tab_ignore_filter.h"
@@ -38,6 +40,7 @@
 #define CBOX_TARGET_IC 2
 #define CBOX_TARGET_BOX_ID 3
 
+/* Indexes into box type combo box. */
 #define CBOX_TYPE_ALL 0
 #define CBOX_TYPE_OVM 1
 #define CBOX_TYPE_PO 2
@@ -544,28 +547,97 @@ void DlgDsSearch::checkInputFieldsFulltext(void)
 	    m_ui->textLineEdit->text().size() > 2);
 }
 
-DlgDsSearch::SearchResult DlgDsSearch::searchDataBoxNormal(void)
+/*!
+ * @brief Converts box type combo box index onto enum Isds::Type::DbType.
+ *
+ * @note ALL is converted onto null type.
+ *
+ * @param[in] cBoxIdx Combo box index.
+ * @return Data box type.
+ */
+static
+enum Isds::Type::DbType typeIdx2DbType(int cBoxIdx)
 {
-	enum TaskSearchOwner::BoxType boxType = TaskSearchOwner::BT_OVM;
-	switch (m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
-	case CBOX_TYPE_FO:
-		boxType = TaskSearchOwner::BT_FO;
-		break;
-	case CBOX_TYPE_PFO:
-		boxType = TaskSearchOwner::BT_PFO;
-		break;
-	case CBOX_TYPE_PO:
-		boxType = TaskSearchOwner::BT_PO;
-		break;
-	case CBOX_TYPE_OVM:
+	switch (cBoxIdx) {
+	case CBOX_TYPE_ALL: return Isds::Type::BT_NULL; break;
+	case CBOX_TYPE_OVM: return Isds::Type::BT_OVM; break;
+	case CBOX_TYPE_PO: return Isds::Type::BT_PO; break;
+	case CBOX_TYPE_PFO: return Isds::Type::BT_PFO; break;
+	case CBOX_TYPE_FO: return Isds::Type::BT_FO; break;
 	default:
-		boxType = TaskSearchOwner::BT_OVM;
+		Q_ASSERT(0);
+		return Isds::Type::BT_NULL;
 		break;
 	}
+}
 
-	return queryBoxNormal(m_ui->iDLineEdit->text(), boxType,
-	    m_ui->iCLineEdit->text(), m_ui->nameLineEdit->text(),
-	    m_ui->pscLineEdit->text());
+DlgDsSearch::SearchResult DlgDsSearch::searchDataBoxNormal(void)
+{
+	enum Isds::Type::DbType boxType = typeIdx2DbType(
+	    m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt());
+	if (boxType == Isds::Type::BT_NULL) {
+		boxType = Isds::Type::BT_OVM; /* TODO -- Is this necessary? */
+	}
+
+	m_ui->contactTableView->setEnabled(false);
+	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
+
+	m_ui->searchResultText->setText(totalFoundStr(0));
+
+	Isds::DbOwnerInfo dbOwnerInfo;
+	{
+		Isds::Address address;
+		Isds::PersonName personName;
+
+		dbOwnerInfo.setDbID(m_ui->iDLineEdit->text());
+		dbOwnerInfo.setDbType(boxType);
+		dbOwnerInfo.setIc(m_ui->iCLineEdit->text());
+		personName.setFirstName(m_ui->nameLineEdit->text());
+		personName.setLastName(m_ui->nameLineEdit->text());
+		dbOwnerInfo.setPersonName(personName);
+		dbOwnerInfo.setFirmName(m_ui->nameLineEdit->text());
+		address.setZipCode(m_ui->pscLineEdit->text());
+		dbOwnerInfo.setAddress(address);
+	}
+
+	TaskSearchOwner *task = new (std::nothrow) TaskSearchOwner(m_userName,
+	    dbOwnerInfo);
+	if (Q_UNLIKELY(task == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		m_ui->contactTableView->setEnabled(true);
+		return SearchResult(TaskSearchOwner::SO_ERROR, QString());
+	}
+	task->setAutoDelete(false);
+	GlobInstcs::workPoolPtr->runSingle(task);
+
+	enum TaskSearchOwner::Result taskResult = task->m_result;
+	QString longErrMsg(task->m_isdsLongError);
+	QList<Isds::DbOwnerInfo> foundBoxes(task->m_foundBoxes);
+
+	delete task; task = Q_NULLPTR;
+
+	if (taskResult != TaskSearchOwner::SO_SUCCESS) {
+		return SearchResult(taskResult, longErrMsg);
+	}
+
+	bool selectFirstRow = m_contactTableModel.rowCount() == 0;
+	m_contactTableModel.appendData(foundBoxes);
+
+	m_ui->searchResultText->setText(totalFoundStr(foundBoxes.size()));
+
+	if (m_contactTableModel.rowCount() > 0) {
+		m_ui->contactTableView->selectColumn(
+		    BoxContactsModel::CHECKBOX_COL);
+		if (selectFirstRow) {
+			m_ui->contactTableView->selectRow(0);
+		}
+	}
+
+	m_ui->contactTableView->setEnabled(true);
+
+	//m_ui->contactTableView->resizeColumnsToContents();
+
+	return SearchResult(taskResult, QString());
 }
 
 DlgDsSearch::SearchResultFt DlgDsSearch::searchDataBoxFulltext(void)
@@ -615,58 +687,6 @@ DlgDsSearch::SearchResultFt DlgDsSearch::searchDataBoxFulltext(void)
 void DlgDsSearch::searchDataBoxFulltextThread(void)
 {
 	m_fulltextThread.start();
-}
-
-DlgDsSearch::SearchResult DlgDsSearch::queryBoxNormal(const QString &boxId,
-    enum TaskSearchOwner::BoxType boxType, const QString &ic,
-    const QString &name, const QString &zipCode)
-{
-	m_ui->contactTableView->setEnabled(false);
-	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());
-
-	m_ui->searchResultText->setText(totalFoundStr(0));
-
-	TaskSearchOwner::SoughtOwnerInfo soughtInfo(boxId, boxType, ic, name,
-	    name, name, zipCode);
-
-	TaskSearchOwner *task = new (std::nothrow) TaskSearchOwner(m_userName,
-	    soughtInfo);
-	if (Q_UNLIKELY(task == Q_NULLPTR)) {
-		Q_ASSERT(0);
-		m_ui->contactTableView->setEnabled(true);
-		return SearchResult(TaskSearchOwner::SO_ERROR, QString());
-	}
-	task->setAutoDelete(false);
-	GlobInstcs::workPoolPtr->runSingle(task);
-
-	enum TaskSearchOwner::Result taskResult = task->m_result;
-	QString longErrMsg(task->m_isdsLongError);
-	QList<TaskSearchOwner::BoxEntry> foundBoxes(task->m_foundBoxes);
-
-	delete task; task = Q_NULLPTR;
-
-	if (taskResult != TaskSearchOwner::SO_SUCCESS) {
-		return SearchResult(taskResult, longErrMsg);
-	}
-
-	bool selectFirstRow = m_contactTableModel.rowCount() == 0;
-	m_contactTableModel.appendData(foundBoxes);
-
-	m_ui->searchResultText->setText(totalFoundStr(foundBoxes.size()));
-
-	if (m_contactTableModel.rowCount() > 0) {
-		m_ui->contactTableView->selectColumn(
-		    BoxContactsModel::CHECKBOX_COL);
-		if (selectFirstRow) {
-			m_ui->contactTableView->selectRow(0);
-		}
-	}
-
-	m_ui->contactTableView->setEnabled(true);
-
-	//m_ui->contactTableView->resizeColumnsToContents();
-
-	return SearchResult(taskResult, QString());
 }
 
 void DlgDsSearch::displaySearchResult(const SearchResult &searchResult)

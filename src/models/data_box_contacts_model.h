@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,11 @@
  * the two.
  */
 
-#ifndef _DATA_BOX_CONTACTS_MODEL_H_
-#define _DATA_BOX_CONTACTS_MODEL_H_
+#pragma once
 
 #include "src/io/message_db.h"
+#include "src/isds/box_interface.h"
 #include "src/models/table_model.h"
-#include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
 
 /*!
@@ -126,7 +125,7 @@ public:
 	 *
 	 * @param[in] entryList List of entries to append into the model.
 	 */
-	void appendData(const QList<TaskSearchOwner::BoxEntry> &entryList);
+	void appendData(const QList<Isds::DbOwnerInfo> &entryList);
 
 	/*!
 	 * @brief Appends data into the model.
@@ -187,5 +186,3 @@ public:
 	 */
 	QList<PartialEntry> partialBoxEntries(enum EntryState entryState) const;
 };
-
-#endif /* _DATA_BOX_CONTACTS_MODEL_H_ */

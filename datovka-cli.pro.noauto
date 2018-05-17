@@ -115,11 +115,19 @@ SOURCES += \
 	src/io/message_db_set_container.cpp \
 	src/io/message_db_set_delegated.cpp \
 	src/io/tag_db.cpp \
+	src/isds/box_conversion.cpp \
+	src/isds/box_interface.cpp \
+	src/isds/internal_conversion.cpp \
 	src/isds/isds_conversion.cpp \
-	src/model_interaction/account_interaction.cpp \
+	src/isds/message_conversion.cpp \
+	src/isds/message_functions.cpp \
+	src/isds/message_interface.cpp \
+	src/isds/to_text_conversion.cpp \
+	src/isds/type_conversion.cpp \
 	src/log/log.cpp \
 	src/log/log_c.cpp \
 	src/main_cli.cpp \
+	src/model_interaction/account_interaction.cpp \
 	src/settings/account.cpp \
 	src/settings/accounts.cpp \
 	src/settings/preferences.cpp \
@@ -170,11 +178,20 @@ HEADERS += \
 	src/io/message_db_set.h \
 	src/io/message_db_set_container.h \
 	src/io/tag_db.h \
+	src/isds/box_conversion.h \
+	src/isds/box_interface.h \
+	src/isds/internal_conversion.h \
 	src/isds/isds_conversion.h \
-	src/model_interaction/account_interaction.h \
+	src/isds/message_conversion.h \
+	src/isds/message_functions.h \
+	src/isds/message_interface.h \
+	src/isds/to_text_conversion.h \
+	src/isds/type_conversion.h \
+	src/isds/types.h \
 	src/log/log_c.h \
 	src/log/log_common.h \
 	src/log/log.h \
+	src/model_interaction/account_interaction.h \
 	src/settings/account.h \
 	src/settings/accounts.h \
 	src/settings/preferences.h \

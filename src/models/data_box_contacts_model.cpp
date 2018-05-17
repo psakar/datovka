@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,9 @@
  */
 
 #include "src/isds/isds_conversion.h"
+#include "src/isds/to_text_conversion.h"
+#include "src/isds/type_conversion.h"
+#include "src/isds/types.h"
 #include "src/models/data_box_contacts_model.h"
 
 BoxContactsModel::BoxContactsModel(QObject *parent)
@@ -175,7 +178,7 @@ void BoxContactsModel::setHeader(void)
 }
 
 void BoxContactsModel::appendData(
-    const QList<TaskSearchOwner::BoxEntry> &entryList)
+    const QList<Isds::DbOwnerInfo> &entryList)
 {
 	if (entryList.isEmpty()) {
 		return;
@@ -184,19 +187,19 @@ void BoxContactsModel::appendData(
 	beginInsertRows(QModelIndex(), rowCount(),
 	    rowCount() + entryList.size() - 1);
 
-	foreach (const TaskSearchOwner::BoxEntry &entry, entryList) {
+	foreach (const Isds::DbOwnerInfo &entry, entryList) {
 
 		reserveSpace();
 
 		QVector<QVariant> row(m_columnCount);
 
 		row[CHECKBOX_COL] = false;
-		row[BOX_ID_COL] = entry.id;
-		row[BOX_TYPE_COL] = entry.type;
-		row[BOX_NAME_COL] = entry.name;
-		row[ADDRESS_COL] = entry.address;
-		row[POST_CODE_COL] = entry.zipCode;
-		row[PDZ_COL] = !entry.effectiveOVM;
+		row[BOX_ID_COL] = entry.dbID();
+		row[BOX_TYPE_COL] = Isds::dbType2IntVariant(entry.dbType());
+		row[BOX_NAME_COL] = Isds::textOwnerName(entry);
+		row[ADDRESS_COL] = Isds::textAddressWithoutIc(entry.address());
+		row[POST_CODE_COL] = entry.address().zipCode();
+		row[PDZ_COL] = (entry.dbEffectiveOVM() != Isds::Type::BOOL_TRUE);
 
 		m_data[m_rowCount++] = row;
 	}

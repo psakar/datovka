@@ -123,15 +123,6 @@ public:
 	QString senderTypeStrToText(const QString &val);
 
 	/*!
-	 * @brief Convert type of user to string.
-	 *
-	 * @param[in] val User type value as used by libisds.
-	 * @return User type string.
-	 */
-	static
-	const QString &userTypeToStr(int val);
-
-	/*!
 	 * @brief Return privileges as html string from number representation.
 	 *
 	 * @param[in] val Privilege value flags.
