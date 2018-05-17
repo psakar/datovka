@@ -28,6 +28,8 @@
 #include "src/global.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/box_interface.h"
+#include "src/isds/types.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/views/table_tab_ignore_filter.h"
@@ -38,6 +40,7 @@
 #define CBOX_TARGET_IC 2
 #define CBOX_TARGET_BOX_ID 3
 
+/* Indexes into box type combo box. */
 #define CBOX_TYPE_ALL 0
 #define CBOX_TYPE_OVM 1
 #define CBOX_TYPE_PO 2
@@ -544,23 +547,36 @@ void DlgDsSearch::checkInputFieldsFulltext(void)
 	    m_ui->textLineEdit->text().size() > 2);
 }
 
+/*!
+ * @brief Converts box type combo box index onto enum Isds::Type::DbType.
+ *
+ * @note ALL is converted onto null type.
+ *
+ * @param[in] cBoxIdx Combo box index.
+ * @return Data box type.
+ */
+static
+enum Isds::Type::DbType typeIdx2DbType(int cBoxIdx)
+{
+	switch (cBoxIdx) {
+	case CBOX_TYPE_ALL: return Isds::Type::BT_NULL; break;
+	case CBOX_TYPE_OVM: return Isds::Type::BT_OVM; break;
+	case CBOX_TYPE_PO: return Isds::Type::BT_PO; break;
+	case CBOX_TYPE_PFO: return Isds::Type::BT_PFO; break;
+	case CBOX_TYPE_FO: return Isds::Type::BT_FO; break;
+	default:
+		Q_ASSERT(0);
+		return Isds::Type::BT_NULL;
+		break;
+	}
+}
+
 DlgDsSearch::SearchResult DlgDsSearch::searchDataBoxNormal(void)
 {
-	enum Isds::Type::DbType boxType = Isds::Type::BT_OVM;
-	switch (m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt()) {
-	case CBOX_TYPE_FO:
-		boxType = Isds::Type::BT_FO;
-		break;
-	case CBOX_TYPE_PFO:
-		boxType = Isds::Type::BT_PFO;
-		break;
-	case CBOX_TYPE_PO:
-		boxType = Isds::Type::BT_PO;
-		break;
-	case CBOX_TYPE_OVM:
-	default:
-		boxType = Isds::Type::BT_OVM;
-		break;
+	enum Isds::Type::DbType boxType = typeIdx2DbType(
+	    m_ui->dataBoxTypeCBox->currentData(CBoxModel::valueRole).toInt());
+	if (boxType == Isds::Type::BT_NULL) {
+		boxType = Isds::Type::BT_OVM; /* TODO -- Is this necessary? */
 	}
 
 	m_ui->contactTableView->setEnabled(false);
@@ -568,19 +584,21 @@ DlgDsSearch::SearchResult DlgDsSearch::searchDataBoxNormal(void)
 
 	m_ui->searchResultText->setText(totalFoundStr(0));
 
-	Isds::Address address;
 	Isds::DbOwnerInfo dbOwnerInfo;
-	Isds::PersonName personName;
+	{
+		Isds::Address address;
+		Isds::PersonName personName;
 
-	dbOwnerInfo.setDbID(m_ui->iDLineEdit->text());
-	dbOwnerInfo.setDbType(boxType);
-	dbOwnerInfo.setIc(m_ui->iCLineEdit->text());
-	personName.setFirstName(m_ui->nameLineEdit->text());
-	personName.setLastName(m_ui->nameLineEdit->text());
-	dbOwnerInfo.setPersonName(personName);
-	dbOwnerInfo.setFirmName(m_ui->nameLineEdit->text());
-	address.setZipCode(m_ui->pscLineEdit->text());
-	dbOwnerInfo.setAddress(address);
+		dbOwnerInfo.setDbID(m_ui->iDLineEdit->text());
+		dbOwnerInfo.setDbType(boxType);
+		dbOwnerInfo.setIc(m_ui->iCLineEdit->text());
+		personName.setFirstName(m_ui->nameLineEdit->text());
+		personName.setLastName(m_ui->nameLineEdit->text());
+		dbOwnerInfo.setPersonName(personName);
+		dbOwnerInfo.setFirmName(m_ui->nameLineEdit->text());
+		address.setZipCode(m_ui->pscLineEdit->text());
+		dbOwnerInfo.setAddress(address);
+	}
 
 	TaskSearchOwner *task = new (std::nothrow) TaskSearchOwner(m_userName,
 	    dbOwnerInfo);
