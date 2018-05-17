@@ -24,8 +24,8 @@
 #pragma once
 
 #include "src/io/message_db.h"
+#include "src/isds/box_interface.h"
 #include "src/models/table_model.h"
-#include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
 
 /*!

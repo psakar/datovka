@@ -1206,12 +1206,12 @@ bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,
 	task->setAutoDelete(false);
 	GlobInstcs::workPoolPtr->runSingle(task);
 
-	QList<Isds::DbOwnerInfo> foundBoxes(task->m_foundBoxes);
+	const QList<Isds::DbOwnerInfo> foundBoxes(task->m_foundBoxes);
 
 	delete task; task = Q_NULLPTR;
 
 	if (foundBoxes.count() == 1) {
-		const Isds::DbOwnerInfo box(foundBoxes.first());
+		const Isds::DbOwnerInfo &box(foundBoxes.constFirst());
 		ret = Isds::nilBool2Variant(box.dbEffectiveOVM()).toBool();
 	}
 

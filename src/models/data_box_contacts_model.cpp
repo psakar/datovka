@@ -22,6 +22,7 @@
  */
 
 #include "src/isds/isds_conversion.h"
+#include "src/isds/to_text_conversion.h"
 #include "src/isds/type_conversion.h"
 #include "src/models/data_box_contacts_model.h"
 
@@ -194,9 +195,8 @@ void BoxContactsModel::appendData(
 		row[CHECKBOX_COL] = false;
 		row[BOX_ID_COL] = entry.dbID();
 		row[BOX_TYPE_COL] = Isds::dbType2IntVariant(entry.dbType());
-		row[BOX_NAME_COL] = Isds::createOwnerName(entry);
-		row[ADDRESS_COL] =
-		    Isds::createOwnerAddressWithoutIc(entry.address());
+		row[BOX_NAME_COL] = Isds::textOwnerName(entry);
+		row[ADDRESS_COL] = Isds::textAddressWithoutIc(entry.address());
 		row[POST_CODE_COL] = entry.address().zipCode();
 		row[PDZ_COL] =
 		    !Isds::nilBool2Variant(entry.dbEffectiveOVM()).toBool();

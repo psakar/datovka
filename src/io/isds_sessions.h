@@ -132,67 +132,6 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     isds_otp_resolution &res);
 
 /*!
- * @brief Add items into isds_PersonName structure.
- *
- * @return NULL on failure.
- */
-struct isds_PersonName * isds_PersonName_create(const QString &pnFirstName,
-    const QString &pnMiddleName, const QString &pnLastName,
-    const QString &pnLastNameAtBirth);
-
-/*!
- * @brief Add items into isds_Address structure.
- *
- * @return NULL on failure.
- */
-struct isds_Address * isds_Address_create(const QString &adCity,
-    const QString &adStreet, const QString &adNumberInStreet,
-    const QString &adNumberInMunicipality, const QString &adZipCode,
-    const QString &adState);
-
-/*!
- * @brief Add items into isds_BirthInfo structure.
- *
- * @return NULL on failure.
- *
- * @note All structure pointers are consumed. The structures are not copied.
- *     Don't use the structures after a successful return from this function.
- */
-struct isds_BirthInfo * isds_BirthInfo_createConsume(struct tm *biDate,
-    const QString &biCity, const QString &biCountry, const QString &biState);
-
-/*!
- * @brief Create new isds_DbOwnerInfo structure according to the supplied
- *     values.
- *
- * @return NULL on failure.
- *
- * @note All structure pointers are consumed. The structures are not copied.
- *     Don't use the structures after a successful return from this function.
- */
-struct isds_DbOwnerInfo * isds_DbOwnerInfo_createConsume(const QString &dbID,
-    isds_DbType dbType, const QString &ic,
-    struct isds_PersonName *personName, const QString &firmName,
-    struct isds_BirthInfo *birthInfo, struct isds_Address *address,
-    const QString &nationality, const QString &email, const QString telNumber,
-    const QString &identifier, const QString &registryCode, long int dbState,
-    bool dbEffectiveOVM, bool dbOpenAddressing);
-
-/*!
- * @brief Create DbUserInfo structure.
- *
- * @return NULL on failure.
- *
- * @note All structure pointers are consumed. The structures are not copied.
- *     Don't use the structures after a successful return from this function.
- */
-struct isds_DbUserInfo * isds_DbUserInfo_createConsume(const QString &userID,
-    isds_UserType userType, long int userPrivils,
-    struct isds_PersonName *personName, struct isds_Address *address,
-    const QString &ic, const QString &firmName, const QString &caStreet,
-    const QString &caCity, const QString &caZipCode, const QString &caState);
-
-/*!
  * @brief Creates a isds message from supplied raw CMS data.
  *
  * @param[in,out] isdsSession Pointer to session context.
