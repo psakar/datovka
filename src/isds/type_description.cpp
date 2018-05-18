@@ -102,3 +102,37 @@ QString Isds::Description::descrDmState(enum Type::DmState state)
 		break;
 	}
 }
+
+QString Isds::Description::descrError(enum Type::Error err)
+{
+	switch (err) {
+	case Type::ERR_SUCCESS: return tr("Success"); break;
+	case Type::ERR_ERROR: return tr("Unspecified error"); break;
+	case Type::ERR_NOTSUP: return tr("Not supported"); break;
+	case Type::ERR_INVAL: return tr("Invalid value"); break;
+	case Type::ERR_INVALID_CONTEXT: return tr("Invalid context"); break;
+	case Type::ERR_NOT_LOGGED_IN: return tr("Not logged in"); break;
+	case Type::ERR_CONNECTION_CLOSED: return tr("Connection closed"); break;
+	case Type::ERR_TIMED_OUT:return ("Timed out"); break;
+	case Type::ERR_NOEXIST: return ("Non existent"); break;
+	case Type::ERR_NOMEM: return tr("Out of memory"); break;
+	case Type::ERR_NETWORK: return tr("Network problem"); break;
+	case Type::ERR_HTTP: return tr("HTTP problem"); break;
+	case Type::ERR_SOAP: return tr("SOAP problem"); break;
+	case Type::ERR_XML: return tr("XML problem"); break;
+	case Type::ERR_ISDS: return tr("ISDS server problem"); break;
+	case Type::ERR_ENUM: return tr("Invalid enum value"); break;
+	case Type::ERR_DATE: return tr("Invalid date value"); break;
+	case Type::ERR_2BIG: return tr("Too big"); break;
+	case Type::ERR_2SMALL: return tr("Too small"); break;
+	case Type::ERR_NOTUNIQ: return tr("Value not unique"); break;
+	case Type::ERR_NOTEQUAL: return tr("Values not equal"); break;
+	case Type::ERR_PARTIAL_SUCCESS: return tr("Some suboperations failed"); break;
+	case Type::ERR_ABORTED: return tr("Operation aborted"); break;
+	case Type::ERR_SECURITY: return tr("Security problem"); break;
+	default:
+		Q_ASSERT(0);
+		return tr("Unknown error");
+		break;
+	}
+}

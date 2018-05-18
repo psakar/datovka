@@ -248,6 +248,36 @@ public:
 		RT_PLAIN_SIGNED_DELIVERYINFO,
 		RT_CMS_SIGNED_DELIVERYINFO
 	};
+
+	/*!
+	 * @brief Error value. Taken from libisds for compatibility.
+	 */
+	enum Error {
+		ERR_SUCCESS = 0, /* No error. */
+		ERR_ERROR, /* Unspecified error. */
+		ERR_NOTSUP,
+		ERR_INVAL,
+		ERR_INVALID_CONTEXT,
+		ERR_NOT_LOGGED_IN,
+		ERR_CONNECTION_CLOSED,
+		ERR_TIMED_OUT,
+		ERR_NOEXIST,
+		ERR_NOMEM,
+		ERR_NETWORK,
+		ERR_HTTP,
+		ERR_SOAP,
+		ERR_XML,
+		ERR_ISDS,
+		ERR_ENUM,
+		ERR_DATE,
+		ERR_2BIG,
+		ERR_2SMALL,
+		ERR_NOTUNIQ,
+		ERR_NOTEQUAL,
+		ERR_PARTIAL_SUCCESS,
+		ERR_ABORTED,
+		ERR_SECURITY
+	};
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Type::Privileges)

@@ -23,43 +23,12 @@
 
 #pragma once
 
-#include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
-#include <QString>
+#include <QtCore> /* Q_NULLPTR */
 
 #include "src/isds/types.h"
 
 namespace Isds {
 
-	/*!
-	 * @brief Contains description of used types.
-	 */
-	class Description {
-		Q_DECLARE_TR_FUNCTIONS(Description)
-
-	private:
-		/*!
-		 * @brief Private constructor.
-		 */
-		Description(void);
-
-	public:
-		/*!
-		 * @brief Returns localised message status description text.
-		 *
-		 * @param[in] state Message status value.
-		 * @return Localised message status description.
-		 */
-		static
-		QString descrDmState(enum Type::DmState state);
-
-		/*!
-		 * @brief Returns localised error description text.
-		 *
-		 * @param[in] err Error code.
-		 * @return Localised error description.
-		 */
-		static
-		QString descrError(enum Type::Error err);
-	};
+	enum Type::Error libisds2descr(int iErr, bool *ok = Q_NULLPTR);
 
 }
