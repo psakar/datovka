@@ -96,15 +96,6 @@ public:
 	int msgStatusIsdsToDbRepr(int val);
 
 	/*!
-	 * @brief Returns localised message status description text.
-	 *
-	 * @param[in] val Message status value as used in database.
-	 * @return Localised message status description.
-	 */
-	static
-	QString msgStatusDbToText(int val);
-
-	/*!
 	 * @brief Convert sender type to string identifier.
 	 *
 	 * @param[in] val Sender type value as used by libisds.

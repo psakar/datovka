@@ -48,7 +48,7 @@ Isds::Message Isds::messageFromData(const QByteArray &rawMsgData,
 
 	iDummySession = isds_ctx_create();
 	if (Q_UNLIKELY(NULL == iDummySession)) {
-		logErrorNL("%s", "cannot create dummy session.");
+		logErrorNL("%s", "Cannot create dummy session.");
 		goto fail;
 	}
 

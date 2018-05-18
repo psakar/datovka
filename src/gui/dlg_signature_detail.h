@@ -72,15 +72,13 @@ public:
 	/*!
 	 * @brief Views a signature detail dialogue.
 	 *
-	 * @param[in] msgDER Pointer to raw message data.
-	 * @param[in] msgSize Message size.
-	 * @param[in] tstDER Pointer to rad time-stamp data.
-	 * @param[in] tstSize Time-stamp size.
+	 * @param[in] msgDER Raw message data.
+	 * @param[in] tstDER Raw time-stamp data.
 	 * @param[in] parent Parent widget.
 	 */
 	static
-	void detail(const void *msgDER, size_t msgSize,
-	    const void *tstDER, size_t tstSize, QWidget *parent = Q_NULLPTR);
+	void detail(const QByteArray &msgDER, const QByteArray &tstDER,
+	    QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Check whether certificate expires before specified limit.

@@ -358,6 +358,7 @@ SOURCES += \
     src/isds/message_interface.cpp \
     src/isds/to_text_conversion.cpp \
     src/isds/type_conversion.cpp \
+    src/isds/type_description.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/main.cpp \
@@ -497,6 +498,7 @@ HEADERS += \
     src/isds/message_interface.h \
     src/isds/to_text_conversion.h \
     src/isds/type_conversion.h \
+    src/isds/type_description.h \
     src/isds/types.h \
     src/log/log_c.h \
     src/log/log_common.h \

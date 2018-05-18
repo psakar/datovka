@@ -29,6 +29,7 @@
 #include <QVariant>
 
 #include "src/io/message_db.h"
+#include "src/isds/message_interface.h"
 #include "src/models/table_model.h"
 
 /*!
@@ -153,10 +154,10 @@ public:
 	 * @brief Sets the content of the model according to the supplied
 	 *     message.
 	 *
-	 * @param[in] message Message structure.
+	 * @param[in] message Message.
 	 * @return True on success.
 	 */
-	bool setMessage(const struct isds_message *message);
+	bool setMessage(const Isds::Message &message);
 
 	/*!
 	 * @brief Adds attachment file.
@@ -198,10 +199,10 @@ private:
 	/*!
 	 * @brief Appends data from the supplied message.
 	 *
-	 * @param[in] message Message structure.
+	 * @param[in] message Message.
 	 * @return True when message data successfully added.
 	 */
-	bool appendMessageData(const struct isds_message *message);
+	bool appendMessageData(const Isds::Message &message);
 
 	/*!
 	 * @brief Insert supplied vector.

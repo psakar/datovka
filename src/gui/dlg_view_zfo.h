@@ -26,6 +26,8 @@
 
 #include <QDialog>
 
+#include "src/isds/message_functions.h"
+#include "src/isds/message_interface.h"
 #include "src/models/files_model.h"
 
 namespace Ui {
@@ -42,12 +44,12 @@ private:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] message Pointer to ISDS message structure.
+	 * @param[in] message Message.
 	 * @param[in] zfoType Specifies type of data.
-	 * @param[in] errMsg Message to be displayed if NULL pointer passed.
+	 * @param[in] errMsg Message to be displayed if null message passed.
 	 * @param[in] parent Parent widget.
 	 */
-	DlgViewZfo(const struct isds_message *message, int zfoType,
+	DlgViewZfo(const Isds::Message &message, enum Isds::LoadType zfoType,
 	    const QString &errMsg, QWidget *parent = Q_NULLPTR);
 
 public:
@@ -98,34 +100,34 @@ private slots:
 	void openSelectedAttachment(const QModelIndex &index = QModelIndex());
 
 	/*!
-	 * @brief View signature details.
+	 * @brief View signature details dialogue.
 	 */
-	void showSignatureDetailsDialog(void);
+	void showSignatureDetailsDlg(void);
 
 private:
 	/*!
 	 * @brief Loads ZFO data.
 	 *
 	 * @param[in]  zfoData Raw ZFO data.
-	 * @param[out] message Newly allocated message.
+	 * @param[out] message Newly created message.
 	 * @param[out] zfoType Detected ZFO file type.
 	 * @return True on success, false on failure.
 	 */
 	static
 	bool parseZfoData(const QByteArray &zfoData,
-	    struct isds_message **message, int *zfoType);
+	    Isds::Message &message, enum Isds::LoadType &zfoType);
 
 	/*!
 	 * @brief Loads ZFO file.
 	 *
 	 * @param[in]  zfoFileName Path to the ZFO file.
-	 * @param[out] message Newly allocated message.
+	 * @param[out] message Newly created message.
 	 * @param[out] zfoType Detected ZFO file type.
 	 * @return True on success, false on failure.
 	 */
 	static
 	bool parseZfoFile(const QString &zfoFileName,
-	    struct isds_message **message, int *zfoType);
+	    Isds::Message &message, enum Isds::LoadType &zfoType);
 
 	/*!
 	 * @brief Performs dialogue set-up after the message has been loaded.
@@ -136,58 +138,51 @@ private:
 	 * @brief Generate description from supplied message.
 	 *
 	 * @param[in] attachmentCount Number of attached files.
-	 * @param[in] msgDER          Raw message data.
-	 * @param[in] msgSize         Raw message size.
-	 * @param[in] tstDer          Time stamp data.
-	 * @param[in] tstSize         Time stamp size.
+	 * @param[in] msgDER Raw message data.
+	 * @param[in] tstDer Time stamp data.
 	 * @return String containing description in HTML format.
 	 */
 	QString messageDescriptionHtml(int attachmentCount,
-	    const void *msgDER, size_t msgSize,
-	    const void *tstDER, size_t tstSize) const;
+	    const QByteArray &msgDER, const QByteArray &tstDER) const;
 
 	/*!
 	 * @brief Generate description for supplied delivery information.
 	 *
-	 * @param[in] msgDER          Raw message data.
-	 * @param[in] msgSize         Raw message size.
-	 * @param[in] tstDer          Time stamp data.
-	 * @param[in] tstSize         Time stamp size.
+	 * @param[in] msgDER Raw message data.
+	 * @param[in] tstDer Time stamp data.
 	 * @return String containing description in HTML format.
 	 */
-	QString deliveryDescriptionHtml(const void *msgDER, size_t msgSize,
-	    const void *tstDER, size_t tstSize) const;
+	QString deliveryDescriptionHtml(const QByteArray &msgDER,
+	    const QByteArray &tstDER) const;
 
 	/*!
 	 * @brief Generates header description according to the supplied
 	 *     envelope.
 	 *
-	 * @param[out] html     HTML text to which the data should be appended.
-	 * @param[in]  envelope Message envelope structure.
+	 * @param[out] html HTML text to which the data should be appended.
+	 * @param[in]  envelope Message envelope.
 	 * @return True on success.
 	 */
 	static
 	bool envelopeHeaderDescriptionHtml(QString &html,
-	    const struct isds_envelope *envelope);
+	    const Isds::Envelope &envelope);
 
 	/*!
 	 * @brief Generates footer description according to the supplied
 	 *     message data.
 	 *
-	 * @param[out] html     HTML text to which the data should be appended.
-	 * @param[in]  msgDER   Raw message data.
-	 * @param[in]  msgSize  Raw message size.
-	 * @param[in]  tstDer   Time stamp data.
-	 * @param[in]  tstSize  Time stamp size.
+	 * @param[out] html HTML text to which the data should be appended.
+	 * @param[in]  msgDER Raw message data.
+	 * @param[in]  tstDer Time stamp data.
 	 * @return True on success.
 	 */
 	static
-	bool signatureFooterDescription(QString &html, const void *msgDER,
-	    size_t msgSize, const void *tstDER, size_t tstSize);
+	bool signatureFooterDescription(QString &html, const QByteArray &msgDER,
+	    const QByteArray &tstDER);
 
 	Ui::DlgViewZfo *m_ui; /*!< UI generated from UI file. */
 
-	const struct isds_message *m_message; /*!< ISDS message pointer copy. */
+	const Isds::Message &m_message; /*!< Message reference. */
 	/*
 	 * (char *) m_message->raw
 	 *     m_message->raw_length
@@ -195,7 +190,7 @@ private:
 	 *     m_message->envelope->timestamp_length
 	 */
 
-	int m_zfoType; /*!< Type of message (enum ImportZFODialog::ZFOtype). */
+	enum Isds::LoadType m_zfoType; /*!< Type of message. */
 	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
 };
 

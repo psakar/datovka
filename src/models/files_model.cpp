@@ -33,7 +33,6 @@
 #include "src/common.h"
 #include "src/io/db_tables.h"
 #include "src/io/filesystem.h"
-#include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
 #include "src/models/files_model.h"
@@ -411,9 +410,9 @@ void DbFlsTblModel::appendData(
 	endInsertRows();
 }
 
-bool DbFlsTblModel::setMessage(const struct isds_message *message)
+bool DbFlsTblModel::setMessage(const Isds::Message &message)
 {
-	if (NULL == message) {
+	if (Q_UNLIKELY(message.isNull())) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -540,39 +539,31 @@ QModelIndexList DbFlsTblModel::sortedUniqueLineIndexes(
 	return uniqueLines;
 }
 
-bool DbFlsTblModel::appendMessageData(const struct isds_message *message)
+bool DbFlsTblModel::appendMessageData(const struct Isds::Message &message)
 {
-	const struct isds_list *docListItem;
-	const struct isds_document *doc;
-
-	if (NULL == message) {
+	if (Q_UNLIKELY(message.isNull())) {
 		Q_ASSERT(0);
 		return false;
 	}
 
-	docListItem = message->documents;
-	if (NULL == docListItem) {
+	const QList<Isds::Document> &docList(message.documents());
+	if (docList.isEmpty()) {
 		logWarning("%s\n", "Message has no documents.");
 	}
-	while (NULL != docListItem) {
-		doc = (struct isds_document *) docListItem->data;
-		if (NULL == doc) {
+	foreach (const Isds::Document &doc, docList) {
+		if (Q_UNLIKELY(doc.isNull())) {
 			Q_ASSERT(0);
 			return false;
 		}
 
 		QVector<QVariant> row(m_columnCount);
 
-		row[CONTENT_COL] = QVariant(
-		    QByteArray::fromRawData((char *) doc->data,
-		        (int) doc->data_length).toBase64());
-		row[FNAME_COL] = QVariant(QString(doc->dmFileDescr));
-		row[FSIZE_COL] = QVariant(0);
+		row[CONTENT_COL] = doc.base64Content();
+		row[FNAME_COL] = doc.fileDescr();
+		row[FSIZE_COL] = 0;
 
 		/* Don't check data duplicity! */
 		insertVector(row, rowCount(), false);
-
-		docListItem = docListItem->next;
 	}
 
 	return true;

@@ -104,11 +104,10 @@ void DlgSignatureDetail::detail(const MessageDbSet &dbSet,
 	dlg.exec();
 }
 
-void DlgSignatureDetail::detail(const void *msgDER, size_t msgSize,
-    const void *tstDER, size_t tstSize, QWidget *parent)
+void DlgSignatureDetail::detail(const QByteArray &msgDER,
+    const QByteArray &tstDER, QWidget *parent)
 {
-	DlgSignatureDetail dlg(QByteArray((char *) msgDER, msgSize),
-	    QByteArray((char *) tstDER, tstSize), false, false, parent);
+	DlgSignatureDetail dlg(msgDER, tstDER, false, false, parent);
 	dlg.exec();
 }
 
