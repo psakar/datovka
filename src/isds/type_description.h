@@ -44,6 +44,15 @@ namespace Isds {
 
 	public:
 		/*!
+		 * @brief Returns localised data box type description.
+		 *
+		 * @param[in] type Box type.
+		 * @return Localised box type description.
+		 */
+		static
+		QString descrDbType(enum Type::DbType type);
+
+		/*!
 		 * @brief Returns localised data box state description text.
 		 *
 		 * @param[in] state Box state.

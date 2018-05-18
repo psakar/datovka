@@ -812,7 +812,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool verSignature) const
 		    query.value(6).toString());
 
 		QString dmSenderType =
-		     IsdsConversion::senderBoxTypeToText(query.value(8).toInt());
+		    Isds::Description::descrDbType(Isds::intVariant2DbType(query.value(8)));
 		if (dmSenderType != "") {
 			html += strongAccountInfoLine(
 			    QObject::tr("Databox type"), dmSenderType);

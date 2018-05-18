@@ -25,34 +25,6 @@
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 
-QString IsdsConversion::senderBoxTypeToText(int val)
-{
-	switch (val) {
-//	case DBTYPE_OVM_MAIN: return tr("public authority - main box"); break; /* organ verejne moci - hlavni schranka */
-	case DBTYPE_SYSTEM: return tr("system box"); break; /* systemova schranka */
-	case DBTYPE_OVM: return tr("public authority"); break; /* organ verejne moci */
-	case DBTYPE_OVM_NOTAR: return tr("public authority - notary"); break; /* organ verejne moci - notar */
-	case DBTYPE_OVM_EXEKUT: return tr("public authority - bailiff"); break; /* organ verejne moci - exekutor */
-	case DBTYPE_OVM_REQ: return tr("public authority - at request"); break; /* organ verejne moci - na zadost */
-	case DBTYPE_OVM_FO: return tr("public authority - natural person"); break; /* organ verejne moci - fyzicka osoba */
-	case DBTYPE_OVM_PFO: return tr("public authority - self-employed person"); break; /* organ verejne moci - podnikajici fyzicka osoba */
-	case DBTYPE_OVM_PO: return tr("public authority - legal person"); break; /* organ verejne moci - pravnicka osoba */
-	case DBTYPE_PO: return tr("legal person"); break; /* pravnicka osoba */
-	case DBTYPE_PO_ZAK: return tr("legal person - founded by an act"); break; /* pravnicka osoba - ze zakona */
-	case DBTYPE_PO_REQ: return tr("legal person - at request"); break; /* pravnicka osoba - na zadost */
-	case DBTYPE_PFO: return tr("self-employed person"); break; /* podnikajici fyzicka osoba */
-	case DBTYPE_PFO_ADVOK: return tr("self-employed person - advocate"); break; /* podnikajici fyzicka osoba - advokat */
-	case DBTYPE_PFO_DANPOR: return tr("self-employed person - tax advisor"); break; /* podnikajici fyzicka osoba - danovy poradce */
-	case DBTYPE_PFO_INSSPR: return tr("self-employed person - insolvency administrator"); break; /* podnikajici fyzicka osoba - insolvencni spravce */
-	case DBTYPE_PFO_AUDITOR: return tr("self-employed person - statutory auditor"); break; /* podnikajici fyzicka osoba - auditor */
-	case DBTYPE_FO: return tr("natural person"); break; /* fyzicka osoba */
-	default:
-		logWarningNL("Unknown sender data box type value '%d'.", val);
-		return QString();
-		break;
-	}
-}
-
 QString IsdsConversion::dmTypeToText(const QString &val)
 {
 	if (val.size() != 1) {

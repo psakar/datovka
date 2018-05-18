@@ -40,15 +40,6 @@ private:
 
 public:
 	/*!
-	 * @brief Return localised sender data box type description string.
-	 *
-	 * @param[in] val Sender data box type value as used by libisds.
-	 * @return Sender data box type description.
-	 */
-	static
-	QString senderBoxTypeToText(int val);
-
-	/*!
 	 * @brief Translates message type to localised text.
 	 *
 	 * @param[in] val Message type value as used by libisds.
