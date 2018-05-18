@@ -44,6 +44,15 @@ namespace Isds {
 
 	public:
 		/*!
+		 * @brief Returns localised data box state description text.
+		 *
+		 * @param[in] state Box state.
+		 * @return Localised box state description.
+		 */
+		static
+		QString descrDbState(enum Type::DbState state);
+
+		/*!
 		 * @brief Returns localised message status description text.
 		 *
 		 * @param[in] state Message status value.

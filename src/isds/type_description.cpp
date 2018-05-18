@@ -24,6 +24,50 @@
 #include "src/isds/type_description.h"
 #include "src/log/log.h"
 
+QString Isds::Description::descrDbState(enum Type::DbState state)
+{
+	switch (state) {
+	case Type::BS_ERROR:
+		return QString();
+		break;
+	case Type::BS_ACCESSIBLE:
+		/* Datová schránka je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat. */
+		return tr(
+		    "The data box is accessible. It is possible to send messages into it. It can be looked up on the Portal.");
+		break;
+	case Type::BS_TEMP_INACCESSIBLE:
+		/* Datová schránka je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna. */
+		return tr(
+		    "The data box is temporarily inaccessible (at own request). It may be made accessible again at some point in the future.");
+		break;
+	case Type::BS_NOT_YET_ACCESSIBLE:
+		/* Datová schránka je dosud neaktivní. Vlastník schránky se musí poprvé přihlásit do webového rozhraní, aby došlo k aktivaci schránky. */
+		return tr(
+		    "The data box is so far inactive. The owner of the box has to log into the web interface at first in order to activate the box.");
+		break;
+	case Type::BS_PERM_INACCESSIBLE:
+		/* Datová schránka je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna). */
+		return tr(
+		    "The data box is permanently inaccessible. It is waiting to be deleted (but it may be made accessible again).");
+		break;
+	case Type::BS_REMOVED:
+		/* Datová schránka je smazána (přesto existuje v ISDS). */
+		return tr(
+		    "The data box has been deleted (none the less it exists in ISDS).");
+		break;
+	case Type::BS_TEMP_UNACCESSIBLE_LAW:
+		/* Datová schránka je dočasně znepřístupněna (z důvodů vyjmenovaných v zákoně), může být později opět zpřístupněna. */
+		return tr(
+		    "The data box is temporarily inaccessible (because of reasons listed in law). It may be made accessible again at some point in the future.");
+		break;
+	default:
+		Q_ASSERT(0);
+		logWarningNL("Unknown data box status value '%d'.", (int)state);
+		return tr("An error occurred while checking the status.");
+		break;
+	}
+}
+
 QString Isds::Description::descrDmState(enum Type::DmState state)
 {
 	switch (state) {
@@ -98,7 +142,7 @@ QString Isds::Description::descrDmState(enum Type::DmState state)
 	default:
 		Q_ASSERT(0);
 		logWarningNL("Unknown message state value '%d'.", (int)state);
-		return QString();
+		return tr("An error occurred while checking the status.");
 		break;
 	}
 }

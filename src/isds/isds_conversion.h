@@ -40,15 +40,6 @@ private:
 
 public:
 	/*!
-	 * @brief Convert data box state to localised text
-	 *
-	 * @param[in] val Data box status value as used by libisds.
-	 * @return Data box status description string.
-	 */
-	static
-	QString boxStateToText(int val);
-
-	/*!
 	 * @brief Convert data box type to string.
 	 *
 	 * @param[in] val Data box type value as used by libisds.

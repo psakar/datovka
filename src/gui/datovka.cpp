@@ -87,6 +87,7 @@
 #include "src/isds/isds_conversion.h"
 #include "src/isds/message_interface.h"
 #include "src/isds/type_conversion.h"
+#include "src/isds/type_description.h"
 #include "src/model_interaction/account_interaction.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/records_management/gui/dlg_records_management.h"
@@ -3432,8 +3433,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 				if (key == "dbState") {
 					html.append(strongAccountInfoLine(
 					    accntinfTbl.attrProps[key].desc,
-					    IsdsConversion::boxStateToText(
-					        accountEntry.value(key).toInt())));
+					    Isds::Description::descrDbState(
+					        Isds::variant2DbState(accountEntry.value(key)))));
 				} else if (key == "ic") {
 					if (accountEntry.value(key).toInt() > 0) {
 						html.append(strongAccountInfoLine(
