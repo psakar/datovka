@@ -25,68 +25,6 @@
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 
-QString IsdsConversion::dmTypeToText(const QString &val)
-{
-	if (val.size() != 1) {
-		logWarningNL("Unknown message type value '%s'.",
-		    val.toUtf8().constData());
-		return QString();
-	}
-
-	/*
-	 * See Provozni rad ISDS:
-	 * Webove sluyby rozhrani ISDS pro manipulaci s datovymi zpravami
-	 * section 2.8.2, GetListOfSentMessages
-	 */
-
-	switch (val[0].toLatin1()) {
-	case 'A':
-		return tr(
-		    "Subsidised postal data message, initiating reply postal data message");
-		break;
-	case 'B':
-		return tr(
-		    "Subsidised postal data message, initiating reply postal data message - used for sending reply");
-		break;
-	case 'C':
-		return tr(
-		    "Subsidised postal data message, initiating reply postal data message - unused for sending reply, expired");
-		break;
-	case 'E':
-		return tr("Postal data message sent using a subscription (prepaid credit)");
-		break;
-	case 'G':
-		/* ??? */
-		return tr(
-		    "Postal data message sent in endowment mode by another data box to the benefactor account");
-		break;
-	case 'K':
-		return tr("Postal data message");
-		break;
-	case 'I':
-		return tr("Initiating postal data message");
-		break;
-	case 'O':
-		return tr(
-		    "Reply postal data message; sent at the expense of the sender of the initiating postal data message");
-		break;
-	case 'V':
-		return tr("Public message (recipient or sender is a public authority)");
-		break;
-	case 'X':
-		return tr("Initiating postal data message - unused for sending reply, expired");
-		break;
-	case 'Y':
-		return tr("Initiating postal data message - used for sending reply");
-		break;
-	default:
-		logWarningNL("Unknown message type value '%c'.",
-		    val[0].toLatin1());
-		return QString();
-		break;
-	}
-}
-
 int IsdsConversion::msgStatusIsdsToDbRepr(int val)
 {
 	switch (val) {

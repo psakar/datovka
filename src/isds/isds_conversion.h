@@ -40,15 +40,6 @@ private:
 
 public:
 	/*!
-	 * @brief Translates message type to localised text.
-	 *
-	 * @param[in] val Message type value as used by libisds.
-	 * @return Message type description.
-	 */
-	static
-	QString dmTypeToText(const QString &val);
-
-	/*!
 	 * @brief Converts libisds message state to database value as used by
 	 *     Datovka.
 	 *

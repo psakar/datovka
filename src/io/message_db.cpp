@@ -797,9 +797,9 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool verSignature) const
 		html += strongAccountInfoLine(QObject::tr("Subject"),
 		    query.value(0).toString());
 		if (!query.value(1).toString().isEmpty() &&
-		    (!IsdsConversion::dmTypeToText(query.value(1).toString()).isEmpty())) {
+		    (!Isds::Description::descrDmTypeChar(query.value(1).toString()).isEmpty())) {
 			html += strongAccountInfoLine(QObject::tr("Message type"),
-			    IsdsConversion::dmTypeToText(query.value(1).toString()));
+			    Isds::Description::descrDmTypeChar(query.value(1).toString()));
 		}
 
 		html += "<br/>";

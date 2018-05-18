@@ -71,6 +71,16 @@ namespace Isds {
 		QString descrDmState(enum Type::DmState state);
 
 		/*!
+		 * @brief Returns localised message type description.
+		 *
+		 * @param[in] typeStr String containing single character
+		 *                    describing the message type.
+		 * @return Localised message type description.
+		 */
+		static
+		QString descrDmTypeChar(const QString &typeStr);
+
+		/*!
 		 * @brief Returns localised error description text.
 		 *
 		 * @param[in] err Error code.
