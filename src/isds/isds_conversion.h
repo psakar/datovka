@@ -40,24 +40,6 @@ private:
 
 public:
 	/*!
-	 * @brief Convert data box type to string.
-	 *
-	 * @param[in] val Data box type value as used by libisds.
-	 * @return Data box type description.
-	 */
-	static
-	const QString &boxTypeToStr(int val);
-
-	/*!
-	 * @brief Convert data box type string to int as used by libisds.
-	 *
-	 * @param[in] val Data box type string.
-	 * @return Data box type integer value.
-	 */
-	static
-	int boxTypeStrToInt(const QString &val);
-
-	/*!
 	 * @brief Return localised sender data box type description string.
 	 *
 	 * @param[in] val Sender data box type value as used by libisds.

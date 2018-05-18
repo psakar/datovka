@@ -46,7 +46,7 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 			{
 				QVariant entry(_data(index, role));
 				if (!entry.isNull()) {
-					return IsdsConversion::boxTypeToStr(entry.toInt());
+					return Isds::dbType2Str(Isds::intVariant2DbType(entry));
 				} else {
 					return entry;
 				}

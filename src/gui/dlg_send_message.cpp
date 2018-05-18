@@ -45,7 +45,6 @@
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/isds/box_interface.h"
-#include "src/isds/isds_conversion.h"
 #include "src/isds/type_conversion.h"
 #include "src/isds/types.h"
 #include "src/log/log.h"
@@ -730,7 +729,7 @@ void DlgSendMessage::initContent(enum Action action,
 	m_ui->attachmentSizeInfo->setText(
 	    tr("Total size of attachments is %1 B").arg(0));
 
-	if (IsdsConversion::boxTypeStrToInt(m_dbType) > DBTYPE_OVM_REQ) {
+	if (Isds::str2DbType(m_dbType) > Isds::Type::BT_OVM_REQ) {
 		m_ui->dmAllowSubstDelivery->setEnabled(false);
 		m_ui->dmAllowSubstDelivery->hide();
 	}
@@ -1243,7 +1242,7 @@ bool DlgSendMessage::buildEnvelope(Isds::Envelope &envelope) const
 	    Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE);
 
 	/* Only OVM can change. */
-	if (IsdsConversion::boxTypeStrToInt(m_dbType) > DBTYPE_OVM_REQ) {
+	if (Isds::str2DbType(m_dbType) > Isds::Type::BT_OVM_REQ) {
 		envelope.setDmAllowSubstDelivery(Isds::Type::BOOL_TRUE);
 	} else {
 		envelope.setDmAllowSubstDelivery(
