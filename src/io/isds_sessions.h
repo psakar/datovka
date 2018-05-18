@@ -132,31 +132,6 @@ isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
     isds_otp_resolution &res);
 
 /*!
- * @brief Creates a isds message from supplied raw CMS data.
- *
- * @param[in,out] isdsSession Pointer to session context.
- * @param[in]     rawMsgData  Raw message data.
- * @param[in]     zfoType     Message or delivery info (enum Imports::Type).
- * @return Pointer to newly allocated message, NULL on error. Use
- *     isds_message_free() to delete.
- */
-struct isds_message *loadZfoData(struct isds_ctx *isdsSession,
-    const QByteArray &rawMsgData, int zfoType);
-
-/*!
- * @brief Create a isds message from zfo file.
- *
- * @param[in,out] isdsSession Pointer to session context.
- * @param[in]     fName       File name.
- * @param[in]     zfoType     Message or delivery info
- *                            (enum ImportZFODialog::ZFOtype).
- * @return Pointer to newly allocated message, NULL on error. Use
- *     isds_message_free() to delete.
- */
-struct isds_message *loadZfoFile(struct isds_ctx *isdsSession,
-    const QString &fName, int zfoType);
-
-/*!
  * @brief Wraps isds_strerror().
  */
 inline

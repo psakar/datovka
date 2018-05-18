@@ -85,6 +85,7 @@
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
 #include "src/isds/isds_conversion.h"
+#include "src/isds/message_interface.h"
 #include "src/isds/type_conversion.h"
 #include "src/model_interaction/account_interaction.h"
 #include "src/model_interaction/attachment_interaction.h"
@@ -7286,36 +7287,17 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 
 		msgCnt = filePathList.count();
 
-		struct isds_message *message = NULL;
-		struct isds_ctx *dummy_session = NULL;
-
-		dummy_session = isds_ctx_create();
-		if (NULL == dummy_session) {
-			qDebug() << "Cannot create dummy ISDS session.";
-			showStatusTextWithTimeout(tr("Loading of ZFO file(s) "
-			    "failed!"));
-			/* TODO */
-			return;
-		}
-
 		for (int i = 0; i < msgCnt; ++i) {
 
-			message = loadZfoFile(dummy_session, filePathList.at(i),
-			    Imports::IMPORT_MESSAGE);
-			if (NULL == message || message->envelope == NULL) {
+			Isds::Message message(
+			    Isds::messageFromFile(filePathList.at(i),
+			        Isds::LT_MESSAGE));
+			if (message.isNull() || message.envelope().isNull()) {
 				errorMsgFileNames.append(filePathList.at(i));
 				continue;
 			}
 
-			if (NULL == message->envelope->timestamp) {
-				errorMsgFileNames.append(filePathList.at(i));
-				continue;
-			}
-
-			tstData = QByteArray(
-			    (char *) message->envelope->timestamp,
-			    (int) message->envelope->timestamp_length);
-
+			const QByteArray &tstData(message.envelope().dmQTimestamp());
 			if (tstData.isEmpty()) {
 				errorMsgFileNames.append(filePathList.at(i));
 				continue;
@@ -7326,9 +7308,6 @@ void MainWindow::checkMsgsTmstmpExpiration(const QString &userName,
 				expirMsgFileNames.append(filePathList.at(i));
 			}
 		}
-
-		isds_message_free(&message);
-		isds_ctx_free(&dummy_session);
 
 		dlgText = tr("Time stamp expiration check of ZFO files finished with result:")
 		    + "<br/><br/>" +

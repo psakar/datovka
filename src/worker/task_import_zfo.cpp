@@ -30,8 +30,7 @@
 #include "src/gui/dlg_import_zfo.h" /* TODO -- Remove this dependency. */
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
-#include "src/io/isds_sessions.h"
-#include "src/isds/message_conversion.h"
+#include "src/isds/message_functions.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
@@ -103,76 +102,54 @@ enum TaskImportZfo::ZfoType TaskImportZfo::determineFileType(
 {
 	debugFuncCall();
 
-	ZfoType zfoType = ZT_UKNOWN;
-
-	if (fileName.isEmpty()) {
+	if (Q_UNLIKELY(fileName.isEmpty())) {
 		Q_ASSERT(0);
-		return zfoType;
+		return ZT_UKNOWN;
 	}
 
-	struct isds_ctx *dummySession = isds_ctx_create();
-	if (NULL == dummySession) {
-		logErrorNL("%s", "Cannot create dummy ISDS session.");
-		return zfoType;
+	Isds::Message message;
+
+	message = Isds::messageFromFile(fileName, Isds::LT_MESSAGE);
+	if (!message.isNull()) {
+		return ZT_MESSAGE;
+	}
+	message = Isds::messageFromFile(fileName, Isds::LT_DELIVERY);
+	if (!message.isNull()) {
+		return ZT_DELIVERY_INFO;
 	}
 
-	struct isds_message *message = loadZfoFile(dummySession, fileName,
-	    Imports::IMPORT_MESSAGE);
-	if (NULL != message) {
-		zfoType = ZT_MESSAGE;
-	} else {
-		message = loadZfoFile(dummySession, fileName,
-		    Imports::IMPORT_DELIVERY);
-		if(NULL != message) {
-			zfoType = ZT_DELIVERY_INFO;
-		} else {
-			zfoType = ZT_UKNOWN;
-		}
-	}
-
-	isds_message_free(&message);
-	isds_ctx_free(&dummySession);
-
-	return zfoType;
+	return ZT_UKNOWN;
 }
 
 /*!
- * @brief Loads ZFO file content into stuct isds_message.
+ * @brief Loads ZFO file content into message.
  *
  * @param[in]  fileName Full path to ZFO file.
- * @param[in]  zfoType  Message of delivery info type.
- * @param[out] msgPtr   Pointer to null pointer to libisds message structure.
+ * @param[in]  zfoType Message of delivery info type.
+ * @param[out] msg Message to be set.
  * @return Error code.
  */
 static
 enum TaskImportZfo::Result loadZfo(const QString &fileName,
-    enum Imports::Type zfoType, struct isds_message **msgPtr)
+    enum Imports::Type zfoType, Isds::Message &msg)
 {
-	Q_ASSERT((NULL != msgPtr) && (NULL == *msgPtr));
 	Q_ASSERT((Imports::IMPORT_MESSAGE == zfoType) ||
 	    (Imports::IMPORT_DELIVERY == zfoType));
 
-	struct isds_message *message = NULL;
-
-	{
-		struct isds_ctx *dummy_session = isds_ctx_create();
-		if (NULL == dummy_session) {
-			logErrorNL("%s\n", "Cannot create dummy ISDS session.");
-			return TaskImportZfo::IMP_ERR;
-		}
-
-		message = loadZfoFile(dummy_session, fileName, zfoType);
-		isds_ctx_free(&dummy_session);
+	enum Isds::LoadType loadType = Isds::LT_MESSAGE;
+	if (Imports::IMPORT_DELIVERY == zfoType) {
+		loadType = Isds::LT_DELIVERY;
 	}
 
-	if ((NULL == message) || (NULL == message->envelope)) {
-		logErrorNL("Wrong format of file '%s', expected delivery info.",
-		    fileName.toUtf8().constData());
-		isds_message_free(&message);
+	msg = Isds::messageFromFile(fileName, loadType);
+	if (msg.isNull() || msg.envelope().isNull()) {
+		logErrorNL("Wrong format of file '%s', expected '%s'.",
+		    fileName.toUtf8().constData(),
+		    (loadType == Isds::LT_MESSAGE) ? "data message" : "delivery info");
+		msg = Isds::Message();
 		return TaskImportZfo::IMP_DATA_ERROR;
 	}
 
-	*msgPtr = message;
 	return TaskImportZfo::IMP_SUCCESS;
 }
 
@@ -205,30 +182,30 @@ TaskAuthenticateMessage::Result authenticateMessageFile(const QString &userName,
 }
 
 enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
-    const Task::AccountDescr &acnt, const struct isds_message *message,
+    const Task::AccountDescr &acnt, const Isds::Message &message,
     qint64 dmId, const QDateTime &deliveryTime, enum MessageDirection direct,
     const QString &fileName, QString &isdsError, QString &isdsLongError,
     QString &resultDesc)
 {
 	Q_ASSERT(acnt.isValid());
-	Q_ASSERT((NULL != message) && (NULL != message->envelope));
+	Q_ASSERT((!message.isNull()) && (!message.envelope().isNull()));
 
 	MessageDb *messageDb = acnt.messageDbSet->accessMessageDb(deliveryTime,
 	    true);
 	if (NULL == messageDb) {
 		logErrorNL("%s", "Cannot create or access database file.");
-		resultDesc = QObject::tr("This file (message) has not been "
+		resultDesc = tr("This file (message) has not been "
 		    "inserted into the database because the corresponding "
 		    "database file could not be accessed or created.");
-		return TaskImportZfo::IMP_ERR;
+		return IMP_ERR;
 	}
 	const QString accountName(
 	    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName());
 	if (-1 != messageDb->getMessageStatus(dmId)) {
-		resultDesc = QObject::tr("Message '%1' already exists in "
+		resultDesc = tr("Message '%1' already exists in "
 		    "the local database, account '%2'.").
 		    arg(dmId).arg(accountName);
-		return TaskImportZfo::IMP_DB_EXISTS;
+		return IMP_DB_EXISTS;
 	}
 
 	if (!fileName.isEmpty()) {
@@ -239,75 +216,64 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
 			/* Continue with execution. */
 			break;
 		case TaskAuthenticateMessage::AUTH_DATA_ERROR:
-			resultDesc = QObject::tr("Couldn't read data from "
+			resultDesc = tr("Couldn't read data from "
 			    "file for authentication on the ISDS server.");
-			return TaskImportZfo::IMP_DATA_ERROR;
+			return IMP_DATA_ERROR;
 			break;
 		case TaskAuthenticateMessage::AUTH_ISDS_ERROR:
-			resultDesc = QObject::tr(
+			resultDesc = tr(
 			    "Error contacting ISDS server.");
-			return TaskImportZfo::IMP_ISDS_ERROR;
+			return IMP_ISDS_ERROR;
 			break;
 		default:
-			resultDesc = QObject::tr("Message '%1' could not be "
+			resultDesc = tr("Message '%1' could not be "
 			    "authenticated by ISDS server.").arg(dmId);
-			return TaskImportZfo::IMP_AUTH_ERR;
+			return IMP_AUTH_ERR;
 			break;
 		}
 	}
 
-	/* Store envelope and message. */
-	bool ok = false;
-	Isds::Message msg = Isds::libisds2message(message, &ok);
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert libisds message to message.");
-		return TaskImportZfo::IMP_ERR;
-	}
-
 	if ((Q_SUCCESS != Task::storeMessageEnvelope(direct,
-	        *(acnt.messageDbSet), msg.envelope())) ||
+	        *(acnt.messageDbSet), message.envelope())) ||
 	    (Q_SUCCESS != Task::storeMessage(true, direct, *(acnt.messageDbSet),
-	        msg, ""))) {
-		resultDesc = QObject::tr("File has not been imported because "
+	        message, ""))) {
+		resultDesc = tr("File has not been imported because "
 		    "an error was detected during insertion process.");
-		return TaskImportZfo::IMP_DB_INS_ERR;
+		return IMP_DB_INS_ERR;
 	}
 
-	resultDesc += QObject::tr("Imported message '%1', account '%2'.").
+	resultDesc += tr("Imported message '%1', account '%2'.").
 	    arg(dmId).arg(accountName);
-	return TaskImportZfo::IMP_SUCCESS;
+	return IMP_SUCCESS;
 }
 
 enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
     const QList<Task::AccountDescr> &accounts,
     const QString &fileName, bool authenticate, QString &resultDesc)
 {
-	struct isds_message *message = NULL;
+	Isds::Message message;
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_MSG,
 	    0);
 
 	{
-		enum TaskImportZfo::Result res = loadZfo(fileName,
-		    Imports::IMPORT_MESSAGE, &message);
+		enum Result res = loadZfo(fileName,
+		    Imports::IMPORT_MESSAGE, message);
 		if (IMP_SUCCESS != res) {
-			Q_ASSERT(NULL == message);
-			resultDesc = QObject::tr("Wrong ZFO format. This file "
-			    "does not contain correct data for import.");
+			resultDesc = tr("Wrong ZFO format. "
+			    "This file does not contain correct data for import.");
 			return res;
 		}
 
-		Q_ASSERT(NULL != message);
+		Q_ASSERT(!message.isNull());
 	}
 
-	const QString dbIDSender(message->envelope->dbIDSender);
-	const QString dbIDRecipient(message->envelope->dbIDRecipient);
+	const QString &dbIDSender(message.envelope().dbIDSender());
+	const QString &dbIDRecipient(message.envelope().dbIDRecipient());
 
-	qint64 dmId = QString(message->envelope->dmID).toLongLong();
-	QDateTime deliveryTime =
-	    timevalToDateTime(message->envelope->dmDeliveryTime);
+	qint64 dmId = message.envelope().dmId();
+	const QDateTime &deliveryTime(message.envelope().dmDeliveryTime());
 	if (!deliveryTime.isValid()) {
-		isds_message_free(&message);
 		return IMP_DATA_ERROR;
 	}
 
@@ -354,8 +320,6 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 		}
 	}
 
-	isds_message_free(&message);
-
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_MSG,
 	    100);
 
@@ -372,12 +336,12 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfo(
 }
 
 enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
-    const Task::AccountDescr &acnt, const struct isds_message *message,
+    const Task::AccountDescr &acnt, const Isds::Message &message,
     qint64 dmId, const QDateTime &deliveryTime, const QString &fileName,
     QString &isdsError, QString &isdsLongError, QString &resultDesc)
 {
 	Q_ASSERT(acnt.isValid());
-	Q_ASSERT((NULL != message) && (NULL != message->envelope));
+	Q_ASSERT((!message.isNull()) && (!message.envelope().isNull()));
 
 	MessageDb *messageDb = acnt.messageDbSet->accessMessageDb(deliveryTime,
 	    false);
@@ -386,17 +350,17 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 	if ((NULL == messageDb) ||
 	    (-1 == messageDb->getMessageStatus(dmId))) {
 		/* Corresponding message does not exist in database. */
-		resultDesc = QObject::tr("This file (acceptance info) has not "
+		resultDesc = tr("This file (acceptance info) has not "
 		    "been inserted into database because there isn't any "
 		    "related message with id '%1' in the databases.").arg(dmId);
-		return TaskImportZfo::IMP_DB_MISSING_MSG;
+		return IMP_DB_MISSING_MSG;
 	}
 
 	if (!messageDb->getDeliveryInfoBase64(dmId).isEmpty()) {
-		resultDesc = QObject::tr("Acceptance info for message '%1' "
+		resultDesc = tr("Acceptance info for message '%1' "
 		    "already exists in the local database, account '%2'.").
 		    arg(dmId).arg(accountName);
-		return TaskImportZfo::IMP_DB_EXISTS;
+		return IMP_DB_EXISTS;
 	}
 
 	if (!fileName.isEmpty()) {
@@ -407,71 +371,59 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 			/* Continue with execution. */
 			break;
 		case TaskAuthenticateMessage::AUTH_DATA_ERROR:
-			resultDesc = QObject::tr("Couldn't read data from "
+			resultDesc = tr("Couldn't read data from "
 			    "file for authentication on the ISDS server.");
-			return TaskImportZfo::IMP_DATA_ERROR;
+			return IMP_DATA_ERROR;
 			break;
 		case TaskAuthenticateMessage::AUTH_ISDS_ERROR:
-			resultDesc = QObject::tr(
-			    "Error contacting ISDS server.");
-			return TaskImportZfo::IMP_ISDS_ERROR;
+			resultDesc = tr("Error contacting ISDS server.");
+			return IMP_ISDS_ERROR;
 			break;
 		default:
-			resultDesc = QObject::tr("Acceptance info for message "
+			resultDesc = tr("Acceptance info for message "
 			    "'%1' could not be authenticated by ISDS server.").
 			    arg(dmId);
-			return TaskImportZfo::IMP_AUTH_ERR;
+			return IMP_AUTH_ERR;
 			break;
 		}
 	}
 
-	bool ok = false;
-	Isds::Message msg = Isds::libisds2message(message, &ok);
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert libisds message to message.");
-		return IMP_ERR;
-	}
-
 	if (Q_SUCCESS !=
-	    Task::storeDeliveryInfo(true, *(acnt.messageDbSet), msg)) {
-		resultDesc = QObject::tr("File has not been imported because "
+	    Task::storeDeliveryInfo(true, *(acnt.messageDbSet), message)) {
+		resultDesc = tr("File has not been imported because "
 		    "an error was detected during insertion process.");
-		return TaskImportZfo::IMP_DB_INS_ERR;
+		return IMP_DB_INS_ERR;
 	}
 
-	resultDesc += QObject::tr(
-	    "Imported acceptance info for message '%1', account '%2'.").
+	resultDesc += tr("Imported acceptance info for message '%1', account '%2'.").
 	    arg(dmId).arg(accountName);
-	return TaskImportZfo::IMP_SUCCESS;
+	return IMP_SUCCESS;
 }
 
 enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfo(
     const QList<Task::AccountDescr> &accounts, const QString &fileName,
     bool authenticate, QString &resultDesc)
 {
-	struct isds_message *message = NULL;
+	Isds::Message message;
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_DINFO,
 	    0);
 
 	{
-		enum TaskImportZfo::Result res = loadZfo(fileName,
-		    Imports::IMPORT_DELIVERY, &message);
+		enum Result res = loadZfo(fileName,
+		    Imports::IMPORT_DELIVERY, message);
 		if (IMP_SUCCESS != res) {
-			Q_ASSERT(NULL == message);
-			resultDesc = QObject::tr("Wrong ZFO format. This file "
-			    "does not contain correct data for import.");
+			resultDesc = tr("Wrong ZFO format. "
+			    "This file does not contain correct data for import.");
 			return res;
 		}
 
-		Q_ASSERT(NULL != message);
+		Q_ASSERT(!message.isNull());
 	}
 
-	qint64 dmId = QString(message->envelope->dmID).toLongLong();
-	QDateTime deliveryTime =
-	    timevalToDateTime(message->envelope->dmDeliveryTime);
+	qint64 dmId = message.envelope().dmId();
+	const QDateTime &deliveryTime(message.envelope().dmDeliveryTime());
 	if (!deliveryTime.isValid()) {
-		isds_message_free(&message);
 		return IMP_DATA_ERROR;
 	}
 
@@ -509,8 +461,6 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfo(
 			errorDescr += resultDesc + "<br/>";
 		}
 	}
-
-	isds_message_free(&message);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IMPORT_ZFO_DINFO,
 	    100);
