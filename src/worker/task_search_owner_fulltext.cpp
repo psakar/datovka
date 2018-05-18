@@ -287,7 +287,7 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
 		    "Searching for data box (page %lu) returned status '%d': '%s'.",
 		    (unsigned long)iPageNumber, status,
 		    isdsStrError(status).toUtf8().constData());
-		error = isds_error(status);
+		error = isds_strerror(status);
 		longError = isdsLongMessage(session);
 	} else {
 		logDebugLv1NL("Find data box (page %lu) returned '%d': '%s'.",

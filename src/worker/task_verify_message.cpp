@@ -116,7 +116,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 	if (IE_SUCCESS != status) {
 		logErrorNL("Error downloading hash of message '%" PRId64 "'.",
 		    msgId.dmId);
-		error = isds_error(status);
+		error = isds_strerror(status);
 		longError = isdsLongMessage(session);
 		isds_hash_free(&hashIsds);
 		return VERIFY_ISDS_ERR;
@@ -153,7 +153,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 	}
 
 	if (IE_SUCCESS != status) {
-		error = isds_error(status);
+		error = isds_strerror(status);
 		return VERIFY_ISDS_ERR;
 	}
 

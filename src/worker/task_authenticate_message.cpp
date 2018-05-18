@@ -110,7 +110,7 @@ enum TaskAuthenticateMessage::Result TaskAuthenticateMessage::authenticateMessag
 		return AUTH_NOT_EQUAL;
 	} else if (IE_SUCCESS != status) {
 		logErrorNL("%s", "Error authenticating message.");
-		error = isds_error(status);
+		error = isds_strerror(status);
 		longError = isdsLongMessage(session);
 		return AUTH_ISDS_ERROR;
 	}
