@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,14 +21,14 @@
  * the two.
  */
 
-#ifndef _FILES_MODEL_H_
-#define _FILES_MODEL_H_
+#pragma once
 
 #include <QByteArray>
 #include <QObject>
 #include <QVariant>
 
 #include "src/io/message_db.h"
+#include "src/isds/message_interface.h"
 #include "src/models/table_model.h"
 
 /*!
@@ -153,10 +153,10 @@ public:
 	 * @brief Sets the content of the model according to the supplied
 	 *     message.
 	 *
-	 * @param[in] message Message structure.
+	 * @param[in] message Message.
 	 * @return True on success.
 	 */
-	bool setMessage(const struct isds_message *message);
+	bool setMessage(const Isds::Message &message);
 
 	/*!
 	 * @brief Adds attachment file.
@@ -198,10 +198,10 @@ private:
 	/*!
 	 * @brief Appends data from the supplied message.
 	 *
-	 * @param[in] message Message structure.
+	 * @param[in] message Message.
 	 * @return True when message data successfully added.
 	 */
-	bool appendMessageData(const struct isds_message *message);
+	bool appendMessageData(const Isds::Message &message);
 
 	/*!
 	 * @brief Insert supplied vector.
@@ -238,5 +238,3 @@ private:
 	QStringList accessibleFiles(const QString &tmpDirPath,
 	    const QModelIndexList &indexes) const;
 };
-
-#endif /* _FILES_MODEL_H_ */

@@ -173,7 +173,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 20);
 
 	if (status != IE_SUCCESS) {
-		error = isds_error(status);
+		error = isds_strerror(status);
 		longError = isdsLongMessage(session);
 		logErrorNL(
 		    "Downloading message list returned status %d: '%s' '%s'.",
@@ -391,7 +391,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageSta
 	}
 
 	if (IE_SUCCESS != status) {
-		error = isds_error(status);
+		error = isds_strerror(status);
 		longError = isdsLongMessage(session);
 		logErrorNL(
 		    "Downloading message state returned status %d: '%s'.",

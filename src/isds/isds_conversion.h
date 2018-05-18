@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _ISDS_CONVERSION_H_
-#define _ISDS_CONVERSION_H_
+#pragma once
 
 #include <QCoreApplication> // Q_DECLARE_TR_FUNCTIONS
 #include <QString>
@@ -96,15 +95,6 @@ public:
 	int msgStatusIsdsToDbRepr(int val);
 
 	/*!
-	 * @brief Returns localised message status description text.
-	 *
-	 * @param[in] val Message status value as used in database.
-	 * @return Localised message status description.
-	 */
-	static
-	QString msgStatusDbToText(int val);
-
-	/*!
 	 * @brief Convert sender type to string identifier.
 	 *
 	 * @param[in] val Sender type value as used by libisds.
@@ -131,5 +121,3 @@ public:
 	static
 	QString userPrivilsToText(int val);
 };
-
-#endif /* _ISDS_CONVERSION_H_ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -256,81 +256,6 @@ int IsdsConversion::msgStatusIsdsToDbRepr(int val)
 	default:
 		logWarningNL("Unknown message state value '%d'.", val);
 		return 0;
-		break;
-	}
-}
-
-QString IsdsConversion::msgStatusDbToText(int val)
-{
-	switch (val) {
-	case 1:
-		/* Zprava byla podana (vznikla v ISDS). */
-		return tr("Message has been submitted (has been created in ISDS)");
-		break;
-	case 2:
-		/*
-		 * Datová zprava vcetne pisemnosti podepsana casovym razitkem.
-		 */
-		return tr("Data message including its attachments signed with time-stamp.");
-		break;
-	case 3:
-		/*
-		 * Zprava neprosla AV kontrolou; nakazena pisemnost je smazana;
-		 * konecny stav zpravy pred smazanim.
-		 */
-		return tr("Message did not pass through AV check; "
-		    "infected paper deleted; final status before deletion.");
-		break;
-	case 4:
-		/* Zprava dodana do ISDS (zapsan cas dodani). */
-		return tr("Message handed into ISDS (delivery time recorded).");
-		break;
-	case 5:
-		/*
-		 * Uplynulo 10 dnu od dodani verejne zpravy, ktera dosud nebyla
-		 * dorucena prihlasenim (predpoklad dorucení fikci u neOVM DS);
-		 * u komercni zpravy nemuze tento stav nastat.
-		 */
-		return tr("10 days have passed since the delivery of "
-		    "the public message which has not been accepted by "
-		    "logging-in (assumption of acceptance through fiction in non-OVM "
-		    "DS); this state cannot occur for commercial messages.");
-		break;
-	case 6:
-		/*
-		 * Osoba opravnena cist tuto zpravu se prihlasila - dodana
-		 * zprava byla dorucena.",
-		 */
-		return tr("A person authorised to read this message "
-		    "has logged in -- delivered message has been accepted.");
-		break;
-	case 7:
-		/* Zprava byla prectena (na portale nebo akci ESS). */
-		return tr("Message has been read (on the portal or by ESS action).");
-		break;
-	case 8:
-		/*
-		 * Zprava byla oznacena jako nedorucitelna, protoze DS adresata
-		 * byla zpetne znepristupnena.
-		 */
-		return tr("Message marked as undeliverable because "
-		    "the target DS has been made inaccessible.");
-		break;
-	case 9:
-		/*
-		 * Obsah zpravy byl smazan, obalka zpravy vcetne hashu
-		 * presunuta do archivu.
-		 */
-		return tr("Message content deleted, envelope "
-		    "including hashes has been moved into archive.");
-		break;
-	case 10:
-		/* Zprava je v Datovem trezoru. */
-		return tr("Message resides in data vault.");
-		break;
-	default:
-		logWarningNL("Unknown message state value '%d'.", val);
-		return QString();
 		break;
 	}
 }

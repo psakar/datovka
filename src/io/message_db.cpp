@@ -53,6 +53,7 @@
 #include "src/io/message_db.h"
 #include "src/isds/isds_conversion.h"
 #include "src/isds/type_conversion.h"
+#include "src/isds/type_description.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 
@@ -941,7 +942,7 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool verSignature) const
 		html += strongAccountInfoLine(
 		    msgsTbl.attrProps[msgStatus[2]].desc,
 		    QString::number(query.value(2).toInt()) + " -- " +
-		    IsdsConversion::msgStatusDbToText(query.value(2).toInt()));
+		    Isds::Description::descrDmState(Isds::variant2DmState(query.value(2))));
 	} else {
 		logErrorNL(
 		    "Cannot execute SQL query and/or read SQL data: %s.",

@@ -79,8 +79,8 @@ bool TaskDownloadPasswordInfo::downloadPasswordInfoFromISDS(
 		logErrorNL(
 		    "Downloading password information for account '%s' returned '%d': '%s'.",
 		    userName.toUtf8().constData(),
-		    status, isds_error(status));
-		error = isds_error(status);
+		    status, isds_strerror(status));
+		error = isds_strerror(status);
 		longError = isdsLongMessage(session);
 		free(expiration);
 		return false;

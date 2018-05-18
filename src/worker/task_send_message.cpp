@@ -149,7 +149,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	status = isds_send_message(session, isdsMessage);
 	if (IE_SUCCESS != status) {
-		isdsError = isds_error(status);
+		isdsError = isds_strerror(status);
 		isdsLongError = isdsLongMessage(session);
 		logErrorNL("Sending message returned status %d: '%s' '%s'.",
 		    status, isdsError.toUtf8().constData(),

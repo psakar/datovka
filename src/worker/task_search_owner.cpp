@@ -154,7 +154,7 @@ enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(const QString &userName
 		logErrorNL(
 		    "Searching for data box returned status %d: '%s'.",
 		    status, isdsStrError(status).toUtf8().constData());
-		error = isds_error(status);
+		error = isds_strerror(status);
 		longError = isdsLongMessage(session);
 	} else {
 		logDebugLv1NL("Find databox returned '%d': '%s'.",

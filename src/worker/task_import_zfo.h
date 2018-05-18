@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,17 +21,20 @@
  * the two.
  */
 
-#ifndef _TASK_IMPORT_ZFO_H_
-#define _TASK_IMPORT_ZFO_H_
+#pragma once
 
+#include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 #include <QString>
 
+#include "src/isds/message_interface.h"
 #include "src/worker/task.h"
 
 /*!
  * @brief Task describing ZFO file import.
  */
 class TaskImportZfo : public Task {
+	Q_DECLARE_TR_FUNCTIONS(TaskImportZfo)
+
 public:
 	/*!
 	 * @brief Return state describing what happened.
@@ -118,7 +121,7 @@ private:
 	 */
 	static
 	enum Result importMessageZfoSingle(const Task::AccountDescr &acnt,
-	    const struct isds_message *message, qint64 dmId,
+	    const Isds::Message &message, qint64 dmId,
 	    const QDateTime &deliveryTime, enum MessageDirection direct,
 	    const QString &fileName, QString &isdsError, QString &isdsLongError,
 	    QString &resultDesc);
@@ -154,7 +157,7 @@ private:
 	 */
 	static
 	enum Result importDeliveryZfoSingle(const Task::AccountDescr &acnt,
-	    const struct isds_message *message, qint64 dmId,
+	    const Isds::Message &message, qint64 dmId,
 	    const QDateTime &deliveryTime, const QString &fileName,
 	    QString &isdsError, QString &isdsLongError, QString &resultDesc);
 
@@ -176,5 +179,3 @@ private:
 	enum ZfoType m_zfoType; /*!< Type of the ZFO file. */
 	const bool m_auth; /*!< True if authentication before importing. */
 };
-
-#endif /* _TASK_IMPORT_ZFO_H_ */

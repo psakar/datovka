@@ -33,6 +33,7 @@ SOURCES += \
 	$${top_srcdir}src/isds/isds_conversion.cpp \
 	$${top_srcdir}src/isds/message_interface.cpp \
 	$${top_srcdir}src/isds/type_conversion.cpp \
+	$${top_srcdir}src/isds/type_description.cpp \
 	$${top_srcdir}src/models/files_model.cpp \
 	$${top_srcdir}src/models/messages_model.cpp \
 	$${top_srcdir}src/models/table_model.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
 	$${top_srcdir}src/isds/isds_conversion.h \
 	$${top_srcdir}src/isds/message_interface.h \
 	$${top_srcdir}src/isds/type_conversion.h \
+	$${top_srcdir}src/isds/type_description.h \
 	$${top_srcdir}src/isds/types.h \
 	$${top_srcdir}src/models/files_model.h \
 	$${top_srcdir}src/models/messages_model.h \

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_SIGNATURE_DETAIL_H_
-#define _DLG_SIGNATURE_DETAIL_H_
+#pragma once
 
 #include <QByteArray>
 #include <QDialog>
@@ -72,15 +71,13 @@ public:
 	/*!
 	 * @brief Views a signature detail dialogue.
 	 *
-	 * @param[in] msgDER Pointer to raw message data.
-	 * @param[in] msgSize Message size.
-	 * @param[in] tstDER Pointer to rad time-stamp data.
-	 * @param[in] tstSize Time-stamp size.
+	 * @param[in] msgDER Raw message data.
+	 * @param[in] tstDER Raw time-stamp data.
 	 * @param[in] parent Parent widget.
 	 */
 	static
-	void detail(const void *msgDER, size_t msgSize,
-	    const void *tstDER, size_t tstSize, QWidget *parent = Q_NULLPTR);
+	void detail(const QByteArray &msgDER, const QByteArray &tstDER,
+	    QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Check whether certificate expires before specified limit.
@@ -140,5 +137,3 @@ private:
 	                  * resizing.
 	                  */
 };
-
-#endif /* _DLG_SIGNATURE_DETAIL_H_ */
