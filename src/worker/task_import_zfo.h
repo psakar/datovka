@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _TASK_IMPORT_ZFO_H_
-#define _TASK_IMPORT_ZFO_H_
+#pragma once
 
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 #include <QString>
@@ -180,5 +179,3 @@ private:
 	enum ZfoType m_zfoType; /*!< Type of the ZFO file. */
 	const bool m_auth; /*!< True if authentication before importing. */
 };
-
-#endif /* _TASK_IMPORT_ZFO_H_ */

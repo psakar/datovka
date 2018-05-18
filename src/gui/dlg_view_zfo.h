@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_VIEW_ZFO_H_
-#define _DLG_VIEW_ZFO_H_
+#pragma once
 
 #include <QDialog>
 
@@ -193,5 +192,3 @@ private:
 	enum Isds::LoadType m_zfoType; /*!< Type of message. */
 	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
 };
-
-#endif /* _DLG_VIEW_ZFO_H_ */

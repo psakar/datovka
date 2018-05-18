@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _ISDS_SESSIONS_H_
-#define _ISDS_SESSIONS_H_
+#pragma once
 
 #if defined(__APPLE__) || defined(__clang__)
 #  define __USE_C99_MATH
@@ -166,5 +165,3 @@ QString isdsLongMessage(const struct isds_ctx *context)
 	return QString::fromUtf8(isds_long_message(context));
 #endif /* WIN32 */
 }
-
-#endif /* _ISDS_SESSIONS_H_ */
