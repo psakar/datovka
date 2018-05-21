@@ -25,26 +25,6 @@
 #include "src/isds/isds_conversion.h"
 #include "src/log/log.h"
 
-int IsdsConversion::msgStatusIsdsToDbRepr(int val)
-{
-	switch (val) {
-	case MESSAGESTATE_SENT: return 1; break;
-	case MESSAGESTATE_STAMPED: return 2; break;
-	case MESSAGESTATE_INFECTED: return 3; break;
-	case MESSAGESTATE_DELIVERED: return 4; break;
-	case MESSAGESTATE_SUBSTITUTED: return 5; break;
-	case MESSAGESTATE_RECEIVED: return 6; break;
-	case MESSAGESTATE_READ: return 7; break;
-	case MESSAGESTATE_UNDELIVERABLE: return 8; break;
-	case MESSAGESTATE_REMOVED: return 9; break;
-	case MESSAGESTATE_IN_SAFE: return 10; break;
-	default:
-		logWarningNL("Unknown message state value '%d'.", val);
-		return 0;
-		break;
-	}
-}
-
 #define STR_PRIMARY_USER "PRIMARY_USER"
 #define STR_ENTRUSTED_USER "ENTRUSTED_USER"
 #define STR_ADMINISTRATOR "ADMINISTRATOR"

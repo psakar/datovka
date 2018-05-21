@@ -40,16 +40,6 @@ private:
 
 public:
 	/*!
-	 * @brief Converts libisds message state to database value as used by
-	 *     Datovka.
-	 *
-	 * @param[in] val Message status value as used by libisds.
-	 * @return Datovka status value as stored in database.
-	 */
-	static
-	int msgStatusIsdsToDbRepr(int val);
-
-	/*!
 	 * @brief Convert sender type to string identifier.
 	 *
 	 * @param[in] val Sender type value as used by libisds.
