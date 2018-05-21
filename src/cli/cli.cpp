@@ -25,7 +25,6 @@
 #include <QDebug>
 #include <QTextStream>
 
-
 #include "src/cli/cli.h"
 #include "src/cli/cli_login.h"
 #include "src/datovka_shared/utility/strings.h"
@@ -842,7 +841,7 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 
 		TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
 		    map["username"].toString(), msgDbSet, transactId,
-		    message, recipientId, QString("unknown"), false);
+		    message, "Databox ID: " + recipientId, "unknown", false);
 		if (task != Q_NULLPTR) {
 			task->setAutoDelete(false);
 			GlobInstcs::workPoolPtr->runSingle(task);
