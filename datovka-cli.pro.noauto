@@ -99,6 +99,7 @@ SOURCES += \
 	src/datovka_shared/localisation/localisation.cpp \
 	src/datovka_shared/settings/pin.cpp \
 	src/datovka_shared/settings/records_management.cpp \
+	src/datovka_shared/utility/strings.cpp \
 	src/datovka_shared/worker/pool.cpp \
 	src/global.cpp \
 	src/initialisation.cpp \
@@ -141,7 +142,8 @@ SOURCES += \
 	src/worker/task_download_owner_info.cpp \
 	src/worker/task_download_password_info.cpp \
 	src/worker/task_download_user_info.cpp \
-	src/worker/task_search_owner.cpp
+	src/worker/task_search_owner.cpp \
+	src/worker/task_send_message.cpp
 
 HEADERS += \
 	src/about.h \
@@ -164,6 +166,7 @@ HEADERS += \
 	src/datovka_shared/localisation/localisation.h \
 	src/datovka_shared/settings/pin.h \
 	src/datovka_shared/settings/records_management.h \
+	src/datovka_shared/utility/strings.h \
 	src/datovka_shared/worker/pool.h \
 	src/global.h \
 	src/initialisation.h \
@@ -207,7 +210,8 @@ HEADERS += \
 	src/worker/task_download_owner_info.h \
 	src/worker/task_download_password_info.h \
 	src/worker/task_download_user_info.h \
-	src/worker/task_search_owner.h
+	src/worker/task_search_owner.h \
+	src/worker/task_send_message.h
 
 FORMS +=
 
