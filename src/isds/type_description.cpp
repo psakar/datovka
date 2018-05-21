@@ -24,6 +24,134 @@
 #include "src/isds/type_description.h"
 #include "src/log/log.h"
 
+QString Isds::Description::descrDbType(enum Type::DbType type)
+{
+	switch (type) {
+	case Type::BT_NULL:
+		return QString();
+		break;
+//	case Type::BT_OVM_MAIN: return tr("public authority - main box"); break; /* organ verejne moci - hlavni schranka */
+	case Type::BT_SYSTEM: return tr("system box"); break; /* systemova schranka */
+	case Type::BT_OVM: return tr("public authority"); break; /* organ verejne moci */
+	case Type::BT_OVM_NOTAR: return tr("public authority - notary"); break; /* organ verejne moci - notar */
+	case Type::BT_OVM_EXEKUT: return tr("public authority - bailiff"); break; /* organ verejne moci - exekutor */
+	case Type::BT_OVM_REQ: return tr("public authority - at request"); break; /* organ verejne moci - na zadost */
+	case Type::BT_OVM_FO: return tr("public authority - natural person"); break; /* organ verejne moci - fyzicka osoba */
+	case Type::BT_OVM_PFO: return tr("public authority - self-employed person"); break; /* organ verejne moci - podnikajici fyzicka osoba */
+	case Type::BT_OVM_PO: return tr("public authority - legal person"); break; /* organ verejne moci - pravnicka osoba */
+	case Type::BT_PO: return tr("legal person"); break; /* pravnicka osoba */
+	case Type::BT_PO_ZAK: return tr("legal person - founded by an act"); break; /* pravnicka osoba - ze zakona */
+	case Type::BT_PO_REQ: return tr("legal person - at request"); break; /* pravnicka osoba - na zadost */
+	case Type::BT_PFO: return tr("self-employed person"); break; /* podnikajici fyzicka osoba */
+	case Type::BT_PFO_ADVOK: return tr("self-employed person - advocate"); break; /* podnikajici fyzicka osoba - advokat */
+	case Type::BT_PFO_DANPOR: return tr("self-employed person - tax advisor"); break; /* podnikajici fyzicka osoba - danovy poradce */
+	case Type::BT_PFO_INSSPR: return tr("self-employed person - insolvency administrator"); break; /* podnikajici fyzicka osoba - insolvencni spravce */
+	case Type::BT_PFO_AUDITOR: return tr("self-employed person - statutory auditor"); break; /* podnikajici fyzicka osoba - auditor */
+	case Type::BT_FO: return tr("natural person"); break; /* fyzicka osoba */
+	default:
+		Q_ASSERT(0);
+		logWarningNL("Unknown sender data box type value '%d'.", (int)type);
+		return tr("An error occurred while checking the type.");
+		break;
+	}
+}
+
+QString Isds::Description::descrDbState(enum Type::DbState state)
+{
+	switch (state) {
+	case Type::BS_ERROR:
+		return QString();
+		break;
+	case Type::BS_ACCESSIBLE:
+		/* Datová schránka je přístupná, lze do ní dodávat zprávy, na Portále lze vyhledat. */
+		return tr(
+		    "The data box is accessible. It is possible to send messages into it. It can be looked up on the Portal.");
+		break;
+	case Type::BS_TEMP_INACCESSIBLE:
+		/* Datová schránka je dočasně znepřístupněna (na vlastní žádost), může být později opět zpřístupněna. */
+		return tr(
+		    "The data box is temporarily inaccessible (at own request). It may be made accessible again at some point in the future.");
+		break;
+	case Type::BS_NOT_YET_ACCESSIBLE:
+		/* Datová schránka je dosud neaktivní. Vlastník schránky se musí poprvé přihlásit do webového rozhraní, aby došlo k aktivaci schránky. */
+		return tr(
+		    "The data box is so far inactive. The owner of the box has to log into the web interface at first in order to activate the box.");
+		break;
+	case Type::BS_PERM_INACCESSIBLE:
+		/* Datová schránka je trvale znepřístupněna, čeká na smazání (může být opět zpřístupněna). */
+		return tr(
+		    "The data box is permanently inaccessible. It is waiting to be deleted (but it may be made accessible again).");
+		break;
+	case Type::BS_REMOVED:
+		/* Datová schránka je smazána (přesto existuje v ISDS). */
+		return tr(
+		    "The data box has been deleted (none the less it exists in ISDS).");
+		break;
+	case Type::BS_TEMP_UNACCESSIBLE_LAW:
+		/* Datová schránka je dočasně znepřístupněna (z důvodů vyjmenovaných v zákoně), může být později opět zpřístupněna. */
+		return tr(
+		    "The data box is temporarily inaccessible (because of reasons listed in law). It may be made accessible again at some point in the future.");
+		break;
+	default:
+		Q_ASSERT(0);
+		logWarningNL("Unknown data box status value '%d'.", (int)state);
+		return tr("An error occurred while checking the status.");
+		break;
+	}
+}
+
+QString Isds::Description::htmlDescrPrivileges(Type::Privileges privils)
+{
+	QString privStr;
+	const QString sepPref("<li>- "), sepSuff("</li>");
+
+	if (((int)privils) == 255) {
+		return tr("Full control");
+	} else {
+		privStr = tr("Restricted control");
+	}
+
+	if (privils & Type::PRIVIL_READ_NON_PERSONAL) {
+		// "stahovat a číst došlé DZ"
+		privStr += sepPref + tr("download and read incoming DM") +
+		    sepSuff;
+	}
+	if (privils & Type::PRIVIL_READ_ALL) {
+		// "stahovat a číst DZ určené do vlastních rukou"
+		privStr += sepPref +
+		    tr("download and read DM sent into own hands") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_CREATE_DM) {
+		// "vytvářet a odesílat DZ, stahovat odeslané DZ"
+		privStr += sepPref +
+		    tr("create and send DM, download sent DM") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_VIEW_INFO) {
+		// "načítat seznamy DZ, Dodejky a Doručenky"
+		privStr += sepPref +
+		    tr("retrieve DM lists, delivery and acceptance reports") +
+		    sepSuff;
+	}
+	if (privils & Type::PRIVIL_SEARCH_DB) {
+		// "vyhledávat DS"
+		privStr += sepPref + tr("search for data boxes") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_OWNER_ADM) {
+		// "spravovat DS"
+		privStr += sepPref + tr("manage the data box") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_READ_VAULT) {
+		// "číst zprávy v DT"
+		privStr += sepPref + tr("read message in data vault") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_ERASE_VAULT) {
+		// "mazat zprávy v DT"
+		privStr += sepPref + tr("erase messages from data vault") +
+		    sepSuff;
+	}
+	return privStr;
+}
+
 QString Isds::Description::descrDmState(enum Type::DmState state)
 {
 	switch (state) {
@@ -98,7 +226,69 @@ QString Isds::Description::descrDmState(enum Type::DmState state)
 	default:
 		Q_ASSERT(0);
 		logWarningNL("Unknown message state value '%d'.", (int)state);
+		return tr("An error occurred while checking the status.");
+		break;
+	}
+}
+
+QString Isds::Description::descrDmTypeChar(const QString &typeStr)
+{
+	if (typeStr.size() != 1) {
+		logWarningNL("Unknown message type value '%s'.",
+		    typeStr.toUtf8().constData());
 		return QString();
+	}
+
+	/*
+	 * See Provozni rad ISDS:
+	 * Webove sluyby rozhrani ISDS pro manipulaci s datovymi zpravami
+	 * section 2.8.2, GetListOfSentMessages
+	 */
+
+	switch (typeStr[0].toLatin1()) {
+	case 'A':
+		return tr(
+		    "Subsidised postal data message, initiating reply postal data message");
+		break;
+	case 'B':
+		return tr(
+		    "Subsidised postal data message, initiating reply postal data message - used for sending reply");
+		break;
+	case 'C':
+		return tr(
+		    "Subsidised postal data message, initiating reply postal data message - unused for sending reply, expired");
+		break;
+	case 'E':
+		return tr("Postal data message sent using a subscription (prepaid credit)");
+		break;
+	case 'G':
+		/* ??? */
+		return tr(
+		    "Postal data message sent in endowment mode by another data box to the benefactor account");
+		break;
+	case 'K':
+		return tr("Postal data message");
+		break;
+	case 'I':
+		return tr("Initiating postal data message");
+		break;
+	case 'O':
+		return tr(
+		    "Reply postal data message; sent at the expense of the sender of the initiating postal data message");
+		break;
+	case 'V':
+		return tr("Public message (recipient or sender is a public authority)");
+		break;
+	case 'X':
+		return tr("Initiating postal data message - unused for sending reply, expired");
+		break;
+	case 'Y':
+		return tr("Initiating postal data message - used for sending reply");
+		break;
+	default:
+		logWarningNL("Unknown message type value '%s'.",
+		    typeStr.toUtf8().constData());
+		return tr("An error occurred while checking the type.");
 		break;
 	}
 }

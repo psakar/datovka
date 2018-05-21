@@ -21,9 +21,9 @@
  * the two.
  */
 
-#include "src/isds/isds_conversion.h"
 #include "src/isds/to_text_conversion.h"
 #include "src/isds/type_conversion.h"
+#include "src/isds/type_description.h"
 #include "src/isds/types.h"
 #include "src/models/data_box_contacts_model.h"
 
@@ -46,7 +46,7 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 			{
 				QVariant entry(_data(index, role));
 				if (!entry.isNull()) {
-					return IsdsConversion::boxTypeToStr(entry.toInt());
+					return Isds::dbType2Str(Isds::intVariant2DbType(entry));
 				} else {
 					return entry;
 				}
@@ -72,7 +72,7 @@ QVariant BoxContactsModel::data(const QModelIndex &index, int role) const
 			QVariant entry(_data(index, Qt::DisplayRole));
 
 			if (!entry.isNull()) {
-				return IsdsConversion::senderBoxTypeToText(entry.toInt());
+				return Isds::Description::descrDbType(Isds::intVariant2DbType(entry));
 			} else {
 				return entry;
 			}

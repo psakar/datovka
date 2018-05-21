@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,12 @@
  * the two.
  */
 
-#ifndef _TASK_DOWNLOAD_MESSAGE_LIST_H_
-#define _TASK_DOWNLOAD_MESSAGE_LIST_H_
+#pragma once
 
 #include <QString>
 
 #include "src/io/message_db_set.h"
+#include "src/isds/message_interface.h"
 #include "src/worker/task.h"
 
 /*!
@@ -136,7 +136,7 @@ private:
 	 */
 	static
 	enum Result updateMessageState(enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const struct isds_envelope *envel);
+	    MessageDbSet &dbSet, const Isds::Envelope &envel);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
@@ -145,5 +145,3 @@ private:
 	unsigned long m_dmLimit; /*!< List length limit. */
 	int m_dmStatusFilter; /*!< Defines type of messages to be downloaded. */
 };
-
-#endif /* _TASK_DOWNLOAD_MESSAGE_LIST_H_ */

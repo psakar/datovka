@@ -44,6 +44,33 @@ namespace Isds {
 
 	public:
 		/*!
+		 * @brief Returns localised data box type description.
+		 *
+		 * @param[in] type Box type.
+		 * @return Localised box type description.
+		 */
+		static
+		QString descrDbType(enum Type::DbType type);
+
+		/*!
+		 * @brief Returns localised data box state description text.
+		 *
+		 * @param[in] state Box state.
+		 * @return Localised box state description.
+		 */
+		static
+		QString descrDbState(enum Type::DbState state);
+
+		/*!
+		 * @brief Returns localised user privilege description text.
+		 *
+		 * @pram[in] privils Privileges.
+		 * @return Localised privilege description.
+		 */
+		static
+		QString htmlDescrPrivileges(Type::Privileges privils);
+
+		/*!
 		 * @brief Returns localised message status description text.
 		 *
 		 * @param[in] state Message status value.
@@ -51,6 +78,16 @@ namespace Isds {
 		 */
 		static
 		QString descrDmState(enum Type::DmState state);
+
+		/*!
+		 * @brief Returns localised message type description.
+		 *
+		 * @param[in] typeStr String containing single character
+		 *                    describing the message type.
+		 * @return Localised message type description.
+		 */
+		static
+		QString descrDmTypeChar(const QString &typeStr);
 
 		/*!
 		 * @brief Returns localised error description text.
