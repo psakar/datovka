@@ -66,13 +66,4 @@ public:
 	 */
 	static
 	QString senderTypeStrToText(const QString &val);
-
-	/*!
-	 * @brief Return privileges as html string from number representation.
-	 *
-	 * @param[in] val Privilege value flags.
-	 * @return Privilege description.
-	 */
-	static
-	QString userPrivilsToText(int val);
 };

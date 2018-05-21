@@ -62,6 +62,15 @@ namespace Isds {
 		QString descrDbState(enum Type::DbState state);
 
 		/*!
+		 * @brief Returns localised user privilege description text.
+		 *
+		 * @pram[in] privils Privileges.
+		 * @return Localised privilege description.
+		 */
+		static
+		QString htmlDescrPrivileges(Type::Privileges privils);
+
+		/*!
 		 * @brief Returns localised message status description text.
 		 *
 		 * @param[in] state Message status value.

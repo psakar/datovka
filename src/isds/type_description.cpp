@@ -100,6 +100,58 @@ QString Isds::Description::descrDbState(enum Type::DbState state)
 	}
 }
 
+QString Isds::Description::htmlDescrPrivileges(Type::Privileges privils)
+{
+	QString privStr;
+	const QString sepPref("<li>- "), sepSuff("</li>");
+
+	if (((int)privils) == 255) {
+		return tr("Full control");
+	} else {
+		privStr = tr("Restricted control");
+	}
+
+	if (privils & Type::PRIVIL_READ_NON_PERSONAL) {
+		// "stahovat a číst došlé DZ"
+		privStr += sepPref + tr("download and read incoming DM") +
+		    sepSuff;
+	}
+	if (privils & Type::PRIVIL_READ_ALL) {
+		// "stahovat a číst DZ určené do vlastních rukou"
+		privStr += sepPref +
+		    tr("download and read DM sent into own hands") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_CREATE_DM) {
+		// "vytvářet a odesílat DZ, stahovat odeslané DZ"
+		privStr += sepPref +
+		    tr("create and send DM, download sent DM") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_VIEW_INFO) {
+		// "načítat seznamy DZ, Dodejky a Doručenky"
+		privStr += sepPref +
+		    tr("retrieve DM lists, delivery and acceptance reports") +
+		    sepSuff;
+	}
+	if (privils & Type::PRIVIL_SEARCH_DB) {
+		// "vyhledávat DS"
+		privStr += sepPref + tr("search for data boxes") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_OWNER_ADM) {
+		// "spravovat DS"
+		privStr += sepPref + tr("manage the data box") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_READ_VAULT) {
+		// "číst zprávy v DT"
+		privStr += sepPref + tr("read message in data vault") + sepSuff;
+	}
+	if (privils & Type::PRIVIL_ERASE_VAULT) {
+		// "mazat zprávy v DT"
+		privStr += sepPref + tr("erase messages from data vault") +
+		    sepSuff;
+	}
+	return privStr;
+}
+
 QString Isds::Description::descrDmState(enum Type::DmState state)
 {
 	switch (state) {
