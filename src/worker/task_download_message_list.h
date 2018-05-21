@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _TASK_DOWNLOAD_MESSAGE_LIST_H_
-#define _TASK_DOWNLOAD_MESSAGE_LIST_H_
+#pragma once
 
 #include <QString>
 
@@ -146,5 +145,3 @@ private:
 	unsigned long m_dmLimit; /*!< List length limit. */
 	int m_dmStatusFilter; /*!< Defines type of messages to be downloaded. */
 };
-
-#endif /* _TASK_DOWNLOAD_MESSAGE_LIST_H_ */
