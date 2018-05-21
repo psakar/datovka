@@ -464,9 +464,13 @@ bool dbType2libisdsDbType(isds_DbType **tgt, enum Isds::Type::DbType src)
 		}
 	}
 	switch (src) {
-	case Isds::Type::BT_NULL:
-		std::free(*tgt); *tgt = NULL;
-		break;
+	/*
+	 * Isds::Type::BT_NULL cannot be reached here.
+	 *
+	 * case Isds::Type::BT_NULL:
+	 * 	std::free(*tgt); *tgt = NULL;
+	 * 	break;
+	 */
 	case Isds::Type::BT_SYSTEM: **tgt = DBTYPE_SYSTEM; break;
 	case Isds::Type::BT_OVM: **tgt = DBTYPE_OVM; break;
 	case Isds::Type::BT_OVM_NOTAR: **tgt = DBTYPE_OVM_NOTAR; break;
@@ -747,9 +751,13 @@ bool userType2libisdsUserType(isds_UserType **tgt,
 		}
 	}
 	switch (src) {
-	case Isds::Type::UT_NULL:
-		std::free(*tgt); *tgt = NULL;
-		break;
+	/*
+	 * Isds::Type::UT_NULL cannot be reached here.
+	 *
+	 * case Isds::Type::UT_NULL:
+	 * 	std::free(*tgt); *tgt = NULL;
+	 * 	break;
+	 */
 	case Isds::Type::UT_PRIMARY: **tgt = USERTYPE_PRIMARY; break;
 	case Isds::Type::UT_ENTRUSTED: **tgt = USERTYPE_ENTRUSTED; break;
 	case Isds::Type::UT_ADMINISTRATOR: **tgt = USERTYPE_ADMINISTRATOR; break;

@@ -635,9 +635,13 @@ bool dmState2libisdsMessageStatus(isds_message_status **tgt,
 		}
 	}
 	switch (src) {
-	case Isds::Type::MS_NULL:
-		std::free(*tgt); *tgt = NULL;
-		break;
+	/*
+	 * Isds::Type::MS_NULL cannot be reached here.
+	 *
+	 * case Isds::Type::MS_NULL:
+	 * 	std::free(*tgt); *tgt = NULL;
+	 * 	break;
+	 */
 	case Isds::Type::MS_POSTED: **tgt = MESSAGESTATE_SENT; break;
 	case Isds::Type::MS_STAMPED: **tgt = MESSAGESTATE_STAMPED; break;
 	case Isds::Type::MS_INFECTED: **tgt = MESSAGESTATE_INFECTED; break;

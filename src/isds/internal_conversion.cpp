@@ -86,10 +86,10 @@ bool Isds::toCStrCopy(char **cStrPtr, const QString &str)
 	/* Copy string content. */
 	QByteArray strBytes(str.toUtf8()); /* Must not be deleted before memcpy. */
 	const char *utfStr = strBytes.constData();
-	size_t utfStrLen = std::strlen(utfStr);
 	if (utfStr == Q_NULLPTR) {
 		return true;
 	}
+	size_t utfStrLen = std::strlen(utfStr);
 	*cStrPtr = (char *)std::malloc(utfStrLen + 1);
 	if (Q_UNLIKELY(*cStrPtr == NULL)) {
 		Q_ASSERT(0);

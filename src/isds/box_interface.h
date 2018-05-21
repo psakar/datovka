@@ -455,8 +455,6 @@ namespace Isds {
 
 	private:
 		QScopedPointer<DbUserInfoPrivate> d_ptr; // std::unique_ptr ?
-
-		void *m_dataPtr;
 	};
 
 	void swap(DbUserInfo &first, DbUserInfo &second) Q_DECL_NOTHROW;

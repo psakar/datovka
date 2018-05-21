@@ -82,13 +82,12 @@ void DlgSignatureDetail::detail(const MessageDbSet &dbSet,
 		return;
 	}
 	QByteArray msgDER;
-	bool isMsgVerified = false;
 	MessageDb::MsgVerificationResult vRes =
 	    messageDb->isMessageVerified(msgId.dmId);
+	bool isMsgVerified = (vRes == MessageDb::MSG_SIG_OK);
 
 	switch (vRes) {
 	case MessageDb::MSG_SIG_OK:
-		isMsgVerified = true;
 	case MessageDb::MSG_SIG_BAD:
 		msgDER = messageDb->getCompleteMessageRaw(msgId.dmId);
 		break;
