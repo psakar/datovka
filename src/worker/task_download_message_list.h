@@ -27,6 +27,7 @@
 #include <QString>
 
 #include "src/io/message_db_set.h"
+#include "src/isds/message_interface.h"
 #include "src/worker/task.h"
 
 /*!
@@ -136,7 +137,7 @@ private:
 	 */
 	static
 	enum Result updateMessageState(enum MessageDirection msgDirect,
-	    MessageDbSet &dbSet, const struct isds_envelope *envel);
+	    MessageDbSet &dbSet, const Isds::Envelope &envel);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */

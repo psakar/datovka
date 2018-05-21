@@ -131,6 +131,49 @@ void TaskDownloadMessageList::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
+/*!
+ * @brief Download message list.
+ *
+ * @param[out]    messageList Message list to be obtained.
+ * @param[in]     msgDirect Sent or received.
+ * @param[in,out] session Communication session.
+ * @param[in]     dmStatusFilter Status filter.
+ * @param[in,out] dmLimit Message list length limit.
+ * @return Error code.
+ */
+static
+isds_error getMessageList(QList<Isds::Message> &messageList,
+    enum MessageDirection msgDirect,struct isds_ctx *session,
+    int dmStatusFilter, ulong *dmLimit)
+{
+	if (Q_UNLIKELY(session == NULL)) {
+		Q_ASSERT(0);
+		return IE_ERROR;
+	}
+
+	messageList = QList<Isds::Message>();
+
+	isds_error status = IE_ERROR;
+	struct isds_list *iml = NULL;
+
+	/* Download sent/received message list from ISDS for current account */
+	if (MSG_SENT == msgDirect) {
+		status = isds_get_list_of_sent_messages(session,
+		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &iml);
+	} else if (MSG_RECEIVED == msgDirect) {
+		status = isds_get_list_of_received_messages(session,
+		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &iml);
+	}
+	if (status != IE_SUCCESS) {
+		isds_list_free(&iml);
+		return status;
+	}
+
+	messageList = Isds::libisds2messageList(iml);
+	isds_list_free(&iml);
+	return status;
+}
+
 enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageList(
     const QString &userName, enum MessageDirection msgDirect,
     MessageDbSet &dbSet, bool downloadWhole, QString &error, QString &longError,
@@ -141,7 +184,6 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 	debugFuncCall();
 
 	int newcnt = 0;
-	int allcnt = 0;
 
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
@@ -159,16 +201,10 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		Q_ASSERT(0);
 		return DL_ERR;
 	}
-	struct isds_list *messageList = NULL;
 
-	/* Download sent/received message list from ISDS for current account */
-	if (MSG_SENT == msgDirect) {
-		status = isds_get_list_of_sent_messages(session,
-		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &messageList);
-	} else if (MSG_RECEIVED == msgDirect) {
-		status = isds_get_list_of_received_messages(session,
-		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &messageList);
-	}
+	QList<Isds::Message> messageList;
+	status = getMessageList(messageList, msgDirect, session, dmStatusFilter,
+	    dmLimit);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 20);
 
@@ -179,31 +215,21 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		    "Downloading message list returned status %d: '%s' '%s'.",
 		    status, error.toUtf8().constData(),
 		    longError.toUtf8().constData());
-		isds_list_free(&messageList);
 		return DL_ISDS_ERROR;
 	}
 
-	const struct isds_list *box;
-	box = messageList;
 	float delta = 0.0;
 	float diff = 0.0;
 
-	while (0 != box) {
-		allcnt++;
-		box = box->next;
-	}
-
-	box = messageList;
-
-	if (allcnt == 0) {
+	if (messageList.size() == 0) {
 		emit GlobInstcs::msgProcEmitterPtr->progressChange(
 		    progressLabel, 50);
 	} else {
-		delta = 80.0 / allcnt;
+		delta = 80.0 / messageList.size();
 	}
 
 	/* Obtain invalid message database if has a separate file. */
-	MessageDb *invalidDb = NULL;
+	MessageDb *invalidDb = Q_NULLPTR;
 	{
 		QString invSecKey(dbSet.secondaryKey(QDateTime()));
 		QString valSecKey(dbSet.secondaryKey(
@@ -217,15 +243,13 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 #ifdef USE_TRANSACTIONS
 	QSet<MessageDb *> usedDbs;
 #endif /* USE_TRANSACTIONS */
-	while (0 != box) {
+	foreach (const Isds::Message &msg, messageList) {
 
 		diff += delta;
 		emit GlobInstcs::msgProcEmitterPtr->progressChange(
 		    progressLabel, (int)(20 + diff));
 
-		const isds_message *item = (isds_message *)box->data;
-
-		if (NULL == item->envelope) {
+		if (msg.envelope().isNull()) {
 			/* TODO - free allocated stuff */
 			return DL_ISDS_ERROR;
 		}
@@ -234,18 +258,17 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		 * Time may be invalid (e.g. messages which failed during
 		 * virus scan).
 		 */
-		MessageDb::MsgId msgId(
-		    QString(item->envelope->dmID).toLongLong(),
-		    timevalToDateTime(item->envelope->dmDeliveryTime));
+		MessageDb::MsgId msgId(msg.envelope().dmId(),
+		    msg.envelope().dmDeliveryTime());
 
 		/* Delivery time may be invalid. */
-		if ((0 != invalidDb) && msgId.deliveryTime.isValid()) {
+		if ((Q_NULLPTR != invalidDb) && msgId.deliveryTime.isValid()) {
 			/* Try deleting possible invalid entry. */
 			invalidDb->msgsDeleteMessageData(msgId.dmId);
 		}
 		MessageDb *messageDb = dbSet.accessMessageDb(msgId.deliveryTime,
 		    true);
-		Q_ASSERT(0 != messageDb);
+		Q_ASSERT(Q_NULLPTR != messageDb);
 
 #ifdef USE_TRANSACTIONS
 		if (!usedDbs.contains(messageDb)) {
@@ -265,12 +288,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		/* Message is NOT in db (-1), -> insert */
 		if (-1 == dmDbMsgStatus) {
 
-			bool ok = false;
-			Isds::Envelope env = Isds::libisds2envelope(item->envelope, &ok);
-			if (!ok) {
-				logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
-				return DL_ERR;
-			}
+			const Isds::Envelope &env(msg.envelope());
 			Task::storeMessageEnvelope(msgDirect, dbSet, env);
 
 			if (downloadWhole) {
@@ -291,17 +309,12 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 		} else {
 
 			/* Update message and envelope only if status has changed. */
-			const int dmNewMsgStatus = IsdsConversion::msgStatusIsdsToDbRepr(
-			     *item->envelope->dmMessageStatus);
+			const enum Isds::Type::DmState dmNewMsgStatus =
+			    msg.envelope().dmMessageStatus();
 
 			if (dmNewMsgStatus != dmDbMsgStatus) {
 				/* Update envelope */
-				bool ok = false;
-				Isds::Envelope env = Isds::libisds2envelope(item->envelope, &ok);
-				if (!ok) {
-					logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
-					return DL_ERR;
-				}
+				const Isds::Envelope &env(msg.envelope());
 				Task::updateMessageEnvelope(msgDirect,
 				    *messageDb, env);
 
@@ -332,8 +345,6 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 			}
 		}
 
-		box = box->next;
-
 	}
 #ifdef USE_TRANSACTIONS
 	/* Commit on all opened databases. */
@@ -342,18 +353,17 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 	}
 #endif /* USE_TRANSACTIONS */
 
-	isds_list_free(&messageList);
-
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 100);
 
 	if (MSG_RECEIVED == msgDirect) {
 		logDebugLv0NL("#Received total: %d #Received new: %d",
-		    allcnt, newcnt);
+		    messageList.size(), newcnt);
 	} else {
-		logDebugLv0NL("#Sent total: %d #Sent new: %d", allcnt, newcnt);
+		logDebugLv0NL("#Sent total: %d #Sent new: %d",
+		    messageList.size(), newcnt);
 	}
 
-	total = allcnt;
+	total = messageList.size();
 	news =  newcnt;
 
 	return DL_SUCCESS;
@@ -382,8 +392,7 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageSta
 		    QString::number(dmId).toUtf8().constData(), &message);
 	} else {
 		Q_ASSERT(0); /* Only signed messages can be downloaded. */
-		res = DL_ERR;
-		goto fail;
+		return DL_ERR;
 		/*
 		status = isds_get_delivery_info(session,
 		    QString::number(dmId).toUtf8().constData(), &message);
@@ -396,75 +405,69 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageSta
 		logErrorNL(
 		    "Downloading message state returned status %d: '%s'.",
 		    status, isdsStrError(status).toUtf8().constData());
-		res = DL_ISDS_ERROR;
-		goto fail;
+		isds_message_free(&message);
+		return DL_ISDS_ERROR;
 	}
 
 	Q_ASSERT(NULL != message);
 
-	res = updateMessageState(msgDirect, dbSet, message->envelope);
-	if (DL_SUCCESS != res) {
-		goto fail;
+	bool ok = false;
+	Isds::Message msg(Isds::libisds2message(message, &ok));
+	if (!ok) {
+		logErrorNL("%s", "Cannot convert message.");
+		isds_message_free(&message);
+		return DL_ERR;
 	}
-
 	isds_message_free(&message);
 
-	return DL_SUCCESS;
-
-fail:
-	if (NULL != message) {
-		isds_message_free(&message);
+	res = updateMessageState(msgDirect, dbSet, msg.envelope());
+	if (DL_SUCCESS != res) {
+		return res;
 	}
 
-	return res;
+	return DL_SUCCESS;
 }
 
 enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState(
     enum MessageDirection msgDirect, MessageDbSet &dbSet,
-    const struct isds_envelope *envel)
+    const Isds::Envelope &envel)
 {
-	if (NULL == envel) {
+	if (Q_UNLIKELY(envel.isNull())) {
 		Q_ASSERT(0);
 		return DL_ERR;
 	}
 
-	qint64 dmID = -1;
-	{
-		bool ok = false;
-		dmID = QString(envel->dmID).toLongLong(&ok);
-		if (!ok) {
-			return DL_ERR;
-		}
+	qint64 dmId = envel.dmId();
+	if (Q_UNLIKELY(dmId < 0)) {
+		Q_ASSERT(0);
+		return DL_ERR;
 	}
 
-	QDateTime deliveryTime;
-	if (NULL != envel->dmDeliveryTime) {
-		deliveryTime = timevalToDateTime(envel->dmDeliveryTime);
-	}
+	const QDateTime &deliveryTime(envel.dmDeliveryTime());
 	/* Delivery time does not have to be valid. */
 	if (Q_UNLIKELY(!deliveryTime.isValid())) {
 		logWarningNL(
 		    "Updating state of message '%" PRId64 "' with invalid delivery time.",
-		    dmID);
+		    dmId);
 	}
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	if (Q_UNLIKELY(Q_NULLPTR == messageDb)) {
 		logErrorNL("Cannot access message database for message '%" PRId64 "'.",
-		    dmID);
+		    dmId);
 		Q_ASSERT(0);
 		return DL_ERR;
 	}
 
 	QString dmDeliveryTime;
-	if (NULL != envel->dmDeliveryTime) {
-		dmDeliveryTime = timevalToDbFormat(envel->dmDeliveryTime);
+	if (!envel.dmDeliveryTime().isNull()) {
+		dmDeliveryTime = qDateTimeToDbFormat(envel.dmDeliveryTime());
 	}
 	QString dmAcceptanceTime;
-	if (NULL != envel->dmAcceptanceTime) {
-		dmAcceptanceTime = timevalToDbFormat(envel->dmAcceptanceTime);
+	if (!envel.dmAcceptanceTime().isNull()) {
+		dmAcceptanceTime = qDateTimeToDbFormat(envel.dmAcceptanceTime());
 	}
 
-	if (1 == messageDb->getMessageStatus(dmID)) {
+	if (1 == messageDb->getMessageStatus(dmId)) {
 		/*
 		 * Update message envelope when the previous state
 		 * is 1. This is because the envelope was generated by this
@@ -472,38 +475,25 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 		 * we get proper data from ISDS rather than storing potentially
 		 * guessed values.
 		 */
-		bool ok = false;
-		Isds::Envelope env = Isds::libisds2envelope(envel, &ok);
-		if (!ok) {
-			logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
-			return DL_ERR;
-		}
-		Task::updateMessageEnvelope(msgDirect, *messageDb, env);
+		Task::updateMessageEnvelope(msgDirect, *messageDb, envel);
 
-	} else if (messageDb->msgsUpdateMessageState(dmID,
+	} else if (messageDb->msgsUpdateMessageState(dmId,
 	    dmDeliveryTime, dmAcceptanceTime,
-	    envel->dmMessageStatus ?
-	        IsdsConversion::msgStatusIsdsToDbRepr(*envel->dmMessageStatus) : 0)) {
+	    (envel.dmMessageStatus() != Isds::Type::MS_NULL) ?
+	        envel.dmMessageStatus() : 0)) {
 		/* Updated message envelope delivery info in db. */
 		logDebugLv0NL(
 		    "Delivery information of message '%" PRId64 "' were updated.",
-		    dmID);
+		    dmId);
 	} else {
 		logErrorNL(
 		    "Updating delivery information of message '%" PRId64 "' failed.",
-		    dmID);
+		    dmId);
 	}
 
-	bool ok = false;
-	Isds::Envelope env = Isds::libisds2envelope(envel, &ok);
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert libisds envelope to envelope.");
-		return DL_ERR;
-	}
-	QList<Isds::Event> events = env.dmEvents();
-
+	const QList<Isds::Event> &events(envel.dmEvents());
 	foreach (const Isds::Event &event, events) {
-		messageDb->insertOrUpdateMessageEvent(dmID, event);
+		messageDb->insertOrUpdateMessageEvent(dmId, event);
 	}
 
 	return DL_SUCCESS;
