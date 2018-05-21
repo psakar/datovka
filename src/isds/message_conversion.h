@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <QList>
+
 #include "src/isds/message_interface.h"
 
 extern "C" {
@@ -31,6 +33,7 @@ extern "C" {
 	struct isds_envelope;
 	struct isds_document;
 	struct isds_message;
+	struct isds_list;
 }
 
 namespace Isds {
@@ -54,6 +57,11 @@ namespace Isds {
 	Message libisds2message(const struct ::isds_message *im,
 	    bool *ok = Q_NULLPTR);
 	struct ::isds_message *message2libisds(const Message &m,
+	    bool *ok = Q_NULLPTR);
+
+	QList<Message> libisds2messageList(const struct ::isds_list *iml,
+	    bool *ok = Q_NULLPTR);
+	struct ::isds_list *messageList2libisds(const QList<Message> &ml,
 	    bool *ok = Q_NULLPTR);
 
 }

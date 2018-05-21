@@ -31,7 +31,6 @@
 #include <cstdlib> // malloc
 #include <cstring> // memcpy
 #include <isds.h>
-#include <QList>
 
 #include "src/isds/internal_conversion.h"
 #include "src/isds/message_conversion.h"
@@ -431,14 +430,26 @@ static
 QList<Isds::Event> libisds2eventList(const struct isds_list *item,
     bool *ok = Q_NULLPTR)
 {
+	/* Event destructor function type. */
+	typedef void (*evnt_destr_func_t)(struct isds_event **);
+
 	QList<Isds::Event> eventList;
 
 	while (item != NULL) {
-		const struct isds_event *ev = (struct isds_event *)item->data;
+		const struct isds_event *ie = (struct isds_event *)item->data;
+		evnt_destr_func_t idestr = (evnt_destr_func_t)item->destructor;
+		/* Destructor function must be set. */
+		if (idestr != isds_event_free) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList<Isds::Event>();
+		}
 
-		if (ev != NULL) {
+		if (ie != NULL) {
 			bool iOk = false;
-			eventList.append(Isds::libisds2event(ev, &iOk));
+			eventList.append(Isds::libisds2event(ie, &iOk));
 			if (!iOk) {
 				if (ok != Q_NULLPTR) {
 					*ok = false;
@@ -967,15 +978,26 @@ static
 QList<Isds::Document> libisds2documentList(const struct isds_list *item,
     bool *ok = Q_NULLPTR)
 {
+	/* Document destructor function type. */
+	typedef void (*doc_destr_func_t)(struct isds_document **);
+
 	QList<Isds::Document> documentList;
 
 	while (item != NULL) {
-		const struct isds_document *doc =
-		    (struct isds_document *)item->data;
+		const struct isds_document *id = (struct isds_document *)item->data;
+		doc_destr_func_t idestr = (doc_destr_func_t)item->destructor;
+		/* Destructor function must be set. */
+		if (idestr != isds_document_free) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList<Isds::Document>();
+		}
 
-		if (doc != NULL) {
+		if (id != NULL) {
 			bool iOk = false;
-			documentList.append(Isds::libisds2document(doc, &iOk));
+			documentList.append(Isds::libisds2document(id, &iOk));
 			if (!iOk) {
 				if (ok != Q_NULLPTR) {
 					*ok = false;
@@ -1080,7 +1102,7 @@ struct isds_list *documentList2libisds(const QList<Isds::Document> &dl,
 		return NULL;
 	}
 
-	struct isds_list *iel = NULL;
+	struct isds_list *idl = NULL;
 	struct isds_list *lastItem = NULL;
 	foreach (const Isds::Document &doc, dl) {
 		struct isds_list *item =
@@ -1105,7 +1127,7 @@ struct isds_list *documentList2libisds(const QList<Isds::Document> &dl,
 
 		/* Append item. */
 		if (lastItem == NULL) {
-			iel = item;
+			idl = item;
 		} else {
 			lastItem->next = item;
 		}
@@ -1115,10 +1137,10 @@ struct isds_list *documentList2libisds(const QList<Isds::Document> &dl,
 	if (ok != Q_NULLPTR) {
 		*ok = true;
 	}
-	return iel;
+	return idl;
 
 fail:
-	isds_list_free(&iel);
+	isds_list_free(&idl);
 	if (ok != Q_NULLPTR) {
 		*ok = false;
 	}
@@ -1163,6 +1185,101 @@ struct isds_message *Isds::message2libisds(const Message &m, bool *ok)
 
 fail:
 	isds_message_free(&im);
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return NULL;
+}
+
+QList<Isds::Message> Isds::libisds2messageList(const struct isds_list *item,
+    bool *ok)
+{
+	/* Message destructor function type. */
+	typedef void (*msg_destr_func_t)(struct isds_message **);
+
+	QList<Message> messageList;
+
+	while (item != NULL) {
+		const struct isds_message *im = (struct isds_message *)item->data;
+		msg_destr_func_t idestr = (msg_destr_func_t)item->destructor;
+		/* Destructor function must be set. */
+		if (idestr != isds_message_free) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList<Message>();
+		}
+
+		if (im != NULL) {
+			bool iOk = false;
+			messageList.append(libisds2message(im, &iOk));
+			if (!iOk) {
+				if (ok != Q_NULLPTR) {
+					*ok = false;
+				}
+				return QList<Message>();
+			}
+		}
+
+		item = item->next;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return messageList;
+}
+
+struct isds_list *Isds::messageList2libisds(const QList<Message> &ml,
+    bool *ok)
+{
+	if (Q_UNLIKELY(ml.isEmpty())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_list *iml = NULL;
+	struct isds_list *lastItem = NULL;
+	foreach (const Message &msg, ml) {
+		struct isds_list *item =
+		    (struct isds_list *)std::malloc(sizeof(*item));
+		if (Q_UNLIKELY(item == NULL)) {
+			Q_ASSERT(0);
+			goto fail;
+		}
+		std::memset(item, 0, sizeof(*item));
+
+		bool iOk = false;
+		struct isds_message *imsg = message2libisds(msg, &iOk);
+		if (Q_UNLIKELY(!iOk)) {
+			std::free(item); item = NULL;
+			goto fail;
+		}
+
+		/* Set list item. */
+		item->next = NULL;
+		item->data = imsg;
+		item->destructor = (void (*)(void **))isds_message_free;
+
+		/* Append item. */
+		if (lastItem == NULL) {
+			iml = item;
+		} else {
+			lastItem->next = item;
+		}
+		lastItem = item;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return iml;
+
+fail:
+	isds_list_free(&iml);
 	if (ok != Q_NULLPTR) {
 		*ok = false;
 	}
