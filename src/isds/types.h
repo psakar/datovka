@@ -186,6 +186,27 @@ public:
 	};
 
 	/*!
+	 * @brief Sender type as mentioned in response description of
+	 *     GetMessageAuthor.
+	 *
+	 * @note Described in pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
+	 *     (section 2.9).
+	 *     The values differ slightly from enum UserType.
+	 */
+	enum SenderType {
+		ST_NULL = -1, /*!< Convenience value, converted from/to NULL. */
+		ST_PRIMARY,
+		ST_ENTRUSTED,
+		ST_ADMINISTRATOR,
+		ST_OFFICIAL,
+		ST_VIRTUAL,
+		ST_OFFICIAL_CERT,
+		ST_LIQUIDATOR,
+		ST_RECEIVER,
+		ST_GUARDIAN
+	};
+
+	/*!
 	 * @brief Hash algorithm type.
 	 *
 	 * @todo Find definition in documentation.

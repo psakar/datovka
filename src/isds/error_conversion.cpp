@@ -32,7 +32,7 @@
 
 #include "src/isds/error_conversion.h"
 
-enum Isds::Type::Error Isds::libisds2descr(int iErr, bool *ok)
+enum Isds::Type::Error Isds::libisds2Error(int iErr, bool *ok)
 {
 	bool iOk = true;
 	enum Isds::Type::Error err = Type::ERR_ERROR;

@@ -40,15 +40,6 @@ private:
 
 public:
 	/*!
-	 * @brief Convert sender type to string identifier.
-	 *
-	 * @param[in] val Sender type value as used by libisds.
-	 * @return Sender type string identifier.
-	 */
-	static
-	const QString &senderTypeToStr(int val);
-
-	/*!
 	 * @brief Translates sender type string to localised text.
 	 *
 	 * @param[in] val Sender type string.

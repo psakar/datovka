@@ -35,31 +35,6 @@
 #define STR_RECEIVER "RECEIVER"
 #define STR_GUARDIAN "GUARDIAN"
 
-const QString &IsdsConversion::senderTypeToStr(int val)
-{
-	static const QString pu(STR_PRIMARY_USER), eu(STR_ENTRUSTED_USER),
-	    a(STR_ADMINISTRATOR), o(STR_OFFICIAL), v(STR_VIRTUAL),
-	    oc(STR_OFFICIAL_CERT), l(STR_LIQUIDATOR), r(STR_RECEIVER),
-	    g(STR_GUARDIAN);
-	static const QString invalid;
-
-	switch (val) {
-	case SENDERTYPE_PRIMARY: return pu; break;
-	case SENDERTYPE_ENTRUSTED: return eu; break;
-	case SENDERTYPE_ADMINISTRATOR: return a; break;
-	case SENDERTYPE_OFFICIAL: return o; break;
-	case SENDERTYPE_VIRTUAL: return v; break;
-	case SENDERTYPE_OFFICIAL_CERT: return oc; break;
-	case SENDERTYPE_LIQUIDATOR: return l; break;
-	case SENDERTYPE_RECEIVER: return r; break;
-	case SENDERTYPE_GUARDIAN: return g; break;
-	default:
-		logWarningNL("Unknown sender type value '%d'.", val);
-		return invalid;
-		break;
-	}
-}
-
 QString IsdsConversion::senderTypeStrToText(const QString &val)
 {
 	if (val == QLatin1String(STR_PRIMARY_USER)) {

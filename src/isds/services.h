@@ -23,12 +23,21 @@
 
 #pragma once
 
-#include <QtCore> /* Q_NULLPTR */
+#include <QString>
 
 #include "src/isds/types.h"
 
+extern "C" {
+	/* TODO -- The context structure needs to be encapsulated. */
+	struct isds_ctx;
+}
+
 namespace Isds {
 
-	enum Type::Error libisds2Error(int iErr, bool *ok = Q_NULLPTR);
+	/* Forward declaration. */
+	class Error;
+
+	Error getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
+	    enum Type::SenderType &userType, QString &authorName);
 
 }

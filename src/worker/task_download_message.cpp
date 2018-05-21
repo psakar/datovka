@@ -27,7 +27,11 @@
 #include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/isds_conversion.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
+#include "src/isds/type_conversion.h"
+#include "src/isds/type_description.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
@@ -329,33 +333,27 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
     const QString &userName, qint64 dmId, MessageDb &messageDb,
     QString &error, QString &longError)
 {
-	isds_error status;
-
-	isds_sender_type *sender_type = NULL;
-	char * raw_sender_type = NULL;
-	char * sender_name = NULL;
-
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	if (Q_UNLIKELY(NULL == session)) {
 		Q_ASSERT(0);
 		return DM_ERR;
 	}
 
-	status = isds_get_message_sender(session,
-	    QString::number(dmId).toUtf8().constData(),
-	    &sender_type, &raw_sender_type, &sender_name);
-
-	if (IE_SUCCESS != status) {
+	enum Isds::Type::SenderType senderType = Isds::Type::ST_NULL;
+	QString senderName;
+	Isds::Error err = Isds::getMessageAuthor(session, dmId, senderType,
+	    senderName);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL(
 		    "Downloading author information returned status %d: '%s'.",
-		    status, isdsStrError(status).toUtf8().constData());
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
+		    err.code(), error.toUtf8().constData());
 		return DM_ISDS_ERROR;
 	}
 
 	if (messageDb.updateMessageAuthorInfo(dmId,
-	        IsdsConversion::senderTypeToStr((int) *sender_type), sender_name)) {
+	        Isds::senderType2Str(senderType), senderName)) {
 		logDebugLv0NL(
 		    "Author information of message '%" PRId64 "' were updated.",
 		    dmId);

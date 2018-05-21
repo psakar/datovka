@@ -440,6 +440,28 @@ QVariant Isds::userType2Variant(enum Type::UserType ut)
 	return QVariant(userType2Str(ut));
 }
 
+static const QString strO("OFFICIAL"), strV("VIRTUAL"), strOc("OFFICIAL_CERT");
+
+const QString &Isds::senderType2Str(enum Type::SenderType st)
+{
+	switch (st) {
+	case Type::ST_NULL: return strNull; break;
+	case Type::ST_PRIMARY: return strPu; break;
+	case Type::ST_ENTRUSTED: return strEu; break;
+	case Type::ST_ADMINISTRATOR: return strA; break;
+	case Type::ST_OFFICIAL: return strO; break;
+	case Type::ST_VIRTUAL: return strV; break;
+	case Type::ST_OFFICIAL_CERT: return strOc; break;
+	case Type::ST_LIQUIDATOR: return strL; break;
+	case Type::ST_RECEIVER: return strR; break;
+	case Type::ST_GUARDIAN: return strG; break;
+	default:
+		Q_ASSERT(0);
+		return strNull;
+		break;
+	}
+}
+
 static const QString strMd5("MD5"), strSha1("SHA-1"), strSha224("SHA-224"),
     strSha256("SHA-256"), strSha384("SHA-384"), strSha512("SHA-512");
 
