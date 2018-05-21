@@ -25,15 +25,16 @@
 #include <QDebug>
 #include <QTextStream>
 
+
 #include "src/cli/cli.h"
 #include "src/cli/cli_login.h"
+#include "src/datovka_shared/utility/strings.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/io/isds_helper.h"
-#include "src/io/isds_sessions.h"
 #include "src/isds/to_text_conversion.h"
 #include "src/isds/type_conversion.h"
 #include "src/log/log.h"
@@ -41,6 +42,7 @@
 #include "src/worker/task_download_message.h"
 #include "src/worker/task_download_message_list.h"
 #include "src/worker/task_search_owner.h"
+#include "src/worker/task_send_message.h"
 
 const QSet<QString> serviceSet = QSet<QString>() << SER_LOGIN <<
 SER_GET_MSG_LIST << SER_SEND_MSG << SER_GET_MSG << SER_GET_DEL_INFO <<
@@ -819,17 +821,14 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 {
 	qDebug() << CLI_PREFIX << "creating a new message...";
 
-	isds_error status = IE_ERROR;
-	struct isds_message *isdsMessage = NULL;
 	cli_error ret = CLI_ERROR;
 	QStringList sendID;
-	bool ok = false;
-
 	Isds::Envelope evelope = buildEnvelope(map);
 	Isds::Message message;
 	message.setDocuments(buildDocuments(map["dmAttachment"].toStringList()));
 
-	foreach (const QString &recipientId, map.value("dbIDRecipient").toStringList()) {
+	foreach (const QString &recipientId,
+	    map.value("dbIDRecipient").toStringList()) {
 
 		logInfo(CLI_PREFIX "Sending message to '%s'.\n",
 		    recipientId.toUtf8().constData());
@@ -837,70 +836,34 @@ cli_error createAndSendMsg(const QMap <QString, QVariant> &map,
 		evelope.setDbIDRecipient(recipientId);
 		message.setEnvelope(evelope);
 
-		struct isds_ctx *session =
-		    GlobInstcs::isdsSessionsPtr->session(map["username"].toString());
-		if (NULL == session) {
-			Q_ASSERT(0);
-			ret = CLI_ERROR;
-			goto finish;
+		QString transactId = map["username"].toString() + "_" +
+		    QDateTime::currentDateTimeUtc().toString() + "_" +
+		    Utility::generateRandomString(6);
+
+		TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
+		    map["username"].toString(), msgDbSet, transactId,
+		    message, recipientId, QString("unknown"), false);
+		if (task != Q_NULLPTR) {
+			task->setAutoDelete(false);
+			GlobInstcs::workPoolPtr->runSingle(task);
 		}
 
-		isdsMessage = Isds::message2libisds(message, &ok);
-		if (!ok) {
-			ret = CLI_ERROR;
-			goto finish;
-		}
-
-		status = isds_send_message(session, isdsMessage);
-		QString err = isdsLongMessage(session);
-
-		if (IE_SUCCESS == status) {
-			/* Store new message into database. */
-			qint64 dmId =
-			    QString(isdsMessage->envelope->dmID).toLongLong();
-			const QString acntDbKey(AccountDb::keyFromLogin(
-			    map["username"].toString()));
-			QDateTime deliveryTime = timevalToDateTime(
-			    isdsMessage->envelope->dmDeliveryTime);
-			MessageDb *messageDb =
-			    msgDbSet->accessMessageDb(deliveryTime, true);
-			if (messageDb == NULL) {
-				errmsg = "Message has been sent but "
-				    "it was not stored to database. "
-				    "Database doesn't exists for user "
-				    + map["username"].toString();
-				qDebug() << CLI_PREFIX << errmsg;
-			} else {
-				bool ok = false;
-				Isds::Envelope envelope =
-				    Isds::libisds2envelope(isdsMessage->envelope, &ok);
-				envelope.setDmId(dmId);
-				envelope.setDbIDSender(GlobInstcs::accntDbPtr->dbId(acntDbKey));
-				envelope.setDmSender(GlobInstcs::accntDbPtr->senderNameGuess(acntDbKey));
-				envelope.setDbIDRecipient(recipientId);
-				envelope.setDmRecipient("Databox ID: " + recipientId);
-				envelope.setDmRecipientAddress("unknown");
-				envelope.setDmAnnotation(map["dmAnnotation"].toString());
-				envelope.setDmMessageStatus(Isds::Type::MS_POSTED);
-				messageDb->insertMessageEnvelope(envelope,
-				     QString(), MessageDirection::MSG_SENT);
-			}
+		if (TaskSendMessage::SM_SUCCESS == task->m_resultData.result) {
 			qDebug() << CLI_PREFIX << "message has been sent"
-			    << QString(isdsMessage->envelope->dmID);
-			sendID.append(isdsMessage->envelope->dmID);
+			    << task->m_resultData.dmId;
+			sendID.append(QString::number(task->m_resultData.dmId));
 			ret = CLI_SUCCESS;
 		} else {
 			errmsg = "Error while sending message! ISDS says: "
-			    + err;
+			    + task->m_resultData.errInfo;
 			qDebug() << CLI_PREFIX << errmsg << "Error code:"
-			    << status;
+			    << task->m_resultData.result;
 			ret = CLI_ERROR;
 		}
+		delete task; task = Q_NULLPTR;
 	}
 
 	printDataToStdOut(sendID);
-finish:
-	isds_message_free(&isdsMessage);
 	return ret;
 }
 
