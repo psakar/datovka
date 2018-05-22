@@ -59,6 +59,101 @@ QString isdsLongMessage(const struct isds_ctx *ctx)
 }
 
 /*!
+ * @brief Converts message filter state.
+ */
+static
+int dmFiltState2libisdsMessageStatus(Isds::Type::DmFiltStates fs)
+{
+	return (int)fs;
+}
+
+Isds::Error Isds::Service::getListOfReceivedMessages(struct isds_ctx *ctx,
+    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
+    unsigned long int *dmLimit, QList<Message> &messages)
+{
+	Error err;
+
+	if (Q_UNLIKELY(ctx == NULL)) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_list *msgList = NULL;
+	bool ok = true;
+
+	isds_error ret = isds_get_list_of_received_messages(ctx, NULL, NULL, NULL,
+	    dmFiltState2libisdsMessageStatus(dmStatusFilter), dmOffset, dmLimit,
+	    &msgList);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	messages = (msgList != NULL) ?
+	    libisds2messageList(msgList, &ok) : QList<Message>();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (msgList != NULL) {
+		isds_list_free(&msgList);
+	}
+
+	return err;
+}
+
+Isds::Error Isds::Service::getListOfSentMessages(struct isds_ctx *ctx,
+    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
+    unsigned long int *dmLimit, QList<Message> &messages)
+{
+	Error err;
+
+	if (Q_UNLIKELY(ctx == NULL)) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_list *msgList = NULL;
+	bool ok = true;
+
+	isds_error ret = isds_get_list_of_sent_messages(ctx, NULL, NULL, NULL,
+	    dmFiltState2libisdsMessageStatus(dmStatusFilter), dmOffset, dmLimit,
+	    &msgList);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	messages = (msgList != NULL) ?
+	    libisds2messageList(msgList, &ok) : QList<Message>();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (msgList != NULL) {
+		isds_list_free(&msgList);
+	}
+
+	return err;
+}
+
+/*!
  * @brief Converts sender type.
  */
 static

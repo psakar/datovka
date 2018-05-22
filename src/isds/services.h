@@ -24,6 +24,7 @@
 #pragma once
 
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
+#include <QList>
 #include <QString>
 
 #include "src/isds/types.h"
@@ -52,6 +53,36 @@ namespace Isds {
 		Service(void);
 
 	public:
+		/*!
+		 * @brief Service GetListOfReceivedMessages.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmStatusFilter Status filter, MFS_ANY for all.
+		 * @param[in]     dmOffset Sequence number of first requested record.
+		 * @param[in,out] dmLimit Message list length limit.
+		 * @param[out]    messages Message list.
+		 * @return Error description.
+		 */
+		static
+		Error getListOfReceivedMessages(struct isds_ctx *ctx,
+		    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
+		    unsigned long int *dmLimit, QList<Message> &messages);
+
+		/*!
+		 * @brief Service GetListOfSentMessages.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmStatusFilter Status filter, MFS_ANY for all.
+		 * @param[in]     dmOffset Sequence number of first requested record.
+		 * @param[in,out] dmLimit Message list length limit.
+		 * @param[out]    messages Message list.
+		 * @return Error description.
+		 */
+		static
+		Error getListOfSentMessages(struct isds_ctx *ctx,
+		    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
+		    unsigned long int *dmLimit, QList<Message> &messages);
+
 		/*!
 		 * @brief Service GetMessageAuthor.
 		 *

@@ -173,7 +173,7 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 	QList<qint64> newMsgIdList;
 	bool complete = false;
 	unsigned long dmLimit = 0;
-	uint dmStatusFilter = MESSAGESTATE_ANY;
+	Isds::Type::DmFiltStates dmStatusFilter = Isds::Type::MFS_ANY;
 	bool ok;
 
 	if (map.contains("dmStatusFilter")) {
@@ -185,17 +185,17 @@ cli_error getMsgList(const QMap<QString,QVariant> &map, MessageDbSet *msgDbSet,
 			return CLI_ATR_VAL_ERR;
 		}
 		switch (number) {
-		case 1: dmStatusFilter = MESSAGESTATE_SENT; break;
-		case 2: dmStatusFilter = MESSAGESTATE_STAMPED; break;
-		case 3: dmStatusFilter = MESSAGESTATE_INFECTED; break;
-		case 4: dmStatusFilter = MESSAGESTATE_DELIVERED; break;
-		case 5: dmStatusFilter = MESSAGESTATE_SUBSTITUTED; break;
-		case 6: dmStatusFilter = MESSAGESTATE_RECEIVED; break;
-		case 7: dmStatusFilter = MESSAGESTATE_READ; break;
-		case 8: dmStatusFilter = MESSAGESTATE_UNDELIVERABLE; break;
-		case 9: dmStatusFilter = MESSAGESTATE_REMOVED; break;
-		case 10: dmStatusFilter = MESSAGESTATE_IN_SAFE; break;
-		default: dmStatusFilter = MESSAGESTATE_ANY; break;
+		case 1: dmStatusFilter = Isds::Type::MFS_POSTED; break;
+		case 2: dmStatusFilter = Isds::Type::MFS_STAMPED; break;
+		case 3: dmStatusFilter = Isds::Type::MFS_INFECTED; break;
+		case 4: dmStatusFilter = Isds::Type::MFS_DELIVERED; break;
+		case 5: dmStatusFilter = Isds::Type::MFS_ACCEPTED_FICT; break;
+		case 6: dmStatusFilter = Isds::Type::MFS_ACCEPTED; break;
+		case 7: dmStatusFilter = Isds::Type::MFS_READ; break;
+		case 8: dmStatusFilter = Isds::Type::MFS_UNDELIVERABLE; break;
+		case 9: dmStatusFilter = Isds::Type::MFS_REMOVED; break;
+		case 10: dmStatusFilter = Isds::Type::MFS_IN_VAULT; break;
+		default: dmStatusFilter = Isds::Type::MFS_ANY; break;
 		}
 	}
 

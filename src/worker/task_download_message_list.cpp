@@ -40,7 +40,7 @@
 
 TaskDownloadMessageList::TaskDownloadMessageList(const QString &userName,
     MessageDbSet *dbSet, enum MessageDirection msgDirect, bool downloadWhole,
-    unsigned long dmLimit, int dmStatusFltr)
+    unsigned long dmLimit, Isds::Type::DmFiltStates dmStatusFltr)
     : m_result(DL_ERR),
     m_isdsError(),
     m_isdsLongError(),
@@ -84,14 +84,14 @@ void TaskDownloadMessageList::run(void)
 
 	/* dmStatusFilter
 	 *
-	 * MESSAGESTATE_SENT |
-	 * MESSAGESTATE_STAMPED |
-	 * MESSAGESTATE_DELIVERED |
-	 * MESSAGESTATE_RECEIVED |
-	 * MESSAGESTATE_READ |
-	 * MESSAGESTATE_REMOVED |
-	 * MESSAGESTATE_IN_SAFE |
-	 * MESSAGESTATE_ANY
+	 * MFS_POSTED
+	 * MFS_STAMPED
+	 * MFS_DELIVERED
+	 * MFS_ACCEPTED
+	 * MFS_READ
+	 * MFS_REMOVED
+	 * MFS_IN_VAULT
+	 * MFS_ANY
 	 */
 
 	logDebugLv1NL("%s", "-----------------------------------------------");
@@ -145,43 +145,38 @@ void TaskDownloadMessageList::run(void)
  * @return Error code.
  */
 static
-isds_error getMessageList(QList<Isds::Message> &messageList,
-    enum MessageDirection msgDirect,struct isds_ctx *session,
-    int dmStatusFilter, ulong *dmLimit)
+Isds::Error getMessageList(QList<Isds::Message> &messageList,
+    enum MessageDirection msgDirect, struct isds_ctx *session,
+    Isds::Type::DmFiltStates dmStatusFilter, unsigned long int *dmLimit)
 {
+	Isds::Error err;
+
 	if (Q_UNLIKELY(session == NULL)) {
 		Q_ASSERT(0);
-		return IE_ERROR;
+		err.setCode(Isds::Type::ERR_ERROR);
+		return err;
 	}
 
 	messageList = QList<Isds::Message>();
 
-	isds_error status = IE_ERROR;
-	struct isds_list *iml = NULL;
-
 	/* Download sent/received message list from ISDS for current account */
 	if (MSG_SENT == msgDirect) {
-		status = isds_get_list_of_sent_messages(session,
-		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &iml);
+		err = Isds::Service::getListOfSentMessages(session,
+		    dmStatusFilter, 0, dmLimit, messageList);
 	} else if (MSG_RECEIVED == msgDirect) {
-		status = isds_get_list_of_received_messages(session,
-		    NULL, NULL, NULL, dmStatusFilter, 0, dmLimit, &iml);
-	}
-	if (status != IE_SUCCESS) {
-		isds_list_free(&iml);
-		return status;
+		err = Isds::Service::getListOfReceivedMessages(session,
+		    dmStatusFilter, 0, dmLimit, messageList);
 	}
 
-	messageList = Isds::libisds2messageList(iml);
-	isds_list_free(&iml);
-	return status;
+	return err;
 }
 
 enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageList(
     const QString &userName, enum MessageDirection msgDirect,
     MessageDbSet &dbSet, bool downloadWhole, QString &error, QString &longError,
     const QString &progressLabel, int &total, int &news,
-    QList<qint64> &newMsgIdList, ulong *dmLimit, int dmStatusFilter)
+    QList<qint64> &newMsgIdList, ulong *dmLimit,
+    Isds::Type::DmFiltStates dmStatusFilter)
 {
 	#define USE_TRANSACTIONS 1
 	debugFuncCall();
@@ -195,8 +190,6 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 0);
 
-	isds_error status = IE_ERROR;
-
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 10);
 
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
@@ -206,17 +199,17 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 	}
 
 	QList<Isds::Message> messageList;
-	status = getMessageList(messageList, msgDirect, session, dmStatusFilter,
-	    dmLimit);
+	Isds::Error err = getMessageList(messageList, msgDirect, session,
+	    dmStatusFilter, dmLimit);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 20);
 
-	if (status != IE_SUCCESS) {
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL(
 		    "Downloading message list returned status %d: '%s' '%s'.",
-		    status, error.toUtf8().constData(),
+		    err.code(), error.toUtf8().constData(),
 		    longError.toUtf8().constData());
 		return DL_ISDS_ERROR;
 	}
