@@ -29,6 +29,6 @@
 
 namespace Isds {
 
-	enum Type::Error libisds2descr(int iErr, bool *ok = Q_NULLPTR);
+	enum Type::Error libisds2Error(int iErr, bool *ok = Q_NULLPTR);
 
 }

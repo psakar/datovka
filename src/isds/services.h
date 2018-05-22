@@ -23,37 +23,21 @@
 
 #pragma once
 
-#include <QCoreApplication> // Q_DECLARE_TR_FUNCTIONS
 #include <QString>
 
-/*!
- * @brief Provides conversion functions for ISDS types.
- */
-class IsdsConversion {
-	Q_DECLARE_TR_FUNCTIONS(IsdsConversion)
+#include "src/isds/types.h"
 
-private:
-	/*!
-	 * @brief Private constructor.
-	 */
-	IsdsConversion(void);
+extern "C" {
+	/* TODO -- The context structure needs to be encapsulated. */
+	struct isds_ctx;
+}
 
-public:
-	/*!
-	 * @brief Convert sender type to string identifier.
-	 *
-	 * @param[in] val Sender type value as used by libisds.
-	 * @return Sender type string identifier.
-	 */
-	static
-	const QString &senderTypeToStr(int val);
+namespace Isds {
 
-	/*!
-	 * @brief Translates sender type string to localised text.
-	 *
-	 * @param[in] val Sender type string.
-	 * @return Sender type description.
-	 */
-	static
-	QString senderTypeStrToText(const QString &val);
-};
+	/* Forward declaration. */
+	class Error;
+
+	Error getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
+	    enum Type::SenderType &userType, QString &authorName);
+
+}

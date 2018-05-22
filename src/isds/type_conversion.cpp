@@ -440,6 +440,74 @@ QVariant Isds::userType2Variant(enum Type::UserType ut)
 	return QVariant(userType2Str(ut));
 }
 
+static const QString strO("OFFICIAL"), strV("VIRTUAL"), strOc("OFFICIAL_CERT");
+
+enum Isds::Type::SenderType Isds::str2SenderType(const QString &s)
+{
+	if (s.isNull()) {
+		return Type::ST_NULL;
+	} else if (s == strPu) {
+		return Type::ST_PRIMARY;
+	} else if (s == strEu) {
+		return Type::ST_ENTRUSTED;
+	} else if (s == strA) {
+		return Type::ST_ADMINISTRATOR;
+	} else if (s == strO) {
+		return Type::ST_OFFICIAL;
+	} else if (s == strV) {
+		return Type::ST_VIRTUAL;
+	} else if (s == strOc) {
+		return Type::ST_OFFICIAL_CERT;
+	} else if (s == strL) {
+		return Type::ST_LIQUIDATOR;
+	} else if (s == strR) {
+		return Type::ST_RECEIVER;
+	} else if (s == strG) {
+		return Type::ST_GUARDIAN;
+	} else {
+		Q_ASSERT(0);
+		return Type::ST_NULL;
+	}
+}
+
+const QString &Isds::senderType2Str(enum Type::SenderType st)
+{
+	switch (st) {
+	case Type::ST_NULL: return strNull; break;
+	case Type::ST_PRIMARY: return strPu; break;
+	case Type::ST_ENTRUSTED: return strEu; break;
+	case Type::ST_ADMINISTRATOR: return strA; break;
+	case Type::ST_OFFICIAL: return strO; break;
+	case Type::ST_VIRTUAL: return strV; break;
+	case Type::ST_OFFICIAL_CERT: return strOc; break;
+	case Type::ST_LIQUIDATOR: return strL; break;
+	case Type::ST_RECEIVER: return strR; break;
+	case Type::ST_GUARDIAN: return strG; break;
+	default:
+		Q_ASSERT(0);
+		return strNull;
+		break;
+	}
+}
+
+enum Isds::Type::SenderType Isds::variant2SenderType(const QVariant &v)
+{
+	if (v.isNull()) {
+		return Type::ST_NULL;
+	}
+
+	return str2SenderType(v.toString());
+}
+
+QVariant Isds::senderType2Variant(enum Type::SenderType st)
+{
+	if (st == Type::ST_NULL) {
+		return QVariant();
+	}
+
+	return QVariant(senderType2Str(st));
+}
+
 static const QString strMd5("MD5"), strSha1("SHA-1"), strSha224("SHA-224"),
     strSha256("SHA-256"), strSha384("SHA-384"), strSha512("SHA-512");
 

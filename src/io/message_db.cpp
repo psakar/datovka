@@ -51,7 +51,6 @@
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db.h"
-#include "src/isds/isds_conversion.h"
 #include "src/isds/type_conversion.h"
 #include "src/isds/type_description.h"
 #include "src/log/log.h"
@@ -834,8 +833,8 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool verSignature) const
 				html += strongAccountInfoLine(
 				    QObject::tr("Message author"),
 				    authorInfo +
-				    IsdsConversion::senderTypeStrToText(
-				        value.toObject().value("userType").toString()));
+				    Isds::Description::descrSenderType(
+				        Isds::variant2SenderType(value.toObject().value("userType"))));
 			}
 		}
 
@@ -2880,14 +2879,14 @@ fail:
 	return false;
 }
 
-bool MessageDb::updateMessageAuthorInfo(qint64 dmId, const QString &senderType,
-    const QString &senderName)
+bool MessageDb::updateMessageAuthorInfo(qint64 dmId,
+    enum Isds::Type::SenderType senderType, const QString &senderName)
 {
 	QSqlQuery query(m_db);
 
 	QJsonObject authorObject;
-	authorObject.insert("userType", senderType.isEmpty() ?
-	    QJsonValue(QJsonValue::Null) : senderType);
+	authorObject.insert("userType", (senderType != Isds::Type::ST_NULL) ?
+	    Isds::senderType2Str(senderType) : QJsonValue(QJsonValue::Null));
 	authorObject.insert("authorName", senderName.isEmpty() ?
 	    QJsonValue(QJsonValue::Null) : senderName);
 	QJsonObject object;

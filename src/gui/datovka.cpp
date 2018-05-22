@@ -84,7 +84,6 @@
 #include "src/io/message_db_single.h"
 #include "src/io/message_db_set_container.h"
 #include "src/io/tag_db.h"
-#include "src/isds/isds_conversion.h"
 #include "src/isds/message_interface.h"
 #include "src/isds/type_conversion.h"
 #include "src/isds/type_description.h"
@@ -3398,8 +3397,8 @@ QString MainWindow::createAccountInfo(const QString &userName)
 				if (key == "userType") {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,
-					    IsdsConversion::senderTypeStrToText(
-					        userEntry.value(key).toString())));
+					    Isds::Description::descrSenderType(
+					        Isds::variant2SenderType(userEntry.value(key)))));
 				} else {
 					html.append(strongAccountInfoLine(
 					    userinfTbl.attrProps[key].desc,

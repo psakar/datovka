@@ -90,6 +90,15 @@ namespace Isds {
 		QString descrDmTypeChar(const QString &typeStr);
 
 		/*!
+		 * @brief Returns localised sender type description text.
+		 *
+		 * @param[in] type Sender type.
+		 * @return Localised sender type description.
+		 */
+		static
+		QString descrSenderType(enum Type::SenderType type);
+
+		/*!
 		 * @brief Returns localised error description text.
 		 *
 		 * @param[in] err Error code.
