@@ -63,7 +63,10 @@ namespace Isds {
 	enum Type::UserType variant2UserType(const QVariant &v);
 	QVariant userType2Variant(enum Type::UserType ut);
 
+	enum Type::SenderType str2SenderType(const QString &s);
 	const QString &senderType2Str(enum Type::SenderType st);
+	enum Type::SenderType variant2SenderType(const QVariant &v);
+	QVariant senderType2Variant(enum Type::SenderType st);
 
 	enum Type::HashAlg str2HashAlg(const QString &s);
 	const QString &hashAlg2Str(enum Type::HashAlg ha);

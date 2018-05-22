@@ -51,7 +51,6 @@
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db.h"
-#include "src/isds/isds_conversion.h"
 #include "src/isds/type_conversion.h"
 #include "src/isds/type_description.h"
 #include "src/log/log.h"
@@ -834,8 +833,8 @@ QString MessageDb::descriptionHtml(qint64 dmId, bool verSignature) const
 				html += strongAccountInfoLine(
 				    QObject::tr("Message author"),
 				    authorInfo +
-				    IsdsConversion::senderTypeStrToText(
-				        value.toObject().value("userType").toString()));
+				    Isds::Description::descrSenderType(
+				        Isds::variant2SenderType(value.toObject().value("userType"))));
 			}
 		}
 

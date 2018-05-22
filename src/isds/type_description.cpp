@@ -293,6 +293,52 @@ QString Isds::Description::descrDmTypeChar(const QString &typeStr)
 	}
 }
 
+QString Isds::Description::descrSenderType(enum Type::SenderType type)
+{
+	switch (type) {
+	case Type::ST_NULL:
+		return QString();
+		break;
+	case Type::ST_PRIMARY:
+		/* Opravnena osoba nebo likvidator. */
+		return tr("Primary user");
+		break;
+	case Type::ST_ENTRUSTED:
+		/* Poverena osoba. */
+		return tr("Entrusted user");
+		break;
+	case Type::ST_ADMINISTRATOR:
+		/* Systemove DZ. */
+		return tr("Administrator");
+		break;
+	case Type::ST_OFFICIAL:
+		/* Systemove DZ. */
+		return tr("Official");
+		break;
+	case Type::ST_VIRTUAL:
+		/* Spisovka. */
+		return tr("Virtual");
+		break;
+	case Type::ST_OFFICIAL_CERT:
+		return tr("???");
+		break;
+	case Type::ST_LIQUIDATOR:
+		return tr("Liquidator");
+		break;
+	case Type::ST_RECEIVER:
+		return tr("Receiver");
+		break;
+	case Type::ST_GUARDIAN:
+		return tr("Guardian");
+		break;
+	default:
+		Q_ASSERT(0);
+		logWarningNL("Unknown sender type value '%d'.", (int)type);
+		return tr("An error occurred while checking the type.");
+		break;
+	}
+}
+
 QString Isds::Description::descrError(enum Type::Error err)
 {
 	switch (err) {
