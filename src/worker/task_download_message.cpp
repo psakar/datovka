@@ -182,10 +182,10 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 	if (signedMsg) {
 		/* sent or received message? */
 		if (MSG_RECEIVED == msgDirect) {
-			err = Isds::Service::SignedReceivedMessageDownload(
+			err = Isds::Service::signedReceivedMessageDownload(
 			    session, mId.dmId, message);
 		} else {
-			err = Isds::Service::SignedSentMessageDownload(
+			err = Isds::Service::signedSentMessageDownload(
 			    session, mId.dmId, message);
 		}
 	} else {

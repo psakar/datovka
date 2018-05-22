@@ -117,7 +117,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error SignedReceivedMessageDownload(struct isds_ctx *ctx,
+		Error signedReceivedMessageDownload(struct isds_ctx *ctx,
 		    qint64 dmId, Message &message);
 
 		/*!
@@ -129,7 +129,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error SignedSentMessageDownload(struct isds_ctx *ctx,
+		Error signedSentMessageDownload(struct isds_ctx *ctx,
 		    qint64 dmId, Message &message);
 	};
 
