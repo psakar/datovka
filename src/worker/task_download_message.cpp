@@ -120,68 +120,40 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadDeliveryInfo(
 {
 	debugFuncCall();
 
-	isds_error status;
-	bool ok = false;
-	Isds::Message msg;
-
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;
 	}
-	struct isds_message *message = NULL;
 
-	enum Result res = DM_ERR;
+	Isds::Error err;
+	err.setCode(Isds::Type::ERR_ERROR);
+	Isds::Message message;
 
 	if (signedMsg) {
-		status = isds_get_signed_delivery_info(session,
-		    QString::number(dmId).toUtf8().constData(),
-		    &message);
+		err = Isds::Service::getSignedDeliveryInfo(session, dmId,
+		    message);
 	} else {
 		Q_ASSERT(0); /* Only signed messages can be downloaded. */
-		res = DM_ERR;
-		goto fail;
-		/*
-		status = isds_get_delivery_info(session,
-		    QString::number(dmId).toUtf8().constData(),
-		    &message);
-		*/
+		return DM_ERR;
 	}
 
-	if (IE_SUCCESS != status) {
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL(
 		    "Downloading delivery information returned status %d: '%s'.",
-		    status, isdsStrError(status).toUtf8().constData());
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
-		res = DM_ISDS_ERROR;
-		goto fail;
+		    err.code(), error.toUtf8().constData());
+		return DM_ISDS_ERROR;
 	}
 
-	Q_ASSERT(NULL != message);
+	Q_ASSERT(!message.isNull());
 
-	msg = Isds::libisds2message(message, &ok);
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert libisds message to message.");
-		res =  DM_ERR;
-		goto fail;
+	if (Q_SUCCESS != Task::storeDeliveryInfo(signedMsg, dbSet, message)) {
+		return DM_DB_INS_ERR;
 	}
-
-	if (Q_SUCCESS != Task::storeDeliveryInfo(signedMsg, dbSet, msg)) {
-		res = DM_DB_INS_ERR;
-		goto fail;
-	}
-
-	isds_message_free(&message);
 
 	return DM_SUCCESS;
-
-fail:
-	if (NULL != message) {
-		isds_message_free(&message);
-	}
-
-	return res;
 }
 
 enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
@@ -341,8 +313,8 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
 
 	enum Isds::Type::SenderType senderType = Isds::Type::ST_NULL;
 	QString senderName;
-	Isds::Error err = Isds::getMessageAuthor(session, dmId, senderType,
-	    senderName);
+	Isds::Error err = Isds::Service::getMessageAuthor(session, dmId,
+	    senderType, senderName);
 	if (err.code() != Isds::Type::ERR_SUCCESS) {
 		error = Isds::Description::descrError(err.code());
 		longError = err.longDescr();

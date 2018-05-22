@@ -34,6 +34,8 @@
 
 #include "src/isds/error_conversion.h"
 #include "src/isds/error.h"
+#include "src/isds/message_conversion.h"
+#include "src/isds/message_interface.h"
 #include "src/isds/services.h"
 
 /*!
@@ -88,7 +90,7 @@ enum Isds::Type::SenderType libisdsSenderType2SenderType(isds_sender_type st,
 	return type;
 }
 
-Isds::Error Isds::getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
+Isds::Error Isds::Service::getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
     enum Type::SenderType &userType, QString &authorName)
 {
 	Error err;
@@ -96,35 +98,80 @@ Isds::Error Isds::getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
 	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
 		return err;
 	}
 
-	isds_sender_type *sender_type = NULL;
-	char *sender_name = NULL;
+	isds_sender_type *s_type = NULL;
+	char *s_name = NULL;
+	bool ok = true;
 
 	isds_error ret = isds_get_message_sender(ctx,
-	    QString::number(dmId).toUtf8().constData(),
-	    &sender_type, NULL, &sender_name);
+	    QString::number(dmId).toUtf8().constData(), &s_type, NULL, &s_name);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
 		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	userType = (s_type != NULL) ?
+	    libisdsSenderType2SenderType(*s_type, &ok) : Type::ST_NULL;
+	authorName = (s_name != NULL) ? QString(s_name) : QString();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (s_type != NULL) {
+		std::free(s_type); s_type = NULL;
+	}
+	if (s_name != NULL) {
+		std::free(s_name); s_name = NULL;
+	}
+
+	return err;
+}
+
+Isds::Error Isds::Service::getSignedDeliveryInfo(struct isds_ctx *ctx,
+    qint64 dmId, Message &message)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
 		return err;
 	}
 
-	if (sender_type != NULL) {
-		userType = libisdsSenderType2SenderType(*sender_type);
-		std::free(sender_type); sender_type = NULL;
-	} else {
-		userType = Type::ST_NULL;
+	struct isds_message *msg = NULL;
+	bool ok = true;
+
+	isds_error ret = isds_get_signed_delivery_info(ctx,
+	    QString::number(dmId).toUtf8().constData(), &msg);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
 	}
 
-	if (sender_name != NULL) {
-		authorName = sender_name;
-		std::free(sender_name); sender_name = NULL;
+	message = (msg != NULL) ? libisds2message(msg, &ok) : Message();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
 	} else {
-		authorName = QString();
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
 	}
 
-	err.setCode(Type::ERR_SUCCESS);
+fail:
+	if (msg != NULL) {
+		isds_message_free(&msg);
+	}
+
 	return err;
 }

@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 #include <QString>
 
 #include "src/isds/types.h"
@@ -36,8 +37,45 @@ namespace Isds {
 
 	/* Forward declaration. */
 	class Error;
+	class Message;
 
-	Error getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
-	    enum Type::SenderType &userType, QString &authorName);
+	/*!
+	 * @brief Encapsulates ISDS services.
+	 */
+	class Service {
+		Q_DECLARE_TR_FUNCTIONS(Service)
+
+	private:
+		/*!
+		 * @brief Private constructor.
+		 */
+		Service(void);
+
+	public:
+		/*!
+		 * @brief Service GetMessageAuthor.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmId Message identifier.
+		 * @param[out]    userType Message sender type.
+		 * @param[out]    authorName Message sender name.
+		 * @return Error description.
+		 */
+		static
+		Error getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
+		    enum Type::SenderType &userType, QString &authorName);
+
+		/*!
+		 * @brief Service GetSignedDeliveryInfo.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmId Message identifier.
+		 * @param[out]    message Signed delivery info.
+		 * @return Error description.
+		 */
+		static
+		Error getSignedDeliveryInfo(struct isds_ctx *ctx, qint64 dmId,
+		    Message &message);
+	};
 
 }
