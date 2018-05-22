@@ -107,6 +107,30 @@ namespace Isds {
 		static
 		Error getSignedDeliveryInfo(struct isds_ctx *ctx, qint64 dmId,
 		    Message &message);
+
+		/*!
+		 * @brief Service SignedMessageDownload.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmId Message identifier.
+		 * @param[out]    message Message.
+		 * @return Error description.
+		 */
+		static
+		Error SignedReceivedMessageDownload(struct isds_ctx *ctx,
+		    qint64 dmId, Message &message);
+
+		/*!
+		 * @brief Service SignedSentMessageDownload.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmId Message identifier.
+		 * @param[out]    message Message.
+		 * @return Error description.
+		 */
+		static
+		Error SignedSentMessageDownload(struct isds_ctx *ctx,
+		    qint64 dmId, Message &message);
 	};
 
 }

@@ -270,3 +270,83 @@ fail:
 
 	return err;
 }
+
+Isds::Error Isds::Service::SignedReceivedMessageDownload(struct isds_ctx *ctx,
+    qint64 dmId, Message &message)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_message *msg = NULL;
+	bool ok = true;
+
+	isds_error ret = isds_get_signed_received_message(ctx,
+	    QString::number(dmId).toUtf8().constData(), &msg);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	message = (msg != NULL) ? libisds2message(msg, &ok) : Message();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (msg != NULL) {
+		isds_message_free(&msg);
+	}
+
+	return err;
+}
+
+Isds::Error Isds::Service::SignedSentMessageDownload(struct isds_ctx *ctx,
+    qint64 dmId, Message &message)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_message *msg = NULL;
+	bool ok = true;
+
+	isds_error ret = isds_get_signed_sent_message(ctx,
+	    QString::number(dmId).toUtf8().constData(), &msg);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	message = (msg != NULL) ? libisds2message(msg, &ok) : Message();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (msg != NULL) {
+		isds_message_free(&msg);
+	}
+
+	return err;
+}

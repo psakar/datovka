@@ -168,67 +168,46 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 0);
 
-	isds_error status;
-
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return DM_ERR;
 	}
-	// message structures - all members
-	struct isds_message *message = NULL;
+
+	Isds::Error err;
+	Isds::Message message;
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 10);
 
-	/* download signed message? */
 	if (signedMsg) {
 		/* sent or received message? */
 		if (MSG_RECEIVED == msgDirect) {
-			status = isds_get_signed_received_message(
-			    GlobInstcs::isdsSessionsPtr->session(userName),
-			    QString::number(mId.dmId).toUtf8().constData(),
-			    &message);
+			err = Isds::Service::SignedReceivedMessageDownload(
+			    session, mId.dmId, message);
 		} else {
-			status = isds_get_signed_sent_message(
-			    GlobInstcs::isdsSessionsPtr->session(userName),
-			    QString::number(mId.dmId).toUtf8().constData(),
-			    &message);
+			err = Isds::Service::SignedSentMessageDownload(
+			    session, mId.dmId, message);
 		}
 	} else {
 		Q_ASSERT(0); /* Only signed messages can be downloaded. */
 		return DM_ERR;
-		/*
-		status = isds_get_received_message(
-		    GlobInstcs::isdsSessionsPtr->session(userName),
-		    QString::number(mId.dmId).toUtf8().constData(),
-		    &message);
-		*/
 	}
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 20);
 
-	if ((IE_SUCCESS != status) ||
-	    (NULL == message) || (NULL == message->envelope)) {
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
+	if ((err.code() != Isds::Type::ERR_SUCCESS) ||
+	    (message.isNull()) || (message.envelope().isNull())) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL("Downloading message returned status %d: '%s' '%s'.",
-		    status, error.toUtf8().constData(),
+		    err.code(), error.toUtf8().constData(),
 		    longError.toUtf8().constData());
-		isds_message_free(&message);
 		return DM_ISDS_ERROR;
-	}
-
-	bool ok = false;
-	Isds::Message msg = Isds::libisds2message(message, &ok);
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert libisds message to message.");
-		return DM_ERR;
 	}
 
 	{
 		QString secKeyBeforeDownload(dbSet.secondaryKey(mId.deliveryTime));
-		QDateTime newDeliveryTime(timevalToDateTime(
-		    message->envelope->dmDeliveryTime));
+		const QDateTime &newDeliveryTime(message.envelope().dmDeliveryTime());
 		QString secKeyAfterDonwload(dbSet.secondaryKey(newDeliveryTime));
 		/*
 		 * Secondary keys may be the sam for valid and invalid
@@ -246,18 +225,18 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 			}
 
 			/* Store envelope in new location. */
-			Task::storeMessageEnvelope(msgDirect, dbSet, msg.envelope());
+			Task::storeMessageEnvelope(msgDirect, dbSet, message.envelope());
 		}
 		/* Update message delivery time. */
 		mId.deliveryTime = newDeliveryTime;
 	}
 
 	/* Store the message. */
-	Task::storeMessage(signedMsg, msgDirect, dbSet, msg, progressLabel);
+	Task::storeMessage(signedMsg, msgDirect, dbSet, message, progressLabel);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 90);
 
-	Q_ASSERT(QString(message->envelope->dmID).toLongLong() == mId.dmId);
+	Q_ASSERT(message.envelope().dmId() == mId.dmId);
 
 	/* Download and save delivery info and message events */
 	if (DM_SUCCESS == downloadDeliveryInfo(userName, mId.dmId, signedMsg,
@@ -292,9 +271,6 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 	}
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 100);
-
-	isds_list_free(&message->documents);
-	isds_message_free(&message);
 
 	logDebugLv0NL("Done with %s().", __func__);
 
