@@ -28,8 +28,8 @@
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/isds/error.h"
+#include "src/isds/message_conversion.h"
 #include "src/isds/services.h"
-#include "src/isds/type_conversion.h"
 #include "src/isds/type_description.h"
 #include "src/isds/types.h"
 #include "src/log/log.h"
@@ -352,8 +352,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
 		return DM_ISDS_ERROR;
 	}
 
-	if (messageDb.updateMessageAuthorInfo(dmId,
-	        Isds::senderType2Str(senderType), senderName)) {
+	if (messageDb.updateMessageAuthorInfo(dmId, senderType, senderName)) {
 		logDebugLv0NL(
 		    "Author information of message '%" PRId64 "' were updated.",
 		    dmId);

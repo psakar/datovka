@@ -34,8 +34,7 @@
 
 #include "src/common.h"
 #include "src/isds/message_interface.h"
-#include "src/isds/message_functions.h"
-#include "src/isds/message_conversion.h"
+#include "src/isds/types.h"
 #include "src/datovka_shared/io/sqlite/db.h"
 
 #define INVALID_YEAR "inv"
@@ -537,8 +536,8 @@ public:
 	 * @param[in] senderName  Name of sender.
 	 * @return True on success.
 	 */
-	bool updateMessageAuthorInfo(qint64 dmId, const QString &senderType,
-	    const QString &senderName);
+	bool updateMessageAuthorInfo(qint64 dmId,
+	    enum Isds::Type::SenderType senderType, const QString &senderName);
 
 	/*!
 	 * @brief Return hash data of message from db.
