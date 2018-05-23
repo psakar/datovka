@@ -133,6 +133,12 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 40);
 
+	if (message.isNull()) {
+		logErrorNL("%s", "Cannot send null message.");
+		ret = SM_ERR;
+		goto fail;
+	}
+
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
 

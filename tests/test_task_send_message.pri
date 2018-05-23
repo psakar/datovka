@@ -37,9 +37,12 @@ SOURCES += \
 	$${top_srcdir}src/io/message_db_set.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
 	$${top_srcdir}src/isds/box_interface.cpp \
+	$${top_srcdir}src/isds/error_conversion.cpp \
+	$${top_srcdir}src/isds/error.cpp \
 	$${top_srcdir}src/isds/internal_conversion.cpp \
 	$${top_srcdir}src/isds/message_conversion.cpp \
 	$${top_srcdir}src/isds/message_interface.cpp \
+	$${top_srcdir}src/isds/services.cpp \
 	$${top_srcdir}src/isds/type_conversion.cpp \
 	$${top_srcdir}src/isds/type_description.cpp \
 	$${top_srcdir}src/models/accounts_model.cpp \
@@ -79,9 +82,12 @@ HEADERS += \
 	$${top_srcdir}src/io/message_db_set.h \
 	$${top_srcdir}src/io/tag_db.h \
 	$${top_srcdir}src/isds/box_interface.h \
+	$${top_srcdir}src/isds/error_conversion.h \
+	$${top_srcdir}src/isds/error.h \
 	$${top_srcdir}src/isds/internal_conversion.h \
 	$${top_srcdir}src/isds/message_conversion.h \
 	$${top_srcdir}src/isds/message_interface.h \
+	$${top_srcdir}src/isds/services.h \
 	$${top_srcdir}src/isds/type_conversion.h \
 	$${top_srcdir}src/isds/type_description.h \
 	$${top_srcdir}src/isds/types.h \
