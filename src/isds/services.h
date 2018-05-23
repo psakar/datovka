@@ -109,6 +109,13 @@ namespace Isds {
 		    Message &message);
 
 		/*!
+		 * @brief Service MarkMessageAsDownloaded.
+		 */
+		static
+		Error markMessageAsDownloaded(struct isds_ctx *ctx,
+		    qint64 dmId);
+
+		/*!
 		 * @brief Service SignedMessageDownload.
 		 *
 		 * @param[in,out] ctx Communication context.

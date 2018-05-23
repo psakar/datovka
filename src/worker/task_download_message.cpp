@@ -324,12 +324,10 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::markMessageAsDownloaded(
 		return DM_ERR;
 	}
 
-	isds_error status = isds_mark_message_read(session,
-	    QString::number(dmId).toUtf8().constData());
-
-	if (IE_SUCCESS != status) {
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
+	Isds::Error err = Isds::Service::markMessageAsDownloaded(session, dmId);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		return DM_ISDS_ERROR;
 	}
 	return DM_SUCCESS;

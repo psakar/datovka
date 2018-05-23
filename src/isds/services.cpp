@@ -369,6 +369,30 @@ Isds::Error Isds::Service::getSignedDeliveryInfo(struct isds_ctx *ctx,
 	    ServicePrivate::MG_SIGNED_DELIVERY_INFO, ctx, dmId, message);
 }
 
+Isds::Error Isds::Service::markMessageAsDownloaded(struct isds_ctx *ctx,
+    qint64 dmId)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	isds_error ret = isds_mark_message_read(ctx,
+	    QString::number(dmId).toUtf8().constData());
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		return err;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+	return err;
+}
+
 Isds::Error Isds::Service::signedReceivedMessageDownload(struct isds_ctx *ctx,
     qint64 dmId, Message &message)
 {
