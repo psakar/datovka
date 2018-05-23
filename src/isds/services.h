@@ -54,6 +54,20 @@ namespace Isds {
 
 	public:
 		/*!
+		 * @brief Service CreateMessage.
+		 *
+		 * @note Some message content is changed to value returned by
+		 *     ISDS. All references to original messages should be newly
+		 *     acquired.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in,out] message Sent message.
+		 * @return Error description.
+		 */
+		static
+		Error createMessage(struct isds_ctx *ctx, Message &message);
+
+		/*!
 		 * @brief Service GetListOfReceivedMessages.
 		 *
 		 * @param[in,out] ctx Communication context.

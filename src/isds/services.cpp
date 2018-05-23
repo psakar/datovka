@@ -266,6 +266,66 @@ fail:
 	return err;
 }
 
+Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx, Message &message)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || message.isNull())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	bool ok = false;
+	isds_error ret = IE_SUCCESS;
+	struct isds_message *msg = message2libisds(message, &ok);
+	if (!ok) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+		goto fail;
+	}
+
+	ret = isds_send_message(ctx, msg);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	/*
+	 * FIXME -- It would be better to set the delivery time and message
+	 * identifier directly in the message but currently the API allowing it
+	 * is missing.
+	 *
+	 * message.envelope().setDmDeliveryTime(msg->envelope->dmDeliveryTime)
+	 * message.envelope().setDmId(msg->envelope->dmID)
+	 */
+
+	ok = false;
+	message = libisds2message(msg, &ok);
+	if (!ok) {
+		/*
+		 * FIXME -- The message has been sent so returning an error
+		 * here is theoretically a problem (but this case should never
+		 * occur).
+		 */
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+		goto fail;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+
+fail:
+	if (msg != NULL) {
+		isds_message_free(&msg);
+	}
+
+	return err;
+}
+
 Isds::Error Isds::Service::getListOfReceivedMessages(struct isds_ctx *ctx,
     Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
     unsigned long int *dmLimit, QList<Message> &messages)

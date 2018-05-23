@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _TASK_SEND_MESSAGE_H_
-#define _TASK_SEND_MESSAGE_H_
+#pragma once
 
 #include <QByteArray>
 #include <QList>
@@ -116,17 +115,15 @@ private:
 	 */
 	static
 	enum Result sendMessage(const QString &userName, MessageDbSet &dbSet,
-	    const Isds::Message &message, const QString &recipientName,
+	    Isds::Message &message, const QString &recipientName,
 	    const QString &recipientAddress, bool isPDZ,
 	    const QString &progressLabel, ResultData *result);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	const QString m_transactId; /*!< Unique transaction identifier. */
-	const Isds::Message m_message; /*!< Message to be sent. */
+	Isds::Message m_message; /*!< Message to be sent. */
 	const QString m_recipientName; /*!< Message recipient name. */
 	const QString m_recipientAddress; /*!< Message recipient address. */
 	const bool m_isPDZ; /*!< True if message is a PDZ. */
 };
-
-#endif /* _TASK_SEND_MESSAGE_H_ */
