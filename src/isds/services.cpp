@@ -34,6 +34,8 @@
 
 #include "src/isds/error_conversion.h"
 #include "src/isds/error.h"
+#include "src/isds/message_conversion.h"
+#include "src/isds/message_interface.h"
 #include "src/isds/services.h"
 
 /*!
@@ -54,6 +56,232 @@ QString isdsLongMessage(const struct isds_ctx *ctx)
 #else /* !WIN32 */
 	return QString::fromUtf8(isds_long_message(ctx));
 #endif /* WIN32 */
+}
+
+namespace Isds {
+
+	/*!
+	 * @brief Encapsulates private services.
+	 */
+	class ServicePrivate {
+		Q_DECLARE_TR_FUNCTIONS(ServicePrivate)
+
+	private:
+		/*!
+		 * @brief Private constructor.
+		 */
+		ServicePrivate(void);
+
+	public:
+		/*!
+		 * @brief Functions downloading message list.
+		 */
+		typedef isds_error (*isdsMessageListGetterFunc)(
+		    struct isds_ctx *, const struct timeval *,
+		    const struct timeval *, const long int *,
+		    const unsigned int, const unsigned long int,
+		    unsigned long int *, struct isds_list **);
+
+		/*!
+		 * @brief Serves as indexes for accessing message list getter functions.
+		 */
+		enum MessageListGetter {
+			MLG_RECEIVED = 0,
+			MLG_SENT = 1
+		};
+
+		/*!
+		 * @brief Returns a pointer to a message list getter function.
+		 *
+		 * @param[in] mlg Service identifier.
+		 * @return Function pointer.
+		 */
+		static
+		isdsMessageListGetterFunc messageListGetterFunc(
+		    enum MessageListGetter mlg)
+		{
+			static isdsMessageListGetterFunc funcArray[] = {
+				isds_get_list_of_received_messages,
+				isds_get_list_of_sent_messages
+			};
+
+			return funcArray[mlg];
+		}
+
+		/*!
+		 * @brief Calls message getter services.
+		 *
+		 * @param[in]     mlg Service identifier.
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmStatusFilter Status filter, MFS_ANY for all.
+		 * @param[in]     dmOffset Sequence number of first requested record.
+		 * @param[in,out] dmLimit Message list length limit.
+		 * @param[out]    messages Message list.
+		 * @return Error description.
+		 */
+		static
+		Error messageListGetterService(enum MessageListGetter mlg,
+		    struct isds_ctx *ctx, Type::DmFiltStates dmStatusFilter,
+		    unsigned long int dmOffset, unsigned long int *dmLimit,
+		    QList<Message> &messages);
+
+		/*!
+		 * @brief Functions reading message identifier and returning message.
+		 */
+		typedef isds_error (*isdsMessageGetterFunc)(struct isds_ctx *, const char *, struct isds_message **);
+
+		/*!
+		 * @brief Serves as indexes for accessing message getter functions.
+		 */
+		enum MessageGetter {
+			MG_SIGNED_DELIVERY_INFO = 0,
+			MG_SIGNED_RECEIVED_MESSAGE = 1,
+			MG_SIGNED_SENT_MESSAGE = 2
+		};
+
+		/*!
+		 * @brief Returns a pointer to a message getter function.
+		 *
+		 * @param[in] mg Service identifier.
+		 * @return Function pointer.
+		 */
+		static
+		isdsMessageGetterFunc messageGetterFunc(enum MessageGetter mg)
+		{
+			static isdsMessageGetterFunc funcArray[] = {
+				isds_get_signed_delivery_info,
+				isds_get_signed_received_message,
+				isds_get_signed_sent_message
+			};
+
+			return funcArray[mg];
+		}
+
+		/*!
+		 * @brief Calls message getter services.
+		 *
+		 * @param[in]     mg Service identifier.
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmId Message identifier.
+		 * @param[out]    message Signed delivery info.
+		 * @return Error description.
+		 */
+		static
+		Error messageGetterService(enum MessageGetter mg,
+		    struct isds_ctx *ctx, qint64 dmId, Message &message);
+	};
+
+}
+
+/*!
+ * @brief Converts message filter state.
+ */
+static
+int dmFiltState2libisdsMessageStatus(Isds::Type::DmFiltStates fs)
+{
+	return (int)fs;
+}
+
+Isds::Error Isds::ServicePrivate::messageListGetterService(
+    enum MessageListGetter mlg, struct isds_ctx *ctx,
+    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
+    unsigned long int *dmLimit, QList<Message> &messages)
+{
+	Error err;
+
+	if (Q_UNLIKELY(ctx == NULL)) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_list *msgList = NULL;
+	bool ok = true;
+
+	isds_error ret = messageListGetterFunc(mlg)(ctx, NULL, NULL, NULL,
+	    dmFiltState2libisdsMessageStatus(dmStatusFilter), dmOffset, dmLimit,
+	    &msgList);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	messages = (msgList != NULL) ?
+	    libisds2messageList(msgList, &ok) : QList<Message>();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (msgList != NULL) {
+		isds_list_free(&msgList);
+	}
+
+	return err;
+}
+
+Isds::Error Isds::ServicePrivate::messageGetterService(enum MessageGetter mg,
+    struct isds_ctx *ctx, qint64 dmId, Message &message)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_message *msg = NULL;
+	bool ok = true;
+
+	isds_error ret = messageGetterFunc(mg)(ctx,
+	    QString::number(dmId).toUtf8().constData(), &msg);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	message = (msg != NULL) ? libisds2message(msg, &ok) : Message();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (msg != NULL) {
+		isds_message_free(&msg);
+	}
+
+	return err;
+}
+
+Isds::Error Isds::Service::getListOfReceivedMessages(struct isds_ctx *ctx,
+    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
+    unsigned long int *dmLimit, QList<Message> &messages)
+{
+	return ServicePrivate::messageListGetterService(
+	    ServicePrivate::MLG_RECEIVED, ctx, dmStatusFilter, dmOffset,
+	    dmLimit, messages);
+}
+
+Isds::Error Isds::Service::getListOfSentMessages(struct isds_ctx *ctx,
+    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
+    unsigned long int *dmLimit, QList<Message> &messages)
+{
+	return ServicePrivate::messageListGetterService(
+	    ServicePrivate::MLG_SENT, ctx, dmStatusFilter, dmOffset,
+	    dmLimit, messages);
 }
 
 /*!
@@ -88,7 +316,7 @@ enum Isds::Type::SenderType libisdsSenderType2SenderType(isds_sender_type st,
 	return type;
 }
 
-Isds::Error Isds::getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
+Isds::Error Isds::Service::getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
     enum Type::SenderType &userType, QString &authorName)
 {
 	Error err;
@@ -96,35 +324,61 @@ Isds::Error Isds::getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
 	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
 		return err;
 	}
 
-	isds_sender_type *sender_type = NULL;
-	char *sender_name = NULL;
+	isds_sender_type *s_type = NULL;
+	char *s_name = NULL;
+	bool ok = true;
 
 	isds_error ret = isds_get_message_sender(ctx,
-	    QString::number(dmId).toUtf8().constData(),
-	    &sender_type, NULL, &sender_name);
+	    QString::number(dmId).toUtf8().constData(), &s_type, NULL, &s_name);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
 		err.setLongDescr(isdsLongMessage(ctx));
-		return err;
+		goto fail;
 	}
 
-	if (sender_type != NULL) {
-		userType = libisdsSenderType2SenderType(*sender_type);
-		std::free(sender_type); sender_type = NULL;
+	userType = (s_type != NULL) ?
+	    libisdsSenderType2SenderType(*s_type, &ok) : Type::ST_NULL;
+	authorName = (s_name != NULL) ? QString(s_name) : QString();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
 	} else {
-		userType = Type::ST_NULL;
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
 	}
 
-	if (sender_name != NULL) {
-		authorName = sender_name;
-		std::free(sender_name); sender_name = NULL;
-	} else {
-		authorName = QString();
+fail:
+	if (s_type != NULL) {
+		std::free(s_type); s_type = NULL;
+	}
+	if (s_name != NULL) {
+		std::free(s_name); s_name = NULL;
 	}
 
-	err.setCode(Type::ERR_SUCCESS);
 	return err;
+}
+
+Isds::Error Isds::Service::getSignedDeliveryInfo(struct isds_ctx *ctx,
+    qint64 dmId, Message &message)
+{
+	return ServicePrivate::messageGetterService(
+	    ServicePrivate::MG_SIGNED_DELIVERY_INFO, ctx, dmId, message);
+}
+
+Isds::Error Isds::Service::signedReceivedMessageDownload(struct isds_ctx *ctx,
+    qint64 dmId, Message &message)
+{
+	return ServicePrivate::messageGetterService(
+	    ServicePrivate::MG_SIGNED_RECEIVED_MESSAGE, ctx, dmId, message);
+}
+
+Isds::Error Isds::Service::signedSentMessageDownload(struct isds_ctx *ctx,
+    qint64 dmId, Message &message)
+{
+	return ServicePrivate::messageGetterService(
+	    ServicePrivate::MG_SIGNED_SENT_MESSAGE, ctx, dmId, message);
 }

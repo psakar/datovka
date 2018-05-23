@@ -242,7 +242,7 @@ void TestTaskDownloads::downloadMessageList(void)
 
 	task = new (::std::nothrow) TaskDownloadMessageList(
 	    m_recipient.userName, m_recipientDbSet, MSG_RECEIVED, false,
-	    MESSAGE_LIST_LIMIT, MESSAGESTATE_ANY);
+	    MESSAGE_LIST_LIMIT, Isds::Type::MFS_ANY);
 
 	QVERIFY(task != Q_NULLPTR);
 	task->setAutoDelete(false);

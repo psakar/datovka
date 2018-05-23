@@ -27,6 +27,7 @@
 
 #include "src/io/message_db_set.h"
 #include "src/isds/message_interface.h"
+#include "src/isds/types.h"
 #include "src/worker/task.h"
 
 /*!
@@ -57,7 +58,7 @@ public:
 	explicit TaskDownloadMessageList(const QString &userName,
 	    MessageDbSet *dbSet, enum MessageDirection msgDirect,
 	    bool downloadWhole, unsigned long dmLimit = MESSAGE_LIST_LIMIT,
-	    int dmStatusFltr = MESSAGESTATE_ANY);
+	    Isds::Type::DmFiltStates dmStatusFltr = Isds::Type::MFS_ANY);
 
 	/*!
 	 * @brief Performs actual message download.
@@ -91,7 +92,8 @@ public:
 	    enum MessageDirection msgDirect, MessageDbSet &dbSet,
 	    bool downloadWhole, QString &error, QString &longError,
 	    const QString &progressLabel, int &total, int &news,
-	    QList<qint64> &newMsgIdList, ulong *dmLimit, int dmStatusFilter);
+	    QList<qint64> &newMsgIdList, ulong *dmLimit,
+	    Isds::Type::DmFiltStates dmStatusFilter);
 
 	enum Result m_result; /*!< Return state. */
 	QString m_isdsError; /*!< Error description. */
@@ -143,5 +145,5 @@ private:
 	enum MessageDirection m_msgDirect; /*!< Sent or received list. */
 	const bool m_downloadWhole; /*!< Plan downloading whole messages. */
 	unsigned long m_dmLimit; /*!< List length limit. */
-	int m_dmStatusFilter; /*!< Defines type of messages to be downloaded. */
+	Isds::Type::DmFiltStates m_dmStatusFilter; /*!< Defines type of messages to be downloaded. */
 };

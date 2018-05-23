@@ -146,6 +146,30 @@ public:
 	};
 
 	/*!
+	 * @brief Message filter status as used by GetListOfSentMessages and
+	 *     GetListOfReceivedMessages.
+	 *
+	 * @note Usage described in
+	 *     pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf
+	 *     (section 2.8.2).
+	 */
+	enum DmFiltState {
+		MFS_POSTED = 0x02,
+		MFS_STAMPED = 0x04,
+		MFS_INFECTED = 0x08,
+		MFS_DELIVERED = 0x10,
+		MFS_ACCEPTED_FICT = 0x20,
+		MFS_ACCEPTED = 0x40,
+		MFS_READ = 0x80,
+		MFS_UNDELIVERABLE = 0x0100,
+		MFS_REMOVED = 0x0200,
+		MFS_IN_VAULT = 0x0400,
+		MFS_ANY = 0x07fe /* Convenience value. */
+	};
+	Q_DECLARE_FLAGS(DmFiltStates, DmFiltState)
+	Q_FLAG(DmFiltStates)
+
+	/*!
 	 * @brief Describes message type.
 	 *
 	 * @note See pril_2/WS_ISDS_Manipulace_s_datovymi_zpravami.pdf.
@@ -302,5 +326,6 @@ public:
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(Type::Privileges)
+Q_DECLARE_OPERATORS_FOR_FLAGS(Type::DmFiltStates)
 
 }
