@@ -74,6 +74,58 @@ namespace Isds {
 
 	public:
 		/*!
+		 * @brief Functions downloading message list.
+		 */
+		typedef isds_error (*isdsMessageListGetterFunc)(
+		    struct isds_ctx *, const struct timeval *,
+		    const struct timeval *, const long int *,
+		    const unsigned int, const unsigned long int,
+		    unsigned long int *, struct isds_list **);
+
+		/*!
+		 * @brief Serves as indexes for accessing message list getter functions.
+		 */
+		enum MessageListGetter {
+			MLG_RECEIVED = 0,
+			MLG_SENT = 1
+		};
+
+		/*!
+		 * @brief Returns a pointer to a message list getter function.
+		 *
+		 * @param[in] mlg Service identifier.
+		 * @return Function pointer.
+		 */
+		static
+		isdsMessageListGetterFunc messageListGetterFunc(
+		    enum MessageListGetter mlg)
+		{
+			static isdsMessageListGetterFunc funcArray[] = {
+				isds_get_list_of_received_messages,
+				isds_get_list_of_sent_messages
+			};
+
+			return funcArray[mlg];
+		}
+
+		/*!
+		 * @brief Calls message getter services.
+		 *
+		 * @param[in]     mlg Service identifier.
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmStatusFilter Status filter, MFS_ANY for all.
+		 * @param[in]     dmOffset Sequence number of first requested record.
+		 * @param[in,out] dmLimit Message list length limit.
+		 * @param[out]    messages Message list.
+		 * @return Error description.
+		 */
+		static
+		Error messageListGetterService(enum MessageListGetter mlg,
+		    struct isds_ctx *ctx, Type::DmFiltStates dmStatusFilter,
+		    unsigned long int dmOffset, unsigned long int *dmLimit,
+		    QList<Message> &messages);
+
+		/*!
 		 * @brief Functions reading message identifier and returning message.
 		 */
 		typedef isds_error (*isdsMessageGetterFunc)(struct isds_ctx *, const char *, struct isds_message **);
@@ -121,6 +173,59 @@ namespace Isds {
 
 }
 
+/*!
+ * @brief Converts message filter state.
+ */
+static
+int dmFiltState2libisdsMessageStatus(Isds::Type::DmFiltStates fs)
+{
+	return (int)fs;
+}
+
+Isds::Error Isds::ServicePrivate::messageListGetterService(
+    enum MessageListGetter mlg, struct isds_ctx *ctx,
+    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
+    unsigned long int *dmLimit, QList<Message> &messages)
+{
+	Error err;
+
+	if (Q_UNLIKELY(ctx == NULL)) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_list *msgList = NULL;
+	bool ok = true;
+
+	isds_error ret = messageListGetterFunc(mlg)(ctx, NULL, NULL, NULL,
+	    dmFiltState2libisdsMessageStatus(dmStatusFilter), dmOffset, dmLimit,
+	    &msgList);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	messages = (msgList != NULL) ?
+	    libisds2messageList(msgList, &ok) : QList<Message>();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (msgList != NULL) {
+		isds_list_free(&msgList);
+	}
+
+	return err;
+}
+
 Isds::Error Isds::ServicePrivate::messageGetterService(enum MessageGetter mg,
     struct isds_ctx *ctx, qint64 dmId, Message &message)
 {
@@ -161,99 +266,22 @@ fail:
 	return err;
 }
 
-/*!
- * @brief Converts message filter state.
- */
-static
-int dmFiltState2libisdsMessageStatus(Isds::Type::DmFiltStates fs)
-{
-	return (int)fs;
-}
-
 Isds::Error Isds::Service::getListOfReceivedMessages(struct isds_ctx *ctx,
     Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
     unsigned long int *dmLimit, QList<Message> &messages)
 {
-	Error err;
-
-	if (Q_UNLIKELY(ctx == NULL)) {
-		Q_ASSERT(0);
-		err.setCode(Type::ERR_ERROR);
-		err.setLongDescr(tr("Insufficient input."));
-		return err;
-	}
-
-	struct isds_list *msgList = NULL;
-	bool ok = true;
-
-	isds_error ret = isds_get_list_of_received_messages(ctx, NULL, NULL, NULL,
-	    dmFiltState2libisdsMessageStatus(dmStatusFilter), dmOffset, dmLimit,
-	    &msgList);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		goto fail;
-	}
-
-	messages = (msgList != NULL) ?
-	    libisds2messageList(msgList, &ok) : QList<Message>();
-
-	if (ok) {
-		err.setCode(Type::ERR_SUCCESS);
-	} else {
-		err.setCode(Type::ERR_ERROR);
-		err.setLongDescr(tr("Error converting types."));
-	}
-
-fail:
-	if (msgList != NULL) {
-		isds_list_free(&msgList);
-	}
-
-	return err;
+	return ServicePrivate::messageListGetterService(
+	    ServicePrivate::MLG_RECEIVED, ctx, dmStatusFilter, dmOffset,
+	    dmLimit, messages);
 }
 
 Isds::Error Isds::Service::getListOfSentMessages(struct isds_ctx *ctx,
     Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
     unsigned long int *dmLimit, QList<Message> &messages)
 {
-	Error err;
-
-	if (Q_UNLIKELY(ctx == NULL)) {
-		Q_ASSERT(0);
-		err.setCode(Type::ERR_ERROR);
-		err.setLongDescr(tr("Insufficient input."));
-		return err;
-	}
-
-	struct isds_list *msgList = NULL;
-	bool ok = true;
-
-	isds_error ret = isds_get_list_of_sent_messages(ctx, NULL, NULL, NULL,
-	    dmFiltState2libisdsMessageStatus(dmStatusFilter), dmOffset, dmLimit,
-	    &msgList);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		goto fail;
-	}
-
-	messages = (msgList != NULL) ?
-	    libisds2messageList(msgList, &ok) : QList<Message>();
-
-	if (ok) {
-		err.setCode(Type::ERR_SUCCESS);
-	} else {
-		err.setCode(Type::ERR_ERROR);
-		err.setLongDescr(tr("Error converting types."));
-	}
-
-fail:
-	if (msgList != NULL) {
-		isds_list_free(&msgList);
-	}
-
-	return err;
+	return ServicePrivate::messageListGetterService(
+	    ServicePrivate::MLG_SENT, ctx, dmStatusFilter, dmOffset,
+	    dmLimit, messages);
 }
 
 /*!
