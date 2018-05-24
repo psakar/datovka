@@ -142,7 +142,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
 
-	err = Isds::Service::createMessage(session, message);
+	err = Isds::Service::createMessage(session, message, dmId);
 	if (err.code() != Isds::Type::ERR_SUCCESS) {
 		isdsError = Isds::Description::descrError(err.code());
 		isdsLongError = err.longDescr();
@@ -165,8 +165,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 			goto fail;
 		}
 
-		/* Get sent message ID */
-		dmId = message.envelope().dmId();
+		Q_ASSERT(dmId >= 0);
 
 		const QString acntDbKey(AccountDb::keyFromLogin(userName));
 

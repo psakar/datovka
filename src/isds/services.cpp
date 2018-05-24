@@ -266,7 +266,8 @@ fail:
 	return err;
 }
 
-Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx, Message &message)
+Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx,
+    const Message &message, qint64 &dmId)
 {
 	Error err;
 
@@ -293,26 +294,19 @@ Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx, Message &message)
 		goto fail;
 	}
 
-	/*
-	 * FIXME -- It would be better to set the delivery time and message
-	 * identifier directly in the message but currently the API allowing it
-	 * is missing.
-	 *
-	 * message.envelope().setDmDeliveryTime(msg->envelope->dmDeliveryTime)
-	 * message.envelope().setDmId(msg->envelope->dmID)
-	 */
-
-	ok = false;
-	message = libisds2message(msg, &ok);
-	if (!ok) {
-		/*
-		 * FIXME -- The message has been sent so returning an error
-		 * here is theoretically a problem (but this case should never
-		 * occur).
-		 */
+	if (msg->envelope->dmID == NULL) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
-		err.setLongDescr(tr("Error converting types."));
+		err.setLongDescr(tr("Missing identifier of sent message."));
+		goto fail;
+	}
+
+	ok = false;
+	dmId = QString(msg->envelope->dmID).toLongLong(&ok);
+	if (Q_UNLIKELY((!ok) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Cannot convert sent message identifier."));
 		goto fail;
 	}
 
