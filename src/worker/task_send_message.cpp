@@ -109,7 +109,7 @@ void TaskSendMessage::run(void)
 }
 
 enum TaskSendMessage::Result TaskSendMessage::sendMessage(
-    const QString &userName, MessageDbSet &dbSet, Isds::Message &message,
+    const QString &userName, MessageDbSet &dbSet, const Isds::Message &message,
     const QString &recipientName, const QString &recipientAddress, bool isPDZ,
     const QString &progressLabel, TaskSendMessage::ResultData *resultData)
 {

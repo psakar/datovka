@@ -105,7 +105,7 @@ private:
 	 *
 	 * @param[in]     userName         Account identifier (user login name).
 	 * @param[in,out] dbSet            Database container.
-	 * @param[in,out] message          Message being sent.
+	 * @param[in]     message          Message being sent.
 	 * @param[in]     recipientName    Message recipient name.
 	 * @param[in]     recipientAddress Message recipient address.
 	 * @param[in]     isPDZ            True if message is a PDZ.
@@ -115,14 +115,14 @@ private:
 	 */
 	static
 	enum Result sendMessage(const QString &userName, MessageDbSet &dbSet,
-	    Isds::Message &message, const QString &recipientName,
+	    const Isds::Message &message, const QString &recipientName,
 	    const QString &recipientAddress, bool isPDZ,
 	    const QString &progressLabel, ResultData *result);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 	const QString m_transactId; /*!< Unique transaction identifier. */
-	Isds::Message m_message; /*!< Message to be sent. */
+	const Isds::Message m_message; /*!< Message to be sent. */
 	const QString m_recipientName; /*!< Message recipient name. */
 	const QString m_recipientAddress; /*!< Message recipient address. */
 	const bool m_isPDZ; /*!< True if message is a PDZ. */
