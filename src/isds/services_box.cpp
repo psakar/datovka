@@ -97,3 +97,43 @@ fail:
 
 	return err;
 }
+
+Isds::Error Isds::Service::getUserInfoFromLogin(struct isds_ctx *ctx,
+    DbUserInfo &userInfo)
+{
+	Error err;
+
+	if (Q_UNLIKELY(ctx == NULL)) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_DbUserInfo *uInfo = NULL;
+	bool ok = true;
+
+	isds_error ret = isds_GetUserInfoFromLogin(ctx, &uInfo);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	userInfo = (uInfo != NULL) ?
+	    libisds2dbUserInfo(uInfo, &ok) : DbUserInfo();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (uInfo != NULL) {
+		isds_DbUserInfo_free(&uInfo);
+	}
+
+	return err;
+}

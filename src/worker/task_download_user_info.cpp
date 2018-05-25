@@ -27,7 +27,11 @@
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/box_conversion.h"
+#include "src/isds/box_interface.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_user_info.h"
@@ -72,31 +76,21 @@ bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
 		return false;
 	}
 
-	struct isds_DbUserInfo *userInfo = NULL;
-	isds_error status = isds_GetUserInfoFromLogin(session, &userInfo);
-	if (IE_SUCCESS != status) {
+	Isds::DbUserInfo userInfo;
+	Isds::Error err = Isds::Service::getUserInfoFromLogin(session,
+	    userInfo);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL(
 		    "Downloading user information for account '%s' returned '%d': '%s'.",
 		    userName.toUtf8().constData(),
-		    status, isds_strerror(status));
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
-		isds_DbUserInfo_free(&userInfo);
+		    err.code(), error.toUtf8().constData());
 		return false;
 	}
 
-	Q_ASSERT(NULL != userInfo);
-
-	bool ok = false;
-	Isds::DbUserInfo dbUserInfo(Isds::libisds2dbUserInfo(userInfo, &ok));
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert libisds dbUserInfo to dbUserInfo.");
-		isds_DbUserInfo_free(&userInfo);
-		return false;
-	}
-
-	isds_DbUserInfo_free(&userInfo);
+	Q_ASSERT(!userInfo.isNull());
 
 	return GlobInstcs::accntDbPtr->insertUserIntoDb(
-	    AccountDb::keyFromLogin(userName), dbUserInfo);
+	    AccountDb::keyFromLogin(userName), userInfo);
 }

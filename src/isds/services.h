@@ -38,6 +38,7 @@ namespace Isds {
 
 	/* Forward declaration. */
 	class DbOwnerInfo;
+	class DbUserInfo;
 	class Error;
 	class Message;
 
@@ -65,6 +66,17 @@ namespace Isds {
 		static
 		Error getOwnerInfoFromLogin(struct isds_ctx *ctx,
 		    DbOwnerInfo &ownerInfo);
+
+		/*!
+		 * @brief Service GetUserInfoFromLogin.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[out]    userInfo Obtained user info.
+		 * @return Error description.
+		 */
+		static
+		Error getUserInfoFromLogin(struct isds_ctx *ctx,
+		    DbUserInfo &userInfo);
 
 	/* Message inetrface: */
 		/*!
