@@ -58,6 +58,60 @@ QString isdsLongMessage(const struct isds_ctx *ctx)
 #endif /* WIN32 */
 }
 
+Isds::Error Isds::Service::findDataBox(struct isds_ctx *ctx,
+    const DbOwnerInfo &criteria, QList<DbOwnerInfo> &boxes)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || criteria.isNull())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	bool ok = false;
+	isds_error ret = IE_SUCCESS;
+	struct isds_DbOwnerInfo *iCrit = NULL;
+	struct isds_list *iBoxes = NULL;
+
+	iCrit = dbOwnerInfo2libisds(criteria, &ok);
+	if (!ok) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+		goto fail;
+	}
+
+	ret = isds_FindDataBox(ctx, iCrit, &iBoxes);
+	if ((ret != IE_SUCCESS) && (ret != IE_2BIG)) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	ok = true;
+	boxes = (iBoxes != NULL) ?
+	    libisds2dbOwnerInfoList(iBoxes, &ok) : QList<DbOwnerInfo>();
+
+	if (ok) {
+		/* May also be ERR_2BIG. */
+		err.setCode(libisds2Error(ret));
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (iCrit != NULL) {
+		isds_DbOwnerInfo_free(&iCrit);
+	}
+	if (iBoxes != NULL) {
+		isds_list_free(&iBoxes);
+	}
+
+	return err;
+}
+
 Isds::Error Isds::Service::getOwnerInfoFromLogin(struct isds_ctx *ctx,
     DbOwnerInfo &ownerInfo)
 {

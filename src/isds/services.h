@@ -57,6 +57,18 @@ namespace Isds {
 	public:
 	/* Box interface: */
 		/*!
+		 * @brief Service FindDataBox.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     criteria Search criteria.
+		 * @param[out]    boxes Found boxes.
+		 * @return Error description.
+		 */
+		static
+		Error findDataBox(struct isds_ctx *ctx,
+		    const DbOwnerInfo &criteria, QList<DbOwnerInfo> &boxes);
+
+		/*!
 		 * @brief Service GetOwnerInfoFromLogin.
 		 *
 		 * @param[in,out] ctx Communication context.

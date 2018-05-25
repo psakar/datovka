@@ -627,6 +627,101 @@ struct isds_DbOwnerInfo *Isds::dbOwnerInfo2libisds(const DbOwnerInfo &doi,
 	return idoi;
 }
 
+QList<Isds::DbOwnerInfo> Isds::libisds2dbOwnerInfoList(
+    const struct isds_list *ioil, bool *ok)
+{
+	/* Owner info destructor function type. */
+	typedef void (*own_info_destr_func_t)(struct isds_DbOwnerInfo **);
+
+	QList<DbOwnerInfo> ownerInfoList;
+
+	while (ioil != NULL) {
+		const struct isds_DbOwnerInfo *ioi = (struct isds_DbOwnerInfo *)ioil->data;
+		own_info_destr_func_t idestr = (own_info_destr_func_t)ioil->destructor;
+		/* Destructor function must be set. */
+		if (idestr != isds_DbOwnerInfo_free) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList<DbOwnerInfo>();
+		}
+
+		if (ioi != NULL) {
+			bool iOk = false;
+			ownerInfoList.append(libisds2dbOwnerInfo(ioi, &iOk));
+			if (!iOk) {
+				if (ok != Q_NULLPTR) {
+					*ok = false;
+				}
+				return QList<DbOwnerInfo>();
+			}
+		}
+
+		ioil = ioil->next;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return ownerInfoList;
+}
+
+struct isds_list *Isds::dbOwnerInfoList2libisds(
+    const QList<DbOwnerInfo> &oil, bool *ok)
+{
+	if (Q_UNLIKELY(oil.isEmpty())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_list *ioil = NULL;
+	struct isds_list *lastItem = NULL;
+	foreach (const DbOwnerInfo &oi, oil) {
+		struct isds_list *item =
+		    (struct isds_list *)std::malloc(sizeof(*item));
+		if (Q_UNLIKELY(item == NULL)) {
+			Q_ASSERT(0);
+			goto fail;
+		}
+		std::memset(item, 0, sizeof(*item));
+
+		bool iOk = false;
+		struct isds_DbOwnerInfo *ioi = dbOwnerInfo2libisds(oi, &iOk);
+		if (Q_UNLIKELY(!iOk)) {
+			std::free(item); item = NULL;
+			goto fail;
+		}
+
+		/* Set list item. */
+		item->next = NULL;
+		item->data = ioi;
+		item->destructor = (void (*)(void **))isds_DbOwnerInfo_free;
+
+		/* Append item. */
+		if (lastItem == NULL) {
+			ioil = item;
+		} else {
+			lastItem->next = item;
+		}
+		lastItem = item;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return ioil;
+
+fail:
+	isds_list_free(&ioil);
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return NULL;
+}
+
 /*!
  * @brief Converts user types.
  */

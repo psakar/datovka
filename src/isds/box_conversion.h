@@ -23,6 +23,8 @@
 
 #pragma once
 
+#include <QList>
+
 #include "src/isds/box_interface.h"
 
 extern "C" {
@@ -54,6 +56,11 @@ namespace Isds {
 	    bool *ok = Q_NULLPTR);
 	struct ::isds_DbOwnerInfo *dbOwnerInfo2libisds(const DbOwnerInfo &doi,
 	    bool *ok = Q_NULLPTR);
+
+	QList<DbOwnerInfo> libisds2dbOwnerInfoList(
+	    const struct ::isds_list *ioil, bool *ok = Q_NULLPTR);
+	struct ::isds_list *dbOwnerInfoList2libisds(
+	    const QList<DbOwnerInfo> &oil, bool *ok = Q_NULLPTR);
 
 	DbUserInfo libisds2dbUserInfo(const struct ::isds_DbUserInfo *idui,
 	    bool *ok = Q_NULLPTR);

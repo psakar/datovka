@@ -27,7 +27,11 @@
 
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/box_conversion.h"
+#include "src/isds/box_interface.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_search_owner.h"
@@ -67,51 +71,33 @@ void TaskSearchOwner::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-static
-void isdsBoxes2dbOwnerInfoList(const struct isds_list *isdsFoundBoxes,
-    QList<Isds::DbOwnerInfo> &foundBoxes)
-{
-	bool ok = false;
-	while (isdsFoundBoxes != NULL) {
-		const struct isds_DbOwnerInfo *isdsFoundBox =
-		    (struct isds_DbOwnerInfo *)isdsFoundBoxes->data;
-		Isds::DbOwnerInfo ds = Isds::libisds2dbOwnerInfo(isdsFoundBox, &ok);
-		if (!ok) {
-			logErrorNL("%s", "Cannot convert libisds dbOwnerInfo to dbOwnerInfo.");
-			continue;
-		}
-		foundBoxes.append(ds);
-		isdsFoundBoxes = isdsFoundBoxes->next;
-	}
-}
-
 /*!
  * @brief Converts libisds error code into task error code.
  *
- * @param[in] status Libisds error status.
+ * @param[in] code Libisds error status.
  * @return Task error code.
  */
 static
-enum TaskSearchOwner::Result convertError(int status)
+enum TaskSearchOwner::Result convertError(enum Isds::Type::Error code)
 {
-	switch (status) {
-	case IE_SUCCESS:
+	switch (code) {
+	case Isds::Type::ERR_SUCCESS:
 		return TaskSearchOwner::SO_SUCCESS;
 		break;
-	case IE_2BIG:
-	case IE_NOEXIST:
-	case IE_INVAL:
-	case IE_INVALID_CONTEXT:
+	case Isds::Type::ERR_2BIG:
+	case Isds::Type::ERR_NOEXIST:
+	case Isds::Type::ERR_INVAL:
+	case Isds::Type::ERR_INVALID_CONTEXT:
 		return TaskSearchOwner::SO_BAD_DATA;
 		break;
-	case IE_ISDS:
-	case IE_NOT_LOGGED_IN:
-	case IE_CONNECTION_CLOSED:
-	case IE_TIMED_OUT:
-	case IE_NETWORK:
-	case IE_HTTP:
-	case IE_SOAP:
-	case IE_XML:
+	case Isds::Type::ERR_ISDS:
+	case Isds::Type::ERR_NOT_LOGGED_IN:
+	case Isds::Type::ERR_CONNECTION_CLOSED:
+	case Isds::Type::ERR_TIMED_OUT:
+	case Isds::Type::ERR_NETWORK:
+	case Isds::Type::ERR_HTTP:
+	case Isds::Type::ERR_SOAP:
+	case Isds::Type::ERR_XML:
 		return TaskSearchOwner::SO_COM_ERROR;
 		break;
 	default:
@@ -124,42 +110,24 @@ enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(const QString &userName
     const Isds::DbOwnerInfo &dbOwnerInfo, QList<Isds::DbOwnerInfo> &foundBoxes,
     QString &error, QString &longError)
 {
-	isds_error status = IE_ERROR;
-
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
 		Q_ASSERT(0);
 		return SO_ERROR;
 	}
 
-	bool ok = false;
-	struct isds_list *isdsFoundBoxes = NULL;
-	struct isds_DbOwnerInfo *isdsDbOwnerInfo =
-	    Isds::dbOwnerInfo2libisds(dbOwnerInfo, &ok);
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert dbOwnerInfo to libisds dbOwnerInfo.");
-		return SO_ERROR;
-	}
-
-	status = isds_FindDataBox(session, isdsDbOwnerInfo, &isdsFoundBoxes);
-
-	isds_DbOwnerInfo_free(&isdsDbOwnerInfo);
-
-	if (isdsFoundBoxes != NULL) {
-		isdsBoxes2dbOwnerInfoList(isdsFoundBoxes, foundBoxes);
-		isds_list_free(&isdsFoundBoxes);
-	}
-
-	if (IE_SUCCESS != status) {
+	Isds::Error err = Isds::Service::findDataBox(session, dbOwnerInfo,
+	    foundBoxes);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL(
 		    "Searching for data box returned status %d: '%s'.",
-		    status, isdsStrError(status).toUtf8().constData());
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
+		    err.code(), error.toUtf8().constData());
 	} else {
 		logDebugLv1NL("Find databox returned '%d': '%s'.",
-		    status, isdsStrError(status).toUtf8().constData());
+		    err.code(), error.toUtf8().constData());
 	}
 
-	return convertError(status);
+	return convertError(err.code());
 }
