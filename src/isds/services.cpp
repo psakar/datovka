@@ -266,6 +266,60 @@ fail:
 	return err;
 }
 
+Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx,
+    const Message &message, qint64 &dmId)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || message.isNull())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	bool ok = false;
+	isds_error ret = IE_SUCCESS;
+	struct isds_message *msg = message2libisds(message, &ok);
+	if (!ok) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+		goto fail;
+	}
+
+	ret = isds_send_message(ctx, msg);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	if (msg->envelope->dmID == NULL) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Missing identifier of sent message."));
+		goto fail;
+	}
+
+	ok = false;
+	dmId = QString(msg->envelope->dmID).toLongLong(&ok);
+	if (Q_UNLIKELY((!ok) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Cannot convert sent message identifier."));
+		goto fail;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+
+fail:
+	if (msg != NULL) {
+		isds_message_free(&msg);
+	}
+
+	return err;
+}
+
 Isds::Error Isds::Service::getListOfReceivedMessages(struct isds_ctx *ctx,
     Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
     unsigned long int *dmLimit, QList<Message> &messages)
@@ -367,6 +421,30 @@ Isds::Error Isds::Service::getSignedDeliveryInfo(struct isds_ctx *ctx,
 {
 	return ServicePrivate::messageGetterService(
 	    ServicePrivate::MG_SIGNED_DELIVERY_INFO, ctx, dmId, message);
+}
+
+Isds::Error Isds::Service::markMessageAsDownloaded(struct isds_ctx *ctx,
+    qint64 dmId)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	isds_error ret = isds_mark_message_read(ctx,
+	    QString::number(dmId).toUtf8().constData());
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		return err;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+	return err;
 }
 
 Isds::Error Isds::Service::signedReceivedMessageDownload(struct isds_ctx *ctx,

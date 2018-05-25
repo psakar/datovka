@@ -30,7 +30,10 @@
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/error.h"
 #include "src/isds/message_conversion.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
@@ -116,11 +119,9 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	enum TaskSendMessage::Result ret = SM_ERR;
 	qint64 dmId = -1;
-	struct isds_message *isdsMessage = NULL;
-	isds_error status;
 	struct isds_ctx *session = NULL;
 	QString isdsError, isdsLongError;
-	bool ok = false;
+	Isds::Error err;
 
 	session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
@@ -132,13 +133,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 40);
 
-	isdsMessage = Isds::message2libisds(message, &ok);
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert message to libisds message.");
-		ret = SM_ERR;
-		goto fail;
-	}
-	if (isdsMessage == NULL) {
+	if (message.isNull()) {
 		logErrorNL("%s", "Cannot send null message.");
 		ret = SM_ERR;
 		goto fail;
@@ -147,12 +142,12 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 	logInfo("Sending message from user '%s'.\n",
 	    userName.toUtf8().constData());
 
-	status = isds_send_message(session, isdsMessage);
-	if (IE_SUCCESS != status) {
-		isdsError = isds_strerror(status);
-		isdsLongError = isdsLongMessage(session);
+	err = Isds::Service::createMessage(session, message, dmId);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		isdsError = Isds::Description::descrError(err.code());
+		isdsLongError = err.longDescr();
 		logErrorNL("Sending message returned status %d: '%s' '%s'.",
-		    status, isdsError.toUtf8().constData(),
+		    err.code(), isdsError.toUtf8().constData(),
 		    isdsLongError.toUtf8().constData());
 		ret = SM_ISDS_ERROR;
 		goto fail;
@@ -162,23 +157,15 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	/* Store sent message to database */
 	{
-		QDateTime deliveryTime(
-		    timevalToDateTime(isdsMessage->envelope->dmDeliveryTime));
-		MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime,
-		    true);
+		MessageDb *messageDb = dbSet.accessMessageDb(
+		    message.envelope().dmDeliveryTime(), true);
 		if (Q_NULLPTR == messageDb) {
 			Q_ASSERT(0);
 			ret = SM_DB_INS_ERR;
 			goto fail;
 		}
 
-		/* Get sent message ID */
-		dmId = QString(isdsMessage->envelope->dmID).toLongLong(&ok);
-		if (!ok) {
-			Q_ASSERT(0);
-			ret = SM_DB_INS_ERR;
-			goto fail;
-		}
+		Q_ASSERT(dmId >= 0);
 
 		const QString acntDbKey(AccountDb::keyFromLogin(userName));
 
@@ -215,8 +202,6 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 100);
 
 fail:
-	isds_message_free(&isdsMessage);
-
 	if (Q_NULLPTR != resultData) {
 		resultData->result = ret;
 		resultData->dbIDRecipient = message.envelope().dbIDRecipient();

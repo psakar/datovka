@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _TASK_SEND_MESSAGE_H_
-#define _TASK_SEND_MESSAGE_H_
+#pragma once
 
 #include <QByteArray>
 #include <QList>
@@ -106,7 +105,7 @@ private:
 	 *
 	 * @param[in]     userName         Account identifier (user login name).
 	 * @param[in,out] dbSet            Database container.
-	 * @param[in,out] message          Message being sent.
+	 * @param[in]     message          Message being sent.
 	 * @param[in]     recipientName    Message recipient name.
 	 * @param[in]     recipientAddress Message recipient address.
 	 * @param[in]     isPDZ            True if message is a PDZ.
@@ -128,5 +127,3 @@ private:
 	const QString m_recipientAddress; /*!< Message recipient address. */
 	const bool m_isPDZ; /*!< True if message is a PDZ. */
 };
-
-#endif /* _TASK_SEND_MESSAGE_H_ */

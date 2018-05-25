@@ -21,16 +21,6 @@
  * the two.
  */
 
-#if defined(__APPLE__) || defined(__clang__)
-#  define __USE_C99_MATH
-#  define _Bool bool
-#else /* !__APPLE__ */
-#  include <cstdbool>
-#endif /* __APPLE__ */
-
-#include <cstdlib>
-#include <cstring>
-#include <isds.h>
 #include <utility> /* std::move */
 
 #include "src/isds/box_interface.h"

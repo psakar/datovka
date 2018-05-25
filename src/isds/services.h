@@ -54,6 +54,18 @@ namespace Isds {
 
 	public:
 		/*!
+		 * @brief Service CreateMessage.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     message Sent message content.
+		 * @param[out]    dmId Identifier of successfully sent message.
+		 * @return Error description.
+		 */
+		static
+		Error createMessage(struct isds_ctx *ctx,
+		    const Message &message, qint64 &dmId);
+
+		/*!
 		 * @brief Service GetListOfReceivedMessages.
 		 *
 		 * @param[in,out] ctx Communication context.
@@ -107,6 +119,13 @@ namespace Isds {
 		static
 		Error getSignedDeliveryInfo(struct isds_ctx *ctx, qint64 dmId,
 		    Message &message);
+
+		/*!
+		 * @brief Service MarkMessageAsDownloaded.
+		 */
+		static
+		Error markMessageAsDownloaded(struct isds_ctx *ctx,
+		    qint64 dmId);
 
 		/*!
 		 * @brief Service SignedMessageDownload.
