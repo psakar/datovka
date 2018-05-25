@@ -26,8 +26,11 @@
 #include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
+#include "src/isds/error.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/box_conversion.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_owner_info.h"
@@ -72,31 +75,21 @@ bool TaskDownloadOwnerInfo::downloadOwnerInfo(const QString &userName,
 		return false;
 	}
 
-	struct isds_DbOwnerInfo *ownerInfo = NULL;
-	isds_error status = isds_GetOwnerInfoFromLogin(session, &ownerInfo);
-	if (IE_SUCCESS != status) {
+	Isds::DbOwnerInfo ownerInfo;
+	Isds::Error err = Isds::Service::getOwnerInfoFromLogin(session,
+	    ownerInfo);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL(
 		    "Downloading owner information for account '%s' returned '%d': '%s'.",
 		    userName.toUtf8().constData(),
-		    status, isds_strerror(status));
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
-		isds_DbOwnerInfo_free(&ownerInfo);
+		    err.code(), error.toUtf8().constData());
 		return false;
 	}
 
-	Q_ASSERT(NULL != ownerInfo);
-
-	bool ok = false;
-	Isds::DbOwnerInfo dbOwnerInfo(Isds::libisds2dbOwnerInfo(ownerInfo, &ok));
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert libisds dbOwnerInfo to dbOwnerInfo.");
-		isds_DbOwnerInfo_free(&ownerInfo);
-		return false;
-	}
-
-	isds_DbOwnerInfo_free(&ownerInfo);
+	Q_ASSERT(!ownerInfo.isNull());
 
 	return GlobInstcs::accntDbPtr->insertAccountIntoDb(
-	    AccountDb::keyFromLogin(userName), dbOwnerInfo);
+	    AccountDb::keyFromLogin(userName), ownerInfo);
 }

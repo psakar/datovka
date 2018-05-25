@@ -37,6 +37,7 @@ extern "C" {
 namespace Isds {
 
 	/* Forward declaration. */
+	class DbOwnerInfo;
 	class Error;
 	class Message;
 
@@ -53,6 +54,19 @@ namespace Isds {
 		Service(void);
 
 	public:
+	/* Box interface: */
+		/*!
+		 * @brief Service GetOwnerInfoFromLogin.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[out]    ownerInfo Obtained owner info.
+		 * @return Error description.
+		 */
+		static
+		Error getOwnerInfoFromLogin(struct isds_ctx *ctx,
+		    DbOwnerInfo &ownerInfo);
+
+	/* Message inetrface: */
 		/*!
 		 * @brief Service CreateMessage.
 		 *
