@@ -24,6 +24,8 @@
 #pragma once
 
 #include <QDate>
+#include <QList>
+#include <QPair>
 #include <QScopedPointer>
 #include <QString>
 
@@ -532,15 +534,30 @@ namespace Isds {
 		void setIc(QString &&ic);
 #endif /* Q_COMPILER_RVALUE_REFS */
 		/* dbEffectiveOVM */
-		enum Type::NilBool dbEffectiveOVM(void) const;
-		void setDbEffectiveOVM(enum Type::NilBool eo);
+		bool dbEffectiveOVM(void) const;
+		void setDbEffectiveOVM(bool eo);
 		/* dbSendOptions -- Not provided; instead use methods below. */
-		enum Type::NilBool active(void) const;
-		void setActive(enum Type::NilBool a);
-		enum Type::NilBool publicSending(void) const;
-		void setPublicSending(enum Type::NilBool ps);
-		enum Type::NilBool commercialSending(void) const;
-		void setCommercialSending(enum Type::NilBool cs);
+		bool active(void) const;
+		void setActive(bool a);
+		bool publicSending(void) const;
+		void setPublicSending(bool ps);
+		bool commercialSending(void) const;
+		void setCommercialSending(bool cs);
+
+		/*
+		 * Indexes of start/stop pairs of highlighted name text which
+		 * match the sought element.
+		 */
+		const QList< QPair<int, int> > &nameMatches(void) const;
+		void setNameMatches(const QList< QPair<int, int> > &nm);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setNameMatches(QList< QPair<int, int> > &&nm);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		const QList< QPair<int, int> > &addressMatches(void) const;
+		void setAddressMatches(const QList< QPair<int, int> > &am);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setAddressMatches(QList< QPair<int, int> > &&am);
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 	private:
 		QScopedPointer<FulltextResultPrivate> d_ptr; // std::unique_ptr ?

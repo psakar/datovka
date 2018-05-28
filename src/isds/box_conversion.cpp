@@ -323,20 +323,13 @@ struct isds_PersonName *Isds::personName2libisds(const PersonName &pn, bool *ok)
  * @brief Converts data box types.
  */
 static
-enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt,
+enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType bt,
     bool *ok = Q_NULLPTR)
 {
-	if (bt == NULL) {
-		if (ok != Q_NULLPTR) {
-			*ok = true;
-		}
-		return Isds::Type::BT_NULL;
-	}
-
 	bool iOk = true;
 	enum Isds::Type::DbType type = Isds::Type::BT_NULL;
 
-	switch (*bt) {
+	switch (bt) {
 	case DBTYPE_SYSTEM: type = Isds::Type::BT_SYSTEM; break;
 	case DBTYPE_OVM: type = Isds::Type::BT_OVM; break;
 	case DBTYPE_OVM_NOTAR: type = Isds::Type::BT_OVM_NOTAR; break;
@@ -365,6 +358,23 @@ enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt,
 		*ok = iOk;
 	}
 	return type;
+}
+
+/*!
+ * @brief Converts data box types.
+ */
+static
+enum Isds::Type::DbType libisdsDbTypePtr2DbType(const isds_DbType *bt,
+    bool *ok = Q_NULLPTR)
+{
+	if (bt == NULL) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::Type::BT_NULL;
+	}
+
+	return libisdsDbType2DbType(*bt, ok);
 }
 
 /*!
@@ -398,7 +408,7 @@ Isds::DbOwnerInfo Isds::libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
 	DbOwnerInfo ownerInfo;
 
 	ownerInfo.setDbID(Isds::fromCStr(idoi->dbID));
-	ownerInfo.setDbType(libisdsDbType2DbType(idoi->dbType, &iOk));
+	ownerInfo.setDbType(libisdsDbTypePtr2DbType(idoi->dbType, &iOk));
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
@@ -425,8 +435,8 @@ Isds::DbOwnerInfo Isds::libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
-	ownerInfo.setDbEffectiveOVM(fromBool(idoi->dbEffectiveOVM));
-	ownerInfo.setDbOpenAddressing(fromBool(idoi->dbOpenAddressing));
+	ownerInfo.setDbEffectiveOVM(fromBoolPtr(idoi->dbEffectiveOVM));
+	ownerInfo.setDbOpenAddressing(fromBoolPtr(idoi->dbOpenAddressing));
 
 	if (ok != Q_NULLPTR) {
 		*ok = true;
@@ -444,7 +454,7 @@ fail:
  * @brief Converts data box types.
  */
 static
-bool dbType2libisdsDbType(isds_DbType **tgt, enum Isds::Type::DbType src)
+bool dbType2libisdsDbTypePtr(isds_DbType **tgt, enum Isds::Type::DbType src)
 {
 	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -544,7 +554,7 @@ bool setLibisdsDbOwnerInfoContent(struct isds_DbOwnerInfo *tgt,
 	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->dbID, src.dbID()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!dbType2libisdsDbType(&tgt->dbType, src.dbType()))) {
+	if (Q_UNLIKELY(!dbType2libisdsDbTypePtr(&tgt->dbType, src.dbType()))) {
 		return false;
 	}
 	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->ic, src.ic()))) {
@@ -583,10 +593,10 @@ bool setLibisdsDbOwnerInfoContent(struct isds_DbOwnerInfo *tgt,
 	if (Q_UNLIKELY(!dbState2longPtr(&tgt->dbState, src.dbState()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!toBool(&tgt->dbEffectiveOVM, src.dbEffectiveOVM()))) {
+	if (Q_UNLIKELY(!toBoolPtr(&tgt->dbEffectiveOVM, src.dbEffectiveOVM()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!toBool(&tgt->dbOpenAddressing, src.dbOpenAddressing()))) {
+	if (Q_UNLIKELY(!toBoolPtr(&tgt->dbOpenAddressing, src.dbOpenAddressing()))) {
 		return false;
 	}
 
@@ -981,4 +991,87 @@ struct isds_DbUserInfo *Isds::dbUserInfo2libisds(const DbUserInfo &dui,
 		*ok = true;
 	}
 	return idui;
+}
+
+Isds::FulltextResult Isds::libisds2fulltextResult(
+    const struct isds_fulltext_result *ifr, bool *ok)
+{
+	if (Q_UNLIKELY(ifr == Q_NULLPTR)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return FulltextResult();
+	}
+
+	bool iOk = false;
+	FulltextResult fulltextResult;
+
+	fulltextResult.setDbID(fromCStr(ifr->dbID));
+	fulltextResult.setDbType(libisdsDbType2DbType(ifr->dbType, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	fulltextResult.setDbName(fromCStr(ifr->name));
+	fulltextResult.setDbAddress(fromCStr(ifr->address));
+	fulltextResult.setDbBiDate(dateFromStructTM(ifr->biDate));
+	fulltextResult.setIc(fromCStr(ifr->ic));
+	fulltextResult.setDbEffectiveOVM(ifr->dbEffectiveOVM);
+	fulltextResult.setActive(ifr->active);
+	fulltextResult.setPublicSending(ifr->public_sending);
+	fulltextResult.setCommercialSending(ifr->commercial_sending);
+
+	/* TODO -- Convert pointers to list. */
+	//fulltextResult.setNameMatches();
+	//fulltextResult.setAddressMatches();
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return fulltextResult;
+
+fail:
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return FulltextResult();
+}
+
+QList<Isds::FulltextResult> Isds::libisds2fulltextResultList(
+    const struct isds_list *ifrl, bool *ok)
+{
+	/* Full-text result destructor function type. */
+	typedef void (*ft_result_destr_func_t)(struct isds_fulltext_result **);
+
+	QList<FulltextResult> resultList;
+
+	while (ifrl != NULL) {
+		const struct isds_fulltext_result *ifr = (struct isds_fulltext_result *)ifrl->data;
+		ft_result_destr_func_t idestr = (ft_result_destr_func_t)ifrl->destructor;
+		/* Destructor function must be set. */
+		if (idestr != isds_fulltext_result_free) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList<FulltextResult>();
+		}
+
+		if (ifr != NULL) {
+			bool iOk = false;
+			resultList.append(libisds2fulltextResult(ifr, &iOk));
+			if (!iOk) {
+				if (ok != Q_NULLPTR) {
+					*ok = false;
+				}
+				return QList<FulltextResult>();
+			}
+		}
+
+		ifrl = ifrl->next;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return resultList;
 }

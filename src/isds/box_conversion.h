@@ -33,6 +33,7 @@ extern "C" {
 	struct isds_PersonName;
 	struct isds_DbOwnerInfo;
 	struct isds_DbUserInfo;
+	struct isds_fulltext_result;
 	struct isds_list;
 }
 
@@ -67,5 +68,11 @@ namespace Isds {
 	    bool *ok = Q_NULLPTR);
 	struct ::isds_DbUserInfo *dbUserInfo2libisds(const DbUserInfo &dui,
 	    bool *ok = Q_NULLPTR);
+
+	FulltextResult libisds2fulltextResult(
+	    const struct ::isds_fulltext_result *ifr, bool *ok = Q_NULLPTR);
+
+	QList<FulltextResult> libisds2fulltextResultList(
+	    const struct ::isds_list *ifrl, bool *ok = Q_NULLPTR);
 
 }

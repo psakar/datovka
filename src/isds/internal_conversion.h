@@ -130,7 +130,7 @@ namespace Isds {
 	 * @param[in] cBoolPtr Pointer to bool.
 	 * @return Nullable bool enumeration type.
 	 */
-	enum Type::NilBool fromBool(const _Bool *cBoolPtr);
+	enum Type::NilBool fromBoolPtr(const _Bool *cBoolPtr);
 
 	/*!
 	 * @brief Sets bool pointer according to supplied value.
@@ -139,7 +139,7 @@ namespace Isds {
 	 * @param[in] nilBool Nullable bool value.
 	 * @return True on success, false in failure.
 	 */
-	bool toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool);
+	bool toBoolPtr(_Bool **cBoolPtr, enum Type::NilBool nilBool);
 
 	/*!
 	 * @brief Converts string to non-negative integer.

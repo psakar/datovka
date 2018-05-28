@@ -31,6 +31,7 @@ static const Isds::Address nullAddress;
 static const Isds::BirthInfo nullBirthInfo;
 static const Isds::PersonName nullPersonName;
 static const QDate nullDate;
+static const QList< QPair<int, int> > nullMatchList;
 static const QString nullString;
 
 /*!
@@ -1786,7 +1787,8 @@ public:
 	    : m_dbID(), m_dbType(Isds::Type::BT_NULL), m_dbName(), m_dbAddress(),
 	    m_dbBiDate(), m_dbICO(), m_dbEffectiveOVM(Isds::Type::BOOL_NULL),
 	    active(Isds::Type::BOOL_NULL), publicSending(Isds::Type::BOOL_NULL),
-	    commercialSending(Isds::Type::BOOL_NULL)
+	    commercialSending(Isds::Type::BOOL_NULL), nameMatches(),
+	    addressMatches()
 	{ }
 
 	FulltextResultPrivate &operator=(const FulltextResultPrivate &other) Q_DECL_NOTHROW
@@ -1801,6 +1803,8 @@ public:
 		active = other.active;
 		publicSending = other.publicSending;
 		commercialSending = other.commercialSending;
+		nameMatches = other.nameMatches;
+		addressMatches = other.addressMatches;
 
 		return *this;
 	}
@@ -1816,7 +1820,9 @@ public:
 		    (m_dbEffectiveOVM == other.m_dbEffectiveOVM) &&
 		    (active == other.active) &&
 		    (publicSending == other.publicSending) &&
-		    (commercialSending == other.commercialSending);
+		    (commercialSending == other.commercialSending) &&
+		    (nameMatches == other.nameMatches) &&
+		    (addressMatches == other.addressMatches);
 	}
 
 	QString m_dbID;
@@ -1825,14 +1831,17 @@ public:
 	QString m_dbAddress;
 	QDate m_dbBiDate;
 	QString m_dbICO;
-	enum Isds::Type::NilBool m_dbEffectiveOVM;
+	bool m_dbEffectiveOVM;
 	/*
 	 * Following entries are derived from libisds at it does not provide
 	 * interface for dbSendOptions.
 	 */
-	enum Isds::Type::NilBool active; /* Box can receive messages. */
-	enum Isds::Type::NilBool publicSending; /* Seeker box can send ordinary messages into this box. */
-	enum Isds::Type::NilBool commercialSending; /* Seeker box can send commercial messages into this box. */
+	bool active; /* Box can receive messages. */
+	bool publicSending; /* Seeker box can send ordinary messages into this box. */
+	bool commercialSending; /* Seeker box can send commercial messages into this box. */
+
+	QList< QPair<int, int> > nameMatches;
+	QList< QPair<int, int> > addressMatches;
 };
 
 Isds::FulltextResult::FulltextResult(void)
@@ -2079,7 +2088,7 @@ void Isds::FulltextResult::setIc(QString &&ic)
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-enum Isds::Type::NilBool Isds::FulltextResult::dbEffectiveOVM(void) const
+bool Isds::FulltextResult::dbEffectiveOVM(void) const
 {
 	Q_D(const FulltextResult);
 	if (Q_UNLIKELY(d == Q_NULLPTR)) {
@@ -2088,14 +2097,14 @@ enum Isds::Type::NilBool Isds::FulltextResult::dbEffectiveOVM(void) const
 	return d->m_dbEffectiveOVM;
 }
 
-void Isds::FulltextResult::setDbEffectiveOVM(enum Type::NilBool eo)
+void Isds::FulltextResult::setDbEffectiveOVM(bool eo)
 {
 	ensureFulltextResultPrivate();
 	Q_D(FulltextResult);
 	d->m_dbEffectiveOVM = eo;
 }
 
-enum Isds::Type::NilBool Isds::FulltextResult::active(void) const
+bool Isds::FulltextResult::active(void) const
 {
 	Q_D(const FulltextResult);
 	if (Q_UNLIKELY(d == Q_NULLPTR)) {
@@ -2104,14 +2113,14 @@ enum Isds::Type::NilBool Isds::FulltextResult::active(void) const
 	return d->active;
 }
 
-void Isds::FulltextResult::setActive(enum Type::NilBool a)
+void Isds::FulltextResult::setActive(bool a)
 {
 	ensureFulltextResultPrivate();
 	Q_D(FulltextResult);
 	d->active = a;
 }
 
-enum Isds::Type::NilBool Isds::FulltextResult::publicSending(void) const
+bool Isds::FulltextResult::publicSending(void) const
 {
 	Q_D(const FulltextResult);
 	if (Q_UNLIKELY(d == Q_NULLPTR)) {
@@ -2120,14 +2129,14 @@ enum Isds::Type::NilBool Isds::FulltextResult::publicSending(void) const
 	return d->publicSending;
 }
 
-void Isds::FulltextResult::setPublicSending(enum Type::NilBool ps)
+void Isds::FulltextResult::setPublicSending(bool ps)
 {
 	ensureFulltextResultPrivate();
 	Q_D(FulltextResult);
 	d->publicSending = ps;
 }
 
-enum Isds::Type::NilBool Isds::FulltextResult::commercialSending(void) const
+bool Isds::FulltextResult::commercialSending(void) const
 {
 	Q_D(const FulltextResult);
 	if (Q_UNLIKELY(d == Q_NULLPTR)) {
@@ -2136,12 +2145,62 @@ enum Isds::Type::NilBool Isds::FulltextResult::commercialSending(void) const
 	return d->commercialSending;
 }
 
-void Isds::FulltextResult::setCommercialSending(enum Type::NilBool cs)
+void Isds::FulltextResult::setCommercialSending(bool cs)
 {
 	ensureFulltextResultPrivate();
 	Q_D(FulltextResult);
 	d->commercialSending = cs;
 }
+
+const QList< QPair<int, int> > &Isds::FulltextResult::nameMatches(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullMatchList;
+	}
+	return d->nameMatches;
+}
+
+void Isds::FulltextResult::setNameMatches(const QList< QPair<int, int> > &nm)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->nameMatches = nm;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setNameMatches(QList< QPair<int, int> > &&nm)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->nameMatches = nm;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QList< QPair<int, int> > &Isds::FulltextResult::addressMatches(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullMatchList;
+	}
+	return d->addressMatches;
+}
+
+void Isds::FulltextResult::setAddressMatches(const QList< QPair<int, int> > &am)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->addressMatches = am;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setAddressMatches(QList< QPair<int, int> > &&am)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->addressMatches = am;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 void Isds::swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW
 {
