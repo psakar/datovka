@@ -33,6 +33,7 @@ extern "C" {
 	struct isds_PersonName;
 	struct isds_DbOwnerInfo;
 	struct isds_DbUserInfo;
+	struct isds_list;
 }
 
 namespace Isds {

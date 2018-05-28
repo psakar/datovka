@@ -1774,3 +1774,159 @@ void Isds::swap(DbUserInfo &first, DbUserInfo &second) Q_DECL_NOTHROW
 	using std::swap;
 	swap(first.d_ptr, second.d_ptr);
 }
+
+/*!
+ * @brief PIMPL full-text data-box search result class.
+ */
+class Isds::FulltextResultPrivate {
+	//Q_DISABLE_COPY(FulltextResultPrivate)
+public:
+	FulltextResultPrivate(void)
+	    : m_dbID(), m_dbType(Isds::Type::BT_NULL), m_dbName(), m_dbAddress(),
+	    m_dbBiDate(), m_dbICO(), m_dbEffectiveOVM(Isds::Type::BOOL_NULL),
+	    active(Isds::Type::BOOL_NULL), publicSending(Isds::Type::BOOL_NULL),
+	    commercialSending(Isds::Type::BOOL_NULL)
+	{ }
+
+	FulltextResultPrivate &operator=(const FulltextResultPrivate &other) Q_DECL_NOTHROW
+	{
+		m_dbID = other.m_dbID;
+		m_dbType = other.m_dbType;
+		m_dbName = other.m_dbName;
+		m_dbAddress = other.m_dbAddress;
+		m_dbBiDate = other.m_dbBiDate;
+		m_dbICO = other.m_dbICO;
+		m_dbEffectiveOVM = other.m_dbEffectiveOVM;
+		active = other.active;
+		publicSending = other.publicSending;
+		commercialSending = other.commercialSending;
+
+		return *this;
+	}
+
+	bool operator==(const FulltextResultPrivate &other) const
+	{
+		return (m_dbID == other.m_dbID) &&
+		    (m_dbType == other.m_dbType) &&
+		    (m_dbName == other.m_dbName) &&
+		    (m_dbAddress == other.m_dbAddress) &&
+		    (m_dbBiDate == other.m_dbBiDate) &&
+		    (m_dbICO == other.m_dbICO) &&
+		    (m_dbEffectiveOVM == other.m_dbEffectiveOVM) &&
+		    (active == other.active) &&
+		    (publicSending == other.publicSending) &&
+		    (commercialSending == other.commercialSending);
+	}
+
+	QString m_dbID;
+	enum Isds::Type::DbType m_dbType;
+	QString m_dbName;
+	QString m_dbAddress;
+	QDate m_dbBiDate;
+	QString m_dbICO;
+	enum Isds::Type::NilBool m_dbEffectiveOVM;
+	/*
+	 * Following entries are derived from libisds at it does not provide
+	 * interface for dbSendOptions.
+	 */
+	enum Isds::Type::NilBool active; /* Box can receive messages. */
+	enum Isds::Type::NilBool publicSending; /* Seeker box can send ordinary messages into this box. */
+	enum Isds::Type::NilBool commercialSending; /* Seeker box can send commercial messages into this box. */
+};
+
+Isds::FulltextResult::FulltextResult(void)
+    : d_ptr(Q_NULLPTR)
+{
+}
+
+Isds::FulltextResult::FulltextResult(const FulltextResult &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) FulltextResultPrivate) : Q_NULLPTR)
+{
+	Q_D(FulltextResult);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::FulltextResult::FulltextResult(FulltextResult &&other) Q_DECL_NOEXCEPT
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::FulltextResult::~FulltextResult(void)
+{
+}
+
+/*!
+ * @brief Ensures private full-text search result presence.
+ *
+ * @note Returns if private full-text search result could not be allocated.
+ */
+#define ensureFulltextResultPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			FulltextResultPrivate *p = new (std::nothrow) FulltextResultPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+Isds::FulltextResult &Isds::FulltextResult::operator=(
+    const FulltextResult &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureFulltextResultPrivate(*this);
+	Q_D(FulltextResult);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::FulltextResult &Isds::FulltextResult::operator=(
+    FulltextResult &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::FulltextResult::operator==(const FulltextResult &other) const
+{
+	Q_D(const FulltextResult);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::FulltextResult::operator!=(const FulltextResult &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::FulltextResult::isNull(void) const
+{
+	Q_D(const FulltextResult);
+	return d == Q_NULLPTR;
+}
+
+void Isds::swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}

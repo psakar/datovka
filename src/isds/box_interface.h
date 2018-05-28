@@ -459,4 +459,38 @@ namespace Isds {
 
 	void swap(DbUserInfo &first, DbUserInfo &second) Q_DECL_NOTHROW;
 
+	class FulltextResultPrivate;
+	/*!
+	 * @brief Full-text data-box search result.
+	 *
+	 * pril_2/WS_ISDS_Vyhledavani_datovych_schranek.pdf (secrion 2.2)
+	 */
+	class FulltextResult {
+		Q_DECLARE_PRIVATE(FulltextResult)
+
+	public:
+		FulltextResult(void);
+		FulltextResult(const FulltextResult &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		FulltextResult(FulltextResult &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+		~FulltextResult(void);
+
+		FulltextResult &operator=(const FulltextResult &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		FulltextResult &operator=(FulltextResult &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const FulltextResult &other) const;
+		bool operator!=(const FulltextResult &other) const;
+
+		friend void swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+	private:
+		QScopedPointer<FulltextResultPrivate> d_ptr; // std::unique_ptr ?
+	};
+
+	void swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW;
 }

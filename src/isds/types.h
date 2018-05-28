@@ -295,6 +295,19 @@ public:
 	};
 
 	/*!
+	 * @brief Full-text search type.
+	 *
+	 * @note Mentioned in pril_2/WS_ISDS_Vyhledavani_datovych_schranek.pdf
+	 *     secrion 2.2.
+	 */
+	enum FulltextSearchType {
+		FST_GENERAL,
+		FST_ADDRESS,
+		FST_IC,
+		FST_BOX_ID
+	};
+
+	/*!
 	 * @brief Error value. Taken from libisds for compatibility.
 	 */
 	enum Error {
