@@ -24,6 +24,7 @@
 #include <utility> /* std::move */
 
 #include "src/isds/box_interface.h"
+#include "src/isds/internal_conversion.h"
 
 /* Null objects - for convenience. */
 static const Isds::Address nullAddress;
@@ -1923,6 +1924,223 @@ bool Isds::FulltextResult::isNull(void) const
 {
 	Q_D(const FulltextResult);
 	return d == Q_NULLPTR;
+}
+
+qint64 Isds::FulltextResult::dbId(void) const
+{
+	bool ok = false;
+	qint64 id = string2NonNegativeLong(dbID(), &ok);
+	return ok ? id : -1;
+}
+
+void Isds::FulltextResult::setDbId(qint64 id)
+{
+	setDbID(nonNegativeLong2String(id));
+}
+
+const QString &Isds::FulltextResult::dbID(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dbID;
+}
+
+void Isds::FulltextResult::setDbID(const QString &id)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbID = id;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setDbID(QString &&id)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbID = id;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+enum Isds::Type::DbType Isds::FulltextResult::dbType(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BT_NULL;
+	}
+	return d->m_dbType;
+}
+
+void Isds::FulltextResult::setDbType(enum Type::DbType bt)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbType = bt;
+}
+
+const QString &Isds::FulltextResult::dbName(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dbName;
+}
+
+void Isds::FulltextResult::setDbName(const QString &n)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbName = n;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setDbName(QString &&n)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbName = n;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::FulltextResult::dbAddress(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dbAddress;
+}
+
+void Isds::FulltextResult::setDbAddress(const QString &a)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbAddress = a;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setDbAddress(QString &&a)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbAddress = a;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QDate &Isds::FulltextResult::dbBiDate(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDate;
+	}
+	return d->m_dbBiDate;
+}
+
+void Isds::FulltextResult::setDbBiDate(const QDate &bd)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbBiDate = bd;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setDbBiDate(QDate &&bd)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbBiDate = bd;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::FulltextResult::ic(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dbICO;
+}
+
+void Isds::FulltextResult::setIc(const QString &ic)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbICO = ic;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setIc(QString &&ic)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbICO = ic;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+enum Isds::Type::NilBool Isds::FulltextResult::dbEffectiveOVM(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BOOL_NULL;
+	}
+	return d->m_dbEffectiveOVM;
+}
+
+void Isds::FulltextResult::setDbEffectiveOVM(enum Type::NilBool eo)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbEffectiveOVM = eo;
+}
+
+enum Isds::Type::NilBool Isds::FulltextResult::active(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BOOL_NULL;
+	}
+	return d->active;
+}
+
+void Isds::FulltextResult::setActive(enum Type::NilBool a)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->active = a;
+}
+
+enum Isds::Type::NilBool Isds::FulltextResult::publicSending(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BOOL_NULL;
+	}
+	return d->publicSending;
+}
+
+void Isds::FulltextResult::setPublicSending(enum Type::NilBool ps)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->publicSending = ps;
+}
+
+enum Isds::Type::NilBool Isds::FulltextResult::commercialSending(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BOOL_NULL;
+	}
+	return d->commercialSending;
+}
+
+void Isds::FulltextResult::setCommercialSending(enum Type::NilBool cs)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->commercialSending = cs;
 }
 
 void Isds::swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW

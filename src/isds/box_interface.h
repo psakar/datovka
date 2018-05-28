@@ -488,6 +488,60 @@ namespace Isds {
 
 		bool isNull(void) const;
 
+		/*
+		 * For convenience purposes. Message identifier consists only
+		 * of digits, but documentation explicitly states that it is
+		 * a max. 20 chars old string.
+		 *
+		 * Returns -1 if conversion to number fails.
+		 */
+		qint64 dbId(void) const;
+		void setDbId(qint64 id);
+
+		/* dbID */
+		const QString &dbID(void) const;
+		void setDbID(const QString &id);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbID(QString &&id);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbType */
+		enum Type::DbType dbType(void) const;
+		void setDbType(enum Type::DbType bt);
+		/* dbName */
+		const QString &dbName(void) const;
+		void setDbName(const QString &n);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbName(QString &&n);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbAddress */
+		const QString &dbAddress(void) const;
+		void setDbAddress(const QString &a);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbAddress(QString &&a);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbBiDate */
+		const QDate &dbBiDate(void) const;
+		void setDbBiDate(const QDate &bd);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbBiDate(QDate &&bd);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbICO */
+		const QString &ic(void) const;
+		void setIc(const QString &ic);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setIc(QString &&ic);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbEffectiveOVM */
+		enum Type::NilBool dbEffectiveOVM(void) const;
+		void setDbEffectiveOVM(enum Type::NilBool eo);
+		/* dbSendOptions -- Not provided; instead use methods below. */
+		enum Type::NilBool active(void) const;
+		void setActive(enum Type::NilBool a);
+		enum Type::NilBool publicSending(void) const;
+		void setPublicSending(enum Type::NilBool ps);
+		enum Type::NilBool commercialSending(void) const;
+		void setCommercialSending(enum Type::NilBool cs);
+
 	private:
 		QScopedPointer<FulltextResultPrivate> d_ptr; // std::unique_ptr ?
 	};
