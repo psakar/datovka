@@ -25,8 +25,8 @@
 
 #include "src/io/message_db.h"
 #include "src/isds/box_interface.h"
+#include "src/isds/types.h"
 #include "src/models/table_model.h"
-#include "src/worker/task_search_owner_fulltext.h"
 
 /*!
  * @brief List of data boxes and additional information.
@@ -132,8 +132,7 @@ public:
 	 *
 	 * @param[in] entryList List of entries to append into the model.
 	 */
-	void appendData(
-	    const QList<TaskSearchOwnerFulltext::BoxEntry> &entryList);
+	void appendData(const QList<Isds::FulltextResult> &entryList);
 
 	/*!
 	 * @brief Appends data into the model.
@@ -152,8 +151,9 @@ public:
 	 * @param[in] postCode Postal code.
 	 * @param[in] pdz True if sending of PDZ is necessary.
 	 */
-	void appendData(const QString &id, int type, const QString &name,
-	    const QString &addr, const QString postCode, const QVariant &pdz);
+	void appendData(const QString &id, enum Isds::Type::DbType type,
+	    const QString &name, const QString &addr, const QString &postCode,
+	    const QVariant &pdz);
 
 	/*!
 	 * @brief Returns true if there are some items checked.

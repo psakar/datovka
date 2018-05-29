@@ -27,6 +27,7 @@
 #include <QItemSelection>
 #include <QThread>
 
+#include "src/isds/types.h"
 #include "src/models/combo_box_model.h"
 #include "src/models/data_box_contacts_model.h"
 #include "src/models/sort_filter_proxy_model.h"
@@ -249,7 +250,7 @@ private:
 	 * @return Search result.
 	 */
 	SearchResultFt queryBoxFulltextPage(
-	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	    enum Isds::Type::FulltextSearchType target,
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase, qint64 pageNum);
 
@@ -261,7 +262,7 @@ private:
 	 * @param[in] phrase Text phrase to search for.
 	 */
 	SearchResultFt queryBoxFulltextAll(
-	    enum TaskSearchOwnerFulltext::FulltextTarget target,
+	    enum Isds::Type::FulltextSearchType target,
 	    enum TaskSearchOwnerFulltext::BoxType boxType,
 	    const QString &phrase);
 

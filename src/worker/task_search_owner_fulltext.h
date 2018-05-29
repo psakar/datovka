@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,13 @@
  * the two.
  */
 
-#ifndef _TASK_SEARCH_OWNER_FULLTEXT_H_
-#define _TASK_SEARCH_OWNER_FULLTEXT_H_
+#pragma once
 
 #include <QList>
 #include <QString>
 
+#include "src/isds/box_interface.h"
+#include "src/isds/types.h"
 #include "src/worker/task.h"
 
 /*!
@@ -44,40 +45,12 @@ public:
 		SOF_ERROR /*!< Other type of error occurred. */
 	};
 
-	enum FulltextTarget {
-		FT_ALL, /*!< Search in all fields. */
-		FT_ADDRESS, /*!< Search in address. */
-		FT_IC, /* Search in organization identifier. */
-		FT_BOX_ID /* Search in box ID. */
-	};
-
 	enum BoxType {
 		BT_ALL, /*!< Search all types. */
 		BT_OVM,
 		BT_PO,
 		BT_PFO,
 		BT_FO
-	};
-
-	/*!
-	 * @brief Describes a data box.
-	 */
-	class BoxEntry {
-	public:
-		/*!
-		 *  @brief Constructor.
-		 */
-		BoxEntry(const QString &i, int t, const QString &n,
-		    const QString &ad, bool ovm, bool ac, bool ps, bool cs);
-
-		QString id; /*!< Data box id. */
-		int type; /*!< Data box type (as specified in libisds). */
-		QString name; /*!< Data box name. */
-		QString address; /*!< Post address. */
-		bool effectiveOVM; /*!< Box has effective OVM role. */
-		bool active; /*!< Box is active. */
-		bool publicSending; /*!< Accepts non-commercial messages. */
-		bool commercialSending; /*!< Box can receive PDZ from current box. */
 	};
 
 	/*!
@@ -92,7 +65,7 @@ public:
 	 *                   from given \a pageNumber.
 	 */
 	explicit TaskSearchOwnerFulltext(const QString &userName,
-	    const QString &query, enum FulltextTarget target,
+	    const QString &query, enum Isds::Type::FulltextSearchType target,
 	    enum BoxType type, qint64 pageNumber = 0, bool askAll = true);
 
 	/*!
@@ -105,7 +78,7 @@ public:
 	QString m_isdsError; /*!< Error description.  */
 	QString m_isdsLongError; /*!< Long error description. */
 	quint64 m_totalMatchingBoxes; /*!< Set to number of boxes matching request. */
-	QList<BoxEntry> m_foundBoxes; /*!< List of found boxes. */
+	QList<Isds::FulltextResult> m_foundBoxes; /*!< List of found boxes. */
 	bool m_gotLastPage; /*!< Set to true if last page acquired. */
 
 private:
@@ -135,11 +108,12 @@ private:
 	 */
 	static
 	enum Result isdsSearch2(const QString &userName,
-	    const QString &query, enum FulltextTarget target, enum BoxType type,
-	    quint64 pageSize, quint64 pageNumber, quint64 &totalMatchingBoxes,
-	    quint64 &currentPageStart, quint64 &currentPageSize,
-	    bool &gotLastPage, QList<BoxEntry> &foundBoxes,
-	    QString &error, QString &longError);
+	    const QString &query, enum Isds::Type::FulltextSearchType target,
+	    enum BoxType type, quint64 pageSize, quint64 pageNumber,
+	    quint64 &totalMatchingBoxes, quint64 &currentPageStart,
+	    quint64 &currentPageSize, bool &gotLastPage,
+	    QList<Isds::FulltextResult> &foundBoxes, QString &error,
+	    QString &longError);
 
 	/*!
 	 * @brief Search for all data boxes matching supplied criteria.
@@ -160,19 +134,18 @@ private:
 	 */
 	static
 	enum Result isdsSearch2All(const QString &userName,
-	    const QString &query, enum FulltextTarget target, enum BoxType type,
-	    quint64 pageNumber, bool askAll, quint64 &totalMatchingBoxes,
-	    bool &gotLastPage, QList<BoxEntry> &foundBoxes, QString &error,
+	    const QString &query, enum Isds::Type::FulltextSearchType target,
+	    enum BoxType type, quint64 pageNumber, bool askAll,
+	    quint64 &totalMatchingBoxes, bool &gotLastPage,
+	    QList<Isds::FulltextResult> &foundBoxes, QString &error,
 	    QString &longError);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	const QString m_query; /*!< Search phrase. */
-	const enum FulltextTarget m_target; /*!< Full-text search target. */
+	const enum Isds::Type::FulltextSearchType m_target; /*!< Full-text search target. */
 	const enum BoxType m_boxType; /*!< Sought box type. */
 	const quint64 m_pageNumber; /*!< Page number to ask for. */
 	const bool m_askAll; /*!< Whether to ask all remaining pages. */
 
 	static const quint64 maxResponseSize; /*!< Maximal response size. */
 };
-
-#endif /* _TASK_SEARCH_OWNER_FULLTEXT_H_ */
