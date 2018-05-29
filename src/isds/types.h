@@ -301,10 +301,10 @@ public:
 	 *     secrion 2.2.
 	 */
 	enum FulltextSearchType {
-		FST_GENERAL,
-		FST_ADDRESS,
-		FST_IC,
-		FST_BOX_ID
+		FST_GENERAL, /*!< Search in all fields. */
+		FST_ADDRESS, /*!< Search in address. */
+		FST_IC, /*!< Search in organisation identifier. */
+		FST_BOX_ID /*!< Search in data-box identifier. */
 	};
 
 	/*!

@@ -1785,10 +1785,9 @@ class Isds::FulltextResultPrivate {
 public:
 	FulltextResultPrivate(void)
 	    : m_dbID(), m_dbType(Isds::Type::BT_NULL), m_dbName(), m_dbAddress(),
-	    m_dbBiDate(), m_dbICO(), m_dbEffectiveOVM(Isds::Type::BOOL_NULL),
-	    active(Isds::Type::BOOL_NULL), publicSending(Isds::Type::BOOL_NULL),
-	    commercialSending(Isds::Type::BOOL_NULL), nameMatches(),
-	    addressMatches()
+	    m_dbBiDate(), m_dbICO(), m_dbEffectiveOVM(false),
+	    active(false), publicSending(false), commercialSending(false),
+	    nameMatches(), addressMatches()
 	{ }
 
 	FulltextResultPrivate &operator=(const FulltextResultPrivate &other) Q_DECL_NOTHROW
@@ -2092,7 +2091,7 @@ bool Isds::FulltextResult::dbEffectiveOVM(void) const
 {
 	Q_D(const FulltextResult);
 	if (Q_UNLIKELY(d == Q_NULLPTR)) {
-		return Type::BOOL_NULL;
+		return false;
 	}
 	return d->m_dbEffectiveOVM;
 }
@@ -2108,7 +2107,7 @@ bool Isds::FulltextResult::active(void) const
 {
 	Q_D(const FulltextResult);
 	if (Q_UNLIKELY(d == Q_NULLPTR)) {
-		return Type::BOOL_NULL;
+		return false;
 	}
 	return d->active;
 }
@@ -2124,7 +2123,7 @@ bool Isds::FulltextResult::publicSending(void) const
 {
 	Q_D(const FulltextResult);
 	if (Q_UNLIKELY(d == Q_NULLPTR)) {
-		return Type::BOOL_NULL;
+		return false;
 	}
 	return d->publicSending;
 }
@@ -2140,7 +2139,7 @@ bool Isds::FulltextResult::commercialSending(void) const
 {
 	Q_D(const FulltextResult);
 	if (Q_UNLIKELY(d == Q_NULLPTR)) {
-		return Type::BOOL_NULL;
+		return false;
 	}
 	return d->commercialSending;
 }
