@@ -32,10 +32,11 @@
 #include <cstring> // memcpy
 #include <isds.h>
 
-#include "src/isds/error_conversion.h"
-#include "src/isds/error.h"
 #include "src/isds/box_conversion.h"
 #include "src/isds/box_interface.h"
+#include "src/isds/error_conversion.h"
+#include "src/isds/error.h"
+#include "src/isds/internal_type_conversion.h"
 #include "src/isds/services.h"
 
 /*!
@@ -187,6 +188,114 @@ Isds::Error Isds::Service::getUserInfoFromLogin(struct isds_ctx *ctx,
 fail:
 	if (uInfo != NULL) {
 		isds_DbUserInfo_free(&uInfo);
+	}
+
+	return err;
+}
+
+/*!
+ * @brief Converts full-text search type.
+ */
+static
+isds_fulltext_target fulltextSearchType2libisdsFulltextSearchType(
+    enum Isds::Type::FulltextSearchType fst)
+{
+	switch (fst) {
+	case Isds::Type::FST_GENERAL: return FULLTEXT_ALL; break;
+	case Isds::Type::FST_ADDRESS: return FULLTEXT_ADDRESS; break;
+	case Isds::Type::FST_IC: return FULLTEXT_IC; break;
+	case Isds::Type::FST_BOX_ID: return FULLTEXT_BOX_ID; break;
+	default:
+		Q_ASSERT(0);
+		return FULLTEXT_ALL;
+		break;
+	}
+}
+
+Isds::Error Isds::Service::isdsSearch2(struct isds_ctx *ctx,
+    const QString &soughtText, enum Type::FulltextSearchType soughtType,
+    enum Type::DbType soughtBoxType, quint64 pageSize, quint64 pageNum,
+    enum Type::NilBool highlight, quint64 &totalMatchingBoxes,
+    quint64 &currentPagePosition, quint64 &currentPageSize,
+    enum Type::NilBool &lastPage, QList<FulltextResult> &boxes)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || soughtText.isEmpty())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	unsigned long int *iTotalMatchingBoxes = NULL;
+	unsigned long int *iCurrentPagePosition = NULL;
+	unsigned long int *iCurrentPageSize = NULL;
+	bool *iLastPage = NULL;
+	struct isds_list *iBoxes = NULL;
+	bool ok = true;
+
+	isds_fulltext_target iSoughtType =
+	    fulltextSearchType2libisdsFulltextSearchType(soughtType);
+	isds_DbType iSoughtBoxType = DBTYPE_SYSTEM;
+	const isds_DbType *iSoughtBoxTypePtr = NULL;
+	if (soughtBoxType != Type::BT_NULL) {
+		iSoughtBoxType =
+		    IsdsInternal::dbType2libisdsDbType(soughtBoxType, &ok);
+		if (!ok) {
+			err.setCode(Type::ERR_ERROR);
+			err.setLongDescr(tr("Error converting types."));
+			return err;
+		}
+		iSoughtBoxTypePtr = &iSoughtBoxType;
+	}
+	unsigned long int iPageSize = pageSize;
+	unsigned long int iPageNum = pageNum;
+	bool iHighlight = false;
+	const bool *iHighlightPtr = NULL;
+	if (highlight != Type::BOOL_NULL) {
+		iHighlight = (highlight == Type::BOOL_TRUE);
+		iHighlightPtr = &iHighlight;
+	}
+
+	isds_error ret = isds_find_box_by_fulltext(ctx,
+	    soughtText.toUtf8().constData(), &iSoughtType, iSoughtBoxTypePtr,
+	    &iPageSize, &iPageNum, iHighlightPtr, &iTotalMatchingBoxes,
+	    &iCurrentPagePosition, &iCurrentPageSize, &iLastPage, &iBoxes);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	totalMatchingBoxes = (iTotalMatchingBoxes != NULL) ? *iTotalMatchingBoxes : 0;
+	currentPagePosition = (iCurrentPagePosition != NULL) ? *iCurrentPagePosition : 0;
+	currentPageSize = (iCurrentPageSize != NULL) ? *iCurrentPageSize : 0;
+	lastPage = (iLastPage != NULL) ? ((*iLastPage) ? Type::BOOL_TRUE : Type::BOOL_FALSE) : Type::BOOL_NULL;
+	boxes = libisds2fulltextResultList(iBoxes, &ok);
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (iTotalMatchingBoxes != NULL) {
+		std::free(iTotalMatchingBoxes);
+	}
+	if (iCurrentPagePosition != NULL) {
+		std::free(iCurrentPagePosition);
+	}
+	if (iCurrentPageSize != NULL) {
+		std::free(iCurrentPageSize);
+	}
+	if (iLastPage != NULL) {
+		std::free(iLastPage);
+	}
+	if (iBoxes != NULL) {
+		isds_list_free(&iBoxes);
 	}
 
 	return err;

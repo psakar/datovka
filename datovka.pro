@@ -352,6 +352,7 @@ SOURCES += \
     src/isds/box_conversion.cpp \
     src/isds/box_interface.cpp \
     src/isds/internal_conversion.cpp \
+    src/isds/internal_type_conversion.cpp \
     src/isds/error_conversion.cpp \
     src/isds/error.cpp \
     src/isds/message_conversion.cpp \
@@ -495,6 +496,7 @@ HEADERS += \
     src/isds/box_conversion.h \
     src/isds/box_interface.h \
     src/isds/internal_conversion.h \
+    src/isds/internal_type_conversion.h \
     src/isds/error_conversion.h \
     src/isds/error.h \
     src/isds/message_conversion.h \

@@ -34,6 +34,7 @@
 
 #include "src/isds/box_conversion.h"
 #include "src/isds/internal_conversion.h"
+#include "src/isds/internal_type_conversion.h"
 #include "src/isds/type_conversion.h"
 
 /*!
@@ -323,47 +324,6 @@ struct isds_PersonName *Isds::personName2libisds(const PersonName &pn, bool *ok)
  * @brief Converts data box types.
  */
 static
-enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType bt,
-    bool *ok = Q_NULLPTR)
-{
-	bool iOk = true;
-	enum Isds::Type::DbType type = Isds::Type::BT_NULL;
-
-	switch (bt) {
-	case DBTYPE_SYSTEM: type = Isds::Type::BT_SYSTEM; break;
-	case DBTYPE_OVM: type = Isds::Type::BT_OVM; break;
-	case DBTYPE_OVM_NOTAR: type = Isds::Type::BT_OVM_NOTAR; break;
-	case DBTYPE_OVM_EXEKUT: type = Isds::Type::BT_OVM_EXEKUT; break;
-	case DBTYPE_OVM_REQ: type = Isds::Type::BT_OVM_REQ; break;
-	case DBTYPE_OVM_FO: type = Isds::Type::BT_OVM_FO; break;
-	case DBTYPE_OVM_PFO: type = Isds::Type::BT_OVM_PFO; break;
-	case DBTYPE_OVM_PO: type = Isds::Type::BT_OVM_PO; break;
-	case DBTYPE_PO: type = Isds::Type::BT_PO; break;
-	case DBTYPE_PO_ZAK: type = Isds::Type::BT_PO_ZAK; break;
-	case DBTYPE_PO_REQ: type = Isds::Type::BT_PO_REQ; break;
-	case DBTYPE_PFO: type = Isds::Type::BT_PFO; break;
-	case DBTYPE_PFO_ADVOK: type = Isds::Type::BT_PFO_ADVOK; break;
-	case DBTYPE_PFO_DANPOR: type = Isds::Type::BT_PFO_DANPOR; break;
-	case DBTYPE_PFO_INSSPR: type = Isds::Type::BT_PFO_INSSPR; break;
-	case DBTYPE_PFO_AUDITOR: type = Isds::Type::BT_PFO_AUDITOR; break;
-	case DBTYPE_FO: type = Isds::Type::BT_FO; break;
-	default:
-		Q_ASSERT(0);
-		iOk = false;
-		type = Isds::Type::BT_SYSTEM; /* FIXME */
-		break;
-	}
-
-	if (ok != Q_NULLPTR) {
-		*ok = iOk;
-	}
-	return type;
-}
-
-/*!
- * @brief Converts data box types.
- */
-static
 enum Isds::Type::DbType libisdsDbTypePtr2DbType(const isds_DbType *bt,
     bool *ok = Q_NULLPTR)
 {
@@ -374,7 +334,7 @@ enum Isds::Type::DbType libisdsDbTypePtr2DbType(const isds_DbType *bt,
 		return Isds::Type::BT_NULL;
 	}
 
-	return libisdsDbType2DbType(*bt, ok);
+	return IsdsInternal::libisdsDbType2DbType(*bt, ok);
 }
 
 /*!
@@ -473,36 +433,12 @@ bool dbType2libisdsDbTypePtr(isds_DbType **tgt, enum Isds::Type::DbType src)
 			return false;
 		}
 	}
-	switch (src) {
-	/*
-	 * Isds::Type::BT_NULL cannot be reached here.
-	 *
-	 * case Isds::Type::BT_NULL:
-	 * 	std::free(*tgt); *tgt = NULL;
-	 * 	break;
-	 */
-	case Isds::Type::BT_SYSTEM: **tgt = DBTYPE_SYSTEM; break;
-	case Isds::Type::BT_OVM: **tgt = DBTYPE_OVM; break;
-	case Isds::Type::BT_OVM_NOTAR: **tgt = DBTYPE_OVM_NOTAR; break;
-	case Isds::Type::BT_OVM_EXEKUT: **tgt = DBTYPE_OVM_EXEKUT; break;
-	case Isds::Type::BT_OVM_REQ: **tgt = DBTYPE_OVM_REQ; break;
-	case Isds::Type::BT_OVM_FO: **tgt = DBTYPE_OVM_FO; break;
-	case Isds::Type::BT_OVM_PFO: **tgt = DBTYPE_OVM_PFO; break;
-	case Isds::Type::BT_OVM_PO: **tgt = DBTYPE_OVM_PO; break;
-	case Isds::Type::BT_PO: **tgt = DBTYPE_PO; break;
-	case Isds::Type::BT_PO_ZAK: **tgt = DBTYPE_PO_ZAK; break;
-	case Isds::Type::BT_PO_REQ: **tgt = DBTYPE_PO_REQ; break;
-	case Isds::Type::BT_PFO: **tgt = DBTYPE_PFO; break;
-	case Isds::Type::BT_PFO_ADVOK: **tgt = DBTYPE_PFO_ADVOK; break;
-	case Isds::Type::BT_PFO_DANPOR: **tgt = DBTYPE_PFO_DANPOR; break;
-	case Isds::Type::BT_PFO_INSSPR: **tgt = DBTYPE_PFO_INSSPR; break;
-	case Isds::Type::BT_PFO_AUDITOR: **tgt = DBTYPE_PFO_AUDITOR; break;
-	case Isds::Type::BT_FO: **tgt = DBTYPE_FO; break;
-	default:
-		Q_ASSERT(0);
+
+	bool ok = false;
+	**tgt = IsdsInternal::dbType2libisdsDbType(src, &ok);
+	if (Q_UNLIKELY(!ok)) {
 		std::free(*tgt); *tgt = NULL;
 		return false;
-		break;
 	}
 
 	return true;
@@ -1007,7 +943,7 @@ Isds::FulltextResult Isds::libisds2fulltextResult(
 	FulltextResult fulltextResult;
 
 	fulltextResult.setDbID(fromCStr(ifr->dbID));
-	fulltextResult.setDbType(libisdsDbType2DbType(ifr->dbType, &iOk));
+	fulltextResult.setDbType(IsdsInternal::libisdsDbType2DbType(ifr->dbType, &iOk));
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}

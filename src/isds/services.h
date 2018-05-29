@@ -40,6 +40,7 @@ namespace Isds {
 	class DbOwnerInfo;
 	class DbUserInfo;
 	class Error;
+	class FulltextResult;
 	class Message;
 
 	/*!
@@ -90,7 +91,40 @@ namespace Isds {
 		Error getUserInfoFromLogin(struct isds_ctx *ctx,
 		    DbUserInfo &userInfo);
 
-	/* Message inetrface: */
+		/*!
+		 * @brief Service ISDSSearch2.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     soughtText Text to search for.
+		 * @param[in]     soughtType Information search type to search in.
+		 * @param[in]     soughtBoxType Type of box to search for.
+		 *                              Value BT_SYSTEM means to search
+		 *                              in all box types. Pass BT_NULL
+		 *                              to let server to use default
+		 *                              value which is BT_SYSTEM.
+		 * @param[in]     pageSize Number of results in one page.
+		 * @param[in]     pageNum Number of page.
+		 * @param[in]     highlight Set to true to track sought
+		 *                          expressions in received response.
+		 *                          Pass BOOL_NULL to let the server decide.
+		 * @param[out]    totalMatchingBoxes Number of found boxes.
+		 * @param[out]    currentPagePosition Position of first entry
+		 *                                    of the current page.
+		 * @param[out]    currentPageSize     Size of current page.
+		 * @param[out]    lastPage Set to true if last page acquired.
+		 * @param[out]    boxes Found boxes.
+		 * @return Error description.
+		 */
+		static
+		Error isdsSearch2(struct isds_ctx *ctx, const QString &soughtText,
+		    enum Type::FulltextSearchType soughtType,
+		    enum Type::DbType soughtBoxType, quint64 pageSize,
+		    quint64 pageNum, enum Type::NilBool highlight,
+		    quint64 &totalMatchingBoxes, quint64 &currentPagePosition,
+		    quint64 &currentPageSize, enum Type::NilBool &lastPage,
+		    QList<FulltextResult> &boxes);
+
+	/* Message interface: */
 		/*!
 		 * @brief Service CreateMessage.
 		 *
