@@ -116,6 +116,10 @@ enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(const QString &userName
 		return SO_ERROR;
 	}
 
+	if (Q_UNLIKELY(dbOwnerInfo.isNull())) {
+		return SO_ERROR;
+	}
+
 	Isds::Error err = Isds::Service::findDataBox(session, dbOwnerInfo,
 	    foundBoxes);
 	if (err.code() != Isds::Type::ERR_SUCCESS) {
