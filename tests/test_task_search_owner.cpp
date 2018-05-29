@@ -28,6 +28,7 @@
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
+#include "src/worker/task_search_owner_fulltext.h"
 #include "src/worker/task_search_owner.h"
 #include "tests/helper_qt.h"
 #include "tests/test_task_search_owner.h"
@@ -46,6 +47,10 @@ private slots:
 	void cleanupTestCase(void);
 
 	void searchOwner(void);
+
+	void searchOwnerFulltext01(void);
+
+	void searchOwnerFulltext02(void);
 
 private:
 	const bool m_testing; /*!< Testing account. */
@@ -203,8 +208,73 @@ void TestTaskSearchOwner::searchOwner(void)
 		QSKIP("Received more than one search result.");
 	}
 
-	const Isds::DbOwnerInfo &foundOwnerInfo(task->m_foundBoxes.first());
+	const Isds::DbOwnerInfo &foundOwnerInfo(task->m_foundBoxes.constFirst());
 	QVERIFY(foundOwnerInfo.dbID() == QString("qrdae26"));
+
+	delete task; task = Q_NULLPTR;
+}
+
+void TestTaskSearchOwner::searchOwnerFulltext01(void)
+{
+	TaskSearchOwnerFulltext *task = Q_NULLPTR;
+
+	QVERIFY(!m_sender.userName.isEmpty());
+
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
+	struct isds_ctx *ctx = GlobInstcs::isdsSessionsPtr->session(
+	    m_sender.userName);
+	QVERIFY(ctx != NULL);
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
+
+	/* Should receive a single result. */
+	task = new (std::nothrow) TaskSearchOwnerFulltext(m_sender.userName,
+	    QString("barbucha"), Isds::Type::FST_GENERAL,
+	    TaskSearchOwnerFulltext::BT_ALL, 0, true);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskSearchOwnerFulltext::SOF_SUCCESS);
+	QVERIFY(task->m_foundBoxes.size() >= 0);
+	QVERIFY(((int)task->m_totalMatchingBoxes) == task->m_foundBoxes.size());
+
+	if (task->m_foundBoxes.size() != 1) {
+		QSKIP("Received more than one search result.");
+	}
+
+	const Isds::FulltextResult &foundResult(task->m_foundBoxes.constFirst());
+	QVERIFY(foundResult.dbID() == QString("qrdae26"));
+
+	delete task; task = Q_NULLPTR;
+}
+
+void TestTaskSearchOwner::searchOwnerFulltext02(void)
+{
+	TaskSearchOwnerFulltext *task = Q_NULLPTR;
+
+	QVERIFY(!m_sender.userName.isEmpty());
+
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
+	struct isds_ctx *ctx = GlobInstcs::isdsSessionsPtr->session(
+	    m_sender.userName);
+	QVERIFY(ctx != NULL);
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
+
+	/* Should receive many results. */
+	task = new (std::nothrow) TaskSearchOwnerFulltext(m_sender.userName,
+	    QString("praha"), Isds::Type::FST_GENERAL,
+	    TaskSearchOwnerFulltext::BT_ALL, 0, true);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskSearchOwnerFulltext::SOF_SUCCESS);
+	QVERIFY(task->m_foundBoxes.size() >= 0);
+	QVERIFY(((int)task->m_totalMatchingBoxes) == task->m_foundBoxes.size());
+
+	QVERIFY(task->m_foundBoxes.size() >= 500);
 
 	delete task; task = Q_NULLPTR;
 }
