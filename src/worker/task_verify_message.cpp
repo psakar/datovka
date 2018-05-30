@@ -21,15 +21,17 @@
  * the two.
  */
 
-#include <cinttypes>
+#include <cinttypes> /* PRId64 */
 #include <cstdlib>
-#include <cstring>
 #include <QThread>
 
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
-#include "src/isds/message_conversion.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_verify_message.h"
@@ -110,51 +112,29 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 	}
 
 	/* Get message hash from isds */
-	struct isds_hash *hashIsds = NULL;
-	isds_error status = isds_download_message_hash(session,
-	    QString::number(msgId.dmId).toUtf8().constData(), &hashIsds);
-	if (IE_SUCCESS != status) {
+	Isds::Hash hashIsds;
+	Isds::Error err = Isds::Service::verifyMessage(session, msgId.dmId,
+	    hashIsds);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL("Error downloading hash of message '%" PRId64 "'.",
 		    msgId.dmId);
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
-		isds_hash_free(&hashIsds);
 		return VERIFY_ISDS_ERR;
 	}
-	Q_ASSERT(NULL != hashIsds);
+	Q_ASSERT(!hashIsds.isNull());
 
 	/* Get message hash from local database */
-	const Isds::Hash hashDb = messageDb->getMessageHash(msgId.dmId);
+	const Isds::Hash hashDb(messageDb->getMessageHash(msgId.dmId));
 	if (hashDb.isNull()) {
 		logErrorNL(
 		    "Error obtaining hash of message '%" PRId64 "' from local database.",
 		    msgId.dmId);
-		isds_hash_free(&hashIsds);
 		return VERIFY_SQL_ERR;
 	}
 
-	bool ok = false;
-	struct isds_hash *hashLocal = Isds::hash2libisds(hashDb, &ok);
-	if (!ok) {
-		logErrorNL("%s", "Cannot convert hash to libisds hash.");
-		isds_hash_free(&hashIsds);
-		isds_hash_free(&hashLocal);
-		return VERIFY_SQL_ERR;
-	}
-
-	/* Compare both hashes */
-	status = isds_hash_cmp(hashIsds, hashLocal);
-
-	isds_hash_free(&hashIsds);
-	isds_hash_free(&hashLocal);
-
-	if (IE_NOTEQUAL == status) {
+	if (hashIsds != hashDb) {
 		return VERIFY_NOT_EQUAL;
-	}
-
-	if (IE_SUCCESS != status) {
-		error = isds_strerror(status);
-		return VERIFY_ISDS_ERR;
 	}
 
 	return VERIFY_SUCCESS;

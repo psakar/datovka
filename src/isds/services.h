@@ -41,6 +41,7 @@ namespace Isds {
 	class DbUserInfo;
 	class Error;
 	class FulltextResult;
+	class Hash;
 	class Message;
 
 	/*!
@@ -222,6 +223,18 @@ namespace Isds {
 		static
 		Error signedSentMessageDownload(struct isds_ctx *ctx,
 		    qint64 dmId, Message &message);
+
+		/*!
+		 * @brief Service VerifyMessage.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmId Message identifier.
+		 * @param[out]    hash Hash.
+		 * @return Error description.
+		 */
+		static
+		Error verifyMessage(struct isds_ctx *ctx, qint64 dmId,
+		    Hash &hash);
 	};
 
 }
