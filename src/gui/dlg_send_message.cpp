@@ -868,8 +868,8 @@ void DlgSendMessage::fillContentAsReply(const QList<MessageDb::MsgId> &msgIds)
 		pdz = true;
 	}
 
-	m_recipTableModel.appendData(envData.dbIDSender(), -1, envData.dmSender(),
-	    envData.dmSenderAddress(), QString(), pdz);
+	m_recipTableModel.appendData(envData.dbIDSender(), Isds::Type::BT_NULL,
+	    envData.dmSender(), envData.dmSenderAddress(), QString(), pdz);
 }
 
 void DlgSendMessage::fillContentFromTemplate(
@@ -959,9 +959,9 @@ void DlgSendMessage::fillContentFromTemplate(
 
 	/* message is received -> recipient == sender */
 	if (m_boxId != envData.dbIDRecipient()) {
-		m_recipTableModel.appendData(envData.dbIDRecipient(), -1,
-		    envData.dmRecipient(), envData.dmRecipientAddress(),
-		    QString(), pdz);
+		m_recipTableModel.appendData(envData.dbIDRecipient(),
+		    Isds::Type::BT_NULL, envData.dmRecipient(),
+		    envData.dmRecipientAddress(), QString(), pdz);
 	}
 
 	/* fill attachments from template message */
@@ -1065,11 +1065,10 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 	enum TaskSearchOwnerFulltext::Result result =
 	    TaskSearchOwnerFulltext::SOF_ERROR;
 	QString errMsg, longErrMsg;
-	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes;
+	QList<Isds::FulltextResult> foundBoxes;
 	TaskSearchOwnerFulltext *task =
 	    new (std::nothrow) TaskSearchOwnerFulltext(m_userName, boxId,
-	        TaskSearchOwnerFulltext::FT_BOX_ID,
-	        TaskSearchOwnerFulltext::BT_ALL);
+	        Isds::Type::FST_BOX_ID, TaskSearchOwnerFulltext::BT_ALL);
 	if (task != Q_NULLPTR) {
 		task->setAutoDelete(false);
 		GlobInstcs::workPoolPtr->runSingle(task);
@@ -1084,16 +1083,15 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 	QString name = tr("Unknown");
 	QString address = tr("Unknown");
 	QVariant pdz;
-	int boxType = -1; /* Unknown type. */
+	enum Isds::Type::DbType boxType = Isds::Type::BT_NULL; /* Unknown type. */
 
 	if (foundBoxes.size() == 1) {
-		const TaskSearchOwnerFulltext::BoxEntry &entry(
-		    foundBoxes.first());
+		const Isds::FulltextResult &entry(foundBoxes.first());
 
-		name = entry.name;
-		address = entry.address;
-		boxType = entry.type;
-		if (!entry.active) {
+		name = entry.dbName();
+		address = entry.dbAddress();
+		boxType = entry.dbType();
+		if (!entry.active()) {
 			DlgMsgBox::message(this, QMessageBox::Warning,
 			    tr("Data box is not active"),
 			    tr("Recipient with data box ID '%1' does not have active data box.")
@@ -1102,11 +1100,11 @@ void DlgSendMessage::addRecipientBox(const QString &boxId)
 			    QMessageBox::Ok, QMessageBox::Ok);
 			return;
 		}
-		if (entry.publicSending) {
+		if (entry.publicSending()) {
 			pdz = false;
-		} else if (entry.commercialSending) {
+		} else if (entry.commercialSending()) {
 			pdz = true;
-		} else if (entry.effectiveOVM) {
+		} else if (entry.dbEffectiveOVM()) {
 			pdz = false;
 		} else {
 			DlgMsgBox::message(this, QMessageBox::Critical,

@@ -24,6 +24,8 @@
 #pragma once
 
 #include <QDate>
+#include <QList>
+#include <QPair>
 #include <QScopedPointer>
 #include <QString>
 
@@ -459,4 +461,107 @@ namespace Isds {
 
 	void swap(DbUserInfo &first, DbUserInfo &second) Q_DECL_NOTHROW;
 
+	class FulltextResultPrivate;
+	/*!
+	 * @brief Full-text data-box search result.
+	 *
+	 * pril_2/WS_ISDS_Vyhledavani_datovych_schranek.pdf (secrion 2.2)
+	 */
+	class FulltextResult {
+		Q_DECLARE_PRIVATE(FulltextResult)
+
+	public:
+		FulltextResult(void);
+		FulltextResult(const FulltextResult &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		FulltextResult(FulltextResult &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+		~FulltextResult(void);
+
+		FulltextResult &operator=(const FulltextResult &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		FulltextResult &operator=(FulltextResult &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const FulltextResult &other) const;
+		bool operator!=(const FulltextResult &other) const;
+
+		friend void swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+		/*
+		 * For convenience purposes. Message identifier consists only
+		 * of digits, but documentation explicitly states that it is
+		 * a max. 20 chars old string.
+		 *
+		 * Returns -1 if conversion to number fails.
+		 */
+		qint64 dbId(void) const;
+		void setDbId(qint64 id);
+
+		/* dbID */
+		const QString &dbID(void) const;
+		void setDbID(const QString &id);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbID(QString &&id);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbType */
+		enum Type::DbType dbType(void) const;
+		void setDbType(enum Type::DbType bt);
+		/* dbName */
+		const QString &dbName(void) const;
+		void setDbName(const QString &n);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbName(QString &&n);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbAddress */
+		const QString &dbAddress(void) const;
+		void setDbAddress(const QString &a);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbAddress(QString &&a);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbBiDate */
+		const QDate &dbBiDate(void) const;
+		void setDbBiDate(const QDate &bd);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbBiDate(QDate &&bd);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbICO */
+		const QString &ic(void) const;
+		void setIc(const QString &ic);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setIc(QString &&ic);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dbEffectiveOVM */
+		bool dbEffectiveOVM(void) const;
+		void setDbEffectiveOVM(bool eo);
+		/* dbSendOptions -- Not provided; instead use methods below. */
+		bool active(void) const;
+		void setActive(bool a);
+		bool publicSending(void) const;
+		void setPublicSending(bool ps);
+		bool commercialSending(void) const;
+		void setCommercialSending(bool cs);
+
+		/*
+		 * Indexes of start/stop pairs of highlighted name text which
+		 * match the sought element.
+		 */
+		const QList< QPair<int, int> > &nameMatches(void) const;
+		void setNameMatches(const QList< QPair<int, int> > &nm);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setNameMatches(QList< QPair<int, int> > &&nm);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		const QList< QPair<int, int> > &addressMatches(void) const;
+		void setAddressMatches(const QList< QPair<int, int> > &am);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setAddressMatches(QList< QPair<int, int> > &&am);
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+	private:
+		QScopedPointer<FulltextResultPrivate> d_ptr; // std::unique_ptr ?
+	};
+
+	void swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW;
 }

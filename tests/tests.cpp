@@ -32,6 +32,7 @@
 #include "tests/test_isds_message.h"
 #include "tests/test_message_db_set.h"
 #include "tests/test_task_downloads.h"
+#include "tests/test_task_search_owner.h"
 #include "tests/test_task_send_message.h"
 #include "tests/test_version.h"
 
@@ -83,6 +84,10 @@ int main(int argc, char *argv[])
 #if defined (TEST_ISDS_LOGIN)
 	status |= testThisClassAndDelete(newTestIsdsLogin(), argc, argv);
 #endif /* defined (TEST_ISDS_LOGIN) */
+
+#if defined (TEST_TASK_SEARCH_OWNER)
+	status |= testThisClassAndDelete(newTestTaskSearchOwner(), argc, argv);
+#endif /* defined TEST_TASK_SEARCH_OWNER */
 
 #if defined (TEST_TASK_SEND_MESSAGE)
 	status |= testThisClassAndDelete(newTestTaskSendMessage(msgId), argc, argv);

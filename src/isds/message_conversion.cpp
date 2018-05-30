@@ -490,7 +490,7 @@ Isds::Envelope Isds::libisds2envelope(const struct isds_envelope *ie, bool *ok)
 	}
 	env.setDmRecipient(fromCStr(ie->dmRecipient));
 	env.setDmRecipientAddress(fromCStr(ie->dmRecipientAddress));
-	env.setDmAmbiguousRecipient(fromBool(ie->dmAmbiguousRecipient));
+	env.setDmAmbiguousRecipient(fromBoolPtr(ie->dmAmbiguousRecipient));
 
 	env.setDmOrdinal((ie->dmOrdinal != NULL) ? *ie->dmOrdinal : 0); /* FIXME ? */
 	env.setDmMessageStatus(libisdsMessageStatus2DmState(ie->dmMessageStatus, &iOk));
@@ -527,12 +527,12 @@ Isds::Envelope Isds::libisds2envelope(const struct isds_envelope *ie, bool *ok)
 	env.setDmLegalTitleSect(fromCStr(ie->dmLegalTitleSect));
 	env.setDmLegalTitlePar(fromCStr(ie->dmLegalTitlePar));
 	env.setDmLegalTitlePoint(fromCStr(ie->dmLegalTitlePoint));
-	env.setDmPersonalDelivery(fromBool(ie->dmPersonalDelivery));
-	env.setDmAllowSubstDelivery(fromBool(ie->dmAllowSubstDelivery));
+	env.setDmPersonalDelivery(fromBoolPtr(ie->dmPersonalDelivery));
+	env.setDmAllowSubstDelivery(fromBoolPtr(ie->dmAllowSubstDelivery));
 	env.setDmType((ie->dmType != NULL) ? QChar(*ie->dmType) : QChar());
 
-	env.setDmOVM(fromBool(ie->dmOVM));
-	env.setDmPublishOwnID(fromBool(ie->dmPublishOwnID));
+	env.setDmOVM(fromBoolPtr(ie->dmOVM));
+	env.setDmPublishOwnID(fromBoolPtr(ie->dmPublishOwnID));
 
 	if (ok != Q_NULLPTR) {
 		*ok = true;
@@ -750,7 +750,7 @@ struct isds_envelope *Isds::envelope2libisds(const Envelope &env, bool *ok)
 	if (Q_UNLIKELY(!dbType2longPtr(&ienv->dmSenderType, env.dmSenderType()))) { goto fail; }
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmRecipient, env.dmRecipient()))) { goto fail; }
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmRecipientAddress, env.dmRecipientAddress()))) { goto fail; }
-	if (Q_UNLIKELY(!toBool(&ienv->dmAmbiguousRecipient, env.dmAmbiguousRecipient()))) { goto fail; }
+	if (Q_UNLIKELY(!toBoolPtr(&ienv->dmAmbiguousRecipient, env.dmAmbiguousRecipient()))) { goto fail; }
 
 	if (Q_UNLIKELY(!toLongUInt(&ienv->dmOrdinal, env.dmOrdinal()))) { goto fail; }
 	if (Q_UNLIKELY(!dmState2libisdsMessageStatus(&ienv->dmMessageStatus, env.dmMessageStatus()))) { goto fail; }
@@ -778,13 +778,13 @@ struct isds_envelope *Isds::envelope2libisds(const Envelope &env, bool *ok)
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmLegalTitleSect, env.dmLegalTitleSect()))) { goto fail; }
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmLegalTitlePar, env.dmLegalTitlePar()))) { goto fail; }
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmLegalTitlePoint, env.dmLegalTitlePoint()))) { goto fail; }
-	if (Q_UNLIKELY(!toBool(&ienv->dmPersonalDelivery, env.dmPersonalDelivery()))) { goto fail; }
-	if (Q_UNLIKELY(!toBool(&ienv->dmAllowSubstDelivery, env.dmAllowSubstDelivery()))) { goto fail; }
+	if (Q_UNLIKELY(!toBoolPtr(&ienv->dmPersonalDelivery, env.dmPersonalDelivery()))) { goto fail; }
+	if (Q_UNLIKELY(!toBoolPtr(&ienv->dmAllowSubstDelivery, env.dmAllowSubstDelivery()))) { goto fail; }
 	if (Q_UNLIKELY(!toCStrCopy(&ienv->dmType,
 	                   (!env.dmType().isNull()) ? QString(env.dmType()) : QString()))) { goto fail; }
 
-	if (Q_UNLIKELY(!toBool(&ienv->dmOVM, env.dmOVM()))) { goto fail; }
-	if (Q_UNLIKELY(!toBool(&ienv->dmPublishOwnID, env.dmPublishOwnID()))) { goto fail; }
+	if (Q_UNLIKELY(!toBoolPtr(&ienv->dmOVM, env.dmOVM()))) { goto fail; }
+	if (Q_UNLIKELY(!toBoolPtr(&ienv->dmPublishOwnID, env.dmPublishOwnID()))) { goto fail; }
 
 	if (ok != Q_NULLPTR) {
 		*ok = true;

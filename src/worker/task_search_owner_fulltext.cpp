@@ -26,6 +26,9 @@
 
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_search_owner_fulltext.h"
@@ -33,22 +36,9 @@
 /* ISDS limits the response size to 100 entries. */
 const quint64 TaskSearchOwnerFulltext::maxResponseSize = 100;
 
-TaskSearchOwnerFulltext::BoxEntry::BoxEntry(const QString &i, int t,
-    const QString &n, const QString &ad, bool ovm, bool ac, bool ps, bool cs)
-    : id(i),
-    type(t),
-    name(n),
-    address(ad),
-    effectiveOVM(ovm),
-    active(ac),
-    publicSending(ps),
-    commercialSending(cs)
-{
-}
-
 TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
-    const QString &query, enum FulltextTarget target, enum BoxType type,
-    qint64 pageNumber, bool askAll)
+    const QString &query, enum Isds::Type::FulltextSearchType target,
+    enum BoxType type, qint64 pageNumber, bool askAll, bool highlight)
     : m_result(SOF_ERROR),
     m_isdsError(),
     m_isdsLongError(),
@@ -60,7 +50,8 @@ TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
     m_target(target),
     m_boxType(type),
     m_pageNumber(pageNumber),
-    m_askAll(askAll)
+    m_askAll(askAll),
+    m_highlight(highlight)
 {
 	Q_ASSERT(!m_userName.isEmpty());
 	Q_ASSERT(!m_query.isEmpty());
@@ -84,8 +75,8 @@ void TaskSearchOwnerFulltext::run(void)
 	/* ### Worker task begin. ### */
 
 	m_result = isdsSearch2All(m_userName, m_query, m_target, m_boxType,
-	    m_pageNumber, m_askAll, m_totalMatchingBoxes, m_gotLastPage,
-	    m_foundBoxes, m_isdsError, m_isdsLongError);
+	    m_pageNumber, m_askAll, m_highlight, m_totalMatchingBoxes,
+	    m_gotLastPage, m_foundBoxes, m_isdsError, m_isdsLongError);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
@@ -96,126 +87,64 @@ void TaskSearchOwnerFulltext::run(void)
 }
 
 /*!
- * @brief Convert target from task enum to libisds enum.
- *
- * @param[in] target Task enum target representation.
- * @return Libisds enum representation.
- */
-static
-isds_fulltext_target convertTarget(
-    enum TaskSearchOwnerFulltext::FulltextTarget target)
-{
-	switch (target) {
-	case TaskSearchOwnerFulltext::FT_ALL:
-		return FULLTEXT_ALL;
-		break;
-	case TaskSearchOwnerFulltext::FT_ADDRESS:
-		return FULLTEXT_ADDRESS;
-		break;
-	case TaskSearchOwnerFulltext::FT_IC:
-		return FULLTEXT_IC;
-		break;
-	case TaskSearchOwnerFulltext::FT_BOX_ID:
-		return FULLTEXT_BOX_ID;
-		break;
-	default:
-		Q_ASSERT(0);
-		return FULLTEXT_ALL;
-		break;
-	}
-}
-
-/*!
  * @brief Convert box type from task to libisds enum.
  *
  * @param[in] type Task enum type representation.
- * @return Libisds enum representation.
+ * @return Isds enum representation.
  */
 static
-isds_DbType convertType(enum TaskSearchOwnerFulltext::BoxType type)
+enum Isds::Type::DbType convertType(enum TaskSearchOwnerFulltext::BoxType type)
 {
 	switch (type) {
 	case TaskSearchOwnerFulltext::BT_ALL:
-		return DBTYPE_SYSTEM;
+		return Isds::Type::BT_SYSTEM;
 		break;
 	case TaskSearchOwnerFulltext::BT_OVM:
-		return DBTYPE_OVM;
+		return Isds::Type::BT_OVM;
 		break;
 	case TaskSearchOwnerFulltext::BT_PO:
-		return DBTYPE_PO;
+		return Isds::Type::BT_PO;
 		break;
 	case TaskSearchOwnerFulltext::BT_PFO:
-		return DBTYPE_PFO;
+		return Isds::Type::BT_PFO;
 		break;
 	case TaskSearchOwnerFulltext::BT_FO:
-		return DBTYPE_FO;
+		return Isds::Type::BT_FO;
 		break;
 	default:
 		Q_ASSERT(0);
-		return DBTYPE_SYSTEM;
+		return Isds::Type::BT_SYSTEM;
 		break;
-	}
-}
-
-/*!
- * @brief Adds entries from libisds list into antry list.
- *
- * @param[out] boxList List of boxes to append data to.
- * @param[in]  boxes List of boxes to copy data from.
- */
-static
-void appendBoxEntries(QList<TaskSearchOwnerFulltext::BoxEntry> &foundBoxes,
-    const struct isds_list *boxes)
-{
-	while (boxes != NULL) {
-		const struct isds_fulltext_result *result =
-		    (struct isds_fulltext_result *)boxes->data;
-		if (result == NULL) {
-			Q_ASSERT(0);
-			return;
-		}
-
-		if (result->dbID == NULL) {
-			Q_ASSERT(0);
-			return;
-		}
-		foundBoxes.append(
-		    TaskSearchOwnerFulltext::BoxEntry(result->dbID,
-		        result->dbType, result->name, result->address,
-		        result->dbEffectiveOVM, result->active,
-		        result->public_sending, result->commercial_sending));
-
-		boxes = boxes->next;
 	}
 }
 
 /*!
  * @brief Converts libisds error code into task error code.
  *
- * @param[in] status Libisds error status.
+ * @param[in] err Error code.
  * @return Task error code.
  */
 static
-enum TaskSearchOwnerFulltext::Result convertError(int status)
+enum TaskSearchOwnerFulltext::Result convertError(enum Isds::Type::Error err)
 {
-	switch (status) {
-	case IE_SUCCESS:
+	switch (err) {
+	case Isds::Type::ERR_SUCCESS:
 		return TaskSearchOwnerFulltext::SOF_SUCCESS;
 		break;
-	case IE_2BIG:
-	case IE_NOEXIST:
-	case IE_INVAL:
-	case IE_INVALID_CONTEXT:
+	case Isds::Type::ERR_2BIG:
+	case Isds::Type::ERR_NOEXIST:
+	case Isds::Type::ERR_INVAL:
+	case Isds::Type::ERR_INVALID_CONTEXT:
 		return TaskSearchOwnerFulltext::SOF_BAD_DATA;
 		break;
-	case IE_ISDS:
-	case IE_NOT_LOGGED_IN:
-	case IE_CONNECTION_CLOSED:
-	case IE_TIMED_OUT:
-	case IE_NETWORK:
-	case IE_HTTP:
-	case IE_SOAP:
-	case IE_XML:
+	case Isds::Type::ERR_ISDS:
+	case Isds::Type::ERR_NOT_LOGGED_IN:
+	case Isds::Type::ERR_CONNECTION_CLOSED:
+	case Isds::Type::ERR_TIMED_OUT:
+	case Isds::Type::ERR_NETWORK:
+	case Isds::Type::ERR_HTTP:
+	case Isds::Type::ERR_SOAP:
+	case Isds::Type::ERR_XML:
 		return TaskSearchOwnerFulltext::SOF_COM_ERROR;
 		break;
 	default:
@@ -225,14 +154,13 @@ enum TaskSearchOwnerFulltext::Result convertError(int status)
 }
 
 enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
-    const QString &userName, const QString &query, enum FulltextTarget target,
-    enum BoxType type, quint64 pageSize, quint64 pageNumber,
+    const QString &userName, const QString &query,
+    enum Isds::Type::FulltextSearchType target, enum BoxType type,
+    quint64 pageSize, quint64 pageNumber, bool highlight,
     quint64 &totalMatchingBoxes, quint64 &currentPageStart,
-    quint64 &currentPageSize, bool &gotLastPage, QList<BoxEntry> &foundBoxes,
-    QString &error, QString &longError)
+    quint64 &currentPageSize, bool &gotLastPage,
+    QList<Isds::FulltextResult> &foundBoxes, QString &error, QString &longError)
 {
-	isds_error status = IE_ERROR;
-
 	if (query.isEmpty()) {
 		Q_ASSERT(0);
 		return SOF_ERROR;
@@ -244,65 +172,40 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
 		return SOF_ERROR;
 	}
 
-	/* For conversion purposes. */
-	isds_fulltext_target iTarget = convertTarget(target);
-	isds_DbType iType = convertType(type);
-	unsigned long int iPageSize = pageSize;
-	unsigned long int iPageNumber = pageNumber;
-	unsigned long int *iTotalMatchingBoxes = NULL;
-	unsigned long int *iCurrentPageStart = NULL;
-	unsigned long int *iCurentPageSize = NULL;
-	_Bool *iIsLastPage = NULL;
-	struct isds_list *iFoundBoxes = NULL;
+	enum Isds::Type::NilBool lastPage = Isds::Type::BOOL_NULL;
+	QList<Isds::FulltextResult> boxes;
 
-	status = isds_find_box_by_fulltext(session, query.toUtf8().constData(),
-	    &iTarget, &iType, &iPageSize, &iPageNumber,
-	    NULL, &iTotalMatchingBoxes, &iCurrentPageStart, &iCurentPageSize,
-	    &iIsLastPage, &iFoundBoxes);
+	Isds::Error err = Isds::Service::isdsSearch2(session, query, target,
+	    convertType(type), pageSize, pageNumber,
+	    highlight ? Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE,
+	    totalMatchingBoxes, currentPageStart, currentPageSize, lastPage,
+	    boxes);
 
-	/* Free allocated stuff. */
-	if (iTotalMatchingBoxes != NULL) {
-		totalMatchingBoxes = *iTotalMatchingBoxes;
-		free(iTotalMatchingBoxes); iTotalMatchingBoxes = NULL;
-	}
-	if (iCurrentPageStart != NULL) {
-		currentPageStart = *iCurrentPageStart;
-		free(iCurrentPageStart); iCurrentPageStart = NULL;
-	}
-	if (iCurentPageSize != NULL) {
-		currentPageSize = *iCurentPageSize;
-		free(iCurentPageSize); iCurentPageSize = NULL;
-	}
-	if (iIsLastPage != NULL) {
-		gotLastPage = *iIsLastPage;
-		free(iIsLastPage); iIsLastPage = NULL;
-	}
-	if (iFoundBoxes != NULL) {
-		appendBoxEntries(foundBoxes, iFoundBoxes);
-		isds_list_free(&iFoundBoxes);
-	}
+	gotLastPage = (lastPage == Isds::Type::BOOL_TRUE);
+	foundBoxes.append(boxes);
 
-	if (IE_SUCCESS != status) {
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL(
 		    "Searching for data box (page %lu) returned status '%d': '%s'.",
-		    (unsigned long)iPageNumber, status,
-		    isdsStrError(status).toUtf8().constData());
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
+		    (unsigned long)pageNumber, err.code(),
+		    error.toUtf8().constData());
 	} else {
 		logDebugLv1NL("Find data box (page %lu) returned '%d': '%s'.",
-		    (unsigned long)iPageNumber, status,
-		    isdsStrError(status).toUtf8().constData());
+		    (unsigned long)pageNumber, err.code(),
+		    Isds::Description::descrError(err.code()).toUtf8().constData());
 	}
 
-	return convertError(status);
+	return convertError(err.code());
 }
 
 enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2All(
-    const QString &userName, const QString &query, enum FulltextTarget target,
-    enum BoxType type, quint64 pageNumber, bool askAll,
-    quint64 &totalMatchingBoxes, bool &gotLastPage, QList<BoxEntry> &foundBoxes,
-    QString &error, QString &longError)
+    const QString &userName, const QString &query,
+    enum Isds::Type::FulltextSearchType target, enum BoxType type,
+    quint64 pageNumber, bool askAll, bool highlight,
+    quint64 &totalMatchingBoxes, bool &gotLastPage,
+    QList<Isds::FulltextResult> &foundBoxes, QString &error, QString &longError)
 {
 	enum Result res = SOF_SUCCESS;
 
@@ -315,8 +218,8 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2All(
 	}
 
 	do {
-		res = isdsSearch2(userName, query, target, type,
-		    pageSize, pageNumber, totalMatchingBoxes, currentPageStart,
+		res = isdsSearch2(userName, query, target, type, pageSize,
+		    pageNumber, highlight, totalMatchingBoxes,currentPageStart,
 		    currentPageSize, gotLastPage, foundBoxes, error, longError);
 
 		++pageNumber;

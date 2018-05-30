@@ -642,21 +642,21 @@ DlgDsSearch::SearchResult DlgDsSearch::searchDataBoxNormal(void)
 
 DlgDsSearch::SearchResultFt DlgDsSearch::searchDataBoxFulltext(void)
 {
-	enum TaskSearchOwnerFulltext::FulltextTarget target =
-	    TaskSearchOwnerFulltext::FT_ALL;
+	enum Isds::Type::FulltextSearchType target =
+	    Isds::Type::FST_GENERAL;
 	switch (m_ui->fulltextTargetCBox->currentData(CBoxModel::valueRole).toInt()) {
 	case CBOX_TARGET_ALL:
-		target = TaskSearchOwnerFulltext::FT_ALL;
+		target = Isds::Type::FST_GENERAL;
 		break;
 	case CBOX_TARGET_ADDRESS:
-		target = TaskSearchOwnerFulltext::FT_ADDRESS;
+		target = Isds::Type::FST_ADDRESS;
 		break;
 	case CBOX_TARGET_IC:
-		target = TaskSearchOwnerFulltext::FT_IC;
+		target = Isds::Type::FST_IC;
 		break;
 	case CBOX_TARGET_BOX_ID:
 	default:
-		target = TaskSearchOwnerFulltext::FT_BOX_ID;
+		target = Isds::Type::FST_BOX_ID;
 		break;
 	}
 
@@ -721,7 +721,7 @@ void DlgDsSearch::displaySearchResult(const SearchResult &searchResult)
 }
 
 DlgDsSearch::SearchResultFt DlgDsSearch::queryBoxFulltextPage(
-    enum TaskSearchOwnerFulltext::FulltextTarget target,
+    enum Isds::Type::FulltextSearchType target,
     enum TaskSearchOwnerFulltext::BoxType boxType,
     const QString &phrase, qint64 pageNum)
 {
@@ -738,7 +738,7 @@ DlgDsSearch::SearchResultFt DlgDsSearch::queryBoxFulltextPage(
 
 	enum TaskSearchOwnerFulltext::Result taskResult = task->m_result;
 	QString longErrMsg(task->m_isdsLongError);
-	QList<TaskSearchOwnerFulltext::BoxEntry> foundBoxes(task->m_foundBoxes);
+	QList<Isds::FulltextResult> foundBoxes(task->m_foundBoxes);
 	quint64 totalDb = task->m_totalMatchingBoxes;
 	bool gotLastPage = task->m_gotLastPage;
 
@@ -771,7 +771,7 @@ DlgDsSearch::SearchResultFt DlgDsSearch::queryBoxFulltextPage(
 }
 
 DlgDsSearch::SearchResultFt DlgDsSearch::queryBoxFulltextAll(
-    enum TaskSearchOwnerFulltext::FulltextTarget target,
+    enum Isds::Type::FulltextSearchType target,
     enum TaskSearchOwnerFulltext::BoxType boxType, const QString &phrase)
 {
 	m_contactTableModel.removeRows(0, m_contactTableModel.rowCount());

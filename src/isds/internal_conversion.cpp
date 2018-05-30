@@ -225,7 +225,7 @@ bool Isds::toLongInt(long int **cLongPtr, qint64 i)
 	return true;
 }
 
-enum Isds::Type::NilBool Isds::fromBool(const _Bool *cBoolPtr)
+enum Isds::Type::NilBool Isds::fromBoolPtr(const _Bool *cBoolPtr)
 {
 	if (cBoolPtr == NULL) {
 		return Type::BOOL_NULL;
@@ -236,7 +236,7 @@ enum Isds::Type::NilBool Isds::fromBool(const _Bool *cBoolPtr)
 	}
 }
 
-bool Isds::toBool(_Bool **cBoolPtr, enum Type::NilBool nilBool)
+bool Isds::toBoolPtr(_Bool **cBoolPtr, enum Type::NilBool nilBool)
 {
 	if (Q_UNLIKELY(cBoolPtr == NULL)) {
 		Q_ASSERT(0);

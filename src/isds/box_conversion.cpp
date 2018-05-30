@@ -34,6 +34,7 @@
 
 #include "src/isds/box_conversion.h"
 #include "src/isds/internal_conversion.h"
+#include "src/isds/internal_type_conversion.h"
 #include "src/isds/type_conversion.h"
 
 /*!
@@ -323,7 +324,7 @@ struct isds_PersonName *Isds::personName2libisds(const PersonName &pn, bool *ok)
  * @brief Converts data box types.
  */
 static
-enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt,
+enum Isds::Type::DbType libisdsDbTypePtr2DbType(const isds_DbType *bt,
     bool *ok = Q_NULLPTR)
 {
 	if (bt == NULL) {
@@ -333,38 +334,7 @@ enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType *bt,
 		return Isds::Type::BT_NULL;
 	}
 
-	bool iOk = true;
-	enum Isds::Type::DbType type = Isds::Type::BT_NULL;
-
-	switch (*bt) {
-	case DBTYPE_SYSTEM: type = Isds::Type::BT_SYSTEM; break;
-	case DBTYPE_OVM: type = Isds::Type::BT_OVM; break;
-	case DBTYPE_OVM_NOTAR: type = Isds::Type::BT_OVM_NOTAR; break;
-	case DBTYPE_OVM_EXEKUT: type = Isds::Type::BT_OVM_EXEKUT; break;
-	case DBTYPE_OVM_REQ: type = Isds::Type::BT_OVM_REQ; break;
-	case DBTYPE_OVM_FO: type = Isds::Type::BT_OVM_FO; break;
-	case DBTYPE_OVM_PFO: type = Isds::Type::BT_OVM_PFO; break;
-	case DBTYPE_OVM_PO: type = Isds::Type::BT_OVM_PO; break;
-	case DBTYPE_PO: type = Isds::Type::BT_PO; break;
-	case DBTYPE_PO_ZAK: type = Isds::Type::BT_PO_ZAK; break;
-	case DBTYPE_PO_REQ: type = Isds::Type::BT_PO_REQ; break;
-	case DBTYPE_PFO: type = Isds::Type::BT_PFO; break;
-	case DBTYPE_PFO_ADVOK: type = Isds::Type::BT_PFO_ADVOK; break;
-	case DBTYPE_PFO_DANPOR: type = Isds::Type::BT_PFO_DANPOR; break;
-	case DBTYPE_PFO_INSSPR: type = Isds::Type::BT_PFO_INSSPR; break;
-	case DBTYPE_PFO_AUDITOR: type = Isds::Type::BT_PFO_AUDITOR; break;
-	case DBTYPE_FO: type = Isds::Type::BT_FO; break;
-	default:
-		Q_ASSERT(0);
-		iOk = false;
-		type = Isds::Type::BT_SYSTEM; /* FIXME */
-		break;
-	}
-
-	if (ok != Q_NULLPTR) {
-		*ok = iOk;
-	}
-	return type;
+	return IsdsInternal::libisdsDbType2DbType(*bt, ok);
 }
 
 /*!
@@ -398,7 +368,7 @@ Isds::DbOwnerInfo Isds::libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
 	DbOwnerInfo ownerInfo;
 
 	ownerInfo.setDbID(Isds::fromCStr(idoi->dbID));
-	ownerInfo.setDbType(libisdsDbType2DbType(idoi->dbType, &iOk));
+	ownerInfo.setDbType(libisdsDbTypePtr2DbType(idoi->dbType, &iOk));
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
@@ -425,8 +395,8 @@ Isds::DbOwnerInfo Isds::libisds2dbOwnerInfo(const struct isds_DbOwnerInfo *idoi,
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
-	ownerInfo.setDbEffectiveOVM(fromBool(idoi->dbEffectiveOVM));
-	ownerInfo.setDbOpenAddressing(fromBool(idoi->dbOpenAddressing));
+	ownerInfo.setDbEffectiveOVM(fromBoolPtr(idoi->dbEffectiveOVM));
+	ownerInfo.setDbOpenAddressing(fromBoolPtr(idoi->dbOpenAddressing));
 
 	if (ok != Q_NULLPTR) {
 		*ok = true;
@@ -444,7 +414,7 @@ fail:
  * @brief Converts data box types.
  */
 static
-bool dbType2libisdsDbType(isds_DbType **tgt, enum Isds::Type::DbType src)
+bool dbType2libisdsDbTypePtr(isds_DbType **tgt, enum Isds::Type::DbType src)
 {
 	if (Q_UNLIKELY(tgt == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -463,36 +433,12 @@ bool dbType2libisdsDbType(isds_DbType **tgt, enum Isds::Type::DbType src)
 			return false;
 		}
 	}
-	switch (src) {
-	/*
-	 * Isds::Type::BT_NULL cannot be reached here.
-	 *
-	 * case Isds::Type::BT_NULL:
-	 * 	std::free(*tgt); *tgt = NULL;
-	 * 	break;
-	 */
-	case Isds::Type::BT_SYSTEM: **tgt = DBTYPE_SYSTEM; break;
-	case Isds::Type::BT_OVM: **tgt = DBTYPE_OVM; break;
-	case Isds::Type::BT_OVM_NOTAR: **tgt = DBTYPE_OVM_NOTAR; break;
-	case Isds::Type::BT_OVM_EXEKUT: **tgt = DBTYPE_OVM_EXEKUT; break;
-	case Isds::Type::BT_OVM_REQ: **tgt = DBTYPE_OVM_REQ; break;
-	case Isds::Type::BT_OVM_FO: **tgt = DBTYPE_OVM_FO; break;
-	case Isds::Type::BT_OVM_PFO: **tgt = DBTYPE_OVM_PFO; break;
-	case Isds::Type::BT_OVM_PO: **tgt = DBTYPE_OVM_PO; break;
-	case Isds::Type::BT_PO: **tgt = DBTYPE_PO; break;
-	case Isds::Type::BT_PO_ZAK: **tgt = DBTYPE_PO_ZAK; break;
-	case Isds::Type::BT_PO_REQ: **tgt = DBTYPE_PO_REQ; break;
-	case Isds::Type::BT_PFO: **tgt = DBTYPE_PFO; break;
-	case Isds::Type::BT_PFO_ADVOK: **tgt = DBTYPE_PFO_ADVOK; break;
-	case Isds::Type::BT_PFO_DANPOR: **tgt = DBTYPE_PFO_DANPOR; break;
-	case Isds::Type::BT_PFO_INSSPR: **tgt = DBTYPE_PFO_INSSPR; break;
-	case Isds::Type::BT_PFO_AUDITOR: **tgt = DBTYPE_PFO_AUDITOR; break;
-	case Isds::Type::BT_FO: **tgt = DBTYPE_FO; break;
-	default:
-		Q_ASSERT(0);
+
+	bool ok = false;
+	**tgt = IsdsInternal::dbType2libisdsDbType(src, &ok);
+	if (Q_UNLIKELY(!ok)) {
 		std::free(*tgt); *tgt = NULL;
 		return false;
-		break;
 	}
 
 	return true;
@@ -544,7 +490,7 @@ bool setLibisdsDbOwnerInfoContent(struct isds_DbOwnerInfo *tgt,
 	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->dbID, src.dbID()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!dbType2libisdsDbType(&tgt->dbType, src.dbType()))) {
+	if (Q_UNLIKELY(!dbType2libisdsDbTypePtr(&tgt->dbType, src.dbType()))) {
 		return false;
 	}
 	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->ic, src.ic()))) {
@@ -583,10 +529,10 @@ bool setLibisdsDbOwnerInfoContent(struct isds_DbOwnerInfo *tgt,
 	if (Q_UNLIKELY(!dbState2longPtr(&tgt->dbState, src.dbState()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!toBool(&tgt->dbEffectiveOVM, src.dbEffectiveOVM()))) {
+	if (Q_UNLIKELY(!toBoolPtr(&tgt->dbEffectiveOVM, src.dbEffectiveOVM()))) {
 		return false;
 	}
-	if (Q_UNLIKELY(!toBool(&tgt->dbOpenAddressing, src.dbOpenAddressing()))) {
+	if (Q_UNLIKELY(!toBoolPtr(&tgt->dbOpenAddressing, src.dbOpenAddressing()))) {
 		return false;
 	}
 
@@ -625,6 +571,101 @@ struct isds_DbOwnerInfo *Isds::dbOwnerInfo2libisds(const DbOwnerInfo &doi,
 		*ok = true;
 	}
 	return idoi;
+}
+
+QList<Isds::DbOwnerInfo> Isds::libisds2dbOwnerInfoList(
+    const struct isds_list *ioil, bool *ok)
+{
+	/* Owner info destructor function type. */
+	typedef void (*own_info_destr_func_t)(struct isds_DbOwnerInfo **);
+
+	QList<DbOwnerInfo> ownerInfoList;
+
+	while (ioil != NULL) {
+		const struct isds_DbOwnerInfo *ioi = (struct isds_DbOwnerInfo *)ioil->data;
+		own_info_destr_func_t idestr = (own_info_destr_func_t)ioil->destructor;
+		/* Destructor function must be set. */
+		if (idestr != isds_DbOwnerInfo_free) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList<DbOwnerInfo>();
+		}
+
+		if (ioi != NULL) {
+			bool iOk = false;
+			ownerInfoList.append(libisds2dbOwnerInfo(ioi, &iOk));
+			if (!iOk) {
+				if (ok != Q_NULLPTR) {
+					*ok = false;
+				}
+				return QList<DbOwnerInfo>();
+			}
+		}
+
+		ioil = ioil->next;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return ownerInfoList;
+}
+
+struct isds_list *Isds::dbOwnerInfoList2libisds(
+    const QList<DbOwnerInfo> &oil, bool *ok)
+{
+	if (Q_UNLIKELY(oil.isEmpty())) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return NULL;
+	}
+
+	struct isds_list *ioil = NULL;
+	struct isds_list *lastItem = NULL;
+	foreach (const DbOwnerInfo &oi, oil) {
+		struct isds_list *item =
+		    (struct isds_list *)std::malloc(sizeof(*item));
+		if (Q_UNLIKELY(item == NULL)) {
+			Q_ASSERT(0);
+			goto fail;
+		}
+		std::memset(item, 0, sizeof(*item));
+
+		bool iOk = false;
+		struct isds_DbOwnerInfo *ioi = dbOwnerInfo2libisds(oi, &iOk);
+		if (Q_UNLIKELY(!iOk)) {
+			std::free(item); item = NULL;
+			goto fail;
+		}
+
+		/* Set list item. */
+		item->next = NULL;
+		item->data = ioi;
+		item->destructor = (void (*)(void **))isds_DbOwnerInfo_free;
+
+		/* Append item. */
+		if (lastItem == NULL) {
+			ioil = item;
+		} else {
+			lastItem->next = item;
+		}
+		lastItem = item;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return ioil;
+
+fail:
+	isds_list_free(&ioil);
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return NULL;
 }
 
 /*!
@@ -886,4 +927,211 @@ struct isds_DbUserInfo *Isds::dbUserInfo2libisds(const DbUserInfo &dui,
 		*ok = true;
 	}
 	return idui;
+}
+
+/*!
+ * @brief Compute number of characters between pointers.
+ *
+ * @note This method is needed to adjust for UTF encoding.
+ *
+ * @param[in]  start Start of string.
+ * @param[in]  stop End of string.
+ * @param[out] ok Set to false on error, true on success.
+ * @return Number of characters (not bytes) between the two pointers.
+ */
+static
+int charactersBetweenPtrs(const char *start, const char *stop,
+    bool *ok = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(start > stop)) {
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return -1;
+	}
+
+	ssize_t len = stop - start;
+	if (len == 0) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return 0;
+	}
+
+	len = QString(QByteArray(start, len)).size();
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return len;
+}
+
+/*!
+ * @brief Converts list of start/stop pointers into indexes into QString.
+ *
+ * @param[in]  str Start of C string.
+ * @param[in]  starts List of start indexes.
+ * @param[in]  stops List of stop indexes.
+ * @param[out] ok Set to false on error, true on success.
+ * @return List of start/stop index pairs.
+ */
+static
+QList< QPair<int, int> > libisdsStartStop2startStop(const char *str,
+    struct isds_list *starts, struct isds_list *stops, bool *ok = Q_NULLPTR)
+{
+	if ((str == NULL) || ((starts == NULL) && (stops == NULL))) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return QList< QPair<int, int> >();
+	}
+
+	if ((starts == NULL) || (stops == NULL)) {
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return QList< QPair<int, int> >();
+	}
+
+	QList< QPair<int, int> > resList;
+
+	while ((starts != NULL) && (stops != NULL)) {
+		const char *start = (char *)starts->data;
+		const char *stop = (char *)stops->data;
+
+		/* Destructor functions must not be set. */
+		if (Q_UNLIKELY((starts->destructor != NULL) || (stops->destructor != NULL))) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList< QPair<int, int> >();
+		}
+
+		qint64 diffStart;
+		qint64 diffStop;
+		/*
+		 * UTF8 characters skew the positions, therefore simple pointer subtraction
+		 * diffStart = start - str;
+		 * diffStop = stop - str;
+		 * canot be performed.
+		 */
+		diffStart = charactersBetweenPtrs(str, start);
+		diffStop = charactersBetweenPtrs(str, stop);
+		if (Q_UNLIKELY((diffStart < 0) || (diffStop < 0) || (diffStart > diffStop))) {
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList< QPair<int, int> >();
+		}
+
+		resList.append(QPair<int, int>(diffStart, diffStop));
+
+		starts = starts->next;
+		stops = stops->next;
+	}
+
+	/* Both lists must be equally long. */
+	if (Q_UNLIKELY((starts != NULL) || (stops != NULL))) {
+		Q_ASSERT(0);
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return QList< QPair<int, int> >();
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return resList;
+}
+
+Isds::FulltextResult Isds::libisds2fulltextResult(
+    const struct isds_fulltext_result *ifr, bool *ok)
+{
+	if (Q_UNLIKELY(ifr == Q_NULLPTR)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return FulltextResult();
+	}
+
+	bool iOk = false;
+	FulltextResult fulltextResult;
+
+	fulltextResult.setDbID(fromCStr(ifr->dbID));
+	fulltextResult.setDbType(IsdsInternal::libisdsDbType2DbType(ifr->dbType, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	fulltextResult.setDbName(fromCStr(ifr->name));
+	fulltextResult.setDbAddress(fromCStr(ifr->address));
+	fulltextResult.setDbBiDate(dateFromStructTM(ifr->biDate));
+	fulltextResult.setIc(fromCStr(ifr->ic));
+	fulltextResult.setDbEffectiveOVM(ifr->dbEffectiveOVM);
+	fulltextResult.setActive(ifr->active);
+	fulltextResult.setPublicSending(ifr->public_sending);
+	fulltextResult.setCommercialSending(ifr->commercial_sending);
+
+	/* Convert pointers to lists. */
+	fulltextResult.setNameMatches(libisdsStartStop2startStop(ifr->name,
+	    ifr->name_match_start, ifr->name_match_end, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	fulltextResult.setAddressMatches(libisdsStartStop2startStop(ifr->address,
+	    ifr->address_match_start, ifr->address_match_end, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return fulltextResult;
+
+fail:
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return FulltextResult();
+}
+
+QList<Isds::FulltextResult> Isds::libisds2fulltextResultList(
+    const struct isds_list *ifrl, bool *ok)
+{
+	/* Full-text result destructor function type. */
+	typedef void (*ft_result_destr_func_t)(struct isds_fulltext_result **);
+
+	QList<FulltextResult> resultList;
+
+	while (ifrl != NULL) {
+		const struct isds_fulltext_result *ifr = (struct isds_fulltext_result *)ifrl->data;
+		ft_result_destr_func_t idestr = (ft_result_destr_func_t)ifrl->destructor;
+		/* Destructor function must be set. */
+		if (idestr != isds_fulltext_result_free) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList<FulltextResult>();
+		}
+
+		if (ifr != NULL) {
+			bool iOk = false;
+			resultList.append(libisds2fulltextResult(ifr, &iOk));
+			if (!iOk) {
+				if (ok != Q_NULLPTR) {
+					*ok = false;
+				}
+				return QList<FulltextResult>();
+			}
+		}
+
+		ifrl = ifrl->next;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return resultList;
 }

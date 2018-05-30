@@ -44,7 +44,7 @@ SOURCES += \
 	$${top_srcdir}src/isds/internal_conversion.cpp \
 	$${top_srcdir}src/isds/message_interface.cpp \
 	$${top_srcdir}src/isds/message_conversion.cpp \
-	$${top_srcdir}src/isds/services.cpp \
+	$${top_srcdir}src/isds/services_message.cpp \
 	$${top_srcdir}src/isds/type_conversion.cpp \
 	$${top_srcdir}src/isds/type_description.cpp \
 	$${top_srcdir}src/models/accounts_model.cpp \

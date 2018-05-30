@@ -24,12 +24,14 @@
 #include <utility> /* std::move */
 
 #include "src/isds/box_interface.h"
+#include "src/isds/internal_conversion.h"
 
 /* Null objects - for convenience. */
 static const Isds::Address nullAddress;
 static const Isds::BirthInfo nullBirthInfo;
 static const Isds::PersonName nullPersonName;
 static const QDate nullDate;
+static const QList< QPair<int, int> > nullMatchList;
 static const QString nullString;
 
 /*!
@@ -1770,6 +1772,436 @@ void Isds::DbUserInfo::setCaState(QString &&cs)
 #endif /* Q_COMPILER_RVALUE_REFS */
 
 void Isds::swap(DbUserInfo &first, DbUserInfo &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief PIMPL full-text data-box search result class.
+ */
+class Isds::FulltextResultPrivate {
+	//Q_DISABLE_COPY(FulltextResultPrivate)
+public:
+	FulltextResultPrivate(void)
+	    : m_dbID(), m_dbType(Isds::Type::BT_NULL), m_dbName(), m_dbAddress(),
+	    m_dbBiDate(), m_dbICO(), m_dbEffectiveOVM(false),
+	    active(false), publicSending(false), commercialSending(false),
+	    nameMatches(), addressMatches()
+	{ }
+
+	FulltextResultPrivate &operator=(const FulltextResultPrivate &other) Q_DECL_NOTHROW
+	{
+		m_dbID = other.m_dbID;
+		m_dbType = other.m_dbType;
+		m_dbName = other.m_dbName;
+		m_dbAddress = other.m_dbAddress;
+		m_dbBiDate = other.m_dbBiDate;
+		m_dbICO = other.m_dbICO;
+		m_dbEffectiveOVM = other.m_dbEffectiveOVM;
+		active = other.active;
+		publicSending = other.publicSending;
+		commercialSending = other.commercialSending;
+		nameMatches = other.nameMatches;
+		addressMatches = other.addressMatches;
+
+		return *this;
+	}
+
+	bool operator==(const FulltextResultPrivate &other) const
+	{
+		return (m_dbID == other.m_dbID) &&
+		    (m_dbType == other.m_dbType) &&
+		    (m_dbName == other.m_dbName) &&
+		    (m_dbAddress == other.m_dbAddress) &&
+		    (m_dbBiDate == other.m_dbBiDate) &&
+		    (m_dbICO == other.m_dbICO) &&
+		    (m_dbEffectiveOVM == other.m_dbEffectiveOVM) &&
+		    (active == other.active) &&
+		    (publicSending == other.publicSending) &&
+		    (commercialSending == other.commercialSending) &&
+		    (nameMatches == other.nameMatches) &&
+		    (addressMatches == other.addressMatches);
+	}
+
+	QString m_dbID;
+	enum Isds::Type::DbType m_dbType;
+	QString m_dbName;
+	QString m_dbAddress;
+	QDate m_dbBiDate;
+	QString m_dbICO;
+	bool m_dbEffectiveOVM;
+	/*
+	 * Following entries are derived from libisds at it does not provide
+	 * interface for dbSendOptions.
+	 */
+	bool active; /* Box can receive messages. */
+	bool publicSending; /* Seeker box can send ordinary messages into this box. */
+	bool commercialSending; /* Seeker box can send commercial messages into this box. */
+
+	QList< QPair<int, int> > nameMatches;
+	QList< QPair<int, int> > addressMatches;
+};
+
+Isds::FulltextResult::FulltextResult(void)
+    : d_ptr(Q_NULLPTR)
+{
+}
+
+Isds::FulltextResult::FulltextResult(const FulltextResult &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) FulltextResultPrivate) : Q_NULLPTR)
+{
+	Q_D(FulltextResult);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::FulltextResult::FulltextResult(FulltextResult &&other) Q_DECL_NOEXCEPT
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::FulltextResult::~FulltextResult(void)
+{
+}
+
+/*!
+ * @brief Ensures private full-text search result presence.
+ *
+ * @note Returns if private full-text search result could not be allocated.
+ */
+#define ensureFulltextResultPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			FulltextResultPrivate *p = new (std::nothrow) FulltextResultPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+Isds::FulltextResult &Isds::FulltextResult::operator=(
+    const FulltextResult &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureFulltextResultPrivate(*this);
+	Q_D(FulltextResult);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::FulltextResult &Isds::FulltextResult::operator=(
+    FulltextResult &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::FulltextResult::operator==(const FulltextResult &other) const
+{
+	Q_D(const FulltextResult);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::FulltextResult::operator!=(const FulltextResult &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::FulltextResult::isNull(void) const
+{
+	Q_D(const FulltextResult);
+	return d == Q_NULLPTR;
+}
+
+qint64 Isds::FulltextResult::dbId(void) const
+{
+	bool ok = false;
+	qint64 id = string2NonNegativeLong(dbID(), &ok);
+	return ok ? id : -1;
+}
+
+void Isds::FulltextResult::setDbId(qint64 id)
+{
+	setDbID(nonNegativeLong2String(id));
+}
+
+const QString &Isds::FulltextResult::dbID(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dbID;
+}
+
+void Isds::FulltextResult::setDbID(const QString &id)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbID = id;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setDbID(QString &&id)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbID = id;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+enum Isds::Type::DbType Isds::FulltextResult::dbType(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::BT_NULL;
+	}
+	return d->m_dbType;
+}
+
+void Isds::FulltextResult::setDbType(enum Type::DbType bt)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbType = bt;
+}
+
+const QString &Isds::FulltextResult::dbName(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dbName;
+}
+
+void Isds::FulltextResult::setDbName(const QString &n)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbName = n;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setDbName(QString &&n)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbName = n;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::FulltextResult::dbAddress(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dbAddress;
+}
+
+void Isds::FulltextResult::setDbAddress(const QString &a)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbAddress = a;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setDbAddress(QString &&a)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbAddress = a;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QDate &Isds::FulltextResult::dbBiDate(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDate;
+	}
+	return d->m_dbBiDate;
+}
+
+void Isds::FulltextResult::setDbBiDate(const QDate &bd)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbBiDate = bd;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setDbBiDate(QDate &&bd)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbBiDate = bd;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::FulltextResult::ic(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dbICO;
+}
+
+void Isds::FulltextResult::setIc(const QString &ic)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbICO = ic;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setIc(QString &&ic)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbICO = ic;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::FulltextResult::dbEffectiveOVM(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+	return d->m_dbEffectiveOVM;
+}
+
+void Isds::FulltextResult::setDbEffectiveOVM(bool eo)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->m_dbEffectiveOVM = eo;
+}
+
+bool Isds::FulltextResult::active(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+	return d->active;
+}
+
+void Isds::FulltextResult::setActive(bool a)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->active = a;
+}
+
+bool Isds::FulltextResult::publicSending(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+	return d->publicSending;
+}
+
+void Isds::FulltextResult::setPublicSending(bool ps)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->publicSending = ps;
+}
+
+bool Isds::FulltextResult::commercialSending(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+	return d->commercialSending;
+}
+
+void Isds::FulltextResult::setCommercialSending(bool cs)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->commercialSending = cs;
+}
+
+const QList< QPair<int, int> > &Isds::FulltextResult::nameMatches(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullMatchList;
+	}
+	return d->nameMatches;
+}
+
+void Isds::FulltextResult::setNameMatches(const QList< QPair<int, int> > &nm)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->nameMatches = nm;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setNameMatches(QList< QPair<int, int> > &&nm)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->nameMatches = nm;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QList< QPair<int, int> > &Isds::FulltextResult::addressMatches(void) const
+{
+	Q_D(const FulltextResult);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullMatchList;
+	}
+	return d->addressMatches;
+}
+
+void Isds::FulltextResult::setAddressMatches(const QList< QPair<int, int> > &am)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->addressMatches = am;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::FulltextResult::setAddressMatches(QList< QPair<int, int> > &&am)
+{
+	ensureFulltextResultPrivate();
+	Q_D(FulltextResult);
+	d->addressMatches = am;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW
 {
 	using std::swap;
 	swap(first.d_ptr, second.d_ptr);

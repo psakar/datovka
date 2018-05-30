@@ -24,7 +24,6 @@
 #include "src/isds/to_text_conversion.h"
 #include "src/isds/type_conversion.h"
 #include "src/isds/type_description.h"
-#include "src/isds/types.h"
 #include "src/models/data_box_contacts_model.h"
 
 BoxContactsModel::BoxContactsModel(QObject *parent)
@@ -207,8 +206,7 @@ void BoxContactsModel::appendData(
 	endInsertRows();
 }
 
-void BoxContactsModel::appendData(
-    const QList<TaskSearchOwnerFulltext::BoxEntry> &entryList)
+void BoxContactsModel::appendData(const QList<Isds::FulltextResult> &entryList)
 {
 	if (entryList.isEmpty()) {
 		return;
@@ -217,19 +215,19 @@ void BoxContactsModel::appendData(
 	beginInsertRows(QModelIndex(), rowCount(),
 	    rowCount() + entryList.size() - 1);
 
-	foreach (const TaskSearchOwnerFulltext::BoxEntry &entry, entryList) {
+	foreach (const Isds::FulltextResult &entry, entryList) {
 
 		reserveSpace();
 
 		QVector<QVariant> row(m_columnCount);
 
 		row[CHECKBOX_COL] = false;
-		row[BOX_ID_COL] = entry.id;
-		row[BOX_TYPE_COL] = entry.type;
-		row[BOX_NAME_COL] = entry.name;
-		row[ADDRESS_COL] = entry.address;
+		row[BOX_ID_COL] = entry.dbID();
+		row[BOX_TYPE_COL] = Isds::dbType2IntVariant(entry.dbType());
+		row[BOX_NAME_COL] = entry.dbName();
+		row[ADDRESS_COL] = entry.dbAddress();
 		//row[POST_CODE_COL];
-		row[PDZ_COL] = !entry.publicSending && entry.commercialSending;
+		row[PDZ_COL] = !entry.publicSending() && entry.commercialSending();
 
 		m_data[m_rowCount++] = row;
 	}
@@ -267,9 +265,9 @@ void BoxContactsModel::appendData(
 	endInsertRows();
 }
 
-void BoxContactsModel::appendData(const QString &id, int type,
-    const QString &name, const QString &addr, const QString postCode,
-    const QVariant &pdz)
+void BoxContactsModel::appendData(const QString &id,
+    enum Isds::Type::DbType type, const QString &name, const QString &addr,
+    const QString &postCode, const QVariant &pdz)
 {
 	if (id.isEmpty() || name.isEmpty() || addr.isEmpty()) {
 		return;
@@ -284,8 +282,8 @@ void BoxContactsModel::appendData(const QString &id, int type,
 
 		row[CHECKBOX_COL] = false;
 		row[BOX_ID_COL] = id;
-		if (type >= 0) {
-			row[BOX_TYPE_COL] = type;
+		if (type != Isds::Type::BT_NULL) {
+			row[BOX_TYPE_COL] = Isds::dbType2IntVariant(type);
 		}
 		row[BOX_NAME_COL] = name;
 		row[ADDRESS_COL] = addr;
