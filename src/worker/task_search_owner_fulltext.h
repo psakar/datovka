@@ -63,10 +63,12 @@ public:
 	 * @param[in] pageNumber Page number to ask for.
 	 * @paran[in] askAll Whether to gather all available data starting
 	 *                   from given \a pageNumber.
+	 * @param[in] highlight Set to true if found matches should be emphasised.
 	 */
 	explicit TaskSearchOwnerFulltext(const QString &userName,
 	    const QString &query, enum Isds::Type::FulltextSearchType target,
-	    enum BoxType type, qint64 pageNumber = 0, bool askAll = true);
+	    enum BoxType type, qint64 pageNumber = 0, bool askAll = true,
+	    bool highlight = false);
 
 	/*!
 	 * @brief Performs action.
@@ -97,6 +99,7 @@ private:
 	 * @param[in]  type Type of data box to search for.
 	 * @patam[in]  pageSize Desired page size.
 	 * @param[in]  pageNumber Index of page to download.
+	 * @param[in]  highlight Whether to emphasise found matches.
 	 * @param[out] totalMatchingBoxes Total number of found boxes.
 	 * @param[out] currentPageStart Index of first box in the found page.
 	 * @param[out] currentPageSize Size of current page.
@@ -110,10 +113,10 @@ private:
 	enum Result isdsSearch2(const QString &userName,
 	    const QString &query, enum Isds::Type::FulltextSearchType target,
 	    enum BoxType type, quint64 pageSize, quint64 pageNumber,
-	    quint64 &totalMatchingBoxes, quint64 &currentPageStart,
-	    quint64 &currentPageSize, bool &gotLastPage,
-	    QList<Isds::FulltextResult> &foundBoxes, QString &error,
-	    QString &longError);
+	    bool highlight, quint64 &totalMatchingBoxes,
+	    quint64 &currentPageStart, quint64 &currentPageSize,
+	    bool &gotLastPage, QList<Isds::FulltextResult> &foundBoxes,
+	    QString &error, QString &longError);
 
 	/*!
 	 * @brief Search for all data boxes matching supplied criteria.
@@ -125,6 +128,7 @@ private:
 	 * @param[in]  pageNumber Index of page to download.
 	 * @paran[in]  askAll Whether to gather all available data starting
 	 *                    from given \a pageNumber.
+	 * @param[in]  highlight Whether to emphasise found matches.
 	 * @param[out] totalMatchingBoxes Total number of found boxes.
 	 * @param[out] gotLastPage True if last page downloaded.
 	 * @param[out] foundBoxes List of found boxes to append search results to.
@@ -135,7 +139,7 @@ private:
 	static
 	enum Result isdsSearch2All(const QString &userName,
 	    const QString &query, enum Isds::Type::FulltextSearchType target,
-	    enum BoxType type, quint64 pageNumber, bool askAll,
+	    enum BoxType type, quint64 pageNumber, bool askAll, bool highlight,
 	    quint64 &totalMatchingBoxes, bool &gotLastPage,
 	    QList<Isds::FulltextResult> &foundBoxes, QString &error,
 	    QString &longError);
@@ -146,6 +150,7 @@ private:
 	const enum BoxType m_boxType; /*!< Sought box type. */
 	const quint64 m_pageNumber; /*!< Page number to ask for. */
 	const bool m_askAll; /*!< Whether to ask all remaining pages. */
+	const bool m_highlight; /*!< Whether to emphasise found matches. */
 
 	static const quint64 maxResponseSize; /*!< Maximal response size. */
 };

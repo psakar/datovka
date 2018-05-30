@@ -52,7 +52,12 @@ private slots:
 
 	void searchOwnerFulltext02(void);
 
+	void searchOwnerFulltext03(void);
+
 private:
+	void checkIndexList(const QString &res, const QString &query,
+	    const QList< QPair<int, int> > &list);
+
 	const bool m_testing; /*!< Testing account. */
 
 	const QString m_testPath; /*!< Test path. */
@@ -229,7 +234,7 @@ void TestTaskSearchOwner::searchOwnerFulltext01(void)
 	/* Should receive a single result. */
 	task = new (std::nothrow) TaskSearchOwnerFulltext(m_sender.userName,
 	    QString("barbucha"), Isds::Type::FST_GENERAL,
-	    TaskSearchOwnerFulltext::BT_ALL, 0, true);
+	    TaskSearchOwnerFulltext::BT_ALL, 0, true, false);
 	QVERIFY(task != Q_NULLPTR);
 	task->setAutoDelete(false);
 
@@ -245,6 +250,8 @@ void TestTaskSearchOwner::searchOwnerFulltext01(void)
 
 	const Isds::FulltextResult &foundResult(task->m_foundBoxes.constFirst());
 	QVERIFY(foundResult.dbID() == QString("qrdae26"));
+	QVERIFY(foundResult.nameMatches().size() == 0);
+	QVERIFY(foundResult.addressMatches().size() == 0);
 
 	delete task; task = Q_NULLPTR;
 }
@@ -264,7 +271,7 @@ void TestTaskSearchOwner::searchOwnerFulltext02(void)
 	/* Should receive many results. */
 	task = new (std::nothrow) TaskSearchOwnerFulltext(m_sender.userName,
 	    QString("praha"), Isds::Type::FST_GENERAL,
-	    TaskSearchOwnerFulltext::BT_ALL, 0, true);
+	    TaskSearchOwnerFulltext::BT_ALL, 0, true, false);
 	QVERIFY(task != Q_NULLPTR);
 	task->setAutoDelete(false);
 
@@ -275,8 +282,69 @@ void TestTaskSearchOwner::searchOwnerFulltext02(void)
 	QVERIFY(((int)task->m_totalMatchingBoxes) == task->m_foundBoxes.size());
 
 	QVERIFY(task->m_foundBoxes.size() >= 500);
+	foreach (const Isds::FulltextResult &foundResult, task->m_foundBoxes) {
+		QVERIFY(foundResult.nameMatches().size() == 0);
+		QVERIFY(foundResult.addressMatches().size() == 0);
+	}
 
 	delete task; task = Q_NULLPTR;
+}
+
+void TestTaskSearchOwner::searchOwnerFulltext03(void)
+{
+	TaskSearchOwnerFulltext *task = Q_NULLPTR;
+
+	QVERIFY(!m_sender.userName.isEmpty());
+
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
+	struct isds_ctx *ctx = GlobInstcs::isdsSessionsPtr->session(
+	    m_sender.userName);
+	QVERIFY(ctx != NULL);
+	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
+
+	const QString query("praha");
+
+	/* Should receive many results. */
+	task = new (std::nothrow) TaskSearchOwnerFulltext(m_sender.userName,
+	    query, Isds::Type::FST_GENERAL, TaskSearchOwnerFulltext::BT_ALL,
+	    0, true, true);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskSearchOwnerFulltext::SOF_SUCCESS);
+	QVERIFY(task->m_foundBoxes.size() >= 0);
+	QVERIFY(((int)task->m_totalMatchingBoxes) == task->m_foundBoxes.size());
+
+	QVERIFY(task->m_foundBoxes.size() >= 500);
+	foreach (const Isds::FulltextResult &foundResult, task->m_foundBoxes) {
+		/* At least one list must be set. */
+		QVERIFY((foundResult.nameMatches().size() > 0) || (foundResult.addressMatches().size() > 0));
+		checkIndexList(foundResult.dbName(), query, foundResult.nameMatches());
+		checkIndexList(foundResult.dbAddress(), query, foundResult.addressMatches());
+	}
+
+	delete task; task = Q_NULLPTR;
+}
+
+void TestTaskSearchOwner::checkIndexList(const QString &res,
+    const QString &query, const QList< QPair<int, int> > &list)
+{
+	typedef QPair<int, int> entryType;
+
+	foreach (const entryType &entry, list) {
+		int start = entry.first;
+		int stop = entry.second;
+		int diff = stop - start;
+		QVERIFY(diff >= 0);
+		QString mid(res.mid(start, diff));
+		/* The full-text search allows small deviations in the text. */
+		if (query.toLower() != mid.toLower()) {
+			fprintf(stderr, "Queried '%s', found '%s'.\n",
+			    query.toUtf8().constData(), mid.toUtf8().constData());
+		}
+	}
 }
 
 QObject *newTestTaskSearchOwner(void)

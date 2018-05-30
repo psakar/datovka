@@ -929,6 +929,119 @@ struct isds_DbUserInfo *Isds::dbUserInfo2libisds(const DbUserInfo &dui,
 	return idui;
 }
 
+/*!
+ * @brief Compute number of characters between pointers.
+ *
+ * @note This method is needed to adjust for UTF encoding.
+ *
+ * @param[in]  start Start of string.
+ * @param[in]  stop End of string.
+ * @param[out] ok Set to false on error, true on success.
+ * @return Number of characters (not bytes) between the two pointers.
+ */
+static
+int charactersBetweenPtrs(const char *start, const char *stop,
+    bool *ok = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(start > stop)) {
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return -1;
+	}
+
+	ssize_t len = stop - start;
+	if (len == 0) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return 0;
+	}
+
+	len = QString(QByteArray(start, len)).size();
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return len;
+}
+
+/*!
+ * @brief Converts list of start/stop pointers into indexes into QString.
+ *
+ * @param[in]  str Start of C string.
+ * @param[in]  starts List of start indexes.
+ * @param[in]  stops List of stop indexes.
+ * @param[out] ok Set to false on error, true on success.
+ * @return List of start/stop index pairs.
+ */
+static
+QList< QPair<int, int> > libisdsStartStop2startStop(const char *str,
+    struct isds_list *starts, struct isds_list *stops, bool *ok = Q_NULLPTR)
+{
+	if ((str == NULL) || ((starts == NULL) && (stops == NULL))) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return QList< QPair<int, int> >();
+	}
+
+	if ((starts == NULL) || (stops == NULL)) {
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return QList< QPair<int, int> >();
+	}
+
+	QList< QPair<int, int> > resList;
+
+	while ((starts != NULL) && (stops != NULL)) {
+		const char *start = (char *)starts->data;
+		const char *stop = (char *)stops->data;
+
+		if (Q_UNLIKELY((starts->destructor != NULL) || (stops->destructor != NULL))) {
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList< QPair<int, int> >();
+		}
+
+		qint64 diffStart;
+		qint64 diffStop;
+		/*
+		 * UTF8 characters skew the positions, therefore simple pointer subtraction
+		 * diffStart = start - str;
+		 * diffStop = stop - str;
+		 * canot be performed.
+		 */
+		diffStart = charactersBetweenPtrs(str, start);
+		diffStop = charactersBetweenPtrs(str, stop);
+		if (Q_UNLIKELY((diffStart < 0) || (diffStop < 0) || (diffStart > diffStop))) {
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList< QPair<int, int> >();
+		}
+
+		resList.append(QPair<int, int>(diffStart, diffStop));
+
+		starts = starts->next;
+		stops = stops->next;
+	}
+
+	/* Both lists must be equally long. */
+	if (Q_UNLIKELY((starts != NULL) || (stops != NULL))) {
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return QList< QPair<int, int> >();
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return resList;
+}
+
 Isds::FulltextResult Isds::libisds2fulltextResult(
     const struct isds_fulltext_result *ifr, bool *ok)
 {
@@ -956,9 +1069,17 @@ Isds::FulltextResult Isds::libisds2fulltextResult(
 	fulltextResult.setPublicSending(ifr->public_sending);
 	fulltextResult.setCommercialSending(ifr->commercial_sending);
 
-	/* TODO -- Convert pointers to list. */
-	//fulltextResult.setNameMatches();
-	//fulltextResult.setAddressMatches();
+	/* Convert pointers to lists. */
+	fulltextResult.setNameMatches(libisdsStartStop2startStop(ifr->name,
+	    ifr->name_match_start, ifr->name_match_end, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+	fulltextResult.setAddressMatches(libisdsStartStop2startStop(ifr->address,
+	    ifr->address_match_start, ifr->address_match_end, &iOk));
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
 
 	if (ok != Q_NULLPTR) {
 		*ok = true;

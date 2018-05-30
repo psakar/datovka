@@ -38,7 +38,7 @@ const quint64 TaskSearchOwnerFulltext::maxResponseSize = 100;
 
 TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
     const QString &query, enum Isds::Type::FulltextSearchType target,
-    enum BoxType type, qint64 pageNumber, bool askAll)
+    enum BoxType type, qint64 pageNumber, bool askAll, bool highlight)
     : m_result(SOF_ERROR),
     m_isdsError(),
     m_isdsLongError(),
@@ -50,7 +50,8 @@ TaskSearchOwnerFulltext::TaskSearchOwnerFulltext(const QString &userName,
     m_target(target),
     m_boxType(type),
     m_pageNumber(pageNumber),
-    m_askAll(askAll)
+    m_askAll(askAll),
+    m_highlight(highlight)
 {
 	Q_ASSERT(!m_userName.isEmpty());
 	Q_ASSERT(!m_query.isEmpty());
@@ -74,8 +75,8 @@ void TaskSearchOwnerFulltext::run(void)
 	/* ### Worker task begin. ### */
 
 	m_result = isdsSearch2All(m_userName, m_query, m_target, m_boxType,
-	    m_pageNumber, m_askAll, m_totalMatchingBoxes, m_gotLastPage,
-	    m_foundBoxes, m_isdsError, m_isdsLongError);
+	    m_pageNumber, m_askAll, m_highlight, m_totalMatchingBoxes,
+	    m_gotLastPage, m_foundBoxes, m_isdsError, m_isdsLongError);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
@@ -155,8 +156,9 @@ enum TaskSearchOwnerFulltext::Result convertError(enum Isds::Type::Error err)
 enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
     const QString &userName, const QString &query,
     enum Isds::Type::FulltextSearchType target, enum BoxType type,
-    quint64 pageSize, quint64 pageNumber, quint64 &totalMatchingBoxes,
-    quint64 &currentPageStart, quint64 &currentPageSize, bool &gotLastPage,
+    quint64 pageSize, quint64 pageNumber, bool highlight,
+    quint64 &totalMatchingBoxes, quint64 &currentPageStart,
+    quint64 &currentPageSize, bool &gotLastPage,
     QList<Isds::FulltextResult> &foundBoxes, QString &error, QString &longError)
 {
 	if (query.isEmpty()) {
@@ -174,7 +176,8 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
 	QList<Isds::FulltextResult> boxes;
 
 	Isds::Error err = Isds::Service::isdsSearch2(session, query, target,
-	    convertType(type), pageSize, pageNumber, Isds::Type::BOOL_NULL,
+	    convertType(type), pageSize, pageNumber,
+	    highlight ? Isds::Type::BOOL_TRUE : Isds::Type::BOOL_FALSE,
 	    totalMatchingBoxes, currentPageStart, currentPageSize, lastPage,
 	    boxes);
 
@@ -200,9 +203,9 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2(
 enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2All(
     const QString &userName, const QString &query,
     enum Isds::Type::FulltextSearchType target, enum BoxType type,
-    quint64 pageNumber, bool askAll, quint64 &totalMatchingBoxes,
-    bool &gotLastPage, QList<Isds::FulltextResult> &foundBoxes, QString &error,
-    QString &longError)
+    quint64 pageNumber, bool askAll, bool highlight,
+    quint64 &totalMatchingBoxes, bool &gotLastPage,
+    QList<Isds::FulltextResult> &foundBoxes, QString &error, QString &longError)
 {
 	enum Result res = SOF_SUCCESS;
 
@@ -215,8 +218,8 @@ enum TaskSearchOwnerFulltext::Result TaskSearchOwnerFulltext::isdsSearch2All(
 	}
 
 	do {
-		res = isdsSearch2(userName, query, target, type,
-		    pageSize, pageNumber, totalMatchingBoxes, currentPageStart,
+		res = isdsSearch2(userName, query, target, type, pageSize,
+		    pageNumber, highlight, totalMatchingBoxes,currentPageStart,
 		    currentPageSize, gotLastPage, foundBoxes, error, longError);
 
 		++pageNumber;
