@@ -998,7 +998,9 @@ QList< QPair<int, int> > libisdsStartStop2startStop(const char *str,
 		const char *start = (char *)starts->data;
 		const char *stop = (char *)stops->data;
 
+		/* Destructor functions must not be set. */
 		if (Q_UNLIKELY((starts->destructor != NULL) || (stops->destructor != NULL))) {
+			Q_ASSERT(0);
 			if (ok != Q_NULLPTR) {
 				*ok = false;
 			}
@@ -1030,6 +1032,7 @@ QList< QPair<int, int> > libisdsStartStop2startStop(const char *str,
 
 	/* Both lists must be equally long. */
 	if (Q_UNLIKELY((starts != NULL) || (stops != NULL))) {
+		Q_ASSERT(0);
 		if (ok != Q_NULLPTR) {
 			*ok = false;
 		}
