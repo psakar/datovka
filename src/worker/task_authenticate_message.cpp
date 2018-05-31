@@ -26,6 +26,10 @@
 
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_authenticate_message.h"
@@ -103,15 +107,13 @@ enum TaskAuthenticateMessage::Result TaskAuthenticateMessage::authenticateMessag
 		return AUTH_ERR;
 	}
 
-	isds_error status = isds_authenticate_message(session, data.data(),
-	    data.size());
-
-	if (IE_NOTEQUAL == status) {
+	Isds::Error err = Isds::Service::authenticateMessage(session, data);
+	if (err.code() == Isds::Type::ERR_NOTEQUAL) {
 		return AUTH_NOT_EQUAL;
-	} else if (IE_SUCCESS != status) {
+	} else if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL("%s", "Error authenticating message.");
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
 		return AUTH_ISDS_ERROR;
 	}
 

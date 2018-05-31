@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <QByteArray>
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 #include <QList>
 #include <QString>
@@ -126,6 +127,19 @@ namespace Isds {
 		    QList<FulltextResult> &boxes);
 
 	/* Message interface: */
+		/*!
+		 * @brief Service AuthenticateMessage.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     raw Raw message or delivery info content.
+		 * @return Error description.
+		 *    (ERR_SUCCESS - if data originate from ISDS;
+		 *    ERR_NOTEQUAL - if data are unknown to ISDS)
+		 */
+		static
+		Error authenticateMessage(struct isds_ctx *ctx,
+		    const QByteArray &raw);
+
 		/*!
 		 * @brief Service CreateMessage.
 		 *

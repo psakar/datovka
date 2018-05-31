@@ -266,6 +266,30 @@ fail:
 	return err;
 }
 
+Isds::Error Isds::Service::authenticateMessage(struct isds_ctx *ctx,
+    const QByteArray &raw)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || raw.isEmpty())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	isds_error ret = isds_authenticate_message(ctx, raw.constData(),
+	    raw.size());
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		return err;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+	return err;
+}
+
 Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx,
     const Message &message, qint64 &dmId)
 {
