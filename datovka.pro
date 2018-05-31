@@ -358,6 +358,7 @@ SOURCES += \
     src/isds/message_conversion.cpp \
     src/isds/message_functions.cpp \
     src/isds/message_interface.cpp \
+    src/isds/services_account.cpp \
     src/isds/services_box.cpp \
     src/isds/services_message.cpp \
     src/isds/to_text_conversion.cpp \

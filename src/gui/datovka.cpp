@@ -3484,7 +3484,7 @@ QString MainWindow::createAccountInfo(const QString &userName)
 
 lastPart:
 
-	QString info(GlobInstcs::accntDbPtr->getPwdExpirFromDb(acntDbKey));
+	QString info(qDateTimeToDbFormat(GlobInstcs::accntDbPtr->getPwdExpirFromDb(acntDbKey)));
 	if (info.isEmpty()) {
 		info = tr("unknown or without expiration");
 	} else {
@@ -6719,9 +6719,8 @@ bool MainWindow::connectToIsds(const QString &userName)
 			    daysTo);
 
 			/* Password change dialogue. */
-			const QDateTime dbDateTime(QDateTime::fromString(
-			    GlobInstcs::accntDbPtr->getPwdExpirFromDb(acntDbKey),
-			    "yyyy-MM-dd HH:mm:ss.000000"));
+			const QDateTime dbDateTime(
+			    GlobInstcs::accntDbPtr->getPwdExpirFromDb(acntDbKey));
 			if (QMessageBox::Yes == showDialogueAboutPwdExpir(
 			        settingsCopy.accountName(), userName, daysTo,
 			        dbDateTime)) {

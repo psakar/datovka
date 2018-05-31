@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <QDateTime>
 #include <QMap>
 #include <QString>
 #include <QVariant>
@@ -122,9 +123,9 @@ public:
 	 * @brief Return pwd expiration info from db.
 	 *
 	 * @param[in] key Key value.
-	 * @return Expiration information.
+	 * @return Expiration information, null value if password does not expire.
 	 */
-	const QString getPwdExpirFromDb(const QString &key) const;
+	QDateTime getPwdExpirFromDb(const QString &key) const;
 
 	/*!
 	 * @brief Checks whether password expires in given period.
@@ -143,7 +144,7 @@ public:
 	 * @param[in] date Expiration date.
 	 * @return True on success.
 	 */
-	bool setPwdExpirIntoDb(const QString &key, const QString &date);
+	bool setPwdExpirIntoDb(const QString &key, const QDateTime &date);
 
 	/*!
 	 * @brief Insert account info into database.

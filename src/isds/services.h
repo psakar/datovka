@@ -25,6 +25,7 @@
 
 #include <QByteArray>
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
+#include <QDateTime>
 #include <QList>
 #include <QString>
 
@@ -58,6 +59,18 @@ namespace Isds {
 		Service(void);
 
 	public:
+	/* Account interface: */
+		/*!
+		 * @brief Service GetPasswordInfo.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[out]    pswExpDate Password expiration date, null
+		 *                           value if password does not exist.
+		 * @return Error description.
+		 */
+		static
+		Error getPasswordInfo(struct isds_ctx *ctx, QDateTime &pswExpDate);
+
 	/* Box interface: */
 		/*!
 		 * @brief Service DummyOperation.

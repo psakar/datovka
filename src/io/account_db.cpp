@@ -21,7 +21,6 @@
  * the two.
  */
 
-#include <QDateTime>
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
@@ -218,7 +217,7 @@ fail:
 	return defaultValue;
 }
 
-const QString AccountDb::getPwdExpirFromDb(const QString &key) const
+QDateTime AccountDb::getPwdExpirFromDb(const QString &key) const
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -240,27 +239,24 @@ const QString AccountDb::getPwdExpirFromDb(const QString &key) const
 	if (query.exec() && query.isActive()) {
 		if (query.first() && query.isValid() &&
 		    !query.value(0).toString().isEmpty()) {
-			return query.value(0).toString();
+			return dateTimeFromDbFormat(query.value(0).toString());
 		}
 	} else {
 		logErrorNL("Cannot execute SQL query and/or read SQL data: "
 		    "%s.", query.lastError().text().toUtf8().constData());
 	}
 fail:
-	return QString();
+	return QDateTime();
 }
 
 int AccountDb::pwdExpiresInDays(const QString &key, int days) const
 {
-	const QString dbDateTimeString(getPwdExpirFromDb(key));
-	if (dbDateTimeString.isNull()) {
+	const QDateTime dbDateTime(getPwdExpirFromDb(key));
+	if (dbDateTime.isNull()) {
 		return -1;
 	}
 
-	const QDateTime dbDateTime = QDateTime::fromString(
-	    dbDateTimeString, "yyyy-MM-dd HH:mm:ss.000000");
 	const QDate dbDate = dbDateTime.date();
-
 	if (!dbDate.isValid()) {
 		return -1;
 	}
@@ -273,7 +269,7 @@ int AccountDb::pwdExpiresInDays(const QString &key, int days) const
 	return daysTo;
 }
 
-bool AccountDb::setPwdExpirIntoDb(const QString &key, const QString &date)
+bool AccountDb::setPwdExpirIntoDb(const QString &key, const QDateTime &date)
 {
 	QSqlQuery query(m_db);
 	QString queryStr;
@@ -292,7 +288,7 @@ bool AccountDb::setPwdExpirIntoDb(const QString &key, const QString &date)
 		goto fail;
 	}
 	query.bindValue(":key", key);
-	query.bindValue(":expDate", date);
+	query.bindValue(":expDate", qDateTimeToDbFormat(date));
 	if (query.exec()) {
 		return true;
 	} else {
