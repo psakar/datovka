@@ -5466,7 +5466,7 @@ void MainWindow::verifySelectedMessage(void)
 	const QString userName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 
-	MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
+	const MessageDb::MsgId msgId(msgMsgId(firstMsgColumnIdxs.first()));
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(msgId.dmId >= 0);
 	if (!msgId.deliveryTime.isValid()) {
@@ -5480,6 +5480,26 @@ void MainWindow::verifySelectedMessage(void)
 		return;
 	}
 
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
+	if (Q_NULLPTR == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const Isds::Hash hashDb(messageDb->getMessageHash(msgId.dmId));
+	if (hashDb.isNull()) {
+		logErrorNL(
+		    "Error obtaining hash of message '%" PRId64 "' from local database.",
+		    msgId.dmId);
+		showStatusTextWithTimeout(tr("Message verification failed."));
+		QMessageBox::warning(this, tr("Verification error"),
+		    tr("The message hash is not in local database.\n"
+		        "Please download complete message from ISDS and try again."),
+		    QMessageBox::Ok);
+		return;
+	}
+
 	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
 	    !connectToIsds(userName)) {
 		showStatusTextWithTimeout(tr("Message verification failed."));
@@ -5490,55 +5510,44 @@ void MainWindow::verifySelectedMessage(void)
 	}
 
 	TaskVerifyMessage *task = new (std::nothrow) TaskVerifyMessage(userName,
-	    dbSet, msgId);
+	    msgId.dmId, hashDb);
 	task->setAutoDelete(false);
 	GlobInstcs::workPoolPtr->runSingle(task);
 
 	TaskVerifyMessage::Result result = task->m_result;
-	delete task;
+	delete task; task = Q_NULLPTR;
 
 	switch (result) {
 	case TaskVerifyMessage::VERIFY_SUCCESS:
-		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
-		    "that the message is valid."));
+		showStatusTextWithTimeout(
+		    tr("Server Datové schránky confirms that the message is valid."));
 		QMessageBox::information(this, tr("Message is valid"),
-		    tr("Message was <b>successfully verified</b> "
-		    "against data on the server Datové schránky.") +
+		    tr("Message was <b>successfully verified</b> against data on the server Datové schránky.") +
 		    "<br/><br/>" +
-		    tr("This message has passed through the system of "
-		    "Datové schránky and has not been tampered with since."),
+		    tr("This message has passed through the system of Datové schránky and has not been tampered with since."),
 		    QMessageBox::Ok);
 		break;
 	case TaskVerifyMessage::VERIFY_NOT_EQUAL:
-		showStatusTextWithTimeout(tr("Server Datové schránky confirms "
-		    "that the message is not valid."));
+		showStatusTextWithTimeout(
+		    tr("Server Datové schránky confirms that the message is not valid."));
 		QMessageBox::critical(this, tr("Message is not valid"),
-		    tr("Message was <b>not</b> authenticated as processed "
-		    "by the system Datové schránky.") + "<br/><br/>" +
-		    tr("It is either not a valid ZFO file or it was modified "
-		    "since it was downloaded from Datové schránky."),
+		    tr("Message was <b>not</b> authenticated as processed by the system Datové schránky.") +
+		    "<br/><br/>" +
+		    tr("It is either not a valid ZFO file or it was modified since it was downloaded from Datové schránky."),
 		     QMessageBox::Ok);
 		break;
 	case TaskVerifyMessage::VERIFY_ISDS_ERR:
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::warning(this, tr("Verification failed"),
-		    tr("Authentication of message has been stopped because "
-		    "the connection to server Datové schránky failed!\n"
-		    "Check your internet connection."),
-		    QMessageBox::Ok);
-		break;
-	case TaskVerifyMessage::VERIFY_SQL_ERR:
-		showStatusTextWithTimeout(tr("Message verification failed."));
-		QMessageBox::warning(this, tr("Verification error"),
-		    tr("The message hash is not in local database.\nPlease "
-		    "download complete message from ISDS and try again."),
+		    tr("Authentication of message has been stopped because the connection to server Datové schránky failed!\n"
+		        "Check your internet connection."),
 		    QMessageBox::Ok);
 		break;
 	case TaskVerifyMessage::VERIFY_ERR:
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::critical(this, tr("Verification error"),
-		    tr("The message hash cannot be verified because an internal"
-		    " error occurred!\nTry again."),
+		    tr("The message hash cannot be verified because an internal error occurred!\n"
+		        "Try again."),
 		    QMessageBox::Ok);
 		break;
 	default:

@@ -27,7 +27,6 @@
 
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
-#include "src/io/message_db.h"
 #include "src/isds/error.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
@@ -36,49 +35,43 @@
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_verify_message.h"
 
-TaskVerifyMessage::TaskVerifyMessage(const QString &userName,
-    MessageDbSet *dbSet, const MessageDb::MsgId &msgId)
+TaskVerifyMessage::TaskVerifyMessage(const QString &userName, qint64 dmId,
+    const Isds::Hash &hashLocal)
     : m_result(VERIFY_ERR),
     m_isdsError(),
     m_isdsLongError(),
     m_userName(userName),
-    m_dbSet(dbSet),
-    m_msgId(msgId)
+    m_dmId(dmId),
+    m_hashLocal(hashLocal)
 {
 	Q_ASSERT(!m_userName.isEmpty());
-	Q_ASSERT(0 != m_dbSet);
-	Q_ASSERT(m_msgId.dmId >= 0);
-	Q_ASSERT(m_msgId.deliveryTime.isValid());
+	Q_ASSERT(m_dmId >= 0);
+	Q_ASSERT(!m_hashLocal.isNull());
 }
 
 void TaskVerifyMessage::run(void)
 {
-	if (m_userName.isEmpty()) {
+	if (Q_UNLIKELY(m_userName.isEmpty())) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	if (0 == m_dbSet) {
+	if (Q_UNLIKELY(0 > m_dmId)) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	if (0 > m_msgId.dmId) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	if (!m_msgId.deliveryTime.isValid()) {
+	if (Q_UNLIKELY(m_hashLocal.isNull())) {
 		Q_ASSERT(0);
 		return;
 	}
 
 	logDebugLv0NL("Starting verify message task in thread '%p'",
-	    (void *) QThread::currentThreadId());
+	    (void *)QThread::currentThreadId());
 
 	/* ### Worker task begin. ### */
 
-	m_result = verifyMessage(m_userName, m_dbSet, m_msgId, m_isdsError,
+	m_result = verifyMessage(m_userName, m_dmId, m_hashLocal, m_isdsError,
 	    m_isdsLongError);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
@@ -86,24 +79,16 @@ void TaskVerifyMessage::run(void)
 	/* ### Worker task end. ### */
 
 	logDebugLv0NL("Verify message task finished in thread '%p'",
-	    (void *) QThread::currentThreadId());
+	    (void *)QThread::currentThreadId());
 }
 
 enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
-    const QString &userName, MessageDbSet *dbSet, const MessageDb::MsgId &msgId,
+    const QString &userName, qint64 dmId, const Isds::Hash &hashLocal,
     QString &error, QString &longError)
 {
 	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(Q_NULLPTR != dbSet);
-	Q_ASSERT(msgId.dmId >= 0);
-	Q_ASSERT(msgId.deliveryTime.isValid());
-
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
-	    false);
-	if (Q_NULLPTR == messageDb) {
-		Q_ASSERT(0);
-		return VERIFY_ERR;
-	}
+	Q_ASSERT(dmId >= 0);
+	Q_ASSERT(!hashLocal.isNull());
 
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
@@ -113,27 +98,17 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 
 	/* Get message hash from isds */
 	Isds::Hash hashIsds;
-	Isds::Error err = Isds::Service::verifyMessage(session, msgId.dmId,
-	    hashIsds);
+	Isds::Error err = Isds::Service::verifyMessage(session, dmId, hashIsds);
 	if (err.code() != Isds::Type::ERR_SUCCESS) {
 		error = Isds::Description::descrError(err.code());
 		longError = err.longDescr();
 		logErrorNL("Error downloading hash of message '%" PRId64 "'.",
-		    msgId.dmId);
+		    dmId);
 		return VERIFY_ISDS_ERR;
 	}
 	Q_ASSERT(!hashIsds.isNull());
 
-	/* Get message hash from local database */
-	const Isds::Hash hashDb(messageDb->getMessageHash(msgId.dmId));
-	if (hashDb.isNull()) {
-		logErrorNL(
-		    "Error obtaining hash of message '%" PRId64 "' from local database.",
-		    msgId.dmId);
-		return VERIFY_SQL_ERR;
-	}
-
-	if (hashIsds != hashDb) {
+	if (hashIsds != hashLocal) {
 		return VERIFY_NOT_EQUAL;
 	}
 
