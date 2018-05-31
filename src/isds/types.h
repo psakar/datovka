@@ -308,6 +308,32 @@ public:
 	};
 
 	/*!
+	 * @brief One-time password authentication method.
+	 */
+	enum OtpMethod {
+		OM_UNKNOWN = -1, /*!< Convenience value. */
+		OM_HMAC, /*!< HMAC-based method. */
+		OM_TIME /*!< Time-base method. */
+	};
+
+	/*!
+	 * @brief One-time password resolution status.
+	 *
+	 * @note Described in pril_2/ISDS_OTP_autentizace.pdf.
+	 */
+	enum OtpResolution {
+		OR_SUCCESS = 0, /*!< Authentication succeeded. */
+		OR_UNKNOWN, /*!< Unknown status. */
+		OR_BAD_AUTH, /*!< Bad log-in, try again. */
+		OR_BLOCKED, /*!< Access blocked for 60 minutes, (brute force attack detected). */
+		OR_PWD_EXPIRED, /*!< Password expired. (OTP or regular password expired?) */
+		OR_TO_FAST, /*!< OTP cannot be sent repeatedly at this rate (minimal delay depends on TOTP window setting). */
+		OR_UNAUTHORIZED, /*!< User name is not allowed to access requested URI. */
+		OR_TOTP_SENT, /*!< OTP has been generated and sent by ISDS. */
+		OR_TOTP_NOT_SENT, /*!< OTP could not bee sent. Retry later. */
+	};
+
+	/*!
 	 * @brief Error value. Taken from libisds for compatibility.
 	 */
 	enum Error {

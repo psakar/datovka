@@ -349,6 +349,7 @@ SOURCES += \
     src/io/message_db_set_delegated.cpp \
     src/io/message_db_single.cpp \
     src/io/tag_db.cpp \
+    src/isds/account_interface.cpp \
     src/isds/box_conversion.cpp \
     src/isds/box_interface.cpp \
     src/isds/internal_conversion.cpp \
@@ -494,6 +495,7 @@ HEADERS += \
     src/io/message_db_set_container.h \
     src/io/message_db_single.h \
     src/io/tag_db.h \
+    src/isds/account_interface.h \
     src/isds/box_conversion.h \
     src/isds/box_interface.h \
     src/isds/internal_conversion.h \
