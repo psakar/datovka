@@ -29,6 +29,8 @@
 #include "src/global.h"
 #include "src/io/imports.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
@@ -184,18 +186,18 @@ struct isds_ctx *IsdsSessions::session(const QString &userName) const
 
 bool IsdsSessions::isConnectedToIsds(const QString &userName)
 {
-	isds_error ping_status;
-
 	if (!holdsSession(userName)) {
 		return false;
 	}
 
+	Isds::Error pingErr;
+
 	setSessionTimeout(userName, ISDS_PING_TIMEOUT_MS);
-	ping_status = isds_ping(session(userName));
+	pingErr = Isds::Service::dummyOperation(session(userName));
 	setSessionTimeout(userName,
 	    GlobInstcs::prefsPtr->isdsDownloadTimeoutMs);
 
-	return IE_SUCCESS == ping_status;
+	return Isds::Type::ERR_SUCCESS == pingErr.code();
 }
 
 struct isds_ctx *IsdsSessions::createCleanSession(const QString &userName,

@@ -59,6 +59,28 @@ QString isdsLongMessage(const struct isds_ctx *ctx)
 #endif /* WIN32 */
 }
 
+Isds::Error Isds::Service::dummyOperation(struct isds_ctx *ctx)
+{
+	Error err;
+
+	if (Q_UNLIKELY(ctx == NULL)) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	isds_error ret = isds_ping(ctx);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		return err;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+	return err;
+}
+
 Isds::Error Isds::Service::findDataBox(struct isds_ctx *ctx,
     const DbOwnerInfo &criteria, QList<DbOwnerInfo> &boxes)
 {

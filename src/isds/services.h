@@ -60,6 +60,15 @@ namespace Isds {
 	public:
 	/* Box interface: */
 		/*!
+		 * @brief Service DummyOperation.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @return Error description.
+		 */
+		static
+		Error dummyOperation(struct isds_ctx *ctx);
+
+		/*!
 		 * @brief Service FindDataBox.
 		 *
 		 * @param[in,out] ctx Communication context.
