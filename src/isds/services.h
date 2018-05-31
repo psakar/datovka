@@ -162,6 +162,18 @@ namespace Isds {
 		    const Message &message, qint64 &dmId);
 
 		/*!
+		 * @brief Service EraseMessage.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmId Identifier of message in state 10.
+		 * @param[in]     dmIncoming True for received message.
+		 * @return Error description.
+		 */
+		static
+		Error eraseMessage(struct isds_ctx *ctx, qint64 dmId,
+		    bool dmIncoming);
+
+		/*!
 		 * @brief Service GetListOfReceivedMessages.
 		 *
 		 * @param[in,out] ctx Communication context.

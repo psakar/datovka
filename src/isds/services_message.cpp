@@ -344,6 +344,30 @@ fail:
 	return err;
 }
 
+Isds::Error Isds::Service::eraseMessage(struct isds_ctx *ctx, qint64 dmId,
+    bool dmIncoming)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	isds_error ret = isds_delete_message_from_storage(ctx,
+	    QString::number(dmId).toUtf8().constData(), dmIncoming);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		return err;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+	return err;
+}
+
 Isds::Error Isds::Service::getListOfReceivedMessages(struct isds_ctx *ctx,
     Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
     unsigned long int *dmLimit, QList<Message> &messages)

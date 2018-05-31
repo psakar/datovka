@@ -27,6 +27,10 @@
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_erase_message.h"
@@ -90,7 +94,8 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 	Q_ASSERT(0 != dbSet);
 	Q_ASSERT(msgId.dmId >= 0);
 
-	isds_error status = IE_SUCCESS;
+	Isds::Error err;
+	err.setCode(Isds::Type::ERR_SUCCESS);
 
 	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
 	    false);
@@ -108,25 +113,24 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 			return NOT_DELETED;
 		}
 
-		status = isds_delete_message_from_storage(session,
-		    QString::number(msgId.dmId).toUtf8().constData(),
+		err = Isds::Service::eraseMessage(session, msgId.dmId,
 		    msgDirect == MSG_RECEIVED);
 
-		if (IE_SUCCESS == status) {
+		if (err.code() == Isds::Type::ERR_SUCCESS) {
 			logDebugLv1NL(
 			    "Message '%" PRId64 "' was deleted from ISDS.",
 			    msgId.dmId);
 		} else {
-			error = isdsStrError(status);
-			longError = isdsLongMessage(session);
+			error = Isds::Description::descrError(err.code());
+			longError = err.longDescr();
 
 			logErrorNL(
 			    "Erasing message '%" PRId64 "'from ISDS returned status '%d': '%s'",
-			    msgId.dmId, status, error.toUtf8().constData());
+			    msgId.dmId, err.code(), error.toUtf8().constData());
 		}
 	}
 
-	if ((IE_SUCCESS != status) && (IE_INVAL != status)) {
+	if ((err.code() != Isds::Type::ERR_SUCCESS) && (err.code() != Isds::Type::ERR_INVAL)) {
 		return NOT_DELETED;
 	}
 
@@ -134,11 +138,11 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 		logDebugLv1NL(
 		    "Message '%" PRId64 "' was deleted from local database.",
 		    msgId.dmId);
-		return (delFromIsds && (IE_SUCCESS == status)) ? DELETED_ISDS_LOCAL : DELETED_LOCAL;
+		return (delFromIsds && (Isds::Type::ERR_SUCCESS == err.code())) ? DELETED_ISDS_LOCAL : DELETED_LOCAL;
 	} else {
 		logErrorNL(
 		    "Could not delete message '%" PRId64 "' from local database.",
 		    msgId.dmId);
-		return (delFromIsds && (IE_SUCCESS == status)) ? DELETED_ISDS : NOT_DELETED;
+		return (delFromIsds && (Isds::Type::ERR_SUCCESS == err.code())) ? DELETED_ISDS : NOT_DELETED;
 	}
 }
