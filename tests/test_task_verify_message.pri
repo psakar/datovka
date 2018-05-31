@@ -28,6 +28,7 @@ SOURCES += \
 	$${top_srcdir}src/isds/type_conversion.cpp \
 	$${top_srcdir}src/isds/type_description.cpp \
 	$${top_srcdir}src/settings/preferences.cpp \
+	$${top_srcdir}src/worker/task_authenticate_message.cpp \
 	$${top_srcdir}src/worker/task_verify_message.cpp \
 	$${top_srcdir}tests/test_task_verify_message.cpp
 
@@ -51,5 +52,6 @@ HEADERS += \
 	$${top_srcdir}src/isds/types.h \
 	$${top_srcdir}src/settings/preferences.h \
 	$${top_srcdir}src/worker/message_emitter.h \
+	$${top_srcdir}src/worker/task_authenticate_message.h \
 	$${top_srcdir}src/worker/task_verify_message.h \
 	$${top_srcdir}tests/test_task_verify_message.h

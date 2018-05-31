@@ -32,6 +32,7 @@
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
+#include "src/worker/task_authenticate_message.h"
 #include "src/worker/task_verify_message.h"
 #include "tests/helper_qt.h"
 #include "tests/test_task_verify_message.h"
@@ -50,6 +51,8 @@ private slots:
 	void cleanupTestCase(void);
 
 	void verifyMessage(void);
+
+	void authenticateMessage(void);
 
 private:
 	void loadCredentials(LoginCredentials &cred, int line);
@@ -202,6 +205,99 @@ void TestTaskVerifyMessage::verifyMessage(void)
 	task->run();
 
 	QVERIFY(task->m_result == TaskVerifyMessage::VERIFY_NOT_EQUAL);
+
+	delete task; task = Q_NULLPTR;
+}
+
+void TestTaskVerifyMessage::authenticateMessage(void)
+{
+	Isds::Message message, delInfo;
+	QVERIFY(message.isNull());
+	QVERIFY(delInfo.isNull());
+
+	message = Isds::messageFromFile(msgPath, Isds::LT_MESSAGE);
+	QVERIFY(!message.isNull());
+	QVERIFY(!message.envelope().isNull());
+	QVERIFY(!message.envelope().dmHash().isNull());
+
+	delInfo = Isds::messageFromFile(delInfoPath, Isds::LT_DELIVERY);
+	QVERIFY(!delInfo.isNull());
+	QVERIFY(!delInfo.envelope().isNull());
+	QVERIFY(!delInfo.envelope().dmHash().isNull());
+
+	QVERIFY(!message.raw().isEmpty());
+	QVERIFY(!delInfo.raw().isEmpty());
+
+	TaskAuthenticateMessage *task = Q_NULLPTR;
+
+	task = new (std::nothrow) TaskAuthenticateMessage(m_third.userName,
+	    message.raw());
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskAuthenticateMessage::AUTH_SUCCESS);
+
+	delete task; task = Q_NULLPTR;
+
+	task = new (std::nothrow) TaskAuthenticateMessage(m_third.userName,
+	    delInfo.raw());
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskAuthenticateMessage::AUTH_SUCCESS);
+
+	delete task; task = Q_NULLPTR;
+
+	task = new (std::nothrow) TaskAuthenticateMessage(m_sender.userName,
+	    message.raw());
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskAuthenticateMessage::AUTH_SUCCESS);
+
+	delete task; task = Q_NULLPTR;
+
+	task = new (std::nothrow) TaskAuthenticateMessage(m_sender.userName,
+	    delInfo.raw());
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskAuthenticateMessage::AUTH_SUCCESS);
+
+	delete task; task = Q_NULLPTR;
+
+	/* Invalid data. */
+
+	QByteArray badRaw(delInfo.raw());
+	badRaw[0] = ~badRaw[0];
+
+	task = new (std::nothrow) TaskAuthenticateMessage(m_sender.userName,
+	    badRaw);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskAuthenticateMessage::AUTH_ISDS_ERROR);
+
+	delete task; task = Q_NULLPTR;
+
+	task = new (std::nothrow) TaskAuthenticateMessage(m_sender.userName,
+	    QByteArray(1, '\0'));
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_result == TaskAuthenticateMessage::AUTH_ISDS_ERROR);
 
 	delete task; task = Q_NULLPTR;
 }
