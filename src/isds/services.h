@@ -45,6 +45,7 @@ namespace Isds {
 	class FulltextResult;
 	class Hash;
 	class Message;
+	class Otp;
 
 	/*!
 	 * @brief Encapsulates ISDS services.
@@ -60,6 +61,28 @@ namespace Isds {
 
 	public:
 	/* Account interface: */
+		/*!
+		 * @brief Service ChangeISDSPassword.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     oldPwd Password currently in use.
+		 * @param[in]     newPwd New password.
+		 * @param[on,out] otp Auxiliary data required if one-time
+		 *                    password authentication is in use. Passes
+		 *                    OTP code (if known) and returns fine grade
+		 *                    resolution of OTP procedure. Pass null,
+		 *                    if one-time password authentication isn't
+		 *                    needed. Please note this argument must
+		 *                    match the OTP method used at log-in time.
+		 *                    See login function for more detail.
+		 * @param[out]    refNum Serial number of request assigned by ISDS.
+		 * @return Error description.
+		 */
+		static
+		Error changeISDSPassword(struct isds_ctx *ctx,
+		    const QString &oldPwd, const QString &newPwd,
+		    Otp &otp, QString &refNum);
+
 		/*!
 		 * @brief Service GetPasswordInfo.
 		 *

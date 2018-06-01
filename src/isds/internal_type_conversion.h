@@ -51,4 +51,12 @@ namespace IsdsInternal {
 	isds_DbType dbType2libisdsDbType(enum Isds::Type::DbType bt,
 	    bool *ok = Q_NULLPTR);
 
+	/*!
+	 * @brief Converts otp resolution.
+	 */
+	enum Isds::Type::OtpResolution libisdsOtpResolution2OtpResolution(
+	    isds_otp_resolution ior, bool *ok = Q_NULLPTR);
+	isds_otp_resolution otpResolution2libisdsOtpResolution(
+	    enum Isds::Type::OtpResolution ores, bool *ok = Q_NULLPTR);
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,12 @@
  * the two.
  */
 
-#ifndef _TASK_CHANGE_PWD_H_
-#define _TASK_CHANGE_PWD_H_
+#pragma once
 
 #include <QString>
 
+#include "src/isds/account_interface.h"
+#include "src/isds/types.h"
 #include "src/worker/task.h"
 
 /*!
@@ -37,29 +38,12 @@ public:
 	 * @brief Constructor, does not use OTP.
 	 *
 	 * @param[in] userName Account identifier (user login name).
-	 * @param[in] oldPwd   Old password.
-	 * @param[in] newPwd   New password.
+	 * @param[in] oldPwd Old password.
+	 * @param[in] newPwd New password.
+	 * @param[in] otpData OTP data.
 	 */
 	explicit TaskChangePwd(const QString &userName, const QString &oldPwd,
-	    const QString &newPwd);
-
-	/*!
-	 * @brief Constructor, uses OTP.
-	 *
-	 * @param[in] userName  Account identifier (user login name).
-	 * @param[in] oldPwd    Old password.
-	 * @param[in] newPwd    New password.
-	 * @param[in] otpMethod OTP login method.
-	 * @param[in] otpCode   OTP code.
-	 */
-	explicit TaskChangePwd(const QString &userName, const QString &oldPwd,
-	    const QString &newPwd, int otpMethod, const QString &otpCode);
-
-	/*!
-	 * @brief Destructor.
-	 */
-	virtual
-	~TaskChangePwd(void);
+	    const QString &newPwd, const Isds::Otp &otpData = Isds::Otp());
 
 	/*!
 	 * @brief Performs action.
@@ -67,7 +51,7 @@ public:
 	virtual
 	void run(void) Q_DECL_OVERRIDE;
 
-	int m_isdsRetError; /*!< Returned error code. */
+	enum Isds::Type::Error m_errorCode; /*!< Returned error code. */
 	QString m_isdsError; /*!< Error description. */
 	QString m_isdsLongError; /*!< Long error description. */
 
@@ -83,24 +67,22 @@ private:
 	/*!
 	 * @brief Change password action.
 	 *
-	 * @param[in]     userName  Account identifier (user login name).
-	 * @param[in]     oldPwd    Old password.
-	 * @param[in]     newPwd    New password.
-	 * @param[in,out] otp       OTP structure.
+	 * @param[in]     userName Account identifier (user login name).
+	 * @param[in]     oldPwd Old password.
+	 * @param[in]     newPwd New password.
+	 * @param[in,out] otp OTP structure.
 	 * @param[out]    refNumber Reference number.
-	 * @param[out]    error     Error description.
+	 * @param[out]    error Error description.
 	 * @param[out]    longError Long error description.
-	 * @return Libisds error code.
+	 * @return Error code.
 	 */
 	static
-	int changePassword(const QString &userName, const QString &oldPwd,
-	    const QString &newPwd, struct isds_otp *otp, QString &refNumber,
-	    QString &error, QString &longError);
+	enum Isds::Type::Error changePassword(const QString &userName,
+	    const QString &oldPwd, const QString &newPwd, Isds::Otp &otp,
+	    QString &refNumber, QString &error, QString &longError);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	const QString m_oldPwd; /*!< Old password. */
 	const QString m_newPwd; /*!< New password. */
-	struct isds_otp *m_otp; /*!< OTP structure. */
+	Isds::Otp m_otp; /*!< OTP data. */
 };
-
-#endif /* _TASK_CHANGE_PWD_H_ */

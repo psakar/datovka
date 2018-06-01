@@ -21,88 +21,29 @@
  * the two.
  */
 
-#include <cstdlib>
-#include <cstring>
 #include <QThread>
 
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_change_pwd.h"
 
 TaskChangePwd::TaskChangePwd(const QString &userName, const QString &oldPwd,
-    const QString &newPwd)
-    : m_isdsRetError(IE_ERROR),
+    const QString &newPwd, const Isds::Otp &otpData)
+    : m_errorCode(Isds::Type::ERR_ERROR),
     m_isdsError(),
     m_isdsLongError(),
     m_refNumber(),
     m_userName(userName),
     m_oldPwd(oldPwd),
     m_newPwd(newPwd),
-    m_otp(NULL)
+    m_otp(otpData)
 {
 	Q_ASSERT(!m_userName.isEmpty());
-}
-
-TaskChangePwd::TaskChangePwd(const QString &userName, const QString &oldPwd,
-    const QString &newPwd, int otpMethod, const QString &otpCode)
-    : m_isdsRetError(IE_ERROR),
-    m_isdsError(),
-    m_isdsLongError(),
-    m_refNumber(),
-    m_userName(userName),
-    m_oldPwd(oldPwd),
-    m_newPwd(newPwd),
-    m_otp(NULL)
-{
-	Q_ASSERT(!m_userName.isEmpty());
-
-	/* Creates OTP structure. */
-
-	struct isds_otp *otp;
-	otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
-	if (NULL == otp) {
-		goto fail;
-	}
-	memset(otp, 0, sizeof(struct isds_otp));
-
-	switch (otpMethod) {
-	case OTP_HMAC:
-		otp->method = OTP_HMAC;
-		break;
-	case OTP_TIME:
-		otp->method = OTP_TIME;
-		break;
-	default:
-		Q_ASSERT(0);
-		logErrorNL("Unsupported OTP login method '%d'.", otpMethod);
-		goto fail;
-		break;
-	}
-
-	if (!otpCode.isEmpty()) {
-		otp->otp_code = strdup(otpCode.toUtf8().constData());
-		if (NULL == otp->otp_code) {
-			goto fail;
-		}
-	}
-
-	m_otp = otp; otp = NULL;
-
-fail:
-	if (NULL != otp) {
-		free(otp->otp_code);
-		free(otp);
-	}
-}
-
-TaskChangePwd::~TaskChangePwd(void)
-{
-	if (NULL != m_otp) {
-		free(m_otp->otp_code);
-		free(m_otp);
-	}
 }
 
 void TaskChangePwd::run(void)
@@ -117,7 +58,7 @@ void TaskChangePwd::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_isdsRetError = changePassword(m_userName, m_oldPwd, m_newPwd, m_otp,
+	m_errorCode = changePassword(m_userName, m_oldPwd, m_newPwd, m_otp,
 	    m_refNumber, m_isdsError, m_isdsLongError);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
@@ -128,35 +69,27 @@ void TaskChangePwd::run(void)
 	    (void *) QThread::currentThreadId());
 }
 
-int TaskChangePwd::changePassword(const QString &userName,
-    const QString &oldPwd, const QString &newPwd, struct isds_otp *otp,
+enum Isds::Type::Error TaskChangePwd::changePassword(const QString &userName,
+    const QString &oldPwd, const QString &newPwd, Isds::Otp &otp,
     QString &refNumber, QString &error, QString &longError)
 {
-	isds_error ret = IE_ERROR;
-
 	Q_ASSERT(!userName.isEmpty());
 
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	if (Q_UNLIKELY(NULL == session)) {
 		Q_ASSERT(0);
-		return IE_ERROR;
+		return Isds::Type::ERR_ERROR;
 	}
 
-	char *reference = NULL;
 	refNumber.clear();
 
-	ret = isds_change_password(session, oldPwd.toUtf8().constData(),
-	    newPwd.toUtf8().constData(), otp, &reference);
-
-	if (IE_SUCCESS != ret) {
-		error = isdsStrError(ret);
-		longError = isdsLongMessage(session);
+	Isds::Error err = Isds::Service::changeISDSPassword(session, oldPwd,
+	    newPwd, otp, refNumber);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
+		logErrorNL("%s", "Error setting new password.");
 	}
 
-	if (NULL != reference) {
-		refNumber = reference;
-		free(reference);
-	}
-
-	return ret;
+	return err.code();
 }

@@ -32,9 +32,11 @@
 #include <cstring> // memcpy
 #include <isds.h>
 
+#include "src/isds/account_conversion.h"
 #include "src/isds/error_conversion.h"
 #include "src/isds/error.h"
 #include "src/isds/internal_conversion.h"
+#include "src/isds/internal_type_conversion.h"
 #include "src/isds/services.h"
 
 /*!
@@ -55,6 +57,61 @@ QString isdsLongMessage(const struct isds_ctx *ctx)
 #else /* !WIN32 */
 	return QString::fromUtf8(isds_long_message(ctx));
 #endif /* WIN32 */
+}
+
+Isds::Error Isds::Service::changeISDSPassword(struct isds_ctx *ctx,
+    const QString &oldPwd, const QString &newPwd, Otp &otp, QString &refNum)
+{
+	Error err;
+
+	if (Q_UNLIKELY(ctx == NULL)) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	bool ok = false;
+	isds_error ret = IE_SUCCESS;
+	struct isds_otp *iOtp = otp2libisds(otp, &ok);
+	char *iRefNum = NULL;
+	if (!ok) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+		goto fail;
+	}
+
+	ret = isds_change_password(ctx, oldPwd.toUtf8().constData(),
+	    newPwd.toUtf8().constData(), iOtp, &iRefNum);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	if (iOtp != NULL) {
+		otp.setResolution(
+		    IsdsInternal::libisdsOtpResolution2OtpResolution(
+		        iOtp->resolution, &ok));
+		if (Q_UNLIKELY(!ok)) {
+			/* Conversion should not fail if operation succeeded. */
+			Q_ASSERT(0);
+		}
+	}
+
+	refNum = (iRefNum != NULL) ? QString(iRefNum) : QString();
+
+	err.setCode(Type::ERR_SUCCESS);
+
+fail:
+	if (iOtp != NULL) {
+		otp_free(&iOtp);
+	}
+	if (iRefNum != NULL) {
+		std::free(iRefNum);
+	}
+
+	return err;
 }
 
 Isds::Error Isds::Service::getPasswordInfo(struct isds_ctx *ctx,

@@ -34,6 +34,7 @@
 
 #include "src/isds/account_conversion.h"
 #include "src/isds/internal_conversion.h"
+#include "src/isds/internal_type_conversion.h"
 
 /*!
  * @brief Converts otp method.
@@ -60,38 +61,6 @@ enum Isds::Type::OtpMethod libisdsOtpMethod2OtpMethod(isds_otp_method iom,
 	return method;
 }
 
-/*!
- * @brief Converts otp resolution.
- */
-static
-enum Isds::Type::OtpResolution libisdsOtpResolution2OtpResolution(
-    isds_otp_resolution ior, bool *ok = Q_NULLPTR)
-{
-	bool iOk = true;
-	enum Isds::Type::OtpResolution resolution = Isds::Type::OR_UNKNOWN;
-
-	switch (ior) {
-	case OTP_RESOLUTION_SUCCESS: resolution = Isds::Type::OR_SUCCESS; break;
-	case OTP_RESOLUTION_UNKNOWN: resolution = Isds::Type::OR_UNKNOWN; break;
-	case OTP_RESOLUTION_BAD_AUTHENTICATION: resolution = Isds::Type::OR_BAD_AUTH; break;
-	case OTP_RESOLUTION_ACCESS_BLOCKED: resolution = Isds::Type::OR_BLOCKED; break;
-	case OTP_RESOLUTION_PASSWORD_EXPIRED: resolution = Isds::Type::OR_PWD_EXPIRED; break;
-	case OTP_RESOLUTION_TO_FAST: resolution = Isds::Type::OR_TOO_FAST; break;
-	case OTP_RESOLUTION_UNAUTHORIZED: resolution = Isds::Type::OR_UNAUTHORIZED; break;
-	case OTP_RESOLUTION_TOTP_SENT: resolution = Isds::Type::OR_TOTP_SENT; break;
-	case OTP_RESOLUTION_TOTP_NOT_SENT: resolution = Isds::Type::OR_TOTP_NOT_SENT; break;
-	default:
-		Q_ASSERT(0);
-		iOk = false;
-		break;
-	}
-
-	if (ok != Q_NULLPTR) {
-		*ok = iOk;
-	}
-	return resolution;
-}
-
 Isds::Otp Isds::libisds2otp(const struct isds_otp *io, bool *ok)
 {
 	if (Q_UNLIKELY(io == NULL)) {
@@ -109,7 +78,8 @@ Isds::Otp Isds::libisds2otp(const struct isds_otp *io, bool *ok)
 		goto fail;
 	}
 	otp.setOtpCode(Isds::fromCStr(io->otp_code));
-	otp.setResolution(libisdsOtpResolution2OtpResolution(io->resolution, &iOk));
+	otp.setResolution(
+	    IsdsInternal::libisdsOtpResolution2OtpResolution(io->resolution, &iOk));
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
@@ -155,38 +125,6 @@ isds_otp_method otpMethod2libisdsOtpMethod(enum Isds::Type::OtpMethod om,
 }
 
 /*!
- * @brief Converts otp resolution.
- */
-static
-isds_otp_resolution otpResolution2libisdsOtpResolution(
-    enum Isds::Type::OtpResolution ores, bool *ok = Q_NULLPTR)
-{
-	bool iOk = true;
-	isds_otp_resolution ior = OTP_RESOLUTION_UNKNOWN;
-
-	switch (ores) {
-	case Isds::Type::OR_SUCCESS: ior = OTP_RESOLUTION_SUCCESS; break;
-	case Isds::Type::OR_UNKNOWN: ior = OTP_RESOLUTION_UNKNOWN; break;
-	case Isds::Type::OR_BAD_AUTH: ior = OTP_RESOLUTION_BAD_AUTHENTICATION; break;
-	case Isds::Type::OR_BLOCKED: ior = OTP_RESOLUTION_ACCESS_BLOCKED; break;
-	case Isds::Type::OR_PWD_EXPIRED: ior = OTP_RESOLUTION_PASSWORD_EXPIRED; break;
-	case Isds::Type::OR_TOO_FAST: ior = OTP_RESOLUTION_TO_FAST; break;
-	case Isds::Type::OR_UNAUTHORIZED: ior = OTP_RESOLUTION_UNAUTHORIZED; break;
-	case Isds::Type::OR_TOTP_SENT: ior = OTP_RESOLUTION_TOTP_SENT; break;
-	case Isds::Type::OR_TOTP_NOT_SENT: ior = OTP_RESOLUTION_TOTP_NOT_SENT; break;
-	break;
-		Q_ASSERT(0);
-		iOk = false;
-		break;
-	}
-
-	if (ok != Q_NULLPTR) {
-		*ok = iOk;
-	}
-	return ior;
-}
-
-/*!
  * @brief Set libisds otp structure according to the otp.
  */
 static
@@ -206,7 +144,8 @@ bool setLibisdsOtpContent(struct isds_otp *tgt, const Isds::Otp &src)
 	if (Q_UNLIKELY(!Isds::toCStrCopy(&tgt->otp_code, src.otpCode()))) {
 		return false;
 	}
-	tgt->resolution = otpResolution2libisdsOtpResolution(src.resolution(), &iOk);
+	tgt->resolution = IsdsInternal::otpResolution2libisdsOtpResolution(
+	    src.resolution(), &iOk);
 	if (Q_UNLIKELY(!iOk)) {
 		return false;
 	}
