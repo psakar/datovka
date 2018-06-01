@@ -29,7 +29,7 @@
 #endif /* __APPLE__ */
 
 #include <cstdlib> // malloc
-#include <cstring> // memcpy
+#include <cstring> // memset
 #include <isds.h>
 
 #include "src/isds/box_conversion.h"

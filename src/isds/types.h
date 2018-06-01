@@ -327,7 +327,7 @@ public:
 		OR_BAD_AUTH, /*!< Bad log-in, try again. */
 		OR_BLOCKED, /*!< Access blocked for 60 minutes, (brute force attack detected). */
 		OR_PWD_EXPIRED, /*!< Password expired. (OTP or regular password expired?) */
-		OR_TO_FAST, /*!< OTP cannot be sent repeatedly at this rate (minimal delay depends on TOTP window setting). */
+		OR_TOO_FAST, /*!< OTP cannot be sent repeatedly at this rate (minimal delay depends on TOTP window setting). */
 		OR_UNAUTHORIZED, /*!< User name is not allowed to access requested URI. */
 		OR_TOTP_SENT, /*!< OTP has been generated and sent by ISDS. */
 		OR_TOTP_NOT_SENT, /*!< OTP could not bee sent. Retry later. */
