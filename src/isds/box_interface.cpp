@@ -29,8 +29,13 @@
 /* Null objects - for convenience. */
 static const Isds::Address nullAddress;
 static const Isds::BirthInfo nullBirthInfo;
+static const Isds::CreditEventCharged nullCreditEventCharged;
+static const Isds::CreditEventDischarged nullCreditEventDischarged;
+static const Isds::CreditEventMsgSent nullCreditEventMsgSent;
+static const Isds::CreditEventStorageSet nullCreditEventStorageSet;
 static const Isds::PersonName nullPersonName;
 static const QDate nullDate;
+static const QDateTime nullDateTime;
 static const QList< QPair<int, int> > nullMatchList;
 static const QString nullString;
 
@@ -2202,6 +2207,1030 @@ void Isds::FulltextResult::setAddressMatches(QList< QPair<int, int> > &&am)
 #endif /* Q_COMPILER_RVALUE_REFS */
 
 void Isds::swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief PIMPL CreditEventCharged class.
+ */
+class Isds::CreditEventChargedPrivate {
+	//Q_DISABLE_COPY(CreditEventChargedPrivate)
+
+public:
+	CreditEventChargedPrivate(void)
+	    : m_transaction()
+	{ }
+
+	CreditEventChargedPrivate &operator=(const CreditEventChargedPrivate &other) Q_DECL_NOTHROW
+	{
+		m_transaction = other.m_transaction;
+
+		return *this;
+	}
+
+	bool operator==(const CreditEventChargedPrivate &other) const
+	{
+		return (m_transaction == other.m_transaction);
+	}
+
+	QString m_transaction; /*!< Transaction identifier. */
+};
+
+Isds::CreditEventCharged::CreditEventCharged(void)
+    : d_ptr(Q_NULLPTR)
+{
+}
+
+Isds::CreditEventCharged::CreditEventCharged(const CreditEventCharged &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) CreditEventChargedPrivate) : Q_NULLPTR)
+{
+	Q_D(CreditEventCharged);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::CreditEventCharged::CreditEventCharged(CreditEventCharged &&other) Q_DECL_NOEXCEPT
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::CreditEventCharged::~CreditEventCharged(void)
+{
+}
+
+/*!
+ * @brief Ensures private charge credit event presence.
+ *
+ * @note Returns if private charge credit event could not be allocated.
+ */
+#define ensureCreditEventChargedPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			CreditEventChargedPrivate *p = new (std::nothrow) CreditEventChargedPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+Isds::CreditEventCharged &Isds::CreditEventCharged::operator=(const CreditEventCharged &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureCreditEventChargedPrivate(*this);
+	Q_D(CreditEventCharged);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::CreditEventCharged &Isds::CreditEventCharged::operator=(CreditEventCharged &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::CreditEventCharged::operator==(const CreditEventCharged &other) const
+{
+	Q_D(const CreditEventCharged);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::CreditEventCharged::operator!=(const CreditEventCharged &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::CreditEventCharged::isNull(void) const
+{
+	Q_D(const CreditEventCharged);
+	return d == Q_NULLPTR;
+}
+
+const QString &Isds::CreditEventCharged::transactID(void) const
+{
+	Q_D(const CreditEventCharged);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_transaction;
+}
+
+void Isds::CreditEventCharged::setTransactID(const QString &t)
+{
+	ensureCreditEventChargedPrivate();
+	Q_D(CreditEventCharged);
+	d->m_transaction = t;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEventCharged::setTransactID(QString &&t)
+{
+	ensureCreditEventChargedPrivate();
+	Q_D(CreditEventCharged);
+	d->m_transaction = t;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(CreditEventCharged &first, CreditEventCharged &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief PIMPL CreditEventMsgSent class.
+ */
+class Isds::CreditEventMsgSentPrivate {
+	//Q_DISABLE_COPY(CreditEventMsgSentPrivate)
+
+public:
+	CreditEventMsgSentPrivate(void)
+	    : m_dbIDRecipient(), m_dmID()
+	{ }
+
+	CreditEventMsgSentPrivate &operator=(const CreditEventMsgSentPrivate &other) Q_DECL_NOTHROW
+	{
+		m_dbIDRecipient = other.m_dbIDRecipient;
+		m_dmID = other.m_dmID;
+
+		return *this;
+	}
+
+	bool operator==(const CreditEventMsgSentPrivate &other) const
+	{
+		return (m_dbIDRecipient == other.m_dbIDRecipient) &&
+		    (m_dmID == other.m_dmID);
+	}
+
+	QString m_dbIDRecipient; /*!< Recipient box identifier. */
+	QString m_dmID; /*!< Sent message identifier. */
+};
+
+Isds::CreditEventMsgSent::CreditEventMsgSent(void)
+    : d_ptr(Q_NULLPTR)
+{
+}
+
+Isds::CreditEventMsgSent::CreditEventMsgSent(const CreditEventMsgSent &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) CreditEventMsgSentPrivate) : Q_NULLPTR)
+{
+	Q_D(CreditEventMsgSent);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::CreditEventMsgSent::CreditEventMsgSent(CreditEventMsgSent &&other) Q_DECL_NOEXCEPT
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::CreditEventMsgSent::~CreditEventMsgSent(void)
+{
+}
+
+/*!
+ * @brief Ensures private message sent event presence.
+ *
+ * @note Returns if private message sent event could not be allocated.
+ */
+#define ensureCreditEventMsgSentPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			CreditEventMsgSentPrivate *p = new (std::nothrow) CreditEventMsgSentPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+Isds::CreditEventMsgSent &Isds::CreditEventMsgSent::operator=(const CreditEventMsgSent &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureCreditEventMsgSentPrivate(*this);
+	Q_D(CreditEventMsgSent);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::CreditEventMsgSent &Isds::CreditEventMsgSent::operator=(CreditEventMsgSent &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::CreditEventMsgSent::operator==(const CreditEventMsgSent &other) const
+{
+	Q_D(const CreditEventMsgSent);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::CreditEventMsgSent::operator!=(const CreditEventMsgSent &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::CreditEventMsgSent::isNull(void) const
+{
+	Q_D(const CreditEventMsgSent);
+	return d == Q_NULLPTR;
+}
+
+qint64 Isds::CreditEventMsgSent::dmId(void) const
+{
+	bool ok = false;
+	qint64 id = string2NonNegativeLong(dmID(), &ok);
+	return ok ? id : -1;
+}
+
+void Isds::CreditEventMsgSent::setDmId(qint64 id)
+{
+	setDmID(nonNegativeLong2String(id));
+}
+
+const QString &Isds::CreditEventMsgSent::dbIDRecipient(void) const
+{
+	Q_D(const CreditEventMsgSent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_dbIDRecipient;
+}
+
+void Isds::CreditEventMsgSent::setDbIDRecipient(const QString &id)
+{
+	ensureCreditEventMsgSentPrivate();
+	Q_D(CreditEventMsgSent);
+	d->m_dbIDRecipient = id;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEventMsgSent::setDbIDRecipient(QString &&id)
+{
+	ensureCreditEventMsgSentPrivate();
+	Q_D(CreditEventMsgSent);
+	d->m_dbIDRecipient = id;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::CreditEventMsgSent::dmID(void) const
+{
+	Q_D(const CreditEventMsgSent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_dmID;
+}
+
+void Isds::CreditEventMsgSent::setDmID(const QString &id)
+{
+	ensureCreditEventMsgSentPrivate();
+	Q_D(CreditEventMsgSent);
+	d->m_dmID = id;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEventMsgSent::setDmID(QString &&id)
+{
+	ensureCreditEventMsgSentPrivate();
+	Q_D(CreditEventMsgSent);
+	d->m_dmID = id;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(CreditEventMsgSent &first, CreditEventMsgSent &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief PIMPL CreditEventStorageSet class.
+ */
+class Isds::CreditEventStorageSetPrivate {
+	//Q_DISABLE_COPY(CreditEventStorageSetPrivate)
+
+public:
+	CreditEventStorageSetPrivate(void)
+	    : m_newCapacity(-1), m_newFrom(), m_newTo(), m_oldCapacity(-1),
+	    m_oldFrom(), m_oldTo(), m_initiator()
+	{ }
+
+	CreditEventStorageSetPrivate &operator=(const CreditEventStorageSetPrivate &other) Q_DECL_NOTHROW
+	{
+		m_newCapacity = other.m_newCapacity;
+		m_newFrom = other.m_newFrom;
+		m_newTo = other.m_newTo;
+		m_oldCapacity = other.m_oldCapacity;
+		m_oldFrom = other.m_oldFrom;
+		m_oldTo = other.m_oldTo;
+		m_initiator = other.m_initiator;
+
+		return *this;
+	}
+
+	bool operator==(const CreditEventStorageSetPrivate &other) const
+	{
+		return (m_newCapacity == other.m_newCapacity) &&
+		    (m_newFrom == other.m_newFrom) &&
+		    (m_newTo == other.m_newTo) &&
+		    (m_oldCapacity == other.m_oldCapacity) &&
+		    (m_oldFrom == other.m_oldFrom) &&
+		    (m_oldTo == other.m_oldTo) &&
+		    (m_initiator == other.m_initiator);
+	}
+
+	qint64 m_newCapacity; /*!< New storage capacity in number of messages. */
+	QDate m_newFrom; /*!< The new capacity is available from this date. */
+	QDate m_newTo; /*!< The new capacity expires on this date. */
+	qint64 m_oldCapacity; /*!< Optional value. Previous storage capacity in number of messages. */
+	QDate m_oldFrom; /*!< Optional value. */
+	QDate m_oldTo; /*!< Optional value. */
+	QString m_initiator; /*!< Optional value. Name of a user who initiated the change. */
+};
+
+Isds::CreditEventStorageSet::CreditEventStorageSet(void)
+    : d_ptr(Q_NULLPTR)
+{
+}
+
+Isds::CreditEventStorageSet::CreditEventStorageSet(const CreditEventStorageSet &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) CreditEventStorageSetPrivate) : Q_NULLPTR)
+{
+	Q_D(CreditEventStorageSet);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::CreditEventStorageSet::CreditEventStorageSet(CreditEventStorageSet &&other) Q_DECL_NOEXCEPT
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::CreditEventStorageSet::~CreditEventStorageSet(void)
+{
+}
+
+/*!
+ * @brief Ensures private storage set event presence.
+ *
+ * @note Returns if private storage set event could not be allocated.
+ */
+#define ensureCreditEventStorageSetPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			CreditEventStorageSetPrivate *p = new (std::nothrow) CreditEventStorageSetPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+Isds::CreditEventStorageSet &Isds::CreditEventStorageSet::operator=(const CreditEventStorageSet &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureCreditEventStorageSetPrivate(*this);
+	Q_D(CreditEventStorageSet);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::CreditEventStorageSet &Isds::CreditEventStorageSet::operator=(CreditEventStorageSet &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::CreditEventStorageSet::operator==(const CreditEventStorageSet &other) const
+{
+	Q_D(const CreditEventStorageSet);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::CreditEventStorageSet::operator!=(const CreditEventStorageSet &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::CreditEventStorageSet::isNull(void) const
+{
+	Q_D(const CreditEventStorageSet);
+	return d == Q_NULLPTR;
+}
+
+qint64 Isds::CreditEventStorageSet::newCapacity(void) const
+{
+	Q_D(const CreditEventStorageSet);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return -1;
+	}
+	return d->m_newCapacity;
+}
+
+void Isds::CreditEventStorageSet::setNewCapacity(qint64 nc)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_newCapacity = (nc >= 0) ? nc : -1;
+}
+
+const QDate &Isds::CreditEventStorageSet::newFrom(void) const
+{
+	Q_D(const CreditEventStorageSet);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDate;
+	}
+	return d->m_newFrom;
+}
+
+void Isds::CreditEventStorageSet::setNewFrom(const QDate &nf)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_newFrom = nf;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEventStorageSet::setNewFrom(QDate &&nf)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_newFrom = nf;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QDate &Isds::CreditEventStorageSet::newTo(void) const
+{
+	Q_D(const CreditEventStorageSet);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDate;
+	}
+	return d->m_newTo;
+}
+
+void Isds::CreditEventStorageSet::setNewTo(const QDate &nt)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_newTo = nt;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEventStorageSet::setNewTo(QDate &&nt)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_newTo = nt;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+qint64 Isds::CreditEventStorageSet::oldCapacity(void) const
+{
+	Q_D(const CreditEventStorageSet);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return -1;
+	}
+	return d->m_oldCapacity;
+}
+
+void Isds::CreditEventStorageSet::setOldCapacity(qint64 oc)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_oldCapacity = (oc >= 0) ? oc : -1;
+}
+
+const QDate &Isds::CreditEventStorageSet::oldFrom(void) const
+{
+	Q_D(const CreditEventStorageSet);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDate;
+	}
+	return d->m_oldFrom;
+}
+
+void Isds::CreditEventStorageSet::setOldFrom(const QDate &of)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_oldFrom = of;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEventStorageSet::setOldFrom(QDate &&of)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_oldFrom = of;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QDate &Isds::CreditEventStorageSet::oldTo(void) const
+{
+	Q_D(const CreditEventStorageSet);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDate;
+	}
+	return d->m_oldTo;
+}
+
+void Isds::CreditEventStorageSet::setOldTo(const QDate &ot)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_oldTo = ot;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEventStorageSet::setOldTo(QDate &&ot)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_oldTo = ot;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &Isds::CreditEventStorageSet::initiator(void) const
+{
+	Q_D(const CreditEventStorageSet);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_initiator;
+}
+
+void Isds::CreditEventStorageSet::setInitiator(const QString &i)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_initiator = i;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEventStorageSet::setInitiator(QString &&i)
+{
+	ensureCreditEventStorageSetPrivate();
+	Q_D(CreditEventStorageSet);
+	d->m_initiator = i;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::swap(CreditEventStorageSet &first, CreditEventStorageSet &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
+}
+
+/*!
+ * @brief PIMPL CreditEvent class.
+ */
+class Isds::CreditEventPrivate {
+	//Q_DISABLE_COPY(CreditEventPrivate)
+
+public:
+	CreditEventPrivate(void)
+	    : m_time(), m_creditChange(0), m_creditAfter(0),
+	    m_type(Type::CET_UNKNOWN), m_charged(), m_discharged(), m_msgSent(),
+	    m_storageSet()
+	{ }
+
+	CreditEventPrivate &operator=(const CreditEventPrivate &other) Q_DECL_NOTHROW
+	{
+		m_time = other.m_time;
+		m_creditChange = other.m_creditChange;
+		m_creditAfter = other.m_creditAfter;
+		m_type = other.m_type;
+		m_charged = other.m_charged;
+		m_discharged = other.m_discharged;
+		m_msgSent = other.m_msgSent;
+		m_storageSet = other.m_storageSet;
+
+		return *this;
+	}
+
+	bool operator==(const CreditEventPrivate &other) const
+	{
+		return (m_time == other.m_time) &&
+		    (m_creditChange == other.m_creditChange) &&
+		    (m_creditAfter == other.m_creditAfter) &&
+		    (m_type == other.m_type) &&
+		    (m_charged == other.m_charged) &&
+		    (m_discharged == other.m_discharged) &&
+		    (m_msgSent == other.m_msgSent) &&
+		    (m_storageSet == other.m_storageSet);
+	}
+
+	QDateTime m_time; /*!< Event time. */
+	qint64 m_creditChange; /*!< Credit change (may be negative) in Heller. */
+	qint64 m_creditAfter; /*!< Credit value in Heller after this event. */
+	enum Type::CreditEventType m_type; /*!< Event type. */
+
+	/* C++ does not allow classes with non-trivial constructors in union. */
+	CreditEventCharged m_charged;
+	CreditEventDischarged m_discharged;
+	CreditEventMsgSent m_msgSent;
+	CreditEventStorageSet m_storageSet;
+};
+
+Isds::CreditEvent::CreditEvent(void)
+    : d_ptr(Q_NULLPTR)
+{
+}
+
+Isds::CreditEvent::CreditEvent(const CreditEvent &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) CreditEventPrivate) : Q_NULLPTR)
+{
+	Q_D(CreditEvent);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::CreditEvent::CreditEvent(CreditEvent &&other) Q_DECL_NOEXCEPT
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+Isds::CreditEvent::~CreditEvent(void)
+{
+}
+
+/*!
+ * @brief Ensures private storage set event presence.
+ *
+ * @note Returns if private storage set event could not be allocated.
+ */
+#define ensureCreditEventPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			CreditEventPrivate *p = new (std::nothrow) CreditEventPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+Isds::CreditEvent &Isds::CreditEvent::operator=(const CreditEvent &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureCreditEventPrivate(*this);
+	Q_D(CreditEvent);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+Isds::CreditEvent &Isds::CreditEvent::operator=(CreditEvent &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool Isds::CreditEvent::operator==(const CreditEvent &other) const
+{
+	Q_D(const CreditEvent);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool Isds::CreditEvent::operator!=(const CreditEvent &other) const
+{
+	return !operator==(other);
+}
+
+bool Isds::CreditEvent::isNull(void) const
+{
+	Q_D(const CreditEvent);
+	return d == Q_NULLPTR;
+}
+
+const QDateTime &Isds::CreditEvent::time(void) const
+{
+	Q_D(const CreditEvent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullDateTime;
+	}
+	return d->m_time;
+}
+
+void Isds::CreditEvent::setTime(const QDateTime &t)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	d->m_time = t;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEvent::setTime(QDateTime &&t)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	d->m_time = t;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+qint64 Isds::CreditEvent::creditChange(void) const
+{
+	Q_D(const CreditEvent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return 0;
+	}
+	return d->m_creditChange;
+}
+
+void Isds::CreditEvent::setCreditChange(qint64 cc)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	d->m_creditChange = cc;
+}
+
+qint64 Isds::CreditEvent::creditAfter(void) const
+{
+	Q_D(const CreditEvent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return 0;
+	}
+	return d->m_creditAfter;
+}
+
+void Isds::CreditEvent::setCreditAfter(qint64 ca)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	d->m_creditAfter = ca;
+}
+
+enum Isds::Type::CreditEventType Isds::CreditEvent::type(void) const
+{
+	Q_D(const CreditEvent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Type::CET_UNKNOWN;
+	}
+	return d->m_type;
+}
+
+const Isds::CreditEventCharged &Isds::CreditEvent::charged(void) const
+{
+	Q_D(const CreditEvent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullCreditEventCharged;
+	}
+	return d->m_charged;
+}
+
+/*!
+ * @brief Erase private event content according to set type.
+ *
+ * @param[in] cep Private credit event.
+ */
+static
+void eraseEventContent(Isds::CreditEventPrivate *cep)
+{
+	if (Q_UNLIKELY(cep == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	switch (cep->m_type) {
+	case Isds::Type::CET_UNKNOWN:
+		/* Nothing to do. */
+		break;
+	case Isds::Type::CET_CHARGED:
+		cep->m_charged = nullCreditEventCharged;
+		break;
+	case Isds::Type::CET_DISCHARGED:
+		cep->m_discharged = nullCreditEventDischarged;
+		break;
+	case Isds::Type::CET_MESSAGE_SENT:
+		cep->m_msgSent = nullCreditEventMsgSent;
+		break;
+	case Isds::Type::CET_STORAGE_SET:
+		cep->m_storageSet = nullCreditEventStorageSet;
+		break;
+	case Isds::Type::CET_EXPIRED:
+		/* Nothing to do. */
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+}
+
+void Isds::CreditEvent::setCharged(const CreditEventCharged &cec)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	if (d->m_type != Type::CET_CHARGED) {
+		eraseEventContent(d);
+	}
+	d->m_charged = cec;
+	d->m_type = Type::CET_CHARGED;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEvent::setCharged(CreditEventCharged &&cec)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	if (d->m_type != Type::CET_CHARGED) {
+		eraseEventContent(d);
+	}
+	d->m_charged = cec;
+	d->m_type = Type::CET_CHARGED;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const Isds::CreditEventDischarged &Isds::CreditEvent::discharged(void) const
+{
+	Q_D(const CreditEvent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullCreditEventDischarged;
+	}
+	return d->m_discharged;
+}
+
+void Isds::CreditEvent::setDischarged(const CreditEventDischarged &ced)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	if (d->m_type != Type::CET_DISCHARGED) {
+		eraseEventContent(d);
+	}
+	d->m_discharged = ced;
+	d->m_type = Type::CET_DISCHARGED;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEvent::setDischarged(CreditEventDischarged &&ced)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	if (d->m_type != Type::CET_DISCHARGED) {
+		eraseEventContent(d);
+	}
+	d->m_discharged = ced;
+	d->m_type = Type::CET_DISCHARGED;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const Isds::CreditEventMsgSent &Isds::CreditEvent::msgSent(void) const
+{
+	Q_D(const CreditEvent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullCreditEventMsgSent;
+	}
+	return d->m_msgSent;
+}
+
+void Isds::CreditEvent::setMsgSent(const CreditEventMsgSent &cems)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	if (d->m_type != Type::CET_MESSAGE_SENT) {
+		eraseEventContent(d);
+	}
+	d->m_msgSent = cems;
+	d->m_type = Type::CET_MESSAGE_SENT;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEvent::setMsgSent(CreditEventMsgSent &&cems)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	if (d->m_type != Type::CET_MESSAGE_SENT) {
+		eraseEventContent(d);
+	}
+	d->m_msgSent = cems;
+	d->m_type = Type::CET_MESSAGE_SENT;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const Isds::CreditEventStorageSet &Isds::CreditEvent::storageSet(void) const
+{
+	Q_D(const CreditEvent);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullCreditEventStorageSet;
+	}
+	return d->m_storageSet;
+}
+
+void Isds::CreditEvent::setStorageSet(const CreditEventStorageSet &cess)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	if (d->m_type != Type::CET_STORAGE_SET) {
+		eraseEventContent(d);
+	}
+	d->m_storageSet = cess;
+	d->m_type = Type::CET_STORAGE_SET;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void Isds::CreditEvent::setStorageSet(CreditEventStorageSet &&cess)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	if (d->m_type != Type::CET_STORAGE_SET) {
+		eraseEventContent(d);
+	}
+	d->m_storageSet = cess;
+	d->m_type = Type::CET_STORAGE_SET;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+void Isds::CreditEvent::setExpired(void)
+{
+	ensureCreditEventPrivate();
+	Q_D(CreditEvent);
+	if (d->m_type != Type::CET_EXPIRED) {
+		eraseEventContent(d);
+	}
+	d->m_type = Type::CET_EXPIRED;
+}
+
+void Isds::swap(CreditEvent &first, CreditEvent &second) Q_DECL_NOTHROW
 {
 	using std::swap;
 	swap(first.d_ptr, second.d_ptr);

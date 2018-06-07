@@ -334,6 +334,18 @@ public:
 	};
 
 	/*!
+	 * @brief Credit event type.
+	 */
+	enum CreditEventType {
+		CET_UNKNOWN = -1, /*!< Convenience values. */
+		CET_CHARGED = 1, /*!< Credit has been charged. */
+		CET_DISCHARGED = 2, /*!< Credit has been discharged. */
+		CET_MESSAGE_SENT = 3, /*!< Credit has been spent for sending a commerical message. */
+		CET_STORAGE_SET = 4, /*!< Credit has been spent for setting a long-term storage. */
+		CET_EXPIRED = 5 /*!< Credit has expired. */
+	};
+
+	/*!
 	 * @brief Error value. Taken from libisds for compatibility.
 	 */
 	enum Error {

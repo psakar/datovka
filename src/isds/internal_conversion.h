@@ -21,7 +21,21 @@
  * the two.
  */
 
+/*
+ * This header file must not be included in other header files.
+ *
+ * Functions in this compilation unit serve for converting types
+ * defined in libisds.
+ */
+
 #pragma once
+
+#if defined(__APPLE__) || defined(__clang__)
+#  define __USE_C99_MATH
+#  define _Bool bool
+#else /* !__APPLE__ */
+#  include <cstdbool>
+#endif /* __APPLE__ */
 
 #include <cstdbool>
 #include <QByteArray>
