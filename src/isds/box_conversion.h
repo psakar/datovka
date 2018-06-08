@@ -30,6 +30,7 @@
 extern "C" {
 	struct isds_Address;
 	struct isds_BirthInfo;
+	struct isds_credit_event;
 	struct isds_PersonName;
 	struct isds_DbOwnerInfo;
 	struct isds_DbUserInfo;
@@ -74,5 +75,8 @@ namespace Isds {
 
 	QList<FulltextResult> libisds2fulltextResultList(
 	    const struct ::isds_list *ifrl, bool *ok = Q_NULLPTR);
+
+	CreditEvent libisds2creditEvent(const struct ::isds_credit_event *ice,
+	    bool *ok = Q_NULLPTR);
 
 }
