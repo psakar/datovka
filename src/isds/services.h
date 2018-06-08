@@ -25,6 +25,7 @@
 
 #include <QByteArray>
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
+#include <QDate>
 #include <QDateTime>
 #include <QList>
 #include <QString>
@@ -39,6 +40,7 @@ extern "C" {
 namespace Isds {
 
 	/* Forward declaration. */
+	class CreditEvent;
 	class DbOwnerInfo;
 	class DbUserInfo;
 	class Error;
@@ -95,6 +97,25 @@ namespace Isds {
 		Error getPasswordInfo(struct isds_ctx *ctx, QDateTime &pswExpDate);
 
 	/* Box interface: */
+		/*!
+		 * @brief Service DataBoxCreditInfo.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     fromDate First day of credit history,
+		 *                         pass null value if you don't care.
+		 * @param[in]     toDate Last day of credit history,
+		 *                       pass null value if you don't care.
+		 * @param[out]    currentCredit Current credit in Heller.
+		 * @param[out]    email Box-related notification email.
+		 * @param[out]    history Credit events in given interval.
+		 * @return Error description.
+		 */
+		static
+		Error dataBoxCreditInfo(struct isds_ctx *ctx,
+		    const QString &dbID, const QDate &fromDate,
+		    const QDate &toDate, qint64 &currentCredit, QString &email,
+		    QList<CreditEvent> &history);
+
 		/*!
 		 * @brief Service DummyOperation.
 		 *

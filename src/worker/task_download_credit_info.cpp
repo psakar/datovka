@@ -25,6 +25,9 @@
 
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/box_interface.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_credit_info.h"
@@ -69,14 +72,13 @@ void TaskDownloadCreditInfo::run(void)
 qint64 TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
     const QString &dbId)
 {
-	long credit = 0;
-
 	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName)) {
 		return -1;
 	}
 
-	isds_error status;
-	struct isds_list *history = NULL;
+	qint64 credit = 0;
+	QString email;
+	QList<Isds::CreditEvent> history;
 
 	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
 	if (NULL == session) {
@@ -84,15 +86,12 @@ qint64 TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
 		return -1;
 	}
 
-	status = isds_get_commercial_credit(session,
-	    dbId.toUtf8().constData(), NULL, NULL, &credit, NULL, &history);
-
-	isds_list_free(&history);
-
-	if (IE_SUCCESS != status) {
+	Isds::Error err = Isds::Service::dataBoxCreditInfo(session,
+	    dbId, QDate(), QDate(), credit, email, history);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
 		logErrorNL(
 		    "Downloading credit information returned '%d': '%s'.",
-		    status, isdsLongMessage(session).toUtf8().constData());
+		    err.code(), err.longDescr().toUtf8().constData());
 		return -1;
 	}
 

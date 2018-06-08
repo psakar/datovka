@@ -36,6 +36,7 @@
 #include "src/isds/box_interface.h"
 #include "src/isds/error_conversion.h"
 #include "src/isds/error.h"
+#include "src/isds/internal_conversion.h"
 #include "src/isds/internal_type_conversion.h"
 #include "src/isds/services.h"
 
@@ -57,6 +58,72 @@ QString isdsLongMessage(const struct isds_ctx *ctx)
 #else /* !WIN32 */
 	return QString::fromUtf8(isds_long_message(ctx));
 #endif /* WIN32 */
+}
+
+Isds::Error Isds::Service::dataBoxCreditInfo(struct isds_ctx *ctx,
+    const QString &dbID, const QDate &fromDate, const QDate &toDate,
+    qint64 &currentCredit, QString &email, QList<CreditEvent> &history)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || dbID.isEmpty())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	bool ok = false;
+	struct tm *iFromDate = NULL;
+	struct tm *iToDate = NULL;
+	isds_error ret = IE_SUCCESS;
+	long int iCredit = 0;
+	char *iEmail = NULL;
+	struct isds_list *iHistory = NULL;
+
+	if (Q_UNLIKELY((!toCDateCopy(&iFromDate, fromDate)) ||
+	               (!toCDateCopy(&iToDate, toDate)))) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+		goto fail;
+	}
+
+	ret = isds_get_commercial_credit(ctx, dbID.toUtf8().constData(),
+	    iFromDate, iToDate, &iCredit, &iEmail, &iHistory);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	ok = true;
+	currentCredit = iCredit;
+	email = (iEmail != NULL) ? QString(iEmail) : QString();
+	history = (iHistory != NULL) ?
+	    libisds2creditEventList(iHistory, &ok) : QList<CreditEvent>();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (iFromDate != NULL) {
+		std::free(iFromDate);
+	}
+	if (iToDate != NULL) {
+		std::free(iToDate);
+	}
+	if (iEmail != NULL) {
+		std::free(iEmail);
+	}
+	if (iHistory != NULL) {
+		isds_list_free(&iHistory);
+	}
+
+	return err;
 }
 
 Isds::Error Isds::Service::dummyOperation(struct isds_ctx *ctx)
