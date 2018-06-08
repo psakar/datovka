@@ -26,11 +26,15 @@
 #include <QtTest/QtTest>
 
 #include "src/global.h"
+#include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_credit_info.h"
+#include "src/worker/task_download_owner_info.h"
+#include "src/worker/task_download_password_info.h"
+#include "src/worker/task_download_user_info.h"
 #include "tests/helper_qt.h"
 #include "tests/test_task_info.h"
 
@@ -48,6 +52,12 @@ private slots:
 	void cleanupTestCase(void);
 
 	void downloadCreditInfo(void);
+
+	void downloadPasswordInfo(void);
+
+	void downloadOwnerInfo(void);
+
+	void downloadUserInfo(void);
 
 private:
 	void loadCredentials(LoginCredentials &cred, int line);
@@ -80,6 +90,8 @@ TestTaskInfo::~TestTaskInfo(void)
 
 void TestTaskInfo::initTestCase(void)
 {
+	bool ret;
+
 	QVERIFY(GlobInstcs::logPtr == Q_NULLPTR);
 	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
 	QVERIFY(GlobInstcs::logPtr != Q_NULLPTR);
@@ -95,6 +107,30 @@ void TestTaskInfo::initTestCase(void)
 
 	/* Set configuration subdirectory to some value. */
 	GlobInstcs::prefsPtr->confSubdir = QLatin1String(".datovka_test");
+
+	/* Create empty working directory. */
+	m_testDir.removeRecursively();
+	QVERIFY(!m_testDir.exists());
+	m_testDir.mkpath(".");
+	QVERIFY(m_testDir.exists());
+
+	/*
+	 * Create accounts database and open it. It is required by the task.
+	 */
+	QVERIFY(GlobInstcs::accntDbPtr == Q_NULLPTR);
+	GlobInstcs::accntDbPtr = new (::std::nothrow) AccountDb("accountDb",
+	    false);
+	if (GlobInstcs::accntDbPtr == Q_NULLPTR) {
+		QSKIP("Cannot create accounts database.");
+	}
+	QVERIFY(GlobInstcs::accntDbPtr != Q_NULLPTR);
+	ret = GlobInstcs::accntDbPtr->openDb(
+	    m_testPath + QDir::separator() + "messages.shelf.db",
+	    SQLiteDb::CREATE_MISSING);
+	if (!ret) {
+		QSKIP("Cannot open account database.");
+	}
+	QVERIFY(ret);
 
 	/* Create ISDS session container. */
 	QVERIFY(GlobInstcs::isdsSessionsPtr == Q_NULLPTR);
@@ -112,6 +148,9 @@ void TestTaskInfo::cleanupTestCase(void)
 {
 	/* Destroy ISDS session container. */
 	delete GlobInstcs::isdsSessionsPtr; GlobInstcs::isdsSessionsPtr = Q_NULLPTR;
+
+	/* Delete account database. */
+	delete GlobInstcs::accntDbPtr; GlobInstcs::accntDbPtr = Q_NULLPTR;
 
 	/* Delete testing directory. */
 	m_testDir.removeRecursively();
@@ -160,6 +199,135 @@ void TestTaskInfo::downloadCreditInfo(void)
 	QVERIFY(task->m_heller > 0);
 
 	delete task; task = Q_NULLPTR;
+}
+
+void TestTaskInfo::downloadPasswordInfo(void)
+{
+	QDateTime dateTime;
+	TaskDownloadPasswordInfo *task = Q_NULLPTR;
+
+	/* Password info not present. */
+	dateTime = GlobInstcs::accntDbPtr->getPwdExpirFromDb(
+	    AccountDb::keyFromLogin(m_first.userName));
+	QVERIFY(dateTime.isNull());
+	dateTime = GlobInstcs::accntDbPtr->getPwdExpirFromDb(
+	    AccountDb::keyFromLogin(m_second.userName));
+	QVERIFY(dateTime.isNull());
+
+	/* Download password info for both accounts. */
+	task = new (std::nothrow) TaskDownloadPasswordInfo(m_first.userName);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_success);
+
+	delete task; task = Q_NULLPTR;
+
+	task = new (std::nothrow) TaskDownloadPasswordInfo(m_second.userName);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_success);
+
+	delete task; task = Q_NULLPTR;
+
+	/* Password info present, but no expiration is set. */
+	dateTime = GlobInstcs::accntDbPtr->getPwdExpirFromDb(
+	    AccountDb::keyFromLogin(m_first.userName));
+	QVERIFY(dateTime.isNull());
+	dateTime = GlobInstcs::accntDbPtr->getPwdExpirFromDb(
+	    AccountDb::keyFromLogin(m_second.userName));
+	QVERIFY(dateTime.isNull());
+}
+
+void TestTaskInfo::downloadOwnerInfo(void)
+{
+	Isds::DbOwnerInfo ownerInfo;
+	TaskDownloadOwnerInfo *task = Q_NULLPTR;
+
+	/* Owner info not present. */
+	ownerInfo = GlobInstcs::accntDbPtr->getOwnerInfo(
+	    AccountDb::keyFromLogin(m_first.userName));
+	QVERIFY(ownerInfo.dbID().isNull());
+	ownerInfo = GlobInstcs::accntDbPtr->getOwnerInfo(
+	    AccountDb::keyFromLogin(m_second.userName));
+	QVERIFY(ownerInfo.dbID().isNull());
+
+	/* Download owner info for both accounts. */
+	task = new (std::nothrow) TaskDownloadOwnerInfo(m_first.userName);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_success);
+
+	delete task; task = Q_NULLPTR;
+
+	task = new (std::nothrow) TaskDownloadOwnerInfo(m_second.userName);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_success);
+
+	delete task; task = Q_NULLPTR;
+
+	/* Owner info downloaded. */
+	ownerInfo = GlobInstcs::accntDbPtr->getOwnerInfo(
+	    AccountDb::keyFromLogin(m_first.userName));
+	QVERIFY(!ownerInfo.dbID().isEmpty());
+	ownerInfo = GlobInstcs::accntDbPtr->getOwnerInfo(
+	    AccountDb::keyFromLogin(m_second.userName));
+	QVERIFY(!ownerInfo.dbID().isEmpty());
+}
+
+void TestTaskInfo::downloadUserInfo(void)
+{
+	DbEntry entry;
+	TaskDownloadUserInfo *task = Q_NULLPTR;
+
+	/* User info not present. */
+	entry = GlobInstcs::accntDbPtr->userEntry(
+	    AccountDb::keyFromLogin(m_first.userName));
+	QVERIFY(!entry.hasValue("userType"));
+	entry = GlobInstcs::accntDbPtr->userEntry(
+	    AccountDb::keyFromLogin(m_second.userName));
+	QVERIFY(!entry.hasValue("userType"));
+
+	/* Download user info for both accounts. */
+	task = new (std::nothrow) TaskDownloadUserInfo(m_first.userName);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_success);
+
+	delete task; task = Q_NULLPTR;
+
+	task = new (std::nothrow) TaskDownloadUserInfo(m_second.userName);
+	QVERIFY(task != Q_NULLPTR);
+	task->setAutoDelete(false);
+
+	task->run();
+
+	QVERIFY(task->m_success);
+
+	delete task; task = Q_NULLPTR;
+
+	/* User info downloaded. */
+	entry = GlobInstcs::accntDbPtr->userEntry(
+	    AccountDb::keyFromLogin(m_first.userName));
+	QVERIFY(entry.hasValue("userType"));
+	entry = GlobInstcs::accntDbPtr->userEntry(
+	    AccountDb::keyFromLogin(m_second.userName));
+	QVERIFY(entry.hasValue("userType"));
 }
 
 void TestTaskInfo::loadCredentials(LoginCredentials &cred, int line)
