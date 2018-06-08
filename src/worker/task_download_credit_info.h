@@ -49,6 +49,8 @@ public:
 	void run(void) Q_DECL_OVERRIDE;
 
 	qint64 m_heller; /*!< Credit in hundredths of crowns. */
+	QString m_isdsError; /*!< Error description. */
+	QString m_isdsLongError; /*!< Long error description. */
 
 private:
 	/*!
@@ -60,13 +62,15 @@ private:
 	/*!
 	 * @brief Download credit information from ISDS.
 	 *
-	 * @param[in] userName Account identifier (user login name).
-	 * @param[in] dbId     Data box identifier.
+	 * @param[in]  userName Account identifier (user login name).
+	 * @param[in]  dbId Data box identifier.
+	 * @param[out] error Error description.
+	 * @param[out] longError Long error description.
 	 * @retrun Credit in heller, -1 on error.
 	 */
 	static
 	qint64 downloadCreditFromISDS(const QString &userName,
-	    const QString &dbId);
+	    const QString &dbId, QString &error, QString &longError);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
 	const QString m_dbId; /*!< Data box identifier. */

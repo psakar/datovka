@@ -28,6 +28,8 @@
 #include "src/isds/box_interface.h"
 #include "src/isds/error.h"
 #include "src/isds/services.h"
+#include "src/isds/type_description.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_credit_info.h"
@@ -35,6 +37,8 @@
 TaskDownloadCreditInfo::TaskDownloadCreditInfo(const QString &userName,
     const QString &dbId)
     : m_heller(-1),
+    m_isdsError(),
+    m_isdsLongError(),
     m_userName(userName),
     m_dbId(dbId)
 {
@@ -59,7 +63,8 @@ void TaskDownloadCreditInfo::run(void)
 
 	/* ### Worker task begin. ### */
 
-	m_heller = downloadCreditFromISDS(m_userName, m_dbId);
+	m_heller = downloadCreditFromISDS(m_userName, m_dbId,
+	    m_isdsError, m_isdsLongError);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
@@ -70,7 +75,7 @@ void TaskDownloadCreditInfo::run(void)
 }
 
 qint64 TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
-    const QString &dbId)
+    const QString &dbId, QString &error, QString &longError)
 {
 	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName)) {
 		return -1;
@@ -89,9 +94,11 @@ qint64 TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
 	Isds::Error err = Isds::Service::dataBoxCreditInfo(session,
 	    dbId, QDate(), QDate(), credit, email, history);
 	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL(
 		    "Downloading credit information returned '%d': '%s'.",
-		    err.code(), err.longDescr().toUtf8().constData());
+		    err.code(), longError.toUtf8().constData());
 		return -1;
 	}
 
