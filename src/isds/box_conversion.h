@@ -79,4 +79,7 @@ namespace Isds {
 	CreditEvent libisds2creditEvent(const struct ::isds_credit_event *ice,
 	    bool *ok = Q_NULLPTR);
 
+	QList<CreditEvent> libisds2creditEventList(
+	    const struct ::isds_list *icel, bool *ok = Q_NULLPTR);
+
 }

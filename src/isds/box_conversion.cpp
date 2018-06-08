@@ -1318,3 +1318,43 @@ fail:
 	}
 	return CreditEvent();
 }
+
+QList<Isds::CreditEvent> Isds::libisds2creditEventList(
+    const struct isds_list *icel, bool *ok)
+{
+	/* Credit event destructor function type. */
+	typedef void (*credit_event_destr_func_t)(struct isds_credit_event **);
+
+	QList<CreditEvent> creditEventList;
+
+	while (icel != NULL) {
+		const struct isds_credit_event *ice = (struct isds_credit_event *)icel->data;
+		credit_event_destr_func_t idestr = (credit_event_destr_func_t)icel->destructor;
+		/* Destructor function must be set. */
+		if (idestr != isds_credit_event_free) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList<CreditEvent>();
+		}
+
+		if (ice != NULL) {
+			bool iOk = false;
+			creditEventList.append(libisds2creditEvent(ice, &iOk));
+			if (!iOk) {
+				if (ok != Q_NULLPTR) {
+					*ok = false;
+				}
+				return QList<CreditEvent>();
+			}
+		}
+
+		icel = icel->next;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return creditEventList;
+}
