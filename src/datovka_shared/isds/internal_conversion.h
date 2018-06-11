@@ -37,7 +37,6 @@
 #  include <cstdbool>
 #endif /* __APPLE__ */
 
-#include <cstdbool>
 #include <QByteArray>
 #include <QDate>
 #include <QDateTime>
