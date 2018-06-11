@@ -32,10 +32,10 @@
 #include <cstring> // memset
 #include <isds.h>
 
+#include "src/datovka_shared/isds/internal_conversion.h"
+#include "src/datovka_shared/isds/type_conversion.h"
 #include "src/isds/box_conversion.h"
-#include "src/isds/internal_conversion.h"
 #include "src/isds/internal_type_conversion.h"
-#include "src/isds/type_conversion.h"
 
 /*!
  * @brief Set address according to the libisds address structure.

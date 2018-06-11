@@ -25,9 +25,9 @@
 
 #include <QString>
 
+#include "src/datovka_shared/isds/message_interface.h"
+#include "src/datovka_shared/isds/types.h"
 #include "src/io/message_db_set.h"
-#include "src/isds/message_interface.h"
-#include "src/isds/types.h"
 #include "src/worker/task.h"
 
 /*!

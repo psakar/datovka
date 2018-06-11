@@ -30,7 +30,7 @@
 #include <QList>
 #include <QString>
 
-#include "src/isds/types.h"
+#include "src/datovka_shared/isds/types.h"
 
 extern "C" {
 	/* TODO -- The context structure needs to be encapsulated. */

@@ -23,13 +23,13 @@
 
 #include <QThread>
 
+#include "src/datovka_shared/isds/box_interface.h"
+#include "src/datovka_shared/isds/error.h"
+#include "src/datovka_shared/isds/types.h"
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/box_interface.h"
-#include "src/isds/error.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
-#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_credit_info.h"

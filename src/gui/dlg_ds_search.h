@@ -27,7 +27,7 @@
 #include <QItemSelection>
 #include <QThread>
 
-#include "src/isds/types.h"
+#include "src/datovka_shared/isds/types.h"
 #include "src/models/combo_box_model.h"
 #include "src/models/data_box_contacts_model.h"
 #include "src/models/sort_filter_proxy_model.h"

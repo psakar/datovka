@@ -26,7 +26,7 @@
 #include <QScopedPointer>
 #include <QString>
 
-#include "src/isds/types.h"
+#include "src/datovka_shared/isds/types.h"
 
 /*
  * Encapsulates error structure as it is more or less used by libisds.

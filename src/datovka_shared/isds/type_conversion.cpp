@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include "src/isds/type_conversion.h"
+#include "src/datovka_shared/isds/type_conversion.h"
 
 qint64 Isds::variant2nonNegativeLong(const QVariant &v)
 {

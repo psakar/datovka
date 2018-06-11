@@ -32,8 +32,8 @@
 #include <cstring> // memset
 #include <isds.h>
 
+#include "src/datovka_shared/isds/internal_conversion.h"
 #include "src/isds/account_conversion.h"
-#include "src/isds/internal_conversion.h"
 #include "src/isds/internal_type_conversion.h"
 
 /*!

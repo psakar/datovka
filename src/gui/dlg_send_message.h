@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_SEND_MESSAGE_H_
-#define _DLG_SEND_MESSAGE_H_
+#pragma once
 
 #include <QDialog>
 #include <QItemSelection>
@@ -30,9 +29,9 @@
 #include <QSet>
 #include <QTimer>
 
+#include "src/datovka_shared/isds/message_interface.h"
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
-#include "src/isds/message_interface.h"
 #include "src/models/data_box_contacts_model.h"
 #include "src/models/files_model.h"
 #include "src/worker/task.h"
@@ -342,6 +341,3 @@ private:
 
 	class MainWindow *const m_mw; /*!< Pointer to main window. */
 };
-
-
-#endif /* _DLG_SEND_MESSAGE_H_ */

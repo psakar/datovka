@@ -23,9 +23,9 @@
 
 #pragma once
 
+#include "src/datovka_shared/isds/box_interface.h"
+#include "src/datovka_shared/isds/types.h"
 #include "src/io/message_db.h"
-#include "src/isds/box_interface.h"
-#include "src/isds/types.h"
 #include "src/models/table_model.h"
 
 /*!

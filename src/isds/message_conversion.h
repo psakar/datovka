@@ -25,7 +25,7 @@
 
 #include <QList>
 
-#include "src/isds/message_interface.h"
+#include "src/datovka_shared/isds/message_interface.h"
 
 extern "C" {
 	struct isds_hash;

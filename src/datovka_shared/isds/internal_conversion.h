@@ -43,7 +43,7 @@
 #include <QDateTime>
 #include <QString>
 
-#include "src/isds/types.h"
+#include "src/datovka_shared/isds/types.h"
 
 namespace Isds {
 

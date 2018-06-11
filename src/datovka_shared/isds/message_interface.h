@@ -30,7 +30,7 @@
 #include <QScopedPointer>
 #include <QString>
 
-#include "src/isds/types.h"
+#include "src/datovka_shared/isds/types.h"
 
 /*
  * https://stackoverflow.com/questions/25250171/how-to-use-the-qts-pimpl-idiom
@@ -87,8 +87,6 @@ namespace Isds {
 		void setValue(QByteArray &&v);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-		friend Hash libisds2hash(const struct isds_hash *ih, bool *ok);
-
 	private:
 		QScopedPointer<HashPrivate> d_ptr; // std::unique_ptr ?
 	};
@@ -143,9 +141,6 @@ namespace Isds {
 		/* Converts even type to string. */
 		static
 		const QString &type2string(enum Type::Event type);
-
-		friend Event libisds2event(const struct isds_event *ie,
-		    bool *ok);
 
 	private:
 		QScopedPointer<EventPrivate> d_ptr; // std::unique_ptr ?
@@ -396,9 +391,6 @@ namespace Isds {
 		static
 		QChar dmType2Char(enum Type::DmType t);
 
-		friend Envelope libisds2envelope(const struct isds_envelope *ie,
-		    bool *ok);
-
 	private:
 		QScopedPointer<EnvelopePrivate> d_ptr; // std::unique_ptr ?
 	};
@@ -482,9 +474,6 @@ namespace Isds {
 		void setFormat(QString &&f);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-		friend Document libisds2document(const struct isds_document *id,
-		    bool *ok);
-
 	private:
 		QScopedPointer<DocumentPrivate> d_ptr; // std::unique_ptr ?
 	};
@@ -541,9 +530,6 @@ namespace Isds {
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setDocuments(QList<Document> &&dl);
 #endif /* Q_COMPILER_RVALUE_REFS */
-
-		friend Message libisds2message(const struct isds_message *im,
-		    bool *ok);
 
 	private:
 		QScopedPointer<MessagePrivate> d_ptr; // std::unique_ptr ?

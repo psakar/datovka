@@ -23,8 +23,8 @@
 
 #include <utility> /* std::move */
 
-#include "src/isds/box_interface.h"
-#include "src/isds/internal_conversion.h"
+#include "src/datovka_shared/isds/box_interface.h"
+#include "src/datovka_shared/isds/internal_conversion.h"
 
 /* Null objects - for convenience. */
 static const Isds::Address nullAddress;

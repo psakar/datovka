@@ -32,10 +32,10 @@
 #include <QString>
 #include <QtTest/QtTest>
 
+#include "src/datovka_shared/isds/message_interface.h"
 #include "src/global.h"
 #include "src/isds/message_conversion.h"
 #include "src/isds/message_functions.h"
-#include "src/isds/message_interface.h"
 #include "src/log/log.h"
 #include "tests/test_isds_message.h"
 

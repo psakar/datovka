@@ -26,7 +26,7 @@
 #include <QScopedPointer>
 #include <QString>
 
-#include "src/isds/types.h"
+#include "src/datovka_shared/isds/types.h"
 
 /*
  * Structures based on from pril_2/ISDS_OTP_autentizace.pdf.

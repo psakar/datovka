@@ -25,10 +25,10 @@
 #include <QString>
 #include <QtTest/QtTest>
 
+#include "src/datovka_shared/isds/message_interface.h"
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/isds/message_functions.h"
-#include "src/isds/message_interface.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"

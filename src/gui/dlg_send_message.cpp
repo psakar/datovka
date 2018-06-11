@@ -29,6 +29,9 @@
 #include <QDir>
 #include <QMimeDatabase>
 
+#include "src/datovka_shared/isds/box_interface.h"
+#include "src/datovka_shared/isds/type_conversion.h"
+#include "src/datovka_shared/isds/types.h"
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/utility/strings.h"
 #include "src/datovka_shared/worker/pool.h"
@@ -44,9 +47,6 @@
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
-#include "src/isds/box_interface.h"
-#include "src/isds/type_conversion.h"
-#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/settings/preferences.h"

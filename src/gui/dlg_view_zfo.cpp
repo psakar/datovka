@@ -27,13 +27,13 @@
 #include <QTimeZone>
 
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/isds/type_conversion.h"
 #include "src/global.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
-#include "src/isds/type_conversion.h"
 #include "src/isds/type_description.h"
 #include "src/log/log.h"
 #include "src/model_interaction/attachment_interaction.h"

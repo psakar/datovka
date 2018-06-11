@@ -26,7 +26,7 @@
 #include <ctime>
 #include <sys/time.h> /* struct timeval */
 
-#include "src/isds/internal_conversion.h"
+#include "src/datovka_shared/isds/internal_conversion.h"
 
 QByteArray Isds::fromCData(const void *cData, size_t cSize)
 {
