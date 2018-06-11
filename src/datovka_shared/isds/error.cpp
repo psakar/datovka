@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include "src/isds/error.h"
+#include "src/datovka_shared/isds/error.h"
 
 static const QString nullString;
 

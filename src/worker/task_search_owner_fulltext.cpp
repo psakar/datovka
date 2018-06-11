@@ -24,9 +24,9 @@
 #include <cstdlib>
 #include <QThread>
 
+#include "src/datovka_shared/isds/error.h"
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/error.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
 #include "src/log/log.h"

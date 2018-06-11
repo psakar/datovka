@@ -24,11 +24,11 @@
 #include <cinttypes>
 #include <QThread>
 
+#include "src/datovka_shared/isds/error.h"
 #include "src/datovka_shared/isds/types.h"
 #include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/error.h"
 #include "src/isds/message_conversion.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
