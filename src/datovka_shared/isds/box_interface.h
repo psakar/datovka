@@ -30,7 +30,7 @@
 #include <QScopedPointer>
 #include <QString>
 
-#include "src/isds/types.h"
+#include "src/datovka_shared/isds/types.h"
 
 /*
  * Structures originating from pril_3/WS_ISDS_Sprava_datovych_schranek.pdf.

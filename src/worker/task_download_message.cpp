@@ -24,6 +24,7 @@
 #include <cinttypes>
 #include <QThread>
 
+#include "src/datovka_shared/isds/types.h"
 #include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/isds_sessions.h"
@@ -31,7 +32,6 @@
 #include "src/isds/message_conversion.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
-#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"

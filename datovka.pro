@@ -441,6 +441,7 @@ HEADERS += \
     src/datovka_shared/isds/account_interface.h \
     src/datovka_shared/isds/box_interface.h \
     src/datovka_shared/isds/message_interface.h \
+    src/datovka_shared/isds/types.h \
     src/datovka_shared/localisation/localisation.h \
     src/datovka_shared/records_management/conversion.h \
     src/datovka_shared/records_management/io/records_management_connection.h \
@@ -511,7 +512,6 @@ HEADERS += \
     src/isds/to_text_conversion.h \
     src/isds/type_conversion.h \
     src/isds/type_description.h \
-    src/isds/types.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/log/log.h \

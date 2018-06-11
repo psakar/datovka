@@ -30,7 +30,7 @@
 #include <QScopedPointer>
 #include <QString>
 
-#include "src/isds/types.h"
+#include "src/datovka_shared/isds/types.h"
 
 /*
  * https://stackoverflow.com/questions/25250171/how-to-use-the-qts-pimpl-idiom

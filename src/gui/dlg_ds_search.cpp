@@ -29,7 +29,6 @@
 #include "src/global.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/types.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
 #include "src/views/table_tab_ignore_filter.h"

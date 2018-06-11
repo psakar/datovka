@@ -33,9 +33,9 @@
 #include <QVector>
 
 #include "src/common.h"
-#include "src/datovka_shared/isds/message_interface.h"
-#include "src/isds/types.h"
 #include "src/datovka_shared/io/sqlite/db.h"
+#include "src/datovka_shared/isds/message_interface.h"
+#include "src/datovka_shared/isds/types.h"
 
 #define INVALID_YEAR "inv"
 #define DB2 "db2"
