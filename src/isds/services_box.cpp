@@ -32,8 +32,8 @@
 #include <cstring> // memcpy
 #include <isds.h>
 
+#include "src/datovka_shared/isds/box_interface.h"
 #include "src/isds/box_conversion.h"
-#include "src/isds/box_interface.h"
 #include "src/isds/error_conversion.h"
 #include "src/isds/error.h"
 #include "src/isds/internal_conversion.h"

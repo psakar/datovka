@@ -24,11 +24,11 @@
 #include <QCoreApplication>
 #include <QMessageBox>
 
+#include "src/datovka_shared/isds/box_interface.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/gui/dlg_ds_search.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/box_interface.h"
 #include "src/isds/types.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"

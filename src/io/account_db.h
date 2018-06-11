@@ -29,7 +29,7 @@
 #include <QVariant>
 
 #include "src/datovka_shared/io/sqlite/db_single.h"
-#include "src/isds/box_interface.h"
+#include "src/datovka_shared/isds/box_interface.h"
 
 /*!
  * @brief Information obtained from database. It is structured only by the

@@ -105,9 +105,6 @@ namespace Isds {
 #endif /* Q_COMPILER_RVALUE_REFS */
 		/* adAMCode - not present in libisds-0.10.7 */
 
-		friend Address libisds2address(const struct isds_Address *ia,
-		    bool *ok);
-
 	private:
 		QScopedPointer<AddressPrivate> d_ptr; // std::unique_ptr ?
 	};
@@ -166,9 +163,6 @@ namespace Isds {
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setState(QString &&s);
 #endif /* Q_COMPILER_RVALUE_REFS */
-
-		friend BirthInfo libisds2birthInfo(
-		    const struct isds_BirthInfo *ibi, bool *ok);
 
 	private:
 		QScopedPointer<BirthInfoPrivate> d_ptr; // std::unique_ptr ?
@@ -230,9 +224,6 @@ namespace Isds {
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setLastNameAtBirth(QString &&lnab);
 #endif /* Q_COMPILER_RVALUE_REFS */
-
-		friend PersonName libisds2personName(
-		    const struct isds_PersonName *ipn, bool *ok);
 
 	private:
 		QScopedPointer<PersonNamePrivate> d_ptr; // std::unique_ptr ?
@@ -348,9 +339,6 @@ namespace Isds {
 		enum Type::NilBool dbOpenAddressing(void) const;
 		void setDbOpenAddressing(enum Type::NilBool oa);
 
-		friend DbOwnerInfo libisds2dbOwnerInfo(
-		    const struct isds_DbOwnerInfo *idoi, bool *ok);
-
 	private:
 		QScopedPointer<DbOwnerInfoPrivate> d_ptr; // std::unique_ptr ?
 	};
@@ -452,9 +440,6 @@ namespace Isds {
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setCaState(QString &&cs);
 #endif /* Q_COMPILER_RVALUE_REFS */
-
-		friend DbUserInfo libisds2dbOwnerInfo(
-		    const struct isds_DbUserInfo *idoi, bool *ok);
 
 	private:
 		QScopedPointer<DbUserInfoPrivate> d_ptr; // std::unique_ptr ?

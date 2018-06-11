@@ -25,7 +25,7 @@
 
 #include <QList>
 
-#include "src/isds/box_interface.h"
+#include "src/datovka_shared/isds/box_interface.h"
 
 extern "C" {
 	struct isds_Address;

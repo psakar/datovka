@@ -26,7 +26,7 @@
 #include <QList>
 #include <QString>
 
-#include "src/isds/box_interface.h"
+#include "src/datovka_shared/isds/box_interface.h"
 #include "src/isds/types.h"
 #include "src/worker/task.h"
 

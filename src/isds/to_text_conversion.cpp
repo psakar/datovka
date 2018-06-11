@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include "src/isds/box_interface.h"
+#include "src/datovka_shared/isds/box_interface.h"
 #include "src/isds/to_text_conversion.h"
 
 /*!
