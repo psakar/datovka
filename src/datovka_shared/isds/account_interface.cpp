@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include "src/isds/account_interface.h"
+#include "src/datovka_shared/isds/account_interface.h"
 
 /* Null objects - for convenience. */
 static const QString nullString;

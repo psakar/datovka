@@ -23,7 +23,7 @@
 
 #pragma once
 
-#include "src/isds/account_interface.h"
+#include "src/datovka_shared/isds/account_interface.h"
 
 extern "C" {
 	struct isds_otp;

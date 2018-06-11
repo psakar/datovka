@@ -23,12 +23,12 @@
 
 #include <QMessageBox>
 
+#include "src/datovka_shared/isds/account_interface.h"
 #include "src/datovka_shared/utility/strings.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/io/isds_sessions.h"
-#include "src/isds/account_interface.h"
 #include "src/isds/types.h"
 #include "src/settings/accounts.h"
 #include "src/worker/task_change_pwd.h"
