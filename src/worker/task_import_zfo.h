@@ -26,7 +26,7 @@
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 #include <QString>
 
-#include "src/isds/message_interface.h"
+#include "src/datovka_shared/isds/message_interface.h"
 #include "src/worker/task.h"
 
 /*!

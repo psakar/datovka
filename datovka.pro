@@ -291,6 +291,7 @@ SOURCES += \
     src/datovka_shared/io/sqlite/db_single.cpp \
     src/datovka_shared/io/sqlite/table.cpp \
     src/datovka_shared/isds/box_interface.cpp \
+    src/datovka_shared/isds/message_interface.cpp \
     src/datovka_shared/localisation/localisation.cpp \
     src/datovka_shared/records_management/conversion.cpp \
     src/datovka_shared/records_management/io/records_management_connection.cpp \
@@ -359,7 +360,6 @@ SOURCES += \
     src/isds/error.cpp \
     src/isds/message_conversion.cpp \
     src/isds/message_functions.cpp \
-    src/isds/message_interface.cpp \
     src/isds/services_account.cpp \
     src/isds/services_box.cpp \
     src/isds/services_message.cpp \
@@ -439,6 +439,7 @@ HEADERS += \
     src/datovka_shared/io/sqlite/db_single.h \
     src/datovka_shared/io/sqlite/table.h \
     src/datovka_shared/isds/box_interface.h \
+    src/datovka_shared/isds/message_interface.h \
     src/datovka_shared/localisation/localisation.h \
     src/datovka_shared/records_management/conversion.h \
     src/datovka_shared/records_management/io/records_management_connection.h \
@@ -506,7 +507,6 @@ HEADERS += \
     src/isds/error.h \
     src/isds/message_conversion.h \
     src/isds/message_functions.h \
-    src/isds/message_interface.h \
     src/isds/services.h \
     src/isds/to_text_conversion.h \
     src/isds/type_conversion.h \

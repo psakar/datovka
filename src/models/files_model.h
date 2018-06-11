@@ -27,8 +27,8 @@
 #include <QObject>
 #include <QVariant>
 
+#include "src/datovka_shared/isds/message_interface.h"
 #include "src/io/message_db.h"
-#include "src/isds/message_interface.h"
 #include "src/models/table_model.h"
 
 /*!

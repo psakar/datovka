@@ -33,7 +33,7 @@
 #include <QVector>
 
 #include "src/common.h"
-#include "src/isds/message_interface.h"
+#include "src/datovka_shared/isds/message_interface.h"
 #include "src/isds/types.h"
 #include "src/datovka_shared/io/sqlite/db.h"
 

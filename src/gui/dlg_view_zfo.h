@@ -25,8 +25,8 @@
 
 #include <QDialog>
 
+#include "src/datovka_shared/isds/message_interface.h"
 #include "src/isds/message_functions.h"
-#include "src/isds/message_interface.h"
 #include "src/models/files_model.h"
 
 namespace Ui {

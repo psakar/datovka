@@ -24,8 +24,8 @@
 #include <QPair>
 #include <utility> /* std::move */
 
+#include "src/datovka_shared/isds/message_interface.h"
 #include "src/isds/internal_conversion.h"
-#include "src/isds/message_interface.h"
 
 /* Null objects - for convenience. */
 static const Isds::Envelope nullEnvelope;
