@@ -29,7 +29,7 @@
 #endif /* __APPLE__ */
 
 #include <cstdlib> // malloc
-#include <cstring> // memcpy
+#include <cstring> // memset
 #include <isds.h>
 
 #include "src/isds/box_conversion.h"
@@ -1134,4 +1134,227 @@ QList<Isds::FulltextResult> Isds::libisds2fulltextResultList(
 		*ok = true;
 	}
 	return resultList;
+}
+
+/*!
+ * @brief Converts credit event types.
+ */
+static
+enum Isds::Type::CreditEventType libisdsCreditEventType2CreditEventType(
+    isds_credit_event_type icet, bool *ok = Q_NULLPTR)
+{
+	bool iOk = true;
+	enum Isds::Type::CreditEventType cet = Isds::Type::CET_UNKNOWN;
+
+	switch (icet) {
+	case ISDS_CREDIT_CHARGED: cet = Isds::Type::CET_CHARGED; break;
+	case ISDS_CREDIT_DISCHARGED: cet = Isds::Type::CET_DISCHARGED; break;
+	case ISDS_CREDIT_MESSAGE_SENT: cet = Isds::Type::CET_MESSAGE_SENT; break;
+	case ISDS_CREDIT_STORAGE_SET: cet = Isds::Type::CET_STORAGE_SET; break;
+	case ISDS_CREDIT_EXPIRED: cet = Isds::Type::CET_EXPIRED; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return cet;
+}
+
+static
+Isds::CreditEventCharged libisds2creditEventCharged(
+    const struct isds_credit_event_charged *icec, bool *ok = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(icec == Q_NULLPTR)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::CreditEventCharged();
+	}
+
+	Isds::CreditEventCharged creditEventCharged;
+
+	creditEventCharged.setTransactID(Isds::fromCStr(icec->transaction));
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return creditEventCharged;
+}
+
+static
+Isds::CreditEventDischarged libisds2creditEventDischarged(
+    const struct isds_credit_event_discharged *iced, bool *ok = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(iced == Q_NULLPTR)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::CreditEventDischarged();
+	}
+
+	Isds::CreditEventDischarged creditEventDischarged;
+
+	creditEventDischarged.setTransactID(Isds::fromCStr(iced->transaction));
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return creditEventDischarged;
+}
+
+static
+Isds::CreditEventMsgSent libisds2CreditEventMsgSent(
+    const struct isds_credit_event_message_sent *icems, bool *ok = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(icems == Q_NULLPTR)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::CreditEventMsgSent();
+	}
+
+	Isds::CreditEventMsgSent creditEventMsgSent;
+
+	creditEventMsgSent.setDbIDRecipient(Isds::fromCStr(icems->recipient));
+	creditEventMsgSent.setDmID(Isds::fromCStr(icems->message_id));
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return creditEventMsgSent;
+}
+
+static
+Isds::CreditEventStorageSet libisds2CreditEventStorageSet(
+    const struct isds_credit_event_storage_set *icess, bool *ok = Q_NULLPTR)
+{
+	if (Q_UNLIKELY(icess == Q_NULLPTR)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::CreditEventStorageSet();
+	}
+
+	Isds::CreditEventStorageSet creditEventStorageSet;
+
+	creditEventStorageSet.setNewCapacity(icess->new_capacity);
+	creditEventStorageSet.setNewFrom(Isds::dateFromStructTM(icess->new_valid_from));
+	creditEventStorageSet.setNewTo(Isds::dateFromStructTM(icess->new_valid_to));
+	creditEventStorageSet.setOldCapacity(Isds::fromLongInt(icess->old_capacity));
+	creditEventStorageSet.setOldFrom(Isds::dateFromStructTM(icess->old_valid_from));
+	creditEventStorageSet.setOldTo(Isds::dateFromStructTM(icess->old_valid_to));
+	creditEventStorageSet.setInitiator(Isds::fromCStr(icess->initiator));
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return creditEventStorageSet;
+}
+
+Isds::CreditEvent Isds::libisds2creditEvent(const struct isds_credit_event *ice,
+    bool *ok)
+{
+	if (Q_UNLIKELY(ice == Q_NULLPTR)) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return CreditEvent();
+	}
+
+	bool iOk = false;
+	CreditEvent creditEvent;
+
+	creditEvent.setTime(dateTimeFromStructTimeval(ice->time));
+	creditEvent.setCreditChange(ice->credit_change);
+	creditEvent.setCreditAfter(ice->new_credit);
+	enum Type::CreditEventType cet =
+	    libisdsCreditEventType2CreditEventType(ice->type, &iOk);
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+
+	iOk = true;
+	switch (cet) {
+	case Type::CET_CHARGED:
+		creditEvent.setCharged(
+		    libisds2creditEventCharged(&ice->details.charged, &iOk));
+		break;
+	case Type::CET_DISCHARGED:
+		creditEvent.setDischarged(
+		    libisds2creditEventDischarged(&ice->details.discharged, &iOk));
+		break;
+	case Type::CET_MESSAGE_SENT:
+		creditEvent.setMsgSent(
+		    libisds2CreditEventMsgSent(&ice->details.message_sent, &iOk));
+		break;
+	case Type::CET_STORAGE_SET:
+		creditEvent.setStorageSet(
+		    libisds2CreditEventStorageSet(&ice->details.storage_set, &iOk));
+		break;
+	case Type::CET_EXPIRED:
+		creditEvent.setExpired();
+		break;
+	default:
+		Q_ASSERT(0);
+		goto fail;
+		break;
+	}
+	if (Q_UNLIKELY(!iOk)) {
+		goto fail;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return creditEvent;
+
+fail:
+	if (ok != Q_NULLPTR) {
+		*ok = false;
+	}
+	return CreditEvent();
+}
+
+QList<Isds::CreditEvent> Isds::libisds2creditEventList(
+    const struct isds_list *icel, bool *ok)
+{
+	/* Credit event destructor function type. */
+	typedef void (*credit_event_destr_func_t)(struct isds_credit_event **);
+
+	QList<CreditEvent> creditEventList;
+
+	while (icel != NULL) {
+		const struct isds_credit_event *ice = (struct isds_credit_event *)icel->data;
+		credit_event_destr_func_t idestr = (credit_event_destr_func_t)icel->destructor;
+		/* Destructor function must be set. */
+		if (idestr != isds_credit_event_free) {
+			Q_ASSERT(0);
+			if (ok != Q_NULLPTR) {
+				*ok = false;
+			}
+			return QList<CreditEvent>();
+		}
+
+		if (ice != NULL) {
+			bool iOk = false;
+			creditEventList.append(libisds2creditEvent(ice, &iOk));
+			if (!iOk) {
+				if (ok != Q_NULLPTR) {
+					*ok = false;
+				}
+				return QList<CreditEvent>();
+			}
+		}
+
+		icel = icel->next;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = true;
+	}
+	return creditEventList;
 }

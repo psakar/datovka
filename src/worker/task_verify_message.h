@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,14 +21,11 @@
  * the two.
  */
 
-#ifndef _TASK_VERIFY_MESSAGE_H_
-#define _TASK_VERIFY_MESSAGE_H_
+#pragma once
 
-#include <QDateTime>
 #include <QString>
 
-#include "src/io/message_db.h"
-#include "src/io/message_db_set.h"
+#include "src/isds/message_interface.h"
 #include "src/worker/task.h"
 
 /*!
@@ -43,19 +40,18 @@ public:
 		VERIFY_SUCCESS, /*!< Verification was successful. */
 		VERIFY_NOT_EQUAL, /*!< Hashes are different. */
 		VERIFY_ISDS_ERR, /*!< Hash cannot be obtained from ISDS. */
-		VERIFY_SQL_ERR, /*!< Hash cannot be obtained from database. */
 		VERIFY_ERR /*!< Other error. */
 	};
 
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in]     userName     Account identifier (user login name).
-	 * @param[in,out] dbSet        Non-null pointer to database container.
-	 * @param[in]     msgId        Message identifier.
+	 * @param[in] userName Account identifier (user login name).
+	 * @param[in] dmId Message identifier.
+	 * @param[in] hashLocal Local has to compare with the value obtained from ISDS.
 	 */
-	explicit TaskVerifyMessage(const QString &userName, MessageDbSet *dbSet,
-	    const MessageDb::MsgId &msgId);
+	explicit TaskVerifyMessage(const QString &userName, qint64 dmId,
+	    const Isds::Hash &hashLocal);
 
 	/*!
 	 * @brief Performs action.
@@ -77,20 +73,18 @@ private:
 	/*!
 	 * @brief Verifies a message.
 	 *
-	 * @param[in]     userName     Account identifier (user login name).
-	 * @param[in,out] dbSet        Non-null pointer to database container.
-	 * @param[in]     msgId        Message identifier.
-	 * @param[out]    error        Error description.
-	 * @param[out]    longError    Long error description.
+	 * @param[in]  userName Account identifier (user login name).
+	 * @param[in]  dmId Message identifier.
+	 * @param[in]  hashLocal Local has to compare with the value obtained from ISDS.
+	 * @param[out] error Error description.
+	 * @param[out] longError Long error description.
 	 * @return Verification result.
 	 */
 	static
-	enum Result verifyMessage(const QString &userName, MessageDbSet *dbSet,
-	    const MessageDb::MsgId &msgId, QString &error, QString &longError);
+	enum Result verifyMessage(const QString &userName, qint64 dmId,
+	    const Isds::Hash &hashLocal, QString &error, QString &longError);
 
 	const QString m_userName; /*!< Account identifier (user login name). */
-	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
-	const MessageDb::MsgId m_msgId; /*!< Message identifier. */
+	const qint64 m_dmId; /*!< Message identifier. */
+	const Isds::Hash &m_hashLocal; /*!< Compared hash value. */
 };
-
-#endif /* _TASK_VERIFY_MESSAGE_H_ */

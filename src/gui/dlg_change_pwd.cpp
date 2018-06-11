@@ -28,6 +28,8 @@
 #include "src/global.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/account_interface.h"
+#include "src/isds/types.h"
 #include "src/settings/accounts.h"
 #include "src/worker/task_change_pwd.h"
 #include "src/worker/task_keep_alive.h"
@@ -119,10 +121,14 @@ bool sendChangePwdRequest(const QString &userName,
 	    AcntSettings::LIM_UNAME_PWD_HOTP ||
 	    (*GlobInstcs::acntMapPtr)[userName].loginMethod() ==
 	    AcntSettings::LIM_UNAME_PWD_TOTP) {
-		task = new (std::nothrow) TaskChangePwd(userName,
-		    currentPwd, newPwd,
-		    ((*GlobInstcs::acntMapPtr)[userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ? OTP_HMAC : OTP_TIME,
-		    secCode);
+		Isds::Otp otp;
+		otp.setMethod(
+		    ((*GlobInstcs::acntMapPtr)[userName].loginMethod() == AcntSettings::LIM_UNAME_PWD_HOTP) ?
+		        Isds::Type::OM_HMAC : Isds::Type::OM_TIME);
+		otp.setOtpCode(secCode);
+
+		task = new (std::nothrow) TaskChangePwd(userName, currentPwd,
+		    newPwd, otp);
 	} else {
 		task = new (std::nothrow) TaskChangePwd(userName, currentPwd,
 		    newPwd);
@@ -134,12 +140,12 @@ bool sendChangePwdRequest(const QString &userName,
 	task->setAutoDelete(false);
 	GlobInstcs::workPoolPtr->runSingle(task);
 
-	int taskStatus = task->m_isdsRetError;
+	enum Isds::Type::Error taskStatus = task->m_errorCode;
 	QString errorStr(task->m_isdsError);
 	QString longErrorStr(task->m_isdsLongError);
 	delete task; task = Q_NULLPTR;
 
-	if (taskStatus == IE_SUCCESS) {
+	if (taskStatus == Isds::Type::ERR_SUCCESS) {
 		QMessageBox::information(parent,
 		    DlgChangePwd::tr("Password has been changed"),
 		    DlgChangePwd::tr("Password has been successfully changed on the ISDS server.") +
@@ -167,7 +173,7 @@ bool sendChangePwdRequest(const QString &userName,
 		    QMessageBox::Ok);
 	}
 
-	return taskStatus == IE_SUCCESS;
+	return taskStatus == Isds::Type::ERR_SUCCESS;
 }
 
 bool DlgChangePwd::changePassword(const QString &boxId, const QString &userName,
@@ -271,9 +277,11 @@ void DlgChangePwd::sendSmsCode(void)
 		return;
 	}
 
+	Isds::Otp otp;
+	otp.setMethod(Isds::Type::OM_TIME);
+
 	TaskChangePwd *task = new (std::nothrow) TaskChangePwd(m_userName,
-	    m_ui->currentPwdLine->text(), m_ui->newPwdLine->text(),
-	    OTP_TIME, QString());
+	    m_ui->currentPwdLine->text(), m_ui->newPwdLine->text(), otp);
 	if (Q_UNLIKELY(task == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		return;
@@ -281,10 +289,10 @@ void DlgChangePwd::sendSmsCode(void)
 	task->setAutoDelete(false);
 	GlobInstcs::workPoolPtr->runSingle(task);
 
-	int taskStatus = task->m_isdsRetError;
+	enum Isds::Type::Error taskStatus = task->m_errorCode;
 	delete task; task = Q_NULLPTR;
 
-	if (IE_PARTIAL_SUCCESS == taskStatus) {
+	if (Isds::Type::ERR_PARTIAL_SUCCESS == taskStatus) {
 		QMessageBox::information(this, tr("Enter SMS security code"),
 		    tr("SMS security code for account \"%1\"<br/>has been sent on your mobile phone...")
 		        .arg((*GlobInstcs::acntMapPtr)[m_userName].accountName()) +

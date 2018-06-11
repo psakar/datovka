@@ -23,7 +23,10 @@
 
 #pragma once
 
+#include <QByteArray>
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
+#include <QDate>
+#include <QDateTime>
 #include <QList>
 #include <QString>
 
@@ -37,11 +40,14 @@ extern "C" {
 namespace Isds {
 
 	/* Forward declaration. */
+	class CreditEvent;
 	class DbOwnerInfo;
 	class DbUserInfo;
 	class Error;
 	class FulltextResult;
+	class Hash;
 	class Message;
+	class Otp;
 
 	/*!
 	 * @brief Encapsulates ISDS services.
@@ -56,7 +62,69 @@ namespace Isds {
 		Service(void);
 
 	public:
+	/* Account interface: */
+		/*!
+		 * @brief Service ChangeISDSPassword.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     oldPwd Password currently in use.
+		 * @param[in]     newPwd New password.
+		 * @param[on,out] otp Auxiliary data required if one-time
+		 *                    password authentication is in use. Passes
+		 *                    OTP code (if known) and returns fine grade
+		 *                    resolution of OTP procedure. Pass null,
+		 *                    if one-time password authentication isn't
+		 *                    needed. Please note this argument must
+		 *                    match the OTP method used at log-in time.
+		 *                    See login function for more detail.
+		 * @param[out]    refNum Serial number of request assigned by ISDS.
+		 * @return Error description.
+		 */
+		static
+		Error changeISDSPassword(struct isds_ctx *ctx,
+		    const QString &oldPwd, const QString &newPwd,
+		    Otp &otp, QString &refNum);
+
+		/*!
+		 * @brief Service GetPasswordInfo.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[out]    pswExpDate Password expiration date, null
+		 *                           value if password does not exist.
+		 * @return Error description.
+		 */
+		static
+		Error getPasswordInfo(struct isds_ctx *ctx, QDateTime &pswExpDate);
+
 	/* Box interface: */
+		/*!
+		 * @brief Service DataBoxCreditInfo.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     fromDate First day of credit history,
+		 *                         pass null value if you don't care.
+		 * @param[in]     toDate Last day of credit history,
+		 *                       pass null value if you don't care.
+		 * @param[out]    currentCredit Current credit in Heller.
+		 * @param[out]    email Box-related notification email.
+		 * @param[out]    history Credit events in given interval.
+		 * @return Error description.
+		 */
+		static
+		Error dataBoxCreditInfo(struct isds_ctx *ctx,
+		    const QString &dbID, const QDate &fromDate,
+		    const QDate &toDate, qint64 &currentCredit, QString &email,
+		    QList<CreditEvent> &history);
+
+		/*!
+		 * @brief Service DummyOperation.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @return Error description.
+		 */
+		static
+		Error dummyOperation(struct isds_ctx *ctx);
+
 		/*!
 		 * @brief Service FindDataBox.
 		 *
@@ -126,6 +194,19 @@ namespace Isds {
 
 	/* Message interface: */
 		/*!
+		 * @brief Service AuthenticateMessage.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     raw Raw message or delivery info content.
+		 * @return Error description.
+		 *    (ERR_SUCCESS - if data originate from ISDS;
+		 *    ERR_NOTEQUAL - if data are unknown to ISDS)
+		 */
+		static
+		Error authenticateMessage(struct isds_ctx *ctx,
+		    const QByteArray &raw);
+
+		/*!
 		 * @brief Service CreateMessage.
 		 *
 		 * @param[in,out] ctx Communication context.
@@ -136,6 +217,18 @@ namespace Isds {
 		static
 		Error createMessage(struct isds_ctx *ctx,
 		    const Message &message, qint64 &dmId);
+
+		/*!
+		 * @brief Service EraseMessage.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmId Identifier of message in state 10.
+		 * @param[in]     dmIncoming True for received message.
+		 * @return Error description.
+		 */
+		static
+		Error eraseMessage(struct isds_ctx *ctx, qint64 dmId,
+		    bool dmIncoming);
 
 		/*!
 		 * @brief Service GetListOfReceivedMessages.
@@ -222,6 +315,18 @@ namespace Isds {
 		static
 		Error signedSentMessageDownload(struct isds_ctx *ctx,
 		    qint64 dmId, Message &message);
+
+		/*!
+		 * @brief Service VerifyMessage.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dmId Message identifier.
+		 * @param[out]    hash Hash.
+		 * @return Error description.
+		 */
+		static
+		Error verifyMessage(struct isds_ctx *ctx, qint64 dmId,
+		    Hash &hash);
 	};
 
 }

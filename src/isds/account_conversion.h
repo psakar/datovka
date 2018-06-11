@@ -21,42 +21,19 @@
  * the two.
  */
 
-/*
- * This header file must not be included in other header files.
- *
- * Functions in this compilation unit serve for converting types
- * defined in libisds.
- */
-
 #pragma once
 
-#if defined(__APPLE__) || defined(__clang__)
-#  define __USE_C99_MATH
-#  define _Bool bool
-#else /* !__APPLE__ */
-#  include <cstdbool>
-#endif /* __APPLE__ */
+#include "src/isds/account_interface.h"
 
-#include <isds.h>
+extern "C" {
+	struct isds_otp;
+}
 
-#include "src/isds/types.h"
+namespace Isds {
 
-namespace IsdsInternal {
-
-	/*!
-	 * @brief Converts data box types.
-	 */
-	enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType ibt,
-	    bool *ok = Q_NULLPTR);
-	isds_DbType dbType2libisdsDbType(enum Isds::Type::DbType bt,
-	    bool *ok = Q_NULLPTR);
-
-	/*!
-	 * @brief Converts otp resolution.
-	 */
-	enum Isds::Type::OtpResolution libisdsOtpResolution2OtpResolution(
-	    isds_otp_resolution ior, bool *ok = Q_NULLPTR);
-	isds_otp_resolution otpResolution2libisdsOtpResolution(
-	    enum Isds::Type::OtpResolution ores, bool *ok = Q_NULLPTR);
+	Otp libisds2otp(const struct ::isds_otp *io, bool *ok = Q_NULLPTR);
+	struct ::isds_otp *otp2libisds(const Otp &o, bool *ok = Q_NULLPTR);
+	/* Libisds does not provide isds_otp_free(). */
+	void otp_free(struct ::isds_otp **io);
 
 }

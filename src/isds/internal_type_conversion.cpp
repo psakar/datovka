@@ -100,3 +100,59 @@ isds_DbType IsdsInternal::dbType2libisdsDbType(enum Isds::Type::DbType bt,
 	}
 	return ibt;
 }
+
+enum Isds::Type::OtpResolution IsdsInternal::libisdsOtpResolution2OtpResolution(
+    isds_otp_resolution ior, bool *ok)
+{
+	bool iOk = true;
+	enum Isds::Type::OtpResolution resolution = Isds::Type::OR_UNKNOWN;
+
+	switch (ior) {
+	case OTP_RESOLUTION_SUCCESS: resolution = Isds::Type::OR_SUCCESS; break;
+	case OTP_RESOLUTION_UNKNOWN: resolution = Isds::Type::OR_UNKNOWN; break;
+	case OTP_RESOLUTION_BAD_AUTHENTICATION: resolution = Isds::Type::OR_BAD_AUTH; break;
+	case OTP_RESOLUTION_ACCESS_BLOCKED: resolution = Isds::Type::OR_BLOCKED; break;
+	case OTP_RESOLUTION_PASSWORD_EXPIRED: resolution = Isds::Type::OR_PWD_EXPIRED; break;
+	case OTP_RESOLUTION_TO_FAST: resolution = Isds::Type::OR_TOO_FAST; break;
+	case OTP_RESOLUTION_UNAUTHORIZED: resolution = Isds::Type::OR_UNAUTHORIZED; break;
+	case OTP_RESOLUTION_TOTP_SENT: resolution = Isds::Type::OR_TOTP_SENT; break;
+	case OTP_RESOLUTION_TOTP_NOT_SENT: resolution = Isds::Type::OR_TOTP_NOT_SENT; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return resolution;
+}
+
+isds_otp_resolution IsdsInternal::otpResolution2libisdsOtpResolution(
+    enum Isds::Type::OtpResolution ores, bool *ok)
+{
+	bool iOk = true;
+	isds_otp_resolution ior = OTP_RESOLUTION_UNKNOWN;
+
+	switch (ores) {
+	case Isds::Type::OR_SUCCESS: ior = OTP_RESOLUTION_SUCCESS; break;
+	case Isds::Type::OR_UNKNOWN: ior = OTP_RESOLUTION_UNKNOWN; break;
+	case Isds::Type::OR_BAD_AUTH: ior = OTP_RESOLUTION_BAD_AUTHENTICATION; break;
+	case Isds::Type::OR_BLOCKED: ior = OTP_RESOLUTION_ACCESS_BLOCKED; break;
+	case Isds::Type::OR_PWD_EXPIRED: ior = OTP_RESOLUTION_PASSWORD_EXPIRED; break;
+	case Isds::Type::OR_TOO_FAST: ior = OTP_RESOLUTION_TO_FAST; break;
+	case Isds::Type::OR_UNAUTHORIZED: ior = OTP_RESOLUTION_UNAUTHORIZED; break;
+	case Isds::Type::OR_TOTP_SENT: ior = OTP_RESOLUTION_TOTP_SENT; break;
+	case Isds::Type::OR_TOTP_NOT_SENT: ior = OTP_RESOLUTION_TOTP_NOT_SENT; break;
+	break;
+		Q_ASSERT(0);
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return ior;
+}

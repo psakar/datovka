@@ -77,9 +77,11 @@ include(test_db_single.pri)
 include(test_message_db_set.pri)
 include(test_isds_login.pri)
 include(test_isds_message.pri)
+include (test_task_info.pri)
 include(test_task_search_owner.pri)
 include(test_task_send_message.pri)
 include(test_task_downloads.pri)
+include(test_task_verify_message.pri)
 include(test_version.pri)
 
 # Replace possible double slashes with a single slash. Also remove duplicated

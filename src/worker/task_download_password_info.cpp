@@ -21,12 +21,16 @@
  * the two.
  */
 
+#include <QDateTime>
 #include <QThread>
 
 #include "src/io/account_db.h"
-#include "src/io/dbs.h"
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/error.h"
+#include "src/isds/services.h"
+#include "src/isds/type_description.h"
+#include "src/isds/types.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_password_info.h"
@@ -72,26 +76,18 @@ bool TaskDownloadPasswordInfo::downloadPasswordInfoFromISDS(
 		return false;
 	}
 
-	struct timeval *expiration = NULL;
-	isds_error status = isds_get_password_expiration(session, &expiration);
-
-	if (IE_SUCCESS != status) {
+	QDateTime expiration;
+	Isds::Error err = Isds::Service::getPasswordInfo(session, expiration);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
+		error = Isds::Description::descrError(err.code());
+		longError = err.longDescr();
 		logErrorNL(
 		    "Downloading password information for account '%s' returned '%d': '%s'.",
 		    userName.toUtf8().constData(),
-		    status, isds_strerror(status));
-		error = isds_strerror(status);
-		longError = isdsLongMessage(session);
-		free(expiration);
+		    err.code(), error.toUtf8().constData());
 		return false;
 	}
 
-	QString expirDate;
-	if (NULL != expiration) {
-		expirDate = timevalToDbFormat(expiration);
-		free(expiration); expiration = NULL;
-	} /* else -> password without expiration */
-
 	return GlobInstcs::accntDbPtr->setPwdExpirIntoDb(
-	    AccountDb::keyFromLogin(userName), expirDate);
+	    AccountDb::keyFromLogin(userName), expiration);
 }

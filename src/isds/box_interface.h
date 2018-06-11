@@ -24,6 +24,7 @@
 #pragma once
 
 #include <QDate>
+#include <QDateTime>
 #include <QList>
 #include <QPair>
 #include <QScopedPointer>
@@ -465,7 +466,7 @@ namespace Isds {
 	/*!
 	 * @brief Full-text data-box search result.
 	 *
-	 * pril_2/WS_ISDS_Vyhledavani_datovych_schranek.pdf (secrion 2.2)
+	 * pril_2/WS_ISDS_Vyhledavani_datovych_schranek.pdf (section 2.2)
 	 */
 	class FulltextResult {
 		Q_DECLARE_PRIVATE(FulltextResult)
@@ -564,4 +565,241 @@ namespace Isds {
 	};
 
 	void swap(FulltextResult &first, FulltextResult &second) Q_DECL_NOTHROW;
+
+	class CreditEventChargedPrivate;
+	class CreditEventCharged {
+		Q_DECLARE_PRIVATE(CreditEventCharged)
+
+	public:
+		CreditEventCharged(void);
+		CreditEventCharged(const CreditEventCharged &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		CreditEventCharged(CreditEventCharged &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+		~CreditEventCharged(void);
+
+		CreditEventCharged &operator=(const CreditEventCharged &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		CreditEventCharged &operator=(CreditEventCharged &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const CreditEventCharged &other) const;
+		bool operator!=(const CreditEventCharged &other) const;
+
+		friend void swap(CreditEventCharged &first, CreditEventCharged &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+		/* transaction */
+		const QString &transactID(void) const;
+		void setTransactID(const QString &t);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setTransactID(QString &&t);
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+	private:
+		QScopedPointer<CreditEventChargedPrivate> d_ptr; // std::unique_ptr ?
+	};
+
+	void swap(CreditEventCharged &first, CreditEventCharged &second) Q_DECL_NOTHROW;
+
+	class CreditEventDischarged : public CreditEventCharged {
+	};
+
+	class CreditEventMsgSentPrivate;
+	class CreditEventMsgSent {
+		Q_DECLARE_PRIVATE(CreditEventMsgSent)
+
+	public:
+		CreditEventMsgSent(void);
+		CreditEventMsgSent(const CreditEventMsgSent &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		CreditEventMsgSent(CreditEventMsgSent &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+		~CreditEventMsgSent(void);
+
+		CreditEventMsgSent &operator=(const CreditEventMsgSent &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		CreditEventMsgSent &operator=(CreditEventMsgSent &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const CreditEventMsgSent &other) const;
+		bool operator!=(const CreditEventMsgSent &other) const;
+
+		friend void swap(CreditEventMsgSent &first, CreditEventMsgSent &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+		/*
+		 * For convenience purposes. Message identifier consists only
+		 * of digits, but documentation explicitly states that it is
+		 * a max. 20 chars old string.
+		 *
+		 * Returns -1 if conversion to number fails.
+		 */
+		qint64 dmId(void) const;
+		void setDmId(qint64 id);
+
+		/* recipient box identifier */
+		const QString &dbIDRecipient(void) const;
+		void setDbIDRecipient(const QString &id);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbIDRecipient(QString &&id);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* message identifier */
+		const QString &dmID(void) const;
+		void setDmID(const QString &id);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmID(QString &&id);
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+	private:
+		QScopedPointer<CreditEventMsgSentPrivate> d_ptr; // std::unique_ptr ?
+	};
+
+	void swap(CreditEventMsgSent &first, CreditEventMsgSent &second) Q_DECL_NOTHROW;
+
+	class CreditEventStorageSetPrivate;
+	class CreditEventStorageSet {
+		Q_DECLARE_PRIVATE(CreditEventStorageSet)
+
+	public:
+		CreditEventStorageSet(void);
+		CreditEventStorageSet(const CreditEventStorageSet &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		CreditEventStorageSet(CreditEventStorageSet &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+		~CreditEventStorageSet(void);
+
+		CreditEventStorageSet &operator=(const CreditEventStorageSet &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		CreditEventStorageSet &operator=(CreditEventStorageSet &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const CreditEventStorageSet &other) const;
+		bool operator!=(const CreditEventStorageSet &other) const;
+
+		friend void swap(CreditEventStorageSet &first, CreditEventStorageSet &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+		/* new storage capacity in number of messages */
+		qint64 newCapacity(void) const;
+		void setNewCapacity(qint64 nc);
+		/* new capacity from */
+		const QDate &newFrom(void) const;
+		void setNewFrom(const QDate &nf);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setNewFrom(QDate &&nf);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* new capacity to */
+		const QDate &newTo(void) const;
+		void setNewTo(const QDate &nt);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setNewTo(QDate &&nt);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* optional; old capacity in number of messages */
+		qint64 oldCapacity(void) const;
+		void setOldCapacity(qint64 oc);
+		/* optional; old capacity from */
+		const QDate &oldFrom(void) const;
+		void setOldFrom(const QDate &of);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setOldFrom(QDate &&of);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* optional; old capacity to */
+		const QDate &oldTo(void) const;
+		void setOldTo(const QDate &ot);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setOldTo(QDate &&ot);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* optional; name of user who initiated this change */
+		const QString &initiator(void) const;
+		void setInitiator(const QString &i);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setInitiator(QString &&i);
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+	private:
+		QScopedPointer<CreditEventStorageSetPrivate> d_ptr; // std::unique_ptr ?
+	};
+
+	void swap(CreditEventStorageSet &first, CreditEventStorageSet &second) Q_DECL_NOTHROW;
+
+	class CreditEventPrivate;
+	/*!
+	 * @brief Based on tDBCreditInfoOutput (dbTypes.xsd)
+	 *
+	 * pril_2/WS_ISDS_Vyhledavani_datovych_schranek.pdf (section 2.8)
+	 */
+	class CreditEvent {
+		Q_DECLARE_PRIVATE(CreditEvent)
+
+	public:
+		CreditEvent(void);
+		CreditEvent(const CreditEvent &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+		CreditEvent(CreditEvent &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+		~CreditEvent(void);
+
+		CreditEvent &operator=(const CreditEvent &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+		CreditEvent &operator=(CreditEvent &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+		bool operator==(const CreditEvent &other) const;
+		bool operator!=(const CreditEvent &other) const;
+
+		friend void swap(CreditEvent &first, CreditEvent &second) Q_DECL_NOTHROW;
+
+		bool isNull(void) const;
+
+		/* ciEventTime */
+		const QDateTime &time(void) const;
+		void setTime(const QDateTime &t);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setTime(QDateTime &&t);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* ciCreditChange */
+		qint64 creditChange(void) const;
+		void setCreditChange(qint64 cc);
+		/* ciCreditAfter */
+		qint64 creditAfter(void) const;
+		void setCreditAfter(qint64 ca);
+		/* ciEventType */
+		enum Type::CreditEventType type(void) const;
+		/*
+		 * Type is set automatically with assigned data.
+		 * Actual record data must be accessed after checking the event
+		 * type.
+		 */
+		const CreditEventCharged &charged(void) const;
+		void setCharged(const CreditEventCharged &cec);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setCharged(CreditEventCharged &&cec);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		const CreditEventDischarged &discharged(void) const;
+		void setDischarged(const CreditEventDischarged &ced);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDischarged(CreditEventDischarged &&ced);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		const CreditEventMsgSent &msgSent(void) const;
+		void setMsgSent(const CreditEventMsgSent &cems);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setMsgSent(CreditEventMsgSent &&cems);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		const CreditEventStorageSet &storageSet(void) const;
+		void setStorageSet(const CreditEventStorageSet &cess);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setStorageSet(CreditEventStorageSet &&cess);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* Expired has no actual additional data. */
+		void setExpired(void);
+
+	private:
+		QScopedPointer<CreditEventPrivate> d_ptr; // std::unique_ptr ?
+	};
+
+	void swap(CreditEvent &first, CreditEvent &second) Q_DECL_NOTHROW;
 }

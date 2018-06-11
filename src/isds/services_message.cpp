@@ -266,6 +266,30 @@ fail:
 	return err;
 }
 
+Isds::Error Isds::Service::authenticateMessage(struct isds_ctx *ctx,
+    const QByteArray &raw)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || raw.isEmpty())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	isds_error ret = isds_authenticate_message(ctx, raw.constData(),
+	    raw.size());
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		return err;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+	return err;
+}
+
 Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx,
     const Message &message, qint64 &dmId)
 {
@@ -317,6 +341,30 @@ fail:
 		isds_message_free(&msg);
 	}
 
+	return err;
+}
+
+Isds::Error Isds::Service::eraseMessage(struct isds_ctx *ctx, qint64 dmId,
+    bool dmIncoming)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	isds_error ret = isds_delete_message_from_storage(ctx,
+	    QString::number(dmId).toUtf8().constData(), dmIncoming);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		return err;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
 	return err;
 }
 
@@ -459,4 +507,44 @@ Isds::Error Isds::Service::signedSentMessageDownload(struct isds_ctx *ctx,
 {
 	return ServicePrivate::messageGetterService(
 	    ServicePrivate::MG_SIGNED_SENT_MESSAGE, ctx, dmId, message);
+}
+
+Isds::Error Isds::Service::verifyMessage(struct isds_ctx *ctx, qint64 dmId,
+    Hash &hash)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_hash *iHash = NULL;
+	bool ok = true;
+
+	isds_error ret = isds_download_message_hash(ctx,
+	    QString::number(dmId).toUtf8().constData(), &iHash);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	hash = (iHash != NULL) ? libisds2hash(iHash, &ok) : Hash();
+
+	if (ok) {
+		err.setCode(Type::ERR_SUCCESS);
+	} else {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+	}
+
+fail:
+	if (iHash != NULL) {
+		isds_hash_free(&iHash);
+	}
+
+	return err;
 }
