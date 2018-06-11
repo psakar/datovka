@@ -25,7 +25,7 @@
 #include <utility> /* std::move */
 
 #include "src/datovka_shared/isds/message_interface.h"
-#include "src/isds/internal_conversion.h"
+#include "src/datovka_shared/isds/internal_conversion.h"
 
 /* Null objects - for convenience. */
 static const Isds::Envelope nullEnvelope;

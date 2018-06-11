@@ -292,6 +292,7 @@ SOURCES += \
     src/datovka_shared/io/sqlite/table.cpp \
     src/datovka_shared/isds/account_interface.cpp \
     src/datovka_shared/isds/box_interface.cpp \
+    src/datovka_shared/isds/internal_conversion.cpp \
     src/datovka_shared/isds/message_interface.cpp \
     src/datovka_shared/isds/type_conversion.cpp \
     src/datovka_shared/localisation/localisation.cpp \
@@ -355,7 +356,6 @@ SOURCES += \
     src/io/tag_db.cpp \
     src/isds/account_conversion.cpp \
     src/isds/box_conversion.cpp \
-    src/isds/internal_conversion.cpp \
     src/isds/internal_type_conversion.cpp \
     src/isds/error_conversion.cpp \
     src/isds/error.cpp \
@@ -440,6 +440,7 @@ HEADERS += \
     src/datovka_shared/io/sqlite/table.h \
     src/datovka_shared/isds/account_interface.h \
     src/datovka_shared/isds/box_interface.h \
+    src/datovka_shared/isds/internal_conversion.h \
     src/datovka_shared/isds/message_interface.h \
     src/datovka_shared/isds/type_conversion.h \
     src/datovka_shared/isds/types.h \
@@ -503,7 +504,6 @@ HEADERS += \
     src/io/tag_db.h \
     src/isds/account_conversion.h \
     src/isds/box_conversion.h \
-    src/isds/internal_conversion.h \
     src/isds/internal_type_conversion.h \
     src/isds/error_conversion.h \
     src/isds/error.h \

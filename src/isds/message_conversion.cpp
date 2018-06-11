@@ -32,8 +32,8 @@
 #include <cstring> // memcpy
 #include <isds.h>
 
+#include "src/datovka_shared/isds/internal_conversion.h"
 #include "src/datovka_shared/isds/type_conversion.h"
-#include "src/isds/internal_conversion.h"
 #include "src/isds/message_conversion.h"
 
 /*!
