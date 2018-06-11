@@ -21,8 +21,8 @@
  * the two.
  */
 
+#include "src/datovka_shared/isds/type_conversion.h"
 #include "src/isds/to_text_conversion.h"
-#include "src/isds/type_conversion.h"
 #include "src/isds/type_description.h"
 #include "src/models/data_box_contacts_model.h"
 

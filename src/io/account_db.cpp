@@ -26,10 +26,10 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 
+#include "src/datovka_shared/isds/type_conversion.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/db_tables.h"
-#include "src/isds/type_conversion.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 

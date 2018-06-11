@@ -293,6 +293,7 @@ SOURCES += \
     src/datovka_shared/isds/account_interface.cpp \
     src/datovka_shared/isds/box_interface.cpp \
     src/datovka_shared/isds/message_interface.cpp \
+    src/datovka_shared/isds/type_conversion.cpp \
     src/datovka_shared/localisation/localisation.cpp \
     src/datovka_shared/records_management/conversion.cpp \
     src/datovka_shared/records_management/io/records_management_connection.cpp \
@@ -364,7 +365,6 @@ SOURCES += \
     src/isds/services_box.cpp \
     src/isds/services_message.cpp \
     src/isds/to_text_conversion.cpp \
-    src/isds/type_conversion.cpp \
     src/isds/type_description.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
@@ -441,6 +441,7 @@ HEADERS += \
     src/datovka_shared/isds/account_interface.h \
     src/datovka_shared/isds/box_interface.h \
     src/datovka_shared/isds/message_interface.h \
+    src/datovka_shared/isds/type_conversion.h \
     src/datovka_shared/isds/types.h \
     src/datovka_shared/localisation/localisation.h \
     src/datovka_shared/records_management/conversion.h \
@@ -510,7 +511,6 @@ HEADERS += \
     src/isds/message_functions.h \
     src/isds/services.h \
     src/isds/to_text_conversion.h \
-    src/isds/type_conversion.h \
     src/isds/type_description.h \
     src/log/log_c.h \
     src/log/log_common.h \

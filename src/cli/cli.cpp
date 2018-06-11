@@ -27,6 +27,7 @@
 
 #include "src/cli/cli.h"
 #include "src/cli/cli_login.h"
+#include "src/datovka_shared/isds/type_conversion.h"
 #include "src/datovka_shared/utility/strings.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
@@ -35,7 +36,6 @@
 #include "src/io/filesystem.h"
 #include "src/io/isds_helper.h"
 #include "src/isds/to_text_conversion.h"
-#include "src/isds/type_conversion.h"
 #include "src/log/log.h"
 #include "src/model_interaction/account_interaction.h"
 #include "src/worker/task_download_message.h"
