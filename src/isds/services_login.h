@@ -26,6 +26,8 @@
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 #include <QString>
 
+#include "src/datovka_shared/isds/types.h"
+
 extern "C" {
 	/* TODO -- The context structure needs to be encapsulated. */
 	struct isds_ctx;
@@ -114,6 +116,24 @@ namespace Isds {
 		    const QString &userName, const QString &pwd,
 		    const QString &certPath, const QString &passphrase,
 		    bool testingSession);
+
+		/*!
+		 * @brief Log in to ISDS using a username, password and OTP.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     userName Login.
+		 * @param[in]     pwd Password.
+		 * @param[in]     testingSession Set to true to log into
+		 *                               testing environment.
+		 * @param[in]     otpMethod OTP authentication method.
+		 * @param[in]     otpCode OTP code.
+		 * @param[out]    res OTP resolution status.
+		 * @return Error description.
+		 */
+		Error loginUserOtp(struct isds_ctx *ctx,
+		    const QString &userName, const QString &pwd,
+		    bool testingSession, enum Type::OtpMethod otpMethod,
+		    const QString &otpCode, enum Type::OtpResolution &res);
 	};
 
 }

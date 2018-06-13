@@ -36,31 +36,6 @@
 #include "src/isds/account_conversion.h"
 #include "src/isds/internal_type_conversion.h"
 
-/*!
- * @brief Converts otp method.
- */
-static
-enum Isds::Type::OtpMethod libisdsOtpMethod2OtpMethod(isds_otp_method iom,
-    bool *ok = Q_NULLPTR)
-{
-	bool iOk = true;
-	enum Isds::Type::OtpMethod method = Isds::Type::OM_UNKNOWN;
-
-	switch (iom) {
-	case OTP_HMAC: method = Isds::Type::OM_HMAC; break;
-	case OTP_TIME: method = Isds::Type::OM_TIME; break;
-	default:
-		Q_ASSERT(0);
-		iOk = false;
-		break;
-	}
-
-	if (ok != Q_NULLPTR) {
-		*ok = iOk;
-	}
-	return method;
-}
-
 Isds::Otp Isds::libisds2otp(const struct isds_otp *io, bool *ok)
 {
 	if (Q_UNLIKELY(io == NULL)) {
@@ -73,7 +48,7 @@ Isds::Otp Isds::libisds2otp(const struct isds_otp *io, bool *ok)
 	bool iOk = false;
 	Otp otp;
 
-	otp.setMethod(libisdsOtpMethod2OtpMethod(io->method, &iOk));
+	otp.setMethod(IsdsInternal::libisdsOtpMethod2OtpMethod(io->method, &iOk));
 	if (Q_UNLIKELY(!iOk)) {
 		goto fail;
 	}
@@ -97,34 +72,6 @@ fail:
 }
 
 /*!
- * @brief Converts otp method.
- */
-static
-isds_otp_method otpMethod2libisdsOtpMethod(enum Isds::Type::OtpMethod om,
-    bool *ok = Q_NULLPTR)
-{
-	bool iOk = true;
-	isds_otp_method iom = OTP_HMAC;
-
-	switch (om) {
-	/*
-	 * Isds::Type::OM_UNKNOWN same as default.
-	 */
-	case Isds::Type::OM_HMAC: iom = OTP_HMAC; break;
-	case Isds::Type::OM_TIME: iom = OTP_TIME; break;
-	default:
-		Q_ASSERT(0);
-		iOk = false;
-		break;
-	}
-
-	if (ok != Q_NULLPTR) {
-		*ok = iOk;
-	}
-	return iom;
-}
-
-/*!
  * @brief Set libisds otp structure according to the otp.
  */
 static
@@ -137,7 +84,7 @@ bool setLibisdsOtpContent(struct isds_otp *tgt, const Isds::Otp &src)
 
 	bool iOk = false;
 
-	tgt->method = otpMethod2libisdsOtpMethod(src.method(), &iOk);
+	tgt->method = IsdsInternal::otpMethod2libisdsOtpMethod(src.method(), &iOk);
 	if (Q_UNLIKELY(!iOk)) {
 		return false;
 	}

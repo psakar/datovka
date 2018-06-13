@@ -52,7 +52,15 @@ namespace IsdsInternal {
 	    bool *ok = Q_NULLPTR);
 
 	/*!
-	 * @brief Converts otp resolution.
+	 * @brief Converts OTP method.
+	 */
+	enum Isds::Type::OtpMethod libisdsOtpMethod2OtpMethod(
+	    isds_otp_method iom, bool *ok = Q_NULLPTR);
+	isds_otp_method otpMethod2libisdsOtpMethod(
+	    enum Isds::Type::OtpMethod om, bool *ok = Q_NULLPTR);
+
+	/*!
+	 * @brief Converts OTP resolution.
 	 */
 	enum Isds::Type::OtpResolution libisdsOtpResolution2OtpResolution(
 	    isds_otp_resolution ior, bool *ok = Q_NULLPTR);

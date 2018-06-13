@@ -34,8 +34,9 @@
 #include <QFileInfo>
 
 #include "src/datovka_shared/isds/error.h"
-#include "src/datovka_shared/isds/types.h"
+#include "src/isds/account_conversion.h" /* Isds::otp_free */
 #include "src/isds/error_conversion.h"
+#include "src/isds/internal_type_conversion.h"
 #include "src/isds/services_internal.h"
 #include "src/isds/services_login.h"
 
@@ -260,6 +261,74 @@ Isds::Error Isds::Login::loginUserCertPwd(struct isds_ctx *ctx,
 fail:
 	if (pki_cred != NULL) {
 		isds_pki_credentials_free(&pki_cred);
+	}
+
+	return err;
+}
+
+Isds::Error Isds::Login::loginUserOtp(struct isds_ctx *ctx,
+    const QString &userName, const QString &pwd, bool testingSession,
+    enum Type::OtpMethod otpMethod, const QString &otpCode,
+    enum Type::OtpResolution &res)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || userName.isEmpty() || pwd.isEmpty())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	bool ok = false;
+	struct isds_otp *otp = NULL;
+	isds_error ret = IE_SUCCESS;
+
+	otp = (struct isds_otp *)std::malloc(sizeof(*otp));
+	if (Q_UNLIKELY(otp == NULL)) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient memory."));
+		return err;
+	}
+	std::memset(otp, 0, sizeof(*otp));
+
+	otp->method = IsdsInternal::otpMethod2libisdsOtpMethod(otpMethod, &ok);
+	if (!ok) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Error converting types."));
+		goto fail;
+	}
+
+	if (!otpCode.isEmpty()) {
+		const QByteArray optCodeBytes(otpCode.toLocal8Bit());
+		const char *old_str =
+		    optCodeBytes.constData(); /* '\0' terminated */
+		size_t len = strlen(old_str) + 1;
+		otp->otp_code = (char *)std::malloc(len);
+		if (Q_UNLIKELY(otp->otp_code == NULL)) {
+			err.setCode(Type::ERR_ERROR);
+			err.setLongDescr(tr("Insufficient memory."));
+			goto fail;
+		}
+		std::memcpy(otp->otp_code, old_str, len);
+	}
+
+	ret = isds_login(ctx,
+	    testingSession ? isds_otp_testing_locator : isds_otp_locator,
+	    userName.toUtf8().constData(), pwd.toUtf8().constData(),
+	    NULL, otp);
+	/* May return partial success. */
+	err.setCode(libisds2Error(ret));
+	if (ret != IE_SUCCESS) {
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
+	}
+
+	/* Ignoring the conversion status here. */
+	res = IsdsInternal::libisdsOtpResolution2OtpResolution(otp->resolution);
+
+fail:
+	if (otp != NULL) {
+		Isds::otp_free(&otp);
 	}
 
 	return err;
