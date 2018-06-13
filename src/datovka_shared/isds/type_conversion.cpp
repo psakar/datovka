@@ -43,6 +43,16 @@ QVariant Isds::nonNegativeLong2Variant(qint64 i)
 	return (i >= 0) ? QVariant(i) : QVariant();
 }
 
+QChar Isds::str2Char(const QString &s)
+{
+	if (!s.isEmpty()) {
+		Q_ASSERT(s.size() == 1);
+		return s[0];
+	} else {
+		return QChar();
+	}
+}
+
 QChar Isds::variant2Char(const QVariant &v)
 {
 	/*
@@ -53,13 +63,7 @@ QChar Isds::variant2Char(const QVariant &v)
 		return QChar();
 	}
 
-	const QString str(v.toString());
-	if (!str.isEmpty()) {
-		Q_ASSERT(str.size() == 1);
-		return str[0];
-	} else {
-		return QChar();
-	}
+	return str2Char(v.toString());
 }
 
 enum Isds::Type::NilBool Isds::variant2NilBool(const QVariant &v)

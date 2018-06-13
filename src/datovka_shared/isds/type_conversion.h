@@ -36,7 +36,9 @@ namespace Isds {
 	/* Null variant is converted to -1. */
 	QVariant nonNegativeLong2Variant(qint64 i);
 
-	/* Null variant is converted to null char. First character of string is returned. */
+	/* Empty string is converted to null char. First character of string is returned. */
+	QChar str2Char(const QString &s);
+	/* Null variant is converted to null char. */
 	QChar variant2Char(const QVariant &v);
 
 	enum Type::NilBool variant2NilBool(const QVariant &v);
