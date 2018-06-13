@@ -39,26 +39,7 @@
 #include "src/isds/error_conversion.h"
 #include "src/isds/internal_type_conversion.h"
 #include "src/isds/services.h"
-
-/*!
- * @brief Wraps the isds_long_message().
- *
- * @param[in] ctx LIbisds context.
- */
-static inline
-QString isdsLongMessage(const struct isds_ctx *ctx)
-{
-#ifdef WIN32
-	/* The function returns strings in local encoding. */
-	return QString::fromLocal8Bit(isds_long_message(ctx));
-	/*
-	 * TODO -- Is there a mechanism how to force the local encoding
-	 * into libisds to be UTF-8?
-	 */
-#else /* !WIN32 */
-	return QString::fromUtf8(isds_long_message(ctx));
-#endif /* WIN32 */
-}
+#include "src/isds/services_internal.h"
 
 Isds::Error Isds::Service::changeISDSPassword(struct isds_ctx *ctx,
     const QString &oldPwd, const QString &newPwd, Otp &otp, QString &refNum)
@@ -86,7 +67,7 @@ Isds::Error Isds::Service::changeISDSPassword(struct isds_ctx *ctx,
 	    newPwd.toUtf8().constData(), iOtp, &iRefNum);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
@@ -132,7 +113,7 @@ Isds::Error Isds::Service::getPasswordInfo(struct isds_ctx *ctx,
 	isds_error ret = isds_get_password_expiration(ctx, &iPswExpDate);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 

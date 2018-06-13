@@ -37,26 +37,7 @@
 #include "src/isds/error_conversion.h"
 #include "src/isds/message_conversion.h"
 #include "src/isds/services.h"
-
-/*!
- * @brief Wraps the isds_long_message().
- *
- * @param[in] ctx LIbisds context.
- */
-static inline
-QString isdsLongMessage(const struct isds_ctx *ctx)
-{
-#ifdef WIN32
-	/* The function returns strings in local encoding. */
-	return QString::fromLocal8Bit(isds_long_message(ctx));
-	/*
-	 * TODO -- Is there a mechanism how to force the local encoding
-	 * into libisds to be UTF-8?
-	 */
-#else /* !WIN32 */
-	return QString::fromUtf8(isds_long_message(ctx));
-#endif /* WIN32 */
-}
+#include "src/isds/services_internal.h"
 
 namespace Isds {
 
@@ -204,7 +185,7 @@ Isds::Error Isds::ServicePrivate::messageListGetterService(
 	    &msgList);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
@@ -245,7 +226,7 @@ Isds::Error Isds::ServicePrivate::messageGetterService(enum MessageGetter mg,
 	    QString::number(dmId).toUtf8().constData(), &msg);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
@@ -282,7 +263,7 @@ Isds::Error Isds::Service::authenticateMessage(struct isds_ctx *ctx,
 	    raw.size());
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		return err;
 	}
 
@@ -314,7 +295,7 @@ Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx,
 	ret = isds_send_message(ctx, msg);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
@@ -360,7 +341,7 @@ Isds::Error Isds::Service::eraseMessage(struct isds_ctx *ctx, qint64 dmId,
 	    QString::number(dmId).toUtf8().constData(), dmIncoming);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		return err;
 	}
 
@@ -438,7 +419,7 @@ Isds::Error Isds::Service::getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
 	    QString::number(dmId).toUtf8().constData(), &s_type, NULL, &s_name);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
@@ -487,7 +468,7 @@ Isds::Error Isds::Service::markMessageAsDownloaded(struct isds_ctx *ctx,
 	    QString::number(dmId).toUtf8().constData());
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		return err;
 	}
 
@@ -528,7 +509,7 @@ Isds::Error Isds::Service::verifyMessage(struct isds_ctx *ctx, qint64 dmId,
 	    QString::number(dmId).toUtf8().constData(), &iHash);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 

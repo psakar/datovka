@@ -39,26 +39,7 @@
 #include "src/isds/error_conversion.h"
 #include "src/isds/internal_type_conversion.h"
 #include "src/isds/services.h"
-
-/*!
- * @brief Wraps the isds_long_message().
- *
- * @param[in] ctx LIbisds context.
- */
-static inline
-QString isdsLongMessage(const struct isds_ctx *ctx)
-{
-#ifdef WIN32
-	/* The function returns strings in local encoding. */
-	return QString::fromLocal8Bit(isds_long_message(ctx));
-	/*
-	 * TODO -- Is there a mechanism how to force the local encoding
-	 * into libisds to be UTF-8?
-	 */
-#else /* !WIN32 */
-	return QString::fromUtf8(isds_long_message(ctx));
-#endif /* WIN32 */
-}
+#include "src/isds/services_internal.h"
 
 Isds::Error Isds::Service::dataBoxCreditInfo(struct isds_ctx *ctx,
     const QString &dbID, const QDate &fromDate, const QDate &toDate,
@@ -92,7 +73,7 @@ Isds::Error Isds::Service::dataBoxCreditInfo(struct isds_ctx *ctx,
 	    iFromDate, iToDate, &iCredit, &iEmail, &iHistory);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
@@ -140,7 +121,7 @@ Isds::Error Isds::Service::dummyOperation(struct isds_ctx *ctx)
 	isds_error ret = isds_ping(ctx);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		return err;
 	}
 
@@ -175,7 +156,7 @@ Isds::Error Isds::Service::findDataBox(struct isds_ctx *ctx,
 	ret = isds_FindDataBox(ctx, iCrit, &iBoxes);
 	if ((ret != IE_SUCCESS) && (ret != IE_2BIG)) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
@@ -220,7 +201,7 @@ Isds::Error Isds::Service::getOwnerInfoFromLogin(struct isds_ctx *ctx,
 	isds_error ret = isds_GetOwnerInfoFromLogin(ctx, &oInfo);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
@@ -260,7 +241,7 @@ Isds::Error Isds::Service::getUserInfoFromLogin(struct isds_ctx *ctx,
 	isds_error ret = isds_GetUserInfoFromLogin(ctx, &uInfo);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
@@ -353,7 +334,7 @@ Isds::Error Isds::Service::isdsSearch2(struct isds_ctx *ctx,
 	    &iCurrentPagePosition, &iCurrentPageSize, &iLastPage, &iBoxes);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
 		goto fail;
 	}
 
