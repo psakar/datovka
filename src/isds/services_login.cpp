@@ -87,11 +87,9 @@ Isds::Error Isds::Login::loginSystemCert(struct isds_ctx *ctx,
 		err.setLongDescr(tr("Insufficient memory."));
 		return err;
 	}
-	memset(pki_cred, 0, sizeof(*pki_cred));
+	std::memset(pki_cred, 0, sizeof(*pki_cred));
 
-	QFileInfo certFile(certPath);
-	QString ext(certFile.suffix());
-	ext = ext.toUpper();
+	const QString ext(QFileInfo(certPath).suffix().toUpper());
 
 	if (ext == QStringLiteral("PEM")) {
 		pki_cred->certificate_format = PKI_FORMAT_PEM;
@@ -117,6 +115,72 @@ Isds::Error Isds::Login::loginSystemCert(struct isds_ctx *ctx,
 	ret = isds_login(ctx,
 	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
 	    NULL, NULL, pki_cred, NULL);
+	if (ret != IE_SUCCESS) {
+		err.setCode(libisds2Error(ret));
+		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
+		goto fail;
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+
+fail:
+	if (pki_cred != NULL) {
+		isds_pki_credentials_free(&pki_cred);
+	}
+
+	return err;
+}
+
+Isds::Error Isds::Login::loginUserCert(struct isds_ctx *ctx,
+    const QString &dbId, const QString &certPath, const QString &passphrase,
+    bool testingSession)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == NULL) || dbId.isEmpty() || certPath.isEmpty())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_pki_credentials *pki_cred = NULL;
+	isds_error ret = IE_SUCCESS;
+
+	pki_cred = (struct isds_pki_credentials *)std::malloc(sizeof(*pki_cred));
+	if (Q_UNLIKELY(pki_cred == NULL)) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient memory."));
+		return err;
+	}
+	std::memset(pki_cred, 0, sizeof(*pki_cred));
+
+	const QString ext(QFileInfo(certPath).suffix().toUpper());
+
+	if (ext == QStringLiteral("PEM")) {
+		pki_cred->certificate_format = PKI_FORMAT_PEM;
+		pki_cred->key_format = PKI_FORMAT_PEM;
+	} else if (ext == QStringLiteral("DER")) {
+		pki_cred->certificate_format = PKI_FORMAT_DER;
+		pki_cred->key_format = PKI_FORMAT_DER;
+	} else if (ext == QStringLiteral("P12")) {
+		/* TODO - convert p12 to pem */
+		pki_cred->certificate_format = PKI_FORMAT_PEM;
+		pki_cred->key_format = PKI_FORMAT_PEM;
+	} else {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		goto fail;
+	}
+
+	pki_cred->engine = NULL;
+	pki_cred->certificate = strdup(certPath.toUtf8().constData());
+	pki_cred->key = strdup(certPath.toUtf8().constData());
+	pki_cred->passphrase = strdup(passphrase.toUtf8().constData());
+
+	ret = isds_login(ctx,
+	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
+	    dbId.toUtf8().constData(), NULL, pki_cred, NULL);
 	if (ret != IE_SUCCESS) {
 		err.setCode(libisds2Error(ret));
 		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));

@@ -55,7 +55,8 @@ namespace Isds {
 		 * @param[in,out] ctx Communication context.
 		 * @param[in]     userName Login.
 		 * @param[in]     pwd Password.
-		 * @param[in]     testingSession Set to true to log into testing environment.
+		 * @param[in]     testingSession Set to true to log into
+		 *                               testing environment.
 		 * @return Error description.
 		 */
 		static
@@ -69,12 +70,32 @@ namespace Isds {
 		 * @param[in,out] ctx Communication context.
 		 * @param[in]     certPath Path to certificate file.
 		 * @param[in]     passphrase Certificate passphrase.
+		 * @param[in]     testingSession Set to true to log into
+		 *                               testing environment.
 		 * @return Error description.
 		 */
 		static
 		Error loginSystemCert(struct isds_ctx *ctx,
 		    const QString &certPath, const QString &passphrase,
 		    bool testingSession);
+
+		/*!
+		 * @brief Log in to ISDS using a user certificate without
+		 *     a password.
+		 *
+		 * @note It needs the data-box identifier instead the username.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     dbId Data-box identifier.
+		 * @param[in]     certPath Path to certificate file.
+		 * @param[in]     passphrase Certificate passphrase.
+		 * @param[in]     testingSession Set to true to log into
+		 *                               testing environment.
+		 * @return Error description.
+		 */
+		Error loginUserCert(struct isds_ctx *ctx,
+		    const QString &dbId, const QString &certPath,
+		    const QString &passphrase, bool testingSession);
 	};
 
 }
