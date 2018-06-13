@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <QChar>
 #include <QString>
 #include <QVariant>
 
@@ -34,6 +35,9 @@ namespace Isds {
 	qint64 variant2nonNegativeLong(const QVariant &v);
 	/* Null variant is converted to -1. */
 	QVariant nonNegativeLong2Variant(qint64 i);
+
+	/* Null variant is converted to null char. First character of string is returned. */
+	QChar variant2Char(const QVariant &v);
 
 	enum Type::NilBool variant2NilBool(const QVariant &v);
 	QVariant nilBool2Variant(enum Type::NilBool b);

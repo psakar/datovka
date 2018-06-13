@@ -484,7 +484,7 @@ const Isds::Envelope MessageDb::getMessageReplyData(qint64 dmId) const
 		envData.setDmLegalTitleSect(query.value(17).toString());
 		envData.setDmLegalTitlePar(query.value(18).toString());
 		envData.setDmLegalTitlePoint(query.value(19).toString());
-		envData.setDmType((!query.value(20).isNull()) ? query.value(20).toChar() : QChar());
+		envData.setDmType(Isds::variant2Char(query.value(20)));
 		return envData;
 	} else {
 		logErrorNL(

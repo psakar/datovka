@@ -43,6 +43,25 @@ QVariant Isds::nonNegativeLong2Variant(qint64 i)
 	return (i >= 0) ? QVariant(i) : QVariant();
 }
 
+QChar Isds::variant2Char(const QVariant &v)
+{
+	/*
+	 * Although QVariant contains a single character string (e.g. "V")
+	 * the conversion toChar() returns a null character.
+	 */
+	if (v.isNull()) {
+		return QChar();
+	}
+
+	const QString str(v.toString());
+	if (!str.isEmpty()) {
+		Q_ASSERT(str.size() == 1);
+		return str[0];
+	} else {
+		return QChar();
+	}
+}
+
 enum Isds::Type::NilBool Isds::variant2NilBool(const QVariant &v)
 {
 	if (v.isNull()) {
