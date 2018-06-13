@@ -802,28 +802,34 @@ of postal data messages active.</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>dmSenderRefNumber</tabstop>
-  <tabstop>dmSenderIdent</tabstop>
-  <tabstop>dmRecipientRefNumber</tabstop>
-  <tabstop>dmRecipientIdent</tabstop>
+  <tabstop>subjectLine</tabstop>
+  <tabstop>addRecipButton</tabstop>
+  <tabstop>removeRecipButton</tabstop>
+  <tabstop>findRecipButton</tabstop>
+  <tabstop>enterBoxIdButton</tabstop>
+  <tabstop>addAttachButton</tabstop>
+  <tabstop>removeAttachButton</tabstop>
+  <tabstop>openAttachButton</tabstop>
+  <tabstop>sendButton</tabstop>
+  <tabstop>cancelButton</tabstop>
+  <tabstop>fromComboBox</tabstop>
+  <tabstop>optionalFormCheckBox</tabstop>
   <tabstop>dmLegalTitleLaw</tabstop>
   <tabstop>dmLegalTitleYear</tabstop>
   <tabstop>dmLegalTitleSect</tabstop>
   <tabstop>dmLegalTitlePar</tabstop>
   <tabstop>dmLegalTitlePoint</tabstop>
-  <tabstop>addRecipButton</tabstop>
-  <tabstop>addAttachButton</tabstop>
-  <tabstop>sendButton</tabstop>
-  <tabstop>cancelButton</tabstop>
-  <tabstop>dmPublishOwnID</tabstop>
-  <tabstop>payRecipient</tabstop>
-  <tabstop>payReplyCheckBox</tabstop>
+  <tabstop>dmSenderRefNumber</tabstop>
+  <tabstop>dmSenderIdent</tabstop>
+  <tabstop>dmRecipientRefNumber</tabstop>
+  <tabstop>dmRecipientIdent</tabstop>
+  <tabstop>dmToHands</tabstop>
+  <tabstop>dmPersonalDelivery</tabstop>
   <tabstop>dmAllowSubstDelivery</tabstop>
-  <tabstop>optionalFormCheckBox</tabstop>
-  <tabstop>removeRecipButton</tabstop>
-  <tabstop>findRecipButton</tabstop>
-  <tabstop>removeAttachButton</tabstop>
-  <tabstop>openAttachButton</tabstop>
+  <tabstop>dmPublishOwnID</tabstop>
+  <tabstop>payReplyCheckBox</tabstop>
+  <tabstop>payRecipient</tabstop>
+  <tabstop>recipTableView</tabstop>
   <tabstop>attachTableView</tabstop>
  </tabstops>
  <resources>
