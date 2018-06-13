@@ -37,7 +37,7 @@
      <item>
       <widget class="QLineEdit" name="filterLine">
        <property name="focusPolicy">
-        <enum>Qt::ClickFocus</enum>
+        <enum>Qt::StrongFocus</enum>
        </property>
       </widget>
      </item>
@@ -45,6 +45,9 @@
    </item>
    <item>
     <widget class="LoweredTableView" name="contactTableView">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
      <property name="showGrid">
       <bool>false</bool>
      </property>
@@ -84,6 +87,10 @@
    <header>src/views/lowered_table_view.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>contactTableView</tabstop>
+  <tabstop>filterLine</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

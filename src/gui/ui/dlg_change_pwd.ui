@@ -245,6 +245,17 @@ at least one digit and one capital letter.</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>currentPwdLine</tabstop>
+  <tabstop>newPwdLine</tabstop>
+  <tabstop>newPwdLine2</tabstop>
+  <tabstop>togglePwdVisibilityButton</tabstop>
+  <tabstop>generateButton</tabstop>
+  <tabstop>smsPushButton</tabstop>
+  <tabstop>secCodeLine</tabstop>
+  <tabstop>userNameLine</tabstop>
+  <tabstop>accountLine</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

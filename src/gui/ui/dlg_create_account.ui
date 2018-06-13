@@ -253,6 +253,16 @@ the synchronisation process of all accounts.</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>acntNameLine</tabstop>
+  <tabstop>usernameLine</tabstop>
+  <tabstop>testAcntCheckBox</tabstop>
+  <tabstop>loginMethodComboBox</tabstop>
+  <tabstop>pwdLine</tabstop>
+  <tabstop>rememberPwdCheckBox</tabstop>
+  <tabstop>addCertButton</tabstop>
+  <tabstop>syncAllCheckBox</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>
