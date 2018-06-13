@@ -83,7 +83,7 @@ namespace Isds {
 		 * @brief Log in to ISDS using a user certificate without
 		 *     a password.
 		 *
-		 * @note It needs the data-box identifier instead the username.
+		 * @note It needs the data-box identifier instead of the username.
 		 *
 		 * @param[in,out] ctx Communication context.
 		 * @param[in]     dbId Data-box identifier.
@@ -96,6 +96,24 @@ namespace Isds {
 		Error loginUserCert(struct isds_ctx *ctx,
 		    const QString &dbId, const QString &certPath,
 		    const QString &passphrase, bool testingSession);
+
+		/*!
+		 * @brief Log in to ISDS using a user certificate with
+		 *     a password.
+		 *
+		 * @param[in,out] ctx Communication context.
+		 * @param[in]     userName Login.
+		 * @param[in]     pwd Password.
+		 * @param[in]     certPath Path to certificate file.
+		 * @param[in]     passphrase Certificate passphrase.
+		 * @param[in]     testingSession Set to true to log into
+		 *                               testing environment.
+		 * @return Error description.
+		 */
+		Error loginUserCertPwd(struct isds_ctx *ctx,
+		    const QString &userName, const QString &pwd,
+		    const QString &certPath, const QString &passphrase,
+		    bool testingSession);
 	};
 
 }
