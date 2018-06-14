@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,14 @@
  * the two.
  */
 
-#ifndef _ISDS_LOGIN_H_
-#define _ISDS_LOGIN_H_
+#pragma once
 
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 #include <QPair>
 #include <QString>
 
+#include "src/datovka_shared/isds/error.h"
+#include "src/datovka_shared/isds/types.h"
 #include "src/io/isds_sessions.h"
 #include "src/settings/accounts.h"
 
@@ -36,6 +37,7 @@
  */
 class IsdsLogin {
 	Q_DECLARE_TR_FUNCTIONS(IsdsLogin)
+
 public:
 	/*!
 	 * @brief Error code.
@@ -149,52 +151,10 @@ private:
 	 */
 	enum ErrorCode totp(void);
 
-	/*!
-	 * @brief preforms a simplification of the obtained ISDS error code.
-	 *
-	 * @param[in] isdsErr ISDS error code.
-	 * @return Error code.
-	 */
-	static
-	enum ErrorCode isdsErrorToCode(int isdsErr);
-
-	/*!
-	 * @brief Converts PKCS #12 certificate into PEM format.
-	 *
-	 * @note The function creates a new PEM file stored in
-	 *     the configuration directory. The path is returned via
-	 *     the second parameter.
-	 *
-	 * @param[in]  p12Path   Path to PKCS #12 certificate file.
-	 * @param[in]  certPwd   Password protecting the certificate.
-	 * @param[out] pemPath   Returned path to created PEM file.
-	 * @param[in]  userName  Account user name, user to name PEM file.
-	 * @return True on success, false on error
-	 *     (e.g. file does not exist, password error, ...)
-	 */
-	static
-	bool p12CertificateToPem(const QString &p12Path,
-	    const QString &certPwd, QString &pemPath, const QString &userName);
-
-	/*!
-	 * @brief Performs a certificate format conversion if necessary.
-	 *
-	 * @param[in,out] certPath Path to certificate. Value is changed when
-	 *                         conversion is preformed.
-	 * @param[in]     passphrase Certificate password.
-	 * @Param[in]     userName Account user name.
-	 * @return False on error.
-	 */
-	static
-	bool convertAndCheckCert(QString &certPath, const QString &passphrase,
-	    const QString &userName);
-
 	IsdsSessions &m_isdsSessions; /*!< Reference to ISDS sessions. */
 	AcntSettings &m_acntSettings; /*!< Reference to account properties. */
 
-	int m_isdsErr; /*!< ISDS error. */
-	QString m_isdsErrStr; /*!< ISDS error string. */
-	QString m_isdsLongErrMsg; /*!< ISDS error message. */
+	Isds::Error m_isdsErr; /*!< ISDS error. */
 
 	/*!
 	 * @brief Describes the state of a TOTP authentication.
@@ -216,5 +176,3 @@ private:
 	                             * successfully requested.
 	                             */
 };
-
-#endif /* _ISDS_LOGIN_H_ */

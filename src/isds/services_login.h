@@ -95,6 +95,7 @@ namespace Isds {
 		 *                               testing environment.
 		 * @return Error description.
 		 */
+		static
 		Error loginUserCert(struct isds_ctx *ctx,
 		    const QString &dbId, const QString &certPath,
 		    const QString &passphrase, bool testingSession);
@@ -112,6 +113,7 @@ namespace Isds {
 		 *                               testing environment.
 		 * @return Error description.
 		 */
+		static
 		Error loginUserCertPwd(struct isds_ctx *ctx,
 		    const QString &userName, const QString &pwd,
 		    const QString &certPath, const QString &passphrase,
@@ -130,6 +132,7 @@ namespace Isds {
 		 * @param[out]    res OTP resolution status.
 		 * @return Error description.
 		 */
+		static
 		Error loginUserOtp(struct isds_ctx *ctx,
 		    const QString &userName, const QString &pwd,
 		    bool testingSession, enum Type::OtpMethod otpMethod,
