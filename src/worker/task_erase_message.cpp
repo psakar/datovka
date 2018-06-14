@@ -106,9 +106,9 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 
 	/* First delete message in ISDS. */
 	if (delFromIsds) {
-		struct isds_ctx *session =
+		Isds::Session *session =
 		    GlobInstcs::isdsSessionsPtr->session(userName);
-		if (NULL == session) {
+		if (Q_UNLIKELY(Q_NULLPTR == session)) {
 			Q_ASSERT(0);
 			return NOT_DELETED;
 		}

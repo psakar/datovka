@@ -32,11 +32,6 @@
 
 #include "src/datovka_shared/isds/types.h"
 
-extern "C" {
-	/* TODO -- The context structure needs to be encapsulated. */
-	struct isds_ctx;
-}
-
 namespace Isds {
 
 	/* Forward declaration. */
@@ -48,6 +43,7 @@ namespace Isds {
 	class Hash;
 	class Message;
 	class Otp;
+	class Session;
 
 	/*!
 	 * @brief Encapsulates ISDS services.
@@ -81,9 +77,8 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error changeISDSPassword(struct isds_ctx *ctx,
-		    const QString &oldPwd, const QString &newPwd,
-		    Otp &otp, QString &refNum);
+		Error changeISDSPassword(Session *ctx, const QString &oldPwd,
+		    const QString &newPwd, Otp &otp, QString &refNum);
 
 		/*!
 		 * @brief Service GetPasswordInfo.
@@ -94,7 +89,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error getPasswordInfo(struct isds_ctx *ctx, QDateTime &pswExpDate);
+		Error getPasswordInfo(Session *ctx, QDateTime &pswExpDate);
 
 	/* Box interface: */
 		/*!
@@ -111,9 +106,9 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error dataBoxCreditInfo(struct isds_ctx *ctx,
-		    const QString &dbID, const QDate &fromDate,
-		    const QDate &toDate, qint64 &currentCredit, QString &email,
+		Error dataBoxCreditInfo(Session *ctx, const QString &dbID,
+		    const QDate &fromDate, const QDate &toDate,
+		    qint64 &currentCredit, QString &email,
 		    QList<CreditEvent> &history);
 
 		/*!
@@ -123,7 +118,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error dummyOperation(struct isds_ctx *ctx);
+		Error dummyOperation(Session *ctx);
 
 		/*!
 		 * @brief Service FindDataBox.
@@ -134,8 +129,8 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error findDataBox(struct isds_ctx *ctx,
-		    const DbOwnerInfo &criteria, QList<DbOwnerInfo> &boxes);
+		Error findDataBox(Session *ctx, const DbOwnerInfo &criteria,
+		    QList<DbOwnerInfo> &boxes);
 
 		/*!
 		 * @brief Service GetOwnerInfoFromLogin.
@@ -145,7 +140,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error getOwnerInfoFromLogin(struct isds_ctx *ctx,
+		Error getOwnerInfoFromLogin(Session *ctx,
 		    DbOwnerInfo &ownerInfo);
 
 		/*!
@@ -156,8 +151,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error getUserInfoFromLogin(struct isds_ctx *ctx,
-		    DbUserInfo &userInfo);
+		Error getUserInfoFromLogin(Session *ctx, DbUserInfo &userInfo);
 
 		/*!
 		 * @brief Service ISDSSearch2.
@@ -184,7 +178,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error isdsSearch2(struct isds_ctx *ctx, const QString &soughtText,
+		Error isdsSearch2(Session *ctx, const QString &soughtText,
 		    enum Type::FulltextSearchType soughtType,
 		    enum Type::DbType soughtBoxType, quint64 pageSize,
 		    quint64 pageNum, enum Type::NilBool highlight,
@@ -203,8 +197,7 @@ namespace Isds {
 		 *    ERR_NOTEQUAL - if data are unknown to ISDS)
 		 */
 		static
-		Error authenticateMessage(struct isds_ctx *ctx,
-		    const QByteArray &raw);
+		Error authenticateMessage(Session *ctx, const QByteArray &raw);
 
 		/*!
 		 * @brief Service CreateMessage.
@@ -215,8 +208,8 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error createMessage(struct isds_ctx *ctx,
-		    const Message &message, qint64 &dmId);
+		Error createMessage(Session *ctx, const Message &message,
+		    qint64 &dmId);
 
 		/*!
 		 * @brief Service EraseMessage.
@@ -227,8 +220,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error eraseMessage(struct isds_ctx *ctx, qint64 dmId,
-		    bool dmIncoming);
+		Error eraseMessage(Session *ctx, qint64 dmId, bool dmIncoming);
 
 		/*!
 		 * @brief Service GetListOfReceivedMessages.
@@ -241,7 +233,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error getListOfReceivedMessages(struct isds_ctx *ctx,
+		Error getListOfReceivedMessages(Session *ctx,
 		    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
 		    unsigned long int *dmLimit, QList<Message> &messages);
 
@@ -256,7 +248,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error getListOfSentMessages(struct isds_ctx *ctx,
+		Error getListOfSentMessages(Session *ctx,
 		    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
 		    unsigned long int *dmLimit, QList<Message> &messages);
 
@@ -270,7 +262,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
+		Error getMessageAuthor(Session *ctx, qint64 dmId,
 		    enum Type::SenderType &userType, QString &authorName);
 
 		/*!
@@ -282,15 +274,14 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error getSignedDeliveryInfo(struct isds_ctx *ctx, qint64 dmId,
+		Error getSignedDeliveryInfo(Session *ctx, qint64 dmId,
 		    Message &message);
 
 		/*!
 		 * @brief Service MarkMessageAsDownloaded.
 		 */
 		static
-		Error markMessageAsDownloaded(struct isds_ctx *ctx,
-		    qint64 dmId);
+		Error markMessageAsDownloaded(Session *ctx, qint64 dmId);
 
 		/*!
 		 * @brief Service SignedMessageDownload.
@@ -301,8 +292,8 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error signedReceivedMessageDownload(struct isds_ctx *ctx,
-		    qint64 dmId, Message &message);
+		Error signedReceivedMessageDownload(Session *ctx, qint64 dmId,
+		    Message &message);
 
 		/*!
 		 * @brief Service SignedSentMessageDownload.
@@ -313,8 +304,8 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error signedSentMessageDownload(struct isds_ctx *ctx,
-		    qint64 dmId, Message &message);
+		Error signedSentMessageDownload(Session *ctx, qint64 dmId,
+		    Message &message);
 
 		/*!
 		 * @brief Service VerifyMessage.
@@ -325,8 +316,7 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error verifyMessage(struct isds_ctx *ctx, qint64 dmId,
-		    Hash &hash);
+		Error verifyMessage(Session *ctx, qint64 dmId, Hash &hash);
 	};
 
 }

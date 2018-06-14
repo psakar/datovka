@@ -31,6 +31,7 @@
 #include <cstdlib> // malloc
 #include <cstring> // memcpy
 #include <isds.h>
+#include <QMutexLocker>
 
 #include "src/datovka_shared/isds/account_interface.h"
 #include "src/datovka_shared/isds/error.h"
@@ -40,13 +41,14 @@
 #include "src/isds/internal_type_conversion.h"
 #include "src/isds/services.h"
 #include "src/isds/services_internal.h"
+#include "src/isds/session.h"
 
-Isds::Error Isds::Service::changeISDSPassword(struct isds_ctx *ctx,
+Isds::Error Isds::Service::changeISDSPassword(Session *ctx,
     const QString &oldPwd, const QString &newPwd, Otp &otp, QString &refNum)
 {
 	Error err;
 
-	if (Q_UNLIKELY(ctx == NULL)) {
+	if (Q_UNLIKELY(ctx == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -63,12 +65,16 @@ Isds::Error Isds::Service::changeISDSPassword(struct isds_ctx *ctx,
 		goto fail;
 	}
 
-	ret = isds_change_password(ctx, oldPwd.toUtf8().constData(),
-	    newPwd.toUtf8().constData(), iOtp, &iRefNum);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		ret = isds_change_password(ctx->ctx(), oldPwd.toUtf8().constData(),
+		    newPwd.toUtf8().constData(), iOtp, &iRefNum);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	if (iOtp != NULL) {
@@ -96,12 +102,12 @@ fail:
 	return err;
 }
 
-Isds::Error Isds::Service::getPasswordInfo(struct isds_ctx *ctx,
+Isds::Error Isds::Service::getPasswordInfo(Session *ctx,
     QDateTime &pswExpDate)
 {
 	Error err;
 
-	if (Q_UNLIKELY(ctx == NULL)) {
+	if (Q_UNLIKELY(ctx == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -110,11 +116,16 @@ Isds::Error Isds::Service::getPasswordInfo(struct isds_ctx *ctx,
 
 	struct timeval *iPswExpDate = NULL;
 
-	isds_error ret = isds_get_password_expiration(ctx, &iPswExpDate);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_get_password_expiration(ctx->ctx(),
+		    &iPswExpDate);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	pswExpDate = (iPswExpDate != NULL) ?

@@ -28,8 +28,6 @@
 #  include <cstdbool>
 #endif /* __APPLE__ */
 
-#include <cstdlib> /* malloc(3) */
-#include <cstring> /* memset(3) */
 #include <isds.h>
 #include <QFile>
 
@@ -39,6 +37,7 @@
 #include "src/io/imports.h"
 #include "src/io/isds_sessions.h"
 #include "src/isds/services.h"
+#include "src/isds/session.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
@@ -158,38 +157,24 @@ IsdsSessions::IsdsSessions(void)
 
 IsdsSessions::~IsdsSessions(void)
 {
-	isds_error status;
-	struct isds_ctx *isdsSession = NULL;
-
 	/* Free all contexts. */
-	foreach (isdsSession, m_sessions) {
-		Q_ASSERT(NULL != isdsSession);
-
-		status = isds_logout(isdsSession);
-		if (IE_SUCCESS != status) {
-			logWarningNL("%s", "Error in ISDS logout procedure.");
-		}
-
-		status = isds_ctx_free(&isdsSession);
-		if (IE_SUCCESS != status) {
-			logWarningNL("%s", "Error freeing ISDS session.");
-		}
+	foreach (Isds::Session *session, m_sessions) {
+		delete session;
 	}
 
-	status = isds_cleanup();
-	if (IE_SUCCESS != status) {
+	if (IE_SUCCESS != isds_cleanup()) {
 		logWarningNL("%s", "Unsuccessful ISDS clean-up.");
 	}
 }
 
 bool IsdsSessions::holdsSession(const QString &userName) const
 {
-	return NULL != m_sessions.value(userName, NULL);
+	return Q_NULLPTR != m_sessions.value(userName, Q_NULLPTR);
 }
 
-struct isds_ctx *IsdsSessions::session(const QString &userName) const
+Isds::Session *IsdsSessions::session(const QString &userName) const
 {
-	return m_sessions.value(userName, NULL);
+	return m_sessions.value(userName, Q_NULLPTR);
 }
 
 bool IsdsSessions::isConnectedToIsds(const QString &userName)
@@ -208,55 +193,37 @@ bool IsdsSessions::isConnectedToIsds(const QString &userName)
 	return Isds::Type::ERR_SUCCESS == pingErr.code();
 }
 
-struct isds_ctx *IsdsSessions::createCleanSession(const QString &userName,
+Isds::Session *IsdsSessions::createCleanSession(const QString &userName,
     unsigned int connectionTimeoutMs)
 {
-	isds_error status;
-	struct isds_ctx *isds_session = NULL;
-
 	/* User name should not exist. */
-	Q_ASSERT(!holdsSession(userName));
+	if (Q_UNLIKELY(holdsSession(userName))) {
+		Q_ASSERT(0);
+		return Q_NULLPTR;
+	}
 
-	isds_session = isds_ctx_create();
-	if (Q_UNLIKELY(NULL == isds_session)) {
+	Isds::Session *session = Isds::Session::createSession(connectionTimeoutMs);
+	if (Q_UNLIKELY(session == Q_NULLPTR)) {
 		logErrorNL("Error creating ISDS session for user '%s'.",
 		    userName.toUtf8().constData());
-		goto fail;
+		return Q_NULLPTR;
 	}
 
-	status = isds_set_timeout(isds_session, connectionTimeoutMs);
-	if (Q_UNLIKELY(IE_SUCCESS != status)) {
-		logErrorNL("Error setting time-out for user '%s'.",
-		    userName.toUtf8().constData());
-		goto fail;
-	}
-
-	m_sessions.insert(userName, isds_session);
-	return isds_session;
-
-fail:
-	if (NULL != isds_session) {
-		status = isds_ctx_free(&isds_session);
-		if (IE_SUCCESS != status) {
-			logWarningNL(
-			    "Error freeing ISDS session for user '%s'.",
-			    userName.toUtf8().constData());
-		}
-	}
-	return NULL;
+	m_sessions.insert(userName, session);
+	return session;
 }
 
 bool IsdsSessions::setSessionTimeout(const QString &userName,
     unsigned int timeoutMs)
 {
-	struct isds_ctx *isds_session = m_sessions.value(userName, NULL);
-	if (Q_UNLIKELY(NULL == isds_session)) {
+	Isds::Session *session = m_sessions.value(userName, Q_NULLPTR);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return false;
 	}
 
-	isds_error status = isds_set_timeout(isds_session, timeoutMs);
-	if (Q_UNLIKELY(IE_SUCCESS != status)) {
+	bool ret = session->setTimeout(timeoutMs);
+	if (Q_UNLIKELY(!ret)) {
 		logErrorNL("Error setting time-out for user '%s'.",
 		    userName.toUtf8().constData());
 		return false;

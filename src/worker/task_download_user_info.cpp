@@ -70,8 +70,8 @@ void TaskDownloadUserInfo::run(void)
 bool TaskDownloadUserInfo::downloadUserInfo(const QString &userName,
     QString &error, QString &longError)
 {
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return false;
 	}

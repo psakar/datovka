@@ -75,8 +75,8 @@ enum Isds::Type::Error TaskChangePwd::changePassword(const QString &userName,
 {
 	Q_ASSERT(!userName.isEmpty());
 
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (Q_UNLIKELY(NULL == session)) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return Isds::Type::ERR_ERROR;
 	}

@@ -28,15 +28,11 @@
 
 #include "src/datovka_shared/isds/types.h"
 
-extern "C" {
-	/* TODO -- The context structure needs to be encapsulated. */
-	struct isds_ctx;
-}
-
 namespace Isds {
 
 	/* Forward declaration. */
 	class Error;
+	class Session;
 
 	/*!
 	 * @brief Encapsulates ISDS login operations.
@@ -62,9 +58,8 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error loginUserName(struct isds_ctx *ctx,
-		    const QString &userName, const QString &pwd,
-		    bool testingSession);
+		Error loginUserName(Session *ctx, const QString &userName,
+		    const QString &pwd, bool testingSession);
 
 		/*!
 		 * @brief Log in to ISDS using a system certificate.
@@ -77,9 +72,8 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error loginSystemCert(struct isds_ctx *ctx,
-		    const QString &certPath, const QString &passphrase,
-		    bool testingSession);
+		Error loginSystemCert(Session *ctx, const QString &certPath,
+		    const QString &passphrase, bool testingSession);
 
 		/*!
 		 * @brief Log in to ISDS using a user certificate without
@@ -96,9 +90,9 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error loginUserCert(struct isds_ctx *ctx,
-		    const QString &dbId, const QString &certPath,
-		    const QString &passphrase, bool testingSession);
+		Error loginUserCert(Session *ctx, const QString &dbId,
+		    const QString &certPath, const QString &passphrase,
+		    bool testingSession);
 
 		/*!
 		 * @brief Log in to ISDS using a user certificate with
@@ -114,10 +108,9 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error loginUserCertPwd(struct isds_ctx *ctx,
-		    const QString &userName, const QString &pwd,
-		    const QString &certPath, const QString &passphrase,
-		    bool testingSession);
+		Error loginUserCertPwd(Session *ctx, const QString &userName,
+		    const QString &pwd, const QString &certPath,
+		    const QString &passphrase, bool testingSession);
 
 		/*!
 		 * @brief Log in to ISDS using a username, password and OTP.
@@ -133,10 +126,10 @@ namespace Isds {
 		 * @return Error description.
 		 */
 		static
-		Error loginUserOtp(struct isds_ctx *ctx,
-		    const QString &userName, const QString &pwd,
-		    bool testingSession, enum Type::OtpMethod otpMethod,
-		    const QString &otpCode, enum Type::OtpResolution &res);
+		Error loginUserOtp(Session *ctx, const QString &userName,
+		    const QString &pwd, bool testingSession,
+		    enum Type::OtpMethod otpMethod, const QString &otpCode,
+		    enum Type::OtpResolution &res);
 	};
 
 }

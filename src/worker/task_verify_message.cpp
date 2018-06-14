@@ -90,8 +90,8 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 	Q_ASSERT(dmId >= 0);
 	Q_ASSERT(!hashLocal.isNull());
 
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return VERIFY_ERR;
 	}

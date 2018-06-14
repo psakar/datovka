@@ -26,6 +26,11 @@
 #include <QMap>
 #include <QString>
 
+namespace Isds {
+	/* Forward class declaration. */
+	class Session;
+}
+
 /*!
  * @brief Container holding context structures of libisds.
  */
@@ -54,7 +59,7 @@ public:
 	 *
 	 * @param[in] userName Username identifying the account.
 	 */
-	struct isds_ctx *session(const QString &userName) const;
+	Isds::Session *session(const QString &userName) const;
 
 	/*!
 	 * @brief Ping ISDS. Test whether connection is active.
@@ -68,19 +73,21 @@ public:
 	 *
 	 * @param[in] userName Username identifying the newly created account.
 	 * @param[in] connectionTimeoutMs Connection timeout in milliseconds.
-	 * @return Pointer to new session or NULL on failure.
+	 * @return Pointer to new session or Q_NULLPTR on failure.
 	 */
-	struct isds_ctx *createCleanSession(const QString &userName,
+	Isds::Session *createCleanSession(const QString &userName,
 	    unsigned int connectionTimeoutMs);
 
 	/*!
 	 * @brief Set time-out in milliseconds to session associated to
 	 *     user name.
 	 *
+	 * @param[in] userName Username identifying the newly created account.
+	 * @param[in] timeoutMs Connection timeout in milliseconds.
 	 * @return True on success.
 	 */
 	bool setSessionTimeout(const QString &userName, unsigned int timeoutMs);
 
 private:
-	QMap<QString, struct isds_ctx *> m_sessions; /*!< Holds sessions. */
+	QMap<QString, Isds::Session *> m_sessions; /*!< Holds sessions. */
 };

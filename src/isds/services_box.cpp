@@ -31,6 +31,7 @@
 #include <cstdlib> // malloc
 #include <cstring> // memcpy
 #include <isds.h>
+#include <QMutexLocker>
 
 #include "src/datovka_shared/isds/box_interface.h"
 #include "src/datovka_shared/isds/error.h"
@@ -40,14 +41,15 @@
 #include "src/isds/internal_type_conversion.h"
 #include "src/isds/services.h"
 #include "src/isds/services_internal.h"
+#include "src/isds/session.h"
 
-Isds::Error Isds::Service::dataBoxCreditInfo(struct isds_ctx *ctx,
-    const QString &dbID, const QDate &fromDate, const QDate &toDate,
-    qint64 &currentCredit, QString &email, QList<CreditEvent> &history)
+Isds::Error Isds::Service::dataBoxCreditInfo(Session *ctx, const QString &dbID,
+    const QDate &fromDate, const QDate &toDate, qint64 &currentCredit,
+    QString &email, QList<CreditEvent> &history)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || dbID.isEmpty())) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || dbID.isEmpty())) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -69,12 +71,17 @@ Isds::Error Isds::Service::dataBoxCreditInfo(struct isds_ctx *ctx,
 		goto fail;
 	}
 
-	ret = isds_get_commercial_credit(ctx, dbID.toUtf8().constData(),
-	    iFromDate, iToDate, &iCredit, &iEmail, &iHistory);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		ret = isds_get_commercial_credit(ctx->ctx(),
+		    dbID.toUtf8().constData(), iFromDate, iToDate, &iCredit,
+		    &iEmail, &iHistory);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	ok = true;
@@ -107,34 +114,38 @@ fail:
 	return err;
 }
 
-Isds::Error Isds::Service::dummyOperation(struct isds_ctx *ctx)
+Isds::Error Isds::Service::dummyOperation(Session *ctx)
 {
 	Error err;
 
-	if (Q_UNLIKELY(ctx == NULL)) {
+	if (Q_UNLIKELY(ctx == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
 		return err;
 	}
 
-	isds_error ret = isds_ping(ctx);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		return err;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_ping(ctx->ctx());
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			return err;
+		}
 	}
 
 	err.setCode(Type::ERR_SUCCESS);
 	return err;
 }
 
-Isds::Error Isds::Service::findDataBox(struct isds_ctx *ctx,
+Isds::Error Isds::Service::findDataBox(Session *ctx,
     const DbOwnerInfo &criteria, QList<DbOwnerInfo> &boxes)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || criteria.isNull())) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || criteria.isNull())) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -153,11 +164,15 @@ Isds::Error Isds::Service::findDataBox(struct isds_ctx *ctx,
 		goto fail;
 	}
 
-	ret = isds_FindDataBox(ctx, iCrit, &iBoxes);
-	if ((ret != IE_SUCCESS) && (ret != IE_2BIG)) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		ret = isds_FindDataBox(ctx->ctx(), iCrit, &iBoxes);
+		if ((ret != IE_SUCCESS) && (ret != IE_2BIG)) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	ok = true;
@@ -183,12 +198,12 @@ fail:
 	return err;
 }
 
-Isds::Error Isds::Service::getOwnerInfoFromLogin(struct isds_ctx *ctx,
+Isds::Error Isds::Service::getOwnerInfoFromLogin(Session *ctx,
     DbOwnerInfo &ownerInfo)
 {
 	Error err;
 
-	if (Q_UNLIKELY(ctx == NULL)) {
+	if (Q_UNLIKELY(ctx == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -198,11 +213,15 @@ Isds::Error Isds::Service::getOwnerInfoFromLogin(struct isds_ctx *ctx,
 	struct isds_DbOwnerInfo *oInfo = NULL;
 	bool ok = true;
 
-	isds_error ret = isds_GetOwnerInfoFromLogin(ctx, &oInfo);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_GetOwnerInfoFromLogin(ctx->ctx(), &oInfo);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	ownerInfo = (oInfo != NULL) ?
@@ -223,12 +242,12 @@ fail:
 	return err;
 }
 
-Isds::Error Isds::Service::getUserInfoFromLogin(struct isds_ctx *ctx,
+Isds::Error Isds::Service::getUserInfoFromLogin(Session *ctx,
     DbUserInfo &userInfo)
 {
 	Error err;
 
-	if (Q_UNLIKELY(ctx == NULL)) {
+	if (Q_UNLIKELY(ctx == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -238,11 +257,15 @@ Isds::Error Isds::Service::getUserInfoFromLogin(struct isds_ctx *ctx,
 	struct isds_DbUserInfo *uInfo = NULL;
 	bool ok = true;
 
-	isds_error ret = isds_GetUserInfoFromLogin(ctx, &uInfo);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_GetUserInfoFromLogin(ctx->ctx(), &uInfo);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	userInfo = (uInfo != NULL) ?
@@ -282,16 +305,16 @@ isds_fulltext_target fulltextSearchType2libisdsFulltextSearchType(
 	}
 }
 
-Isds::Error Isds::Service::isdsSearch2(struct isds_ctx *ctx,
-    const QString &soughtText, enum Type::FulltextSearchType soughtType,
-    enum Type::DbType soughtBoxType, quint64 pageSize, quint64 pageNum,
-    enum Type::NilBool highlight, quint64 &totalMatchingBoxes,
-    quint64 &currentPagePosition, quint64 &currentPageSize,
-    enum Type::NilBool &lastPage, QList<FulltextResult> &boxes)
+Isds::Error Isds::Service::isdsSearch2(Session *ctx, const QString &soughtText,
+    enum Type::FulltextSearchType soughtType, enum Type::DbType soughtBoxType,
+    quint64 pageSize, quint64 pageNum, enum Type::NilBool highlight,
+    quint64 &totalMatchingBoxes, quint64 &currentPagePosition,
+    quint64 &currentPageSize, enum Type::NilBool &lastPage,
+    QList<FulltextResult> &boxes)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || soughtText.isEmpty())) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || soughtText.isEmpty())) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -328,14 +351,18 @@ Isds::Error Isds::Service::isdsSearch2(struct isds_ctx *ctx,
 		iHighlightPtr = &iHighlight;
 	}
 
-	isds_error ret = isds_find_box_by_fulltext(ctx,
-	    soughtText.toUtf8().constData(), &iSoughtType, iSoughtBoxTypePtr,
-	    &iPageSize, &iPageNum, iHighlightPtr, &iTotalMatchingBoxes,
-	    &iCurrentPagePosition, &iCurrentPageSize, &iLastPage, &iBoxes);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_find_box_by_fulltext(ctx->ctx(),
+		    soughtText.toUtf8().constData(), &iSoughtType, iSoughtBoxTypePtr,
+		    &iPageSize, &iPageNum, iHighlightPtr, &iTotalMatchingBoxes,
+		    &iCurrentPagePosition, &iCurrentPageSize, &iLastPage, &iBoxes);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	totalMatchingBoxes = (iTotalMatchingBoxes != NULL) ? *iTotalMatchingBoxes : 0;

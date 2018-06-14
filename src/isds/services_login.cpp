@@ -32,6 +32,7 @@
 #include <cstring> // memcpy
 #include <isds.h>
 #include <QFileInfo>
+#include <QMutexLocker>
 
 #include "src/datovka_shared/isds/error.h"
 #include "src/isds/account_conversion.h" /* Isds::otp_free */
@@ -39,27 +40,32 @@
 #include "src/isds/internal_type_conversion.h"
 #include "src/isds/services_internal.h"
 #include "src/isds/services_login.h"
+#include "src/isds/session.h"
 
-Isds::Error Isds::Login::loginUserName(struct isds_ctx *ctx,
-    const QString &userName, const QString &pwd, bool testingSession)
+Isds::Error Isds::Login::loginUserName(Session *ctx, const QString &userName,
+    const QString &pwd, bool testingSession)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || userName.isEmpty() || pwd.isEmpty())) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || userName.isEmpty() || pwd.isEmpty())) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
 		return err;
 	}
 
-	isds_error ret = isds_login(ctx,
-	    testingSession ? isds_testing_locator : isds_locator,
-	    userName.toUtf8().constData(), pwd.toUtf8().constData(),
-	    NULL, NULL);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		return err;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_login(ctx->ctx(),
+		    testingSession ? isds_testing_locator : isds_locator,
+		    userName.toUtf8().constData(), pwd.toUtf8().constData(),
+		    NULL, NULL);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			return err;
+		}
 	}
 
 	err.setCode(Type::ERR_SUCCESS);
@@ -67,144 +73,151 @@ Isds::Error Isds::Login::loginUserName(struct isds_ctx *ctx,
 	return err;
 }
 
-Isds::Error Isds::Login::loginSystemCert(struct isds_ctx *ctx,
-    const QString &certPath, const QString &passphrase, bool testingSession)
-{
-	Error err;
-
-	if (Q_UNLIKELY((ctx == NULL) || certPath.isEmpty())) {
-		Q_ASSERT(0);
-		err.setCode(Type::ERR_ERROR);
-		err.setLongDescr(tr("Insufficient input."));
-		return err;
-	}
-
-	struct isds_pki_credentials *pki_cred = NULL;
-	isds_error ret = IE_SUCCESS;
-
-	pki_cred = (struct isds_pki_credentials *)std::malloc(sizeof(*pki_cred));
-	if (Q_UNLIKELY(pki_cred == NULL)) {
-		err.setCode(Type::ERR_ERROR);
-		err.setLongDescr(tr("Insufficient memory."));
-		return err;
-	}
-	std::memset(pki_cred, 0, sizeof(*pki_cred));
-
-	const QString ext(QFileInfo(certPath).suffix().toUpper());
-
-	if (ext == QStringLiteral("PEM")) {
-		pki_cred->certificate_format = PKI_FORMAT_PEM;
-		pki_cred->key_format = PKI_FORMAT_PEM;
-	} else if (ext == QStringLiteral("DER")) {
-		pki_cred->certificate_format = PKI_FORMAT_DER;
-		pki_cred->key_format = PKI_FORMAT_DER;
-	} else if (ext == QStringLiteral("P12")) {
-		/* TODO - convert p12 to pem */
-		pki_cred->certificate_format = PKI_FORMAT_PEM;
-		pki_cred->key_format = PKI_FORMAT_PEM;
-	} else {
-		Q_ASSERT(0);
-		err.setCode(Type::ERR_ERROR);
-		goto fail;
-	}
-
-	pki_cred->engine = NULL;
-	pki_cred->certificate = strdup(certPath.toUtf8().constData());
-	pki_cred->key = strdup(certPath.toUtf8().constData());
-	pki_cred->passphrase = strdup(passphrase.toUtf8().constData());
-
-	ret = isds_login(ctx,
-	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
-	    NULL, NULL, pki_cred, NULL);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
-	}
-
-	err.setCode(Type::ERR_SUCCESS);
-
-fail:
-	if (pki_cred != NULL) {
-		isds_pki_credentials_free(&pki_cred);
-	}
-
-	return err;
-}
-
-Isds::Error Isds::Login::loginUserCert(struct isds_ctx *ctx,
-    const QString &dbId, const QString &certPath, const QString &passphrase,
-    bool testingSession)
-{
-	Error err;
-
-	if (Q_UNLIKELY((ctx == NULL) || dbId.isEmpty() || certPath.isEmpty())) {
-		Q_ASSERT(0);
-		err.setCode(Type::ERR_ERROR);
-		err.setLongDescr(tr("Insufficient input."));
-		return err;
-	}
-
-	struct isds_pki_credentials *pki_cred = NULL;
-	isds_error ret = IE_SUCCESS;
-
-	pki_cred = (struct isds_pki_credentials *)std::malloc(sizeof(*pki_cred));
-	if (Q_UNLIKELY(pki_cred == NULL)) {
-		err.setCode(Type::ERR_ERROR);
-		err.setLongDescr(tr("Insufficient memory."));
-		return err;
-	}
-	std::memset(pki_cred, 0, sizeof(*pki_cred));
-
-	const QString ext(QFileInfo(certPath).suffix().toUpper());
-
-	if (ext == QStringLiteral("PEM")) {
-		pki_cred->certificate_format = PKI_FORMAT_PEM;
-		pki_cred->key_format = PKI_FORMAT_PEM;
-	} else if (ext == QStringLiteral("DER")) {
-		pki_cred->certificate_format = PKI_FORMAT_DER;
-		pki_cred->key_format = PKI_FORMAT_DER;
-	} else if (ext == QStringLiteral("P12")) {
-		/* TODO - convert p12 to pem */
-		pki_cred->certificate_format = PKI_FORMAT_PEM;
-		pki_cred->key_format = PKI_FORMAT_PEM;
-	} else {
-		Q_ASSERT(0);
-		err.setCode(Type::ERR_ERROR);
-		goto fail;
-	}
-
-	pki_cred->engine = NULL;
-	pki_cred->certificate = strdup(certPath.toUtf8().constData());
-	pki_cred->key = strdup(certPath.toUtf8().constData());
-	pki_cred->passphrase = strdup(passphrase.toUtf8().constData());
-
-	ret = isds_login(ctx,
-	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
-	    dbId.toUtf8().constData(), NULL, pki_cred, NULL);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
-	}
-
-	err.setCode(Type::ERR_SUCCESS);
-
-fail:
-	if (pki_cred != NULL) {
-		isds_pki_credentials_free(&pki_cred);
-	}
-
-	return err;
-}
-
-Isds::Error Isds::Login::loginUserCertPwd(struct isds_ctx *ctx,
-    const QString &userName, const QString &pwd, const QString &certPath,
+Isds::Error Isds::Login::loginSystemCert(Session *ctx, const QString &certPath,
     const QString &passphrase, bool testingSession)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || userName.isEmpty() || pwd.isEmpty() ||
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || certPath.isEmpty())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_pki_credentials *pki_cred = NULL;
+	isds_error ret = IE_SUCCESS;
+
+	pki_cred = (struct isds_pki_credentials *)std::malloc(sizeof(*pki_cred));
+	if (Q_UNLIKELY(pki_cred == NULL)) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient memory."));
+		return err;
+	}
+	std::memset(pki_cred, 0, sizeof(*pki_cred));
+
+	const QString ext(QFileInfo(certPath).suffix().toUpper());
+
+	if (ext == QStringLiteral("PEM")) {
+		pki_cred->certificate_format = PKI_FORMAT_PEM;
+		pki_cred->key_format = PKI_FORMAT_PEM;
+	} else if (ext == QStringLiteral("DER")) {
+		pki_cred->certificate_format = PKI_FORMAT_DER;
+		pki_cred->key_format = PKI_FORMAT_DER;
+	} else if (ext == QStringLiteral("P12")) {
+		/* TODO - convert p12 to pem */
+		pki_cred->certificate_format = PKI_FORMAT_PEM;
+		pki_cred->key_format = PKI_FORMAT_PEM;
+	} else {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		goto fail;
+	}
+
+	pki_cred->engine = NULL;
+	pki_cred->certificate = strdup(certPath.toUtf8().constData());
+	pki_cred->key = strdup(certPath.toUtf8().constData());
+	pki_cred->passphrase = strdup(passphrase.toUtf8().constData());
+
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		ret = isds_login(ctx->ctx(),
+		    testingSession ? isds_cert_testing_locator : isds_cert_locator,
+		    NULL, NULL, pki_cred, NULL);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+
+fail:
+	if (pki_cred != NULL) {
+		isds_pki_credentials_free(&pki_cred);
+	}
+
+	return err;
+}
+
+Isds::Error Isds::Login::loginUserCert(Session *ctx, const QString &dbId,
+    const QString &certPath, const QString &passphrase, bool testingSession)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || dbId.isEmpty() || certPath.isEmpty())) {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient input."));
+		return err;
+	}
+
+	struct isds_pki_credentials *pki_cred = NULL;
+	isds_error ret = IE_SUCCESS;
+
+	pki_cred = (struct isds_pki_credentials *)std::malloc(sizeof(*pki_cred));
+	if (Q_UNLIKELY(pki_cred == NULL)) {
+		err.setCode(Type::ERR_ERROR);
+		err.setLongDescr(tr("Insufficient memory."));
+		return err;
+	}
+	std::memset(pki_cred, 0, sizeof(*pki_cred));
+
+	const QString ext(QFileInfo(certPath).suffix().toUpper());
+
+	if (ext == QStringLiteral("PEM")) {
+		pki_cred->certificate_format = PKI_FORMAT_PEM;
+		pki_cred->key_format = PKI_FORMAT_PEM;
+	} else if (ext == QStringLiteral("DER")) {
+		pki_cred->certificate_format = PKI_FORMAT_DER;
+		pki_cred->key_format = PKI_FORMAT_DER;
+	} else if (ext == QStringLiteral("P12")) {
+		/* TODO - convert p12 to pem */
+		pki_cred->certificate_format = PKI_FORMAT_PEM;
+		pki_cred->key_format = PKI_FORMAT_PEM;
+	} else {
+		Q_ASSERT(0);
+		err.setCode(Type::ERR_ERROR);
+		goto fail;
+	}
+
+	pki_cred->engine = NULL;
+	pki_cred->certificate = strdup(certPath.toUtf8().constData());
+	pki_cred->key = strdup(certPath.toUtf8().constData());
+	pki_cred->passphrase = strdup(passphrase.toUtf8().constData());
+
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		ret = isds_login(ctx->ctx(),
+		    testingSession ? isds_cert_testing_locator : isds_cert_locator,
+		    dbId.toUtf8().constData(), NULL, pki_cred, NULL);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
+	}
+
+	err.setCode(Type::ERR_SUCCESS);
+
+fail:
+	if (pki_cred != NULL) {
+		isds_pki_credentials_free(&pki_cred);
+	}
+
+	return err;
+}
+
+Isds::Error Isds::Login::loginUserCertPwd(Session *ctx, const QString &userName,
+    const QString &pwd, const QString &certPath, const QString &passphrase,
+    bool testingSession)
+{
+	Error err;
+
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || userName.isEmpty() || pwd.isEmpty() ||
 	               certPath.isEmpty())) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
@@ -246,14 +259,18 @@ Isds::Error Isds::Login::loginUserCertPwd(struct isds_ctx *ctx,
 	pki_cred->key = strdup(certPath.toUtf8().constData());
 	pki_cred->passphrase = strdup(passphrase.toUtf8().constData());
 
-	ret = isds_login(ctx,
-	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
-	    userName.toUtf8().constData(), pwd.toUtf8().constData(),
-	    pki_cred, NULL);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		ret = isds_login(ctx->ctx(),
+		    testingSession ? isds_cert_testing_locator : isds_cert_locator,
+		    userName.toUtf8().constData(), pwd.toUtf8().constData(),
+		    pki_cred, NULL);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	err.setCode(Type::ERR_SUCCESS);
@@ -266,14 +283,13 @@ fail:
 	return err;
 }
 
-Isds::Error Isds::Login::loginUserOtp(struct isds_ctx *ctx,
-    const QString &userName, const QString &pwd, bool testingSession,
-    enum Type::OtpMethod otpMethod, const QString &otpCode,
-    enum Type::OtpResolution &res)
+Isds::Error Isds::Login::loginUserOtp(Session *ctx, const QString &userName,
+    const QString &pwd, bool testingSession, enum Type::OtpMethod otpMethod,
+    const QString &otpCode, enum Type::OtpResolution &res)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || userName.isEmpty() || pwd.isEmpty())) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || userName.isEmpty() || pwd.isEmpty())) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -313,14 +329,18 @@ Isds::Error Isds::Login::loginUserOtp(struct isds_ctx *ctx,
 		std::memcpy(otp->otp_code, old_str, len);
 	}
 
-	ret = isds_login(ctx,
-	    testingSession ? isds_otp_testing_locator : isds_otp_locator,
-	    userName.toUtf8().constData(), pwd.toUtf8().constData(),
-	    NULL, otp);
-	/* May return partial success. */
-	err.setCode(libisds2Error(ret));
-	if (ret != IE_SUCCESS) {
-		err.setLongDescr(IsdsInternal::isdsLongMessage(ctx));
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		ret = isds_login(ctx->ctx(),
+		    testingSession ? isds_otp_testing_locator : isds_otp_locator,
+		    userName.toUtf8().constData(), pwd.toUtf8().constData(),
+		    NULL, otp);
+		/* May return partial success. */
+		err.setCode(libisds2Error(ret));
+		if (ret != IE_SUCCESS) {
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+		}
 	}
 
 	/* Ignoring the conversion status here. */

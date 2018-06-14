@@ -110,8 +110,8 @@ enum TaskSearchOwner::Result TaskSearchOwner::isdsSearch(const QString &userName
     const Isds::DbOwnerInfo &dbOwnerInfo, QList<Isds::DbOwnerInfo> &foundBoxes,
     QString &error, QString &longError)
 {
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return SO_ERROR;
 	}
