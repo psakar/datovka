@@ -347,9 +347,7 @@ Isds::Error Isds::Login::loginUserOtp(Session *ctx, const QString &userName,
 	res = IsdsInternal::libisdsOtpResolution2OtpResolution(otp->resolution);
 
 fail:
-	if (otp != NULL) {
-		Isds::otp_free(&otp);
-	}
+	Isds::otp_free(&otp);
 
 	return err;
 }
