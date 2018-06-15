@@ -21,8 +21,14 @@
  * the two.
  */
 
-#include <cstdlib> /* malloc(3) */
-#include <cstring> /* memset(3) */
+#if defined(__APPLE__) || defined(__clang__)
+#  define __USE_C99_MATH
+#  define _Bool bool
+#else /* !__APPLE__ */
+#  include <cstdbool>
+#endif /* __APPLE__ */
+
+#include <isds.h>
 #include <QFile>
 
 #include "src/common.h"
@@ -31,6 +37,7 @@
 #include "src/io/imports.h"
 #include "src/io/isds_sessions.h"
 #include "src/isds/services.h"
+#include "src/isds/session.h"
 #include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
@@ -150,38 +157,24 @@ IsdsSessions::IsdsSessions(void)
 
 IsdsSessions::~IsdsSessions(void)
 {
-	isds_error status;
-	struct isds_ctx *isdsSession = NULL;
-
 	/* Free all contexts. */
-	foreach (isdsSession, m_sessions) {
-		Q_ASSERT(NULL != isdsSession);
-
-		status = isds_logout(isdsSession);
-		if (IE_SUCCESS != status) {
-			logWarningNL("%s", "Error in ISDS logout procedure.");
-		}
-
-		status = isds_ctx_free(&isdsSession);
-		if (IE_SUCCESS != status) {
-			logWarningNL("%s", "Error freeing ISDS session.");
-		}
+	foreach (Isds::Session *session, m_sessions) {
+		delete session;
 	}
 
-	status = isds_cleanup();
-	if (IE_SUCCESS != status) {
+	if (IE_SUCCESS != isds_cleanup()) {
 		logWarningNL("%s", "Unsuccessful ISDS clean-up.");
 	}
 }
 
 bool IsdsSessions::holdsSession(const QString &userName) const
 {
-	return NULL != m_sessions.value(userName, NULL);
+	return Q_NULLPTR != m_sessions.value(userName, Q_NULLPTR);
 }
 
-struct isds_ctx *IsdsSessions::session(const QString &userName) const
+Isds::Session *IsdsSessions::session(const QString &userName) const
 {
-	return m_sessions.value(userName, NULL);
+	return m_sessions.value(userName, Q_NULLPTR);
 }
 
 bool IsdsSessions::isConnectedToIsds(const QString &userName)
@@ -200,330 +193,41 @@ bool IsdsSessions::isConnectedToIsds(const QString &userName)
 	return Isds::Type::ERR_SUCCESS == pingErr.code();
 }
 
-struct isds_ctx *IsdsSessions::createCleanSession(const QString &userName,
+Isds::Session *IsdsSessions::createCleanSession(const QString &userName,
     unsigned int connectionTimeoutMs)
 {
-	isds_error status;
-	struct isds_ctx *isds_session = NULL;
-
 	/* User name should not exist. */
-	Q_ASSERT(!holdsSession(userName));
+	if (Q_UNLIKELY(holdsSession(userName))) {
+		Q_ASSERT(0);
+		return Q_NULLPTR;
+	}
 
-	isds_session = isds_ctx_create();
-	if (NULL == isds_session) {
+	Isds::Session *session = Isds::Session::createSession(connectionTimeoutMs);
+	if (Q_UNLIKELY(session == Q_NULLPTR)) {
 		logErrorNL("Error creating ISDS session for user '%s'.",
 		    userName.toUtf8().constData());
-		goto fail;
+		return Q_NULLPTR;
 	}
 
-	status = isds_set_timeout(isds_session, connectionTimeoutMs);
-	if (IE_SUCCESS != status) {
-		logErrorNL("Error setting time-out for user '%s'.",
-		    userName.toUtf8().constData());
-		goto fail;
-	}
-
-	m_sessions.insert(userName, isds_session);
-	return isds_session;
-
-fail:
-	if (NULL != isds_session) {
-		status = isds_ctx_free(&isds_session);
-		if (IE_SUCCESS != status) {
-			logWarningNL(
-			    "Error freeing ISDS session for user '%s'.",
-			    userName.toUtf8().constData());
-		}
-	}
-	return NULL;
+	m_sessions.insert(userName, session);
+	return session;
 }
 
 bool IsdsSessions::setSessionTimeout(const QString &userName,
     unsigned int timeoutMs)
 {
-	struct isds_ctx *isds_session = m_sessions.value(userName, NULL);
-	if (NULL == isds_session) {
+	Isds::Session *session = m_sessions.value(userName, Q_NULLPTR);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return false;
 	}
 
-	isds_error status = isds_set_timeout(isds_session, timeoutMs);
-	if (IE_SUCCESS != status) {
+	bool ret = session->setTimeout(timeoutMs);
+	if (Q_UNLIKELY(!ret)) {
 		logErrorNL("Error setting time-out for user '%s'.",
 		    userName.toUtf8().constData());
 		return false;
 	}
 
 	return true;
-}
-
-
-/* ========================================================================= */
-/*
- * Log in using user name and password.
- */
-isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, bool testingSession)
-/* ========================================================================= */
-{
-	Q_ASSERT(0 != isdsSession);
-	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(!pwd.isEmpty());
-
-	return isds_login(isdsSession,
-	    testingSession ? isds_testing_locator : isds_locator,
-	    userName.toUtf8().constData(),
-	    pwd.toUtf8().constData(),
-	    NULL, NULL);
-}
-
-
-/* ========================================================================= */
-/*
- * Log in using system certificate.
- */
-isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
-    const QString &certPath, const QString &passphrase, bool testingSession)
-/* ========================================================================= */
-{
-	Q_ASSERT(0 != isdsSession);
-	Q_ASSERT(!certPath.isEmpty());
-
-	isds_error status = IE_ERROR;
-
-	if (certPath.isNull() || certPath.isEmpty()) {
-		return status;
-	}
-
-	isds_pki_credentials *pki_credentials = NULL;
-	pki_credentials = (struct isds_pki_credentials *)
-	    malloc(sizeof(struct isds_pki_credentials));
-	if (pki_credentials == NULL) {
-		return status;
-	}
-	memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
-
-	QFileInfo certFile(certPath);
-	QString ext = certFile.suffix();
-	ext = ext.toUpper();
-
-	if (ext == "PEM") {
-		pki_credentials->certificate_format = PKI_FORMAT_PEM;
-		pki_credentials->key_format = PKI_FORMAT_PEM;
-	} else if (ext == "DER") {
-		pki_credentials->certificate_format = PKI_FORMAT_DER;
-		pki_credentials->key_format = PKI_FORMAT_DER;
-	} else if (ext == "P12") {
-		/* TODO - convert p12 to pem */
-		pki_credentials->certificate_format = PKI_FORMAT_PEM;
-		pki_credentials->key_format = PKI_FORMAT_PEM;
-	}
-
-	pki_credentials->engine = NULL;
-	pki_credentials->certificate = strdup(certPath.toUtf8().constData());
-	pki_credentials->key = strdup(certPath.toUtf8().constData());
-	pki_credentials->passphrase = strdup(passphrase.toUtf8().constData());
-
-	status = isds_login(isdsSession,
-	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
-	    NULL, NULL, pki_credentials, NULL);
-
-	isds_pki_credentials_free(&pki_credentials);
-
-	return status;
-
-}
-
-
-/* ========================================================================= */
-/*
- * Log in using user certificate without password. Username = IDdatabox
- */
-isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
-    const QString &idBox, const QString &certPath, const QString &passphrase,
-    bool testingSession)
-/* ========================================================================= */
-{
-	Q_ASSERT(0 != isdsSession);
-	Q_ASSERT(!idBox.isEmpty());
-	Q_ASSERT(!certPath.isEmpty());
-
-	isds_error status = IE_ERROR;
-
-	if (certPath.isNull() || certPath.isEmpty()) {
-		return status;
-	}
-
-	if (idBox.isNull() || idBox.isEmpty()) {
-		return status;
-	}
-
-	isds_pki_credentials *pki_credentials = NULL;
-
-	pki_credentials = (struct isds_pki_credentials *)
-	    malloc(sizeof(struct isds_pki_credentials));
-	if (pki_credentials == NULL) {
-		return status;
-	}
-	memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
-
-	QFileInfo certFile(certPath);
-	QString ext = certFile.suffix();
-	ext = ext.toUpper();
-
-	if (ext == "PEM") {
-		pki_credentials->certificate_format = PKI_FORMAT_PEM;
-		pki_credentials->key_format = PKI_FORMAT_PEM;
-	} else if (ext == "DER") {
-		pki_credentials->certificate_format = PKI_FORMAT_DER;
-		pki_credentials->key_format = PKI_FORMAT_DER;
-	} else if (ext == "P12") {
-		/* TODO - convert p12 to pem */
-		pki_credentials->certificate_format = PKI_FORMAT_PEM;
-		pki_credentials->key_format = PKI_FORMAT_PEM;
-	}
-
-	pki_credentials->engine = NULL;
-	pki_credentials->certificate = strdup(certPath.toUtf8().constData());
-	pki_credentials->key = strdup(certPath.toUtf8().constData());
-	pki_credentials->passphrase = strdup(passphrase.toUtf8().constData());
-
-	status = isds_login(isdsSession,
-	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
-	    idBox.toUtf8().constData(), NULL, pki_credentials, NULL);
-
-	isds_pki_credentials_free(&pki_credentials);
-
-	return status;
-}
-
-
-/* ========================================================================= */
-/*!
- * @brief Log in using user certificate with password.
- */
-isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, const QString &certPath,
-    const QString &passphrase, bool testingSession)
-/* ========================================================================= */
-{
-	Q_ASSERT(0 != isdsSession);
-	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(!certPath.isEmpty());
-	Q_ASSERT(!pwd.isEmpty());
-
-	isds_error status = IE_ERROR;
-
-	if (certPath.isNull() || certPath.isEmpty()) {
-		return status;
-	}
-
-	if (userName.isNull() || userName.isEmpty()) {
-		return status;
-	}
-
-	QString password = pwd;
-	isds_pki_credentials *pki_credentials = NULL;
-
-	pki_credentials = (struct isds_pki_credentials *)
-	    malloc(sizeof(struct isds_pki_credentials));
-	if (pki_credentials == NULL) {
-		return status;
-	}
-	memset(pki_credentials, 0, sizeof(struct isds_pki_credentials));
-
-	QFileInfo certFile(certPath);
-	QString ext = certFile.suffix();
-	ext = ext.toUpper();
-
-	if (ext == "PEM") {
-		pki_credentials->certificate_format = PKI_FORMAT_PEM;
-		pki_credentials->key_format = PKI_FORMAT_PEM;
-	} else if (ext == "DER") {
-		pki_credentials->certificate_format = PKI_FORMAT_DER;
-		pki_credentials->key_format = PKI_FORMAT_DER;
-	} else if (ext == "P12") {
-		/* TODO - convert p12 to pem */
-		pki_credentials->certificate_format = PKI_FORMAT_PEM;
-		pki_credentials->key_format = PKI_FORMAT_PEM;
-	}
-
-	pki_credentials->engine = NULL;
-	pki_credentials->certificate = strdup(certPath.toUtf8().constData());
-	pki_credentials->key = strdup(certPath.toUtf8().constData());
-	pki_credentials->passphrase = strdup(passphrase.toUtf8().constData());
-
-	status = isds_login(isdsSession,
-	    testingSession ? isds_cert_testing_locator : isds_cert_locator,
-	    userName.toUtf8().constData(), password.toUtf8().constData(),
-	    pki_credentials, NULL);
-
-	isds_pki_credentials_free(&pki_credentials);
-
-	return status;
-}
-
-
-/* ========================================================================= */
-/*
- * Log in using opt.
- */
-isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, bool testingSession,
-    enum AcntSettings::LogInMethod otpMethod, const QString &otpCode,
-    isds_otp_resolution &res)
-/* ========================================================================= */
-{
-	Q_ASSERT(0 != isdsSession);
-	Q_ASSERT(!userName.isEmpty());
-	Q_ASSERT(!pwd.isEmpty());
-
-	struct isds_otp *otp = NULL;
-	isds_error status = IE_ERROR;
-
-	if (userName.isEmpty()) {
-		goto fail;
-	}
-
-	otp = (struct isds_otp *) malloc(sizeof(struct isds_otp));
-	if (otp == NULL) {
-		goto fail;
-	}
-	memset(otp, 0, sizeof(struct isds_otp));
-
-	if (otpMethod == AcntSettings::LIM_UNAME_PWD_HOTP) {
-		otp->method = OTP_HMAC;
-	} else {
-		otp->method = OTP_TIME;
-	}
-
-	if (otpCode.isEmpty()) {
-		otp->otp_code = NULL;
-	} else {
-		QByteArray optCodeBytes = otpCode.toLocal8Bit();
-		const char *old_str =
-		    optCodeBytes.data(); /* '\0' terminated */
-		size_t len = strlen(old_str) + 1;
-		otp->otp_code = (char *) malloc(len);
-		if (NULL == otp->otp_code) {
-			goto fail;
-		}
-		memcpy(otp->otp_code, old_str, len);
-	}
-
-	status = isds_login(isdsSession,
-	    testingSession ? isds_otp_testing_locator : isds_otp_locator,
-	    userName.toUtf8().constData(), pwd.toUtf8().constData(),
-	    NULL, otp);
-
-	res = otp->resolution;
-
-fail:
-	if (NULL != otp) {
-		if (NULL != otp->otp_code) {
-			free(otp->otp_code);
-		}
-		free(otp);
-	}
-	return status;
 }

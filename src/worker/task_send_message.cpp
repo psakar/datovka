@@ -119,12 +119,12 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 
 	enum TaskSendMessage::Result ret = SM_ERR;
 	qint64 dmId = -1;
-	struct isds_ctx *session = NULL;
+	Isds::Session *session = Q_NULLPTR;
 	QString isdsError, isdsLongError;
 	Isds::Error err;
 
 	session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		logErrorNL("%s", "Missing ISDS session.");
 		ret = SM_ERR;

@@ -101,8 +101,8 @@ enum TaskAuthenticateMessage::Result TaskAuthenticateMessage::authenticateMessag
 		return AUTH_DATA_ERROR;
 	}
 
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return AUTH_ERR;
 	}

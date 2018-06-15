@@ -120,8 +120,8 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadDeliveryInfo(
 {
 	debugFuncCall();
 
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return DM_ERR;
 	}
@@ -168,8 +168,8 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 0);
 
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return DM_ERR;
 	}
@@ -281,8 +281,8 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
     const QString &userName, qint64 dmId, MessageDb &messageDb,
     QString &error, QString &longError)
 {
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (Q_UNLIKELY(NULL == session)) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return DM_ERR;
 	}
@@ -318,8 +318,8 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::markMessageAsDownloaded(
 {
 	debugFuncCall();
 
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return DM_ERR;
 	}

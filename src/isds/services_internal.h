@@ -24,8 +24,7 @@
 /*
  * This header file must not be included in other header files.
  *
- * Functions in this compilation unit serve for converting types
- * defined in libisds.
+ * It provides functions needed for internal conversion.
  */
 
 #pragma once
@@ -39,32 +38,26 @@
 
 #include <isds.h>
 
-#include "src/datovka_shared/isds/types.h"
-
 namespace IsdsInternal {
 
 	/*!
-	 * @brief Converts data box types.
+	 * @brief Wraps the isds_long_message().
+	 *
+	 * @param[in] ctx LIbisds context.
 	 */
-	enum Isds::Type::DbType libisdsDbType2DbType(const isds_DbType ibt,
-	    bool *ok = Q_NULLPTR);
-	isds_DbType dbType2libisdsDbType(enum Isds::Type::DbType bt,
-	    bool *ok = Q_NULLPTR);
-
-	/*!
-	 * @brief Converts OTP method.
-	 */
-	enum Isds::Type::OtpMethod libisdsOtpMethod2OtpMethod(
-	    isds_otp_method iom, bool *ok = Q_NULLPTR);
-	isds_otp_method otpMethod2libisdsOtpMethod(
-	    enum Isds::Type::OtpMethod om, bool *ok = Q_NULLPTR);
-
-	/*!
-	 * @brief Converts OTP resolution.
-	 */
-	enum Isds::Type::OtpResolution libisdsOtpResolution2OtpResolution(
-	    isds_otp_resolution ior, bool *ok = Q_NULLPTR);
-	isds_otp_resolution otpResolution2libisdsOtpResolution(
-	    enum Isds::Type::OtpResolution ores, bool *ok = Q_NULLPTR);
+	static inline
+	QString isdsLongMessage(const struct isds_ctx *ctx)
+	{
+#ifdef WIN32
+		/* The function returns strings in local encoding. */
+		return QString::fromLocal8Bit(isds_long_message(ctx));
+		/*
+		 * TODO -- Is there a mechanism how to force the local encoding
+		 * into libisds to be UTF-8?
+		 */
+#else /* !WIN32 */
+		return QString::fromUtf8(isds_long_message(ctx));
+#endif /* WIN32 */
+	}
 
 }

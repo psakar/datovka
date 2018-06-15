@@ -25,9 +25,12 @@
 #include <QString>
 #include <QtTest/QtTest>
 
+#include "src/datovka_shared/isds/error.h"
+#include "src/datovka_shared/isds/types.h"
 #include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/services_login.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
@@ -344,24 +347,24 @@ void TestTaskInfo::loadCredentials(LoginCredentials &cred, int line)
 	QVERIFY(!cred.pwd.isEmpty());
 
 	/* Log into ISDS. */
-	struct isds_ctx *ctx =
+	Isds::Session *ctx =
 	    GlobInstcs::isdsSessionsPtr->session(cred.userName);
 	if (!GlobInstcs::isdsSessionsPtr->holdsSession(cred.userName)) {
-		QVERIFY(ctx == NULL);
+		QVERIFY(ctx == Q_NULLPTR);
 		ctx = GlobInstcs::isdsSessionsPtr->createCleanSession(
 		    cred.userName,
 		    GlobInstcs::prefsPtr->isdsDownloadTimeoutMs);
 	}
-	if (ctx == NULL) {
+	if (ctx == Q_NULLPTR) {
 		QSKIP("Cannot obtain communication context.");
 	}
-	QVERIFY(ctx != NULL);
-	isds_error err = isdsLoginUserName(ctx, cred.userName, cred.pwd,
-	    m_testing);
-	if (err != IE_SUCCESS) {
+	QVERIFY(ctx != Q_NULLPTR);
+	Isds::Error err = Isds::Login::loginUserName(ctx, cred.userName,
+	    cred.pwd, m_testing);
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
 		QSKIP("Error connecting into ISDS.");
 	}
-	QVERIFY(err == IE_SUCCESS);
+	QVERIFY(err.code() == Isds::Type::ERR_SUCCESS);
 }
 
 QObject *newTestTaskInfo(void)

@@ -85,14 +85,14 @@ qint64 TaskDownloadCreditInfo::downloadCreditFromISDS(const QString &userName,
 	QString email;
 	QList<Isds::CreditEvent> history;
 
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return -1;
 	}
 
-	Isds::Error err = Isds::Service::dataBoxCreditInfo(session,
-	    dbId, QDate(), QDate(), credit, email, history);
+	Isds::Error err = Isds::Service::dataBoxCreditInfo(session, dbId,
+	    QDate(), QDate(), credit, email, history);
 	if (err.code() != Isds::Type::ERR_SUCCESS) {
 		error = Isds::Description::descrError(err.code());
 		longError = err.longDescr();

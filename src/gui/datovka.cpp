@@ -3250,7 +3250,7 @@ bool MainWindow::synchroniseSelectedAccount(QString userName)
 		const QString key("userPrivils");
 		if (userEntry.hasValue(key)) {
 			int privils = userEntry.value(key).toInt();
-			if (!(privils & (PRIVIL_READ_NON_PERSONAL | PRIVIL_READ_ALL))) {
+			if (!(privils & (Isds::Type::PRIVIL_READ_NON_PERSONAL | Isds::Type::PRIVIL_READ_ALL))) {
 				logInfo(
 				    "User '%s' has no privileges to download received messages. Won't try downloading messages.\n",
 				    userName.toUtf8().constData());

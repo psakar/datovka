@@ -101,6 +101,51 @@ isds_DbType IsdsInternal::dbType2libisdsDbType(enum Isds::Type::DbType bt,
 	return ibt;
 }
 
+enum Isds::Type::OtpMethod IsdsInternal::libisdsOtpMethod2OtpMethod(
+    isds_otp_method iom, bool *ok)
+{
+	bool iOk = true;
+	enum Isds::Type::OtpMethod method = Isds::Type::OM_UNKNOWN;
+
+	switch (iom) {
+	case OTP_HMAC: method = Isds::Type::OM_HMAC; break;
+	case OTP_TIME: method = Isds::Type::OM_TIME; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return method;
+}
+
+isds_otp_method IsdsInternal::otpMethod2libisdsOtpMethod(
+    enum Isds::Type::OtpMethod om, bool *ok)
+{
+	bool iOk = true;
+	isds_otp_method iom = OTP_HMAC;
+
+	switch (om) {
+	/*
+	 * Isds::Type::OM_UNKNOWN same as default.
+	 */
+	case Isds::Type::OM_HMAC: iom = OTP_HMAC; break;
+	case Isds::Type::OM_TIME: iom = OTP_TIME; break;
+	default:
+		Q_ASSERT(0);
+		iOk = false;
+		break;
+	}
+
+	if (ok != Q_NULLPTR) {
+		*ok = iOk;
+	}
+	return iom;
+}
+
 enum Isds::Type::OtpResolution IsdsInternal::libisdsOtpResolution2OtpResolution(
     isds_otp_resolution ior, bool *ok)
 {

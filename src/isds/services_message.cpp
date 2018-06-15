@@ -31,32 +31,15 @@
 #include <cstdlib> // malloc
 #include <cstring> // memcpy
 #include <isds.h>
+#include <QMutexLocker>
 
 #include "src/datovka_shared/isds/error.h"
 #include "src/datovka_shared/isds/message_interface.h"
 #include "src/isds/error_conversion.h"
 #include "src/isds/message_conversion.h"
 #include "src/isds/services.h"
-
-/*!
- * @brief Wraps the isds_long_message().
- *
- * @param[in] ctx LIbisds context.
- */
-static inline
-QString isdsLongMessage(const struct isds_ctx *ctx)
-{
-#ifdef WIN32
-	/* The function returns strings in local encoding. */
-	return QString::fromLocal8Bit(isds_long_message(ctx));
-	/*
-	 * TODO -- Is there a mechanism how to force the local encoding
-	 * into libisds to be UTF-8?
-	 */
-#else /* !WIN32 */
-	return QString::fromUtf8(isds_long_message(ctx));
-#endif /* WIN32 */
-}
+#include "src/isds/services_internal.h"
+#include "src/isds/session.h"
 
 namespace Isds {
 
@@ -121,7 +104,7 @@ namespace Isds {
 		 */
 		static
 		Error messageListGetterService(enum MessageListGetter mlg,
-		    struct isds_ctx *ctx, Type::DmFiltStates dmStatusFilter,
+		    Session *ctx, Type::DmFiltStates dmStatusFilter,
 		    unsigned long int dmOffset, unsigned long int *dmLimit,
 		    QList<Message> &messages);
 
@@ -168,7 +151,7 @@ namespace Isds {
 		 */
 		static
 		Error messageGetterService(enum MessageGetter mg,
-		    struct isds_ctx *ctx, qint64 dmId, Message &message);
+		    Session *ctx, qint64 dmId, Message &message);
 	};
 
 }
@@ -183,13 +166,13 @@ int dmFiltState2libisdsMessageStatus(Isds::Type::DmFiltStates fs)
 }
 
 Isds::Error Isds::ServicePrivate::messageListGetterService(
-    enum MessageListGetter mlg, struct isds_ctx *ctx,
-    Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
-    unsigned long int *dmLimit, QList<Message> &messages)
+    enum MessageListGetter mlg, Session *ctx, Type::DmFiltStates dmStatusFilter,
+    unsigned long int dmOffset, unsigned long int *dmLimit,
+    QList<Message> &messages)
 {
 	Error err;
 
-	if (Q_UNLIKELY(ctx == NULL)) {
+	if (Q_UNLIKELY(ctx == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -199,13 +182,17 @@ Isds::Error Isds::ServicePrivate::messageListGetterService(
 	struct isds_list *msgList = NULL;
 	bool ok = true;
 
-	isds_error ret = messageListGetterFunc(mlg)(ctx, NULL, NULL, NULL,
-	    dmFiltState2libisdsMessageStatus(dmStatusFilter), dmOffset, dmLimit,
-	    &msgList);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = messageListGetterFunc(mlg)(ctx->ctx(), NULL,
+		    NULL, NULL, dmFiltState2libisdsMessageStatus(dmStatusFilter),
+		    dmOffset, dmLimit, &msgList);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	messages = (msgList != NULL) ?
@@ -227,11 +214,11 @@ fail:
 }
 
 Isds::Error Isds::ServicePrivate::messageGetterService(enum MessageGetter mg,
-    struct isds_ctx *ctx, qint64 dmId, Message &message)
+    Session *ctx, qint64 dmId, Message &message)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || (dmId < 0))) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -241,12 +228,16 @@ Isds::Error Isds::ServicePrivate::messageGetterService(enum MessageGetter mg,
 	struct isds_message *msg = NULL;
 	bool ok = true;
 
-	isds_error ret = messageGetterFunc(mg)(ctx,
-	    QString::number(dmId).toUtf8().constData(), &msg);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = messageGetterFunc(mg)(ctx->ctx(),
+		    QString::number(dmId).toUtf8().constData(), &msg);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	message = (msg != NULL) ? libisds2message(msg, &ok) : Message();
@@ -266,36 +257,40 @@ fail:
 	return err;
 }
 
-Isds::Error Isds::Service::authenticateMessage(struct isds_ctx *ctx,
+Isds::Error Isds::Service::authenticateMessage(Session *ctx,
     const QByteArray &raw)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || raw.isEmpty())) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || raw.isEmpty())) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
 		return err;
 	}
 
-	isds_error ret = isds_authenticate_message(ctx, raw.constData(),
-	    raw.size());
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		return err;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_authenticate_message(ctx->ctx(),
+		    raw.constData(), raw.size());
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			return err;
+		}
 	}
 
 	err.setCode(Type::ERR_SUCCESS);
 	return err;
 }
 
-Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx,
-    const Message &message, qint64 &dmId)
+Isds::Error Isds::Service::createMessage(Session *ctx, const Message &message,
+    qint64 &dmId)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || message.isNull())) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || message.isNull())) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -311,11 +306,15 @@ Isds::Error Isds::Service::createMessage(struct isds_ctx *ctx,
 		goto fail;
 	}
 
-	ret = isds_send_message(ctx, msg);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		ret = isds_send_message(ctx->ctx(), msg);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	if (msg->envelope->dmID == NULL) {
@@ -344,31 +343,35 @@ fail:
 	return err;
 }
 
-Isds::Error Isds::Service::eraseMessage(struct isds_ctx *ctx, qint64 dmId,
+Isds::Error Isds::Service::eraseMessage(Session *ctx, qint64 dmId,
     bool dmIncoming)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || (dmId < 0))) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
 		return err;
 	}
 
-	isds_error ret = isds_delete_message_from_storage(ctx,
-	    QString::number(dmId).toUtf8().constData(), dmIncoming);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		return err;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_delete_message_from_storage(ctx->ctx(),
+		    QString::number(dmId).toUtf8().constData(), dmIncoming);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			return err;
+		}
 	}
 
 	err.setCode(Type::ERR_SUCCESS);
 	return err;
 }
 
-Isds::Error Isds::Service::getListOfReceivedMessages(struct isds_ctx *ctx,
+Isds::Error Isds::Service::getListOfReceivedMessages(Session *ctx,
     Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
     unsigned long int *dmLimit, QList<Message> &messages)
 {
@@ -377,7 +380,7 @@ Isds::Error Isds::Service::getListOfReceivedMessages(struct isds_ctx *ctx,
 	    dmLimit, messages);
 }
 
-Isds::Error Isds::Service::getListOfSentMessages(struct isds_ctx *ctx,
+Isds::Error Isds::Service::getListOfSentMessages(Session *ctx,
     Type::DmFiltStates dmStatusFilter, unsigned long int dmOffset,
     unsigned long int *dmLimit, QList<Message> &messages)
 {
@@ -418,12 +421,12 @@ enum Isds::Type::SenderType libisdsSenderType2SenderType(isds_sender_type st,
 	return type;
 }
 
-Isds::Error Isds::Service::getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
+Isds::Error Isds::Service::getMessageAuthor(Session *ctx, qint64 dmId,
     enum Type::SenderType &userType, QString &authorName)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || (dmId < 0))) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -434,12 +437,17 @@ Isds::Error Isds::Service::getMessageAuthor(struct isds_ctx *ctx, qint64 dmId,
 	char *s_name = NULL;
 	bool ok = true;
 
-	isds_error ret = isds_get_message_sender(ctx,
-	    QString::number(dmId).toUtf8().constData(), &s_type, NULL, &s_name);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_get_message_sender(ctx->ctx(),
+		    QString::number(dmId).toUtf8().constData(), &s_type, NULL,
+		    &s_name);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	userType = (s_type != NULL) ?
@@ -464,57 +472,59 @@ fail:
 	return err;
 }
 
-Isds::Error Isds::Service::getSignedDeliveryInfo(struct isds_ctx *ctx,
-    qint64 dmId, Message &message)
+Isds::Error Isds::Service::getSignedDeliveryInfo(Session *ctx, qint64 dmId,
+    Message &message)
 {
 	return ServicePrivate::messageGetterService(
 	    ServicePrivate::MG_SIGNED_DELIVERY_INFO, ctx, dmId, message);
 }
 
-Isds::Error Isds::Service::markMessageAsDownloaded(struct isds_ctx *ctx,
-    qint64 dmId)
+Isds::Error Isds::Service::markMessageAsDownloaded(Session *ctx, qint64 dmId)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || (dmId < 0))) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
 		return err;
 	}
 
-	isds_error ret = isds_mark_message_read(ctx,
-	    QString::number(dmId).toUtf8().constData());
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		return err;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_mark_message_read(ctx->ctx(),
+		    QString::number(dmId).toUtf8().constData());
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			return err;
+		}
 	}
 
 	err.setCode(Type::ERR_SUCCESS);
 	return err;
 }
 
-Isds::Error Isds::Service::signedReceivedMessageDownload(struct isds_ctx *ctx,
+Isds::Error Isds::Service::signedReceivedMessageDownload(Session *ctx,
     qint64 dmId, Message &message)
 {
 	return ServicePrivate::messageGetterService(
 	    ServicePrivate::MG_SIGNED_RECEIVED_MESSAGE, ctx, dmId, message);
 }
 
-Isds::Error Isds::Service::signedSentMessageDownload(struct isds_ctx *ctx,
-    qint64 dmId, Message &message)
+Isds::Error Isds::Service::signedSentMessageDownload(Session *ctx, qint64 dmId,
+    Message &message)
 {
 	return ServicePrivate::messageGetterService(
 	    ServicePrivate::MG_SIGNED_SENT_MESSAGE, ctx, dmId, message);
 }
 
-Isds::Error Isds::Service::verifyMessage(struct isds_ctx *ctx, qint64 dmId,
-    Hash &hash)
+Isds::Error Isds::Service::verifyMessage(Session *ctx, qint64 dmId, Hash &hash)
 {
 	Error err;
 
-	if (Q_UNLIKELY((ctx == NULL) || (dmId < 0))) {
+	if (Q_UNLIKELY((ctx == Q_NULLPTR) || (dmId < 0))) {
 		Q_ASSERT(0);
 		err.setCode(Type::ERR_ERROR);
 		err.setLongDescr(tr("Insufficient input."));
@@ -524,12 +534,16 @@ Isds::Error Isds::Service::verifyMessage(struct isds_ctx *ctx, qint64 dmId,
 	struct isds_hash *iHash = NULL;
 	bool ok = true;
 
-	isds_error ret = isds_download_message_hash(ctx,
-	    QString::number(dmId).toUtf8().constData(), &iHash);
-	if (ret != IE_SUCCESS) {
-		err.setCode(libisds2Error(ret));
-		err.setLongDescr(isdsLongMessage(ctx));
-		goto fail;
+	{
+		QMutexLocker locker(ctx->mutex());
+
+		isds_error ret = isds_download_message_hash(ctx->ctx(),
+		    QString::number(dmId).toUtf8().constData(), &iHash);
+		if (ret != IE_SUCCESS) {
+			err.setCode(libisds2Error(ret));
+			err.setLongDescr(IsdsInternal::isdsLongMessage(ctx->ctx()));
+			goto fail;
+		}
 	}
 
 	hash = (iHash != NULL) ? libisds2hash(iHash, &ok) : Hash();

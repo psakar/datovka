@@ -363,7 +363,9 @@ SOURCES += \
     src/isds/message_functions.cpp \
     src/isds/services_account.cpp \
     src/isds/services_box.cpp \
+    src/isds/services_login.cpp \
     src/isds/services_message.cpp \
+    src/isds/session.cpp \
     src/isds/to_text_conversion.cpp \
     src/isds/type_description.cpp \
     src/log/log.cpp \
@@ -510,6 +512,9 @@ HEADERS += \
     src/isds/message_conversion.h \
     src/isds/message_functions.h \
     src/isds/services.h \
+    src/isds/services_internal.h \
+    src/isds/services_login.h \
+    src/isds/session.h \
     src/isds/to_text_conversion.h \
     src/isds/type_description.h \
     src/log/log_c.h \

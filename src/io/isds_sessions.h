@@ -23,18 +23,13 @@
 
 #pragma once
 
-#if defined(__APPLE__) || defined(__clang__)
-#  define __USE_C99_MATH
-#  define _Bool bool
-#else /* !__APPLE__ */
-#  include <cstdbool>
-#endif /* __APPLE__ */
-
-#include <isds.h>
 #include <QMap>
 #include <QString>
 
-#include "src/settings/account.h"
+namespace Isds {
+	/* Forward class declaration. */
+	class Session;
+}
 
 /*!
  * @brief Container holding context structures of libisds.
@@ -64,7 +59,7 @@ public:
 	 *
 	 * @param[in] userName Username identifying the account.
 	 */
-	struct isds_ctx *session(const QString &userName) const;
+	Isds::Session *session(const QString &userName) const;
 
 	/*!
 	 * @brief Ping ISDS. Test whether connection is active.
@@ -78,90 +73,21 @@ public:
 	 *
 	 * @param[in] userName Username identifying the newly created account.
 	 * @param[in] connectionTimeoutMs Connection timeout in milliseconds.
-	 * @return Pointer to new session or NULL on failure.
+	 * @return Pointer to new session or Q_NULLPTR on failure.
 	 */
-	struct isds_ctx *createCleanSession(const QString &userName,
+	Isds::Session *createCleanSession(const QString &userName,
 	    unsigned int connectionTimeoutMs);
 
 	/*!
 	 * @brief Set time-out in milliseconds to session associated to
 	 *     user name.
 	 *
+	 * @param[in] userName Username identifying the newly created account.
+	 * @param[in] timeoutMs Connection timeout in milliseconds.
 	 * @return True on success.
 	 */
 	bool setSessionTimeout(const QString &userName, unsigned int timeoutMs);
 
 private:
-	QMap<QString, struct isds_ctx *> m_sessions; /*!< Holds sessions. */
+	QMap<QString, Isds::Session *> m_sessions; /*!< Holds sessions. */
 };
-
-/*!
- * @brief Log in using user name and password.
- */
-isds_error isdsLoginUserName(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, bool testingSession);
-
-/*!
- * @brief Log in using system certificate.
- */
-isds_error isdsLoginSystemCert(struct isds_ctx *isdsSession,
-    const QString &certPath, const QString &passphrase, bool testingSession);
-
-/*!
- * @brief Log in using user certificate without password.
- * NOTE: It need ID of Databox instead username
- */
-isds_error isdsLoginUserCert(struct isds_ctx *isdsSession,
-    const QString &idBox, const QString &certPath, const QString &passphrase,
-    bool testingSession);
-
-/*!
- * @brief Log in using user certificate with password.
- */
-isds_error isdsLoginUserCertPwd(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, const QString &certPath,
-    const QString &passphrase, bool testingSession);
-
-/*!
- * @brief Log in using username, pwd and OTP.
- */
-isds_error isdsLoginUserOtp(struct isds_ctx *isdsSession,
-    const QString &userName, const QString &pwd, bool testingSession,
-    enum AcntSettings::LogInMethod otpMethod, const QString &otpCode,
-    isds_otp_resolution &res);
-
-/*!
- * @brief Wraps isds_strerror().
- */
-inline
-QString isdsStrError(const isds_error error)
-{
-#ifdef WIN32
-	/* The function returns strings in local encoding. */
-	return QString::fromLocal8Bit(isds_strerror(error));
-	/*
-	 * TODO -- Is there a mechanism how to force the local encoding
-	 * into libisds to be UTF-8?
-	 */
-#else /* !WIN32 */
-	return QString::fromUtf8(isds_strerror(error));
-#endif /* WIN32 */
-}
-
-/*!
- * @brief Wraps the isds_long_message().
- */
-inline
-QString isdsLongMessage(const struct isds_ctx *context)
-{
-#ifdef WIN32
-	/* The function returns strings in local encoding. */
-	return QString::fromLocal8Bit(isds_long_message(context));
-	/*
-	 * TODO -- Is there a mechanism how to force the local encoding
-	 * into libisds to be UTF-8?
-	 */
-#else /* !WIN32 */
-	return QString::fromUtf8(isds_long_message(context));
-#endif /* WIN32 */
-}

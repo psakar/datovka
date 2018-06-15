@@ -146,12 +146,12 @@ void TaskDownloadMessageList::run(void)
  */
 static
 Isds::Error getMessageList(QList<Isds::Message> &messageList,
-    enum MessageDirection msgDirect, struct isds_ctx *session,
+    enum MessageDirection msgDirect, Isds::Session *session,
     Isds::Type::DmFiltStates dmStatusFilter, unsigned long int *dmLimit)
 {
 	Isds::Error err;
 
-	if (Q_UNLIKELY(session == NULL)) {
+	if (Q_UNLIKELY(session == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		err.setCode(Isds::Type::ERR_ERROR);
 		return err;
@@ -192,8 +192,8 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageLis
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 10);
 
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (NULL == session) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return DL_ERR;
 	}
@@ -372,8 +372,8 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::downloadMessageSta
 {
 	debugFuncCall();
 
-	struct isds_ctx *session = GlobInstcs::isdsSessionsPtr->session(userName);
-	if (Q_UNLIKELY(NULL == session)) {
+	Isds::Session *session = GlobInstcs::isdsSessionsPtr->session(userName);
+	if (Q_UNLIKELY(Q_NULLPTR == session)) {
 		Q_ASSERT(0);
 		return DL_ERR;
 	}
