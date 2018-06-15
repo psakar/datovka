@@ -4453,48 +4453,74 @@ of postal data messages active.</source>
     </message>
 </context>
 <context>
-    <name>Isds::Service</name>
+    <name>Isds::Login</name>
     <message>
-        <location filename="../src/isds/services_account.cpp" line="71"/>
-        <location filename="../src/isds/services_account.cpp" line="126"/>
-        <location filename="../src/isds/services_box.cpp" line="72"/>
-        <location filename="../src/isds/services_box.cpp" line="136"/>
-        <location filename="../src/isds/services_box.cpp" line="159"/>
-        <location filename="../src/isds/services_box.cpp" line="213"/>
-        <location filename="../src/isds/services_box.cpp" line="253"/>
-        <location filename="../src/isds/services_box.cpp" line="316"/>
-        <location filename="../src/isds/services_message.cpp" line="277"/>
-        <location filename="../src/isds/services_message.cpp" line="301"/>
-        <location filename="../src/isds/services_message.cpp" line="355"/>
-        <location filename="../src/isds/services_message.cpp" line="429"/>
-        <location filename="../src/isds/services_message.cpp" line="482"/>
-        <location filename="../src/isds/services_message.cpp" line="520"/>
+        <location filename="../src/isds/services_login.cpp" line="53"/>
+        <location filename="../src/isds/services_login.cpp" line="84"/>
+        <location filename="../src/isds/services_login.cpp" line="153"/>
+        <location filename="../src/isds/services_login.cpp" line="224"/>
+        <location filename="../src/isds/services_login.cpp" line="295"/>
         <source>Insufficient input.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/services_account.cpp" line="81"/>
-        <location filename="../src/isds/services_box.cpp" line="87"/>
-        <location filename="../src/isds/services_box.cpp" line="109"/>
-        <location filename="../src/isds/services_box.cpp" line="171"/>
-        <location filename="../src/isds/services_box.cpp" line="191"/>
+        <location filename="../src/isds/services_login.cpp" line="94"/>
+        <location filename="../src/isds/services_login.cpp" line="163"/>
+        <location filename="../src/isds/services_login.cpp" line="234"/>
+        <location filename="../src/isds/services_login.cpp" line="306"/>
+        <location filename="../src/isds/services_login.cpp" line="326"/>
+        <source>Insufficient memory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/services_login.cpp" line="314"/>
+        <source>Error converting types.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Isds::Service</name>
+    <message>
+        <location filename="../src/isds/services_account.cpp" line="54"/>
+        <location filename="../src/isds/services_account.cpp" line="113"/>
+        <location filename="../src/isds/services_box.cpp" line="55"/>
+        <location filename="../src/isds/services_box.cpp" line="124"/>
+        <location filename="../src/isds/services_box.cpp" line="151"/>
+        <location filename="../src/isds/services_box.cpp" line="209"/>
+        <location filename="../src/isds/services_box.cpp" line="253"/>
+        <location filename="../src/isds/services_box.cpp" line="320"/>
+        <location filename="../src/isds/services_message.cpp" line="268"/>
+        <location filename="../src/isds/services_message.cpp" line="296"/>
+        <location filename="../src/isds/services_message.cpp" line="354"/>
+        <location filename="../src/isds/services_message.cpp" line="432"/>
+        <location filename="../src/isds/services_message.cpp" line="489"/>
+        <location filename="../src/isds/services_message.cpp" line="530"/>
+        <source>Insufficient input.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/services_account.cpp" line="64"/>
+        <location filename="../src/isds/services_box.cpp" line="70"/>
+        <location filename="../src/isds/services_box.cpp" line="97"/>
+        <location filename="../src/isds/services_box.cpp" line="163"/>
+        <location filename="../src/isds/services_box.cpp" line="187"/>
         <location filename="../src/isds/services_box.cpp" line="234"/>
-        <location filename="../src/isds/services_box.cpp" line="274"/>
-        <location filename="../src/isds/services_box.cpp" line="336"/>
-        <location filename="../src/isds/services_box.cpp" line="370"/>
-        <location filename="../src/isds/services_message.cpp" line="310"/>
-        <location filename="../src/isds/services_message.cpp" line="453"/>
-        <location filename="../src/isds/services_message.cpp" line="541"/>
+        <location filename="../src/isds/services_box.cpp" line="278"/>
+        <location filename="../src/isds/services_box.cpp" line="340"/>
+        <location filename="../src/isds/services_box.cpp" line="378"/>
+        <location filename="../src/isds/services_message.cpp" line="305"/>
+        <location filename="../src/isds/services_message.cpp" line="461"/>
+        <location filename="../src/isds/services_message.cpp" line="555"/>
         <source>Error converting types.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/services_message.cpp" line="324"/>
+        <location filename="../src/isds/services_message.cpp" line="323"/>
         <source>Missing identifier of sent message.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/services_message.cpp" line="333"/>
+        <location filename="../src/isds/services_message.cpp" line="332"/>
         <source>Cannot convert sent message identifier.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4502,197 +4528,197 @@ of postal data messages active.</source>
 <context>
     <name>IsdsLogin</name>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="106"/>
+        <location filename="../src/io/isds_login.cpp" line="105"/>
         <source>Error when connecting to ISDS server!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="112"/>
+        <location filename="../src/io/isds_login.cpp" line="111"/>
         <source>Error during authentication!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="114"/>
-        <location filename="../src/io/isds_login.cpp" line="130"/>
+        <location filename="../src/io/isds_login.cpp" line="113"/>
+        <location filename="../src/io/isds_login.cpp" line="129"/>
         <source>It was not possible to connect to your data box from account &quot;%1&quot;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="116"/>
+        <location filename="../src/io/isds_login.cpp" line="115"/>
         <source>Authentication failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="118"/>
-        <location filename="../src/io/isds_login.cpp" line="134"/>
-        <location filename="../src/io/isds_login.cpp" line="148"/>
-        <location filename="../src/io/isds_login.cpp" line="165"/>
-        <location filename="../src/io/isds_login.cpp" line="179"/>
-        <location filename="../src/io/isds_login.cpp" line="193"/>
-        <location filename="../src/io/isds_login.cpp" line="209"/>
-        <location filename="../src/io/isds_login.cpp" line="222"/>
-        <location filename="../src/io/isds_login.cpp" line="236"/>
-        <location filename="../src/io/isds_login.cpp" line="252"/>
+        <location filename="../src/io/isds_login.cpp" line="117"/>
+        <location filename="../src/io/isds_login.cpp" line="133"/>
+        <location filename="../src/io/isds_login.cpp" line="147"/>
+        <location filename="../src/io/isds_login.cpp" line="164"/>
+        <location filename="../src/io/isds_login.cpp" line="178"/>
+        <location filename="../src/io/isds_login.cpp" line="192"/>
+        <location filename="../src/io/isds_login.cpp" line="208"/>
+        <location filename="../src/io/isds_login.cpp" line="221"/>
+        <location filename="../src/io/isds_login.cpp" line="235"/>
+        <location filename="../src/io/isds_login.cpp" line="251"/>
         <source>Error: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="120"/>
+        <location filename="../src/io/isds_login.cpp" line="119"/>
         <source>Please check your credentials and login method together with your password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="122"/>
-        <location filename="../src/io/isds_login.cpp" line="138"/>
+        <location filename="../src/io/isds_login.cpp" line="121"/>
+        <location filename="../src/io/isds_login.cpp" line="137"/>
         <source>It is also possible that your password has expired - in this case, you need to use the official ISDS web interface to change it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="128"/>
+        <location filename="../src/io/isds_login.cpp" line="127"/>
         <source>Error during OTP authentication!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="132"/>
+        <location filename="../src/io/isds_login.cpp" line="131"/>
         <source>OTP authentication failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="136"/>
+        <location filename="../src/io/isds_login.cpp" line="135"/>
         <source>Please check your credentials together with entered security/SMS code and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="144"/>
+        <location filename="../src/io/isds_login.cpp" line="143"/>
         <source>It was not possible to establish a connection within a set time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="146"/>
+        <location filename="../src/io/isds_login.cpp" line="145"/>
         <source>Time-out for connection to server expired!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="150"/>
+        <location filename="../src/io/isds_login.cpp" line="149"/>
         <source>This is either caused by an extremely slow and/or unstable connection or by an improper set-up.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="152"/>
-        <location filename="../src/io/isds_login.cpp" line="197"/>
+        <location filename="../src/io/isds_login.cpp" line="151"/>
+        <location filename="../src/io/isds_login.cpp" line="196"/>
         <source>Please check your internet connection and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="154"/>
+        <location filename="../src/io/isds_login.cpp" line="153"/>
         <source>It might be necessary to use a proxy to connect to the server. It is also possible that the ISDS server is inoperative or busy. Try again later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="161"/>
-        <location filename="../src/io/isds_login.cpp" line="175"/>
-        <location filename="../src/io/isds_login.cpp" line="189"/>
-        <location filename="../src/io/isds_login.cpp" line="205"/>
-        <location filename="../src/io/isds_login.cpp" line="218"/>
-        <location filename="../src/io/isds_login.cpp" line="232"/>
+        <location filename="../src/io/isds_login.cpp" line="160"/>
+        <location filename="../src/io/isds_login.cpp" line="174"/>
+        <location filename="../src/io/isds_login.cpp" line="188"/>
+        <location filename="../src/io/isds_login.cpp" line="204"/>
+        <location filename="../src/io/isds_login.cpp" line="217"/>
+        <location filename="../src/io/isds_login.cpp" line="231"/>
         <source>It was not possible to establish a connection between your computer and the ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="163"/>
+        <location filename="../src/io/isds_login.cpp" line="162"/>
         <source>HTTPS problem occurred or redirection to server failed!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="167"/>
-        <location filename="../src/io/isds_login.cpp" line="181"/>
+        <location filename="../src/io/isds_login.cpp" line="166"/>
+        <location filename="../src/io/isds_login.cpp" line="180"/>
         <source>This is usually caused by either lack of internet connectivity or by some problem with the ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="169"/>
-        <location filename="../src/io/isds_login.cpp" line="183"/>
+        <location filename="../src/io/isds_login.cpp" line="168"/>
+        <location filename="../src/io/isds_login.cpp" line="182"/>
         <source>It is possible that the ISDS server is inoperative or busy. Try again later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="177"/>
+        <location filename="../src/io/isds_login.cpp" line="176"/>
         <source>An ISDS server problem occurred or service was not found!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="191"/>
+        <location filename="../src/io/isds_login.cpp" line="190"/>
         <source>The connection to server failed or a problem with the network occurred!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="195"/>
+        <location filename="../src/io/isds_login.cpp" line="194"/>
         <source>This is usually caused by either lack of internet connectivity or by a firewall on the way.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="199"/>
+        <location filename="../src/io/isds_login.cpp" line="198"/>
         <source>It might be necessary to use a proxy to connect to the server. If yes, please set it up in the proxy settings menu.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="207"/>
+        <location filename="../src/io/isds_login.cpp" line="206"/>
         <source>Problem with HTTPS connection!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="211"/>
+        <location filename="../src/io/isds_login.cpp" line="210"/>
         <source>This may be caused by a missing certificate for the SSL communication or the application cannot open an SSL socket.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="224"/>
+        <location filename="../src/io/isds_login.cpp" line="223"/>
         <source>This may be caused by a missing SSL certificate needed for communication with the server or it was not possible to establish a secure connection with the ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="238"/>
+        <location filename="../src/io/isds_login.cpp" line="237"/>
         <source>This may be caused by an error in SOAP or the XML content for this web service is invalid.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="213"/>
+        <location filename="../src/io/isds_login.cpp" line="212"/>
         <source>It is also possible that some libraries (e.g. CURL, SSL) may be missing or may be incorrectly configured.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="220"/>
+        <location filename="../src/io/isds_login.cpp" line="219"/>
         <source>HTTPS problem or security problem!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="226"/>
+        <location filename="../src/io/isds_login.cpp" line="225"/>
         <source>It is also possible that the certificate has expired.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="234"/>
+        <location filename="../src/io/isds_login.cpp" line="233"/>
         <source>SOAP problem or XML problem!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="240"/>
+        <location filename="../src/io/isds_login.cpp" line="239"/>
         <source>It is also possible that the ISDS server is inoperative or busy. Try again later.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="246"/>
-        <location filename="../src/io/isds_login.cpp" line="250"/>
+        <location filename="../src/io/isds_login.cpp" line="245"/>
+        <location filename="../src/io/isds_login.cpp" line="249"/>
         <source>Datovka internal error!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="248"/>
+        <location filename="../src/io/isds_login.cpp" line="247"/>
         <source>It was not possible to establish a connection to the ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/io/isds_login.cpp" line="254"/>
+        <location filename="../src/io/isds_login.cpp" line="253"/>
         <source>An unexpected error occurred. Please restart the application and try again. It this doesn&apos;t help then you should contact the support for this application.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7574,14 +7600,14 @@ to origin path
 <context>
     <name>ServicePrivate</name>
     <message>
-        <location filename="../src/isds/services_message.cpp" line="195"/>
-        <location filename="../src/isds/services_message.cpp" line="237"/>
+        <location filename="../src/isds/services_message.cpp" line="178"/>
+        <location filename="../src/isds/services_message.cpp" line="224"/>
         <source>Insufficient input.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/isds/services_message.cpp" line="218"/>
-        <location filename="../src/isds/services_message.cpp" line="258"/>
+        <location filename="../src/isds/services_message.cpp" line="205"/>
+        <location filename="../src/isds/services_message.cpp" line="249"/>
         <source>Error converting types.</source>
         <translation type="unfinished"></translation>
     </message>
