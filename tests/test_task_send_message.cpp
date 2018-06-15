@@ -25,11 +25,13 @@
 #include <QDir>
 #include <QtTest/QtTest>
 
+#include "src/datovka_shared/isds/error.h"
 #include "src/datovka_shared/isds/message_interface.h"
 #include "src/datovka_shared/isds/types.h"
 #include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_sessions.h"
+#include "src/isds/services_login.h"
 #include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
@@ -180,24 +182,24 @@ void TestTaskSendMessage::initTestCase(void)
 	QVERIFY(GlobInstcs::isdsSessionsPtr != Q_NULLPTR);
 
 	/* Log into ISDS. */
-	struct isds_ctx *ctx =
+	Isds::Session *ctx =
 	    GlobInstcs::isdsSessionsPtr->session(m_sender.userName);
 	if (!GlobInstcs::isdsSessionsPtr->holdsSession(m_sender.userName)) {
-		QVERIFY(ctx == NULL);
+		QVERIFY(ctx == Q_NULLPTR);
 		ctx = GlobInstcs::isdsSessionsPtr->createCleanSession(
 		    m_sender.userName,
 		    GlobInstcs::prefsPtr->isdsDownloadTimeoutMs);
 	}
-	if (ctx == NULL) {
+	if (ctx == Q_NULLPTR) {
 		QSKIP("Cannot obtain communication context.");
 	}
-	QVERIFY(ctx != NULL);
-	isds_error err = isdsLoginUserName(ctx, m_sender.userName,
+	QVERIFY(ctx != Q_NULLPTR);
+	Isds::Error err = Isds::Login::loginUserName(ctx, m_sender.userName,
 	    m_sender.pwd, m_testing);
-	if (err != IE_SUCCESS) {
+	if (err.code() != Isds::Type::ERR_SUCCESS) {
 		QSKIP("Error connection into ISDS.");
 	}
-	QVERIFY(err == IE_SUCCESS);
+	QVERIFY(err.code() == Isds::Type::ERR_SUCCESS);
 
 	QVERIFY(GlobInstcs::acntMapPtr == Q_NULLPTR);
 	GlobInstcs::acntMapPtr = new (std::nothrow) AccountsMap;
@@ -239,9 +241,9 @@ void TestTaskSendMessage::sendMessage(void)
 	QVERIFY(m_senderDbSet != Q_NULLPTR);
 
 	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
-	struct isds_ctx *ctx = GlobInstcs::isdsSessionsPtr->session(
+	Isds::Session *ctx = GlobInstcs::isdsSessionsPtr->session(
 	    m_sender.userName);
-	QVERIFY(ctx != NULL);
+	QVERIFY(ctx != Q_NULLPTR);
 	QVERIFY(GlobInstcs::isdsSessionsPtr->isConnectedToIsds(m_sender.userName));
 
 	QString transactionId(QLatin1String("some_id"));

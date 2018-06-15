@@ -19,6 +19,7 @@ SOURCES += \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.c \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.c \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.cpp \
+	$${top_srcdir}src/datovka_shared/isds/account_interface.cpp \
 	$${top_srcdir}src/datovka_shared/isds/box_interface.cpp \
 	$${top_srcdir}src/datovka_shared/isds/error.cpp \
 	$${top_srcdir}src/datovka_shared/isds/internal_conversion.cpp \
@@ -28,10 +29,13 @@ SOURCES += \
 	$${top_srcdir}src/io/filesystem.cpp \
 	$${top_srcdir}src/io/isds_login.cpp \
 	$${top_srcdir}src/io/isds_sessions.cpp \
+	$${top_srcdir}src/isds/account_conversion.cpp \
 	$${top_srcdir}src/isds/box_conversion.cpp \
 	$${top_srcdir}src/isds/error_conversion.cpp \
 	$${top_srcdir}src/isds/internal_type_conversion.cpp \
 	$${top_srcdir}src/isds/services_box.cpp \
+	$${top_srcdir}src/isds/services_login.cpp \
+	$${top_srcdir}src/isds/session.cpp \
 	$${top_srcdir}src/settings/account.cpp \
 	$${top_srcdir}src/settings/accounts.cpp \
 	$${top_srcdir}src/settings/preferences.cpp \
@@ -45,6 +49,7 @@ HEADERS += \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.h \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.h \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.h \
+	$${top_srcdir}src/datovka_shared/isds/account_interface.h \
 	$${top_srcdir}src/datovka_shared/isds/box_interface.h \
 	$${top_srcdir}src/datovka_shared/isds/error.h \
 	$${top_srcdir}src/datovka_shared/isds/internal_conversion.h \
@@ -55,10 +60,13 @@ HEADERS += \
 	$${top_srcdir}src/io/filesystem.h \
 	$${top_srcdir}src/io/isds_login.h \
 	$${top_srcdir}src/io/isds_sessions.h \
+	$${top_srcdir}src/isds/account_conversion.h \
 	$${top_srcdir}src/isds/box_conversion.h \
 	$${top_srcdir}src/isds/error_conversion.h \
 	$${top_srcdir}src/isds/internal_type_conversion.h \
 	$${top_srcdir}src/isds/services.h \
+	$${top_srcdir}src/isds/services_login.h \
+	$${top_srcdir}src/isds/session.h \
 	$${top_srcdir}src/settings/account.h \
 	$${top_srcdir}src/settings/accounts.h \
 	$${top_srcdir}src/settings/preferences.h \

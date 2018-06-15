@@ -32,6 +32,8 @@ SOURCES += \
 	$${top_srcdir}src/isds/error_conversion.cpp \
 	$${top_srcdir}src/isds/services_account.cpp \
 	$${top_srcdir}src/isds/services_box.cpp \
+	$${top_srcdir}src/isds/services_login.cpp \
+	$${top_srcdir}src/isds/session.cpp \
 	$${top_srcdir}src/isds/type_description.cpp \
 	$${top_srcdir}src/settings/preferences.cpp \
 	$${top_srcdir}src/worker/task_download_credit_info.cpp \
@@ -61,6 +63,8 @@ HEADERS += \
 	$${top_srcdir}src/isds/internal_type_conversion.h \
 	$${top_srcdir}src/isds/error_conversion.h \
 	$${top_srcdir}src/isds/services.h \
+	$${top_srcdir}src/isds/services_login.h \
+	$${top_srcdir}src/isds/session.h \
 	$${top_srcdir}src/isds/type_description.h \
 	$${top_srcdir}src/settings/preferences.h \
 	$${top_srcdir}src/worker/message_emitter.h \

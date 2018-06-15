@@ -24,6 +24,7 @@ SOURCES += \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db.cpp \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db_single.cpp \
 	$${top_srcdir}src/datovka_shared/io/sqlite/table.cpp \
+	$${top_srcdir}src/datovka_shared/isds/account_interface.cpp \
 	$${top_srcdir}src/datovka_shared/isds/box_interface.cpp \
 	$${top_srcdir}src/datovka_shared/isds/error.cpp \
 	$${top_srcdir}src/datovka_shared/isds/internal_conversion.cpp \
@@ -43,12 +44,15 @@ SOURCES += \
 	$${top_srcdir}src/io/message_db_set.cpp \
 	$${top_srcdir}src/io/message_db_set_delegated.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
+	$${top_srcdir}src/isds/account_conversion.cpp \
 	$${top_srcdir}src/isds/box_conversion.cpp \
 	$${top_srcdir}src/isds/error_conversion.cpp \
 	$${top_srcdir}src/isds/internal_type_conversion.cpp \
 	$${top_srcdir}src/isds/message_conversion.cpp \
 	$${top_srcdir}src/isds/services_box.cpp \
+	$${top_srcdir}src/isds/services_login.cpp \
 	$${top_srcdir}src/isds/services_message.cpp \
+	$${top_srcdir}src/isds/session.cpp \
 	$${top_srcdir}src/isds/type_description.cpp \
 	$${top_srcdir}src/models/accounts_model.cpp \
 	$${top_srcdir}src/models/files_model.cpp \
@@ -75,6 +79,7 @@ HEADERS += \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db.h \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db_single.h \
 	$${top_srcdir}src/datovka_shared/io/sqlite/table.h \
+	$${top_srcdir}src/datovka_shared/isds/account_interface.h \
 	$${top_srcdir}src/datovka_shared/isds/box_interface.h \
 	$${top_srcdir}src/datovka_shared/isds/error.h \
 	$${top_srcdir}src/datovka_shared/isds/internal_conversion.h \
@@ -94,11 +99,14 @@ HEADERS += \
 	$${top_srcdir}src/io/message_db.h \
 	$${top_srcdir}src/io/message_db_set.h \
 	$${top_srcdir}src/io/tag_db.h \
+	$${top_srcdir}src/isds/account_conversion.h \
 	$${top_srcdir}src/isds/box_conversion.h \
 	$${top_srcdir}src/isds/error_conversion.h \
 	$${top_srcdir}src/isds/internal_type_conversion.h \
 	$${top_srcdir}src/isds/message_conversion.h \
 	$${top_srcdir}src/isds/services.h \
+	$${top_srcdir}src/isds/services_login.h \
+	$${top_srcdir}src/isds/session.h \
 	$${top_srcdir}src/isds/type_description.h \
 	$${top_srcdir}src/models/accounts_model.h \
 	$${top_srcdir}src/models/files_model.h \
