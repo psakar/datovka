@@ -1,3 +1,13 @@
+4.10.3 /
+ * Added classes based on Qt types encapsulating various ISDS data types and
+   structures. Sharing this code with mobile application.
+ * Added per-account locking of communication contexts.
+ * Modified database interface to accommodate new data types.
+ * Fixed a problem with wrong conversion of obtained ISDS error statuses into
+   readable text. This may have caused the programme to crash.
+ * Added scripts needed for building Datovka and related packages
+   in openSuse Build Service.
+
 4.10.2 / 2018-03-21
  * Displaying busy cursor when switching between entries in account list.
  * New version notification can be blocked on Windows in runtime by setting
