@@ -45,6 +45,7 @@ DlgChangePwd::DlgChangePwd(const QString &boxId, const QString &userName,
     m_userName(userName)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	m_ui->userNameLine->setText(m_userName);
 	m_ui->accountLine->setText(boxId);
