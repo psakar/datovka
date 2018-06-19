@@ -1208,7 +1208,11 @@ bool DlgSendMessage::queryISDSBoxEOVM(const QString &userName,
 	delete task; task = Q_NULLPTR;
 
 	if (foundBoxes.count() == 1) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 6, 0))
 		const Isds::DbOwnerInfo &box(foundBoxes.constFirst());
+#else /* < Qt-5.6 */
+		const Isds::DbOwnerInfo &box(foundBoxes.first());
+#endif /* >= Qt-5.6 */
 		ret = (box.dbEffectiveOVM() == Isds::Type::BOOL_TRUE);
 	}
 

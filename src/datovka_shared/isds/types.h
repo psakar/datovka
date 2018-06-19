@@ -123,7 +123,11 @@ namespace Isds {
 			PRIVIL_ERASE_VAULT = 0x80
 		};
 		Q_DECLARE_FLAGS(Privileges, Privilege)
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
 		Q_FLAG(Privileges)
+#else /* < Qt-5.5 */
+		Q_FLAGS(Privileges)
+#endif /* >= Qt-5.5 */
 
 		/*
 		 * @brief Describes the message cycle.
@@ -167,7 +171,11 @@ namespace Isds {
 			MFS_ANY = 0x07fe /* Convenience value. */
 		};
 		Q_DECLARE_FLAGS(DmFiltStates, DmFiltState)
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
 		Q_FLAG(DmFiltStates)
+#else /* < Qt-5.5 */
+		Q_FLAGS(DmFiltStates)
+#endif /* >= Qt-5.5 */
 
 		/*!
 		 * @brief Describes message type.
