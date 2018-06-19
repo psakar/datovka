@@ -59,6 +59,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>info</tabstop>
+  <tabstop>directory</tabstop>
+  <tabstop>files</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

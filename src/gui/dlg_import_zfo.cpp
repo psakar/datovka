@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ DlgImportZFO::DlgImportZFO(QWidget *parent)
     m_ui(new (std::nothrow) Ui::DlgImportZFO)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	m_ui->infoLabel->setText(tr(
 	    "Here you can import whole messages and message acceptance information from ZFO files into the local database. "

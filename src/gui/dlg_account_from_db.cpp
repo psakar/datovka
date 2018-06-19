@@ -37,6 +37,8 @@ DlgCreateAccountFromDb::DlgCreateAccountFromDb(QWidget *parent)
     m_ui(new (std::nothrow) Ui::DlgCreateAccountFromDb)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
+
 	m_ui->info->setText(tr(
 	    "A new account will be created according to the name and the content of the database file. "
 	    "This account will operate over the selected database. "

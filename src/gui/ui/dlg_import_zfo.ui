@@ -199,6 +199,15 @@ into your local database.</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>allZFO</tabstop>
+  <tabstop>messageZFO</tabstop>
+  <tabstop>deliveryZFO</tabstop>
+  <tabstop>radioImportSelected</tabstop>
+  <tabstop>radioImportAll</tabstop>
+  <tabstop>includeSubDir</tabstop>
+  <tabstop>checkOnServer</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
