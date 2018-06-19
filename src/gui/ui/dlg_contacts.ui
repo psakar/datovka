@@ -36,18 +36,12 @@
      </item>
      <item>
       <widget class="QLineEdit" name="filterLine">
-       <property name="focusPolicy">
-        <enum>Qt::StrongFocus</enum>
-       </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
     <widget class="LoweredTableView" name="contactTableView">
-     <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
-     </property>
      <property name="showGrid">
       <bool>false</bool>
      </property>
