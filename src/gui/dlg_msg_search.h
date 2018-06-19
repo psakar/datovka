@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_MSG_SEARCH_H_
-#define _DLG_MSG_SEARCH_H_
+#pragma once
 
 #include <QDialog>
 
@@ -124,5 +123,3 @@ private:
 
 	const QList< QPair<QString, MessageDbSet *> > m_msgSetEntryList; /*!< Usernames and database sets. */
 };
-
-#endif /* _DLG_MSG_SEARCH_H_ */

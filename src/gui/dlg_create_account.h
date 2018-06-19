@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_CREATE_ACCOUNT_H_
-#define _DLG_CREATE_ACCOUNT_H_
+#pragma once
 
 #include <QDialog>
 #include <QString>
@@ -128,5 +127,3 @@ private:
 	int m_loginmethod; /*!< Specifies the method the user uses for logging in. */
 	QString m_certPath; /*!< Path to certificate. */
 };
-
-#endif /* _DLG_CREATE_ACCOUNT_H_ */
