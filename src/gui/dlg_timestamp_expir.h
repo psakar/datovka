@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_TIMESTAMP_EXPIR_H_
-#define _DLG_TIMESTAMP_EXPIR_H_
+#pragma once
 
 #include <QDialog>
 
@@ -81,5 +80,3 @@ private slots:
 private:
 	Ui::DlgTimestampExpir *m_ui; /*!< UI generated from UI file. */
 };
-
-#endif /* _DLG_TIMESTAMP_EXPIR_H_ */

@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_PIN_INPUT_H_
-#define _DLG_PIN_INPUT_H_
+#pragma once
 
 #include <QDialog>
 
@@ -67,5 +66,3 @@ public:
 private:
 	Ui::DlgPinInput *m_ui; /*!< UI generated from UI file. */
 };
-
-#endif /* _DLG_PIN_INPUT_H_ */

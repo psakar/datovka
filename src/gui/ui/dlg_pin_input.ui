@@ -148,6 +148,9 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>pinLine</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

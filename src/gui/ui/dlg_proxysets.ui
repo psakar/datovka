@@ -517,6 +517,24 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>httpsNoProxyRadioButton</tabstop>
+  <tabstop>httpsAutoProxyRadioButton</tabstop>
+  <tabstop>httpsManualProxyRadioButton</tabstop>
+  <tabstop>httpsHostnameLine</tabstop>
+  <tabstop>httpsPortLine</tabstop>
+  <tabstop>httpsAuthCheckBox</tabstop>
+  <tabstop>httpsUnameLine</tabstop>
+  <tabstop>httpsPwdLine</tabstop>
+  <tabstop>httpNoProxyRadioButton</tabstop>
+  <tabstop>httpAutoProxyRadioButton</tabstop>
+  <tabstop>httpManualProxyRadioButton</tabstop>
+  <tabstop>httpHostnameLine</tabstop>
+  <tabstop>httpPortLine</tabstop>
+  <tabstop>httpAuthCheckBox</tabstop>
+  <tabstop>httpUnameLine</tabstop>
+  <tabstop>httpPwdLine</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

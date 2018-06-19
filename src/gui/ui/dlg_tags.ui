@@ -191,6 +191,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>availableTagsView</tabstop>
+  <tabstop>addTagButton</tabstop>
+  <tabstop>deleteTagButton</tabstop>
+  <tabstop>updateTagButton</tabstop>
+  <tabstop>assignButton</tabstop>
+  <tabstop>assignedTagsView</tabstop>
+  <tabstop>removeButton</tabstop>
+  <tabstop>removeAllButton</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

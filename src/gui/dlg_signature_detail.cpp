@@ -46,6 +46,7 @@ DlgSignatureDetail::DlgSignatureDetail(const QByteArray &msgDER,
     m_dlgSize()
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	m_ui->verifyWidget->setHidden(true);
 	connect(m_ui->showVerifyDetail, SIGNAL(stateChanged(int)),
