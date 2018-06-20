@@ -539,7 +539,7 @@ QModelIndexList DbFlsTblModel::sortedUniqueLineIndexes(
 	return uniqueLines;
 }
 
-bool DbFlsTblModel::appendMessageData(const struct Isds::Message &message)
+bool DbFlsTblModel::appendMessageData(const Isds::Message &message)
 {
 	if (Q_UNLIKELY(message.isNull())) {
 		Q_ASSERT(0);
