@@ -589,6 +589,21 @@ namespace Isds {
 	void swap(CreditEventCharged &first, CreditEventCharged &second) Q_DECL_NOTHROW;
 
 	class CreditEventDischarged : public CreditEventCharged {
+#if defined (Q_OS_OSX)
+	/*
+	 * XCode prior to version 9 has problems with inheriting constructors
+	 * which should work in C++11.
+	 *
+	 * Use
+	 * # clang/gcc -dM -E - < /dev/null
+	 * to identify compiler.
+	 */
+#  if defined (__clang_major__) && (__clang_major__ < 9)
+#    warning "Using user-provided constructors."
+	public:
+		CreditEventDischarged(void) : CreditEventCharged() { }
+#  endif /* __clang_major__ */
+#endif /* Q_OS_OSX */
 	};
 
 	class CreditEventMsgSentPrivate;
