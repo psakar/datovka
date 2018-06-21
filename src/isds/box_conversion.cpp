@@ -35,6 +35,7 @@
 #include "src/datovka_shared/isds/internal_conversion.h"
 #include "src/datovka_shared/isds/type_conversion.h"
 #include "src/isds/box_conversion.h"
+#include "src/isds/conversion_internal.h"
 #include "src/isds/internal_type_conversion.h"
 
 /*!
@@ -585,7 +586,7 @@ QList<Isds::DbOwnerInfo> Isds::libisds2dbOwnerInfoList(
 		const struct isds_DbOwnerInfo *ioi = (struct isds_DbOwnerInfo *)ioil->data;
 		own_info_destr_func_t idestr = (own_info_destr_func_t)ioil->destructor;
 		/* Destructor function must be set. */
-		if (idestr != isds_DbOwnerInfo_free) {
+		if (!IsdsInternal::crudeEqual(idestr, isds_DbOwnerInfo_free)) {
 			Q_ASSERT(0);
 			if (ok != Q_NULLPTR) {
 				*ok = false;
@@ -1108,7 +1109,7 @@ QList<Isds::FulltextResult> Isds::libisds2fulltextResultList(
 		const struct isds_fulltext_result *ifr = (struct isds_fulltext_result *)ifrl->data;
 		ft_result_destr_func_t idestr = (ft_result_destr_func_t)ifrl->destructor;
 		/* Destructor function must be set. */
-		if (idestr != isds_fulltext_result_free) {
+		if (!IsdsInternal::crudeEqual(idestr, isds_fulltext_result_free)) {
 			Q_ASSERT(0);
 			if (ok != Q_NULLPTR) {
 				*ok = false;
@@ -1331,7 +1332,7 @@ QList<Isds::CreditEvent> Isds::libisds2creditEventList(
 		const struct isds_credit_event *ice = (struct isds_credit_event *)icel->data;
 		credit_event_destr_func_t idestr = (credit_event_destr_func_t)icel->destructor;
 		/* Destructor function must be set. */
-		if (idestr != isds_credit_event_free) {
+		if (!IsdsInternal::crudeEqual(idestr, isds_credit_event_free)) {
 			Q_ASSERT(0);
 			if (ok != Q_NULLPTR) {
 				*ok = false;
