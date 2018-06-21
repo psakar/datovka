@@ -35,9 +35,10 @@ namespace IsdsInternal {
 	 * @brief Performs a crude function pointer comparison
 	 *    (i.e. both pointers must be null or non-null).
 	 *
-	 * @note We cannot compare function pointers directly causes problems
-	 *     especially on Windows when the pointers are pointing to different
-	 *     instances of the same function (e.g. into a DLL).
+	 * @note We cannot compare function pointers directly. This causes
+	 *     problems especially on Windows when the pointers are pointing
+	 *     onto the same function but to different addresses
+	 *     (e.g. function loaded from a DLL).
 	 *
 	 * @param[in] first First function pointer.
 	 * @param[in] second Second function pointer.
