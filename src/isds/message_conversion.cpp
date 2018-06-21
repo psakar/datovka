@@ -34,6 +34,7 @@
 
 #include "src/datovka_shared/isds/internal_conversion.h"
 #include "src/datovka_shared/isds/type_conversion.h"
+#include "src/isds/conversion_internal.h"
 #include "src/isds/message_conversion.h"
 
 /*!
@@ -439,7 +440,7 @@ QList<Isds::Event> libisds2eventList(const struct isds_list *item,
 		const struct isds_event *ie = (struct isds_event *)item->data;
 		evnt_destr_func_t idestr = (evnt_destr_func_t)item->destructor;
 		/* Destructor function must be set. */
-		if (idestr != isds_event_free) {
+		if (!IsdsInternal::crudeEqual(idestr, isds_event_free)) {
 			Q_ASSERT(0);
 			if (ok != Q_NULLPTR) {
 				*ok = false;
@@ -991,7 +992,7 @@ QList<Isds::Document> libisds2documentList(const struct isds_list *item,
 		const struct isds_document *id = (struct isds_document *)item->data;
 		doc_destr_func_t idestr = (doc_destr_func_t)item->destructor;
 		/* Destructor function must be set. */
-		if (idestr != isds_document_free) {
+		if (!IsdsInternal::crudeEqual(idestr, isds_document_free)) {
 			Q_ASSERT(0);
 			if (ok != Q_NULLPTR) {
 				*ok = false;
@@ -1207,7 +1208,7 @@ QList<Isds::Message> Isds::libisds2messageList(const struct isds_list *item,
 		const struct isds_message *im = (struct isds_message *)item->data;
 		msg_destr_func_t idestr = (msg_destr_func_t)item->destructor;
 		/* Destructor function must be set. */
-		if (idestr != isds_message_free) {
+		if (!IsdsInternal::crudeEqual(idestr, isds_message_free)) {
 			Q_ASSERT(0);
 			if (ok != Q_NULLPTR) {
 				*ok = false;
