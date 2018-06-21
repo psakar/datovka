@@ -22,6 +22,7 @@ HEADERS += \
 	$${top_srcdir}src/datovka_shared/isds/message_interface.h \
 	$${top_srcdir}src/datovka_shared/isds/type_conversion.h \
 	$${top_srcdir}src/datovka_shared/isds/types.h \
+	$${top_srcdir}src/isds/conversion_internal.h \
 	$${top_srcdir}src/isds/message_conversion.h \
 	$${top_srcdir}src/isds/message_functions.h \
 	$${top_srcdir}tests/test_isds_message.h

@@ -101,6 +101,7 @@ HEADERS += \
 	$${top_srcdir}src/io/tag_db.h \
 	$${top_srcdir}src/isds/account_conversion.h \
 	$${top_srcdir}src/isds/box_conversion.h \
+	$${top_srcdir}src/isds/conversion_internal.h \
 	$${top_srcdir}src/isds/error_conversion.h \
 	$${top_srcdir}src/isds/internal_type_conversion.h \
 	$${top_srcdir}src/isds/message_conversion.h \
