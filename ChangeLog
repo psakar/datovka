@@ -3,7 +3,7 @@
    structures. Sharing this code with mobile application.
  * Added per-account locking of communication contexts.
  * Modified database interface to accommodate new data types.
- * Explicitly specifying tab order for most windows and dialogues. Is is also
+ * Explicitly specifying tab order for most windows and dialogues. It is also
    possible (on Windows and Linux) to cycle through actions in top tool bar.
  * Fixed a problem with wrong conversion of obtained ISDS error statuses into
    readable text. This may have caused the programme to crash.
