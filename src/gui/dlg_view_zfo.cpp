@@ -51,6 +51,7 @@ DlgViewZfo::DlgViewZfo(const Isds::Message &message, enum Isds::LoadType zfoType
     m_attachmentModel(this)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	/* Set default line height for table views/widgets. */
 	m_ui->attachmentTable->setNarrowedLineHeight();

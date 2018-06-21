@@ -314,6 +314,19 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>outputFormatComboBox</tabstop>
+  <tabstop>fromCalendarWidget</tabstop>
+  <tabstop>toCalendarWidget</tabstop>
+  <tabstop>sentCheckBox</tabstop>
+  <tabstop>receivedCheckBox</tabstop>
+  <tabstop>addTagsCheckBox</tabstop>
+  <tabstop>colourTagsCheckBox</tabstop>
+  <tabstop>exportZfoCheckBox</tabstop>
+  <tabstop>exportMessageEnvelopePDFCheckBox</tabstop>
+  <tabstop>exportDeliveryZfoCheckBox</tabstop>
+  <tabstop>exportDeliveryPDFCheckBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

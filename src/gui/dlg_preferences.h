@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_PREFERENCES_H_
-#define _DLG_PREFERENCES_H_
+#pragma once
 
 #include <QDialog>
 
@@ -129,5 +128,3 @@ private:
 
 	PinSettings m_pinSett; /*!< PIN settings copy. */
 };
-
-#endif /* _DLG_PREFERENCES_H_ */

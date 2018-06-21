@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ DlgTag::DlgTag(const TagItem &tag, QWidget *parent)
     m_tagItem(tag)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	m_ui->currentColor->setEnabled(false);
 	m_ui->tagNamelineEdit->setText(m_tagItem.name);

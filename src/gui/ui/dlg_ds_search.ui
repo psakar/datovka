@@ -282,6 +282,19 @@ contain all otherwise matching databoxes.</string>
    <header>src/views/lowered_table_view.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>useFulltextCheckBox</tabstop>
+  <tabstop>dataBoxTypeCBox</tabstop>
+  <tabstop>fulltextTargetCBox</tabstop>
+  <tabstop>textLineEdit</tabstop>
+  <tabstop>iDLineEdit</tabstop>
+  <tabstop>iCLineEdit</tabstop>
+  <tabstop>nameLineEdit</tabstop>
+  <tabstop>pscLineEdit</tabstop>
+  <tabstop>searchPushButton</tabstop>
+  <tabstop>contactTableView</tabstop>
+  <tabstop>filterLine</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

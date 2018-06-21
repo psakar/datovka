@@ -418,6 +418,26 @@
    <header>src/views/lowered_table_widget.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>searchAllAcntCheckBox</tabstop>
+  <tabstop>searchRcvdMsgCheckBox</tabstop>
+  <tabstop>searchSntMsgCheckBox</tabstop>
+  <tabstop>msgIdLine</tabstop>
+  <tabstop>subjectLine</tabstop>
+  <tabstop>sndrBoxIdLine</tabstop>
+  <tabstop>rcpntBoxIdLine</tabstop>
+  <tabstop>sndrNameLine</tabstop>
+  <tabstop>rcpntNameLine</tabstop>
+  <tabstop>sndrRefNumLine</tabstop>
+  <tabstop>rcpntRefNumLine</tabstop>
+  <tabstop>sndrFileMarkLine</tabstop>
+  <tabstop>rcpntFileMarkLine</tabstop>
+  <tabstop>addressLine</tabstop>
+  <tabstop>toHandsLine</tabstop>
+  <tabstop>tagLine</tabstop>
+  <tabstop>searchPushButton</tabstop>
+  <tabstop>resultsTableWidget</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

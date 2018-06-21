@@ -91,6 +91,11 @@
    <header>src/views/attachment_table_view.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>envelopeTextEdit</tabstop>
+  <tabstop>attachmentTable</tabstop>
+  <tabstop>signaturePushButton</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

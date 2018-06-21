@@ -60,6 +60,7 @@ HEADERS += \
 	$${top_srcdir}src/io/isds_sessions.h \
 	$${top_srcdir}src/isds/account_conversion.h \
 	$${top_srcdir}src/isds/box_conversion.h \
+	$${top_srcdir}src/isds/conversion_internal.h \
 	$${top_srcdir}src/isds/internal_type_conversion.h \
 	$${top_srcdir}src/isds/error_conversion.h \
 	$${top_srcdir}src/isds/services.h \

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,8 @@ DlgContacts::DlgContacts(const MessageDbSet &dbSet, QStringList *dbIdList,
     m_dbIdList(dbIdList)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
+
 	/* Set default line height for table views/widgets. */
 	m_ui->contactTableView->setNarrowedLineHeight();
 	m_ui->contactTableView->setSelectionMode(

@@ -82,6 +82,7 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
     m_showInfoLabel(false)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	/* Set default line height for table views/widgets. */
 	m_ui->contactTableView->setNarrowedLineHeight();

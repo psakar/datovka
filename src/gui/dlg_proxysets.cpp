@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ DlgProxysets::DlgProxysets(const ProxiesSettings &sett, QWidget *parent)
     m_ui(new (std::nothrow) Ui::DlgProxysets)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	connect(m_ui->httpNoProxyRadioButton, SIGNAL(toggled(bool)),
 	    this, SLOT(toggleHttpProxyPassword(bool)));

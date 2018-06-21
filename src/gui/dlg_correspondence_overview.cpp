@@ -50,6 +50,7 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
     m_exportedMsgs()
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	Q_ASSERT(!userName.isEmpty());
 

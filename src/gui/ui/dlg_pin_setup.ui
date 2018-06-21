@@ -81,6 +81,11 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>currentPinLine</tabstop>
+  <tabstop>newPinLine</tabstop>
+  <tabstop>newPinLine2</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

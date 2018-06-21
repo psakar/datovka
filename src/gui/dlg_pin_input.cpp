@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ DlgPinInput::DlgPinInput(QWidget *parent)
     m_ui(new (std::nothrow) Ui::DlgPinInput)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	m_ui->logoLabel->setPixmap(QPixmap(ICON_128x128_PATH "datovka.png"));
 	m_ui->logoLabel->setAlignment(Qt::AlignHCenter);

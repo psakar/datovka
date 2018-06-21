@@ -176,6 +176,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>chooseButton</tabstop>
+  <tabstop>moveDataRadioButton</tabstop>
+  <tabstop>copyDataRadioButton</tabstop>
+  <tabstop>startDataRadioButton</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

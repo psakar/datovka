@@ -135,6 +135,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>radioFromCurrent</tabstop>
+  <tabstop>radioFromAll</tabstop>
+  <tabstop>radioFromDir</tabstop>
+  <tabstop>includeSubDir</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

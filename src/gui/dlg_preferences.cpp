@@ -50,6 +50,7 @@ DlgPreferences::DlgPreferences(const Preferences &prefs,
     m_pinSett(pinSett)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	{
 		/* Adjust window size according to font size. */

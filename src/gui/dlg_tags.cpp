@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,8 @@ DlgTags::DlgTags(const QString &userName, TagDb *tagDb,
     m_retCode(NO_ACTION)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
+
 	initDlg();
 	fillTagsToListViews();
 	//selectAllAssingedTagsFromMsgs();

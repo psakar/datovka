@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ DlgPinSetup::DlgPinSetup(enum Operation op, QWidget *parent)
     m_ui(new (std::nothrow) Ui::DlgPinSetup)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	m_ui->currentPinLine->setEchoMode(QLineEdit::Password);
 	m_ui->newPinLine->setEchoMode(QLineEdit::Password);

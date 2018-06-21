@@ -38,6 +38,7 @@ DlgChangeDirectory::DlgChangeDirectory(const QString &currentDir,
     m_ui(new (std::nothrow) Ui::DlgChangeDirectory)
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	m_ui->newPath->setText("");
 	m_ui->currentPath->setText(currentDir);

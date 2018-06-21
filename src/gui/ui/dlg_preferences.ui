@@ -1973,6 +1973,45 @@ attachment file name (parameter %f is required).</string>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>PrefWidget</tabstop>
+  <tabstop>downloadOnBackground</tabstop>
+  <tabstop>timerSpinBox</tabstop>
+  <tabstop>autoDownloadWholeMessages</tabstop>
+  <tabstop>downloadAtStart</tabstop>
+  <tabstop>timeoutMinSpinBox</tabstop>
+  <tabstop>timeoutMarkMsgSpinBox</tabstop>
+  <tabstop>checkNewVersions</tabstop>
+  <tabstop>sendStatsWithVersionChecks</tabstop>
+  <tabstop>storeMessagesOnDisk</tabstop>
+  <tabstop>storeAdditionalDataOnDisk</tabstop>
+  <tabstop>certValidationDateNow</tabstop>
+  <tabstop>certValidationDateDownload</tabstop>
+  <tabstop>checkCrl</tabstop>
+  <tabstop>timestampExpirSpinBox</tabstop>
+  <tabstop>setPinButton</tabstop>
+  <tabstop>changePinButton</tabstop>
+  <tabstop>clearPinButton</tabstop>
+  <tabstop>afterStartSelectNewest</tabstop>
+  <tabstop>afterStartSelectLast</tabstop>
+  <tabstop>afterStartSelectNothing</tabstop>
+  <tabstop>toolButtonIconOnly</tabstop>
+  <tabstop>toolButtonTextBesideIcon</tabstop>
+  <tabstop>toolButtonTextUnderIcon</tabstop>
+  <tabstop>enableGlobalPaths</tabstop>
+  <tabstop>savePathPushButton</tabstop>
+  <tabstop>addFilePathPushButton</tabstop>
+  <tabstop>allAttachmentsSaveZfoMsg</tabstop>
+  <tabstop>allAttachmentsSavePdfMsgEnvel</tabstop>
+  <tabstop>allAttachmentsSaveZfoDelInfo</tabstop>
+  <tabstop>allAttachmentsSavePdfDelInfo</tabstop>
+  <tabstop>msgFileNameFmt</tabstop>
+  <tabstop>delInfoFileNameFmt</tabstop>
+  <tabstop>attachFileNameFmt</tabstop>
+  <tabstop>delInfoForEveryFile</tabstop>
+  <tabstop>allAttachDelInfoFileNameFmt</tabstop>
+  <tabstop>langComboBox</tabstop>
+ </tabstops>
  <resources>
   <include location="../../../res/resources.qrc"/>
  </resources>

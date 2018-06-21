@@ -50,6 +50,7 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
     m_certPath()
 {
 	m_ui->setupUi(this);
+	/* Tab order is defined in UI file. */
 
 	m_ui->loginMethodComboBox->addItem(tr("Password"));
 	m_ui->loginMethodComboBox->addItem(tr("Certificate"));
