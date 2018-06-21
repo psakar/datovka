@@ -7641,6 +7641,8 @@ void MainWindow::splitMsgDbByYearsSlot(void)
 void MainWindow::setUpUi(void)
 {
 	ui->setupUi(this);
+	setUpTabOrder();
+
 	/* Set default line height for table views/widgets. */
 	ui->accountList->setNarrowedLineHeight();
 	ui->messageList->setNarrowedLineHeight();
@@ -7702,20 +7704,71 @@ void MainWindow::setUpUi(void)
 	ui->accountTextInfo->setReadOnly(true);
 }
 
+void MainWindow::setUpTabOrder(void)
+{
+	ui->toolBar->setFocusPolicy(Qt::StrongFocus);
+
+	/* Tool bar elements need to have focus enabled. */
+	QWidget::setTabOrder(ui->toolBar, ui->accountList);
+	QWidget::setTabOrder(ui->accountList, ui->accountTextInfo);
+	QWidget::setTabOrder(ui->accountTextInfo, ui->messageList);
+	QWidget::setTabOrder(ui->messageList, ui->signatureDetails);
+	QWidget::setTabOrder(ui->signatureDetails, ui->messageStateCombo);
+	QWidget::setTabOrder(ui->messageStateCombo, ui->downloadComplete);
+	QWidget::setTabOrder(ui->downloadComplete, ui->saveAttachments);
+	QWidget::setTabOrder(ui->saveAttachments, ui->saveAttachment);
+	QWidget::setTabOrder(ui->saveAttachment, ui->openAttachment);
+	QWidget::setTabOrder(ui->openAttachment, ui->messageInfo);
+	QWidget::setTabOrder(ui->messageInfo, ui->messageAttachmentList);
+}
+
+/*!
+ * @brief Add action to a tool bar.
+ *
+ * @param[in,out] toolBar Tool bar.
+ * @param[in]     action Action to be added.
+ * @param[in]     focusPolicy Focus policy.
+ * @return True if action has been added and policy set.
+ */
+static
+bool addToolBarAction(QToolBar *toolBar, QAction *action,
+    enum Qt::FocusPolicy focusPolicy = Qt::StrongFocus)
+{
+	if (Q_UNLIKELY((toolBar == Q_NULLPTR) || (action == Q_NULLPTR))) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	/* TODO -- Abort if action already held. */
+
+	toolBar->addAction(action);
+
+	if (focusPolicy == Qt::NoFocus) {
+		return true;
+	}
+
+	QWidget *w = toolBar->widgetForAction(action);
+	if (Q_UNLIKELY(w == Q_NULLPTR)) {
+		return false;
+	}
+	w->setFocusPolicy(focusPolicy);
+	return true;
+}
+
 void MainWindow::topToolBarSetUp(void)
 {
 	/* Add actions to the top tool bar. */
-	ui->toolBar->addAction(ui->actionSync_all_accounts);
-	ui->toolBar->addAction(ui->actionGet_messages);
+	addToolBarAction(ui->toolBar, ui->actionSync_all_accounts);
+	addToolBarAction(ui->toolBar, ui->actionGet_messages);
 	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(ui->actionSend_message);
-	ui->toolBar->addAction(ui->actionReply);
-	ui->toolBar->addAction(ui->actionAuthenticate_message);
+	addToolBarAction(ui->toolBar, ui->actionSend_message);
+	addToolBarAction(ui->toolBar, ui->actionReply);
+	addToolBarAction(ui->toolBar, ui->actionAuthenticate_message);
 	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(ui->actionMsgAdvancedSearch);
+	addToolBarAction(ui->toolBar, ui->actionMsgAdvancedSearch);
 	ui->toolBar->addSeparator();
-	ui->toolBar->addAction(ui->actionAccount_properties);
-	ui->toolBar->addAction(ui->actionPreferences);
+	addToolBarAction(ui->toolBar, ui->actionAccount_properties);
+	addToolBarAction(ui->toolBar, ui->actionPreferences);
 
 	{
 		QWidget *spacer = new QWidget();

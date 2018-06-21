@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DATOVKA_H_
-#define _DATOVKA_H_
+#pragma once
 
 #include <QItemSelection>
 #include <QLabel>
@@ -1095,6 +1094,11 @@ private:
 	void setUpUi(void);
 
 	/*!
+	 * @brief Sets tab order.
+	 */
+	void setUpTabOrder(void);
+
+	/*!
 	 * @brief Adds actions to to tool bar.
 	 */
 	void topToolBarSetUp(void);
@@ -1104,6 +1108,3 @@ private:
 	 */
 	void setMenuActionIcons(void);
 };
-
-
-#endif /* _DATOVKA_H_ */
