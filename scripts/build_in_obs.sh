@@ -120,7 +120,7 @@ x${P_DATOVKA})
 	RELEASE="1"
 	;;
 x${P_LIBISDS})
-	VERSION="0.10.7"
+	VERSION="0.10.8"
 	RELEASE="1"
 	;;
 x)

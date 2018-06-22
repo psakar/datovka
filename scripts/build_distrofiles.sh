@@ -93,7 +93,7 @@ x${P_DATOVKA})
 	PACKAGE_SRC="${SRC_ROOT}/${PACKAGE}-${VERSION}.tar.xz"
 	;;
 x${P_LIBISDS})
-	VERSION="0.10.7"
+	VERSION="0.10.8"
 	RELEASE="1"
 
 	ensure_source_presence "${SRC_ROOT}/libs/srcs" "${_LIBISDS_ARCHIVE}" \
