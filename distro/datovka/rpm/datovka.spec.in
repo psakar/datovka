@@ -9,7 +9,7 @@ URL: https://www.datovka.cz/
 Source0: datovka_%{version}.orig.tar.xz
 
 BuildRequires: desktop-file-utils
-BuildRequires: libisds-devel >= 0.10.7
+BuildRequires: libisds-devel >= 0.10.8
 BuildRequires: openssl-devel
 BuildRequires: qt5-linguist
 # qt5-qtbase provides SQLite driver
