@@ -224,6 +224,48 @@ archive_add_qm_files() {
 	rm -r "${TEMPDIR}"
 }
 
+archive_override_version() {
+	local ARCHIVE="$1"
+	local PACKAGE_NAME="$2"
+	local NEW_VERSION="$3"
+
+	if [ "x${ARCHIVE}" = "x" ]; then
+		echo "No archive specified." >&2
+		return 1
+	fi
+	if [ ! -f "${ARCHIVE}" ]; then
+		echo "Supplied archive name '${ARCHIVE}' is not a file." >&2
+		return 1
+	fi
+
+	if [ "x${PACKAGE_NAME}" = "x" ]; then
+		echo "No package name specified." >&2
+		return 1
+	fi
+
+	if [ "x${NEW_VERSION}" = "x" ]; then
+		echo "No version specified." >&2
+		return 1
+	fi
+
+	local TEMPDIR=$(mktemp -d tmp.XXXXXXXX)
+	cd "${TEMPDIR}"
+
+	tar -xf "../${ARCHIVE}" "${PACKAGE_NAME}/datovka.pro" "${PACKAGE_NAME}/pri/version.pri"
+
+	echo "VERSION = ${NEW_VERSION}" > "${PACKAGE_NAME}/pri/version.pri"
+
+	# Modify timestamps of generated files in order to be able
+	# to generate reproducible checksums.
+	touch -r "${PACKAGE_NAME}/datovka.pro" "${PACKAGE_NAME}/pri/version.pri"
+
+	tar --delete -f "../${ARCHIVE}" "${PACKAGE_NAME}/pri/version.pri"
+	tar --append -f "../${ARCHIVE}" "${PACKAGE_NAME}/pri/version.pri"
+
+	cd ..
+	rm -r "${TEMPDIR}"
+}
+
 compute_checksum() {
 	local FILE_NAME="$1"
 
@@ -299,7 +341,8 @@ if [ "x${DESIRED_BRANCH}" != "x" ]; then
 	COMMIT_ID=$(git rev-parse "${DESIRED_BRANCH}")
 	SHORT_COMMIT_ID=$(git rev-parse --short=16 "${DESIRED_BRANCH}")
 	UTC_TIME=$(date -u +%Y%m%d.%H%M%S)
-	PACKAGE_NAME="datovka-${DESIRED_VERSION}.9999.${UTC_TIME}.${SHORT_COMMIT_ID}"
+	DESIRED_VERSION="${DESIRED_VERSION}.9999.${UTC_TIME}.${SHORT_COMMIT_ID}"
+	PACKAGE_NAME="datovka-${DESIRED_VERSION}"
 	TARGTET_TAR="${PACKAGE_NAME}.tar"
 	TARGET_COMPRESSED="${PACKAGE_NAME}.tar.xz"
 elif [ "x${DESIRED_TAG}" != "x" ]; then
@@ -335,6 +378,10 @@ if [ "x${COMMIT_ID}" != "x${TAR_COMMIT_ID}" ]; then
 fi
 
 archive_add_qm_files "${TARGTET_TAR}" "${PACKAGE_NAME}"
+
+if [ "x${DESIRED_BRANCH}" != "x" ]; then
+	archive_override_version "${TARGTET_TAR}" "${PACKAGE_NAME}" "${DESIRED_VERSION}"
+fi
 
 cat "${TARGTET_TAR}" | xz -9 > "${TARGET_COMPRESSED}"
 rm "${TARGTET_TAR}"
