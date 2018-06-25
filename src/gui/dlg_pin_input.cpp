@@ -45,6 +45,10 @@ DlgPinInput::DlgPinInput(QWidget *parent)
 	    QLatin1String("</b>"));
 
 	m_ui->pinLine->setEchoMode(QLineEdit::Password);
+	/* Always display placeholder text. */
+	m_ui->pinLine->setMinimumWidth(1.2 *
+	    m_ui->pinLine->fontMetrics().width(
+	        m_ui->pinLine->placeholderText()));
 }
 
 DlgPinInput::~DlgPinInput(void)
