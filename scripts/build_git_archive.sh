@@ -42,14 +42,14 @@ while [ $# -gt 0 ]; do
 	case "${KEY}" in
 	${B_SHORT}|${B_LONG})
 		if [ "x${VAL}" = "x" ]; then
-			echo "Argument '${KEY}' requires an ergument." >&2
+			echo "Argument '${KEY}' requires an argument." >&2
 			exit 1
 		fi
 		if [ "x${DESIRED_BRANCH}" = "x" ]; then
 			DESIRED_BRANCH="${VAL}"
 			shift
 		else
-			echo "Version already specified or in colflict." >&2
+			echo "Version already specified or in conflict." >&2
 			exit 1
 		fi
 		;;
@@ -59,14 +59,14 @@ while [ $# -gt 0 ]; do
 		;;
 	${V_SHORT}|${V_LONG})
 		if [ "x${VAL}" = "x" ]; then
-			echo "Argument '${KEY}' requires an ergument." >&2
+			echo "Argument '${KEY}' requires an argument." >&2
 			exit 1
 		fi
 		if [ "x${DESIRED_VERSION}" = "x" ]; then
 			DESIRED_VERSION="${VAL}"
 			shift
 		else
-			echo "Version already specified or in colflict." >&2
+			echo "Version already specified or in conflict." >&2
 			exit 1
 		fi
 		;;

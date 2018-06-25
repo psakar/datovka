@@ -22,6 +22,7 @@ cd "${SRC_ROOT}"
 
 REPO=""
 PACKAGE=""
+VERSION=""
 ANSWER_YES="no"
 
 H_SHORT="-h"
@@ -32,6 +33,9 @@ P_LONG="--package"
 P_DATOVKA="datovka"
 P_LIBISDS="libisds"
 
+V_SHORT="-v"
+V_LONG="--version"
+
 D_LONG="--devel"
 L_LONG="--latest"
 Y_LONG="--yes"
@@ -40,6 +44,7 @@ USAGE="Usage:\n\t$0 [options]\n\n"
 USAGE="${USAGE}Supported options:\n"
 USAGE="${USAGE}\t${H_SHORT}, ${H_LONG}\n\t\tPrints help message.\n"
 USAGE="${USAGE}\t${P_SHORT}, ${P_LONG} <package>\n\t\tSupported arguments are '${P_DATOVKA}' and '${P_LIBISDS}'.\n"
+USAGE="${USAGE}\t${V_SHORT}, ${V_LONG} <version>\n\t\tExplicitly specify package version (applies only to datovka).\n"
 USAGE="${USAGE}\t${D_LONG} (default)\n\t\tPush into '${HP_REPO_DEVEL}'.\n"
 USAGE="${USAGE}\t${L_LONG}\n\t\tPush into '${HP_REPO_LATEST}'.\n"
 USAGE="${USAGE}\t${Y_LONG}\n\t\tAutomatically answer 'yes' to all questions.\n"
@@ -55,14 +60,27 @@ while [ $# -gt 0 ]; do
 		;;
 	${P_SHORT}|${P_LONG})
 		if [ "x${VAL}" = "x" ]; then
-			echo "Argument '${KEY}' requires an ergument." >&2
+			echo "Argument '${KEY}' requires an argument." >&2
 			exit 1
 		fi
 		if [ "x${PACKAGE}" = "x" ]; then
 			PACKAGE="${VAL}"
 			shift
 		else
-			echo "Package name already specified or in colflict." >&2
+			echo "Package name already specified or in conflict." >&2
+			exit 1
+		fi
+		;;
+	${V_SHORT}|${V_LONG})
+		if [ "x${VAL}" = "x" ]; then
+			echo "Argument '${KEY}' requires an argument." >&2
+			exit 1
+		fi
+		if [ "x${VERSION}" = "x" ]; then
+			VERSION="${VAL}"
+			shift
+		else
+			echo "Version already specified or in conflict." >&2
 			exit 1
 		fi
 		;;
@@ -103,20 +121,32 @@ if [ $# -gt 0 ]; then
 	exit 1
 fi
 
-# Use devel by defauilt.
+# Use devel by default.
 if [ "x${REPO}" = "x" ]; then
 	REPO="${HP_REPO_DEVEL}"
 fi
 
+# Cannot use latest and explicitly specified version.
+if [ "x${REPO}" != "x${HP_REPO_DEVEL}" -a "x${VERSION}" != "x" ]; then
+	echo "Cannot use latest repository and explicitly specified version." >&2
+	exit 1
+fi
+
 PROJECT="${HP_OBS_PROJECT}:${REPO}"
 #PACKAGE=""
-VERSION=""
+#VERSION=""
 RELEASE=""
 
 # Set package to be uploaded.
 case "x${PACKAGE}" in
 x${P_DATOVKA})
-	VERSION="4.10.2"
+	if [ "x${VERSION}" != "x" ]; then
+		# Do nothing.
+		echo "" > /dev/null
+	else
+		# Use latest release as default.
+		VERSION="4.10.2"
+	fi
 	RELEASE="1"
 	;;
 x${P_LIBISDS})
