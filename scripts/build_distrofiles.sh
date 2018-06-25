@@ -21,6 +21,7 @@ cd "${SRC_ROOT}"
 . "${SRC_ROOT}"/scripts/helper_packaging.sh
 
 PACKAGE=""
+VERSION=""
 
 H_SHORT="-h"
 H_LONG="--help"
@@ -29,11 +30,14 @@ P_SHORT="-p"
 P_LONG="--package"
 P_DATOVKA="datovka"
 P_LIBISDS="libisds"
+V_SHORT="-v"
+V_LONG="--version"
 
 USAGE="Usage:\n\t$0 [options]\n\n"
 USAGE="${USAGE}Supported options:\n"
 USAGE="${USAGE}\t${H_SHORT}, ${H_LONG}\n\t\tPrints help message.\n"
 USAGE="${USAGE}\t${P_SHORT}, ${P_LONG} <package>\n\t\tSupported arguments are '${P_DATOVKA}' and '${P_LIBISDS}'.\n"
+USAGE="${USAGE}\t${V_SHORT}, ${V_LONG} <version>\n\t\tExplicitly specify package version (applies only to datovka).\n"
 
 # Parse rest of command line
 while [ $# -gt 0 ]; do
@@ -46,14 +50,27 @@ while [ $# -gt 0 ]; do
 		;;
 	${P_SHORT}|${P_LONG})
 		if [ "x${VAL}" = "x" ]; then
-			echo "Argument '${KEY}' requires an ergument." >&2
+			echo "Argument '${KEY}' requires an argument." >&2
 			exit 1
 		fi
 		if [ "x${PACKAGE}" = "x" ]; then
 			PACKAGE="${VAL}"
 			shift
 		else
-			echo "Package name already specified or in colflict." >&2
+			echo "Package name already specified or in conflict." >&2
+			exit 1
+		fi
+		;;
+	${V_SHORT}|${V_LONG})
+		if [ "x${VAL}" = "x" ]; then
+			echo "Argument '${KEY}' requires an argument." >&2
+			exit 1
+		fi
+		if [ "x${VERSION}" = "x" ]; then
+			VERSION="${VAL}"
+			shift
+		else
+			echo "Version already specified or in conflict." >&2
 			exit 1
 		fi
 		;;
@@ -76,7 +93,7 @@ if [ $# -gt 0 ]; then
 fi
 
 #PACKAGE=""
-VERSION=""
+#VERSION=""
 RELEASE=""
 
 PACKAGE_SRC=""
@@ -84,21 +101,29 @@ PACKAGE_SRC=""
 # Set package to be uploaded.
 case "x${PACKAGE}" in
 x${P_DATOVKA})
-	VERSION="4.10.2"
+	if [ "x${VERSION}" != "x" ]; then
+		if [ ! -f "${PACKAGE}-${VERSION}.tar.xz" ]; then
+			echo "Missing file '${PACKAGE}-${VERSION}.tar.xz'." >&2
+			exit 1
+		fi
+	else
+		# Use latest release as default.
+		VERSION="4.10.2"
+
+		ensure_source_presence "${SRC_ROOT}" "${PACKAGE}-${VERSION}.tar.xz" \
+		    "https://secure.nic.cz/files/datove_schranky/${VERSION}/" "ed0cd597fe7c4438de397da058fb582453dbfeedf696a65b9e5fde677824c4d2" "" "" || exit 1
+	fi
+
 	RELEASE="1"
-
-	ensure_source_presence "${SRC_ROOT}" "${PACKAGE}-${VERSION}.tar.xz" \
-	    "https://secure.nic.cz/files/datove_schranky/${VERSION}/" "ed0cd597fe7c4438de397da058fb582453dbfeedf696a65b9e5fde677824c4d2" "" "" || exit 1
-
 	PACKAGE_SRC="${SRC_ROOT}/${PACKAGE}-${VERSION}.tar.xz"
 	;;
 x${P_LIBISDS})
 	VERSION="0.10.8"
-	RELEASE="1"
 
 	ensure_source_presence "${SRC_ROOT}/libs/srcs" "${_LIBISDS_ARCHIVE}" \
 	    "${_LIBISDS_URL_PREFIX}" "${_LIBISDS_SHA256}" "${_LIBISDS_SIG_SUFF}" "${_LIBISDS_KEY_FP}" || exit 1
 
+	RELEASE="1"
 	PACKAGE_SRC="${SRC_ROOT}/libs/srcs/${PACKAGE}-${VERSION}.tar.xz"
 	;;
 x)
