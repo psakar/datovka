@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Datovka <datove-schranky@labs.nic.cz>
 Uploaders: Karel Slany <karel.slany@nic.cz>
 Build-Depends: debhelper (>= 9),
-               libisds-dev (>= 0.10.7),
+               libisds-dev (>= 0.10.8),
                libqt5svg5-dev,
                libssl-dev,
                libxml2-dev,
@@ -17,7 +17,7 @@ Vcs-Browser: http://anonscm.debian.org/?p=collab-maint/datovka.git;a=summary
 
 Package: datovka
 Architecture: any
-Depends: libisds5 (>= 0.10.7),
+Depends: libisds5 (>= 0.10.8),
          libqt5sql5-sqlite,
          qttranslations5-l10n,
          ${misc:Depends},

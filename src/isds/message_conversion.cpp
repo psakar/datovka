@@ -227,6 +227,7 @@ enum Isds::Type::Event libisdsEventType2EventType(isds_event_type *src,
 	case EVENT_ACCEPTED_BY_FICTION: event = Isds::Type::EV_ACCEPTED_FICTION; break;
 	case EVENT_UNDELIVERABLE: event = Isds::Type::EV_UNDELIVERABLE; break;
 	case EVENT_COMMERCIAL_ACCEPTED: event = Isds::Type::EV_ACCEPTED_BY_RECIPIENT; break;
+	case EVENT_UNDELIVERED_AV_CHECK: event = Isds::Type::EV_UNDELIVERED_AV_CHECK; break;
 	default:
 		iOk = false;
 		break;
@@ -304,7 +305,7 @@ bool eventType2libisdsEventType(isds_event_type **tgt,
 	case Isds::Type::EV_ACCEPTED_FICTION: **tgt = EVENT_ACCEPTED_BY_FICTION; break;
 	case Isds::Type::EV_UNDELIVERABLE: **tgt = EVENT_UNDELIVERABLE; break;
 	case Isds::Type::EV_ACCEPTED_BY_RECIPIENT: **tgt = EVENT_COMMERCIAL_ACCEPTED; break;
-	/* case Isds::Type::EV_UNDELIVERED_AV_CHECK: Unknown to libisds. */
+	case Isds::Type::EV_UNDELIVERED_AV_CHECK: **tgt = EVENT_UNDELIVERED_AV_CHECK; break;
 	default:
 		**tgt = EVENT_UKNOWN;
 		break;
