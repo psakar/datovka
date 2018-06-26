@@ -272,6 +272,22 @@ win32 {
 		-lcrypto
 }
 
+!isEmpty(UNSPECIFIED_VARIABLE) {
+	# This block of configuration code is only a hack. It is not intended
+	# to be actually used in code configuration. Its sole purpose is
+	# to trick the lupdate tool into reading header file content and
+	# to force it to handle namespaces properly.
+	# If this is not done then errors like:
+	# 'Qualifying with unknown namespace/class ::Isds'
+	# are being issued. The translator is then unable to find the proper
+	# translation strings and some translations are thus not loaded by
+	# the running application.
+	# See e.g. https://stackoverflow.com/questions/6504902/lupdate-error-qualifying-with-unknown-namespace-class
+
+	warning(UNSPECIFIED_VARIABLE set to \'$${UNSPECIFIED_VARIABLE}\'.)
+	INCLUDEPATH += .
+}
+
 SOURCES += \
     src/about.cpp \
     src/cli/cli.cpp \
