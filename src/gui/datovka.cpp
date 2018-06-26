@@ -7934,7 +7934,7 @@ void MainWindow::setMenuActionIcons(void)
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "clipboard_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "clipboard.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "clipboard_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionImport_messages_from_database->setIcon(ico);
 		ui->actionImport_messages_from_database->isEnabled();
 		ui->actionImport_ZFO_file_into_database->setIcon(ico);
