@@ -243,6 +243,29 @@ fail:
 	return QList<TagEntry>();
 }
 
+int TagDb::getTagAssignmentCount(int tagId) const
+{
+	QSqlQuery query(m_db);
+
+	QString queryStr("SELECT COUNT(*) AS entries FROM message_tags "
+	    "WHERE tag_id = :tag_id");
+	if (!query.prepare(queryStr)) {
+		logErrorNL("Cannot prepare SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return -1;
+	}
+	query.bindValue(":tag_id", tagId);
+
+	if (query.exec() && query.isActive() &&
+	    query.first() && query.isValid()) {
+		return query.value(0).toInt();
+	} else {
+		logErrorNL("Cannot execute SQL query: %s.",
+		    query.lastError().text().toUtf8().constData());
+		return -1;
+	}
+}
+
 QList<TagDb::TagEntry> TagDb::getMessageTags(const QString &userName,
     quint64 msgId) const
 {
