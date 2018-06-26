@@ -48,6 +48,8 @@ DlgSignatureDetail::DlgSignatureDetail(const QByteArray &msgDER,
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
 
+	setIcons();
+
 	m_ui->verifyWidget->setHidden(true);
 	connect(m_ui->showVerifyDetail, SIGNAL(stateChanged(int)),
 	    this, SLOT(showVerificationDetail(int)));
@@ -556,7 +558,7 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 
 	if (m_tstDER.isEmpty()) {
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		resStr = tr("Time stamp not present.");
 	} else {
 		time_t utc_time = 0;
@@ -623,4 +625,14 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 	m_ui->tImage->setIcon(ico);
 	m_ui->tStatus->setTextFormat(Qt::RichText);
 	m_ui->tStatus->setText(resStr);
+}
+
+void DlgSignatureDetail::setIcons(void)
+{
+	QIcon ico;
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+	m_ui->tImage->setIcon(ico);
+	m_ui->cImage->setIcon(ico);
+	m_ui->mSignatureImage->setIcon(ico);
 }

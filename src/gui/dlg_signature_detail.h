@@ -125,6 +125,11 @@ private:
 	 */
 	void validateMessageTimestamp(void);
 
+	/*!
+	 * @brief Set icon set to buttons.
+	 */
+	void setIcons(void);
+
 	Ui::DlgSignatureDetail *m_ui; /*!< UI generated from UI file. */
 
 	const QByteArray &m_msgDER; /*!< Message CMS. */

@@ -322,7 +322,7 @@ void DlgTags::fillTagsToListViews(void)
 
 void DlgTags::initDlg(void)
 {
-	setIconSetToButtons();
+	setIcons();
 
 	m_ui->availableTagsView->setItemDelegate(&m_availableTagsDelegate);
 	m_ui->availableTagsView->setModel(&m_availableTagsModel);
@@ -389,7 +389,7 @@ void DlgTags::selectAllAssingedTagsFromMsgs(void)
 	}
 }
 
-void DlgTags::setIconSetToButtons(void)
+void DlgTags::setIcons(void)
 {
 	{
 		QIcon ico;

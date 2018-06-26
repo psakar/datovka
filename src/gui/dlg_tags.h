@@ -158,7 +158,7 @@ private:
 	/*!
 	 * @brief Set icon set to buttons.
 	 */
-	void setIconSetToButtons(void);
+	void setIcons(void);
 
 	Ui::DlgTags *m_ui; /*!< UI generated from UI file. */
 
