@@ -122,19 +122,35 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 	    AttachmentInteraction::selectedColumnIndexes(*m_ui->attachmentTable,
 	        DbFlsTblModel::FNAME_COL));
 
+
+
+
 	if (index.isValid()) {
-		menu->addAction(QIcon(ICON_3PARTY_PATH "folder_16.png"),
-		    tr("Open attachment"), this,
-		    SLOT(openSelectedAttachment()))->
-		        setEnabled(indexes.size() == 1);
-		menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
-		    tr("Save attachment"), this,
-		    SLOT(saveSelectedAttachmentsToFile()))->
-		        setEnabled(indexes.size() == 1);
-		menu->addAction(QIcon(ICON_3PARTY_PATH "save_16.png"),
-		    tr("Save attachments"), this,
-		    SLOT(saveSelectedAttachmentsIntoDirectory()))->
-		        setEnabled(indexes.size() > 1);
+
+		{
+			QIcon ico;
+			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_16.png"),
+			    QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_32.png"),
+			    QSize(), QIcon::Normal, QIcon::Off);
+			menu->addAction(ico, tr("Open attachment"), this,
+			    SLOT(openSelectedAttachment()))->
+				setEnabled(indexes.size() == 1);
+		}
+
+		{
+			QIcon ico;
+			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_16.png"),
+			    QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_32.png"),
+			    QSize(), QIcon::Normal, QIcon::Off);
+			menu->addAction(ico, tr("Save attachment"), this,
+			    SLOT(saveSelectedAttachmentsToFile()))->
+				setEnabled(indexes.size() == 1);
+			menu->addAction(ico, tr("Save attachments"), this,
+			    SLOT(saveSelectedAttachmentsIntoDirectory()))->
+				setEnabled(indexes.size() > 1);
+		}
 	} else {
 		/* Do nothing. */
 	}

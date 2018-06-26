@@ -329,8 +329,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
 	setUpUi();
 
-	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
-	    QString(), QIcon(ICON_3PARTY_PATH "briefcase_grey_16.png"),
+	QIcon ico;
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_grey_16.png"),
+	    QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_grey_32.png"),
+	    QSize(), QIcon::Normal, QIcon::Off);
+	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(QString(), ico,
 	    tr("Uploaded to records management service")));
 
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
@@ -1488,8 +1492,14 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		submenu->addAction(tr("As Settled"), this,
 		    SLOT(messageItemsSelectedMarkSettled()));
 	}
-	menu->addAction(QIcon(ICON_3PARTY_PATH "label_16.png"),
-	    ui->actionTag_settings->text(), this, SLOT(addOrDeleteMsgTags()));
+
+	QIcon ico;
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "label_16.png"),
+	    QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "label_32.png"),
+	    QSize(), QIcon::Normal, QIcon::Off);
+	menu->addAction(ico, ui->actionTag_settings->text(),
+	    this, SLOT(addOrDeleteMsgTags()));
 
 	menu->addSeparator();
 
