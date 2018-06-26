@@ -433,6 +433,452 @@
     </message>
 </context>
 <context>
+    <name>Description</name>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="34"/>
+        <source>system box</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="35"/>
+        <source>public authority</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="36"/>
+        <source>public authority - notary</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="37"/>
+        <source>public authority - bailiff</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="38"/>
+        <source>public authority - at request</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="39"/>
+        <source>public authority - natural person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="40"/>
+        <source>public authority - self-employed person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="41"/>
+        <source>public authority - legal person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="42"/>
+        <source>legal person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="43"/>
+        <source>legal person - founded by an act</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="44"/>
+        <source>legal person - at request</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="45"/>
+        <source>self-employed person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="46"/>
+        <source>self-employed person - advocate</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="47"/>
+        <source>self-employed person - tax advisor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="48"/>
+        <source>self-employed person - insolvency administrator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="49"/>
+        <source>self-employed person - statutory auditor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="50"/>
+        <source>natural person</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="54"/>
+        <location filename="../src/isds/type_description.cpp" line="291"/>
+        <location filename="../src/isds/type_description.cpp" line="337"/>
+        <source>An error occurred while checking the type.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="67"/>
+        <source>The data box is accessible. It is possible to send messages into it. It can be looked up on the Portal.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="72"/>
+        <source>The data box is temporarily inaccessible (at own request). It may be made accessible again at some point in the future.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="77"/>
+        <source>The data box is so far inactive. The owner of the box has to log into the web interface at first in order to activate the box.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="82"/>
+        <source>The data box is permanently inaccessible. It is waiting to be deleted (but it may be made accessible again).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="87"/>
+        <source>The data box has been deleted (none the less it exists in ISDS).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="92"/>
+        <source>The data box is temporarily inaccessible (because of reasons listed in law). It may be made accessible again at some point in the future.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="98"/>
+        <location filename="../src/isds/type_description.cpp" line="229"/>
+        <source>An error occurred while checking the status.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="109"/>
+        <source>Full control</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="111"/>
+        <source>Restricted control</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="116"/>
+        <source>download and read incoming DM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="122"/>
+        <source>download and read DM sent into own hands</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="127"/>
+        <source>create and send DM, download sent DM</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="132"/>
+        <source>retrieve DM lists, delivery and acceptance reports</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="137"/>
+        <source>search for data boxes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="141"/>
+        <source>manage the data box</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="145"/>
+        <source>read message in data vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="149"/>
+        <source>erase messages from data vault</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="163"/>
+        <source>Message has been submitted (has been created in ISDS)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="169"/>
+        <source>Data message including its attachments signed with time-stamp.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="176"/>
+        <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="181"/>
+        <source>Message handed into ISDS (delivery time recorded).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="189"/>
+        <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of acceptance through fiction in non-OVM DS); this state cannot occur for commercial messages.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="199"/>
+        <source>A person authorised to read this message has logged in -- delivered message has been accepted.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="204"/>
+        <source>Message has been read (on the portal or by ESS action).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="211"/>
+        <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="219"/>
+        <source>Message content deleted, envelope including hashes has been moved into archive.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="224"/>
+        <source>Message resides in data vault.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="250"/>
+        <source>Subsidised postal data message, initiating reply postal data message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="254"/>
+        <source>Subsidised postal data message, initiating reply postal data message - used for sending reply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="258"/>
+        <source>Subsidised postal data message, initiating reply postal data message - unused for sending reply, expired</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="262"/>
+        <source>Postal data message sent using a subscription (prepaid credit)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="266"/>
+        <source>Postal data message sent in endowment mode by another data box to the benefactor account</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="270"/>
+        <source>Postal data message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="273"/>
+        <source>Initiating postal data message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="276"/>
+        <source>Reply postal data message; sent at the expense of the sender of the initiating postal data message</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="280"/>
+        <source>Public message (recipient or sender is a public authority)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="283"/>
+        <source>Initiating postal data message - unused for sending reply, expired</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="286"/>
+        <source>Initiating postal data message - used for sending reply</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="304"/>
+        <source>Primary user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="308"/>
+        <source>Entrusted user</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="312"/>
+        <source>Administrator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="316"/>
+        <source>Official</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="320"/>
+        <source>Virtual</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="323"/>
+        <source>???</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="326"/>
+        <source>Liquidator</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="329"/>
+        <source>Receiver</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="332"/>
+        <source>Guardian</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="345"/>
+        <source>Success</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="346"/>
+        <source>Unspecified error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="347"/>
+        <source>Not supported</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="348"/>
+        <source>Invalid value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="349"/>
+        <source>Invalid context</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="350"/>
+        <source>Not logged in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="351"/>
+        <source>Connection closed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="354"/>
+        <source>Out of memory</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="355"/>
+        <source>Network problem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="356"/>
+        <source>HTTP problem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="357"/>
+        <source>SOAP problem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="358"/>
+        <source>XML problem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="359"/>
+        <source>ISDS server problem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="360"/>
+        <source>Invalid enum value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="361"/>
+        <source>Invalid date value</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="362"/>
+        <source>Too big</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="363"/>
+        <source>Too small</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="364"/>
+        <source>Value not unique</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="365"/>
+        <source>Values not equal</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="366"/>
+        <source>Some suboperations failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="367"/>
+        <source>Operation aborted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="368"/>
+        <source>Security problem</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/type_description.cpp" line="371"/>
+        <source>Unknown error</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>DlgAbout</name>
     <message>
         <location filename="../src/gui/dlg_about.cpp" line="39"/>
@@ -4007,525 +4453,6 @@ of postal data messages active.</source>
     </message>
 </context>
 <context>
-    <name>Isds::Description</name>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="34"/>
-        <source>system box</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="35"/>
-        <source>public authority</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="36"/>
-        <source>public authority - notary</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="37"/>
-        <source>public authority - bailiff</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="38"/>
-        <source>public authority - at request</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="39"/>
-        <source>public authority - natural person</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="40"/>
-        <source>public authority - self-employed person</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="41"/>
-        <source>public authority - legal person</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="42"/>
-        <source>legal person</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="43"/>
-        <source>legal person - founded by an act</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="44"/>
-        <source>legal person - at request</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="45"/>
-        <source>self-employed person</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="46"/>
-        <source>self-employed person - advocate</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="47"/>
-        <source>self-employed person - tax advisor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="48"/>
-        <source>self-employed person - insolvency administrator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="49"/>
-        <source>self-employed person - statutory auditor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="50"/>
-        <source>natural person</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="54"/>
-        <location filename="../src/isds/type_description.cpp" line="291"/>
-        <location filename="../src/isds/type_description.cpp" line="337"/>
-        <source>An error occurred while checking the type.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="67"/>
-        <source>The data box is accessible. It is possible to send messages into it. It can be looked up on the Portal.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="72"/>
-        <source>The data box is temporarily inaccessible (at own request). It may be made accessible again at some point in the future.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="77"/>
-        <source>The data box is so far inactive. The owner of the box has to log into the web interface at first in order to activate the box.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="82"/>
-        <source>The data box is permanently inaccessible. It is waiting to be deleted (but it may be made accessible again).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="87"/>
-        <source>The data box has been deleted (none the less it exists in ISDS).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="92"/>
-        <source>The data box is temporarily inaccessible (because of reasons listed in law). It may be made accessible again at some point in the future.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="98"/>
-        <location filename="../src/isds/type_description.cpp" line="229"/>
-        <source>An error occurred while checking the status.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="109"/>
-        <source>Full control</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="111"/>
-        <source>Restricted control</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="116"/>
-        <source>download and read incoming DM</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="122"/>
-        <source>download and read DM sent into own hands</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="127"/>
-        <source>create and send DM, download sent DM</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="132"/>
-        <source>retrieve DM lists, delivery and acceptance reports</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="137"/>
-        <source>search for data boxes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="141"/>
-        <source>manage the data box</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="145"/>
-        <source>read message in data vault</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="149"/>
-        <source>erase messages from data vault</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="163"/>
-        <source>Message has been submitted (has been created in ISDS)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="169"/>
-        <source>Data message including its attachments signed with time-stamp.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="176"/>
-        <source>Message did not pass through AV check; infected paper deleted; final status before deletion.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="181"/>
-        <source>Message handed into ISDS (delivery time recorded).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="189"/>
-        <source>10 days have passed since the delivery of the public message which has not been accepted by logging-in (assumption of acceptance through fiction in non-OVM DS); this state cannot occur for commercial messages.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="199"/>
-        <source>A person authorised to read this message has logged in -- delivered message has been accepted.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="204"/>
-        <source>Message has been read (on the portal or by ESS action).</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="211"/>
-        <source>Message marked as undeliverable because the target DS has been made inaccessible.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="219"/>
-        <source>Message content deleted, envelope including hashes has been moved into archive.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="224"/>
-        <source>Message resides in data vault.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="250"/>
-        <source>Subsidised postal data message, initiating reply postal data message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="254"/>
-        <source>Subsidised postal data message, initiating reply postal data message - used for sending reply</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="258"/>
-        <source>Subsidised postal data message, initiating reply postal data message - unused for sending reply, expired</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="262"/>
-        <source>Postal data message sent using a subscription (prepaid credit)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="266"/>
-        <source>Postal data message sent in endowment mode by another data box to the benefactor account</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="270"/>
-        <source>Postal data message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="273"/>
-        <source>Initiating postal data message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="276"/>
-        <source>Reply postal data message; sent at the expense of the sender of the initiating postal data message</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="280"/>
-        <source>Public message (recipient or sender is a public authority)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="283"/>
-        <source>Initiating postal data message - unused for sending reply, expired</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="286"/>
-        <source>Initiating postal data message - used for sending reply</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="304"/>
-        <source>Primary user</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="308"/>
-        <source>Entrusted user</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="312"/>
-        <source>Administrator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="316"/>
-        <source>Official</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="320"/>
-        <source>Virtual</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="323"/>
-        <source>???</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="326"/>
-        <source>Liquidator</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="329"/>
-        <source>Receiver</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="332"/>
-        <source>Guardian</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="345"/>
-        <source>Success</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="346"/>
-        <source>Unspecified error</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="347"/>
-        <source>Not supported</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="348"/>
-        <source>Invalid value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="349"/>
-        <source>Invalid context</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="350"/>
-        <source>Not logged in</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="351"/>
-        <source>Connection closed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="354"/>
-        <source>Out of memory</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="355"/>
-        <source>Network problem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="356"/>
-        <source>HTTP problem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="357"/>
-        <source>SOAP problem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="358"/>
-        <source>XML problem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="359"/>
-        <source>ISDS server problem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="360"/>
-        <source>Invalid enum value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="361"/>
-        <source>Invalid date value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="362"/>
-        <source>Too big</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="363"/>
-        <source>Too small</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="364"/>
-        <source>Value not unique</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="365"/>
-        <source>Values not equal</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="366"/>
-        <source>Some suboperations failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="367"/>
-        <source>Operation aborted</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="368"/>
-        <source>Security problem</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/type_description.cpp" line="371"/>
-        <source>Unknown error</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Isds::Login</name>
-    <message>
-        <location filename="../src/isds/services_login.cpp" line="53"/>
-        <location filename="../src/isds/services_login.cpp" line="84"/>
-        <location filename="../src/isds/services_login.cpp" line="153"/>
-        <location filename="../src/isds/services_login.cpp" line="224"/>
-        <location filename="../src/isds/services_login.cpp" line="295"/>
-        <source>Insufficient input.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/services_login.cpp" line="94"/>
-        <location filename="../src/isds/services_login.cpp" line="163"/>
-        <location filename="../src/isds/services_login.cpp" line="234"/>
-        <location filename="../src/isds/services_login.cpp" line="306"/>
-        <location filename="../src/isds/services_login.cpp" line="326"/>
-        <source>Insufficient memory.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/services_login.cpp" line="314"/>
-        <source>Error converting types.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>Isds::Service</name>
-    <message>
-        <location filename="../src/isds/services_account.cpp" line="54"/>
-        <location filename="../src/isds/services_account.cpp" line="113"/>
-        <location filename="../src/isds/services_box.cpp" line="55"/>
-        <location filename="../src/isds/services_box.cpp" line="124"/>
-        <location filename="../src/isds/services_box.cpp" line="151"/>
-        <location filename="../src/isds/services_box.cpp" line="209"/>
-        <location filename="../src/isds/services_box.cpp" line="253"/>
-        <location filename="../src/isds/services_box.cpp" line="320"/>
-        <location filename="../src/isds/services_message.cpp" line="268"/>
-        <location filename="../src/isds/services_message.cpp" line="296"/>
-        <location filename="../src/isds/services_message.cpp" line="354"/>
-        <location filename="../src/isds/services_message.cpp" line="432"/>
-        <location filename="../src/isds/services_message.cpp" line="489"/>
-        <location filename="../src/isds/services_message.cpp" line="530"/>
-        <source>Insufficient input.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/services_account.cpp" line="64"/>
-        <location filename="../src/isds/services_box.cpp" line="70"/>
-        <location filename="../src/isds/services_box.cpp" line="97"/>
-        <location filename="../src/isds/services_box.cpp" line="163"/>
-        <location filename="../src/isds/services_box.cpp" line="187"/>
-        <location filename="../src/isds/services_box.cpp" line="234"/>
-        <location filename="../src/isds/services_box.cpp" line="278"/>
-        <location filename="../src/isds/services_box.cpp" line="340"/>
-        <location filename="../src/isds/services_box.cpp" line="378"/>
-        <location filename="../src/isds/services_message.cpp" line="305"/>
-        <location filename="../src/isds/services_message.cpp" line="461"/>
-        <location filename="../src/isds/services_message.cpp" line="555"/>
-        <source>Error converting types.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/services_message.cpp" line="323"/>
-        <source>Missing identifier of sent message.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/isds/services_message.cpp" line="332"/>
-        <source>Cannot convert sent message identifier.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>IsdsLogin</name>
     <message>
         <location filename="../src/io/isds_login.cpp" line="105"/>
@@ -4720,6 +4647,32 @@ of postal data messages active.</source>
     <message>
         <location filename="../src/io/isds_login.cpp" line="253"/>
         <source>An unexpected error occurred. Please restart the application and try again. It this doesn&apos;t help then you should contact the support for this application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Login</name>
+    <message>
+        <location filename="../src/isds/services_login.cpp" line="53"/>
+        <location filename="../src/isds/services_login.cpp" line="84"/>
+        <location filename="../src/isds/services_login.cpp" line="153"/>
+        <location filename="../src/isds/services_login.cpp" line="224"/>
+        <location filename="../src/isds/services_login.cpp" line="295"/>
+        <source>Insufficient input.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/services_login.cpp" line="94"/>
+        <location filename="../src/isds/services_login.cpp" line="163"/>
+        <location filename="../src/isds/services_login.cpp" line="234"/>
+        <location filename="../src/isds/services_login.cpp" line="306"/>
+        <location filename="../src/isds/services_login.cpp" line="326"/>
+        <source>Insufficient memory.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/services_login.cpp" line="314"/>
+        <source>Error converting types.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7594,6 +7547,53 @@ to origin path
     <message>
         <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="255"/>
         <source>It can be now found in the records management service in these locations:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Service</name>
+    <message>
+        <location filename="../src/isds/services_account.cpp" line="54"/>
+        <location filename="../src/isds/services_account.cpp" line="113"/>
+        <location filename="../src/isds/services_box.cpp" line="55"/>
+        <location filename="../src/isds/services_box.cpp" line="124"/>
+        <location filename="../src/isds/services_box.cpp" line="151"/>
+        <location filename="../src/isds/services_box.cpp" line="209"/>
+        <location filename="../src/isds/services_box.cpp" line="253"/>
+        <location filename="../src/isds/services_box.cpp" line="320"/>
+        <location filename="../src/isds/services_message.cpp" line="268"/>
+        <location filename="../src/isds/services_message.cpp" line="296"/>
+        <location filename="../src/isds/services_message.cpp" line="354"/>
+        <location filename="../src/isds/services_message.cpp" line="432"/>
+        <location filename="../src/isds/services_message.cpp" line="489"/>
+        <location filename="../src/isds/services_message.cpp" line="530"/>
+        <source>Insufficient input.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/services_account.cpp" line="64"/>
+        <location filename="../src/isds/services_box.cpp" line="70"/>
+        <location filename="../src/isds/services_box.cpp" line="97"/>
+        <location filename="../src/isds/services_box.cpp" line="163"/>
+        <location filename="../src/isds/services_box.cpp" line="187"/>
+        <location filename="../src/isds/services_box.cpp" line="234"/>
+        <location filename="../src/isds/services_box.cpp" line="278"/>
+        <location filename="../src/isds/services_box.cpp" line="340"/>
+        <location filename="../src/isds/services_box.cpp" line="378"/>
+        <location filename="../src/isds/services_message.cpp" line="305"/>
+        <location filename="../src/isds/services_message.cpp" line="461"/>
+        <location filename="../src/isds/services_message.cpp" line="555"/>
+        <source>Error converting types.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/services_message.cpp" line="323"/>
+        <source>Missing identifier of sent message.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/isds/services_message.cpp" line="332"/>
+        <source>Cannot convert sent message identifier.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
