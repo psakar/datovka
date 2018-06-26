@@ -726,10 +726,8 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 bool DbMsgsTblModel::setRecordsManagementIcon(void)
 {
 	QIcon ico;
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(),
-	    QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(),
-	    QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 
 	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
 		m_dsIco = ico;
