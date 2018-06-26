@@ -515,7 +515,7 @@ sent reply on this message</string>
   <action name="actionAdd_account">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/plus_16.png</normaloff>:/icons/3party/plus_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Add new account</string>
@@ -530,7 +530,7 @@ sent reply on this message</string>
   <action name="actionDelete_account">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Remove account</string>
@@ -548,7 +548,7 @@ sent reply on this message</string>
    </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/globe_16.png</normaloff>:/icons/3party/globe_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Proxy settings</string>
@@ -578,7 +578,7 @@ sent reply on this message</string>
   <action name="actionQuit">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
@@ -596,7 +596,7 @@ sent reply on this message</string>
   <action name="actionImport_database_directory">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/address_16.png</normaloff>:/icons/3party/address_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Create account from database</string>
@@ -647,7 +647,7 @@ sent reply on this message</string>
   <action name="actionMark_all_as_read">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka-ok.png</normaloff>:/icons/16x16/datovka-ok.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Mark all as read</string>
@@ -662,7 +662,7 @@ sent reply on this message</string>
   <action name="actionChange_password">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/user_16.png</normaloff>:/icons/3party/user_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Change password</string>
@@ -692,7 +692,7 @@ sent reply on this message</string>
   <action name="actionMove_account_up">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/up_16.png</normaloff>:/icons/3party/up_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Move account up</string>
@@ -707,7 +707,7 @@ sent reply on this message</string>
   <action name="actionMove_account_down">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/down_16.png</normaloff>:/icons/3party/down_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Move account down</string>
@@ -722,7 +722,7 @@ sent reply on this message</string>
   <action name="actionChange_data_directory">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/folder_16.png</normaloff>:/icons/3party/folder_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Change data directory</string>
@@ -737,7 +737,7 @@ sent reply on this message</string>
   <action name="actionAbout_Datovka">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/info_16.png</normaloff>:/icons/3party/info_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>About Datovka</string>
@@ -755,7 +755,7 @@ sent reply on this message</string>
    </property>
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/help_16.png</normaloff>:/icons/3party/help_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>User manual</string>
@@ -770,7 +770,7 @@ sent reply on this message</string>
   <action name="actionFind_databox">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/search_16.png</normaloff>:/icons/3party/search_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Find Data Box</string>
@@ -785,7 +785,7 @@ sent reply on this message</string>
   <action name="actionAuthenticate_message_file">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/key_16.png</normaloff>:/icons/3party/key_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Authenticate message file</string>
@@ -800,7 +800,7 @@ sent reply on this message</string>
   <action name="actionView_message_from_ZPO_file">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/monitor_16.png</normaloff>:/icons/3party/monitor_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>View message from ZFO file</string>
@@ -815,7 +815,7 @@ sent reply on this message</string>
   <action name="actionExport_correspondence_overview">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/save_16.png</normaloff>:/icons/3party/save_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Export correspondence overview</string>
@@ -893,7 +893,7 @@ sent reply on this message</string>
   <action name="actionDelete_message_from_db">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Delete message</string>
@@ -1030,7 +1030,7 @@ sent reply on this message</string>
   <action name="actionImport_ZFO_file_into_database">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/clipboard_16.png</normaloff>:/icons/3party/clipboard_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Import messages from ZFO files</string>
@@ -1078,7 +1078,7 @@ sent reply on this message</string>
   <action name="actionCheck_message_timestamp_expiration">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/shield_16.png</normaloff>:/icons/3party/shield_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Time stamp expiration check</string>
@@ -1093,7 +1093,7 @@ sent reply on this message</string>
   <action name="actionHomepage">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/home_16.png</normaloff>:/icons/3party/home_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Homepage</string>
@@ -1108,7 +1108,7 @@ sent reply on this message</string>
   <action name="actionImport_messages_from_database">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/clipboard_16.png</normaloff>:/icons/3party/clipboard_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Import messages from database</string>
@@ -1123,7 +1123,7 @@ sent reply on this message</string>
   <action name="actionSplit_database_by_years">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/statistics_16.png</normaloff>:/icons/3party/statistics_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Split database by years</string>
@@ -1171,7 +1171,7 @@ sent reply on this message</string>
   <action name="actionTag_settings">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/label_16.png</normaloff>:/icons/3party/label_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Edit tags</string>
@@ -1186,7 +1186,7 @@ sent reply on this message</string>
   <action name="actionVacuum_message_database">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/3party/trash_16.png</normaloff>:/icons/3party/trash_16.png</iconset>
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
     <string>Vacuum message database</string>

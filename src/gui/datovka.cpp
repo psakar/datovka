@@ -7804,7 +7804,12 @@ void MainWindow::topToolBarSetUp(void)
 
 void MainWindow::setMenuActionIcons(void)
 {
-	/* Don't remove the isEnabled() calls. */
+	/*
+	 * Don't remove the isEnabled() calls as they server as placeholders
+	 * for existing actions.
+	 *
+	 * You may replace them with a setIcon() if you wan to specify a icon.
+	 */
 
 	/* File menu. */
 	{
@@ -7820,14 +7825,12 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionAdd_account->setIcon(ico);
-		ui->actionAdd_account->isEnabled();
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionDelete_account->setIcon(ico);
-		ui->actionDelete_account->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -7835,7 +7838,6 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "address_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "address_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionImport_database_directory->setIcon(ico);
-		ui->actionImport_database_directory->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -7843,7 +7845,6 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "globe_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "globe_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionProxy_settings->setIcon(ico);
-		ui->actionProxy_settings->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -7890,7 +7891,6 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionMark_all_as_read->setIcon(ico);
-		ui->actionMark_all_as_read->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -7898,7 +7898,6 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "user_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "user_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionChange_password->setIcon(ico);
-		ui->actionChange_password->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -7913,14 +7912,12 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionMove_account_up->setIcon(ico);
-		ui->actionMove_account_up->isEnabled();
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "down_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "down_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionMove_account_down->setIcon(ico);
-		ui->actionMove_account_down->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -7928,7 +7925,6 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionChange_data_directory->setIcon(ico);
-		ui->actionChange_data_directory->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -7936,9 +7932,7 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "clipboard_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "clipboard_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionImport_messages_from_database->setIcon(ico);
-		ui->actionImport_messages_from_database->isEnabled();
 		ui->actionImport_ZFO_file_into_database->setIcon(ico);
-		ui->actionImport_ZFO_file_into_database->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -7946,14 +7940,12 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "trash_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "trash_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionVacuum_message_database->setIcon(ico);
-		ui->actionVacuum_message_database->isEnabled();
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "statistics_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "statistics_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSplit_database_by_years->setIcon(ico);
-		ui->actionSplit_database_by_years->isEnabled();
 	}
 
 	/* Message menu. */
@@ -8038,7 +8030,6 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionDelete_message_from_db->setIcon(ico);
-		ui->actionDelete_message_from_db->isEnabled();
 	}
 
 	/* Tools menu. */
@@ -8047,7 +8038,6 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionFind_databox->setIcon(ico);
-		ui->actionFind_databox->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -8055,28 +8045,24 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "key_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "key_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionAuthenticate_message_file->setIcon(ico);
-		ui->actionAuthenticate_message_file->isEnabled();
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "monitor_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "monitor_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionView_message_from_ZPO_file->setIcon(ico);
-		ui->actionView_message_from_ZPO_file->isEnabled();
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionExport_correspondence_overview->setIcon(ico);
-		ui->actionExport_correspondence_overview->isEnabled();
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "shield_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "shield_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionCheck_message_timestamp_expiration->setIcon(ico);
-		ui->actionCheck_message_timestamp_expiration->isEnabled();
 	}
 	    /* Separator. */
 	{
@@ -8091,7 +8077,6 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "label_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "label_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionTag_settings->setIcon(ico);
-		ui->actionTag_settings->isEnabled();
 	}
 
 	/* Help. */
@@ -8100,21 +8085,18 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "info_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "info_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionAbout_Datovka->setIcon(ico);
-		ui->actionAbout_Datovka->isEnabled();
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "home_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "home_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionHomepage->setIcon(ico);
-		ui->actionHomepage->isEnabled();
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "help_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "help_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionHelp->setIcon(ico);
-		ui->actionHelp->isEnabled();
 	}
 
 	/* Actions that are not shown in the top menu. */
