@@ -84,6 +84,13 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
 
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->searchPushButton->setIcon(ico);
+	}
+
 	/* Set default line height for table views/widgets. */
 	m_ui->contactTableView->setNarrowedLineHeight();
 	m_ui->contactTableView->setSelectionMode(
@@ -414,8 +421,8 @@ void DlgDsSearch::filterContact(const QString &text)
 
 void DlgDsSearch::initContent(void)
 {
-	QString dbOpenAddressing = "";
-	QString toolTipInfo = "";
+	QString dbOpenAddressing;
+	QString toolTipInfo;
 
 	if ("OVM" != m_dbType && !m_dbEffectiveOVM) {
 		if (m_dbOpenAddressing) {
