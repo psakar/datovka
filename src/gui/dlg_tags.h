@@ -155,6 +155,11 @@ private:
 	 */
 	void selectAllAssingedTagsFromMsgs(void);
 
+	/*!
+	 * @brief Set icon set to buttons.
+	 */
+	void setIcons(void);
+
 	Ui::DlgTags *m_ui; /*!< UI generated from UI file. */
 
 	const QString m_userName; /*!< Account username. */

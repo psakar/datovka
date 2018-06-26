@@ -230,6 +230,7 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 	}
 	const AcntSettings &accountInfo((*GlobInstcs::acntMapPtr)[uName]);
 	enum NodeType type = internalIdNodeType(index.internalId());
+	QIcon ico;
 
 	switch (role) {
 	case Qt::DisplayRole:
@@ -306,20 +307,25 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 	case Qt::DecorationRole:
 		switch (type) {
 		case nodeAccountTop:
-			return QIcon(ICON_3PARTY_PATH +
-			    QStringLiteral("letter_16.png"));
+			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+			return ico;
 			break;
 		case nodeRecentReceived:
 		case nodeReceived:
 		case nodeReceivedYear:
-			return QIcon(ICON_16x16_PATH +
-			    QStringLiteral("datovka-message-download.png"));
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+			return ico;
 			break;
 		case nodeRecentSent:
 		case nodeSent:
 		case nodeSentYear:
-			return QIcon(ICON_16x16_PATH +
-			    QStringLiteral("datovka-message-reply.png"));
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
+			return ico;
 			break;
 		default:
 			return QVariant();

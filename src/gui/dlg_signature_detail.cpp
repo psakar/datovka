@@ -48,6 +48,8 @@ DlgSignatureDetail::DlgSignatureDetail(const QByteArray &msgDER,
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
 
+	setIcons();
+
 	m_ui->verifyWidget->setHidden(true);
 	connect(m_ui->showVerifyDetail, SIGNAL(stateChanged(int)),
 	    this, SLOT(showVerificationDetail(int)));
@@ -315,16 +317,10 @@ bool signingCertValid(const QByteArray &DER, struct crt_verif_outcome &cvo)
 
 void DlgSignatureDetail::validateSigningCertificate(void)
 {
-	QString iconPath;
-	QString resStr;
-
 	m_ui->showCertDetail->setHidden(false);
 	m_ui->showVerifyDetail->setHidden(false);
 
 	if (m_msgDER.isEmpty()) {
-		iconPath = ICON_3PARTY_PATH "warning_16.png";
-		resStr = tr("Message signature is not present.") + "<br/>";
-		resStr += tr("Cannot check signing certificate.");
 		m_ui->showCertDetail->setHidden(true);
 		m_ui->showVerifyDetail->setHidden(true);
 
@@ -333,23 +329,27 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 
 	struct crt_verif_outcome cvo;
 
-	resStr = "<b>" + tr("Valid") + ": </b>";
+	QString resStr("<b>" + tr("Valid") + ": </b>");
 
+	QIcon ico;
 	if (!signingCertValid(m_msgDER, cvo)) {
-		iconPath = ICON_16x16_PATH "datovka-error.png";
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
 		resStr += NO;
 	} else {
-		iconPath = ICON_16x16_PATH "datovka-ok.png";
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
 		resStr += YES;
 	}
 
 	if (!GlobInstcs::prefsPtr->checkCrl) {
-//		iconPath = ICON_3PARTY_PATH "warning_16.png";
 		resStr += " <b>(" +
 		    tr("Certificate revocation check is turned off!") + ")</b>";
 	}
 
-	m_ui->cImage->setIcon(QIcon(iconPath));
+	m_ui->cImage->setIcon(ico);
 	m_ui->cStatus->setTextFormat(Qt::RichText);
 	m_ui->cStatus->setText(resStr);
 	m_ui->cDetail->setText(QString());
@@ -551,13 +551,14 @@ fail:
 
 void DlgSignatureDetail::validateMessageTimestamp(void)
 {
-	QString iconPath;
+	QIcon ico;
 	QString resStr;
 	QString detailStr;
-
 	QDateTime tst;
+
 	if (m_tstDER.isEmpty()) {
-		iconPath = ICON_3PARTY_PATH "warning_16.png";
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		resStr = tr("Time stamp not present.");
 	} else {
 		time_t utc_time = 0;
@@ -569,10 +570,14 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 		}
 		resStr = "<b>" + tr("Valid") + ": </b>";
 		if (1 != ret) {
-			iconPath = ICON_16x16_PATH "datovka-error.png";
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
 			resStr += NO;
 		} else {
-			iconPath = ICON_16x16_PATH "datovka-ok.png";
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
 			resStr += YES;
 		}
 
@@ -617,7 +622,17 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 		m_ui->tDetail->setText(detailStr);
 	}
 
-	m_ui->tImage->setIcon(QIcon(iconPath));
+	m_ui->tImage->setIcon(ico);
 	m_ui->tStatus->setTextFormat(Qt::RichText);
 	m_ui->tStatus->setText(resStr);
+}
+
+void DlgSignatureDetail::setIcons(void)
+{
+	QIcon ico;
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+	m_ui->tImage->setIcon(ico);
+	m_ui->cImage->setIcon(ico);
+	m_ui->mSignatureImage->setIcon(ico);
 }

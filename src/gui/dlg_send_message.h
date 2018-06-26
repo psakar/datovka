@@ -311,6 +311,11 @@ private:
 	void sendMessageISDS(
 	    const QList<BoxContactsModel::PartialEntry> &recipEntries);
 
+	/*!
+	 * @brief Set icon set to buttons.
+	 */
+	void setIcons(void);
+
 	Ui::DlgSendMessage *m_ui; /*!< UI generated from UI file. */
 
 	QTimer m_keepAliveTimer; /*!< Keeps connection to ISDS alive. */

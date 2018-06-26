@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _COMMON_H_
-#define _COMMON_H_
+#pragma once
 
 #include <QDir>
 #include <QSettings>
@@ -31,6 +30,7 @@
 #define ICON_14x14_PATH ":/icons/14x14/"
 #define ICON_16x16_PATH ":/icons/16x16/"
 #define ICON_24x24_PATH ":/icons/24x24/"
+#define ICON_32x32_PATH ":/icons/32x32/"
 #define ICON_128x128_PATH ":/icons/128x128/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
 
@@ -211,5 +211,3 @@ bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
  * @return text string in Base64.
  */
 QString toBase64(const QString &plain);
-
-#endif /* _COMMON_H_ */

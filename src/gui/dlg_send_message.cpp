@@ -122,6 +122,8 @@ DlgSendMessage::DlgSendMessage(
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
 
+	setIcons();
+
 	/* Set default line height for table views/widgets. */
 	m_ui->recipTableView->setNarrowedLineHeight();
 	m_ui->recipTableView->setSelectionBehavior(
@@ -1409,4 +1411,44 @@ finish:
 	    tr("It has not been possible to send a message to the ISDS server."),
 	    infoText, QString(), QMessageBox::Ok);
 	this->close();
+}
+
+void DlgSendMessage::setIcons(void)
+{
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->addRecipButton->setIcon(ico);
+		m_ui->addAttachButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->removeRecipButton->setIcon(ico);
+		m_ui->removeAttachButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->findRecipButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->enterBoxIdButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->openAttachButton->setIcon(ico);
+	}
 }

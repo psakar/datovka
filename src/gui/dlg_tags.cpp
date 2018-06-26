@@ -322,6 +322,8 @@ void DlgTags::fillTagsToListViews(void)
 
 void DlgTags::initDlg(void)
 {
+	setIcons();
+
 	m_ui->availableTagsView->setItemDelegate(&m_availableTagsDelegate);
 	m_ui->availableTagsView->setModel(&m_availableTagsModel);
 	m_ui->availableTagsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -384,5 +386,50 @@ void DlgTags::selectAllAssingedTagsFromMsgs(void)
 				}
 			}
 		}
+	}
+}
+
+void DlgTags::setIcons(void)
+{
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->addTagButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->deleteTagButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->updateTagButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "right_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "right_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->assignButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "left_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "left_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->removeButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "left_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "left_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->removeAllButton->setIcon(ico);
 	}
 }

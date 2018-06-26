@@ -725,20 +725,24 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 
 bool DbMsgsTblModel::setRecordsManagementIcon(void)
 {
+	QIcon ico;
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+
 	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
-		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
+		m_dsIco = ico;
 		return false;
 	}
 
 	RecordsManagementDb::ServiceInfoEntry entry(
 	    GlobInstcs::recMgmtDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
-		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
+		m_dsIco = ico;
 		return false;
 	}
 	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, 16));
 	if (pixmap.isNull()) {
-		m_dsIco = QIcon(ICON_3PARTY_PATH "up_16.png");
+		m_dsIco = ico;
 		return false;
 	}
 
