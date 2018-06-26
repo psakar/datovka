@@ -1433,13 +1433,6 @@ void DlgSendMessage::setIcons(void)
 
 	{
 		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->openAttachButton->setIcon(ico);
-	}
-
-	{
-		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		m_ui->findRecipButton->setIcon(ico);
@@ -1450,5 +1443,12 @@ void DlgSendMessage::setIcons(void)
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		m_ui->enterBoxIdButton->setIcon(ico);
+	}
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->openAttachButton->setIcon(ico);
 	}
 }

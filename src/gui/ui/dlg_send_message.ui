@@ -407,7 +407,7 @@
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
-         <normaloff>:/icons/3party/plus_16.png</normaloff>:/icons/3party/plus_16.png</iconset>
+         <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
        </property>
       </widget>
      </item>
@@ -430,7 +430,7 @@
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
-         <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+         <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
        </property>
       </widget>
      </item>
@@ -454,7 +454,7 @@
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
-         <normaloff>:/icons/3party/search_16.png</normaloff>:/icons/3party/search_16.png</iconset>
+         <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
        </property>
       </widget>
      </item>
@@ -475,7 +475,7 @@
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
-         <normaloff>:/icons/3party/pencil_16.png</normaloff>:/icons/3party/pencil_16.png</iconset>
+         <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
        </property>
       </widget>
      </item>
@@ -628,7 +628,7 @@ of postal data messages active.</string>
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
-         <normaloff>:/icons/3party/plus_16.png</normaloff>:/icons/3party/plus_16.png</iconset>
+         <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
        </property>
       </widget>
      </item>
@@ -651,7 +651,7 @@ of postal data messages active.</string>
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
-         <normaloff>:/icons/3party/delete_16.png</normaloff>:/icons/3party/delete_16.png</iconset>
+         <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
        </property>
       </widget>
      </item>
@@ -681,7 +681,7 @@ of postal data messages active.</string>
        </property>
        <property name="icon">
         <iconset resource="../../../res/resources.qrc">
-         <normaloff>:/icons/3party/folder_16.png</normaloff>:/icons/3party/folder_16.png</iconset>
+         <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
        </property>
       </widget>
      </item>

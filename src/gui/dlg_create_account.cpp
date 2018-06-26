@@ -52,10 +52,12 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
 
-	QIcon ico;
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-	m_ui->addCertButton->setIcon(ico);
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->addCertButton->setIcon(ico);
+	}
 
 	m_ui->loginMethodComboBox->addItem(tr("Password"));
 	m_ui->loginMethodComboBox->addItem(tr("Certificate"));

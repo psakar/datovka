@@ -317,11 +317,6 @@ void DlgMsgSearch::searchMessages(void)
 
 void DlgMsgSearch::initSearchWindow(const QString &username)
 {
-	QIcon ico;
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-	m_ui->searchPushButton->setIcon(ico);
-
 	m_ui->infoTextLabel->setText(tr(
 	    "Here it is possible to search for messages according to supplied criteria. "
 	    "You can search for messages in the selected account or in all accounts. "
@@ -342,6 +337,13 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 
 	m_ui->tooManyFields->setStyleSheet("QLabel { color: red }");
 	m_ui->tooManyFields->hide();
+
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		m_ui->searchPushButton->setIcon(ico);
+	}
 
 	m_ui->resultsTableWidget->setColumnCount(7);
 	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_USER_NAME, new QTableWidgetItem(tr("Account")));
