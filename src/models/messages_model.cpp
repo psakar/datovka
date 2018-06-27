@@ -118,7 +118,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			/* Show icon for 'is downloaded'. */
 			if (_data(index).toBool()) {
 				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_14x14_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
 				ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
 				return ico;
 			} else {
@@ -321,7 +321,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 			break;
 		case DB_BOOL_ATTACHMENT_DOWNLOADED:
 			/* Show icon for 'is downloaded'. */
-			ico.addFile(QStringLiteral(ICON_14x14_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
 			ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
 			return ico;
 			break;

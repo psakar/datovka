@@ -66,11 +66,13 @@
         <file>icons/128x128/datovka.png</file>
         <file>icons/128x128/cznic.png</file>
         <file>icons/24x24/save-all.png</file>
+        <file>icons/14x14/attachment.png</file>
         <file>icons/14x14/yellow.png</file>
         <file>icons/14x14/red.png</file>
         <file>icons/14x14/grey.png</file>
         <file>icons/14x14/green.png</file>
         <file>icons/14x14/blue.png</file>
+        <file>icons/16x16/attachment.png</file>
         <file>icons/16x16/grey.png</file>
         <file>icons/16x16/green.png</file>
         <file>icons/16x16/red.png</file>
@@ -78,7 +80,6 @@
         <file>icons/16x16/blue.png</file>
         <file>icons/16x16/black.png</file>
         <file>icons/16x16/brown.png</file>
-        <file>icons/14x14/attachment.png</file>
         <file>icons/16x16/readcol.png</file>
         <file>icons/16x16/flag.png</file>
         <file>icons/256x256/datovka.png</file>
