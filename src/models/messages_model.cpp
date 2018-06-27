@@ -117,7 +117,10 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		case DB_BOOL_ATTACHMENT_DOWNLOADED:
 			/* Show icon for 'is downloaded'. */
 			if (_data(index).toBool()) {
-				return QIcon(ICON_14x14_PATH "attachment.png");
+				QIcon ico;
+				ico.addFile(QStringLiteral(ICON_14x14_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
 			} else {
 				return QVariant(); /* No icon. */
 			}
@@ -262,6 +265,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
     int role) const
 {
 	int dataType;
+	QIcon ico;
 
 	/* Draw additional. */
 	switch (m_type) {
@@ -306,20 +310,25 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		if (section < READLOC_STATUS_COL) {
 			return _headerData(section, orientation, role);
 		}
-
 		dataType = _headerData(section, Qt::Horizontal,
 		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
 		switch (dataType) {
 		case DB_BOOL_READ_LOCALLY:
 			/* Show icon for 'read locally'. */
-			return QIcon(ICON_16x16_PATH "readcol.png");
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
+			return ico;
 			break;
 		case DB_BOOL_ATTACHMENT_DOWNLOADED:
 			/* Show icon for 'is downloaded'. */
-			return QIcon(ICON_14x14_PATH "attachment.png");
+			ico.addFile(QStringLiteral(ICON_14x14_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+			return ico;
 			break;
 		case DB_INT_PROCESSING_STATE:
-			return QIcon(ICON_16x16_PATH "flag.png");
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
+			return ico;
 			break;
 		default:
 			return _headerData(section, orientation, role);
