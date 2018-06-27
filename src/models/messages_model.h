@@ -263,6 +263,16 @@ private:
 	 */
 	QVariant tagsData(const QModelIndex &index, int role) const;
 
+	/*!
+	 * @brief Construct a numeric sorting identifier.
+	 *
+	 * @param[in] num Small number with highest significance.
+	 * @param[in] index Index which is used to take message identifier from.
+	 *                  The message identifier has a low significance.
+	 * @return A number that can be used for sorting purposes.
+	 */
+	qint64 sortRank(qint16 num, const QModelIndex &index) const;
+
 	enum Type m_type; /*!<
 	                   * Whether this is a model dummy or contains data.
 	                   */

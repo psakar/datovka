@@ -234,25 +234,13 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		case DB_BOOLEAN:
 		case DB_BOOL_READ_LOCALLY:
 		case DB_BOOL_ATTACHMENT_DOWNLOADED:
-			{
-				qint64 id =
-				    _data(index, Qt::DisplayRole).toBool() ?
-				    1 : 0;
-				id = id << MSG_ID_WIDTH;
-				id += _data(index.sibling(index.row(), 0),
-				    Qt::DisplayRole).toLongLong(); /* dmId */
-				return id;
-			}
+			return sortRank(
+			    _data(index, Qt::DisplayRole).toBool() ? 1 : 0,
+			    index);
 			break;
 		case DB_INT_PROCESSING_STATE:
-			{
-				qint64 id =
-				    _data(index, Qt::DisplayRole).toInt();
-				id = id << MSG_ID_WIDTH;
-				id += _data(index.sibling(index.row(), 0),
-				    Qt::DisplayRole).toLongLong(); /* dmId */
-				return id;
-			}
+			return sortRank(_data(index, Qt::DisplayRole).toInt(),
+			    index);
 			break;
 		case DB_TEXT: /* Ignore case for sorting. */
 			return _data(index,
@@ -844,6 +832,9 @@ QVariant DbMsgsTblModel::recMgmtData(const QModelIndex &index, int role) const
 		}
 		return QVariant();
 		break;
+	case ROLE_MSGS_DB_PROXYSORT:
+		return sortRank(locations.isEmpty() ? 0 : 1, index);
+		break;
 	default:
 		return QVariant();
 		break;
@@ -891,4 +882,13 @@ QVariant DbMsgsTblModel::tagsData(const QModelIndex &index, int role) const
 		return _data(index, role);
 		break;
 	}
+}
+
+qint64 DbMsgsTblModel::sortRank(qint16 num, const QModelIndex &index) const
+{
+	qint64 id = num;
+	id = id << MSG_ID_WIDTH;
+	id += _data(index.sibling(index.row(), DMID_COL),
+	    Qt::DisplayRole).toLongLong(); /* dmId */
+	return id;
 }
