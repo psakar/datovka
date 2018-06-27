@@ -882,6 +882,10 @@ QVariant DbMsgsTblModel::tagsData(const QModelIndex &index, int role) const
 		}
 		return QVariant();
 		break;
+	case ROLE_MSGS_DB_PROXYSORT:
+		/* Sort proxy model is able to handle tags. */
+		return _data(index, Qt::DisplayRole);
+		break;
 	default:
 		/* Leave additional tags to delegates. */
 		return _data(index, role);
