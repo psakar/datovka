@@ -311,7 +311,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_sent_1(200),
     m_sent_2(200),
     m_sort_column(0),
-    m_sort_order(""),
+    m_sort_order(),
     m_save_attach_dir(QDir::homePath()),
     m_add_attach_dir(QDir::homePath()),
     m_export_correspond_dir(QDir::homePath()),
@@ -4289,10 +4289,10 @@ void MainWindow::loadSentReceivedMessagesColumnWidth(const QSettings &settings)
 	    0).toInt();
 	/* Sort column saturation from old datovka */
 	if (m_sort_column > 5) {
-		m_sort_column = 1;
+		m_sort_column = 0;
 	}
 	m_sort_order = settings.value("message_ordering/sort_order",
-	    "").toString();
+	    QString()).toString();
 }
 
 /* ========================================================================= */
@@ -4976,11 +4976,13 @@ void MainWindow::filterMessages(const QString &text)
 	    Qt::CaseInsensitive, QRegExp::FixedString));
 	/* Filter according to second and third column. */
 	QList<int> columnList;
-	columnList.append(1);
-	columnList.append(2);
+	columnList.append(DbMsgsTblModel::DMID_COL);
+	columnList.append(DbMsgsTblModel::ANNOT_COL);
+	columnList.append(DbMsgsTblModel::SENDER_RECIP_COL);
 	if (Q_NULLPTR != GlobInstcs::tagDbPtr) {
-		columnList.append(7); /* Tags in sent messages. */
-		columnList.append(8); /* Tags in received messages. */
+		columnList.append(
+		    m_messageListProxyModel.sourceModel()->columnCount() +
+		    DbMsgsTblModel::TAGS_NEG_COL); /* Tags. */
 	}
 	m_messageListProxyModel.setFilterKeyColumns(columnList);
 
@@ -5121,7 +5123,7 @@ void MainWindow::onTableColumnHeaderSectionClicked(int column)
 	           Qt::DescendingOrder) {
 		m_sort_order = "SORT_DESCENDING";
 	} else {
-		m_sort_order = "";
+		m_sort_order = QString();
 	}
 }
 
