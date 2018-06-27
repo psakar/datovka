@@ -21,8 +21,9 @@
  * the two.
  */
 
-#include <QString>
 #include <QItemSelectionModel>
+#include <QMessageBox>
+#include <QString>
 
 #include "src/common.h"
 #include "src/gui/dlg_tag.h"
@@ -168,6 +169,25 @@ void DlgTags::deleteTag(void)
 	if (Q_UNLIKELY(slctIdxs.isEmpty())) {
 		/* Nothing to do. */
 		return;
+	}
+
+	QList<QModelIndex> usedTagIdxs;
+	foreach (const QModelIndex &idx, slctIdxs) {
+		if (m_tagDbPtr->getTagAssignmentCount(getTagIdFromIndex(idx)) > 0) {
+			usedTagIdxs.append(idx);
+		}
+	}
+
+	if ((usedTagIdxs.size() > 0)) {
+		QMessageBox::StandardButton reply = QMessageBox::question(this,
+		    tr("Delete assigned tags"),
+		    tr("Some selected tags are assigned to some messages.") +
+		    "<br/><br/>" +
+		    tr("Do you want to delete the selected tags?"),
+		    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+		if (reply == QMessageBox::No) {
+			return;
+		}
 	}
 
 	foreach (const QModelIndex &idx, slctIdxs) {

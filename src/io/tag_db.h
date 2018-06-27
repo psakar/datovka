@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _TAG_DB_H_
-#define _TAG_DB_H_
+#pragma once
 
 #include <QList>
 #include <QString>
@@ -143,6 +142,14 @@ public:
 	QList<TagEntry> getAllTags(void) const;
 
 	/*!
+	 * @brief Get number of assignments of given tag.
+	 *
+	 * @param[in] tagId Tad identifier.
+	 * @return Number of messages the tag is assigned to, -1 on any error.
+	 */
+	int getTagAssignmentCount(int tagId) const;
+
+	/*!
 	 * @brief Get all tags related to given message.
 	 *
 	 * @param[in] userName account identifier.
@@ -216,5 +223,3 @@ protected:
  * @return Hashed tag entry.
  */
 uint qHash(const TagDb::TagEntry &entry, uint seed = 0);
-
-#endif /* _TAG_DB_H_ */
