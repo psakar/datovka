@@ -119,6 +119,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			if (_data(index).toBool()) {
 				QIcon ico;
 				ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
 				ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
 				return ico;
 			} else {
@@ -316,17 +317,20 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		case DB_BOOL_READ_LOCALLY:
 			/* Show icon for 'read locally'. */
 			ico.addFile(QStringLiteral(ICON_16x16_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
 			ico.addFile(QStringLiteral(ICON_32x32_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
 			return ico;
 			break;
 		case DB_BOOL_ATTACHMENT_DOWNLOADED:
 			/* Show icon for 'is downloaded'. */
 			ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
 			ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
 			return ico;
 			break;
 		case DB_INT_PROCESSING_STATE:
 			ico.addFile(QStringLiteral(ICON_16x16_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
 			ico.addFile(QStringLiteral(ICON_32x32_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
 			return ico;
 			break;

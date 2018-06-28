@@ -10,6 +10,7 @@
         <file>icons/16x16/datovka-ok.png</file>
         <file>icons/16x16/datovka-stock-keyring.png</file>
         <file>icons/16x16/datovka.png</file>
+        <file>icons/24x24/attachment.png</file>
         <file>icons/24x24/datovka-account-sync.png</file>
         <file>icons/24x24/datovka-all-accounts-sync.png</file>
         <file>icons/24x24/datovka-error.png</file>
@@ -20,6 +21,8 @@
         <file>icons/24x24/datovka-ok.png</file>
         <file>icons/24x24/datovka-stock-keyring.png</file>
         <file>icons/24x24/datovka.png</file>
+        <file>icons/24x24/flag.png</file>
+        <file>icons/24x24/readcol.png</file>
         <file>icons/3party/address_16.png</file>
         <file>icons/3party/block_16.png</file>
         <file>icons/3party/bookmark_16.png</file>
@@ -164,6 +167,7 @@
         <file>icons/3party/bookmark_32.png</file>
         <file>icons/3party/block_32.png</file>
         <file>icons/3party/address_32.png</file>
+        <file>icons/svg/readcol.svg</file>
         <file>datovka.png</file>
         <file>splash/datovka-splash.png</file>
         <file>dschranka.png</file>
