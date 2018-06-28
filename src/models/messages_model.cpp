@@ -266,7 +266,6 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
     int role) const
 {
 	int dataType;
-	QIcon ico;
 
 	/* Draw additional. */
 	switch (m_type) {
@@ -316,23 +315,32 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		switch (dataType) {
 		case DB_BOOL_READ_LOCALLY:
 			/* Show icon for 'read locally'. */
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
-			return ico;
+			{
+				QIcon ico;
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
+			}
 			break;
 		case DB_BOOL_ATTACHMENT_DOWNLOADED:
 			/* Show icon for 'is downloaded'. */
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-			return ico;
+			{
+				QIcon ico;
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
+			}
 			break;
 		case DB_INT_PROCESSING_STATE:
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
-			return ico;
+			{
+				QIcon ico;
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
+			}
 			break;
 		default:
 			return _headerData(section, orientation, role);
