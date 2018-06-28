@@ -7701,12 +7701,27 @@ void MainWindow::setUpUi(void)
 
 	/* Message state combo box. */
 	ui->messageStateCombo->setInsertPolicy(QComboBox::InsertAtBottom);
-	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "red.png"),
-	    tr("Unsettled"));
-	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "yellow.png"),
-	    tr("In Progress"));
-	ui->messageStateCombo->addItem(QIcon(ICON_14x14_PATH "grey.png"),
-	    tr("Settled"));
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->messageStateCombo->addItem(ico, tr("Unsettled"));
+	}
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->messageStateCombo->addItem(ico, tr("In Progress"));
+	}
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->messageStateCombo->addItem(ico, tr("Settled"));
+	}
 
 	/* Show banner. */
 	ui->messageStackedWidget->setCurrentIndex(0);

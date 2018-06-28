@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/">
+        <file>icons/16x16/attachment.png</file>
+        <file>icons/16x16/blue.png</file>
+        <file>icons/16x16/datovka.png</file>
         <file>icons/16x16/datovka-account-sync.png</file>
         <file>icons/16x16/datovka-all-accounts-sync.png</file>
         <file>icons/16x16/datovka-error.png</file>
@@ -9,7 +12,15 @@
         <file>icons/16x16/datovka-message.png</file>
         <file>icons/16x16/datovka-ok.png</file>
         <file>icons/16x16/datovka-stock-keyring.png</file>
-        <file>icons/16x16/datovka.png</file>
+        <file>icons/16x16/flag.png</file>
+        <file>icons/16x16/green.png</file>
+        <file>icons/16x16/grey.png</file>
+        <file>icons/16x16/readcol.png</file>
+        <file>icons/16x16/red.png</file>
+        <file>icons/16x16/yellow.png</file>
+        <file>icons/24x24/attachment.png</file>
+        <file>icons/24x24/blue.png</file>
+        <file>icons/24x24/datovka.png</file>
         <file>icons/24x24/datovka-account-sync.png</file>
         <file>icons/24x24/datovka-all-accounts-sync.png</file>
         <file>icons/24x24/datovka-error.png</file>
@@ -19,7 +30,56 @@
         <file>icons/24x24/datovka-message.png</file>
         <file>icons/24x24/datovka-ok.png</file>
         <file>icons/24x24/datovka-stock-keyring.png</file>
-        <file>icons/24x24/datovka.png</file>
+        <file>icons/24x24/flag.png</file>
+        <file>icons/24x24/green.png</file>
+        <file>icons/24x24/grey.png</file>
+        <file>icons/24x24/readcol.png</file>
+        <file>icons/24x24/red.png</file>
+        <file>icons/24x24/save-all.png</file>
+        <file>icons/24x24/yellow.png</file>
+        <file>icons/32x32/attachment.png</file>
+        <file>icons/32x32/blue.png</file>
+        <file>icons/32x32/datovka.png</file>
+        <file>icons/32x32/datovka-account-sync.png</file>
+        <file>icons/32x32/datovka-all-accounts-sync.png</file>
+        <file>icons/32x32/datovka-error.png</file>
+        <file>icons/32x32/datovka-message.png</file>
+        <file>icons/32x32/datovka-message-download.png</file>
+        <file>icons/32x32/datovka-message-reply.png</file>
+        <file>icons/32x32/datovka-message-verify.png</file>
+        <file>icons/32x32/datovka-ok.png</file>
+        <file>icons/32x32/datovka-stock-keyring.png</file>
+        <file>icons/32x32/flag.png</file>
+        <file>icons/32x32/green.png</file>
+        <file>icons/32x32/grey.png</file>
+        <file>icons/32x32/readcol.png</file>
+        <file>icons/32x32/red.png</file>
+        <file>icons/32x32/yellow.png</file>
+        <file>icons/48x48/datovka.png</file>
+        <file>icons/48x48/datovka-account-sync.png</file>
+        <file>icons/48x48/datovka-all-accounts-sync.png</file>
+        <file>icons/48x48/datovka-error.png</file>
+        <file>icons/48x48/datovka-message.png</file>
+        <file>icons/48x48/datovka-message-download.png</file>
+        <file>icons/48x48/datovka-message-reply.png</file>
+        <file>icons/48x48/datovka-message-verify.png</file>
+        <file>icons/48x48/datovka-ok.png</file>
+        <file>icons/48x48/datovka-stock-keyring.png</file>
+        <file>icons/48x48/datovka-question.png</file>
+        <file>icons/64x64/datovka.png</file>
+        <file>icons/64x64/datovka-account-sync.png</file>
+        <file>icons/64x64/datovka-all-accounts-sync.png</file>
+        <file>icons/64x64/datovka-error.png</file>
+        <file>icons/64x64/datovka-message.png</file>
+        <file>icons/64x64/datovka-message-download.png</file>
+        <file>icons/64x64/datovka-message-reply.png</file>
+        <file>icons/64x64/datovka-message-verify.png</file>
+        <file>icons/64x64/datovka-ok.png</file>
+        <file>icons/64x64/datovka-stock-keyring.png</file>
+        <file>icons/128x128/datovka.png</file>
+        <file>icons/128x128/cznic.png</file>
+        <file>icons/128x128/logo.png</file>
+        <file>icons/256x256/datovka.png</file>
         <file>icons/3party/address_16.png</file>
         <file>icons/3party/block_16.png</file>
         <file>icons/3party/bookmark_16.png</file>
@@ -63,57 +123,6 @@
         <file>icons/3party/user_16.png</file>
         <file>icons/3party/wallet_16.png</file>
         <file>icons/3party/warning_16.png</file>
-        <file>icons/128x128/datovka.png</file>
-        <file>icons/128x128/cznic.png</file>
-        <file>icons/24x24/save-all.png</file>
-        <file>icons/14x14/yellow.png</file>
-        <file>icons/14x14/red.png</file>
-        <file>icons/14x14/grey.png</file>
-        <file>icons/14x14/green.png</file>
-        <file>icons/14x14/blue.png</file>
-        <file>icons/16x16/grey.png</file>
-        <file>icons/16x16/green.png</file>
-        <file>icons/16x16/red.png</file>
-        <file>icons/16x16/yellow.png</file>
-        <file>icons/16x16/blue.png</file>
-        <file>icons/16x16/black.png</file>
-        <file>icons/16x16/brown.png</file>
-        <file>icons/14x14/attachment.png</file>
-        <file>icons/16x16/readcol.png</file>
-        <file>icons/16x16/flag.png</file>
-        <file>icons/256x256/datovka.png</file>
-        <file>icons/64x64/datovka.png</file>
-        <file>icons/64x64/datovka-account-sync.png</file>
-        <file>icons/64x64/datovka-all-accounts-sync.png</file>
-        <file>icons/64x64/datovka-error.png</file>
-        <file>icons/64x64/datovka-message.png</file>
-        <file>icons/64x64/datovka-message-download.png</file>
-        <file>icons/64x64/datovka-message-reply.png</file>
-        <file>icons/64x64/datovka-message-verify.png</file>
-        <file>icons/64x64/datovka-ok.png</file>
-        <file>icons/64x64/datovka-stock-keyring.png</file>
-        <file>icons/48x48/datovka.png</file>
-        <file>icons/48x48/datovka-account-sync.png</file>
-        <file>icons/48x48/datovka-all-accounts-sync.png</file>
-        <file>icons/48x48/datovka-error.png</file>
-        <file>icons/48x48/datovka-message.png</file>
-        <file>icons/48x48/datovka-message-download.png</file>
-        <file>icons/48x48/datovka-message-reply.png</file>
-        <file>icons/48x48/datovka-message-verify.png</file>
-        <file>icons/48x48/datovka-ok.png</file>
-        <file>icons/48x48/datovka-stock-keyring.png</file>
-        <file>icons/32x32/datovka.png</file>
-        <file>icons/32x32/datovka-account-sync.png</file>
-        <file>icons/32x32/datovka-all-accounts-sync.png</file>
-        <file>icons/32x32/datovka-error.png</file>
-        <file>icons/32x32/datovka-message.png</file>
-        <file>icons/32x32/datovka-message-download.png</file>
-        <file>icons/32x32/datovka-message-reply.png</file>
-        <file>icons/32x32/datovka-message-verify.png</file>
-        <file>icons/32x32/datovka-ok.png</file>
-        <file>icons/32x32/datovka-stock-keyring.png</file>
-        <file>icons/48x48/datovka-question.png</file>
-        <file>icons/128x128/logo.png</file>
         <file>icons/3party/search_32.png</file>
         <file>icons/3party/warning_32.png</file>
         <file>icons/3party/wallet_32.png</file>
@@ -160,8 +169,15 @@
         <file>icons/3party/bookmark_32.png</file>
         <file>icons/3party/block_32.png</file>
         <file>icons/3party/address_32.png</file>
-        <file>datovka.png</file>
+        <file>icons/svg/blue.svg</file>
+        <file>icons/svg/green.svg</file>
+        <file>icons/svg/grey.svg</file>
+        <file>icons/svg/readcol.svg</file>
+        <file>icons/svg/red.svg</file>
+        <file>icons/svg/sphere_monochrome_simple.svg</file>
+        <file>icons/svg/yellow.svg</file>
         <file>splash/datovka-splash.png</file>
+        <file>datovka.png</file>
         <file>dschranka.png</file>
     </qresource>
 </RCC>

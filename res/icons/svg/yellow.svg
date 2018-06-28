@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.0"
+   x="0.00000000"
+   y="0.00000000"
+   width="500.00000"
+   height="500.00000"
+   id="svg2"
+   sodipodi:docname="yellow.svg"
+   inkscape:version="0.92.2 5c3e80d, 2017-08-06">
+  <metadata
+     id="metadata1474">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1916"
+     inkscape:window-height="1041"
+     id="namedview1472"
+     showgrid="false"
+     inkscape:snap-nodes="true"
+     inkscape:snap-others="true"
+     inkscape:zoom="1.3350176"
+     inkscape:cx="59.48044"
+     inkscape:cy="260.58722"
+     inkscape:window-x="0"
+     inkscape:window-y="18"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg2" />
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient6453">
+      <stop
+         style="stop-color:#f5f5b4;stop-opacity:1"
+         offset="0.00000000"
+         id="stop6455" />
+      <stop
+         style="stop-color:#e6d406;stop-opacity:1"
+         offset="1.0000000"
+         id="stop6457" />
+    </linearGradient>
+    <radialGradient
+       cx="171.20810"
+       cy="196.85463"
+       r="200.00000"
+       fx="171.20810"
+       fy="196.85463"
+       id="radialGradient6459"
+       xlink:href="#linearGradient6453"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.040418,0.796229,-0.814518,1.064316,153.4218,-150.4353)" />
+  </defs>
+  <g
+     id="layer1">
+    <path
+       d="M 450.00000 255.00000 A 200.00000 205.00000 0 1 1  50.000000,255.00000 A 200.00000 205.00000 0 1 1  450.00000 255.00000 z"
+       style="opacity:1.0000000;fill:url(#radialGradient6459);fill-opacity:1.0000000;fill-rule:evenodd;stroke:none;stroke-width:8.0000000;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4.0000000;stroke-dasharray:none;stroke-dashoffset:0.00000000;stroke-opacity:1.0000000"
+       id="path5725" />
+  </g>
+</svg>
