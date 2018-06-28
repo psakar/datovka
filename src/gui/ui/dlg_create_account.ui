@@ -170,10 +170,16 @@ select this option. For normal account
      <item row="8" column="1">
       <widget class="QCheckBox" name="rememberPwdCheckBox">
        <property name="toolTip">
-        <string>The password will be saved in a readable format in the
-configuration file which is usually located in your home
-directory. Do not use this possibility if you are concerned
-about the security of your account.</string>
+        <string>If no PIN is configured then the password will be saved
+in a readable format in the configuration file which is
+usually located in your home directory. Do not use this
+possibility if you are concerned about the security
+of your account.
+
+If you configure a PIN (master password) then the password
+is going to be stored in an encrypted form into the configuration
+file. If you forget the PIN then there is no easy way how to obtain
+the stored password in decrypted form.</string>
        </property>
        <property name="text">
         <string>Remember password</string>
