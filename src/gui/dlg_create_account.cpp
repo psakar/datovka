@@ -72,6 +72,10 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	m_ui->loginMethodComboBox->addItem(tr("Password + Security code"));
 	m_ui->loginMethodComboBox->addItem(tr("Password + Security SMS"));
 
+	m_ui->viewPwdProgress->setFixedHeight(m_ui->pwdLine->height() / 4);
+	m_ui->viewPwdProgress->setTextVisible(false);
+	m_ui->viewPwdProgress->setVisible(false);
+
 	m_ui->certLabel->setEnabled(false);
 	m_ui->addCertButton->setEnabled(false);
 
@@ -215,6 +219,8 @@ void DlgCreateAccount::updatePwdVisibilityProgress(void)
 		Q_ASSERT(0);
 		m_viewPwdRemainingCycles = 0;
 	}
+
+	m_ui->viewPwdProgress->setValue(m_viewPwdRemainingCycles);
 
 	if (Q_UNLIKELY(m_viewPwdRemainingCycles == 0)) {
 		setPwdLineEchomode(QLineEdit::Password);
@@ -370,11 +376,15 @@ void DlgCreateAccount::setPwdLineEchomode(int echoMode)
 
 	if (mode == QLineEdit::Password) {
 		m_hidePwdTimer.stop();
+		m_ui->viewPwdProgress->setVisible(false);
 	}
 	m_ui->pwdLine->setEchoMode(mode);
 	m_ui->showHidePwdButton->setText(buttonLabel);
 	if (mode == QLineEdit::Normal) {
+		m_ui->viewPwdProgress->setVisible(true);
+		m_ui->viewPwdProgress->setMinimum(0);
 		m_viewPwdRemainingCycles = m_viewPwdDuration / m_viewPwdUpdate;
+		m_ui->viewPwdProgress->setMaximum(m_viewPwdRemainingCycles);
 		m_hidePwdTimer.start(m_viewPwdUpdate);
 	}
 }
