@@ -26,12 +26,14 @@
 #include "src/common.h"
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/datovka_shared/io/records_management_db.h"
+#include "src/datovka_shared/isds/type_conversion.h"
 #include "src/delegates/tag_item.h"
 #include "src/global.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db.h"
 #include "src/io/tag_db.h" /* Direct access to tag database, */
+#include "src/isds/type_description.h"
 #include "src/log/log.h"
 #include "src/models/messages_model.h"
 
@@ -177,6 +179,17 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		}
 		break;
 
+	case Qt::ToolTipRole:
+		if ((index.column() == READLOC_STATUS_COL) &&
+		    (DB_BOOL_READ_LOCALLY != _headerData(READLOC_STATUS_COL,
+		        Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
+			/* Message state in sent messages. */
+			return Isds::Description::descrDmState(
+			    Isds::variant2DmState(_data(index, Qt::DisplayRole)));
+		}
+		return QVariant();
+		break;
+
 	case Qt::FontRole:
 		if (DB_BOOL_READ_LOCALLY == _headerData(READLOC_STATUS_COL,
 		        Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
@@ -194,12 +207,27 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::AccessibleTextRole:
-		if (index.column() == DMID_COL) {
-			return tr("message identifier") + QLatin1String(" ") +
-			    _data(index, Qt::DisplayRole).toString();
-		}
 		dataType = _headerData(index.column(), Qt::Horizontal,
 		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (index.column()) {
+		case DMID_COL:
+			return tr("message identifier") + QLatin1String(" ") +
+			    _data(index, Qt::DisplayRole).toString();
+			break;
+		case READLOC_STATUS_COL:
+			if (DB_BOOL_READ_LOCALLY != dataType) {
+				return headerData(index.column(), Qt::Horizontal).toString() +
+				    QStringLiteral(" ") +
+				    _data(index, Qt::DisplayRole).toString() +
+				    QStringLiteral(" ") +
+				    Isds::Description::descrDmState(
+				        Isds::variant2DmState(_data(index, Qt::DisplayRole)));
+			}
+			break;
+		default:
+			/* Continue with code. */
+			break;
+		}
 		switch (dataType) {
 		case DB_DATETIME:
 			return headerData(index.column(), Qt::Horizontal).toString() +
