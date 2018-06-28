@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@
 #include <QFileInfo>
 
 #include "src/common.h"
+#include "src/datovka_shared/settings/pin.h"
+#include "src/global.h"
 #include "src/gui/dlg_create_account.h"
 #include "src/log/log.h"
 #include "ui_dlg_create_account.h"
@@ -46,7 +48,8 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
     m_ui(new (std::nothrow) Ui::DlgCreateAccount),
     m_accountInfo(accountInfo),
     m_action(action),
-    m_loginmethod(USER_NAME),
+    m_showViewPwd((ACT_EDIT == action) && GlobInstcs::pinSetPtr->pinConfigured()),
+    m_loginMethod(USER_NAME),
     m_certPath()
 {
 	m_ui->setupUi(this);
@@ -87,6 +90,8 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	connect(m_ui->pwdLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
+	m_ui->viewPwdButton->setVisible(m_showViewPwd);
+
 	/* Set dialogue content for existing account. */
 	if (ACT_ADDNEW != m_action) {
 		setContent(m_accountInfo);
@@ -113,12 +118,13 @@ bool DlgCreateAccount::modify(AcntSettings &accountInfo, enum Action action,
 
 void DlgCreateAccount::activateContent(int loginMethodIdx)
 {
-	m_loginmethod = loginMethodIdx;
+	m_loginMethod = loginMethodIdx;
 
-	switch (m_loginmethod) {
+	switch (m_loginMethod) {
 	case CERTIFICATE:
 		m_ui->pwdLabel->setEnabled(false);
 		m_ui->pwdLine->setEnabled(false);
+		m_ui->viewPwdButton->setEnabled(false);
 		m_ui->rememberPwdCheckBox->setEnabled(false);
 		m_ui->certLabel->setEnabled(true);
 		m_ui->addCertButton->setEnabled(true);
@@ -126,6 +132,7 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 	case USER_CERTIFICATE:
 		m_ui->pwdLabel->setEnabled(true);
 		m_ui->pwdLine->setEnabled(true);
+		m_ui->viewPwdButton->setEnabled(m_showViewPwd);
 		m_ui->rememberPwdCheckBox->setEnabled(true);
 		m_ui->certLabel->setEnabled(true);
 		m_ui->addCertButton->setEnabled(true);
@@ -133,6 +140,7 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 	default:
 		m_ui->pwdLabel->setEnabled(true);
 		m_ui->pwdLine->setEnabled(true);
+		m_ui->viewPwdButton->setEnabled(m_showViewPwd);
 		m_ui->rememberPwdCheckBox->setEnabled(true);
 		m_ui->certLabel->setEnabled(false);
 		m_ui->addCertButton->setEnabled(false);
@@ -148,7 +156,7 @@ void DlgCreateAccount::checkInputFields(void)
 {
 	bool enabled = false;
 
-	switch (m_loginmethod) {
+	switch (m_loginMethod) {
 	case CERTIFICATE:
 		enabled = !m_ui->acntNameLine->text().isEmpty()
 		    && !m_ui->usernameLine->text().isEmpty()
@@ -167,6 +175,8 @@ void DlgCreateAccount::checkInputFields(void)
 		break;
 	}
 
+	m_ui->viewPwdButton->setEnabled(
+	     m_showViewPwd && !m_ui->pwdLine->text().isEmpty());
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(enabled);
 }
 
@@ -226,6 +236,7 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 		m_ui->acntNameLine->setEnabled(false);
 		m_ui->loginMethodComboBox->setEnabled(false);
 		m_ui->pwdLine->setEnabled(false);
+		m_ui->viewPwdButton->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
 		windowTitle = tr("Enter password/certificate for account %1")

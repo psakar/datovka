@@ -124,6 +124,7 @@ private:
 
 	AcntSettings m_accountInfo; /*!< Account data with submitted changes. */
 	const enum Action m_action; /*!< Actual action the dialogue should be configured to. */
-	int m_loginmethod; /*!< Specifies the method the user uses for logging in. */
+	const bool m_showViewPwd; /*!< Whether to show view password button. */
+	int m_loginMethod; /*!< Specifies the method the user uses for logging in. */
 	QString m_certPath; /*!< Path to certificate. */
 };
