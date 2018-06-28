@@ -50,7 +50,11 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
     m_action(action),
     m_showViewPwd((ACT_EDIT == action) && GlobInstcs::pinSetPtr->pinConfigured()),
     m_loginMethod(USER_NAME),
-    m_certPath()
+    m_certPath(),
+    m_hidePwdTimer(this),
+    m_viewPwdUpdate(100),
+    m_viewPwdDuration(5000),
+    m_viewPwdRemainingCycles(0)
 {
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
@@ -91,6 +95,9 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	    this, SLOT(checkInputFields()));
 	connect(m_ui->pwdLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
+
+	connect(&m_hidePwdTimer, SIGNAL(timeout()), this,
+	    SLOT(updatePwdVisibilityProgress()));
 
 	m_ui->showHidePwdButton->setVisible(m_showViewPwd);
 
@@ -198,6 +205,20 @@ void DlgCreateAccount::togglePwdVisibility(void)
 	}
 
 	setPwdLineEchomode(newEchoMode);
+}
+
+void DlgCreateAccount::updatePwdVisibilityProgress(void)
+{
+	--m_viewPwdRemainingCycles;
+
+	if (Q_UNLIKELY(m_viewPwdRemainingCycles < 0)) {
+		Q_ASSERT(0);
+		m_viewPwdRemainingCycles = 0;
+	}
+
+	if (Q_UNLIKELY(m_viewPwdRemainingCycles == 0)) {
+		setPwdLineEchomode(QLineEdit::Password);
+	}
 }
 
 void DlgCreateAccount::addCertificateFile(void)
@@ -333,22 +354,29 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 void DlgCreateAccount::setPwdLineEchomode(int echoMode)
 {
 	enum QLineEdit::EchoMode mode = QLineEdit::Password;
+	QString buttonLabel(tr("View"));
 
 	switch (echoMode) {
 	case QLineEdit::Normal:
 		mode = QLineEdit::Normal;
-		m_ui->showHidePwdButton->setText(tr("Hide"));
+		buttonLabel = tr("Hide");
 		break;
 	case QLineEdit::Password:
-		m_ui->showHidePwdButton->setText(tr("View"));
 		break;
 	default:
 		Q_ASSERT(0);
-		m_ui->showHidePwdButton->setText(tr("View"));
 		break;
 	}
 
+	if (mode == QLineEdit::Password) {
+		m_hidePwdTimer.stop();
+	}
 	m_ui->pwdLine->setEchoMode(mode);
+	m_ui->showHidePwdButton->setText(buttonLabel);
+	if (mode == QLineEdit::Normal) {
+		m_viewPwdRemainingCycles = m_viewPwdDuration / m_viewPwdUpdate;
+		m_hidePwdTimer.start(m_viewPwdUpdate);
+	}
 }
 
 AcntSettings DlgCreateAccount::getContent(void) const

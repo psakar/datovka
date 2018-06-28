@@ -25,6 +25,7 @@
 
 #include <QDialog>
 #include <QString>
+#include <QTimer>
 
 #include "src/settings/account.h"
 
@@ -101,6 +102,11 @@ private slots:
 	void togglePwdVisibility(void);
 
 	/*!
+	 * @brief Update password visibility progress.
+	 */
+	void updatePwdVisibilityProgress(void);
+
+	/*!
 	 * @brief Opens a dialogue in order to select a certificate file.
 	 */
 	void addCertificateFile(void);
@@ -141,4 +147,9 @@ private:
 	const bool m_showViewPwd; /*!< Whether to show view password button. */
 	int m_loginMethod; /*!< Specifies the method the user uses for logging in. */
 	QString m_certPath; /*!< Path to certificate. */
+
+	QTimer m_hidePwdTimer; /*!< View password countdown timer. */
+	const int m_viewPwdUpdate; /*!< Update interval in milliseconds. */
+	const int m_viewPwdDuration; /*!< Duration in milliseconds. */
+	int m_viewPwdRemainingCycles; /*!< Number of remaining timer cycles. */
 };
