@@ -109,9 +109,17 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		case DB_BOOL_READ_LOCALLY:
 			/* Show icon for 'read locally'. */
 			if (_data(index).toBool()) {
-				return QIcon(ICON_14x14_PATH "grey.png");
+				QIcon ico;
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
 			} else {
-				return QIcon(ICON_14x14_PATH "green.png");
+				QIcon ico;
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "green.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "green.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "green.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
 			}
 			break;
 		case DB_BOOL_ATTACHMENT_DOWNLOADED:
@@ -130,13 +138,31 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			/* Show icon for 'process status'. */
 			switch (_data(index).toInt()) {
 			case UNSETTLED:
-				return QIcon(ICON_14x14_PATH "red.png");
+				{
+					QIcon ico;
+					ico.addFile(QStringLiteral(ICON_16x16_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
+					ico.addFile(QStringLiteral(ICON_24x24_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
+					ico.addFile(QStringLiteral(ICON_32x32_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
+					return ico;
+				}
 				break;
 			case IN_PROGRESS:
-				return QIcon(ICON_14x14_PATH "yellow.png");
+				{
+					QIcon ico;
+					ico.addFile(QStringLiteral(ICON_16x16_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
+					ico.addFile(QStringLiteral(ICON_24x24_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
+					ico.addFile(QStringLiteral(ICON_32x32_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
+					return ico;
+				}
 				break;
 			case SETTLED:
-				return QIcon(ICON_14x14_PATH "grey.png");
+				{
+					QIcon ico;
+					ico.addFile(QStringLiteral(ICON_16x16_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+					ico.addFile(QStringLiteral(ICON_24x24_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+					ico.addFile(QStringLiteral(ICON_32x32_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+					return ico;
+				}
 				break;
 			default:
 				Q_ASSERT(0);
