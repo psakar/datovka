@@ -79,6 +79,8 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 
 	connect(m_ui->loginMethodComboBox, SIGNAL(currentIndexChanged(int)),
 	    this, SLOT(activateContent(int)));
+	connect(m_ui->showHidePwdButton, SIGNAL(clicked()), this,
+	    SLOT(togglePwdVisibility()));
 	connect(m_ui->addCertButton, SIGNAL(clicked()), this,
 	    SLOT(addCertificateFile()));
 	connect(m_ui->buttonBox, SIGNAL(accepted()), this,
@@ -90,7 +92,7 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	connect(m_ui->pwdLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
-	m_ui->viewPwdButton->setVisible(m_showViewPwd);
+	m_ui->showHidePwdButton->setVisible(m_showViewPwd);
 
 	/* Set dialogue content for existing account. */
 	if (ACT_ADDNEW != m_action) {
@@ -124,7 +126,7 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 	case CERTIFICATE:
 		m_ui->pwdLabel->setEnabled(false);
 		m_ui->pwdLine->setEnabled(false);
-		m_ui->viewPwdButton->setEnabled(false);
+		m_ui->showHidePwdButton->setEnabled(false);
 		m_ui->rememberPwdCheckBox->setEnabled(false);
 		m_ui->certLabel->setEnabled(true);
 		m_ui->addCertButton->setEnabled(true);
@@ -132,7 +134,7 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 	case USER_CERTIFICATE:
 		m_ui->pwdLabel->setEnabled(true);
 		m_ui->pwdLine->setEnabled(true);
-		m_ui->viewPwdButton->setEnabled(m_showViewPwd);
+		m_ui->showHidePwdButton->setEnabled(m_showViewPwd);
 		m_ui->rememberPwdCheckBox->setEnabled(true);
 		m_ui->certLabel->setEnabled(true);
 		m_ui->addCertButton->setEnabled(true);
@@ -140,7 +142,7 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 	default:
 		m_ui->pwdLabel->setEnabled(true);
 		m_ui->pwdLine->setEnabled(true);
-		m_ui->viewPwdButton->setEnabled(m_showViewPwd);
+		m_ui->showHidePwdButton->setEnabled(m_showViewPwd);
 		m_ui->rememberPwdCheckBox->setEnabled(true);
 		m_ui->certLabel->setEnabled(false);
 		m_ui->addCertButton->setEnabled(false);
@@ -175,9 +177,27 @@ void DlgCreateAccount::checkInputFields(void)
 		break;
 	}
 
-	m_ui->viewPwdButton->setEnabled(
+	m_ui->showHidePwdButton->setEnabled(
 	     m_showViewPwd && !m_ui->pwdLine->text().isEmpty());
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(enabled);
+}
+
+void DlgCreateAccount::togglePwdVisibility(void)
+{
+	enum QLineEdit::EchoMode newEchoMode = QLineEdit::Password;
+
+	switch (m_ui->pwdLine->echoMode()) {
+	case QLineEdit::Normal:
+		break;
+	case QLineEdit::Password:
+		newEchoMode = QLineEdit::Normal;
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	setPwdLineEchomode(newEchoMode);
 }
 
 void DlgCreateAccount::addCertificateFile(void)
@@ -236,7 +256,7 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 		m_ui->acntNameLine->setEnabled(false);
 		m_ui->loginMethodComboBox->setEnabled(false);
 		m_ui->pwdLine->setEnabled(false);
-		m_ui->viewPwdButton->setEnabled(false);
+		m_ui->showHidePwdButton->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
 		windowTitle = tr("Enter password/certificate for account %1")
@@ -308,6 +328,27 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	}
 
 	checkInputFields();
+}
+
+void DlgCreateAccount::setPwdLineEchomode(int echoMode)
+{
+	enum QLineEdit::EchoMode mode = QLineEdit::Password;
+
+	switch (echoMode) {
+	case QLineEdit::Normal:
+		mode = QLineEdit::Normal;
+		m_ui->showHidePwdButton->setText(tr("Hide"));
+		break;
+	case QLineEdit::Password:
+		m_ui->showHidePwdButton->setText(tr("View"));
+		break;
+	default:
+		Q_ASSERT(0);
+		m_ui->showHidePwdButton->setText(tr("View"));
+		break;
+	}
+
+	m_ui->pwdLine->setEchoMode(mode);
 }
 
 AcntSettings DlgCreateAccount::getContent(void) const

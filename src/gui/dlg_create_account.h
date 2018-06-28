@@ -96,6 +96,11 @@ private slots:
 	void checkInputFields(void);
 
 	/*!
+	 * @brief Toggle password visibility.
+	 */
+	void togglePwdVisibility(void);
+
+	/*!
 	 * @brief Opens a dialogue in order to select a certificate file.
 	 */
 	void addCertificateFile(void);
@@ -112,6 +117,15 @@ private:
 	 * @param[in] acntData Account data to use when setting content.
 	 */
 	void setContent(const AcntSettings &acntData);
+
+	/*!
+	 * @brief Set password line edit echo mode.
+	 *
+	 * @note Also sets view password button name.
+	 *
+	 * @param[in] echoMode Password line edit echo mode value.
+	 */
+	void setPwdLineEchomode(int echoMode);
 
 	/*!
 	 * @brief Constructs account data from dialogue content.

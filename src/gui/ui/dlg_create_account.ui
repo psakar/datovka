@@ -157,7 +157,7 @@ select this option. For normal account
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="viewPwdButton">
+        <widget class="QPushButton" name="showHidePwdButton">
          <property name="text">
           <string>View</string>
          </property>
@@ -276,6 +276,7 @@ the synchronisation process of all accounts.</string>
   <tabstop>testAcntCheckBox</tabstop>
   <tabstop>loginMethodComboBox</tabstop>
   <tabstop>pwdLine</tabstop>
+  <tabstop>showHidePwdButton</tabstop>
   <tabstop>rememberPwdCheckBox</tabstop>
   <tabstop>addCertButton</tabstop>
   <tabstop>syncAllCheckBox</tabstop>
