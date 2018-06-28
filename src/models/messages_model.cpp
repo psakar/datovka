@@ -207,12 +207,27 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::AccessibleTextRole:
-		if (index.column() == DMID_COL) {
-			return tr("message identifier") + QLatin1String(" ") +
-			    _data(index, Qt::DisplayRole).toString();
-		}
 		dataType = _headerData(index.column(), Qt::Horizontal,
 		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
+		switch (index.column()) {
+		case DMID_COL:
+			return tr("message identifier") + QLatin1String(" ") +
+			    _data(index, Qt::DisplayRole).toString();
+			break;
+		case READLOC_STATUS_COL:
+			if (DB_BOOL_READ_LOCALLY != dataType) {
+				return headerData(index.column(), Qt::Horizontal).toString() +
+				    QStringLiteral(" ") +
+				    _data(index, Qt::DisplayRole).toString() +
+				    QStringLiteral(" ") +
+				    Isds::Description::descrDmState(
+				        Isds::variant2DmState(_data(index, Qt::DisplayRole)));
+			}
+			break;
+		default:
+			/* Continue with code. */
+			break;
+		}
 		switch (dataType) {
 		case DB_DATETIME:
 			return headerData(index.column(), Qt::Horizontal).toString() +
