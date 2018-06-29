@@ -28,6 +28,7 @@
 #include "src/datovka_shared/settings/pin.h"
 #include "src/global.h"
 #include "src/gui/dlg_create_account.h"
+#include "src/gui/dlg_pin_input.h"
 #include "src/log/log.h"
 #include "ui_dlg_create_account.h"
 
@@ -53,7 +54,7 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
     m_certPath(),
     m_hidePwdTimer(this),
     m_viewPwdUpdate(100),
-    m_viewPwdDuration(5000),
+    m_viewPwdDuration(10000), /* 10 seconds */
     m_viewPwdRemainingCycles(0)
 {
 	m_ui->setupUi(this);
@@ -201,6 +202,10 @@ void DlgCreateAccount::togglePwdVisibility(void)
 	case QLineEdit::Normal:
 		break;
 	case QLineEdit::Password:
+		if (!DlgPinInput::queryPin(*GlobInstcs::pinSetPtr, false, this)) {
+			return;
+		}
+		/* Pin was entered correctly. */
 		newEchoMode = QLineEdit::Normal;
 		break;
 	default:
