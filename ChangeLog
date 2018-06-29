@@ -8,6 +8,8 @@
  * Asking users for confirmation before deleting tags which are still assigned
    to some messages.
  * Added tooltip description of message state value in sent message list.
+ * Added button to view account password when editing account credentials and
+   PIN (master password) is enabled.
  * Fixed a problem with wrong conversion of obtained ISDS error statuses into
    readable text. This may have caused the programme to crash.
  * Fixed message list sorting and filtering according to assigned tags.
