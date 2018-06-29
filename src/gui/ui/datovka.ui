@@ -219,6 +219,9 @@ sent reply on this message</string>
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
+                  <property name="text">
+                   <string>Download complete</string>
+                  </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
                     <normaloff>:/icons/24x24/datovka.png</normaloff>:/icons/24x24/datovka.png</iconset>
@@ -238,6 +241,9 @@ sent reply on this message</string>
                  <widget class="QToolButton" name="saveAttachments">
                   <property name="enabled">
                    <bool>false</bool>
+                  </property>
+                  <property name="text">
+                   <string>Save all attachments</string>
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
@@ -259,6 +265,9 @@ sent reply on this message</string>
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
+                  <property name="text">
+                   <string>Save attachment</string>
+                  </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
                     <normaloff>:/icons/24x24/datovka.png</normaloff>:/icons/24x24/datovka.png</iconset>
@@ -278,6 +287,9 @@ sent reply on this message</string>
                  <widget class="QToolButton" name="openAttachment">
                   <property name="enabled">
                    <bool>false</bool>
+                  </property>
+                  <property name="text">
+                   <string>Open attachment</string>
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
