@@ -1542,67 +1542,72 @@ at least one digit and one capital letter.</source>
 <context>
     <name>DlgCreateAccount</name>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="62"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="70"/>
         <source>Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="63"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="71"/>
         <source>Certificate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="64"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="72"/>
         <source>Certificate + Password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="211"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="273"/>
         <source>Update account %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="215"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="277"/>
         <source>Enter password for account %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="223"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="285"/>
         <source>Set certificate for account %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="231"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="294"/>
         <source>Enter password/certificate for account %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="176"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="373"/>
+        <source>Hide</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_create_account.cpp" line="238"/>
         <source>Open Certificate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="65"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="73"/>
         <source>Password + Security code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="66"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="74"/>
         <source>Password + Security SMS</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="72"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="84"/>
         <source>Synchronise this account when &apos;%1&apos; is activated</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="177"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="239"/>
         <source>Certificate Files (*.p12 *.pem)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="294"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="357"/>
         <source>File does not exists or cannot be read.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1628,23 +1633,43 @@ This name serves for easier account identification in the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="150"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="152"/>
         <source>Enter your password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="202"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="162"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="368"/>
+        <source>View</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="184"/>
+        <source>If no PIN is configured then the password will be saved
+in a readable format in the configuration file which is
+usually located in your home directory. Do not use this
+possibility if you are concerned about the security
+of your account.
+
+If you configure a PIN (master password) then the password
+is going to be stored in an encrypted form into the configuration
+file. If you forget the PIN then there is no easy way how to obtain
+the stored password in decrypted form.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="219"/>
         <source>Select a certificate.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="233"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="253"/>
         <source>If selected, the account will be included into
 the synchronisation process of all accounts.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="237"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="257"/>
         <source>Synchronise this account together with all accounts</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1686,25 +1711,17 @@ select this option. For normal account
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="173"/>
-        <source>The password will be saved in a readable format in the
-configuration file which is usually located in your home
-directory. Do not use this possibility if you are concerned
-about the security of your account.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="179"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="196"/>
         <source>Remember password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="186"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="203"/>
         <source>Certificate file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="205"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="222"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2357,7 +2374,7 @@ into your local database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_pin_input.cpp" line="44"/>
+        <location filename="../src/gui/dlg_pin_input.cpp" line="69"/>
         <source>Version</source>
         <translation type="unfinished"></translation>
     </message>
