@@ -213,7 +213,7 @@ void DlgCreateAccount::togglePwdVisibility(void)
 		break;
 	}
 
-	setPwdLineEchomode(newEchoMode);
+	setPwdLineEchoMode(newEchoMode);
 }
 
 void DlgCreateAccount::updatePwdVisibilityProgress(void)
@@ -228,7 +228,7 @@ void DlgCreateAccount::updatePwdVisibilityProgress(void)
 	m_ui->viewPwdProgress->setValue(m_viewPwdRemainingCycles);
 
 	if (Q_UNLIKELY(m_viewPwdRemainingCycles == 0)) {
-		setPwdLineEchomode(QLineEdit::Password);
+		setPwdLineEchoMode(QLineEdit::Password);
 	}
 }
 
@@ -362,7 +362,7 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	checkInputFields();
 }
 
-void DlgCreateAccount::setPwdLineEchomode(int echoMode)
+void DlgCreateAccount::setPwdLineEchoMode(int echoMode)
 {
 	enum QLineEdit::EchoMode mode = QLineEdit::Password;
 	QString buttonLabel(tr("View"));

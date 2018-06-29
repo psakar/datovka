@@ -131,7 +131,7 @@ private:
 	 *
 	 * @param[in] echoMode Password line edit echo mode value.
 	 */
-	void setPwdLineEchomode(int echoMode);
+	void setPwdLineEchoMode(int echoMode);
 
 	/*!
 	 * @brief Constructs account data from dialogue content.
