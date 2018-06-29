@@ -28,21 +28,60 @@
 #include "src/log/log.h"
 #include "ui_dlg_pin_input.h"
 
-DlgPinInput::DlgPinInput(QWidget *parent)
+/*!
+ * @brief Remove and delete layout items.
+ *
+ * @param[in] layout Horizontal or vertical layout.
+ * @param[in] pos Position identifier.
+ */
+static
+void removeLayoutItem(QBoxLayout *layout, int pos)
+{
+	if (Q_UNLIKELY(layout == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QLayoutItem *item = layout->itemAt(pos);
+	if (Q_UNLIKELY(item == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	layout->removeItem(item);
+	delete item;
+}
+
+DlgPinInput::DlgPinInput(bool viewLogo, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgPinInput)
 {
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
 
-	m_ui->logoLabel->setPixmap(QPixmap(ICON_128x128_PATH "datovka.png"));
-	m_ui->logoLabel->setAlignment(Qt::AlignHCenter);
-	m_ui->horizontalLayout->setStretch(1, 10);
+	if (viewLogo) {
+		m_ui->logoLabel->setPixmap(QPixmap(ICON_128x128_PATH "datovka.png"));
+		m_ui->logoLabel->setAlignment(Qt::AlignHCenter);
+		m_ui->horizontalLayout->setStretch(1, 10);
 
-	m_ui->versionLabel->setTextFormat(Qt::RichText);
-	m_ui->versionLabel->setText(QLatin1String("<b>") +
-	    tr("Version") + QLatin1String(": ") + VERSION +
-	    QLatin1String("</b>"));
+		m_ui->versionLabel->setTextFormat(Qt::RichText);
+		m_ui->versionLabel->setText(QLatin1String("<b>") +
+		    tr("Version") + QLatin1String(": ") + VERSION +
+		    QLatin1String("</b>"));
+	} else {
+		/* Remove parts of the dialogue layout. */
+		removeLayoutItem(m_ui->horizontalLayout, 0);
+
+		removeLayoutItem(m_ui->verticalLayout_3, 2);
+		removeLayoutItem(m_ui->verticalLayout_3, 0);
+
+		m_ui->logoLabel->hide();
+		m_ui->logoLabel->setEnabled(false);
+		m_ui->versionLabel->hide();
+		m_ui->versionLabel->setEnabled(false);
+
+		this->adjustSize();
+	}
 
 	m_ui->pinLine->setEchoMode(QLineEdit::Password);
 	/* Always display placeholder text. */
@@ -56,7 +95,7 @@ DlgPinInput::~DlgPinInput(void)
 	delete m_ui;
 }
 
-bool DlgPinInput::queryPin(PinSettings &sett, QWidget *parent)
+bool DlgPinInput::queryPin(PinSettings &sett, bool viewLogo, QWidget *parent)
 {
 	if (Q_UNLIKELY(!sett.pinConfigured())) {
 		Q_ASSERT(0);
@@ -66,7 +105,7 @@ bool DlgPinInput::queryPin(PinSettings &sett, QWidget *parent)
 	bool properlySet = false;
 
 	do {
-		DlgPinInput dlg(parent);
+		DlgPinInput dlg(viewLogo, parent);
 		if (QDialog::Accepted == dlg.exec()) {
 			if (dlg.m_ui->pinLine->text().isEmpty()) {
 				logWarningNL("%s", "Entered empty PIN value.");

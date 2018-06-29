@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,10 @@
 #include <QFileInfo>
 
 #include "src/common.h"
+#include "src/datovka_shared/settings/pin.h"
+#include "src/global.h"
 #include "src/gui/dlg_create_account.h"
+#include "src/gui/dlg_pin_input.h"
 #include "src/log/log.h"
 #include "ui_dlg_create_account.h"
 
@@ -46,8 +49,13 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
     m_ui(new (std::nothrow) Ui::DlgCreateAccount),
     m_accountInfo(accountInfo),
     m_action(action),
-    m_loginmethod(USER_NAME),
-    m_certPath()
+    m_showViewPwd((ACT_EDIT == action) && GlobInstcs::pinSetPtr->pinConfigured()),
+    m_loginMethod(USER_NAME),
+    m_certPath(),
+    m_hidePwdTimer(this),
+    m_viewPwdUpdate(100),
+    m_viewPwdDuration(10000), /* 10 seconds */
+    m_viewPwdRemainingCycles(0)
 {
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
@@ -65,6 +73,10 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	m_ui->loginMethodComboBox->addItem(tr("Password + Security code"));
 	m_ui->loginMethodComboBox->addItem(tr("Password + Security SMS"));
 
+	m_ui->viewPwdProgress->setFixedHeight(m_ui->pwdLine->height() / 4);
+	m_ui->viewPwdProgress->setTextVisible(false);
+	m_ui->viewPwdProgress->setVisible(false);
+
 	m_ui->certLabel->setEnabled(false);
 	m_ui->addCertButton->setEnabled(false);
 
@@ -76,6 +88,8 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 
 	connect(m_ui->loginMethodComboBox, SIGNAL(currentIndexChanged(int)),
 	    this, SLOT(activateContent(int)));
+	connect(m_ui->showHidePwdButton, SIGNAL(clicked()), this,
+	    SLOT(togglePwdVisibility()));
 	connect(m_ui->addCertButton, SIGNAL(clicked()), this,
 	    SLOT(addCertificateFile()));
 	connect(m_ui->buttonBox, SIGNAL(accepted()), this,
@@ -86,6 +100,11 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	    this, SLOT(checkInputFields()));
 	connect(m_ui->pwdLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
+
+	connect(&m_hidePwdTimer, SIGNAL(timeout()), this,
+	    SLOT(updatePwdVisibilityProgress()));
+
+	m_ui->showHidePwdButton->setVisible(m_showViewPwd);
 
 	/* Set dialogue content for existing account. */
 	if (ACT_ADDNEW != m_action) {
@@ -113,12 +132,13 @@ bool DlgCreateAccount::modify(AcntSettings &accountInfo, enum Action action,
 
 void DlgCreateAccount::activateContent(int loginMethodIdx)
 {
-	m_loginmethod = loginMethodIdx;
+	m_loginMethod = loginMethodIdx;
 
-	switch (m_loginmethod) {
+	switch (m_loginMethod) {
 	case CERTIFICATE:
 		m_ui->pwdLabel->setEnabled(false);
 		m_ui->pwdLine->setEnabled(false);
+		m_ui->showHidePwdButton->setEnabled(false);
 		m_ui->rememberPwdCheckBox->setEnabled(false);
 		m_ui->certLabel->setEnabled(true);
 		m_ui->addCertButton->setEnabled(true);
@@ -126,6 +146,7 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 	case USER_CERTIFICATE:
 		m_ui->pwdLabel->setEnabled(true);
 		m_ui->pwdLine->setEnabled(true);
+		m_ui->showHidePwdButton->setEnabled(m_showViewPwd);
 		m_ui->rememberPwdCheckBox->setEnabled(true);
 		m_ui->certLabel->setEnabled(true);
 		m_ui->addCertButton->setEnabled(true);
@@ -133,6 +154,7 @@ void DlgCreateAccount::activateContent(int loginMethodIdx)
 	default:
 		m_ui->pwdLabel->setEnabled(true);
 		m_ui->pwdLine->setEnabled(true);
+		m_ui->showHidePwdButton->setEnabled(m_showViewPwd);
 		m_ui->rememberPwdCheckBox->setEnabled(true);
 		m_ui->certLabel->setEnabled(false);
 		m_ui->addCertButton->setEnabled(false);
@@ -148,7 +170,7 @@ void DlgCreateAccount::checkInputFields(void)
 {
 	bool enabled = false;
 
-	switch (m_loginmethod) {
+	switch (m_loginMethod) {
 	case CERTIFICATE:
 		enabled = !m_ui->acntNameLine->text().isEmpty()
 		    && !m_ui->usernameLine->text().isEmpty()
@@ -167,7 +189,47 @@ void DlgCreateAccount::checkInputFields(void)
 		break;
 	}
 
+	m_ui->showHidePwdButton->setEnabled(
+	     m_showViewPwd && !m_ui->pwdLine->text().isEmpty());
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(enabled);
+}
+
+void DlgCreateAccount::togglePwdVisibility(void)
+{
+	enum QLineEdit::EchoMode newEchoMode = QLineEdit::Password;
+
+	switch (m_ui->pwdLine->echoMode()) {
+	case QLineEdit::Normal:
+		break;
+	case QLineEdit::Password:
+		if (!DlgPinInput::queryPin(*GlobInstcs::pinSetPtr, false, this)) {
+			return;
+		}
+		/* Pin was entered correctly. */
+		newEchoMode = QLineEdit::Normal;
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	setPwdLineEchoMode(newEchoMode);
+}
+
+void DlgCreateAccount::updatePwdVisibilityProgress(void)
+{
+	--m_viewPwdRemainingCycles;
+
+	if (Q_UNLIKELY(m_viewPwdRemainingCycles < 0)) {
+		Q_ASSERT(0);
+		m_viewPwdRemainingCycles = 0;
+	}
+
+	m_ui->viewPwdProgress->setValue(m_viewPwdRemainingCycles);
+
+	if (Q_UNLIKELY(m_viewPwdRemainingCycles == 0)) {
+		setPwdLineEchoMode(QLineEdit::Password);
+	}
 }
 
 void DlgCreateAccount::addCertificateFile(void)
@@ -226,6 +288,7 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 		m_ui->acntNameLine->setEnabled(false);
 		m_ui->loginMethodComboBox->setEnabled(false);
 		m_ui->pwdLine->setEnabled(false);
+		m_ui->showHidePwdButton->setEnabled(false);
 		break;
 	case ACT_CERTPWD:
 		windowTitle = tr("Enter password/certificate for account %1")
@@ -297,6 +360,38 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 	}
 
 	checkInputFields();
+}
+
+void DlgCreateAccount::setPwdLineEchoMode(int echoMode)
+{
+	enum QLineEdit::EchoMode mode = QLineEdit::Password;
+	QString buttonLabel(tr("View"));
+
+	switch (echoMode) {
+	case QLineEdit::Normal:
+		mode = QLineEdit::Normal;
+		buttonLabel = tr("Hide");
+		break;
+	case QLineEdit::Password:
+		break;
+	default:
+		Q_ASSERT(0);
+		break;
+	}
+
+	if (mode == QLineEdit::Password) {
+		m_hidePwdTimer.stop();
+		m_ui->viewPwdProgress->setVisible(false);
+	}
+	m_ui->pwdLine->setEchoMode(mode);
+	m_ui->showHidePwdButton->setText(buttonLabel);
+	if (mode == QLineEdit::Normal) {
+		m_ui->viewPwdProgress->setVisible(true);
+		m_ui->viewPwdProgress->setMinimum(0);
+		m_viewPwdRemainingCycles = m_viewPwdDuration / m_viewPwdUpdate;
+		m_ui->viewPwdProgress->setMaximum(m_viewPwdRemainingCycles);
+		m_hidePwdTimer.start(m_viewPwdUpdate);
+	}
 }
 
 AcntSettings DlgCreateAccount::getContent(void) const

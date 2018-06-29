@@ -41,9 +41,10 @@ private:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] viewLogo Whether to display application logo.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgPinInput(QWidget *parent = Q_NULLPTR);
+	explicit DlgPinInput(bool viewLogo = true, QWidget *parent = Q_NULLPTR);
 
 public:
 	/*!
@@ -57,11 +58,13 @@ public:
 	 * @note Stores PIN in unencrypted form into settings structure.
 	 *
 	 * @param[in,out] sett PIN settings to be modified.
+	 * @param[in] viewLogo Whether to display application logo.
 	 * @param[in] parent Parent widget.
 	 * @return True if correct PIN has been entered.
 	 */
 	static
-	bool queryPin(PinSettings &sett, QWidget *parent = Q_NULLPTR);
+	bool queryPin(PinSettings &sett, bool viewLogo = true,
+	    QWidget *parent = Q_NULLPTR);
 
 private:
 	Ui::DlgPinInput *m_ui; /*!< UI generated from UI file. */

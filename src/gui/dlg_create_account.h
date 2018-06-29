@@ -25,6 +25,7 @@
 
 #include <QDialog>
 #include <QString>
+#include <QTimer>
 
 #include "src/settings/account.h"
 
@@ -96,6 +97,16 @@ private slots:
 	void checkInputFields(void);
 
 	/*!
+	 * @brief Toggle password visibility.
+	 */
+	void togglePwdVisibility(void);
+
+	/*!
+	 * @brief Update password visibility progress.
+	 */
+	void updatePwdVisibilityProgress(void);
+
+	/*!
 	 * @brief Opens a dialogue in order to select a certificate file.
 	 */
 	void addCertificateFile(void);
@@ -114,6 +125,15 @@ private:
 	void setContent(const AcntSettings &acntData);
 
 	/*!
+	 * @brief Set password line edit echo mode.
+	 *
+	 * @note Also sets view password button name.
+	 *
+	 * @param[in] echoMode Password line edit echo mode value.
+	 */
+	void setPwdLineEchoMode(int echoMode);
+
+	/*!
 	 * @brief Constructs account data from dialogue content.
 	 *
 	 * @return Account settings according to the dialogue state.
@@ -124,6 +144,12 @@ private:
 
 	AcntSettings m_accountInfo; /*!< Account data with submitted changes. */
 	const enum Action m_action; /*!< Actual action the dialogue should be configured to. */
-	int m_loginmethod; /*!< Specifies the method the user uses for logging in. */
+	const bool m_showViewPwd; /*!< Whether to show view password button. */
+	int m_loginMethod; /*!< Specifies the method the user uses for logging in. */
 	QString m_certPath; /*!< Path to certificate. */
+
+	QTimer m_hidePwdTimer; /*!< View password countdown timer. */
+	const int m_viewPwdUpdate; /*!< Update interval in milliseconds. */
+	const int m_viewPwdDuration; /*!< Duration in milliseconds. */
+	int m_viewPwdRemainingCycles; /*!< Number of remaining timer cycles. */
 };

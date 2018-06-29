@@ -145,14 +145,25 @@ select this option. For normal account
       </widget>
      </item>
      <item row="6" column="1">
-      <widget class="QLineEdit" name="pwdLine">
-       <property name="toolTip">
-        <string>Enter your password.</string>
-       </property>
-       <property name="echoMode">
-        <enum>QLineEdit::Password</enum>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QLineEdit" name="pwdLine">
+         <property name="toolTip">
+          <string>Enter your password.</string>
+         </property>
+         <property name="echoMode">
+          <enum>QLineEdit::Password</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="showHidePwdButton">
+         <property name="text">
+          <string>View</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item row="8" column="0">
       <spacer name="horizontalSpacer_2">
@@ -170,10 +181,16 @@ select this option. For normal account
      <item row="8" column="1">
       <widget class="QCheckBox" name="rememberPwdCheckBox">
        <property name="toolTip">
-        <string>The password will be saved in a readable format in the
-configuration file which is usually located in your home
-directory. Do not use this possibility if you are concerned
-about the security of your account.</string>
+        <string>If no PIN is configured then the password will be saved
+in a readable format in the configuration file which is
+usually located in your home directory. Do not use this
+possibility if you are concerned about the security
+of your account.
+
+If you configure a PIN (master password) then the password
+is going to be stored in an encrypted form into the configuration
+file. If you forget the PIN then there is no easy way how to obtain
+the stored password in decrypted form.</string>
        </property>
        <property name="text">
         <string>Remember password</string>
@@ -225,6 +242,9 @@ about the security of your account.</string>
        </item>
       </layout>
      </item>
+     <item row="7" column="1">
+      <widget class="QProgressBar" name="viewPwdProgress"/>
+     </item>
     </layout>
    </item>
    <item>
@@ -259,6 +279,7 @@ the synchronisation process of all accounts.</string>
   <tabstop>testAcntCheckBox</tabstop>
   <tabstop>loginMethodComboBox</tabstop>
   <tabstop>pwdLine</tabstop>
+  <tabstop>showHidePwdButton</tabstop>
   <tabstop>rememberPwdCheckBox</tabstop>
   <tabstop>addCertButton</tabstop>
   <tabstop>syncAllCheckBox</tabstop>
