@@ -7723,6 +7723,13 @@ void MainWindow::setUpUi(void)
 		ui->messageStateCombo->addItem(ico, tr("Settled"));
 	}
 
+	/* Override tool button sizes. */
+	ui->signatureDetails->setVerticalSizeHintOrigin(ui->messageStateCombo);
+	ui->downloadComplete->setVerticalSizeHintOrigin(ui->messageStateCombo);
+	ui->saveAttachments->setVerticalSizeHintOrigin(ui->messageStateCombo);
+	ui->saveAttachment->setVerticalSizeHintOrigin(ui->messageStateCombo);
+	ui->openAttachment->setVerticalSizeHintOrigin(ui->messageStateCombo);
+
 	/* Show banner. */
 	ui->messageStackedWidget->setCurrentIndex(0);
 	ui->accountTextInfo->setHtml(createDatovkaBanner(

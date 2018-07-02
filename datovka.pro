@@ -409,6 +409,7 @@ SOURCES += \
     src/settings/registry.cpp \
     src/single/single_instance.cpp \
     src/views/attachment_table_view.cpp \
+    src/views/external_size_hint_tool_button.cpp \
     src/views/lowered_table_view.cpp \
     src/views/lowered_table_widget.cpp \
     src/views/lowered_tree_view.cpp \
@@ -559,6 +560,7 @@ HEADERS += \
     src/settings/registry.h \
     src/single/single_instance.h \
     src/views/attachment_table_view.h \
+    src/views/external_size_hint_tool_button.h \
     src/views/lowered_table_view.h \
     src/views/lowered_table_widget.h \
     src/views/lowered_tree_view.h \

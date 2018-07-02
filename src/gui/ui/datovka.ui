@@ -143,7 +143,7 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_5">
                 <item>
-                 <widget class="QToolButton" name="signatureDetails">
+                 <widget class="ExternalSizeHintToolButton" name="signatureDetails">
                   <property name="enabled">
                    <bool>false</bool>
                   </property>
@@ -215,12 +215,9 @@ sent reply on this message</string>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout">
                 <item>
-                 <widget class="QToolButton" name="downloadComplete">
+                 <widget class="ExternalSizeHintToolButton" name="downloadComplete">
                   <property name="enabled">
                    <bool>false</bool>
-                  </property>
-                  <property name="text">
-                   <string>Download complete</string>
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
@@ -238,12 +235,9 @@ sent reply on this message</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QToolButton" name="saveAttachments">
+                 <widget class="ExternalSizeHintToolButton" name="saveAttachments">
                   <property name="enabled">
                    <bool>false</bool>
-                  </property>
-                  <property name="text">
-                   <string>Save all attachments</string>
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
@@ -261,12 +255,9 @@ sent reply on this message</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QToolButton" name="saveAttachment">
+                 <widget class="ExternalSizeHintToolButton" name="saveAttachment">
                   <property name="enabled">
                    <bool>false</bool>
-                  </property>
-                  <property name="text">
-                   <string>Save attachment</string>
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
@@ -284,12 +275,9 @@ sent reply on this message</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QToolButton" name="openAttachment">
+                 <widget class="ExternalSizeHintToolButton" name="openAttachment">
                   <property name="enabled">
                    <bool>false</bool>
-                  </property>
-                  <property name="text">
-                   <string>Open attachment</string>
                   </property>
                   <property name="icon">
                    <iconset resource="../../../res/resources.qrc">
@@ -1277,6 +1265,11 @@ sent reply on this message</string>
    <class>LoweredTableView</class>
    <extends>QTableView</extends>
    <header>src/views/lowered_table_view.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ExternalSizeHintToolButton</class>
+   <extends>QToolButton</extends>
+   <header>src/views/external_size_hint_tool_button.h</header>
   </customwidget>
  </customwidgets>
  <resources>
