@@ -1837,9 +1837,15 @@ enum Isds::Type::DmState MessageDb::getMessageStatus(qint64 dmId) const
 		return Isds::Type::MS_NULL;
 	}
 	query.bindValue(":dmId", dmId);
-	if (query.exec() && query.isActive() &&
-	    query.first() && query.isValid()) {
-		return Isds::variant2DmState(query.value(0));
+	if (query.exec() && query.isActive()) {
+		if (query.first() && query.isValid()) {
+			return Isds::variant2DmState(query.value(0));
+		} else {
+			logWarningNL(
+			    "Status of message '%" PRId64 "' is not stored in database.",
+			    dmId);
+			return Isds::Type::MS_NULL;
+		}
 	} else {
 		logErrorNL("Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
