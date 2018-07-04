@@ -351,7 +351,8 @@ void MessageDb::appendSntEntryList(QList<SntEntry> &entryList, QSqlQuery &query)
 		entryList.append(SntEntry(query.value(0).toLongLong(),
 		    query.value(1).toString(), query.value(2).toString(),
 		    query.value(3).toString(), query.value(4).toString(),
-		    query.value(5).toInt(), query.value(6).toBool()));
+		    Isds::variant2DmState(query.value(5)),
+		    query.value(6).toBool()));
 		query.next();
 	}
 }
@@ -1824,7 +1825,7 @@ fail:
 	return false;
 }
 
-int MessageDb::getMessageStatus(qint64 dmId) const
+enum Isds::Type::DmState MessageDb::getMessageStatus(qint64 dmId) const
 {
 	QSqlQuery query(m_db);
 	QString queryStr =
@@ -1833,16 +1834,16 @@ int MessageDb::getMessageStatus(qint64 dmId) const
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
-		return -1;
+		return Isds::Type::MS_NULL;
 	}
 	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
-		return query.value(0).toInt();
+		return Isds::variant2DmState(query.value(0));
 	} else {
 		logErrorNL("Cannot execute SQL query and/or read SQL data: %s.",
 		    query.lastError().text().toUtf8().constData());
-		return -1;
+		return Isds::Type::MS_NULL;
 	}
 }
 
@@ -2191,7 +2192,7 @@ fail:
 
 bool MessageDb::msgsUpdateMessageState(qint64 dmId,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    int dmMessageStatus)
+    enum Isds::Type::DmState dmMessageStatus)
 {
 	QSqlQuery query(m_db);
 	QString queryStr = "UPDATE messages SET "
@@ -2208,7 +2209,7 @@ bool MessageDb::msgsUpdateMessageState(qint64 dmId,
 	query.bindValue(":dmId", dmId);
 	query.bindValue(":dmDeliveryTime", dmDeliveryTime);
 	query.bindValue(":dmAcceptanceTime", dmAcceptanceTime);
-	query.bindValue(":dmMessageStatus", dmMessageStatus);
+	query.bindValue(":dmMessageStatus", Isds::dmState2Variant(dmMessageStatus));
 	if (query.exec()) {
 		return true;
 	} else {

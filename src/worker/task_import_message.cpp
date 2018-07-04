@@ -24,6 +24,7 @@
 #include <QThread>
 
 #include "src/common.h"
+#include "src/datovka_shared/isds/types.h"
 #include "src/global.h"
 #include "src/log/log.h"
 #include "src/worker/message_emitter.h"
@@ -98,7 +99,7 @@ enum TaskImportMessage::Result TaskImportMessage::importSingleMessage(
 	}
 
 	/* check if msg exists in target database */
-	if (-1 != dstDb->getMessageStatus(mId.dmId)) {
+	if (Isds::Type::MS_NULL != dstDb->getMessageStatus(mId.dmId)) {
 		resultDesc = QObject::tr("Message '%1' already exists in "
 		    "database for this account.").arg(mId.dmId);
 		return TaskImportMessage::IMP_DB_EXISTS;

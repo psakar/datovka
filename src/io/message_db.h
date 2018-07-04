@@ -217,11 +217,12 @@ public:
 		QString dmRecipient; /*!< Message recipient. */
 		QString dmDeliveryTime; /*!< Delivery time as stored in the database. */
 		QString dmAcceptanceTime; /*!< Acceptance time as stored in the database. */
-		int dmMessageStatus; /*!< Brief message status. */
+		enum Isds::Type::DmState dmMessageStatus; /*!< Brief message status. */
 		bool isDownloaded; /*!< True if complete message has been downloaded. */
 
 		SntEntry(qint64 i, const QString &a, const QString &r,
-		    const QString &dt, const QString &at, int ms, bool id)
+		    const QString &dt, const QString &at,
+		    enum Isds::Type::DmState ms, bool id)
 		    : dmId(i), dmAnnotation(a), dmRecipient(r),
 		    dmDeliveryTime(dt), dmAcceptanceTime(at),
 		    dmMessageStatus(ms), isDownloaded(id)
@@ -405,9 +406,9 @@ public:
 	 * @brief Get message status.
 	 *
 	 * @param[in] dmId Message identifier.
-	 * @return Message status number or -1 if message does not in database.
+	 * @return Message state or MS_NULL if message does not exist in the database.
 	 */
-	int getMessageStatus(qint64 dmId) const;
+	enum Isds::Type::DmState getMessageStatus(qint64 dmId) const;
 
 	/*!
 	 * @brief Update message envelope delivery information.
@@ -419,7 +420,7 @@ public:
 	 */
 	bool msgsUpdateMessageState(qint64 dmId,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    int dmMessageStatus);
+	    enum Isds::Type::DmState dmMessageStatus);
 
 	/*!
 	 * @brief Insert/update message files into files table.
