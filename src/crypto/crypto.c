@@ -387,6 +387,7 @@ skip_files:
 			log_warning("Could not load certificate '%s'.\n",
 			    pem_desc->name);
 		} else {
+			log_info("Loaded certificate '%s'.\n", pem_desc->name);
 			++loaded_ca_certs;
 		}
 		++pem_desc;
