@@ -108,10 +108,10 @@ x${P_DATOVKA})
 		fi
 	else
 		# Use latest release as default.
-		VERSION="4.10.2"
+		VERSION="4.10.3"
 
 		ensure_source_presence "${SRC_ROOT}" "${PACKAGE}-${VERSION}.tar.xz" \
-		    "https://secure.nic.cz/files/datove_schranky/${VERSION}/" "ed0cd597fe7c4438de397da058fb582453dbfeedf696a65b9e5fde677824c4d2" "" "" || exit 1
+		    "https://secure.nic.cz/files/datove_schranky/${VERSION}/" "1785091f896d906ef3a5a65522b659e2815712516bf3a1982ace7b4bbfc8d892" "" "" || exit 1
 	fi
 
 	RELEASE="1"
