@@ -1,4 +1,4 @@
-4.10.3 /
+4.10.3 / 2018-07-09
  * Added classes based on Qt types encapsulating various ISDS data types and
    structures. Sharing this code with mobile application.
  * Added per-account locking of communication contexts.
