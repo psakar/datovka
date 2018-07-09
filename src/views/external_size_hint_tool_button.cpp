@@ -34,6 +34,13 @@ void ExternalSizeHintToolButton::setVerticalSizeHintOrigin(QWidget *widget)
 	m_sizeHintWidget = widget;
 }
 
+/*
+ * There are still some problems with the size of the tool buttons.
+ * The buttons appear not to enlarge properly on 1080p displays. When testing
+ * on a smaller-resolution display (1366x768 on Win 10) the buttons seem
+ * to enlarge according to the size of the origin widget.
+ */
+
 QSize ExternalSizeHintToolButton::sizeHint(void) const
 {
 	QSize sizeHint(QToolButton::sizeHint());
@@ -54,11 +61,4 @@ QSize ExternalSizeHintToolButton::sizeHint(void) const
 	}
 
 	return sizeHint;
-
-//	QToolButton button;
-//	button.setIcon(icon());
-//	button.setText("X");
-//	button.setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-
-//	return button.sizeHint();
 }
