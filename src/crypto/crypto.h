@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,7 @@
  * the two.
  */
 
-
-#ifndef _CRYPTO_H_
-#define _CRYPTO_H_
-
+#pragma once
 
 #ifdef __cplusplus
 #  include <ctime>
@@ -32,17 +29,14 @@
 #  include <time.h>
 #endif
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /* Opaque structures to hide cryptographic implementation details. */
 //struct cms_msg;
 //struct cms_tst;
 struct x509_crt;
-
 
 /*!
  * @brief Holds locations of the CRL files.
@@ -52,12 +46,10 @@ struct crl_location {
 	const char **urls; /*!< NULL-terminated list of URLs. */
 };
 
-
 /*!
  * @brief NULL-terminated list of CRL files.
  */
 extern const struct crl_location crl_locations[];
-
 
 /*!
  * @brief Certificate issuer information.
@@ -69,7 +61,6 @@ struct crt_issuer_info {
 	char *c; /*!< Country name. */
 };
 
-
 /*!
  * @brief Certificate verification outcome structure.
  */
@@ -80,10 +71,6 @@ struct crt_verif_outcome {
 	int crt_signature_invalid;
 };
 
-
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
-
-
-#endif /* _CRYPTO_H_ */
