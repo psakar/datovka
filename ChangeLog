@@ -10,6 +10,7 @@
  * Added tooltip description of message state value in sent message list.
  * Added button to view account password when editing account credentials and
    PIN (master password) is enabled.
+ * Added DigiCert Global Root G2 certificate.
  * Improved keyboard-based control of main and other dialogue windows. All
    important elements should be navigable only by keyboard (on Windows and
    Linux).
