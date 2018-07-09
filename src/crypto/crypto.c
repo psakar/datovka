@@ -2222,9 +2222,9 @@ int cert_force_success(int ok, X509_STORE_CTX *ctx)
 	return 1;
 }
 
-const char postsignum_qca_root_file[] = "postsignum_qca_root.pem";
-const char postsignum_qca_root_name[] = "PostSignum Root QCA";
-const char postsignum_qca_root_pem[] =
+static const char postsignum_qca_root_file[] = "postsignum_qca_root.pem";
+static const char postsignum_qca_root_name[] = "PostSignum Root QCA";
+static const char postsignum_qca_root_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGKjCCBRKgAwIBAgIBATANBgkqhkiG9w0BAQUFADBZMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHDAa""\n"
@@ -2261,9 +2261,9 @@ const char postsignum_qca_root_pem[] =
 "KQuvApdC79JbGojTzZiMOVBH9H+v/8suZgFdQqBwF82mwSZwxHmn149grQLkJg==""\n"
 "-----END CERTIFICATE-----";
 
-const char postsignum_qca_sub_file[] = "postsignum_qca_sub.pem";
-const char postsignum_qca_sub_name[] = "PostSignum Qualified CA";
-const char postsignum_qca_sub_pem[] =
+static const char postsignum_qca_sub_file[] = "postsignum_qca_sub.pem";
+static const char postsignum_qca_sub_name[] = "PostSignum Qualified CA";
+static const char postsignum_qca_sub_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGLjCCBRagAwIBAgIBHDANBgkqhkiG9w0BAQUFADBZMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHDAa""\n"
@@ -2301,9 +2301,9 @@ const char postsignum_qca_sub_pem[] =
 "Xr0=""\n"
 "-----END CERTIFICATE-----";
 
-const char postsignum_qca2_root_file[] = "postsignum_qca2_root.pem";
-const char postsignum_qca2_root_name[] = "PostSignum Root QCA 2";
-const char postsignum_qca2_root_pem[] =
+static const char postsignum_qca2_root_file[] = "postsignum_qca2_root.pem";
+static const char postsignum_qca2_root_name[] = "PostSignum Root QCA 2";
+static const char postsignum_qca2_root_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIFnDCCBISgAwIBAgIBZDANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHjAc""\n"
@@ -2337,9 +2337,9 @@ const char postsignum_qca2_root_pem[] =
 "Y+jUu/G0zAdLyeU4vaXdQm1A8AEiJPTd0Z9LAxL6Sq2iraLNN36+NyEK/ts3mPLL""\n"
 "-----END CERTIFICATE-----";
 
-const char postsignum_qca2_sub_file[] = "postsignum_qca2_sub.pem";
-const char postsignum_qca2_sub_name[] = "PostSignum Qualified CA 2";
-const char postsignum_qca2_sub_pem[] =
+static const char postsignum_qca2_sub_file[] = "postsignum_qca2_sub.pem";
+static const char postsignum_qca2_sub_name[] = "PostSignum Qualified CA 2";
+static const char postsignum_qca2_sub_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGXzCCBUegAwIBAgIBcTANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHjAc""\n"
@@ -2378,9 +2378,9 @@ const char postsignum_qca2_sub_pem[] =
 "Dcn+""\n"
 "-----END CERTIFICATE-----";
 
-const char postsignum_qca3_sub_file[] = "postsignum_qca3_sub.pem";
-const char postsignum_qca3_sub_name[] = "PostSignum Qualified CA 3";
-const char postsignum_qca3_sub_pem[] =
+static const char postsignum_qca3_sub_file[] = "postsignum_qca3_sub.pem";
+static const char postsignum_qca3_sub_name[] = "PostSignum Qualified CA 3";
+static const char postsignum_qca3_sub_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGYDCCBUigAwIBAgICAKQwDQYJKoZIhvcNAQELBQAwWzELMAkGA1UEBhMCQ1ox""\n"
 "LDAqBgNVBAoMI8SMZXNrw6EgcG/FoXRhLCBzLnAuIFtJxIwgNDcxMTQ5ODNdMR4w""\n"
@@ -2419,9 +2419,10 @@ const char postsignum_qca3_sub_pem[] =
 "5KhDYA==""\n"
 "-----END CERTIFICATE-----";
 
-const char equifax_ca_file[] = "equifax_ca.pem";
-const char equifax_ca_name[] = "Equifax Secure Certificate Authority";
-const char equifax_ca_pem[] =
+#if 0
+static const char equifax_ca_file[] = "equifax_ca.pem";
+static const char equifax_ca_name[] = "Equifax Secure Certificate Authority";
+static const char equifax_ca_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIDIDCCAomgAwIBAgIENd70zzANBgkqhkiG9w0BAQUFADBOMQswCQYDVQQGEwJV""\n"
 "UzEQMA4GA1UEChMHRXF1aWZheDEtMCsGA1UECxMkRXF1aWZheCBTZWN1cmUgQ2Vy""\n"
@@ -2441,10 +2442,11 @@ const char equifax_ca_pem[] =
 "7qj/WsjTVbJmcVfewCHrPSqnI0kBBIZCe/zuf6IWUrVnZ9NA2zsmWLIodz2uFHdh""\n"
 "1voqZiegDfqnc1zqcPGUIWVEX/r87yloqaKHee9570+sB3c4""\n"
 "-----END CERTIFICATE-----";
+#endif
 
-const char digicert_ca_file[] = "digicert_global_root_g2.pem";
-const char digicert_ca_name[] = "DigiCert Global Root G2";
-const char digicert_ca_pem[] =
+static const char digicert_ca_file[] = "digicert_global_root_g2.pem";
+static const char digicert_ca_name[] = "DigiCert Global Root G2";
+static const char digicert_ca_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh""\n"
 "MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3""\n"
@@ -2468,8 +2470,9 @@ const char digicert_ca_pem[] =
 "MrY=""\n"
 "-----END CERTIFICATE-----";
 
-const char all_certs_file[] = "all_trusted.pem";
-
+#if 0
+static const char all_certs_file[] = "all_trusted.pem";
+#endif
 
 /*!
  * @brief Holds NULL-terminated list of PEM encoded certificate files.
@@ -2514,15 +2517,15 @@ const struct pem_str root_pem_strs[] = {
 	{NULL, NULL}
 };
 
-const char psrootqca_file[] = "psrootqca.crl";
-const char *psrootqca_urls[] = {
+static const char psrootqca_file[] = "psrootqca.crl";
+static const char *psrootqca_urls[] = {
 	"http://www.postsignum.cz/crl/psrootqca.crl",
 	"http://postsignum.ttc.cz/crl/psrootqca.crl",
 	NULL
 };
 
-const char psrootqca2_file[] = "psrootqca2.crl";
-const char *psrootqca2_urls[] = {
+static const char psrootqca2_file[] = "psrootqca2.crl";
+static const char *psrootqca2_urls[] = {
 	"http://www.postsignum.cz/crl/psrootqca2.crl",
 	"http://www2.postsignum.cz/crl/psrootqca2.crl",
 	"http://postsignum.ttc.cz/crl/psrootqca2.crl",
