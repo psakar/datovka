@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2015 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
  * individual source file, and distribute linked combinations including
  * the two.
  */
-
 
 #include <assert.h>
 #include <ctype.h> /* isdigit(3) */
@@ -100,7 +99,6 @@
  */
 extern const char *pem_files[];
 
-
 /*!
  * @brief Holds a PEM encoded certificate string and a certificate name.
  */
@@ -108,7 +106,6 @@ struct pem_str {
 	const char *name; /*!< Certificate name. */
 	const char *pem; /*!< PEM encoded certificate. */
 };
-
 
 /*!
  * @brief Holds NULL-terminated list of PEM encoded certificates.
@@ -132,7 +129,6 @@ X509_STORE *ca_certs = NULL;
 static
 int loaded_ca_certs = 0;
 
-
 /*!
  * @brief Read certificate from a PEM string.
  *
@@ -142,7 +138,6 @@ int loaded_ca_certs = 0;
  */
 static
 int x509_store_add_cert_pem(X509_STORE *store, const char *pem_str);
-
 
 /*!
  * @brief Read certificate file.
@@ -156,15 +151,13 @@ static
 int x509_store_add_cert_file(X509_STORE *store, const char *fname,
     int *num_loaded);
 
-
 /*!
  * @brief Load CMS from buffer.
  *
  * @return NULL on failure.
  */
 static
-CMS_ContentInfo * cms_load_der(const void *raw, size_t raw_len);
-
+CMS_ContentInfo *cms_load_der(const void *raw, size_t raw_len);
 
 /*!
  * @brief Load X509 from buffer.
@@ -172,8 +165,7 @@ CMS_ContentInfo * cms_load_der(const void *raw, size_t raw_len);
  * @return NULL on failure.
  */
 static
-X509 * x509_load_der(const void *raw, size_t raw_len);
-
+X509 *x509_load_der(const void *raw, size_t raw_len);
 
 /*!
  * @brief Converts X509 certificate to DER.
@@ -185,15 +177,13 @@ X509 * x509_load_der(const void *raw, size_t raw_len);
 static
 int x509_store_der(X509 *x509, void **der, size_t *der_len);
 
-
 /*!
  * @brief Load X509 from buffer.
  *
  * @return NULL on failure.
  */
 static
-X509 * x509_load_pem(const char *pem_str);
-
+X509 *x509_load_pem(const char *pem_str);
 
 /*!
  * @brief Converts X509 certificate to PEM.
@@ -204,7 +194,6 @@ X509 * x509_load_pem(const char *pem_str);
  */
 static
 int x509_store_pem(X509 *x509, void **pem, size_t *pem_len);
-
 
 /*!
  * @brief Converts the private key to PEM.
@@ -218,15 +207,13 @@ static
 int evp_pkey_store_pem(EVP_PKEY *pkey, void **pem, size_t *pem_len,
     const char *pwd);
 
-
 /*!
  * @brief Load X509_CRL from buffer.
  *
  * @return NULL on failure.
  */
 static
-X509_CRL * x509_crl_load_der(const void *raw, size_t raw_len);
-
+X509_CRL *x509_crl_load_der(const void *raw, size_t raw_len);
 
 /*!
  * @brief Load PKCS12 from buffer.
@@ -234,8 +221,7 @@ X509_CRL * x509_crl_load_der(const void *raw, size_t raw_len);
  * @return NULL on failure.
  */
 static
-PKCS12 * pkcs12_load_p12(const void *raw, size_t raw_len);
-
+PKCS12 *pkcs12_load_p12(const void *raw, size_t raw_len);
 
 /*!
  * @brief Verify the signature of the CRL.
@@ -248,7 +234,6 @@ PKCS12 * pkcs12_load_p12(const void *raw, size_t raw_len);
  */
 static
 int x509_crl_verify_signature(X509_CRL *x509_crl);
-
 
 /*!
  * @brief Verifies CMS signature.
@@ -265,7 +250,6 @@ static
 int cms_verify_signature(CMS_ContentInfo *cms, X509_STORE *ca_store,
     int crl_check);
 
-
 /*!
  * @brief Get RFC 3161 time-stamp value.
  *
@@ -275,7 +259,6 @@ int cms_verify_signature(CMS_ContentInfo *cms, X509_STORE *ca_store,
  */
 static
 int cms_get_timestamp_value(CMS_ContentInfo *cms, time_t *utc_time);
-
 
 /*!
  * @brief Check certificate date.
@@ -289,7 +272,6 @@ int cms_get_timestamp_value(CMS_ContentInfo *cms, time_t *utc_time);
 static
 int x509_check_date(const X509 *x509, time_t utc_time);
 
-
 /*!
  * @brief Converts ASN1_TIME into time_t UTC time.
  *
@@ -300,17 +282,14 @@ int x509_check_date(const X509 *x509, time_t utc_time);
 static
 int asn1_time_to_utc_time(const ASN1_TIME *asn1_time, time_t *utc_time);
 
-
 /*!
  * @brief Portable version of timegm().
  */
 static
 time_t timegm_utc(struct tm *tm);
 
-
 //#define PRINT_CERTS 1
 //#define CUSTOM_VERIFY_CB 1
-
 
 #if defined PRINT_CERTS
 /*!
@@ -319,7 +298,6 @@ time_t timegm_utc(struct tm *tm);
 static
 int x509_printf(X509 *x509, FILE *fout);
 #endif /* PRINT_CERTS */
-
 
 #if defined CUSTOM_VERIFY_CB
 /*!
@@ -331,7 +309,6 @@ static
 int cert_verify_cb(int ok, X509_STORE_CTX *ctx);
 #endif /* CUSTOM_VERIFY_CB */
 
-
 /*!
  * @brief Forces verification success and sets various variables according to
  *     verification progress.
@@ -339,13 +316,7 @@ int cert_verify_cb(int ok, X509_STORE_CTX *ctx);
 static
 int cert_force_success(int ok, X509_STORE_CTX *ctx);
 
-
-/* ========================================================================= */
-/*
- * Initialises cryptographic back-end.
- */
 int crypto_init(void)
-/* ========================================================================= */
 {
 	const char **pem_file;
 	const struct pem_str *pem_desc;
@@ -416,6 +387,7 @@ skip_files:
 			log_warning("Could not load certificate '%s'.\n",
 			    pem_desc->name);
 		} else {
+			log_info("Loaded certificate '%s'.\n", pem_desc->name);
 			++loaded_ca_certs;
 		}
 		++pem_desc;
@@ -441,17 +413,10 @@ fail:
 #undef MAX_PATH_LEN
 }
 
-
-/* ========================================================================= */
-/*
- * Check whether certificates have been loaded.
- */
 int crypto_certificates_loaded(void)
-/* ========================================================================= */
 {
 	return (NULL != ca_certs) && (0 < loaded_ca_certs);
 }
-
 
 //#define USE_VERIFY_PARAM
 /*
@@ -460,13 +425,7 @@ int crypto_certificates_loaded(void)
  */
 #define VERIFY_FLAGS (X509_V_FLAG_CRL_CHECK_ALL)
 
-
-/* ========================================================================= */
-/*
- * Set certificate revocation list.
- */
 int crypto_add_crl(const void *der, size_t der_size)
-/* ========================================================================= */
 {
 #ifdef USE_VERIFY_PARAM
 	X509_VERIFY_PARAM *param = NULL;
@@ -533,14 +492,8 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Verifies signed message signature.
- */
 int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
     int crl_check)
-/* ========================================================================= */
 {
 //#define PRINT_HANDLED_CERT
 
@@ -577,14 +530,8 @@ int raw_msg_verify_signature(const void *der, size_t der_size, int verify_cert,
 #endif /* PRINT_HANDLED_CERT */
 }
 
-
-/* ========================================================================= */
-/*
- * Verifies whether raw message signature is valid at given date.
- */
 int raw_msg_verify_signature_date(const void *der, size_t der_size,
     time_t utc_time, int crl_check)
-/* ========================================================================= */
 {
 	int ret;
 	CMS_ContentInfo *cms = NULL;
@@ -641,14 +588,7 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Verifies signature of raw qualified time-stamp and parses
- *     the time-stamp value. Time-stamp format follows RFC 3161.
- */
 int raw_tst_verify(const void *der, size_t der_size, time_t *utc_time)
-/* ========================================================================= */
 {
 //#define PRINT_HANDLED_CERT
 
@@ -741,14 +681,7 @@ fail:
 #endif /* PRINT_HANDLED_CERT */
 }
 
-
-/* ========================================================================= */
-/*
- * Returns X509 certificate structure from certificate obtained from
- *     supplied raw CMS message.
- */
-struct x509_crt * raw_cms_signing_cert(const void *der, size_t der_size)
-/* ========================================================================= */
+struct x509_crt *raw_cms_signing_cert(const void *der, size_t der_size)
 {
 	int ret;
 	CMS_ContentInfo *cms = NULL;
@@ -804,13 +737,7 @@ fail:
 	return NULL;
 }
 
-
-/* ========================================================================= */
-/*
- * Destroy certificate structure.
- */
 void x509_crt_destroy(struct x509_crt *x509_crt)
-/* ========================================================================= */
 {
 	debug_func_call();
 
@@ -819,41 +746,22 @@ void x509_crt_destroy(struct x509_crt *x509_crt)
 	X509_free((X509 *) x509_crt);
 }
 
-
-/* ========================================================================= */
-/*
- * Write X509 certificate in DER format into a buffer.
- */
 int x509_crt_to_der(struct x509_crt *x509_crt, void **der_out,
     size_t *out_size)
-/* ========================================================================= */
 {
 	debug_func_call();
 
 	return x509_store_der((X509 *) x509_crt, der_out, out_size);
 }
 
-
-
-/* ========================================================================= */
-/*
- * Read X509 certificate from DER buffer.
- */
-struct x509_crt * x509_crt_from_der(const void *der, size_t der_size)
-/* ========================================================================= */
+struct x509_crt *x509_crt_from_der(const void *der, size_t der_size)
 {
 	debug_func_call();
 
 	return (struct x509_crt *) x509_load_der(der, der_size);
 }
 
-
-/* ========================================================================= */
-/*
- * Initialises values inside the structure.
- */
 void crt_issuer_info_init(struct crt_issuer_info *cii)
-/* ========================================================================= */
 {
 	if (NULL == cii) {
 		assert(0);
@@ -863,13 +771,7 @@ void crt_issuer_info_init(struct crt_issuer_info *cii)
 	memset(cii, 0, sizeof(*cii));
 }
 
-
-/* ========================================================================= */
-/*
- * Clear values inside the structure.
- */
 void crt_issuer_info_clear(struct crt_issuer_info *cii)
-/* ========================================================================= */
 {
 	if (NULL == cii) {
 		assert(0);
@@ -890,14 +792,8 @@ void crt_issuer_info_clear(struct crt_issuer_info *cii)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Get information about the certificate issuer.
- */
 int x509_crt_issuer_info(struct x509_crt *x509_crt,
     struct crt_issuer_info *cii)
-/* ========================================================================= */
 {
 	const X509_NAME *subject;
 	int num_entries, i;
@@ -967,14 +863,8 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Get signature algorithm information.
- */
 int x509_crt_algorithm_info(struct x509_crt *x509_crt, char **sa_id,
     char **sa_name)
-/* ========================================================================= */
 {
 //#define PRINT_HANDLED_CERT
 
@@ -1035,14 +925,8 @@ fail:
 #endif /* PRINT_HANDLED_CERT */
 }
 
-
-/* ========================================================================= */
-/*
- * Read inception and expiry date from X509 certificate.
- */
 int x509_crt_date_info(struct x509_crt *x509_crt, time_t *utc_inception,
     time_t *utc_expiration)
-/* ========================================================================= */
 {
 	const ASN1_TIME *notBefore, *notAfter;
 
@@ -1079,13 +963,7 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Verify certificate.
- */
 int x509_crt_verify(struct x509_crt *x509_crt)
-/* ========================================================================= */
 {
 //#define PRINT_HANDLED_CERT
 
@@ -1154,18 +1032,11 @@ fail:
 #endif /* PRINT_HANDLED_CERT */
 }
 
-
 static
 struct crt_verif_outcome glob_cvo;
 
-
-/* ========================================================================= */
-/*
- * Tracks certificate verification.
- */
 int x509_crt_track_verification(struct x509_crt *x509_crt,
     struct crt_verif_outcome *cvo)
-/* ========================================================================= */
 {
 //#define PRINT_HANDLED_CERT
 
@@ -1255,14 +1126,8 @@ fail:
 #endif /* PRINT_HANDLED_CERT */
 }
 
-
-/* ========================================================================= */
-/*
- * Converts certificate file from PKCS #12 to PEM format.
- */
 int p12_to_pem(const void *p12, size_t p12_size, const char *pwd,
     void **pem_out, size_t *out_size)
-/* ========================================================================= */
 {
 	PKCS12 *pkcs12 = NULL;
 	unsigned long err;
@@ -1357,14 +1222,8 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Read certificate from PEM string.
- */
 static
 int x509_store_add_cert_pem(X509_STORE *store, const char *pem_str)
-/* ========================================================================= */
 {
 //#define PRINT_HANDLED_CERT
 
@@ -1418,15 +1277,9 @@ fail:
 #endif /* PRINT_HANDLED_CERT */
 }
 
-
-/* ========================================================================= */
-/*
- * Read certificate file.
- */
 static
 int x509_store_add_cert_file(X509_STORE *store, const char *fname,
     int *num_loaded)
-/* ========================================================================= */
 {
 //#define PRINT_HANDLED_CERT
 
@@ -1530,14 +1383,8 @@ fail:
 #endif /* PRINT_HANDLED_CERT */
 }
 
-
-/* ========================================================================= */
-/*
- * Load CMS from buffer.
- */
 static
 CMS_ContentInfo * cms_load_der(const void *raw, size_t raw_len)
-/* ========================================================================= */
 {
 	BIO *bio = NULL;
 	CMS_ContentInfo *cms = NULL;
@@ -1576,14 +1423,8 @@ fail:
 	return NULL;
 }
 
-
-/* ========================================================================= */
-/*
- * Load X509 from buffer.
- */
 static
-X509 * x509_load_der(const void *raw, size_t raw_len)
-/* ========================================================================= */
+X509 *x509_load_der(const void *raw, size_t raw_len)
 {
 	BIO *bio = NULL;
 	X509 *x509 = NULL;
@@ -1622,14 +1463,8 @@ fail:
 	return NULL;
 }
 
-
-/* ========================================================================= */
-/*
- * Converts X509 certificate to DER.
- */
 static
 int x509_store_der(X509 *x509, void **der, size_t *der_len)
-/* ========================================================================= */
 {
 	BIO *bio = NULL;
 	BUF_MEM *bptr = NULL;
@@ -1679,14 +1514,8 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Load X509 from buffer.
- */
 static
-X509 * x509_load_pem(const char *pem_str)
-/* ========================================================================= */
+X509 *x509_load_pem(const char *pem_str)
 {
 	BIO *bio = NULL;
 	X509 *x509 = NULL;
@@ -1723,14 +1552,8 @@ fail:
 	return NULL;
 }
 
-
-/* ========================================================================= */
-/*
- * Converts X509 certificate to PEM.
- */
 static
 int x509_store_pem(X509 *x509, void **pem, size_t *pem_len)
-/* ========================================================================= */
 {
 	BIO *bio = NULL;
 	BUF_MEM *bptr = NULL;
@@ -1780,15 +1603,9 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Converts the private key to PEM.
- */
 static
 int evp_pkey_store_pem(EVP_PKEY *pkey, void **pem, size_t *pem_len,
     const char *pwd)
-/* ========================================================================= */
 {
 	const EVP_CIPHER *enc = EVP_des_ede3_cbc();
 	BIO *bio = NULL;
@@ -1846,14 +1663,8 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Load X509_CRL from buffer.
- */
 static
-X509_CRL * x509_crl_load_der(const void *raw, size_t raw_len)
-/* ========================================================================= */
+X509_CRL *x509_crl_load_der(const void *raw, size_t raw_len)
 {
 	BIO *bio = NULL;
 	X509_CRL *x509_crl = NULL;
@@ -1892,14 +1703,8 @@ fail:
 	return NULL;
 }
 
-
-/* ========================================================================= */
-/*
- * Load PKCS12 from buffer.
- */
 static
-PKCS12 * pkcs12_load_p12(const void *raw, size_t raw_len)
-/* ========================================================================= */
+PKCS12 *pkcs12_load_p12(const void *raw, size_t raw_len)
 {
 	BIO *bio = NULL;
 	PKCS12 *pkcs12 = NULL;
@@ -1938,14 +1743,8 @@ fail:
 	return NULL;
 }
 
-
-/* ========================================================================= */
-/*
- * Verify the signature of the CRL.
- */
 static
 int x509_crl_verify_signature(X509_CRL *x509_crl)
-/* ========================================================================= */
 {
 	X509 *x509 = NULL;
 	const struct pem_str *pem_desc;
@@ -1986,15 +1785,9 @@ next:
 	return verified;
 }
 
-
-/* ========================================================================= */
-/*
- * Verifies CMS signature.
- */
 static
 int cms_verify_signature(CMS_ContentInfo *cms, X509_STORE *ca_store,
     int crl_check)
-/* ========================================================================= */
 {
 	const ASN1_OBJECT *asn1;
 	int nid;
@@ -2041,14 +1834,8 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Get RFC 3161 time-stamp value.
- */
 static
 int cms_get_timestamp_value(CMS_ContentInfo *cms, time_t *utc_time)
-/* ========================================================================= */
 {
 	const ASN1_OBJECT *asn1;
 	int nid;
@@ -2131,14 +1918,8 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Check certificate date.
- */
 static
 int x509_check_date(const X509 *x509, time_t utc_time)
-/* ========================================================================= */
 {
 	const ASN1_TIME *notBefore, *notAfter;
 	time_t tNotBef, tNotAft;
@@ -2171,14 +1952,8 @@ fail:
 	return -1;
 }
 
-
-/* ========================================================================= */
-/*
- * Converts ASN1_TIME into time_t UTC time.
- */
 static
 int asn1_time_to_utc_time(const ASN1_TIME *asn1_time, time_t *utc_time)
-/* ========================================================================= */
 {
 	struct tm t;
 	const char *str;
@@ -2312,13 +2087,8 @@ char *sanitised_tz_val(const char *tz_val)
 }
 #endif /* !WIN32 */
 
-/* ========================================================================= */
-/*
- * Portable version of timegm().
- */
 static
 time_t timegm_utc(struct tm *tm)
-/* ========================================================================= */
 {
 #ifndef WIN32
 	/* Code taken from man timegm(3). */
@@ -2353,13 +2123,8 @@ time_t timegm_utc(struct tm *tm)
 
 
 #if defined PRINT_CERTS
-/* ========================================================================= */
-/*
- * Prints x509.
- */
 static
 int x509_printf(X509 *x509, FILE *fout)
-/* ========================================================================= */
 {
 	BIO *wbio = NULL;
 	BUF_MEM *buf_mem;
@@ -2391,13 +2156,8 @@ fail:
 
 
 #if defined CUSTOM_VERIFY_CB
-/* ========================================================================= */
-/*
- * Custom certificate verification callback.
- */
 static
 int cert_verify_cb(int ok, X509_STORE_CTX *ctx)
-/* ========================================================================= */
 {
 	int error;
 
@@ -2418,15 +2178,8 @@ int cert_verify_cb(int ok, X509_STORE_CTX *ctx)
 }
 #endif /* CUSTOM_VERIFY_CB */
 
-
-/* ========================================================================= */
-/*
- * Forces verification success and sets various variables according to
- *     verification progress.
- */
 static
 int cert_force_success(int ok, X509_STORE_CTX *ctx)
-/* ========================================================================= */
 {
 //	X509 *err_cert;
 	int err;
@@ -2470,10 +2223,9 @@ int cert_force_success(int ok, X509_STORE_CTX *ctx)
 	return 1;
 }
 
-
-const char postsignum_qca_root_file[] = "postsignum_qca_root.pem";
-const char postsignum_qca_root_name[] = "PostSignum Root QCA";
-const char postsignum_qca_root_pem[] =
+static const char postsignum_qca_root_file[] = "postsignum_qca_root.pem";
+static const char postsignum_qca_root_name[] = "PostSignum Root QCA";
+static const char postsignum_qca_root_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGKjCCBRKgAwIBAgIBATANBgkqhkiG9w0BAQUFADBZMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHDAa""\n"
@@ -2510,9 +2262,9 @@ const char postsignum_qca_root_pem[] =
 "KQuvApdC79JbGojTzZiMOVBH9H+v/8suZgFdQqBwF82mwSZwxHmn149grQLkJg==""\n"
 "-----END CERTIFICATE-----";
 
-const char postsignum_qca_sub_file[] = "postsignum_qca_sub.pem";
-const char postsignum_qca_sub_name[] = "PostSignum Qualified CA";
-const char postsignum_qca_sub_pem[] =
+static const char postsignum_qca_sub_file[] = "postsignum_qca_sub.pem";
+static const char postsignum_qca_sub_name[] = "PostSignum Qualified CA";
+static const char postsignum_qca_sub_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGLjCCBRagAwIBAgIBHDANBgkqhkiG9w0BAQUFADBZMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHDAa""\n"
@@ -2550,9 +2302,9 @@ const char postsignum_qca_sub_pem[] =
 "Xr0=""\n"
 "-----END CERTIFICATE-----";
 
-const char postsignum_qca2_root_file[] = "postsignum_qca2_root.pem";
-const char postsignum_qca2_root_name[] = "PostSignum Root QCA 2";
-const char postsignum_qca2_root_pem[] =
+static const char postsignum_qca2_root_file[] = "postsignum_qca2_root.pem";
+static const char postsignum_qca2_root_name[] = "PostSignum Root QCA 2";
+static const char postsignum_qca2_root_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIFnDCCBISgAwIBAgIBZDANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHjAc""\n"
@@ -2586,9 +2338,9 @@ const char postsignum_qca2_root_pem[] =
 "Y+jUu/G0zAdLyeU4vaXdQm1A8AEiJPTd0Z9LAxL6Sq2iraLNN36+NyEK/ts3mPLL""\n"
 "-----END CERTIFICATE-----";
 
-const char postsignum_qca2_sub_file[] = "postsignum_qca2_sub.pem";
-const char postsignum_qca2_sub_name[] = "PostSignum Qualified CA 2";
-const char postsignum_qca2_sub_pem[] =
+static const char postsignum_qca2_sub_file[] = "postsignum_qca2_sub.pem";
+static const char postsignum_qca2_sub_name[] = "PostSignum Qualified CA 2";
+static const char postsignum_qca2_sub_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGXzCCBUegAwIBAgIBcTANBgkqhkiG9w0BAQsFADBbMQswCQYDVQQGEwJDWjEs""\n"
 "MCoGA1UECgwjxIxlc2vDoSBwb8WhdGEsIHMucC4gW0nEjCA0NzExNDk4M10xHjAc""\n"
@@ -2627,9 +2379,9 @@ const char postsignum_qca2_sub_pem[] =
 "Dcn+""\n"
 "-----END CERTIFICATE-----";
 
-const char postsignum_qca3_sub_file[] = "postsignum_qca3_sub.pem";
-const char postsignum_qca3_sub_name[] = "PostSignum Qualified CA 3";
-const char postsignum_qca3_sub_pem[] =
+static const char postsignum_qca3_sub_file[] = "postsignum_qca3_sub.pem";
+static const char postsignum_qca3_sub_name[] = "PostSignum Qualified CA 3";
+static const char postsignum_qca3_sub_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIGYDCCBUigAwIBAgICAKQwDQYJKoZIhvcNAQELBQAwWzELMAkGA1UEBhMCQ1ox""\n"
 "LDAqBgNVBAoMI8SMZXNrw6EgcG/FoXRhLCBzLnAuIFtJxIwgNDcxMTQ5ODNdMR4w""\n"
@@ -2668,9 +2420,10 @@ const char postsignum_qca3_sub_pem[] =
 "5KhDYA==""\n"
 "-----END CERTIFICATE-----";
 
-const char equifax_ca_file[] = "equifax_ca.pem";
-const char equifax_ca_name[] = "Equifax Secure Certificate Authority";
-const char equifax_ca_pem[] =
+#if 0
+static const char equifax_ca_file[] = "equifax_ca.pem";
+static const char equifax_ca_name[] = "Equifax Secure Certificate Authority";
+static const char equifax_ca_pem[] =
 "-----BEGIN CERTIFICATE-----""\n"
 "MIIDIDCCAomgAwIBAgIENd70zzANBgkqhkiG9w0BAQUFADBOMQswCQYDVQQGEwJV""\n"
 "UzEQMA4GA1UEChMHRXF1aWZheDEtMCsGA1UECxMkRXF1aWZheCBTZWN1cmUgQ2Vy""\n"
@@ -2690,15 +2443,43 @@ const char equifax_ca_pem[] =
 "7qj/WsjTVbJmcVfewCHrPSqnI0kBBIZCe/zuf6IWUrVnZ9NA2zsmWLIodz2uFHdh""\n"
 "1voqZiegDfqnc1zqcPGUIWVEX/r87yloqaKHee9570+sB3c4""\n"
 "-----END CERTIFICATE-----";
+#endif
 
-const char all_certs_file[] = "all_trusted.pem";
+static const char digicert_ca_file[] = "digicert_global_root_g2.pem";
+static const char digicert_ca_name[] = "DigiCert Global Root G2";
+static const char digicert_ca_pem[] =
+"-----BEGIN CERTIFICATE-----""\n"
+"MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh""\n"
+"MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3""\n"
+"d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBH""\n"
+"MjAeFw0xMzA4MDExMjAwMDBaFw0zODAxMTUxMjAwMDBaMGExCzAJBgNVBAYTAlVT""\n"
+"MRUwEwYDVQQKEwxEaWdpQ2VydCBJbmMxGTAXBgNVBAsTEHd3dy5kaWdpY2VydC5j""\n"
+"b20xIDAeBgNVBAMTF0RpZ2lDZXJ0IEdsb2JhbCBSb290IEcyMIIBIjANBgkqhkiG""\n"
+"9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuzfNNNx7a8myaJCtSnX/RrohCgiN9RlUyfuI""\n"
+"2/Ou8jqJkTx65qsGGmvPrC3oXgkkRLpimn7Wo6h+4FR1IAWsULecYxpsMNzaHxmx""\n"
+"1x7e/dfgy5SDN67sH0NO3Xss0r0upS/kqbitOtSZpLYl6ZtrAGCSYP9PIUkY92eQ""\n"
+"q2EGnI/yuum06ZIya7XzV+hdG82MHauVBJVJ8zUtluNJbd134/tJS7SsVQepj5Wz""\n"
+"tCO7TG1F8PapspUwtP1MVYwnSlcUfIKdzXOS0xZKBgyMUNGPHgm+F6HmIcr9g+UQ""\n"
+"vIOlCsRnKPZzFBQ9RnbDhxSJITRNrw9FDKZJobq7nMWxM4MphQIDAQABo0IwQDAP""\n"
+"BgNVHRMBAf8EBTADAQH/MA4GA1UdDwEB/wQEAwIBhjAdBgNVHQ4EFgQUTiJUIBiV""\n"
+"5uNu5g/6+rkS7QYXjzkwDQYJKoZIhvcNAQELBQADggEBAGBnKJRvDkhj6zHd6mcY""\n"
+"1Yl9PMWLSn/pvtsrF9+wX3N3KjITOYFnQoQj8kVnNeyIv/iPsGEMNKSuIEyExtv4""\n"
+"NeF22d+mQrvHRAiGfzZ0JFrabA0UWTW98kndth/Jsw1HKj2ZL7tcu7XUIOGZX1NG""\n"
+"Fdtom/DzMNU+MeKNhJ7jitralj41E6Vf8PlwUHBHQRFXGU7Aj64GxJUTFy8bJZ91""\n"
+"8rGOmaFvE7FBcf6IKshPECBV1/MUReXgRPTqh5Uykw7+U0b6LJ3/iyK5S9kJRaTe""\n"
+"pLiaWN0bfVKfjllDiIGknibVb63dDcY3fe0Dkhvld1927jyNxF1WW6LZZm6zNTfl""\n"
+"MrY=""\n"
+"-----END CERTIFICATE-----";
 
+#if 0
+static const char all_certs_file[] = "all_trusted.pem";
+#endif
 
 /*!
  * @brief Holds NULL-terminated list of PEM encoded certificate files.
  *
  * @note In C file names may be string literals or 'cost char str[]'.
- * C++ allows 'const char * str'.
+ * C++ allows 'const char *str'.
  */
 const char *pem_files[] = {
 	NULL, /* Don't use this list. */
@@ -2708,6 +2489,7 @@ const char *pem_files[] = {
 	postsignum_qca2_sub_file,
 	postsignum_qca3_sub_file,
 //	equifax_ca_file,
+	digicert_ca_file,
 //	NULL,
 //	all_certs_file,
 	NULL
@@ -2723,6 +2505,7 @@ const struct pem_str pem_strs[] = {
 	{postsignum_qca2_sub_name, postsignum_qca2_sub_pem},
 	{postsignum_qca3_sub_name, postsignum_qca3_sub_pem},
 //	{equifax_ca_name, equifax_ca_pem},
+	{digicert_ca_name, digicert_ca_pem},
 	{NULL, NULL}
 };
 
@@ -2735,22 +2518,20 @@ const struct pem_str root_pem_strs[] = {
 	{NULL, NULL}
 };
 
-
-const char psrootqca_file[] = "psrootqca.crl";
-const char *psrootqca_urls[] = {
+static const char psrootqca_file[] = "psrootqca.crl";
+static const char *psrootqca_urls[] = {
 	"http://www.postsignum.cz/crl/psrootqca.crl",
 	"http://postsignum.ttc.cz/crl/psrootqca.crl",
 	NULL
 };
 
-const char psrootqca2_file[] = "psrootqca2.crl";
-const char *psrootqca2_urls[] = {
+static const char psrootqca2_file[] = "psrootqca2.crl";
+static const char *psrootqca2_urls[] = {
 	"http://www.postsignum.cz/crl/psrootqca2.crl",
 	"http://www2.postsignum.cz/crl/psrootqca2.crl",
 	"http://postsignum.ttc.cz/crl/psrootqca2.crl",
 	NULL
 };
-
 
 /*
  * NULL-terminated list of CRL files.
