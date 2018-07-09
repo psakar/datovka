@@ -26,6 +26,7 @@
 #include <QThread>
 
 #include "src/common.h"
+#include "src/datovka_shared/isds/types.h"
 #include "src/global.h"
 #include "src/gui/dlg_import_zfo.h" /* TODO -- Remove this dependency. */
 #include "src/io/account_db.h"
@@ -201,10 +202,10 @@ enum TaskImportZfo::Result TaskImportZfo::importMessageZfoSingle(
 	}
 	const QString accountName(
 	    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName());
-	if (-1 != messageDb->getMessageStatus(dmId)) {
-		resultDesc = tr("Message '%1' already exists in "
-		    "the local database, account '%2'.").
-		    arg(dmId).arg(accountName);
+	if (Isds::Type::MS_NULL != messageDb->getMessageStatus(dmId)) {
+		resultDesc =
+		    tr("Message '%1' already exists in the local database, account '%2'.")
+		        .arg(dmId).arg(accountName);
 		return IMP_DB_EXISTS;
 	}
 
@@ -347,8 +348,8 @@ enum TaskImportZfo::Result TaskImportZfo::importDeliveryZfoSingle(
 	    false);
 	const QString accountName(
 	    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName());
-	if ((NULL == messageDb) ||
-	    (-1 == messageDb->getMessageStatus(dmId))) {
+	if ((Q_NULLPTR == messageDb) ||
+	    (Isds::Type::MS_NULL == messageDb->getMessageStatus(dmId))) {
 		/* Corresponding message does not exist in database. */
 		resultDesc = tr("This file (acceptance info) has not "
 		    "been inserted into database because there isn't any "
