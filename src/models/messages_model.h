@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _MESSAGES_MODEL_H_
-#define _MESSAGES_MODEL_H_
+#pragma once
 
 #include <QIcon>
 #include <QList>
@@ -49,6 +48,23 @@ public:
 	 * @brief Identifies the column index.
 	 */
 	enum ColumnNumbers {
+		_DMID_COL = 0, /* Message identifier. */
+		_ANNOT_COL = 1, /* Annotation column. */
+		_SENDER_COL = 2, /* Sender name column. */
+		_RECIP_COL = 3, /* Recipient name column. */
+		_DELIVERY_COL = 4, /* Delivery time column. */
+		_ACCEPT_COL = 5, /* Acceptance time column. */
+		_READLOC_COL = 6, /* Read locally. */
+		_MSGSTAT_COL = 7, /* Message status. */
+		_ATTDOWN_COL = 8, /* Attachments downloaded. */
+		_PROCSNG_COL = 9, /* Processing state. */
+		_RECMGMT_NEG_COL = -2, /* 10 */ /* Records management service. */
+		_TAGS_NEG_COL = -1, /* 11 */ /* Tags. */
+		_BASIC_COLNUM = 10, /* Number of basic columns (convenience value). */
+		_COLNUM = 12 /* Maximal number of columns (convenience value). */
+
+#if 0
+		,
 		DMID_COL = 0, /* Message identifier. */
 		ANNOT_COL = 1, /* Annotation column. */
 		SENDER_RECIP_COL = 2, /* Sender or recipient name column. */
@@ -59,6 +75,7 @@ public:
 		PROCSNG_COL = 7, /* Processing state. */
 		REC_MGMT_NEG_COL = -2, /* Records management service. */
 		TAGS_NEG_COL = -1 /* Tags. */
+#endif
 	};
 
 	/*!
@@ -151,18 +168,18 @@ public:
 	bool setType(enum Type type);
 
 	/*!
-	 * @brief Set header data for received model.
+	 * @brief Get model type.
 	 *
-	 * @return False on error.
+	 * @return Model type.
 	 */
-	bool setRcvdHeader(const QList<AppendedCol> &appendedCols);
+	enum Type type(void) const;
 
 	/*!
-	 * @Brief Set header data for sent model.
+	 * @brief Set header data.
 	 *
 	 * @return False on error.
 	 */
-	bool setSntHeader(const QList<AppendedCol> &appendedCols);
+	bool setHeader(const QList<AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Override message as being read.
@@ -273,11 +290,7 @@ private:
 	 */
 	qint64 sortRank(qint16 num, const QModelIndex &index) const;
 
-	enum Type m_type; /*!<
-	                   * Whether this is a model dummy or contains data.
-	                   */
+	enum Type m_type; /*!< Specifies type of data held in the model. */
 
 	QIcon m_dsIco; /*!< Records management icon. */
 };
-
-#endif /* _MESSAGES_MODEL_H_ */

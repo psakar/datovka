@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _TABLE_MODEL_H_
-#define _TABLE_MODEL_H_
+#pragma once
 
 #include <QAbstractTableModel>
 #include <QMap>
@@ -30,6 +29,9 @@
 #include <QVariant>
 #include <QVector>
 
+/*!
+ * @brief Custom table model.
+ */
 class TblModel : public QAbstractTableModel {
     Q_OBJECT
 
@@ -211,5 +213,3 @@ private:
 	 */
 	QMap< int, QMap<int, QVariant> > m_headerData; /*!< Header data. */
 };
-
-#endif /* _TABLE_MODEL_H_ */
