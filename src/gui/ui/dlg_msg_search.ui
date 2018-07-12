@@ -327,6 +327,27 @@
        </layout>
       </item>
       <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="h5">
+        <item>
+         <widget class="QLabel" name="fileNameLabel">
+          <property name="text">
+           <string>File name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="fileNameLine"/>
+        </item>
+       </layout>
+      </item>
+      <item>
        <widget class="QLabel" name="tooManyFields">
         <property name="enabled">
          <bool>false</bool>

@@ -562,7 +562,7 @@ public: /* Database function that have been delegate to the container. */
 	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
 	    const QString &dmRecipientIdent, const QString &dmToHands,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    enum MessageDirection msgDirect) const;
+	    enum MessageDirection msgDirect, const QString fileName) const;
 
 	/*!
 	 * @brief Get message envelope data from id.
@@ -654,11 +654,11 @@ private:
 	inline QList<MessageDb::SoughtMsg> _sf_msgsAdvancedSearchMessageEnvelope(qint64 dmId, const QString &dmAnnotation, const QString &dbIDSender,
 	    const QString &dmSender, const QString &dmAddress, const QString &dbIDRecipient, const QString &dmRecipient, const QString &dmSenderRefNumber,
 	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber, const QString &dmRecipientIdent, const QString &dmToHands,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime, enum MessageDirection msgDirect) const;
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime, enum MessageDirection msgDirect, const QString fileName) const;
 	inline QList<MessageDb::SoughtMsg> _yrly_msgsAdvancedSearchMessageEnvelope(qint64 dmId, const QString &dmAnnotation, const QString &dbIDSender,
 	    const QString &dmSender, const QString &dmAddress, const QString &dbIDRecipient, const QString &dmRecipient, const QString &dmSenderRefNumber,
 	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber, const QString &dmRecipientIdent, const QString &dmToHands,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime, enum MessageDirection msgDirect) const;
+	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime, enum MessageDirection msgDirect, const QString fileName) const;
 
 	inline MessageDb::SoughtMsg _sf_msgsGetMsgDataFromId(const qint64 msgId) const;
 	inline MessageDb::SoughtMsg _yrly_msgsGetMsgDataFromId(const qint64 msgId) const;

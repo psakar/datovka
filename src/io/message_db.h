@@ -855,7 +855,7 @@ protected: /* These function are used from within a database container. */
 	    const QString &dmRecipientIdent,
 	    const QString &dmToHands,
 	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    enum MessageDirection msgDirect) const;
+	    enum MessageDirection msgDirect, const QString fileName) const;
 
 	/*!
 	 * @brief Get message envelope data from id.

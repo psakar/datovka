@@ -1860,7 +1860,8 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
     const QString &dmSenderRefNumber, const QString &dmSenderIdent,
     const QString &dmRecipientRefNumber, const QString &dmRecipientIdent,
     const QString &dmToHands, const QString &dmDeliveryTime,
-    const QString &dmAcceptanceTime, enum MessageDirection msgDirect) const
+    const QString &dmAcceptanceTime, enum MessageDirection msgDirect,
+    const QString fileName) const
 {
 	QSqlQuery query(m_db);
 
@@ -1883,6 +1884,8 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	    dmRecipient.split(separ, QString::SkipEmptyParts);
 	QStringList dmToHandsList =
 	    dmToHands.split(separ, QString::SkipEmptyParts);
+	QStringList dmFileNameList =
+	    fileName.split(separ, QString::SkipEmptyParts);
 	QList<SoughtMsg> msgList;
 
 	/* Always ask for message type. */
@@ -1893,6 +1896,8 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	    "FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
+	    "LEFT JOIN files AS f "
+	    "ON (m.dmID = f.message_id) "
 	    "WHERE ";
 
 	if (MSG_ALL == msgDirect) {
@@ -2037,6 +2042,20 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 		}
 
+		if (!dmFileNameList.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += andToken;
+			}
+			isNotFirst = true;
+			queryStr += "f._dmFileDescr LIKE "
+			    "'%'||:_dmFileDescr0||'%'";
+			for (i = 1; i < dmFileNameList.count(); i++) {
+				queryStr += " AND f._dmFileDescr LIKE "
+				    "'%'||:_dmFileDescr" + QString::number(i) +
+				    "||'%'";
+			}
+		}
+
 		/* prepare query string */
 		if (!query.prepare(queryStr)) {
 			logErrorNL("Cannot prepare SQL query: %s.",
@@ -2097,6 +2116,14 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 		}
 
+		if (!dmFileNameList.isEmpty()) {
+			for (i = 0; i < dmFileNameList.count(); i++) {
+				query.bindValue(":_dmFileDescr" +
+				    QString::number(i),
+				    dmFileNameList[i]);
+			}
+		}
+
 		if (isMultiSelect) {
 			if (MSG_RECEIVED == msgDirect) {
 				query.bindValue(":message_type", TYPE_RECEIVED);
@@ -2153,8 +2180,12 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			query.next();
 		}
 	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+		/*
+		 * SQL query can return empty search result. It is not error.
+		 * Show log information like warning.
+		*/
+		logWarningNL("Cannot execute SQL query or empty search result:"
+		    " %s.", query.lastError().text().toUtf8().constData());
 		return msgList;
 	}
 

@@ -1274,7 +1274,7 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsAdvancedSearchMessageEnvelope(
     const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
     const QString &dmRecipientIdent, const QString &dmToHands,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect) const
+    enum MessageDirection msgDirect, const QString fileName) const
 {
 	if (this->size() == 0) {
 		return QList<MessageDb::SoughtMsg>();
@@ -1284,7 +1284,7 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsAdvancedSearchMessageEnvelope(
 	    dmAnnotation, dbIDSender, dmSender, dmAddress, dbIDRecipient,
 	    dmRecipient, dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber,
 	    dmRecipientIdent, dmToHands, dmDeliveryTime, dmAcceptanceTime,
-	    msgDirect);
+	    msgDirect, fileName);
 }
 
 QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelope(
@@ -1295,7 +1295,7 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
     const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
     const QString &dmRecipientIdent, const QString &dmToHands,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect) const
+    enum MessageDirection msgDirect, const QString fileName) const
 {
 	QList<MessageDb::SoughtMsg> msgs;
 
@@ -1311,7 +1311,8 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
 		    dmAnnotation, dbIDSender, dmSender, dmAddress,
 		    dbIDRecipient, dmRecipient, dmSenderRefNumber,
 		    dmSenderIdent, dmRecipientRefNumber, dmRecipientIdent,
-		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect));
+		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect,
+		    fileName));
 	}
 
 	return msgs;
@@ -1325,7 +1326,7 @@ QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
     const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
     const QString &dmRecipientIdent, const QString &dmToHands,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect) const
+    enum MessageDirection msgDirect, const QString fileName) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
@@ -1333,14 +1334,15 @@ QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
 		    dbIDSender, dmSender, dmAddress, dbIDRecipient, dmRecipient,
 		    dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber,
 		    dmRecipientIdent, dmToHands, dmDeliveryTime,
-		    dmAcceptanceTime, msgDirect);
+		    dmAcceptanceTime, msgDirect, fileName);
 		break;
 	case DO_YEARLY:
 		return _yrly_msgsAdvancedSearchMessageEnvelope(dmId,
 		    dmAnnotation, dbIDSender, dmSender, dmAddress,
 		    dbIDRecipient, dmRecipient, dmSenderRefNumber,
 		    dmSenderIdent, dmRecipientRefNumber, dmRecipientIdent,
-		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect);
+		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect,
+		    fileName);
 		break;
 	default:
 		Q_ASSERT(0);

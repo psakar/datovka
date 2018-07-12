@@ -92,6 +92,7 @@ void DlgMsgSearch::checkInputFields(void)
 	m_ui->addressLine->setEnabled(msgIdMissing);
 	m_ui->toHandsLine->setEnabled(msgIdMissing);
 	m_ui->tagLine->setEnabled(msgIdMissing);
+	m_ui->fileNameLine->setEnabled(msgIdMissing);
 
 	if (!msgIdMissing) {
 		/* Search via message ID. */
@@ -283,7 +284,8 @@ void DlgMsgSearch::searchMessages(void)
 			        m_ui->rcpntRefNumLine->text(),
 			        m_ui->rcpntFileMarkLine->text(),
 			        m_ui->toHandsLine->text(),
-			        QString(), QString(), msgType);
+			        QString(), QString(), msgType,
+			        m_ui->fileNameLine->text());
 		}
 
 		if (searchTags && !tagResults.isEmpty() && !envelResults.isEmpty()) {
@@ -393,6 +395,9 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	connect(m_ui->tagLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
+	connect(m_ui->fileNameLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+
 	connect(m_ui->resultsTableWidget, SIGNAL(itemSelectionChanged()),
 	    this, SLOT(setFirtsColumnActive()));
 	connect(m_ui->resultsTableWidget, SIGNAL(cellDoubleClicked(int, int)),
@@ -426,6 +431,7 @@ int DlgMsgSearch::filledInExceptTags(void) const
 	if (!m_ui->rcpntFileMarkLine->text().isEmpty()) { ++cnt; }
 	if (!m_ui->addressLine->text().isEmpty()) { ++cnt; }
 	if (!m_ui->toHandsLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->fileNameLine->text().isEmpty()) { ++cnt; }
 
 	return cnt;
 }
