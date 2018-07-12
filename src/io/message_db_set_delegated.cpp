@@ -1267,35 +1267,20 @@ QList<MessageDb::MsgId> MessageDbSet::msgsDateInterval(const QDate &fromDate,
 }
 
 QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsAdvancedSearchMessageEnvelope(
-    qint64 dmId, const QString &dmAnnotation,
-    const QString &dbIDSender, const QString &dmSender,
-    const QString &dmAddress, const QString &dbIDRecipient,
-    const QString &dmRecipient, const QString &dmSenderRefNumber,
-    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
-    const QString &dmRecipientIdent, const QString &dmToHands,
-    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect, const QString fileName) const
+    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+    const QString fileNameSearchPhrase) const
 {
 	if (this->size() == 0) {
 		return QList<MessageDb::SoughtMsg>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsAdvancedSearchMessageEnvelope(dmId,
-	    dmAnnotation, dbIDSender, dmSender, dmAddress, dbIDRecipient,
-	    dmRecipient, dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber,
-	    dmRecipientIdent, dmToHands, dmDeliveryTime, dmAcceptanceTime,
-	    msgDirect, fileName);
+	return this->first()->msgsAdvancedSearchMessageEnvelope(envelope,
+	    msgDirect, fileNameSearchPhrase);
 }
 
 QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelope(
-    qint64 dmId, const QString &dmAnnotation,
-    const QString &dbIDSender, const QString &dmSender,
-    const QString &dmAddress, const QString &dbIDRecipient,
-    const QString &dmRecipient, const QString &dmSenderRefNumber,
-    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
-    const QString &dmRecipientIdent, const QString &dmToHands,
-    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect, const QString fileName) const
+    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+    const QString fileNameSearchPhrase) const
 {
 	QList<MessageDb::SoughtMsg> msgs;
 
@@ -1307,42 +1292,25 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
 			return QList<MessageDb::SoughtMsg>();
 		}
 
-		msgs.append(db->msgsAdvancedSearchMessageEnvelope(dmId,
-		    dmAnnotation, dbIDSender, dmSender, dmAddress,
-		    dbIDRecipient, dmRecipient, dmSenderRefNumber,
-		    dmSenderIdent, dmRecipientRefNumber, dmRecipientIdent,
-		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect,
-		    fileName));
+		msgs.append(db->msgsAdvancedSearchMessageEnvelope(envelope,
+		    msgDirect, fileNameSearchPhrase));
 	}
 
 	return msgs;
 }
 
 QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
-    qint64 dmId, const QString &dmAnnotation,
-    const QString &dbIDSender, const QString &dmSender,
-    const QString &dmAddress, const QString &dbIDRecipient,
-    const QString &dmRecipient, const QString &dmSenderRefNumber,
-    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
-    const QString &dmRecipientIdent, const QString &dmToHands,
-    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect, const QString fileName) const
+    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+    const QString fileNameSearchPhrase) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsAdvancedSearchMessageEnvelope(dmId, dmAnnotation,
-		    dbIDSender, dmSender, dmAddress, dbIDRecipient, dmRecipient,
-		    dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber,
-		    dmRecipientIdent, dmToHands, dmDeliveryTime,
-		    dmAcceptanceTime, msgDirect, fileName);
+		return _sf_msgsAdvancedSearchMessageEnvelope(envelope,
+		    msgDirect, fileNameSearchPhrase);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsAdvancedSearchMessageEnvelope(dmId,
-		    dmAnnotation, dbIDSender, dmSender, dmAddress,
-		    dbIDRecipient, dmRecipient, dmSenderRefNumber,
-		    dmSenderIdent, dmRecipientRefNumber, dmRecipientIdent,
-		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect,
-		    fileName);
+		return _yrly_msgsAdvancedSearchMessageEnvelope(envelope,
+		    msgDirect, fileNameSearchPhrase);
 		break;
 	default:
 		Q_ASSERT(0);

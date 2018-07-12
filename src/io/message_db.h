@@ -841,21 +841,14 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Advance message envelope search.
 	 *
+	 * @param[in] envelope  Message envelope structure for search.
+	 * @param[in] msgDirect Message orientation.
+	 * @param[in] fileNameSearchPhrase  Text for attachment name search.
 	 * @return message item list pass to search query.
 	 */
 	QList<SoughtMsg> msgsAdvancedSearchMessageEnvelope(
-	    qint64 dmId,
-	    const QString &dmAnnotation,
-	    const QString &dbIDSender, const QString &dmSender,
-	    const QString &dmAddress,
-	    const QString &dbIDRecipient, const QString &dmRecipient,
-	    const QString &dmSenderRefNumber,
-	    const QString &dmSenderIdent,
-	    const QString &dmRecipientRefNumber,
-	    const QString &dmRecipientIdent,
-	    const QString &dmToHands,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    enum MessageDirection msgDirect, const QString fileName) const;
+	    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+	    const QString fileNameSearchPhrase) const;
 
 	/*!
 	 * @brief Get message envelope data from id.

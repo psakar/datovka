@@ -259,6 +259,21 @@ void DlgMsgSearch::searchMessages(void)
 	/* How many envelope fields (without tags) are supplied. */
 	const int envelopeItems = filledInExceptTags();
 
+	Isds::Envelope envelope;
+	envelope.setDmId(m_ui->msgIdLine->text().isEmpty() ? -1 :
+	    m_ui->msgIdLine->text().toLongLong());
+	envelope.setDmAnnotation(m_ui->subjectLine->text());
+	envelope.setDbIDSender(m_ui->sndrBoxIdLine->text());
+	envelope.setDmSender(m_ui->sndrNameLine->text());
+	envelope.setDmSenderAddress(m_ui->addressLine->text());
+	envelope.setDbIDRecipient(m_ui->rcpntBoxIdLine->text());
+	envelope.setDmRecipient(m_ui->rcpntNameLine->text());
+	envelope.setDmSenderRefNumber(m_ui->sndrRefNumLine->text());
+	envelope.setDmSenderIdent(m_ui->sndrFileMarkLine->text());
+	envelope.setDmRecipientRefNumber(m_ui->rcpntRefNumLine->text());
+	envelope.setDmRecipientIdent(m_ui->rcpntFileMarkLine->text());
+	envelope.setDmToHands(m_ui->toHandsLine->text());
+
 	/* Search in accounts. */
 	for (int i = 0; i < dbCount; ++i) {
 		const QPair<QString, MessageDbSet *> &msgSetEntry(
@@ -271,21 +286,7 @@ void DlgMsgSearch::searchMessages(void)
 			/* Search in envelope envelope data. */
 			envelResults =
 			    msgSetEntry.second->msgsAdvancedSearchMessageEnvelope(
-			        m_ui->msgIdLine->text().isEmpty() ? -1 :
-			            m_ui->msgIdLine->text().toLongLong(),
-			        m_ui->subjectLine->text(),
-			        m_ui->sndrBoxIdLine->text(),
-			        m_ui->sndrNameLine->text(),
-			        m_ui->addressLine->text(),
-			        m_ui->rcpntBoxIdLine->text(),
-			        m_ui->rcpntNameLine->text(),
-			        m_ui->sndrRefNumLine->text(),
-			        m_ui->sndrFileMarkLine->text(),
-			        m_ui->rcpntRefNumLine->text(),
-			        m_ui->rcpntFileMarkLine->text(),
-			        m_ui->toHandsLine->text(),
-			        QString(), QString(), msgType,
-			        m_ui->fileNameLine->text());
+			        envelope, msgType, m_ui->fileNameLine->text());
 		}
 
 		if (searchTags && !tagResults.isEmpty() && !envelResults.isEmpty()) {
