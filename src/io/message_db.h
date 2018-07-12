@@ -841,13 +841,13 @@ protected: /* These function are used from within a database container. */
 	/*!
 	 * @brief Advance message envelope search.
 	 *
-	 * @param[in] envelope  Message envelope structure for search.
+	 * @param[in] searchEnvelope Message envelope structure for search.
 	 * @param[in] msgDirect Message orientation.
-	 * @param[in] fileNameSearchPhrase  Text for attachment name search.
+	 * @param[in] fileNameSearchPhrase Text for attachment name search.
 	 * @return message item list pass to search query.
 	 */
 	QList<SoughtMsg> msgsAdvancedSearchMessageEnvelope(
-	    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+	    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
 	    const QString fileNameSearchPhrase) const;
 
 	/*!

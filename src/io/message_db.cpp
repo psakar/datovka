@@ -1854,7 +1854,7 @@ enum Isds::Type::DmState MessageDb::getMessageStatus(qint64 dmId) const
 }
 
 QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
-    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
     const QString fileNameSearchPhrase) const
 {
 	QSqlQuery query(m_db);
@@ -1866,15 +1866,15 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	QString separ = " ";
 
 	QStringList dmAnnotationList =
-	    envelope.dmAnnotation().split(separ, QString::SkipEmptyParts);
+	    searchEnvelope.dmAnnotation().split(separ, QString::SkipEmptyParts);
 	QStringList dmSenderList =
-	    envelope.dmSender().split(separ, QString::SkipEmptyParts);
+	    searchEnvelope.dmSender().split(separ, QString::SkipEmptyParts);
 	QStringList dmAddressList =
-	    envelope.dmSenderAddress().split(separ, QString::SkipEmptyParts);
+	    searchEnvelope.dmSenderAddress().split(separ, QString::SkipEmptyParts);
 	QStringList dmRecipientList =
-	    envelope.dmRecipient().split(separ, QString::SkipEmptyParts);
+	    searchEnvelope.dmRecipient().split(separ, QString::SkipEmptyParts);
 	QStringList dmToHandsList =
-	    envelope.dmToHands().split(separ, QString::SkipEmptyParts);
+	    searchEnvelope.dmToHands().split(separ, QString::SkipEmptyParts);
 	QStringList dmFileNameList =
 	    fileNameSearchPhrase.split(separ, QString::SkipEmptyParts);
 	QList<SoughtMsg> msgList;
@@ -1901,7 +1901,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 		return msgList;
 	}
 
-	if (envelope.dmId() < 0) {
+	if (searchEnvelope.dmId() < 0) {
 
 		bool isNotFirst = false;
 
@@ -1910,7 +1910,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			isNotFirst = true;
 		}
 
-		if (!envelope.dbIDSender().isEmpty()) {
+		if (!searchEnvelope.dbIDSender().isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
@@ -1930,7 +1930,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 		}
 
-		if (!envelope.dbIDRecipient().isEmpty()) {
+		if (!searchEnvelope.dbIDRecipient().isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
@@ -1950,7 +1950,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 		}
 
-		if (!envelope.dmSenderRefNumber().isEmpty()) {
+		if (!searchEnvelope.dmSenderRefNumber().isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
@@ -1959,7 +1959,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			    "'%'||:dmSenderRefNumber||'%'";
 		}
 
-		if (!envelope.dmRecipientRefNumber().isEmpty()) {
+		if (!searchEnvelope.dmRecipientRefNumber().isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
@@ -1968,7 +1968,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			    "'%'||:dmRecipientRefNumber||'%'";
 		}
 
-		if (!envelope.dmSenderIdent().isEmpty()) {
+		if (!searchEnvelope.dmSenderIdent().isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
@@ -1977,7 +1977,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			    "'%'||:dmSenderIdent||'%'";
 		}
 
-		if (!envelope.dmRecipientIdent().isEmpty()) {
+		if (!searchEnvelope.dmRecipientIdent().isEmpty()) {
 			if (isNotFirst) {
 				queryStr += andToken;
 			}
@@ -2055,15 +2055,15 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 		}
 
 		/* query string binding */
-		query.bindValue(":dbIDSender", envelope.dbIDSender());
-		query.bindValue(":dbIDRecipient", envelope.dbIDRecipient());
+		query.bindValue(":dbIDSender", searchEnvelope.dbIDSender());
+		query.bindValue(":dbIDRecipient", searchEnvelope.dbIDRecipient());
 		query.bindValue(":dmSenderRefNumber",
-		    envelope.dmSenderRefNumber());
-		query.bindValue(":dmSenderIdent", envelope.dmSenderIdent());
+		    searchEnvelope.dmSenderRefNumber());
+		query.bindValue(":dmSenderIdent", searchEnvelope.dmSenderIdent());
 		query.bindValue(":dmRecipientRefNumber",
-		    envelope.dmRecipientRefNumber());
+		    searchEnvelope.dmRecipientRefNumber());
 		query.bindValue(":dmRecipientIdent",
-		    envelope.dmRecipientIdent());
+		    searchEnvelope.dmRecipientIdent());
 
 		if (!dmAddressList.isEmpty()) {
 			for (i = 0; i < dmAddressList.count(); i++) {
@@ -2140,7 +2140,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			return msgList;
 		}
 
-		query.bindValue(":dmId", envelope.dmId());
+		query.bindValue(":dmId", searchEnvelope.dmId());
 
 		if (isMultiSelect) {
 			if (MSG_RECEIVED == msgDirect) {

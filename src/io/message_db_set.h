@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _MESSAGE_DB_SET_H_
-#define _MESSAGE_DB_SET_H_
+#pragma once
 
 #include <QDateTime>
 #include <QMap>
@@ -552,13 +551,13 @@ public: /* Database function that have been delegate to the container. */
 	/*!
 	 * @brief Searches for matching messages according to envelope data.
 	 *
-	 * @param[in] envelope  Message envelope structure for search.
+	 * @param[in] searchEnvelope Message envelope structure for search.
 	 * @param[in] msgDirect Message orientation.
-	 * @param[in] fileNameSearchPhrase  Text for attachment name search.
+	 * @param[in] fileNameSearchPhrase Text for attachment name search.
 	 * @return message item list pass to search query.
 	 */
 	QList<MessageDb::SoughtMsg> msgsAdvancedSearchMessageEnvelope(
-	    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+	    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
 	    const QString fileNameSearchPhrase) const;
 
 	/*!
@@ -651,16 +650,14 @@ private:
 	/*!
 	 * @brief Advance message envelope search.
 	 *
-	 * @param[in] envelope  Message envelope structure for search.
+	 * @param[in] searchEnvelope Message envelope structure for search.
 	 * @param[in] msgDirect Message orientation.
-	 * @param[in] fileNameSearchPhrase  Text for attachment name search.
+	 * @param[in] fileNameSearchPhrase Text for attachment name search.
 	 * @return message item list pass to search query.
 	 */
-	inline QList<MessageDb::SoughtMsg> _sf_msgsAdvancedSearchMessageEnvelope(const Isds::Envelope &envelope, enum MessageDirection msgDirect, const QString fileNameSearchPhrase) const;
-	inline QList<MessageDb::SoughtMsg> _yrly_msgsAdvancedSearchMessageEnvelope(const Isds::Envelope &envelope, enum MessageDirection msgDirect, const QString fileNameSearchPhrase) const;
+	inline QList<MessageDb::SoughtMsg> _sf_msgsAdvancedSearchMessageEnvelope(const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect, const QString fileNameSearchPhrase) const;
+	inline QList<MessageDb::SoughtMsg> _yrly_msgsAdvancedSearchMessageEnvelope(const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect, const QString fileNameSearchPhrase) const;
 
 	inline MessageDb::SoughtMsg _sf_msgsGetMsgDataFromId(const qint64 msgId) const;
 	inline MessageDb::SoughtMsg _yrly_msgsGetMsgDataFromId(const qint64 msgId) const;
 };
-
-#endif /* _MESSAGE_DB_SET_H_ */

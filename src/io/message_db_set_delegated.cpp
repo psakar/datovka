@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1267,19 +1267,19 @@ QList<MessageDb::MsgId> MessageDbSet::msgsDateInterval(const QDate &fromDate,
 }
 
 QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsAdvancedSearchMessageEnvelope(
-    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
     const QString fileNameSearchPhrase) const
 {
 	if (this->size() == 0) {
 		return QList<MessageDb::SoughtMsg>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsAdvancedSearchMessageEnvelope(envelope,
+	return this->first()->msgsAdvancedSearchMessageEnvelope(searchEnvelope,
 	    msgDirect, fileNameSearchPhrase);
 }
 
 QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelope(
-    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
     const QString fileNameSearchPhrase) const
 {
 	QList<MessageDb::SoughtMsg> msgs;
@@ -1292,7 +1292,7 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
 			return QList<MessageDb::SoughtMsg>();
 		}
 
-		msgs.append(db->msgsAdvancedSearchMessageEnvelope(envelope,
+		msgs.append(db->msgsAdvancedSearchMessageEnvelope(searchEnvelope,
 		    msgDirect, fileNameSearchPhrase));
 	}
 
@@ -1300,16 +1300,16 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
 }
 
 QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
-    const Isds::Envelope &envelope, enum MessageDirection msgDirect,
+    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
     const QString fileNameSearchPhrase) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsAdvancedSearchMessageEnvelope(envelope,
+		return _sf_msgsAdvancedSearchMessageEnvelope(searchEnvelope,
 		    msgDirect, fileNameSearchPhrase);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsAdvancedSearchMessageEnvelope(envelope,
+		return _yrly_msgsAdvancedSearchMessageEnvelope(searchEnvelope,
 		    msgDirect, fileNameSearchPhrase);
 		break;
 	default:
