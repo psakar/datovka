@@ -1880,7 +1880,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	QList<SoughtMsg> msgList;
 
 	/* Always ask for message type. */
-	queryStr = "SELECT "
+	queryStr = "SELECT DISTINCT "
 	    "m.dmID, m.dmDeliveryTime, "
 	    "m.dmAnnotation, m.dmSender, m.dmRecipient, "
 	    "s.message_type "
