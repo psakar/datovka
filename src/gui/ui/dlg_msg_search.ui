@@ -345,6 +345,13 @@
        </layout>
       </item>
       <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="tooManyFields">
         <property name="enabled">
          <bool>false</bool>
