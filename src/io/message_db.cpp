@@ -1853,47 +1853,42 @@ enum Isds::Type::DmState MessageDb::getMessageStatus(qint64 dmId) const
 	}
 }
 
-QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
-    qint64 dmId, const QString &dmAnnotation, const QString &dbIDSender,
-    const QString &dmSender, const QString &dmAddress,
-    const QString &dbIDRecipient, const QString &dmRecipient,
-    const QString &dmSenderRefNumber, const QString &dmSenderIdent,
-    const QString &dmRecipientRefNumber, const QString &dmRecipientIdent,
-    const QString &dmToHands, const QString &dmDeliveryTime,
-    const QString &dmAcceptanceTime, enum MessageDirection msgDirect) const
+QList<MessageDb::SoughtMsg> MessageDb::msgsSearch(const Isds::Envelope &envel,
+    enum MessageDirection msgDirect, const QString &attachPhrase,
+    bool logicalAnd) const
 {
 	QSqlQuery query(m_db);
 
-	Q_UNUSED(dmDeliveryTime); /* TODO */
-	Q_UNUSED(dmAcceptanceTime); /* TODO */
-
 	int i = 0;
 	bool isMultiSelect = false;
-	QString queryStr = "";
-	QString andToken = " AND ";
-	QString separ = " ";
+	const QString logicalToken(logicalAnd ? " AND " : " OR ");
+	const QString separ(" ");
 
-	QStringList dmAnnotationList =
-	    dmAnnotation.split(separ, QString::SkipEmptyParts);
-	QStringList dmSenderList =
-	    dmSender.split(separ, QString::SkipEmptyParts);
-	QStringList dmAddressList =
-	    dmAddress.split(separ, QString::SkipEmptyParts);
-	QStringList dmRecipientList =
-	    dmRecipient.split(separ, QString::SkipEmptyParts);
-	QStringList dmToHandsList =
-	    dmToHands.split(separ, QString::SkipEmptyParts);
+	const QStringList dmAnnotationList(
+	    envel.dmAnnotation().split(separ, QString::SkipEmptyParts));
+	const QStringList dmSenderList(
+	    envel.dmSender().split(separ, QString::SkipEmptyParts));
+	const QStringList dmAddressList(
+	    envel.dmSenderAddress().split(separ, QString::SkipEmptyParts));
+	const QStringList dmRecipientList(
+	    envel.dmRecipient().split(separ, QString::SkipEmptyParts));
+	const QStringList dmToHandsList(
+	    envel.dmToHands().split(separ, QString::SkipEmptyParts));
+	const QStringList dmFileNameList(
+	    attachPhrase.split(separ, QString::SkipEmptyParts));
 	QList<SoughtMsg> msgList;
 
 	/* Always ask for message type. */
-	queryStr = "SELECT "
+	QString queryStr("SELECT DISTINCT "
 	    "m.dmID, m.dmDeliveryTime, "
 	    "m.dmAnnotation, m.dmSender, m.dmRecipient, "
 	    "s.message_type "
 	    "FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
 	    "ON (m.dmID = s.message_id) "
-	    "WHERE ";
+	    "LEFT JOIN files AS f "
+	    "ON (m.dmID = f.message_id) "
+	    "WHERE ");
 
 	if (MSG_ALL == msgDirect) {
 		/* select from all messages */
@@ -1905,7 +1900,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 		return msgList;
 	}
 
-	if (dmId < 0) {
+	if (envel.dmId() < 0) {
 
 		bool isNotFirst = false;
 
@@ -1914,15 +1909,15 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			isNotFirst = true;
 		}
 
-		if (!dbIDSender.isEmpty()) {
+		if (!envel.dbIDSender().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dbIDSender = :dbIDSender";
 		} else if (!dmSenderList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmSender LIKE "
@@ -1934,15 +1929,15 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 		}
 
-		if (!dbIDRecipient.isEmpty()) {
+		if (!envel.dbIDRecipient().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dbIDRecipient = :dbIDRecipient";
 		} else if (!dmRecipientList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmRecipient LIKE "
@@ -1954,36 +1949,36 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 		}
 
-		if (!dmSenderRefNumber.isEmpty()) {
+		if (!envel.dmSenderRefNumber().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmSenderRefNumber LIKE "
 			    "'%'||:dmSenderRefNumber||'%'";
 		}
 
-		if (!dmRecipientRefNumber.isEmpty()) {
+		if (!envel.dmRecipientRefNumber().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmRecipientRefNumber LIKE "
 			    "'%'||:dmRecipientRefNumber||'%'";
 		}
 
-		if (!dmSenderIdent.isEmpty()) {
+		if (!envel.dmSenderIdent().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmSenderIdent LIKE "
 			    "'%'||:dmSenderIdent||'%'";
 		}
 
-		if (!dmRecipientIdent.isEmpty()) {
+		if (!envel.dmRecipientIdent().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmRecipientIdent LIKE "
@@ -1992,7 +1987,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!dmAddressList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "(m.dmSenderAddress LIKE "
@@ -2011,7 +2006,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!dmAnnotationList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmAnnotation LIKE "
@@ -2025,7 +2020,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!dmToHandsList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmToHands LIKE "
@@ -2033,6 +2028,20 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			for (i = 1; i < dmToHandsList.count(); i++) {
 				queryStr += " AND m.dmToHands LIKE "
 				    "'%'||:dmToHands" + QString::number(i) +
+				    "||'%'";
+			}
+		}
+
+		if (!dmFileNameList.isEmpty()) {
+			if (isNotFirst) {
+				queryStr += logicalToken;
+			}
+			isNotFirst = true;
+			queryStr += "f._dmFileDescr LIKE "
+			    "'%'||:_dmFileDescr0||'%'";
+			for (i = 1; i < dmFileNameList.count(); i++) {
+				queryStr += " AND f._dmFileDescr LIKE "
+				    "'%'||:_dmFileDescr" + QString::number(i) +
 				    "||'%'";
 			}
 		}
@@ -2045,12 +2054,15 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 		}
 
 		/* query string binding */
-		query.bindValue(":dbIDSender", dbIDSender);
-		query.bindValue(":dbIDRecipient", dbIDRecipient);
-		query.bindValue(":dmSenderRefNumber", dmSenderRefNumber);
-		query.bindValue(":dmSenderIdent", dmSenderIdent);
-		query.bindValue(":dmRecipientRefNumber", dmRecipientRefNumber);
-		query.bindValue(":dmRecipientIdent", dmRecipientIdent);
+		query.bindValue(":dbIDSender", envel.dbIDSender());
+		query.bindValue(":dbIDRecipient", envel.dbIDRecipient());
+		query.bindValue(":dmSenderRefNumber",
+		    envel.dmSenderRefNumber());
+		query.bindValue(":dmSenderIdent", envel.dmSenderIdent());
+		query.bindValue(":dmRecipientRefNumber",
+		    envel.dmRecipientRefNumber());
+		query.bindValue(":dmRecipientIdent",
+		    envel.dmRecipientIdent());
 
 		if (!dmAddressList.isEmpty()) {
 			for (i = 0; i < dmAddressList.count(); i++) {
@@ -2097,6 +2109,14 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			}
 		}
 
+		if (!dmFileNameList.isEmpty()) {
+			for (i = 0; i < dmFileNameList.count(); i++) {
+				query.bindValue(":_dmFileDescr" +
+				    QString::number(i),
+				    dmFileNameList[i]);
+			}
+		}
+
 		if (isMultiSelect) {
 			if (MSG_RECEIVED == msgDirect) {
 				query.bindValue(":message_type", TYPE_RECEIVED);
@@ -2107,7 +2127,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	} else {
 		if (isMultiSelect) {
 			queryStr += "s.message_type = :message_type";
-			queryStr += andToken;
+			queryStr += logicalToken;
 		}
 
 		queryStr += "m.dmID LIKE '%'||:dmId||'%'";
@@ -2119,7 +2139,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			return msgList;
 		}
 
-		query.bindValue(":dmId", dmId);
+		query.bindValue(":dmId", envel.dmId());
 
 		if (isMultiSelect) {
 			if (MSG_RECEIVED == msgDirect) {
@@ -2153,8 +2173,12 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 			query.next();
 		}
 	} else {
-		logErrorNL("Cannot execute SQL query: %s.",
-		    query.lastError().text().toUtf8().constData());
+		/*
+		 * SQL query can return empty search result. It is not error.
+		 * Show log information like warning.
+		*/
+		logWarningNL("Cannot execute SQL query or empty search result:"
+		    " %s.", query.lastError().text().toUtf8().constData());
 		return msgList;
 	}
 

@@ -92,6 +92,7 @@ void DlgMsgSearch::checkInputFields(void)
 	m_ui->addressLine->setEnabled(msgIdMissing);
 	m_ui->toHandsLine->setEnabled(msgIdMissing);
 	m_ui->tagLine->setEnabled(msgIdMissing);
+	m_ui->attachNameLine->setEnabled(msgIdMissing);
 
 	if (!msgIdMissing) {
 		/* Search via message ID. */
@@ -258,6 +259,22 @@ void DlgMsgSearch::searchMessages(void)
 	/* How many envelope fields (without tags) are supplied. */
 	const int envelopeItems = filledInExceptTags();
 
+	/* Fill search envelope items. */
+	Isds::Envelope searchEnvelope;
+	searchEnvelope.setDmId(m_ui->msgIdLine->text().isEmpty() ? -1 :
+	    m_ui->msgIdLine->text().toLongLong());
+	searchEnvelope.setDmAnnotation(m_ui->subjectLine->text());
+	searchEnvelope.setDbIDSender(m_ui->sndrBoxIdLine->text());
+	searchEnvelope.setDmSender(m_ui->sndrNameLine->text());
+	searchEnvelope.setDmSenderAddress(m_ui->addressLine->text());
+	searchEnvelope.setDbIDRecipient(m_ui->rcpntBoxIdLine->text());
+	searchEnvelope.setDmRecipient(m_ui->rcpntNameLine->text());
+	searchEnvelope.setDmSenderRefNumber(m_ui->sndrRefNumLine->text());
+	searchEnvelope.setDmSenderIdent(m_ui->sndrFileMarkLine->text());
+	searchEnvelope.setDmRecipientRefNumber(m_ui->rcpntRefNumLine->text());
+	searchEnvelope.setDmRecipientIdent(m_ui->rcpntFileMarkLine->text());
+	searchEnvelope.setDmToHands(m_ui->toHandsLine->text());
+
 	/* Search in accounts. */
 	for (int i = 0; i < dbCount; ++i) {
 		const QPair<QString, MessageDbSet *> &msgSetEntry(
@@ -269,21 +286,9 @@ void DlgMsgSearch::searchMessages(void)
 		if (envelopeItems > 0) {
 			/* Search in envelope envelope data. */
 			envelResults =
-			    msgSetEntry.second->msgsAdvancedSearchMessageEnvelope(
-			        m_ui->msgIdLine->text().isEmpty() ? -1 :
-			            m_ui->msgIdLine->text().toLongLong(),
-			        m_ui->subjectLine->text(),
-			        m_ui->sndrBoxIdLine->text(),
-			        m_ui->sndrNameLine->text(),
-			        m_ui->addressLine->text(),
-			        m_ui->rcpntBoxIdLine->text(),
-			        m_ui->rcpntNameLine->text(),
-			        m_ui->sndrRefNumLine->text(),
-			        m_ui->sndrFileMarkLine->text(),
-			        m_ui->rcpntRefNumLine->text(),
-			        m_ui->rcpntFileMarkLine->text(),
-			        m_ui->toHandsLine->text(),
-			        QString(), QString(), msgType);
+			    msgSetEntry.second->msgsSearch(searchEnvelope,
+			    msgType, m_ui->attachNameLine->text(),
+			    m_ui->logicalAndRelationCheckBox->isChecked());
 		}
 
 		if (searchTags && !tagResults.isEmpty() && !envelResults.isEmpty()) {
@@ -393,6 +398,9 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	connect(m_ui->tagLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
+	connect(m_ui->attachNameLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(checkInputFields()));
+
 	connect(m_ui->resultsTableWidget, SIGNAL(itemSelectionChanged()),
 	    this, SLOT(setFirtsColumnActive()));
 	connect(m_ui->resultsTableWidget, SIGNAL(cellDoubleClicked(int, int)),
@@ -426,6 +434,7 @@ int DlgMsgSearch::filledInExceptTags(void) const
 	if (!m_ui->rcpntFileMarkLine->text().isEmpty()) { ++cnt; }
 	if (!m_ui->addressLine->text().isEmpty()) { ++cnt; }
 	if (!m_ui->toHandsLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->attachNameLine->text().isEmpty()) { ++cnt; }
 
 	return cnt;
 }

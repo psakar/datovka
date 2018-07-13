@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _MESSAGE_DB_SET_H_
-#define _MESSAGE_DB_SET_H_
+#pragma once
 
 #include <QDateTime>
 #include <QMap>
@@ -550,27 +549,25 @@ public: /* Database function that have been delegate to the container. */
 	    const QDate &toDate, enum MessageDirection msgDirect) const;
 
 	/*!
-	 * @brief Searches for matching messages according to envelope data.
+	 * @brief Message search according to envelope data.
 	 *
-	 * @return message item list pass to search query.
+	 * @param[in] envel Message envelope data to search for.
+	 * @param[in] msgDirect Message orientation.
+	 * @param[in] attachPhrase Phrase to search in attachment names.
+	 * @param[in] logicalAnd Set to true if found messages should match all criteria,
+	 *                       set to false if found messages should match any criteria.
+	 * @return Found message data.
 	 */
-	QList<MessageDb::SoughtMsg> msgsAdvancedSearchMessageEnvelope(
-	    qint64 dmId, const QString &dmAnnotation,
-	    const QString &dbIDSender, const QString &dmSender,
-	    const QString &dmAddress, const QString &dbIDRecipient,
-	    const QString &dmRecipient, const QString &dmSenderRefNumber,
-	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
-	    const QString &dmRecipientIdent, const QString &dmToHands,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-	    enum MessageDirection msgDirect) const;
+	QList<MessageDb::SoughtMsg> msgsSearch(const Isds::Envelope &envel,
+	    enum MessageDirection msgDirect, const QString &attachPhrase,
+	    bool logicalAnd) const;
 
 	/*!
 	 * @brief Get message envelope data from id.
 	 *
 	 * @return message data for message id.
 	 */
-	MessageDb::SoughtMsg msgsGetMsgDataFromId(
-	    const qint64 msgId) const;
+	MessageDb::SoughtMsg msgsGetMsgDataFromId(const qint64 msgId) const;
 
 private:
 	/*!
@@ -651,17 +648,9 @@ private:
 	inline QList<MessageDb::MsgId> _sf_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 	inline QList<MessageDb::MsgId> _yrly_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 
-	inline QList<MessageDb::SoughtMsg> _sf_msgsAdvancedSearchMessageEnvelope(qint64 dmId, const QString &dmAnnotation, const QString &dbIDSender,
-	    const QString &dmSender, const QString &dmAddress, const QString &dbIDRecipient, const QString &dmRecipient, const QString &dmSenderRefNumber,
-	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber, const QString &dmRecipientIdent, const QString &dmToHands,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime, enum MessageDirection msgDirect) const;
-	inline QList<MessageDb::SoughtMsg> _yrly_msgsAdvancedSearchMessageEnvelope(qint64 dmId, const QString &dmAnnotation, const QString &dbIDSender,
-	    const QString &dmSender, const QString &dmAddress, const QString &dbIDRecipient, const QString &dmRecipient, const QString &dmSenderRefNumber,
-	    const QString &dmSenderIdent, const QString &dmRecipientRefNumber, const QString &dmRecipientIdent, const QString &dmToHands,
-	    const QString &dmDeliveryTime, const QString &dmAcceptanceTime, enum MessageDirection msgDirect) const;
+	inline QList<MessageDb::SoughtMsg> _sf_msgsSearch(const Isds::Envelope &envel, enum MessageDirection msgDirect, const QString &attachPhrase, bool logicalAnd) const;
+	inline QList<MessageDb::SoughtMsg> _yrly_msgsSearch(const Isds::Envelope &envel, enum MessageDirection msgDirect, const QString &attachPhrase, bool logicalAnd) const;
 
 	inline MessageDb::SoughtMsg _sf_msgsGetMsgDataFromId(const qint64 msgId) const;
 	inline MessageDb::SoughtMsg _yrly_msgsGetMsgDataFromId(const qint64 msgId) const;
 };
-
-#endif /* _MESSAGE_DB_SET_H_ */

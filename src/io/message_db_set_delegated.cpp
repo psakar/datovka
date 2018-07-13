@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1266,36 +1266,21 @@ QList<MessageDb::MsgId> MessageDbSet::msgsDateInterval(const QDate &fromDate,
 	return QList<MessageDb::MsgId>();
 }
 
-QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsAdvancedSearchMessageEnvelope(
-    qint64 dmId, const QString &dmAnnotation,
-    const QString &dbIDSender, const QString &dmSender,
-    const QString &dmAddress, const QString &dbIDRecipient,
-    const QString &dmRecipient, const QString &dmSenderRefNumber,
-    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
-    const QString &dmRecipientIdent, const QString &dmToHands,
-    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect) const
+QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsSearch(
+    const Isds::Envelope &envel, enum MessageDirection msgDirect,
+    const QString &attachPhrase, bool logicalAnd) const
 {
 	if (this->size() == 0) {
 		return QList<MessageDb::SoughtMsg>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsAdvancedSearchMessageEnvelope(dmId,
-	    dmAnnotation, dbIDSender, dmSender, dmAddress, dbIDRecipient,
-	    dmRecipient, dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber,
-	    dmRecipientIdent, dmToHands, dmDeliveryTime, dmAcceptanceTime,
-	    msgDirect);
+	return this->first()->msgsSearch(envel, msgDirect, attachPhrase,
+	    logicalAnd);
 }
 
-QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelope(
-    qint64 dmId, const QString &dmAnnotation,
-    const QString &dbIDSender, const QString &dmSender,
-    const QString &dmAddress, const QString &dbIDRecipient,
-    const QString &dmRecipient, const QString &dmSenderRefNumber,
-    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
-    const QString &dmRecipientIdent, const QString &dmToHands,
-    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect) const
+QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsSearch(
+    const Isds::Envelope &envel, enum MessageDirection msgDirect,
+    const QString &attachPhrase, bool logicalAnd) const
 {
 	QList<MessageDb::SoughtMsg> msgs;
 
@@ -1307,40 +1292,25 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
 			return QList<MessageDb::SoughtMsg>();
 		}
 
-		msgs.append(db->msgsAdvancedSearchMessageEnvelope(dmId,
-		    dmAnnotation, dbIDSender, dmSender, dmAddress,
-		    dbIDRecipient, dmRecipient, dmSenderRefNumber,
-		    dmSenderIdent, dmRecipientRefNumber, dmRecipientIdent,
-		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect));
+		msgs.append(db->msgsSearch(envel, msgDirect, attachPhrase,
+		    logicalAnd));
 	}
 
 	return msgs;
 }
 
-QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
-    qint64 dmId, const QString &dmAnnotation,
-    const QString &dbIDSender, const QString &dmSender,
-    const QString &dmAddress, const QString &dbIDRecipient,
-    const QString &dmRecipient, const QString &dmSenderRefNumber,
-    const QString &dmSenderIdent, const QString &dmRecipientRefNumber,
-    const QString &dmRecipientIdent, const QString &dmToHands,
-    const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
-    enum MessageDirection msgDirect) const
+QList<MessageDb::SoughtMsg> MessageDbSet::msgsSearch(
+    const Isds::Envelope &envel, enum MessageDirection msgDirect,
+    const QString &attachPhrase, bool logicalAnd) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsAdvancedSearchMessageEnvelope(dmId, dmAnnotation,
-		    dbIDSender, dmSender, dmAddress, dbIDRecipient, dmRecipient,
-		    dmSenderRefNumber, dmSenderIdent, dmRecipientRefNumber,
-		    dmRecipientIdent, dmToHands, dmDeliveryTime,
-		    dmAcceptanceTime, msgDirect);
+		return _sf_msgsSearch(envel, msgDirect, attachPhrase,
+		    logicalAnd);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsAdvancedSearchMessageEnvelope(dmId,
-		    dmAnnotation, dbIDSender, dmSender, dmAddress,
-		    dbIDRecipient, dmRecipient, dmSenderRefNumber,
-		    dmSenderIdent, dmRecipientRefNumber, dmRecipientIdent,
-		    dmToHands, dmDeliveryTime, dmAcceptanceTime, msgDirect);
+		return _yrly_msgsSearch(envel, msgDirect, attachPhrase,
+		    logicalAnd);
 		break;
 	default:
 		Q_ASSERT(0);
