@@ -92,7 +92,7 @@ void DlgMsgSearch::checkInputFields(void)
 	m_ui->addressLine->setEnabled(msgIdMissing);
 	m_ui->toHandsLine->setEnabled(msgIdMissing);
 	m_ui->tagLine->setEnabled(msgIdMissing);
-	m_ui->fileNameLine->setEnabled(msgIdMissing);
+	m_ui->attachNameLine->setEnabled(msgIdMissing);
 
 	if (!msgIdMissing) {
 		/* Search via message ID. */
@@ -287,8 +287,8 @@ void DlgMsgSearch::searchMessages(void)
 			/* Search in envelope envelope data. */
 			envelResults =
 			    msgSetEntry.second->msgsAdvancedSearchMessageEnvelope(
-			    searchEnvelope, msgType, m_ui->fileNameLine->text(),
-			    m_ui->andOrCheckBox->isChecked());
+			    searchEnvelope, msgType, m_ui->attachNameLine->text(),
+			    m_ui->logicalAndRelationCheckBox->isChecked());
 		}
 
 		if (searchTags && !tagResults.isEmpty() && !envelResults.isEmpty()) {
@@ -398,7 +398,7 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	connect(m_ui->tagLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
-	connect(m_ui->fileNameLine, SIGNAL(textChanged(QString)),
+	connect(m_ui->attachNameLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 
 	connect(m_ui->resultsTableWidget, SIGNAL(itemSelectionChanged()),
@@ -434,7 +434,7 @@ int DlgMsgSearch::filledInExceptTags(void) const
 	if (!m_ui->rcpntFileMarkLine->text().isEmpty()) { ++cnt; }
 	if (!m_ui->addressLine->text().isEmpty()) { ++cnt; }
 	if (!m_ui->toHandsLine->text().isEmpty()) { ++cnt; }
-	if (!m_ui->fileNameLine->text().isEmpty()) { ++cnt; }
+	if (!m_ui->attachNameLine->text().isEmpty()) { ++cnt; }
 
 	return cnt;
 }
