@@ -315,35 +315,32 @@
       <item>
        <layout class="QHBoxLayout" name="h4">
         <item>
-         <widget class="QLabel" name="tagLabel">
-          <property name="text">
-           <string>Tag text:</string>
-          </property>
-         </widget>
+         <layout class="QFormLayout" name="formLayout_10">
+          <item row="0" column="0">
+           <widget class="QLabel" name="fileNameLabel">
+            <property name="text">
+             <string>Attachment name:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="fileNameLine"/>
+          </item>
+         </layout>
         </item>
         <item>
-         <widget class="QLineEdit" name="tagLine"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="Line" name="line_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="h5">
-        <item>
-         <widget class="QLabel" name="fileNameLabel">
-          <property name="text">
-           <string>File name:</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLineEdit" name="fileNameLine"/>
+         <layout class="QFormLayout" name="formLayout_6">
+          <item row="0" column="0">
+           <widget class="QLabel" name="tagLabel">
+            <property name="text">
+             <string>Tag text:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="tagLine"/>
+          </item>
+         </layout>
         </item>
        </layout>
       </item>
@@ -455,6 +452,7 @@
   <tabstop>rcpntFileMarkLine</tabstop>
   <tabstop>addressLine</tabstop>
   <tabstop>toHandsLine</tabstop>
+  <tabstop>fileNameLine</tabstop>
   <tabstop>tagLine</tabstop>
   <tabstop>searchPushButton</tabstop>
   <tabstop>resultsTableWidget</tabstop>
