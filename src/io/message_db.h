@@ -844,11 +844,14 @@ protected: /* These function are used from within a database container. */
 	 * @param[in] searchEnvelope Message envelope structure for search.
 	 * @param[in] msgDirect Message orientation.
 	 * @param[in] fileNameSearchPhrase Text for attachment name search.
+	 * @param[in] useAllSuppliedCriteria True = search messages
+	 *                          corresponding all supplied criteria (AND).
 	 * @return message item list pass to search query.
 	 */
 	QList<SoughtMsg> msgsAdvancedSearchMessageEnvelope(
 	    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-	    const QString fileNameSearchPhrase) const;
+	    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria)
+	    const;
 
 	/*!
 	 * @brief Get message envelope data from id.

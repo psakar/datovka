@@ -287,7 +287,8 @@ void DlgMsgSearch::searchMessages(void)
 			/* Search in envelope envelope data. */
 			envelResults =
 			    msgSetEntry.second->msgsAdvancedSearchMessageEnvelope(
-			    searchEnvelope, msgType, m_ui->fileNameLine->text());
+			    searchEnvelope, msgType, m_ui->fileNameLine->text(),
+			    m_ui->andOrCheckBox->isChecked());
 		}
 
 		if (searchTags && !tagResults.isEmpty() && !envelResults.isEmpty()) {

@@ -1268,19 +1268,19 @@ QList<MessageDb::MsgId> MessageDbSet::msgsDateInterval(const QDate &fromDate,
 
 QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsAdvancedSearchMessageEnvelope(
     const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-    const QString fileNameSearchPhrase) const
+    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria) const
 {
 	if (this->size() == 0) {
 		return QList<MessageDb::SoughtMsg>();
 	}
 	Q_ASSERT(this->size() == 1);
 	return this->first()->msgsAdvancedSearchMessageEnvelope(searchEnvelope,
-	    msgDirect, fileNameSearchPhrase);
+	    msgDirect, fileNameSearchPhrase, useAllSuppliedCriteria);
 }
 
 QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelope(
     const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-    const QString fileNameSearchPhrase) const
+    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria) const
 {
 	QList<MessageDb::SoughtMsg> msgs;
 
@@ -1293,7 +1293,7 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
 		}
 
 		msgs.append(db->msgsAdvancedSearchMessageEnvelope(searchEnvelope,
-		    msgDirect, fileNameSearchPhrase));
+		    msgDirect, fileNameSearchPhrase, useAllSuppliedCriteria));
 	}
 
 	return msgs;
@@ -1301,16 +1301,16 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
 
 QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
     const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-    const QString fileNameSearchPhrase) const
+    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
 		return _sf_msgsAdvancedSearchMessageEnvelope(searchEnvelope,
-		    msgDirect, fileNameSearchPhrase);
+		    msgDirect, fileNameSearchPhrase, useAllSuppliedCriteria);
 		break;
 	case DO_YEARLY:
 		return _yrly_msgsAdvancedSearchMessageEnvelope(searchEnvelope,
-		    msgDirect, fileNameSearchPhrase);
+		    msgDirect, fileNameSearchPhrase, useAllSuppliedCriteria);
 		break;
 	default:
 		Q_ASSERT(0);

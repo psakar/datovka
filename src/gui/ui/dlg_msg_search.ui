@@ -358,6 +358,16 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="andOrCheckBox">
+        <property name="text">
+         <string>Search messages corresponding all supplied criteria</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="searchPushButton">
         <property name="enabled">
          <bool>false</bool>
@@ -454,6 +464,7 @@
   <tabstop>toHandsLine</tabstop>
   <tabstop>fileNameLine</tabstop>
   <tabstop>tagLine</tabstop>
+  <tabstop>andOrCheckBox</tabstop>
   <tabstop>searchPushButton</tabstop>
   <tabstop>resultsTableWidget</tabstop>
  </tabstops>

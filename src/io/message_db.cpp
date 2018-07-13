@@ -1855,14 +1855,14 @@ enum Isds::Type::DmState MessageDb::getMessageStatus(qint64 dmId) const
 
 QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
     const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-    const QString fileNameSearchPhrase) const
+    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria) const
 {
 	QSqlQuery query(m_db);
 
 	int i = 0;
 	bool isMultiSelect = false;
 	QString queryStr = "";
-	QString andToken = " AND ";
+	QString logicalToken = useAllSuppliedCriteria ? " AND " : " OR ";
 	QString separ = " ";
 
 	QStringList dmAnnotationList =
@@ -1912,13 +1912,13 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!searchEnvelope.dbIDSender().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dbIDSender = :dbIDSender";
 		} else if (!dmSenderList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmSender LIKE "
@@ -1932,13 +1932,13 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!searchEnvelope.dbIDRecipient().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dbIDRecipient = :dbIDRecipient";
 		} else if (!dmRecipientList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmRecipient LIKE "
@@ -1952,7 +1952,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!searchEnvelope.dmSenderRefNumber().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmSenderRefNumber LIKE "
@@ -1961,7 +1961,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!searchEnvelope.dmRecipientRefNumber().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmRecipientRefNumber LIKE "
@@ -1970,7 +1970,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!searchEnvelope.dmSenderIdent().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmSenderIdent LIKE "
@@ -1979,7 +1979,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!searchEnvelope.dmRecipientIdent().isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmRecipientIdent LIKE "
@@ -1988,7 +1988,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!dmAddressList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "(m.dmSenderAddress LIKE "
@@ -2007,7 +2007,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!dmAnnotationList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmAnnotation LIKE "
@@ -2021,7 +2021,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!dmToHandsList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "m.dmToHands LIKE "
@@ -2035,7 +2035,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 
 		if (!dmFileNameList.isEmpty()) {
 			if (isNotFirst) {
-				queryStr += andToken;
+				queryStr += logicalToken;
 			}
 			isNotFirst = true;
 			queryStr += "f._dmFileDescr LIKE "
@@ -2128,7 +2128,7 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsAdvancedSearchMessageEnvelope(
 	} else {
 		if (isMultiSelect) {
 			queryStr += "s.message_type = :message_type";
-			queryStr += andToken;
+			queryStr += logicalToken;
 		}
 
 		queryStr += "m.dmID LIKE '%'||:dmId||'%'";
