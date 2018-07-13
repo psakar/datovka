@@ -2244,42 +2244,42 @@ zanést neplatná data.</translation>
 <context>
     <name>DlgMsgSearch</name>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="320"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="325"/>
         <source>Here it is possible to search for messages according to supplied criteria. You can search for messages in the selected account or in all accounts. Double clicking on a found message will change focus of the selected message in the main application window. Note: You can view additional information when hovering the mouse cursor over the message ID.</source>
         <translation>Zde je možné vyhledávat zprávy podle zvolených kritérií. Můžete vyhledávat zprávy v aktivním účtu nebo ve všech účtech. Dvojklik na nalezenou zprávu změní fokus zvolené zprávy v hlavním okně aplikace. Poznámka: Dodatečné informace je možné zobrazit podržením kurzoru myši nad identifikátorem zprávy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="349"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="354"/>
         <source>Account</source>
         <translation>Účet</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="350"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="355"/>
         <source>Message ID</source>
         <translation>ID zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="351"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="356"/>
         <source>Subject</source>
         <translation>Předmět</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="352"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="357"/>
         <source>Sender</source>
         <translation>Odesílatel</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="353"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="358"/>
         <source>Recipient</source>
         <translation>Příjemce</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="354"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="359"/>
         <source>Delivery Year</source>
         <translation>Rok dodání</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="355"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="360"/>
         <source>Message Type</source>
         <translation>Typ zprávy</translation>
     </message>
@@ -2379,17 +2379,27 @@ zanést neplatná data.</translation>
         <translation>K rukám:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="320"/>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="322"/>
+        <source>Attachment name:</source>
+        <translation>Název přílohy:</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="336"/>
         <source>Tag text:</source>
         <translation>Text tagu:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="335"/>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="360"/>
         <source>Too many parameters to search for!</source>
         <translation>Příliš mnoho parametrů vyhledávání!</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="354"/>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="370"/>
+        <source>Search for messages matching all supplied criteria</source>
+        <translation>Hledat zprávy odpovídající všem zadaným kriteriím</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="389"/>
         <source>Search</source>
         <translation>Vyhledat</translation>
     </message>

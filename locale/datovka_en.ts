@@ -2205,42 +2205,42 @@ into your local database.</source>
 <context>
     <name>DlgMsgSearch</name>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="320"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="325"/>
         <source>Here it is possible to search for messages according to supplied criteria. You can search for messages in the selected account or in all accounts. Double clicking on a found message will change focus of the selected message in the main application window. Note: You can view additional information when hovering the mouse cursor over the message ID.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="349"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="354"/>
         <source>Account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="350"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="355"/>
         <source>Message ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="351"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="356"/>
         <source>Subject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="352"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="357"/>
         <source>Sender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="353"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="358"/>
         <source>Recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="354"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="359"/>
         <source>Delivery Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="355"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="360"/>
         <source>Message Type</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2340,17 +2340,27 @@ into your local database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="320"/>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="322"/>
+        <source>Attachment name:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="336"/>
         <source>Tag text:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="335"/>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="360"/>
         <source>Too many parameters to search for!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_msg_search.ui" line="354"/>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="370"/>
+        <source>Search for messages matching all supplied criteria</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/dlg_msg_search.ui" line="389"/>
         <source>Search</source>
         <translation type="unfinished"></translation>
     </message>
