@@ -549,27 +549,25 @@ public: /* Database function that have been delegate to the container. */
 	    const QDate &toDate, enum MessageDirection msgDirect) const;
 
 	/*!
-	 * @brief Advance message envelope search.
+	 * @brief Message search according to envelope data.
 	 *
-	 * @param[in] searchEnvelope Message envelope structure for search.
+	 * @param[in] envel Message envelope data to search for.
 	 * @param[in] msgDirect Message orientation.
-	 * @param[in] fileNameSearchPhrase Text for attachment name search.
-	 * @param[in] useAllSuppliedCriteria True = search messages
-	 *                          corresponding all supplied criteria (AND).
-	 * @return message item list pass to search query.
+	 * @param[in] attachPhrase Phrase to search in attachment names.
+	 * @param[in] logicalAnd Set to true if found messages should match all criteria,
+	 *                       set to false if found messages should match any criteria.
+	 * @return Found message data.
 	 */
-	QList<MessageDb::SoughtMsg> msgsAdvancedSearchMessageEnvelope(
-	    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-	    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria)
-	    const;
+	QList<MessageDb::SoughtMsg> msgsSearch(const Isds::Envelope &envel,
+	    enum MessageDirection msgDirect, const QString &attachPhrase,
+	    bool logicalAnd) const;
 
 	/*!
 	 * @brief Get message envelope data from id.
 	 *
 	 * @return message data for message id.
 	 */
-	MessageDb::SoughtMsg msgsGetMsgDataFromId(
-	    const qint64 msgId) const;
+	MessageDb::SoughtMsg msgsGetMsgDataFromId(const qint64 msgId) const;
 
 private:
 	/*!
@@ -650,18 +648,8 @@ private:
 	inline QList<MessageDb::MsgId> _sf_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 	inline QList<MessageDb::MsgId> _yrly_msgsDateInterval(const QDate &fromDate, const QDate &toDate, enum MessageDirection msgDirect) const;
 
-	/*!
-	 * @brief Advance message envelope search.
-	 *
-	 * @param[in] searchEnvelope Message envelope structure for search.
-	 * @param[in] msgDirect Message orientation.
-	 * @param[in] fileNameSearchPhrase Text for attachment name search.
-	 * @param[in] useAllSuppliedCriteria True = search messages
-	 *                          corresponding all supplied criteria (AND).
-	 * @return message item list pass to search query.
-	 */
-	inline QList<MessageDb::SoughtMsg> _sf_msgsAdvancedSearchMessageEnvelope(const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect, const QString fileNameSearchPhrase, bool useAllSuppliedCriteria) const;
-	inline QList<MessageDb::SoughtMsg> _yrly_msgsAdvancedSearchMessageEnvelope(const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect, const QString fileNameSearchPhrase, bool useAllSuppliedCriteria) const;
+	inline QList<MessageDb::SoughtMsg> _sf_msgsSearch(const Isds::Envelope &envel, enum MessageDirection msgDirect, const QString &attachPhrase, bool logicalAnd) const;
+	inline QList<MessageDb::SoughtMsg> _yrly_msgsSearch(const Isds::Envelope &envel, enum MessageDirection msgDirect, const QString &attachPhrase, bool logicalAnd) const;
 
 	inline MessageDb::SoughtMsg _sf_msgsGetMsgDataFromId(const qint64 msgId) const;
 	inline MessageDb::SoughtMsg _yrly_msgsGetMsgDataFromId(const qint64 msgId) const;

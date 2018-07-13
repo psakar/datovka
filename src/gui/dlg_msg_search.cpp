@@ -286,8 +286,8 @@ void DlgMsgSearch::searchMessages(void)
 		if (envelopeItems > 0) {
 			/* Search in envelope envelope data. */
 			envelResults =
-			    msgSetEntry.second->msgsAdvancedSearchMessageEnvelope(
-			    searchEnvelope, msgType, m_ui->attachNameLine->text(),
+			    msgSetEntry.second->msgsSearch(searchEnvelope,
+			    msgType, m_ui->attachNameLine->text(),
 			    m_ui->logicalAndRelationCheckBox->isChecked());
 		}
 

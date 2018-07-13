@@ -839,19 +839,18 @@ protected: /* These function are used from within a database container. */
 	    const QDate &toDate, enum MessageDirection msgDirect) const;
 
 	/*!
-	 * @brief Advance message envelope search.
+	 * @brief Message search according to envelope data.
 	 *
-	 * @param[in] searchEnvelope Message envelope structure for search.
+	 * @param[in] envel Message envelope data to search for.
 	 * @param[in] msgDirect Message orientation.
-	 * @param[in] fileNameSearchPhrase Text for attachment name search.
-	 * @param[in] useAllSuppliedCriteria True = search messages
-	 *                          corresponding all supplied criteria (AND).
-	 * @return message item list pass to search query.
+	 * @param[in] attachPhrase Phrase to search in attachment names.
+	 * @param[in] logicalAnd Set to true if found messages should match all criteria,
+	 *                       set to false if found messages should match any criteria.
+	 * @return Found message data.
 	 */
-	QList<SoughtMsg> msgsAdvancedSearchMessageEnvelope(
-	    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-	    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria)
-	    const;
+	QList<SoughtMsg> msgsSearch(const Isds::Envelope &envel,
+	    enum MessageDirection msgDirect, const QString &attachPhrase,
+	    bool logicalAnd) const;
 
 	/*!
 	 * @brief Get message envelope data from id.

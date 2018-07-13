@@ -1266,21 +1266,21 @@ QList<MessageDb::MsgId> MessageDbSet::msgsDateInterval(const QDate &fromDate,
 	return QList<MessageDb::MsgId>();
 }
 
-QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsAdvancedSearchMessageEnvelope(
-    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria) const
+QList<MessageDb::SoughtMsg> MessageDbSet::_sf_msgsSearch(
+    const Isds::Envelope &envel, enum MessageDirection msgDirect,
+    const QString &attachPhrase, bool logicalAnd) const
 {
 	if (this->size() == 0) {
 		return QList<MessageDb::SoughtMsg>();
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsAdvancedSearchMessageEnvelope(searchEnvelope,
-	    msgDirect, fileNameSearchPhrase, useAllSuppliedCriteria);
+	return this->first()->msgsSearch(envel, msgDirect, attachPhrase,
+	    logicalAnd);
 }
 
-QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelope(
-    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria) const
+QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsSearch(
+    const Isds::Envelope &envel, enum MessageDirection msgDirect,
+    const QString &attachPhrase, bool logicalAnd) const
 {
 	QList<MessageDb::SoughtMsg> msgs;
 
@@ -1292,25 +1292,25 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsAdvancedSearchMessageEnvelop
 			return QList<MessageDb::SoughtMsg>();
 		}
 
-		msgs.append(db->msgsAdvancedSearchMessageEnvelope(searchEnvelope,
-		    msgDirect, fileNameSearchPhrase, useAllSuppliedCriteria));
+		msgs.append(db->msgsSearch(envel, msgDirect, attachPhrase,
+		    logicalAnd));
 	}
 
 	return msgs;
 }
 
-QList<MessageDb::SoughtMsg> MessageDbSet::msgsAdvancedSearchMessageEnvelope(
-    const Isds::Envelope &searchEnvelope, enum MessageDirection msgDirect,
-    const QString fileNameSearchPhrase, bool useAllSuppliedCriteria) const
+QList<MessageDb::SoughtMsg> MessageDbSet::msgsSearch(
+    const Isds::Envelope &envel, enum MessageDirection msgDirect,
+    const QString &attachPhrase, bool logicalAnd) const
 {
 	switch (m_organisation) {
 	case DO_SINGLE_FILE:
-		return _sf_msgsAdvancedSearchMessageEnvelope(searchEnvelope,
-		    msgDirect, fileNameSearchPhrase, useAllSuppliedCriteria);
+		return _sf_msgsSearch(envel, msgDirect, attachPhrase,
+		    logicalAnd);
 		break;
 	case DO_YEARLY:
-		return _yrly_msgsAdvancedSearchMessageEnvelope(searchEnvelope,
-		    msgDirect, fileNameSearchPhrase, useAllSuppliedCriteria);
+		return _yrly_msgsSearch(envel, msgDirect, attachPhrase,
+		    logicalAnd);
 		break;
 	default:
 		Q_ASSERT(0);
