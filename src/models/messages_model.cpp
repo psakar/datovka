@@ -365,7 +365,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
     int appendedColsNum)
 {
-	if (Q_UNLIKELY(m_columnCount == _COLNUM)) {
+	if (Q_UNLIKELY(m_columnCount != _COLNUM)) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -423,7 +423,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
     int appendedColsNum)
 {
-	if (Q_UNLIKELY(m_columnCount == _COLNUM)) {
+	if (Q_UNLIKELY(m_columnCount != _COLNUM)) {
 		Q_ASSERT(0);
 		return;
 	}
