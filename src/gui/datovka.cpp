@@ -5022,7 +5022,7 @@ void MainWindow::setReceivedColumnWidths(void)
 	/* These columns display an icon. */
 	ui->messageList->setColumnWidth(DbMsgsTblModel::_READLOC_COL, 24);
 	ui->messageList->setColumnWidth(DbMsgsTblModel::_ATTDOWN_COL, 24);
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_MSGSTAT_COL, 24);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_PROCSNG_COL, 24);
 	if (GlobInstcs::recMgmtSetPtr->isValid()) {
 		ui->messageList->setColumnWidth(
 		    DbMsgsTblModel::_COLNUM + DbMsgsTblModel::_RECMGMT_NEG_COL,
