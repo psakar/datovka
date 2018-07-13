@@ -574,13 +574,13 @@ bool DbMsgsTblModel::setHeader(const QList<AppendedCol> &appendedCols)
 
 	setHeaderData(_ATTDOWN_COL, Qt::Horizontal,
 	    tr("Attachments downloaded"), Qt::DisplayRole);
-	setHeaderData(_ATTDOWN_COL, Qt::Horizontal,
-	    DB_BOOL_ATTACHMENT_DOWNLOADED, ROLE_MSGS_DB_ENTRY_TYPE);
+	setHeaderData(_ATTDOWN_COL, Qt::Horizontal, DB_BOOLEAN,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
 
 	setHeaderData(_PROCSNG_COL, Qt::Horizontal, tr("Processing state"),
 	    Qt::DisplayRole);
-	setHeaderData(_PROCSNG_COL, Qt::Horizontal,
-	    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
+	setHeaderData(_PROCSNG_COL, Qt::Horizontal, DB_INTEGER,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
 
 	appendHeaderColumns(this, _BASIC_COLNUM, appendedCols);
 

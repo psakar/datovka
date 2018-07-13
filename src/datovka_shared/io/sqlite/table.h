@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,11 +34,8 @@
  */
 enum EntryType {
 	DB_INTEGER = 1,
-	DB_INT_PROCESSING_STATE, /* Integer. */
 	DB_TEXT,
 	DB_BOOLEAN,
-	DB_BOOL_READ_LOCALLY, /* Boolean. */
-	DB_BOOL_ATTACHMENT_DOWNLOADED, /* Boolean. */
 	DB_DATETIME,
 	DB_DATE,
 	DB_APPENDED_VARIANT /*
