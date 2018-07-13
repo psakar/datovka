@@ -48,34 +48,20 @@ public:
 	 * @brief Identifies the column index.
 	 */
 	enum ColumnNumbers {
-		_DMID_COL = 0, /* Message identifier. */
-		_ANNOT_COL = 1, /* Annotation column. */
-		_SENDER_COL = 2, /* Sender name column. */
-		_RECIP_COL = 3, /* Recipient name column. */
-		_DELIVERY_COL = 4, /* Delivery time column. */
-		_ACCEPT_COL = 5, /* Acceptance time column. */
-		_READLOC_COL = 6, /* Read locally. */
-		_MSGSTAT_COL = 7, /* Message status. */
-		_ATTDOWN_COL = 8, /* Attachments downloaded. */
-		_PROCSNG_COL = 9, /* Processing state. */
-		_RECMGMT_NEG_COL = -2, /* 10 */ /* Records management service. */
-		_TAGS_NEG_COL = -1, /* 11 */ /* Tags. */
-		_BASIC_COLNUM = 10, /* Number of basic columns (convenience value). */
-		_COLNUM = 12 /* Maximal number of columns (convenience value). */
-
-#if 0
-		,
 		DMID_COL = 0, /* Message identifier. */
 		ANNOT_COL = 1, /* Annotation column. */
-		SENDER_RECIP_COL = 2, /* Sender or recipient name column. */
-		DELIVERY_COL = 3, /* Delivery time column. */
-		ACCEPT_COL = 4, /* Acceptance time column. */
-		READLOC_STATUS_COL = 5, /* Read locally or message status. */
-		ATTDOWN_COL = 6, /* Attachments downloaded. */
-		PROCSNG_COL = 7, /* Processing state. */
-		REC_MGMT_NEG_COL = -2, /* Records management service. */
-		TAGS_NEG_COL = -1 /* Tags. */
-#endif
+		SENDER_COL = 2, /* Sender name column. */
+		RECIP_COL = 3, /* Recipient name column. */
+		DELIVERY_COL = 4, /* Delivery time column. */
+		ACCEPT_COL = 5, /* Acceptance time column. */
+		READLOC_COL = 6, /* Read locally. */
+		MSGSTAT_COL = 7, /* Message status. */
+		ATTDOWN_COL = 8, /* Attachments downloaded. */
+		PROCSNG_COL = 9, /* Processing state. */
+		RECMGMT_NEG_COL = -2, /* 10 */ /* Records management service. */
+		TAGS_NEG_COL = -1, /* 11 */ /* Tags. */
+		BASIC_COLNUM = 10, /* Number of basic columns (convenience value). */
+		COLNUM = 12 /* Maximal number of columns (convenience value). */
 	};
 
 	/*!

@@ -196,10 +196,10 @@ static inline
 qint64 msgIdentifier(const QModelIndex &msgIdx)
 {
 	Q_ASSERT(msgIdx.isValid());
-	if (msgIdx.column() == DbMsgsTblModel::_DMID_COL) {
+	if (msgIdx.column() == DbMsgsTblModel::DMID_COL) {
 		return msgIdx.data().toLongLong();
 	} else {
-		return msgIdx.sibling(msgIdx.row(), DbMsgsTblModel::_DMID_COL)
+		return msgIdx.sibling(msgIdx.row(), DbMsgsTblModel::DMID_COL)
 		    .data().toLongLong();
 	}
 }
@@ -214,7 +214,7 @@ static inline
 QDateTime msgDeliveryTime(const QModelIndex &msgIdx)
 {
 	QModelIndex deliveryIdx(
-	    msgIdx.sibling(msgIdx.row(), DbMsgsTblModel::_DELIVERY_COL));
+	    msgIdx.sibling(msgIdx.row(), DbMsgsTblModel::DELIVERY_COL));
 	Q_ASSERT(deliveryIdx.isValid());
 
 	return dateTimeFromDbFormat(
@@ -297,6 +297,7 @@ MainWindow::~MainWindow(void)
 #define DFLT_COL_WIDTH 200
 #define COL_WIDTH_COUNT 3
 #define DFLT_COL_SORT 0
+#define ICON_COL_WIDTH 24
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -704,10 +705,10 @@ void MainWindow::showProxySettingsDialog(void)
  * @brief Shows all columns except the supplied ones.
  *
  * @param[in] view Table view.
- * @param[in] cols List of column indexes, may also be negative.
+ * @param[in] hideCols Indexes of column to be hidden, may also be negative.
  */
 static
-void showAllColumnsExcept(QTableView *view, const QList<int> &cols)
+void showAllColumnsExcept(QTableView *view, const QList<int> &hideCols)
 {
 	if (Q_NULLPTR == view) {
 		Q_ASSERT(0);
@@ -724,7 +725,7 @@ void showAllColumnsExcept(QTableView *view, const QList<int> &cols)
 		view->setColumnHidden(col, false);
 	}
 
-	foreach (int col, cols) {
+	foreach (int col, hideCols) {
 		if (col < 0) {
 			/* Negative are taken from the end. */
 			col = model->columnCount() + col;
@@ -747,22 +748,22 @@ static
 void showMessageColumnsAccordingToFunctionality(QTableView *view,
     enum DbMsgsTblModel::Type type)
 {
-	QList<int> cols;
+	QList<int> hideCols;
 
 	if (type == DbMsgsTblModel::WORKING_RCVD) {
-		cols.append(DbMsgsTblModel::_RECIP_COL);
-		cols.append(DbMsgsTblModel::_MSGSTAT_COL);
+		hideCols.append(DbMsgsTblModel::RECIP_COL);
+		hideCols.append(DbMsgsTblModel::MSGSTAT_COL);
 	} else if (type == DbMsgsTblModel::WORKING_SNT) {
-		cols.append(DbMsgsTblModel::_SENDER_COL);
-		cols.append(DbMsgsTblModel::_READLOC_COL);
-		cols.append(DbMsgsTblModel::_PROCSNG_COL);
+		hideCols.append(DbMsgsTblModel::SENDER_COL);
+		hideCols.append(DbMsgsTblModel::READLOC_COL);
+		hideCols.append(DbMsgsTblModel::PROCSNG_COL);
 	}
 
 	if (!GlobInstcs::recMgmtSetPtr->isValid()) {
-		cols.append(DbMsgsTblModel::_RECMGMT_NEG_COL);
+		hideCols.append(DbMsgsTblModel::RECMGMT_NEG_COL);
 	}
 
-	showAllColumnsExcept(view, cols);
+	showAllColumnsExcept(view, hideCols);
 }
 
 void MainWindow::showRecordsManagementDialogue(void)
@@ -779,7 +780,7 @@ void MainWindow::showRecordsManagementDialogue(void)
 
 	m_messageTableModel.setRecordsManagementIcon();
 	m_messageTableModel.fillRecordsManagementColumn(
-	    DbMsgsTblModel::_RECMGMT_NEG_COL);
+	    DbMsgsTblModel::RECMGMT_NEG_COL);
 
 	showMessageColumnsAccordingToFunctionality(ui->messageList,
 	    m_messageTableModel.type());
@@ -998,9 +999,9 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	{
 		m_messageTableModel.setRecordsManagementIcon();
 		m_messageTableModel.fillRecordsManagementColumn(
-		    DbMsgsTblModel::_RECMGMT_NEG_COL);
+		    DbMsgsTblModel::RECMGMT_NEG_COL);
 		m_messageTableModel.fillTagsColumn(userName,
-		    DbMsgsTblModel::_TAGS_NEG_COL);
+		    DbMsgsTblModel::TAGS_NEG_COL);
 		/* TODO -- Add some labels. */
 	}
 
@@ -1378,7 +1379,7 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 {
 	debugSlotCall();
 
-	if (DbMsgsTblModel::_READLOC_COL != index.column()) {
+	if (DbMsgsTblModel::READLOC_COL != index.column()) {
 		logDebugLv1NL("%s", "Not clicked read locally.");
 		return;
 	}
@@ -4981,14 +4982,14 @@ void MainWindow::filterMessages(const QString &text)
 	    Qt::CaseInsensitive, QRegExp::FixedString));
 	/* Filter according to second and third column. */
 	QList<int> columnList;
-	columnList.append(DbMsgsTblModel::_DMID_COL);
-	columnList.append(DbMsgsTblModel::_ANNOT_COL);
-	columnList.append(DbMsgsTblModel::_SENDER_COL);
-	columnList.append(DbMsgsTblModel::_RECIP_COL);
+	columnList.append(DbMsgsTblModel::DMID_COL);
+	columnList.append(DbMsgsTblModel::ANNOT_COL);
+	columnList.append(DbMsgsTblModel::SENDER_COL);
+	columnList.append(DbMsgsTblModel::RECIP_COL);
 	if (Q_NULLPTR != GlobInstcs::tagDbPtr) {
 		columnList.append(
 		    m_messageListProxyModel.sourceModel()->columnCount() +
-		    DbMsgsTblModel::_TAGS_NEG_COL); /* Tags. */
+		    DbMsgsTblModel::TAGS_NEG_COL); /* Tags. */
 	}
 	m_messageListProxyModel.setFilterKeyColumns(columnList);
 
@@ -5009,24 +5010,24 @@ void MainWindow::setReceivedColumnWidths(void)
 {
 	debugFuncCall();
 
-	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_DMID_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::DMID_COL);
 
 	/* Sender and recipient column must be set both here. */
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_ANNOT_COL, m_colWidthRcvd[1]);
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_SENDER_COL, m_colWidthRcvd[2]);
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_RECIP_COL, m_colWidthSnt[2]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::ANNOT_COL, m_colWidthRcvd[1]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::SENDER_COL, m_colWidthRcvd[2]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::RECIP_COL, m_colWidthSnt[2]);
 
-	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_DELIVERY_COL);
-	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_ACCEPT_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::DELIVERY_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::ACCEPT_COL);
 
 	/* These columns display an icon. */
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_READLOC_COL, 24);
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_ATTDOWN_COL, 24);
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_PROCSNG_COL, 24);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::READLOC_COL, ICON_COL_WIDTH);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::ATTDOWN_COL, ICON_COL_WIDTH);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::PROCSNG_COL, ICON_COL_WIDTH);
 	if (GlobInstcs::recMgmtSetPtr->isValid()) {
 		ui->messageList->setColumnWidth(
-		    DbMsgsTblModel::_COLNUM + DbMsgsTblModel::_RECMGMT_NEG_COL,
-		    24);
+		    DbMsgsTblModel::COLNUM + DbMsgsTblModel::RECMGMT_NEG_COL,
+		    ICON_COL_WIDTH);
 	}
 
 	if (m_sort_order == "SORT_ASCENDING") {
@@ -5040,23 +5041,23 @@ void MainWindow::setSentColumnWidths(void)
 {
 	debugFuncCall();
 
-	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_DMID_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::DMID_COL);
 
 	/* Sender and recipient column must be set both here. */
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_ANNOT_COL, m_colWidthSnt[1]);
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_SENDER_COL, m_colWidthRcvd[2]);
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_RECIP_COL, m_colWidthSnt[2]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::ANNOT_COL, m_colWidthSnt[1]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::SENDER_COL, m_colWidthRcvd[2]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::RECIP_COL, m_colWidthSnt[2]);
 
-	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_DELIVERY_COL);
-	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_ACCEPT_COL);
-	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_MSGSTAT_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::DELIVERY_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::ACCEPT_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::MSGSTAT_COL);
 
 	/* These columns display an icon. */
-	ui->messageList->setColumnWidth(DbMsgsTblModel::_ATTDOWN_COL, 24);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::ATTDOWN_COL, ICON_COL_WIDTH);
 	if (GlobInstcs::recMgmtSetPtr->isValid()) {
 		ui->messageList->setColumnWidth(
-		    DbMsgsTblModel::_COLNUM + DbMsgsTblModel::_RECMGMT_NEG_COL,
-		    24);
+		    DbMsgsTblModel::COLNUM + DbMsgsTblModel::RECMGMT_NEG_COL,
+		    ICON_COL_WIDTH);
 	}
 
 	if (m_sort_order == "SORT_ASCENDING") {
@@ -5077,18 +5078,18 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeReceived:
 	case AccountModel::nodeReceivedYear:
-		if (index == DbMsgsTblModel::_ANNOT_COL) {
+		if (index == DbMsgsTblModel::ANNOT_COL) {
 			m_colWidthRcvd[1] = newSize;
-		} else if (index == DbMsgsTblModel::_SENDER_COL) {
+		} else if (index == DbMsgsTblModel::SENDER_COL) {
 			m_colWidthRcvd[2] = newSize;
 		}
 		break;
 	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
-		if (index == DbMsgsTblModel::_ANNOT_COL) {
+		if (index == DbMsgsTblModel::ANNOT_COL) {
 			m_colWidthSnt[1] = newSize;
-		} else if (index == DbMsgsTblModel::_RECIP_COL) {
+		} else if (index == DbMsgsTblModel::RECIP_COL) {
 			m_colWidthSnt[2] = newSize;
 		}
 		break;
@@ -6334,7 +6335,7 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 	    *GlobInstcs::recMgmtSetPtr, accounts, this);
 
 	m_messageTableModel.fillRecordsManagementColumn(
-	    DbMsgsTblModel::_RECMGMT_NEG_COL);
+	    DbMsgsTblModel::RECMGMT_NEG_COL);
 }
 
 void MainWindow::sendSelectedMessageToRecordsManagement(void)
@@ -6411,7 +6412,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	msgIdList.append(msgId.dmId);
 
 	m_messageTableModel.refillRecordsManagementColumn(msgIdList,
-	    DbMsgsTblModel::_RECMGMT_NEG_COL);
+	    DbMsgsTblModel::RECMGMT_NEG_COL);
 }
 
 void MainWindow::showSignatureDetailsDialog(void)
@@ -8249,7 +8250,7 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 		msgIdList.clear();
 		for (int row = 0; row < m_messageTableModel.rowCount(); ++row) {
 			msgIdList.append(m_messageTableModel.index(row,
-			    DbMsgsTblModel::_DMID_COL).data().toLongLong());
+			    DbMsgsTblModel::DMID_COL).data().toLongLong());
 		}
 	}
 
@@ -8258,7 +8259,7 @@ void MainWindow::modifyTags(const QString &userName, QList<qint64> msgIdList)
 	}
 
 	m_messageTableModel.refillTagsColumn(userName, msgIdList,
-	    DbMsgsTblModel::_TAGS_NEG_COL);
+	    DbMsgsTblModel::TAGS_NEG_COL);
 }
 
 void MainWindow::doExportOfSelectedFiles(
