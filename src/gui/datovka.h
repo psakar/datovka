@@ -1064,11 +1064,9 @@ private:
 
 	bool m_searchDlgActive; /*!< True if search dialogue is active. */
 
-	int m_received_1;
-	int m_received_2;
-	int m_sent_1;
-	int m_sent_2;
-	int m_sort_column;
+	QVector<int> m_colWidthRcvd; /*!< Received list column widths. */
+	QVector<int> m_colWidthSnt; /*!< Sent list column widths. */
+	int m_sortCol; /*!< Column with enabled sorting. */
 	QString m_sort_order;
 	QString m_save_attach_dir;
 	QString m_add_attach_dir;

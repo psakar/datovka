@@ -294,6 +294,10 @@ MainWindow::~MainWindow(void)
 	delete ui;
 }
 
+#define DFLT_COL_WIDTH 200
+#define COL_WIDTH_COUNT 3
+#define DFLT_COL_SORT 0
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_accountModel(this),
@@ -306,11 +310,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_lastSelectedAccountNodeType(AccountModel::nodeUnknown),
     m_lastStoredAccountNodeType(AccountModel::nodeUnknown),
     m_searchDlgActive(false),
-    m_received_1(200),
-    m_received_2(200),
-    m_sent_1(200),
-    m_sent_2(200),
-    m_sort_column(0),
+    m_colWidthRcvd(COL_WIDTH_COUNT),
+    m_colWidthSnt(COL_WIDTH_COUNT),
+    m_sortCol(DFLT_COL_SORT),
     m_sort_order(),
     m_save_attach_dir(QDir::homePath()),
     m_add_attach_dir(QDir::homePath()),
@@ -327,6 +329,9 @@ MainWindow::MainWindow(QWidget *parent)
     mui_statusOnlineLabel(0),
     mui_statusProgressBar(0)
 {
+	m_colWidthRcvd[1] = m_colWidthRcvd[2] = DFLT_COL_WIDTH;
+	m_colWidthSnt[1] = m_colWidthSnt[2] = DFLT_COL_WIDTH;
+
 	setUpUi();
 
 	{
@@ -4286,47 +4291,34 @@ void MainWindow::loadSettings(void)
 	loadAccountCollapseInfo(settings);
 }
 
-
-/* ========================================================================= */
-/*
- * Load received/sent messages column widths and sort order from settings.
- */
 void MainWindow::loadSentReceivedMessagesColumnWidth(const QSettings &settings)
-/* ========================================================================= */
 {
-	m_received_1 = settings.value("column_widths/received_1", 200).toInt();
-	m_received_2 = settings.value("column_widths/received_2", 200).toInt();
-	m_sent_1 = settings.value("column_widths/sent_1", 200).toInt();
-	m_sent_2 = settings.value("column_widths/sent_2", 200).toInt();
-	m_sort_column = settings.value("message_ordering/sort_column",
-	    0).toInt();
+	m_colWidthRcvd[1] = settings.value("column_widths/received_1", DFLT_COL_WIDTH).toInt();
+	m_colWidthRcvd[2] = settings.value("column_widths/received_2", DFLT_COL_WIDTH).toInt();
+	m_colWidthSnt[1] = settings.value("column_widths/sent_1", DFLT_COL_WIDTH).toInt();
+	m_colWidthSnt[2] = settings.value("column_widths/sent_2", DFLT_COL_WIDTH).toInt();
+	m_sortCol = settings.value("message_ordering/sort_column", DFLT_COL_SORT).toInt();
 	/* Sort column saturation from old datovka */
-	if (m_sort_column > 5) {
-		m_sort_column = 0;
+	if (m_sortCol > 5) {
+		m_sortCol = DFLT_COL_SORT;
 	}
 	m_sort_order = settings.value("message_ordering/sort_order",
 	    QString()).toString();
 }
 
-/* ========================================================================= */
-/*
- * Save received/sent messages column widths and sort order into settings.
- */
 void MainWindow::saveSentReceivedColumnWidth(QSettings &settings) const
-/* ========================================================================= */
 {
 	settings.beginGroup("column_widths");
-	settings.setValue("received_1", m_received_1);
-	settings.setValue("received_2", m_received_2);
-	settings.setValue("sent_1", m_sent_1);
-	settings.setValue("sent_2", m_sent_2);
+	settings.setValue("received_1", m_colWidthRcvd[1]);
+	settings.setValue("received_2", m_colWidthRcvd[2]);
+	settings.setValue("sent_1", m_colWidthSnt[1]);
+	settings.setValue("sent_2", m_colWidthSnt[2]);
 	settings.endGroup();
 
 	settings.beginGroup("message_ordering");
-	settings.setValue("sort_column", m_sort_column);
+	settings.setValue("sort_column", m_sortCol);
 	settings.setValue("sort_order", m_sort_order);
 	settings.endGroup();
-
 }
 
 /* ========================================================================= */
@@ -5013,83 +5005,68 @@ void MainWindow::filterMessages(const QString &text)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Set received message column widths and sort order.
- */
 void MainWindow::setReceivedColumnWidths(void)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
-	int i;
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_DMID_COL);
 
-	ui->messageList->resizeColumnToContents(0);
-	ui->messageList->setColumnWidth(1, m_received_1);
-	ui->messageList->setColumnWidth(2, m_received_2);
-	for (i = 3; i < (MessageDb::rcvdItemIds.size() - 3); ++i) {
-		ui->messageList->resizeColumnToContents(i);
-	}
-	/* Last three columns display icons. */
-	int max = MessageDb::rcvdItemIds.size();
+	/* Sender and recipient column must be set both here. */
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_ANNOT_COL, m_colWidthRcvd[1]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_SENDER_COL, m_colWidthRcvd[2]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_RECIP_COL, m_colWidthSnt[2]);
+
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_DELIVERY_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_ACCEPT_COL);
+
+	/* These columns display an icon. */
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_READLOC_COL, 24);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_ATTDOWN_COL, 24);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_MSGSTAT_COL, 24);
 	if (GlobInstcs::recMgmtSetPtr->isValid()) {
-		/* Add one column if records management service is activated. */
-		++max;
+		ui->messageList->setColumnWidth(
+		    DbMsgsTblModel::_COLNUM + DbMsgsTblModel::_RECMGMT_NEG_COL,
+		    24);
 	}
-	for (; i < max; ++i) {
-		ui->messageList->setColumnWidth(i, 24);
-	}
+
 	if (m_sort_order == "SORT_ASCENDING") {
-		ui->messageList->sortByColumn(m_sort_column,
-		    Qt::AscendingOrder);
+		ui->messageList->sortByColumn(m_sortCol, Qt::AscendingOrder);
 	} else if (m_sort_order == "SORT_DESCENDING") {
-		ui->messageList->sortByColumn(m_sort_column,
-		    Qt::DescendingOrder);
+		ui->messageList->sortByColumn(m_sortCol, Qt::DescendingOrder);
 	}
 }
 
-/* ========================================================================= */
-/*
- * Set sent message column widths and sort order.
- */
 void MainWindow::setSentColumnWidths(void)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
-	int i;
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_DMID_COL);
 
-	ui->messageList->resizeColumnToContents(0);
-	ui->messageList->setColumnWidth(1, m_sent_1);
-	ui->messageList->setColumnWidth(2, m_sent_2);
-	for (i = 3; i < (MessageDb::sntItemIds.size() - 1); ++i) {
-		ui->messageList->resizeColumnToContents(i);
-	}
-	/* Last column displays an icon. */
-	int max = MessageDb::rcvdItemIds.size();
+	/* Sender and recipient column must be set both here. */
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_ANNOT_COL, m_colWidthSnt[1]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_SENDER_COL, m_colWidthRcvd[2]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_RECIP_COL, m_colWidthSnt[2]);
+
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_DELIVERY_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_ACCEPT_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::_MSGSTAT_COL);
+
+	/* These columns display an icon. */
+	ui->messageList->setColumnWidth(DbMsgsTblModel::_ATTDOWN_COL, 24);
 	if (GlobInstcs::recMgmtSetPtr->isValid()) {
-		/* Add one column if records management service is activated. */
-		++max;
+		ui->messageList->setColumnWidth(
+		    DbMsgsTblModel::_COLNUM + DbMsgsTblModel::_RECMGMT_NEG_COL,
+		    24);
 	}
-	for (; i < max; ++i) {
-		ui->messageList->setColumnWidth(i, 24);
-	}
+
 	if (m_sort_order == "SORT_ASCENDING") {
-		ui->messageList->sortByColumn(m_sort_column,
-		    Qt::AscendingOrder);
+		ui->messageList->sortByColumn(m_sortCol, Qt::AscendingOrder);
 	} else if (m_sort_order == "SORT_DESCENDING") {
-		ui->messageList->sortByColumn(m_sort_column,
-		    Qt::DescendingOrder);
+		ui->messageList->sortByColumn(m_sortCol, Qt::DescendingOrder);
 	}
 }
 
-/* ========================================================================= */
-/*
- * Set new sent/received message column widths.
- */
 void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
-/* ========================================================================= */
 {
 	//debugSlotCall();
 
@@ -5100,19 +5077,19 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeReceived:
 	case AccountModel::nodeReceivedYear:
-		if (index == 1) {
-			m_received_1 = newSize;
-		} else if (index == 2) {
-			m_received_2 = newSize;
+		if (index == DbMsgsTblModel::_ANNOT_COL) {
+			m_colWidthRcvd[1] = newSize;
+		} else if (index == DbMsgsTblModel::_SENDER_COL) {
+			m_colWidthRcvd[2] = newSize;
 		}
 		break;
 	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
-		if (index == 1) {
-			m_sent_1 = newSize;
-		} else if (index == 2) {
-			m_sent_2 = newSize;
+		if (index == DbMsgsTblModel::_ANNOT_COL) {
+			m_colWidthSnt[1] = newSize;
+		} else if (index == DbMsgsTblModel::_RECIP_COL) {
+			m_colWidthSnt[2] = newSize;
 		}
 		break;
 	default:
@@ -5120,16 +5097,11 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 	}
 }
 
-/* ========================================================================= */
-/*
- * Set actual sort order for current column.
- */
 void MainWindow::onTableColumnHeaderSectionClicked(int column)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
-	m_sort_column = column;
+	m_sortCol = column;
 	if (ui->messageList->horizontalHeader()->sortIndicatorOrder() ==
 	    Qt::AscendingOrder) {
 		m_sort_order = "SORT_ASCENDING";
@@ -5140,7 +5112,6 @@ void MainWindow::onTableColumnHeaderSectionClicked(int column)
 		m_sort_order = QString();
 	}
 }
-
 
 /* ========================================================================= */
 /*
