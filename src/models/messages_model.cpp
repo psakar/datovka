@@ -43,13 +43,29 @@
  */
 #define MSG_ID_WIDTH 48
 
+/*!
+ * @brief Construct the default records management icon.
+ *
+ * @return Icon object.
+ */
+static
+QIcon defaultRMIcon(void)
+{
+	QIcon ico;
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+	return ico;
+}
+
 DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
     : TblModel(parent),
     m_type(type),
-    m_rmIco(ICON_3PARTY_PATH "up_16.png")
+    m_rmIco()
 {
 	/* Fixed column size. */
 	m_columnCount = MAX_COLNUM;
+
+	m_rmIco = defaultRMIcon();
 }
 
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
@@ -717,28 +733,28 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 
 bool DbMsgsTblModel::setRecordsManagementIcon(void)
 {
-	QIcon ico;
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-
 	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
-		m_rmIco = ico;
+		m_rmIco = defaultRMIcon();
 		return false;
 	}
 
 	RecordsManagementDb::ServiceInfoEntry entry(
 	    GlobInstcs::recMgmtDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
-		m_rmIco = ico;
+		m_rmIco = defaultRMIcon();
 		return false;
 	}
-	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, 16));
-	if (pixmap.isNull()) {
-		m_rmIco = ico;
+	QPixmap pixmap16(Graphics::pixmapFromSvg(entry.logoSvg, 16));
+	QPixmap pixmap32(Graphics::pixmapFromSvg(entry.logoSvg, 32));
+	if (pixmap16.isNull() || pixmap32.isNull()) {
+		m_rmIco = defaultRMIcon();
 		return false;
 	}
 
-	m_rmIco = QIcon(pixmap);
+	QIcon ico;
+	ico.addPixmap(pixmap16, QIcon::Normal, QIcon::Off);
+	ico.addPixmap(pixmap32, QIcon::Normal, QIcon::Off);
+	m_rmIco = ico;
 	return true;
 }
 
