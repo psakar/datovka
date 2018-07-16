@@ -60,12 +60,10 @@ QIcon defaultRMIcon(void)
 DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
     : TblModel(parent),
     m_type(type),
-    m_rmIco()
+    m_rmIco(defaultRMIcon())
 {
 	/* Fixed column size. */
 	m_columnCount = MAX_COLNUM;
-
-	m_rmIco = defaultRMIcon();
 }
 
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
