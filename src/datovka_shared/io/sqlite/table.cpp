@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,15 +150,12 @@ const QString &SQLiteTbl::entryType2SQLiteDataType(enum EntryType entryType)
 
 	switch (entryType) {
 	case DB_INTEGER:
-	case DB_INT_PROCESSING_STATE:
 		return integer;
 		break;
 	case DB_TEXT:
 		return text;
 		break;
 	case DB_BOOLEAN:
-	case DB_BOOL_READ_LOCALLY:
-	case DB_BOOL_ATTACHMENT_DOWNLOADED:
 		return boolean;
 		break;
 	case DB_DATETIME:

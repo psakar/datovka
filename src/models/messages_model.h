@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _MESSAGES_MODEL_H_
-#define _MESSAGES_MODEL_H_
+#pragma once
 
 #include <QIcon>
 #include <QList>
@@ -47,18 +46,30 @@ class DbMsgsTblModel : public TblModel {
 public:
 	/*!
 	 * @brief Identifies the column index.
+	 *
+	 * @Note Non-negative values are directly derived from the message
+	 *     database. Columns identified by negative values are added and
+	 *     are kept in separate database files.
+	 *
+	 * @todo Processing state should be separated from the message database
+	 *     and should be kept in a separate database in a similar fashion
+	 *     as tags or records management information.
 	 */
 	enum ColumnNumbers {
 		DMID_COL = 0, /* Message identifier. */
 		ANNOT_COL = 1, /* Annotation column. */
-		SENDER_RECIP_COL = 2, /* Sender or recipient name column. */
-		DELIVERY_COL = 3, /* Delivery time column. */
-		ACCEPT_COL = 4, /* Acceptance time column. */
-		READLOC_STATUS_COL = 5, /* Read locally or message status. */
-		ATTDOWN_COL = 6, /* Attachments downloaded. */
-		PROCSNG_COL = 7, /* Processing state. */
-		REC_MGMT_NEG_COL = -2, /* Records management service. */
-		TAGS_NEG_COL = -1 /* Tags. */
+		SENDER_COL = 2, /* Sender name column. */
+		RECIP_COL = 3, /* Recipient name column. */
+		DELIVERY_COL = 4, /* Delivery time column. */
+		ACCEPT_COL = 5, /* Acceptance time column. */
+		READLOC_COL = 6, /* Read locally. */
+		MSGSTAT_COL = 7, /* Message status. */
+		ATTDOWN_COL = 8, /* Attachments downloaded. */
+		PROCSNG_COL = 9, /* Processing state. */
+		RECMGMT_NEG_COL = -2, /* 10 */ /* Records management service. */
+		TAGS_NEG_COL = -1, /* 11 */ /* Tags. */
+		BASIC_COLNUM = 10, /* Number of basic columns (convenience value). */
+		MAX_COLNUM = 12 /* Maximal number of columns (convenience value). */
 	};
 
 	/*!
@@ -67,8 +78,8 @@ public:
 	 * @note Dummies are used to fake empty models.
 	 */
 	enum Type {
-		WORKING_RCVD = 0, /*!< Ordinary model created from SQL query result. */
-		WORKING_SNT /*!< Ordinary model created from SQL query result. */
+		RCVD_MODEL = 0, /*!< Model created from SQL query result. */
+		SNT_MODEL /*!< Model created from SQL query result. */
 	};
 
 	/*!
@@ -96,7 +107,7 @@ public:
 	 * @param[in] type   Type of the table model.
 	 * @param[in] parent Parent object.
 	 */
-	explicit DbMsgsTblModel(enum Type type = WORKING_RCVD,
+	explicit DbMsgsTblModel(enum Type type = RCVD_MODEL,
 	    QObject *parent = Q_NULLPTR);
 
 	/*!
@@ -151,18 +162,18 @@ public:
 	bool setType(enum Type type);
 
 	/*!
-	 * @brief Set header data for received model.
+	 * @brief Get model type.
 	 *
-	 * @return False on error.
+	 * @return Model type.
 	 */
-	bool setRcvdHeader(const QList<AppendedCol> &appendedCols);
+	enum Type type(void) const;
 
 	/*!
-	 * @Brief Set header data for sent model.
+	 * @brief Set header data.
 	 *
 	 * @return False on error.
 	 */
-	bool setSntHeader(const QList<AppendedCol> &appendedCols);
+	bool setHeader(const QList<AppendedCol> &appendedCols);
 
 	/*!
 	 * @brief Override message as being read.
@@ -273,11 +284,7 @@ private:
 	 */
 	qint64 sortRank(qint16 num, const QModelIndex &index) const;
 
-	enum Type m_type; /*!<
-	                   * Whether this is a model dummy or contains data.
-	                   */
+	enum Type m_type; /*!< Specifies type of data held in the model. */
 
-	QIcon m_dsIco; /*!< Records management icon. */
+	QIcon m_rmIco; /*!< Records management icon. */
 };
-
-#endif /* _MESSAGES_MODEL_H_ */

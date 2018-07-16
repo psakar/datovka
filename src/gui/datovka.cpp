@@ -294,10 +294,15 @@ MainWindow::~MainWindow(void)
 	delete ui;
 }
 
+#define DFLT_COL_WIDTH 200
+#define COL_WIDTH_COUNT 3
+#define DFLT_COL_SORT 0
+#define ICON_COL_WIDTH 24
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_accountModel(this),
-    m_messageTableModel(DbMsgsTblModel::WORKING_RCVD, this),
+    m_messageTableModel(DbMsgsTblModel::RCVD_MODEL, this),
     m_messageListProxyModel(this),
     m_attachmentModel(this),
     m_messageMarker(this),
@@ -306,11 +311,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_lastSelectedAccountNodeType(AccountModel::nodeUnknown),
     m_lastStoredAccountNodeType(AccountModel::nodeUnknown),
     m_searchDlgActive(false),
-    m_received_1(200),
-    m_received_2(200),
-    m_sent_1(200),
-    m_sent_2(200),
-    m_sort_column(0),
+    m_colWidthRcvd(COL_WIDTH_COUNT),
+    m_colWidthSnt(COL_WIDTH_COUNT),
+    m_sortCol(DFLT_COL_SORT),
     m_sort_order(),
     m_save_attach_dir(QDir::homePath()),
     m_add_attach_dir(QDir::homePath()),
@@ -327,6 +330,9 @@ MainWindow::MainWindow(QWidget *parent)
     mui_statusOnlineLabel(0),
     mui_statusProgressBar(0)
 {
+	m_colWidthRcvd[1] = m_colWidthRcvd[2] = DFLT_COL_WIDTH;
+	m_colWidthSnt[1] = m_colWidthSnt[2] = DFLT_COL_WIDTH;
+
 	setUpUi();
 
 	{
@@ -699,10 +705,10 @@ void MainWindow::showProxySettingsDialog(void)
  * @brief Shows all columns except the supplied ones.
  *
  * @param[in] view Table view.
- * @param[in] cols List of negative column indexes.
+ * @param[in] hideCols Indexes of column to be hidden, may also be negative.
  */
 static
-void showAllColumnsExcept(QTableView *view, QList<int> cols)
+void showAllColumnsExcept(QTableView *view, const QList<int> &hideCols)
 {
 	if (Q_NULLPTR == view) {
 		Q_ASSERT(0);
@@ -714,12 +720,16 @@ void showAllColumnsExcept(QTableView *view, QList<int> cols)
 		return;
 	}
 
+	/* Set all columns visible. */
 	for (int col = 0; col < model->columnCount(); ++col) {
 		view->setColumnHidden(col, false);
 	}
 
-	foreach (int negCol, cols) {
-		int col = model->columnCount() + negCol;
+	foreach (int col, hideCols) {
+		if (col < 0) {
+			/* Negative are taken from the end. */
+			col = model->columnCount() + col;
+		}
 		if ((col < 0) || (col >= model->columnCount())) {
 			Q_ASSERT(0);
 			continue;
@@ -731,18 +741,29 @@ void showAllColumnsExcept(QTableView *view, QList<int> cols)
 /*!
  * @brief Shows/hides message table columns according to functionality.
  *
- * @param[in] view Table view.
+ * @param[in,out] view Table view.
+ * @param[in]     type Whether received or sent messages are displayed.
  */
 static
-void showColumnsAccordingToFunctionality(QTableView *view)
+void showMessageColumnsAccordingToFunctionality(QTableView *view,
+    enum DbMsgsTblModel::Type type)
 {
-	QList<int> negCols;
+	QList<int> hideCols;
 
-	if (!GlobInstcs::recMgmtSetPtr->isValid()) {
-		negCols.append(DbMsgsTblModel::REC_MGMT_NEG_COL);
+	if (type == DbMsgsTblModel::RCVD_MODEL) {
+		hideCols.append(DbMsgsTblModel::RECIP_COL);
+		hideCols.append(DbMsgsTblModel::MSGSTAT_COL);
+	} else if (type == DbMsgsTblModel::SNT_MODEL) {
+		hideCols.append(DbMsgsTblModel::SENDER_COL);
+		hideCols.append(DbMsgsTblModel::READLOC_COL);
+		hideCols.append(DbMsgsTblModel::PROCSNG_COL);
 	}
 
-	showAllColumnsExcept(view, negCols);
+	if (!GlobInstcs::recMgmtSetPtr->isValid()) {
+		hideCols.append(DbMsgsTblModel::RECMGMT_NEG_COL);
+	}
+
+	showAllColumnsExcept(view, hideCols);
 }
 
 void MainWindow::showRecordsManagementDialogue(void)
@@ -759,20 +780,16 @@ void MainWindow::showRecordsManagementDialogue(void)
 
 	m_messageTableModel.setRecordsManagementIcon();
 	m_messageTableModel.fillRecordsManagementColumn(
-	    DbMsgsTblModel::REC_MGMT_NEG_COL);
+	    DbMsgsTblModel::RECMGMT_NEG_COL);
 
-	showColumnsAccordingToFunctionality(ui->messageList);
+	showMessageColumnsAccordingToFunctionality(ui->messageList,
+	    m_messageTableModel.type());
 	AccountModel::nodeTypeIsReceived(currentAccountModelIndex()) ?
 	    setReceivedColumnWidths() : setSentColumnWidths();
 }
 
-/* ========================================================================= */
-/*
- * Redraws widgets according to selected account item.
- */
 void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
     const QModelIndex &previous)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
@@ -898,7 +915,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		m_messageTableModel.appendData(
 		    dbSet->msgsRcvdEntriesWithin90Days(),
 		    m_msgTblAppendedCols.size());
-		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
+		m_messageTableModel.setHeader(m_msgTblAppendedCols);
 		//ui->messageList->horizontalHeader()->moveSection(5,3);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
@@ -908,7 +925,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		m_messageTableModel.appendData(
 		    dbSet->msgsSntEntriesWithin90Days(),
 		    m_msgTblAppendedCols.size());
-		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
+		m_messageTableModel.setHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeAll:
@@ -931,7 +948,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #else /* !DISABLE_ALL_TABLE */
 		m_messageTableModel.appendData(dbSet->msgsEntriesRcvd(),
 		    m_msgTblAppendedCols.size());
-		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
+		m_messageTableModel.setHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
 		    this, SLOT(messageItemClicked(QModelIndex)));
@@ -948,7 +965,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #else /* !DISABLE_ALL_TABLE */
 		m_messageTableModel.appendData(dbSet->msgsSntEntries(),
 		    m_msgTblAppendedCols.size());
-		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
+		m_messageTableModel.setHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 #endif /* DISABLE_ALL_TABLE */
 		break;
@@ -957,7 +974,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    dbSet->msgsRcvdEntriesInYear(
 		        current.data(ROLE_PLAIN_DISPLAY).toString()),
 		    m_msgTblAppendedCols.size());
-		m_messageTableModel.setRcvdHeader(m_msgTblAppendedCols);
+		m_messageTableModel.setHeader(m_msgTblAppendedCols);
 		/* TODO -- Parameter check. */
 		ui->actionDelete_message_from_db->setEnabled(true);
 		connect(ui->messageList, SIGNAL(clicked(QModelIndex)),
@@ -968,7 +985,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    dbSet->msgsSntEntriesInYear(
 		        current.data(ROLE_PLAIN_DISPLAY).toString()),
 		    m_msgTblAppendedCols.size());
-		m_messageTableModel.setSntHeader(m_msgTblAppendedCols);
+		m_messageTableModel.setHeader(m_msgTblAppendedCols);
 		/* TODO -- Parameter check. */
 		ui->actionDelete_message_from_db->setEnabled(true);
 		break;
@@ -982,7 +999,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	{
 		m_messageTableModel.setRecordsManagementIcon();
 		m_messageTableModel.fillRecordsManagementColumn(
-		    DbMsgsTblModel::REC_MGMT_NEG_COL);
+		    DbMsgsTblModel::RECMGMT_NEG_COL);
 		m_messageTableModel.fillTagsColumn(userName,
 		    DbMsgsTblModel::TAGS_NEG_COL);
 		/* TODO -- Add some labels. */
@@ -1031,7 +1048,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeReceivedYear:
 		/* Set model. */
-		showColumnsAccordingToFunctionality(ui->messageList);
+		showMessageColumnsAccordingToFunctionality(ui->messageList,
+		    m_messageTableModel.type());
 		/* Set specific column width. */
 		setReceivedColumnWidths();
 		msgViewType = AccountModel::nodeReceived;
@@ -1042,7 +1060,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 #endif /* !DISABLE_ALL_TABLE */
 	case AccountModel::nodeSentYear:
 		/* Set model. */
-		showColumnsAccordingToFunctionality(ui->messageList);
+		showMessageColumnsAccordingToFunctionality(ui->messageList,
+		    m_messageTableModel.type());
 		/* Set specific column width. */
 		setSentColumnWidths();
 		msgViewType = AccountModel::nodeSent;
@@ -1360,8 +1379,8 @@ void MainWindow::messageItemClicked(const QModelIndex &index)
 {
 	debugSlotCall();
 
-	if (DbMsgsTblModel::READLOC_STATUS_COL != index.column()) {
-		qDebug() << "Not clicked read locally.";
+	if (DbMsgsTblModel::READLOC_COL != index.column()) {
+		logDebugLv1NL("%s", "Not clicked read locally.");
 		return;
 	}
 
@@ -4273,47 +4292,34 @@ void MainWindow::loadSettings(void)
 	loadAccountCollapseInfo(settings);
 }
 
-
-/* ========================================================================= */
-/*
- * Load received/sent messages column widths and sort order from settings.
- */
 void MainWindow::loadSentReceivedMessagesColumnWidth(const QSettings &settings)
-/* ========================================================================= */
 {
-	m_received_1 = settings.value("column_widths/received_1", 200).toInt();
-	m_received_2 = settings.value("column_widths/received_2", 200).toInt();
-	m_sent_1 = settings.value("column_widths/sent_1", 200).toInt();
-	m_sent_2 = settings.value("column_widths/sent_2", 200).toInt();
-	m_sort_column = settings.value("message_ordering/sort_column",
-	    0).toInt();
+	m_colWidthRcvd[1] = settings.value("column_widths/received_1", DFLT_COL_WIDTH).toInt();
+	m_colWidthRcvd[2] = settings.value("column_widths/received_2", DFLT_COL_WIDTH).toInt();
+	m_colWidthSnt[1] = settings.value("column_widths/sent_1", DFLT_COL_WIDTH).toInt();
+	m_colWidthSnt[2] = settings.value("column_widths/sent_2", DFLT_COL_WIDTH).toInt();
+	m_sortCol = settings.value("message_ordering/sort_column", DFLT_COL_SORT).toInt();
 	/* Sort column saturation from old datovka */
-	if (m_sort_column > 5) {
-		m_sort_column = 0;
+	if (m_sortCol > 5) {
+		m_sortCol = DFLT_COL_SORT;
 	}
 	m_sort_order = settings.value("message_ordering/sort_order",
 	    QString()).toString();
 }
 
-/* ========================================================================= */
-/*
- * Save received/sent messages column widths and sort order into settings.
- */
 void MainWindow::saveSentReceivedColumnWidth(QSettings &settings) const
-/* ========================================================================= */
 {
 	settings.beginGroup("column_widths");
-	settings.setValue("received_1", m_received_1);
-	settings.setValue("received_2", m_received_2);
-	settings.setValue("sent_1", m_sent_1);
-	settings.setValue("sent_2", m_sent_2);
+	settings.setValue("received_1", m_colWidthRcvd[1]);
+	settings.setValue("received_2", m_colWidthRcvd[2]);
+	settings.setValue("sent_1", m_colWidthSnt[1]);
+	settings.setValue("sent_2", m_colWidthSnt[2]);
 	settings.endGroup();
 
 	settings.beginGroup("message_ordering");
-	settings.setValue("sort_column", m_sort_column);
+	settings.setValue("sort_column", m_sortCol);
 	settings.setValue("sort_order", m_sort_order);
 	settings.endGroup();
-
 }
 
 /* ========================================================================= */
@@ -4978,7 +4984,8 @@ void MainWindow::filterMessages(const QString &text)
 	QList<int> columnList;
 	columnList.append(DbMsgsTblModel::DMID_COL);
 	columnList.append(DbMsgsTblModel::ANNOT_COL);
-	columnList.append(DbMsgsTblModel::SENDER_RECIP_COL);
+	columnList.append(DbMsgsTblModel::SENDER_COL);
+	columnList.append(DbMsgsTblModel::RECIP_COL);
 	if (Q_NULLPTR != GlobInstcs::tagDbPtr) {
 		columnList.append(
 		    m_messageListProxyModel.sourceModel()->columnCount() +
@@ -4999,83 +5006,68 @@ void MainWindow::filterMessages(const QString &text)
 	}
 }
 
-
-/* ========================================================================= */
-/*
- * Set received message column widths and sort order.
- */
 void MainWindow::setReceivedColumnWidths(void)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
-	int i;
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::DMID_COL);
 
-	ui->messageList->resizeColumnToContents(0);
-	ui->messageList->setColumnWidth(1, m_received_1);
-	ui->messageList->setColumnWidth(2, m_received_2);
-	for (i = 3; i < (MessageDb::rcvdItemIds.size() - 3); ++i) {
-		ui->messageList->resizeColumnToContents(i);
-	}
-	/* Last three columns display icons. */
-	int max = MessageDb::rcvdItemIds.size();
+	/* Sender and recipient column must be set both here. */
+	ui->messageList->setColumnWidth(DbMsgsTblModel::ANNOT_COL, m_colWidthRcvd[1]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::SENDER_COL, m_colWidthRcvd[2]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::RECIP_COL, m_colWidthSnt[2]);
+
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::DELIVERY_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::ACCEPT_COL);
+
+	/* These columns display an icon. */
+	ui->messageList->setColumnWidth(DbMsgsTblModel::READLOC_COL, ICON_COL_WIDTH);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::ATTDOWN_COL, ICON_COL_WIDTH);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::PROCSNG_COL, ICON_COL_WIDTH);
 	if (GlobInstcs::recMgmtSetPtr->isValid()) {
-		/* Add one column if records management service is activated. */
-		++max;
+		ui->messageList->setColumnWidth(
+		    DbMsgsTblModel::MAX_COLNUM + DbMsgsTblModel::RECMGMT_NEG_COL,
+		    ICON_COL_WIDTH);
 	}
-	for (; i < max; ++i) {
-		ui->messageList->setColumnWidth(i, 24);
-	}
+
 	if (m_sort_order == "SORT_ASCENDING") {
-		ui->messageList->sortByColumn(m_sort_column,
-		    Qt::AscendingOrder);
+		ui->messageList->sortByColumn(m_sortCol, Qt::AscendingOrder);
 	} else if (m_sort_order == "SORT_DESCENDING") {
-		ui->messageList->sortByColumn(m_sort_column,
-		    Qt::DescendingOrder);
+		ui->messageList->sortByColumn(m_sortCol, Qt::DescendingOrder);
 	}
 }
 
-/* ========================================================================= */
-/*
- * Set sent message column widths and sort order.
- */
 void MainWindow::setSentColumnWidths(void)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
-	int i;
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::DMID_COL);
 
-	ui->messageList->resizeColumnToContents(0);
-	ui->messageList->setColumnWidth(1, m_sent_1);
-	ui->messageList->setColumnWidth(2, m_sent_2);
-	for (i = 3; i < (MessageDb::sntItemIds.size() - 1); ++i) {
-		ui->messageList->resizeColumnToContents(i);
-	}
-	/* Last column displays an icon. */
-	int max = MessageDb::rcvdItemIds.size();
+	/* Sender and recipient column must be set both here. */
+	ui->messageList->setColumnWidth(DbMsgsTblModel::ANNOT_COL, m_colWidthSnt[1]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::SENDER_COL, m_colWidthRcvd[2]);
+	ui->messageList->setColumnWidth(DbMsgsTblModel::RECIP_COL, m_colWidthSnt[2]);
+
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::DELIVERY_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::ACCEPT_COL);
+	ui->messageList->resizeColumnToContents(DbMsgsTblModel::MSGSTAT_COL);
+
+	/* These columns display an icon. */
+	ui->messageList->setColumnWidth(DbMsgsTblModel::ATTDOWN_COL, ICON_COL_WIDTH);
 	if (GlobInstcs::recMgmtSetPtr->isValid()) {
-		/* Add one column if records management service is activated. */
-		++max;
+		ui->messageList->setColumnWidth(
+		    DbMsgsTblModel::MAX_COLNUM + DbMsgsTblModel::RECMGMT_NEG_COL,
+		    ICON_COL_WIDTH);
 	}
-	for (; i < max; ++i) {
-		ui->messageList->setColumnWidth(i, 24);
-	}
+
 	if (m_sort_order == "SORT_ASCENDING") {
-		ui->messageList->sortByColumn(m_sort_column,
-		    Qt::AscendingOrder);
+		ui->messageList->sortByColumn(m_sortCol, Qt::AscendingOrder);
 	} else if (m_sort_order == "SORT_DESCENDING") {
-		ui->messageList->sortByColumn(m_sort_column,
-		    Qt::DescendingOrder);
+		ui->messageList->sortByColumn(m_sortCol, Qt::DescendingOrder);
 	}
 }
 
-/* ========================================================================= */
-/*
- * Set new sent/received message column widths.
- */
 void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
-/* ========================================================================= */
 {
 	//debugSlotCall();
 
@@ -5086,19 +5078,19 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 	case AccountModel::nodeRecentReceived:
 	case AccountModel::nodeReceived:
 	case AccountModel::nodeReceivedYear:
-		if (index == 1) {
-			m_received_1 = newSize;
-		} else if (index == 2) {
-			m_received_2 = newSize;
+		if (index == DbMsgsTblModel::ANNOT_COL) {
+			m_colWidthRcvd[1] = newSize;
+		} else if (index == DbMsgsTblModel::SENDER_COL) {
+			m_colWidthRcvd[2] = newSize;
 		}
 		break;
 	case AccountModel::nodeRecentSent:
 	case AccountModel::nodeSent:
 	case AccountModel::nodeSentYear:
-		if (index == 1) {
-			m_sent_1 = newSize;
-		} else if (index == 2) {
-			m_sent_2 = newSize;
+		if (index == DbMsgsTblModel::ANNOT_COL) {
+			m_colWidthSnt[1] = newSize;
+		} else if (index == DbMsgsTblModel::RECIP_COL) {
+			m_colWidthSnt[2] = newSize;
 		}
 		break;
 	default:
@@ -5106,16 +5098,11 @@ void MainWindow::onTableColumnResized(int index, int oldSize, int newSize)
 	}
 }
 
-/* ========================================================================= */
-/*
- * Set actual sort order for current column.
- */
 void MainWindow::onTableColumnHeaderSectionClicked(int column)
-/* ========================================================================= */
 {
 	debugSlotCall();
 
-	m_sort_column = column;
+	m_sortCol = column;
 	if (ui->messageList->horizontalHeader()->sortIndicatorOrder() ==
 	    Qt::AscendingOrder) {
 		m_sort_order = "SORT_ASCENDING";
@@ -5126,7 +5113,6 @@ void MainWindow::onTableColumnHeaderSectionClicked(int column)
 		m_sort_order = QString();
 	}
 }
-
 
 /* ========================================================================= */
 /*
@@ -6349,7 +6335,7 @@ void MainWindow::getStoredMsgInfoFromRecordsManagement(void)
 	    *GlobInstcs::recMgmtSetPtr, accounts, this);
 
 	m_messageTableModel.fillRecordsManagementColumn(
-	    DbMsgsTblModel::REC_MGMT_NEG_COL);
+	    DbMsgsTblModel::RECMGMT_NEG_COL);
 }
 
 void MainWindow::sendSelectedMessageToRecordsManagement(void)
@@ -6426,7 +6412,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	msgIdList.append(msgId.dmId);
 
 	m_messageTableModel.refillRecordsManagementColumn(msgIdList,
-	    DbMsgsTblModel::REC_MGMT_NEG_COL);
+	    DbMsgsTblModel::RECMGMT_NEG_COL);
 }
 
 void MainWindow::showSignatureDetailsDialog(void)

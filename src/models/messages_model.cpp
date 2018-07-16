@@ -43,58 +43,52 @@
  */
 #define MSG_ID_WIDTH 48
 
+/*!
+ * @brief Construct the default records management icon.
+ *
+ * @return Icon object.
+ */
+static
+QIcon defaultRMIcon(void)
+{
+	QIcon ico;
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+	return ico;
+}
+
 DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
     : TblModel(parent),
     m_type(type),
-    m_dsIco(ICON_3PARTY_PATH "up_16.png")
+    m_rmIco(defaultRMIcon())
 {
+	/* Fixed column size. */
+	m_columnCount = MAX_COLNUM;
 }
 
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 {
-	int dataType;
-
-#define TAGS_OFFS 1 /* Tags are located behind upload information. */
-
 	/* Draw records management and tag information. */
 	/* TODO -- This is only a temporal solution. */
-	switch (m_type) {
-	case WORKING_RCVD:
-		if (index.column() == (PROCSNG_COL + TAGS_OFFS)) {
-			return recMgmtData(index, role);
-		} else if (index.column() > (PROCSNG_COL + TAGS_OFFS)) {
-			return tagsData(index, role);
-		}
-		break;
-	case WORKING_SNT:
-		if (index.column() == (ATTDOWN_COL + TAGS_OFFS)) {
-			return recMgmtData(index, role);
-		} else if (index.column() > (ATTDOWN_COL + TAGS_OFFS)) {
-			return tagsData(index, role);
-		}
-		break;
-	default:
-		Q_ASSERT(0);
-		return QVariant();
-		break;
+	if (index.column() == (MAX_COLNUM + RECMGMT_NEG_COL)) {
+		return recMgmtData(index, role);
+	} else if (index.column() == (MAX_COLNUM + TAGS_NEG_COL)) {
+		return tagsData(index, role);
 	}
-
-#undef TAGS_OFFS
 
 	switch (role) {
 	case Qt::DisplayRole:
-		dataType = _headerData(index.column(), Qt::Horizontal,
-		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
-		switch (dataType) {
-		case DB_DATETIME:
+		switch (index.column()) {
+		case DELIVERY_COL:
+		case ACCEPT_COL:
 			/* Convert date on display. */
 			return dateTimeStrFromDbFormat(
 			    _data(index, role).toString(),
 			    dateTimeDisplayFormat);
 			break;
-		case DB_BOOL_READ_LOCALLY: /* 'read locally' */
-		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded' */
-		case DB_INT_PROCESSING_STATE: /* 'process status' */
+		case READLOC_COL: /* 'read locally' */
+		case PROCSNG_COL: /* 'process status' */
+		case ATTDOWN_COL: /* 'is downloaded' */
 			/* Hide text. */
 			return QVariant();
 			break;
@@ -105,10 +99,8 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::DecorationRole:
-		dataType = _headerData(index.column(), Qt::Horizontal,
-		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
-		switch (dataType) {
-		case DB_BOOL_READ_LOCALLY:
+		switch (index.column()) {
+		case READLOC_COL:
 			/* Show icon for 'read locally'. */
 			if (_data(index).toBool()) {
 				QIcon ico;
@@ -124,19 +116,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				return ico;
 			}
 			break;
-		case DB_BOOL_ATTACHMENT_DOWNLOADED:
-			/* Show icon for 'is downloaded'. */
-			if (_data(index).toBool()) {
-				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
-			} else {
-				return QVariant(); /* No icon. */
-			}
-			break;
-		case DB_INT_PROCESSING_STATE:
+		case PROCSNG_COL:
 			/* Show icon for 'process status'. */
 			switch (_data(index).toInt()) {
 			case UNSETTLED:
@@ -172,7 +152,18 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			}
 			return QVariant();
 			break;
-
+		case ATTDOWN_COL:
+			/* Show icon for 'is downloaded'. */
+			if (_data(index).toBool()) {
+				QIcon ico;
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
+			} else {
+				return QVariant(); /* No icon. */
+			}
+			break;
 		default:
 			return _data(index, role);
 			break;
@@ -180,9 +171,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::ToolTipRole:
-		if ((index.column() == READLOC_STATUS_COL) &&
-		    (DB_BOOL_READ_LOCALLY != _headerData(READLOC_STATUS_COL,
-		        Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt())) {
+		if (index.column() == MSGSTAT_COL) {
 			/* Message state in sent messages. */
 			return Isds::Description::descrDmState(
 			    Isds::variant2DmState(_data(index, Qt::DisplayRole)));
@@ -191,66 +180,61 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::FontRole:
-		if (DB_BOOL_READ_LOCALLY == _headerData(READLOC_STATUS_COL,
-		        Qt::Horizontal, ROLE_MSGS_DB_ENTRY_TYPE).toInt()) {
-			/* In read messages. */
+		if (m_type == RCVD_MODEL) {
+			/* In received messages. */
 			if (!_data(index.sibling(index.row(),
-			        READLOC_STATUS_COL)).toBool()) {
+			        READLOC_COL)).toBool()) {
 				/* Unread messages are shown bold. */
 				QFont boldFont;
 				boldFont.setBold(true);
 				return boldFont;
 			}
 		}
-
 		return _data(index, role);
 		break;
 
 	case Qt::AccessibleTextRole:
-		dataType = _headerData(index.column(), Qt::Horizontal,
-		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
 		switch (index.column()) {
 		case DMID_COL:
 			return tr("message identifier") + QLatin1String(" ") +
 			    _data(index, Qt::DisplayRole).toString();
 			break;
-		case READLOC_STATUS_COL:
-			if (DB_BOOL_READ_LOCALLY != dataType) {
-				return headerData(index.column(), Qt::Horizontal).toString() +
-				    QStringLiteral(" ") +
-				    _data(index, Qt::DisplayRole).toString() +
-				    QStringLiteral(" ") +
-				    Isds::Description::descrDmState(
-				        Isds::variant2DmState(_data(index, Qt::DisplayRole)));
-			}
+		case READLOC_COL:
+			return headerData(index.column(), Qt::Horizontal).toString() +
+			    QStringLiteral(" ") +
+			    _data(index, Qt::DisplayRole).toString() +
+			    QStringLiteral(" ") +
+			    Isds::Description::descrDmState(
+			        Isds::variant2DmState(_data(index, Qt::DisplayRole)));
 			break;
 		default:
 			/* Continue with code. */
 			break;
 		}
-		switch (dataType) {
-		case DB_DATETIME:
+		switch (index.column()) {
+		case DELIVERY_COL:
+		case ACCEPT_COL:
 			return headerData(index.column(), Qt::Horizontal).toString() +
 			    QLatin1String(" ") +
 			    dateTimeStrFromDbFormat(
 			        _data(index, Qt::DisplayRole).toString(),
 			        dateTimeDisplayFormat);
 			break;
-		case DB_BOOL_READ_LOCALLY: /* 'read locally' */
+		case READLOC_COL: /* 'read locally' */
 			if (_data(index).toBool()) {
 				return tr("marked as read");
 			} else {
 				return tr("marked as unread");
 			}
 			break;
-		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded' */
+		case ATTDOWN_COL: /* 'is downloaded' */
 			if (_data(index).toBool()) {
 				return tr("attachments downloaded");
 			} else {
 				return tr("attachments not downloaded");
 			}
 			break;
-		case DB_INT_PROCESSING_STATE: /* 'process status' */
+		case PROCSNG_COL: /* 'process status' */
 			{
 				QString headerPref(headerData(index.column(),
 				     Qt::Horizontal, Qt::ToolTipRole).toString());
@@ -286,21 +270,20 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case ROLE_MSGS_DB_PROXYSORT:
-		dataType = _headerData(index.column(), Qt::Horizontal,
-		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
-		switch (dataType) {
-		case DB_BOOLEAN:
-		case DB_BOOL_READ_LOCALLY:
-		case DB_BOOL_ATTACHMENT_DOWNLOADED:
+		switch (index.column()) {
+		case READLOC_COL:
+		case ATTDOWN_COL:
 			return sortRank(
 			    _data(index, Qt::DisplayRole).toBool() ? 1 : 0,
 			    index);
 			break;
-		case DB_INT_PROCESSING_STATE:
+		case PROCSNG_COL:
 			return sortRank(_data(index, Qt::DisplayRole).toInt(),
 			    index);
 			break;
-		case DB_TEXT: /* Ignore case for sorting. */
+		case ANNOT_COL: /* Ignore case for sorting. */
+		case SENDER_COL:
+		case RECIP_COL:
 			return _data(index,
 			    Qt::DisplayRole).toString().toLower();
 			break;
@@ -319,38 +302,17 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
     int role) const
 {
-	int dataType;
-
 	/* Draw additional. */
-	switch (m_type) {
-	case WORKING_RCVD:
-		if (section > PROCSNG_COL) {
-			return _headerData(section, orientation, role);
-		}
-		break;
-	case WORKING_SNT:
-		if (section > ATTDOWN_COL) {
-			return _headerData(section, orientation, role);
-		}
-		break;
-	default:
-		Q_ASSERT(0);
-		return QVariant();
-		break;
+	if (section >= BASIC_COLNUM) {
+		return _headerData(section, orientation, role);
 	}
 
 	switch (role) {
 	case Qt::DisplayRole:
-		if (section < READLOC_STATUS_COL) {
-			return _headerData(section, orientation, role);
-		}
-
-		dataType = _headerData(section, Qt::Horizontal,
-		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
-		switch (dataType) {
-		case DB_BOOL_READ_LOCALLY: /* 'read locally' */
-		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded' */
-		case DB_INT_PROCESSING_STATE: /* 'process status' */
+		switch (section) {
+		case READLOC_COL: /* 'read locally' */
+		case ATTDOWN_COL: /* 'is downloaded' */
+		case PROCSNG_COL: /* 'process status' */
 			/* Hide text. */
 			return QVariant();
 			break;
@@ -361,14 +323,8 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		break;
 
 	case Qt::DecorationRole:
-		if (section < READLOC_STATUS_COL) {
-			return _headerData(section, orientation, role);
-		}
-		dataType = _headerData(section, Qt::Horizontal,
-		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
-		switch (dataType) {
-		case DB_BOOL_READ_LOCALLY:
-			/* Show icon for 'read locally'. */
+		switch (section) {
+		case READLOC_COL: /* 'read locally' */
 			{
 				QIcon ico;
 				ico.addFile(QStringLiteral(ICON_16x16_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -377,8 +333,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 				return ico;
 			}
 			break;
-		case DB_BOOL_ATTACHMENT_DOWNLOADED:
-			/* Show icon for 'is downloaded'. */
+		case ATTDOWN_COL: /* 'is downloaded' */
 			{
 				QIcon ico;
 				ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -387,7 +342,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 				return ico;
 			}
 			break;
-		case DB_INT_PROCESSING_STATE:
+		case PROCSNG_COL: /* 'process status' */
 			{
 				QIcon ico;
 				ico.addFile(QStringLiteral(ICON_16x16_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -403,16 +358,10 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		break;
 
 	case Qt::ToolTipRole:
-		if (section < READLOC_STATUS_COL) {
-			return QVariant();
-		}
-
-		dataType = _headerData(section, Qt::Horizontal,
-		    ROLE_MSGS_DB_ENTRY_TYPE).toInt();
-		switch (dataType) {
-		case DB_BOOL_READ_LOCALLY: /* 'read locally'. */
-		case DB_BOOL_ATTACHMENT_DOWNLOADED: /* 'is downloaded'. */
-		case DB_INT_PROCESSING_STATE: /* 'process status'. */
+		switch (section) {
+		case READLOC_COL: /* 'read locally' */
+		case ATTDOWN_COL: /* 'is downloaded' */
+		case PROCSNG_COL: /* 'process status' */
 			/* Tool tip. */
 			return _headerData(section, orientation, Qt::DisplayRole);
 			break;
@@ -431,6 +380,10 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
     int appendedColsNum)
 {
+	if (Q_UNLIKELY(m_columnCount != MAX_COLNUM)) {
+		Q_ASSERT(0);
+		return;
+	}
 	if (Q_UNLIKELY(appendedColsNum < 0)) {
 		Q_ASSERT(0);
 		return;
@@ -439,16 +392,11 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 	/* Set column count if the model is empty. */
 	if (rowCount() == 0) {
 		beginResetModel();
-		m_type = WORKING_RCVD;
-		m_columnCount = MessageDb::rcvdItemIds.size() + appendedColsNum;
+		m_type = RCVD_MODEL;
+		//m_columnCount = MAX_COLNUM;
 		endResetModel();
 	} else {
-		if (Q_UNLIKELY(m_type != WORKING_RCVD)) {
-			Q_ASSERT(0);
-			return;
-		}
-		if (Q_UNLIKELY(m_columnCount !=
-		        (MessageDb::rcvdItemIds.size() + appendedColsNum))) {
+		if (Q_UNLIKELY(m_type != RCVD_MODEL)) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -470,10 +418,10 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 
 		row[DMID_COL] = entry.dmId;
 		row[ANNOT_COL] = entry.dmAnnotation;
-		row[SENDER_RECIP_COL] = entry.dmSender;
+		row[SENDER_COL] = entry.dmSender;
 		row[DELIVERY_COL] = entry.dmDeliveryTime;
 		row[ACCEPT_COL] = entry.dmAcceptanceTime;
-		row[READLOC_STATUS_COL] = entry.readLocally;
+		row[READLOC_COL] = entry.readLocally;
 		row[ATTDOWN_COL] = entry.isDownloaded;
 		row[PROCSNG_COL] = entry.processStatus;
 
@@ -486,6 +434,10 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
     int appendedColsNum)
 {
+	if (Q_UNLIKELY(m_columnCount != MAX_COLNUM)) {
+		Q_ASSERT(0);
+		return;
+	}
 	if (Q_UNLIKELY(appendedColsNum < 0)) {
 		Q_ASSERT(0);
 		return;
@@ -494,16 +446,11 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 	/* Set column count if the model is empty. */
 	if (rowCount() == 0) {
 		beginResetModel();
-		m_type = WORKING_SNT;
-		m_columnCount = MessageDb::sntItemIds.size() + appendedColsNum;
+		m_type = SNT_MODEL;
+		//m_columnCount = MAX_COLNUM;
 		endResetModel();
 	} else {
-		if (Q_UNLIKELY(m_type != WORKING_SNT)) {
-			Q_ASSERT(0);
-			return;
-		}
-		if (Q_UNLIKELY(m_columnCount !=
-		        (MessageDb::sntItemIds.size() + appendedColsNum))) {
+		if (Q_UNLIKELY(m_type != SNT_MODEL)) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -525,10 +472,10 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 
 		row[DMID_COL] = entry.dmId;
 		row[ANNOT_COL] = entry.dmAnnotation;
-		row[SENDER_RECIP_COL] = entry.dmRecipient;
+		row[RECIP_COL] = entry.dmRecipient;
 		row[DELIVERY_COL] = entry.dmDeliveryTime;
 		row[ACCEPT_COL] = entry.dmAcceptanceTime;
-		row[READLOC_STATUS_COL] = entry.dmMessageStatus;
+		row[MSGSTAT_COL] = entry.dmMessageStatus;
 		row[ATTDOWN_COL] = entry.isDownloaded;
 
 		m_data[m_rowCount++] = row;
@@ -537,11 +484,16 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 	endInsertRows();
 }
 
-bool DbMsgsTblModel::setType(enum DbMsgsTblModel::Type type)
+bool DbMsgsTblModel::setType(enum Type type)
 {
 	m_type = type;
 
 	return true;
+}
+
+enum DbMsgsTblModel::Type DbMsgsTblModel::type(void) const
+{
+	return m_type;
 }
 
 static
@@ -567,98 +519,91 @@ void appendHeaderColumns(DbMsgsTblModel *model, int dfltHdrSize,
 	}
 }
 
-bool DbMsgsTblModel::setRcvdHeader(const QList<AppendedCol> &appendedCols)
+bool DbMsgsTblModel::setHeader(const QList<AppendedCol> &appendedCols)
 {
-	for (int i = 0; i < MessageDb::rcvdItemIds.size(); ++i) {
-		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(MessageDb::rcvdItemIds[i]) !=
-		    msgsTbl.attrProps.end()) {
-			/* Description. */
-			setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[i]).desc,
-			    Qt::DisplayRole);
-			/* Data type. */
-			setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if (smsgdtTbl.attrProps.find(MessageDb::rcvdItemIds[i]) !=
-		    smsgdtTbl.attrProps.end()) {
-			/* Description. */
-			setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[i]).desc,
-			    Qt::DisplayRole);
-			/* Data type. */
-			setHeaderData(i, Qt::Horizontal,
-			    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == MessageDb::rcvdItemIds[i]) {
-			/* Description. */
-			setHeaderData(i, Qt::Horizontal,
-			    tr("Attachments downloaded"), Qt::DisplayRole);
-			/* Data type. */
-			setHeaderData(i, Qt::Horizontal,
-			    DB_BOOL_ATTACHMENT_DOWNLOADED,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("process_status" == MessageDb::rcvdItemIds[i]) {
-			/* Description. */
-			setHeaderData(i, Qt::Horizontal,
-			    tr("Processing state"), Qt::DisplayRole);
-			/* Data type. */
-			setHeaderData(i, Qt::Horizontal,
-			    DB_INT_PROCESSING_STATE, ROLE_MSGS_DB_ENTRY_TYPE);
-		} else {
-			return false;
-		}
-	}
+	/* Sets description and data type. */
 
-	appendHeaderColumns(this, MessageDb::rcvdItemIds.size(), appendedCols);
+	setHeaderData(DMID_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[0]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(DMID_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[0]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
 
-	return true;
-}
+	setHeaderData(ANNOT_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[1]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(ANNOT_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[1]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
 
-bool DbMsgsTblModel::setSntHeader(const QList<AppendedCol> &appendedCols)
-{
-	for (int i = 0; i < MessageDb::sntItemIds.size(); ++i) {
-		/* TODO -- Handle the joined tables in a better way. */
-		if (msgsTbl.attrProps.find(MessageDb::sntItemIds[i]) !=
-		    msgsTbl.attrProps.end()) {
-			/* Description. */
-			setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(MessageDb::sntItemIds[i]).desc,
-			    Qt::DisplayRole);
-			/* Data type. */
-			setHeaderData(i, Qt::Horizontal,
-			    msgsTbl.attrProps.value(MessageDb::sntItemIds[i]).type,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else if ("is_downloaded" == MessageDb::sntItemIds[i]) {
-			/* Description. */
-			setHeaderData(i, Qt::Horizontal,
-			    tr("Attachments downloaded"), Qt::DisplayRole);
-			/* Data type. */
-			setHeaderData(i, Qt::Horizontal,
-			    DB_BOOL_ATTACHMENT_DOWNLOADED,
-			    ROLE_MSGS_DB_ENTRY_TYPE);
-		} else {
-			return false;
-		}
-	}
+	setHeaderData(SENDER_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[2]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(SENDER_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[2]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
 
-	appendHeaderColumns(this, MessageDb::sntItemIds.size(), appendedCols);
+	setHeaderData(RECIP_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::sntItemIds[2]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(RECIP_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::sntItemIds[2]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
+
+	setHeaderData(DELIVERY_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[3]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(DELIVERY_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[3]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
+
+	setHeaderData(ACCEPT_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[4]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(ACCEPT_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[4]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
+
+	setHeaderData(READLOC_COL, Qt::Horizontal,
+	    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[5]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(READLOC_COL, Qt::Horizontal,
+	    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[5]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
+
+	setHeaderData(MSGSTAT_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::sntItemIds[5]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(MSGSTAT_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::sntItemIds[5]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
+
+	setHeaderData(ATTDOWN_COL, Qt::Horizontal,
+	    tr("Attachments downloaded"), Qt::DisplayRole);
+	setHeaderData(ATTDOWN_COL, Qt::Horizontal, DB_BOOLEAN,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
+
+	setHeaderData(PROCSNG_COL, Qt::Horizontal, tr("Processing state"),
+	    Qt::DisplayRole);
+	setHeaderData(PROCSNG_COL, Qt::Horizontal, DB_INTEGER,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
+
+	appendHeaderColumns(this, BASIC_COLNUM, appendedCols);
 
 	return true;
 }
 
 bool DbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
 {
-	if (WORKING_RCVD != m_type) {
+	if (RCVD_MODEL != m_type) {
 		/* Not a read messages model. */
 		return false;
 	}
 
 	for (int row = 0; row < rowCount(); ++row) {
-		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() ==
-		    dmId) {
-			m_data[row][READLOC_STATUS_COL] = QVariant(forceRead);
+		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() == dmId) {
+			m_data[row][READLOC_COL] = QVariant(forceRead);
 
 			emit dataChanged(TblModel::index(row, 0),
 			    TblModel::index(row, columnCount() - 1));
@@ -671,14 +616,13 @@ bool DbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
 
 bool DbMsgsTblModel::overrideDownloaded(qint64 dmId, bool forceDownloaded)
 {
-	if (WORKING_RCVD != m_type) {
+	if (RCVD_MODEL != m_type) {
 		/* Not a read messages model. */
 		return false;
 	}
 
 	for (int row = 0; row < rowCount(); ++row) {
-		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() ==
-		    dmId) {
+		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() == dmId) {
 			m_data[row][ATTDOWN_COL] = QVariant(forceDownloaded);
 
 			emit dataChanged(TblModel::index(row, 0),
@@ -693,14 +637,13 @@ bool DbMsgsTblModel::overrideDownloaded(qint64 dmId, bool forceDownloaded)
 bool DbMsgsTblModel::overrideProcessing(qint64 dmId,
     enum MessageProcessState forceState)
 {
-	if (WORKING_RCVD != m_type) {
+	if (RCVD_MODEL != m_type) {
 		/* Not a read messages model. */
 		return false;
 	}
 
 	for (int row = 0; row < rowCount(); ++row) {
-		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() ==
-		    dmId) {
+		if (_data(row, DMID_COL, Qt::DisplayRole).toLongLong() == dmId) {
 			m_data[row][PROCSNG_COL] = QVariant(forceState);
 
 			emit dataChanged(TblModel::index(row, 0),
@@ -788,28 +731,28 @@ bool DbMsgsTblModel::refillTagsColumn(const QString &userName,
 
 bool DbMsgsTblModel::setRecordsManagementIcon(void)
 {
-	QIcon ico;
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-
 	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
-		m_dsIco = ico;
+		m_rmIco = defaultRMIcon();
 		return false;
 	}
 
 	RecordsManagementDb::ServiceInfoEntry entry(
 	    GlobInstcs::recMgmtDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
-		m_dsIco = ico;
+		m_rmIco = defaultRMIcon();
 		return false;
 	}
-	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, 16));
-	if (pixmap.isNull()) {
-		m_dsIco = ico;
+	QPixmap pixmap16(Graphics::pixmapFromSvg(entry.logoSvg, 16));
+	QPixmap pixmap32(Graphics::pixmapFromSvg(entry.logoSvg, 32));
+	if (pixmap16.isNull() || pixmap32.isNull()) {
+		m_rmIco = defaultRMIcon();
 		return false;
 	}
 
-	m_dsIco = QIcon(pixmap);
+	QIcon ico;
+	ico.addPixmap(pixmap16, QIcon::Normal, QIcon::Off);
+	ico.addPixmap(pixmap32, QIcon::Normal, QIcon::Off);
+	m_rmIco = ico;
 	return true;
 }
 
@@ -894,7 +837,7 @@ QVariant DbMsgsTblModel::recMgmtData(const QModelIndex &index, int role) const
 
 	switch (role) {
 	case Qt::DecorationRole:
-		return locations.isEmpty() ? QVariant() : m_dsIco;
+		return locations.isEmpty() ? QVariant() : m_rmIco;
 		break;
 	case Qt::ToolTipRole:
 		return locations.join(QLatin1String("\n"));

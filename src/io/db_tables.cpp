@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -506,7 +506,7 @@ namespace SmsgdtTbl {
 	const QVector< QPair<QString, enum EntryType> > knownAttrs = {
 	{"message_id", DB_INTEGER}, /* NOT NULL */
 	{"message_type", DB_INTEGER},
-	{"read_locally", DB_BOOL_READ_LOCALLY},
+	{"read_locally", DB_BOOLEAN},
 	{"download_date", DB_DATETIME},
 	{"custom_data", DB_TEXT}
 	/*
@@ -530,7 +530,7 @@ namespace SmsgdtTbl {
 	const QMap<QString, SQLiteTbl::AttrProp> attrProps = {
 	{"message_id",    {DB_INTEGER, ""}},
 	{"message_type",  {DB_INTEGER, ""}},
-	{"read_locally",  {DB_BOOL_READ_LOCALLY, QObject::tr("Read locally")}},
+	{"read_locally",  {DB_BOOLEAN, QObject::tr("Read locally")}},
 	{"download_date", {DB_DATETIME, ""}},
 	{"custom_data",   {DB_TEXT, ""}}
 	};
