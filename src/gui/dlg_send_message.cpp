@@ -1306,7 +1306,22 @@ bool DlgSendMessage::buildDocuments(QList<Isds::Document> &documents) const
 		 * be filled up on the ISDS server. It allows sending files
 		 * with special mime types without recognition by application.
 		 */
-		document.setMimeType(QStringLiteral(""));
+		index = m_attachModel.index(row, DbFlsTblModel::MIME_COL);
+		if (index.data().toString() == QStringLiteral("application/xml")) {
+			/*
+			 * When sending XML requests to the eGov portals then
+			 * the robots handling the requests are likely
+			 * to discard them if the MIME type for the XML
+			 * documents is not set.
+			 */
+			logDebugLv1NL("Setting '%s' mime type for document '%s'.",
+			    index.data().toString().toUtf8().constData(),
+			    document.fileDescr().toUtf8().constData());
+			document.setMimeType(index.data().toString());
+		} else {
+			/* Must be empty non-null string. */
+			document.setMimeType(QStringLiteral(""));
+		}
 
 		index = m_attachModel.index(row, DbFlsTblModel::CONTENT_COL);
 		if (!index.isValid()) {
