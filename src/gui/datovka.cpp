@@ -302,7 +302,7 @@ MainWindow::~MainWindow(void)
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     m_accountModel(this),
-    m_messageTableModel(DbMsgsTblModel::WORKING_RCVD, this),
+    m_messageTableModel(DbMsgsTblModel::RCVD_MODEL, this),
     m_messageListProxyModel(this),
     m_attachmentModel(this),
     m_messageMarker(this),
@@ -750,10 +750,10 @@ void showMessageColumnsAccordingToFunctionality(QTableView *view,
 {
 	QList<int> hideCols;
 
-	if (type == DbMsgsTblModel::WORKING_RCVD) {
+	if (type == DbMsgsTblModel::RCVD_MODEL) {
 		hideCols.append(DbMsgsTblModel::RECIP_COL);
 		hideCols.append(DbMsgsTblModel::MSGSTAT_COL);
-	} else if (type == DbMsgsTblModel::WORKING_SNT) {
+	} else if (type == DbMsgsTblModel::SNT_MODEL) {
 		hideCols.append(DbMsgsTblModel::SENDER_COL);
 		hideCols.append(DbMsgsTblModel::READLOC_COL);
 		hideCols.append(DbMsgsTblModel::PROCSNG_COL);

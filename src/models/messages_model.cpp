@@ -46,8 +46,9 @@
 DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
     : TblModel(parent),
     m_type(type),
-    m_dsIco(ICON_3PARTY_PATH "up_16.png")
+    m_rmIco(ICON_3PARTY_PATH "up_16.png")
 {
+	/* Fixed column size. */
 	m_columnCount = COLNUM;
 }
 
@@ -165,7 +166,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::FontRole:
-		if (m_type == WORKING_RCVD) {
+		if (m_type == RCVD_MODEL) {
 			/* In received messages. */
 			if (!_data(index.sibling(index.row(),
 			        READLOC_COL)).toBool()) {
@@ -377,18 +378,14 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 	/* Set column count if the model is empty. */
 	if (rowCount() == 0) {
 		beginResetModel();
-		m_type = WORKING_RCVD;
-//		m_columnCount = COLNUM;
+		m_type = RCVD_MODEL;
+		//m_columnCount = COLNUM;
 		endResetModel();
 	} else {
-		if (Q_UNLIKELY(m_type != WORKING_RCVD)) {
+		if (Q_UNLIKELY(m_type != RCVD_MODEL)) {
 			Q_ASSERT(0);
 			return;
 		}
-//		if (Q_UNLIKELY(m_columnCount != COLNUM)) {
-//			Q_ASSERT(0);
-//			return;
-//		}
 	}
 
 	if (entryList.isEmpty()) {
@@ -435,18 +432,14 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 	/* Set column count if the model is empty. */
 	if (rowCount() == 0) {
 		beginResetModel();
-		m_type = WORKING_SNT;
-//		m_columnCount = COLNUM;
+		m_type = SNT_MODEL;
+		//m_columnCount = COLNUM;
 		endResetModel();
 	} else {
-		if (Q_UNLIKELY(m_type != WORKING_SNT)) {
+		if (Q_UNLIKELY(m_type != SNT_MODEL)) {
 			Q_ASSERT(0);
 			return;
 		}
-//		if (Q_UNLIKELY(m_columnCount != COLNUM)) {
-//			Q_ASSERT(0);
-//			return;
-//		}
 	}
 
 	if (entryList.isEmpty()) {
@@ -589,7 +582,7 @@ bool DbMsgsTblModel::setHeader(const QList<AppendedCol> &appendedCols)
 
 bool DbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
 {
-	if (WORKING_RCVD != m_type) {
+	if (RCVD_MODEL != m_type) {
 		/* Not a read messages model. */
 		return false;
 	}
@@ -609,7 +602,7 @@ bool DbMsgsTblModel::overrideRead(qint64 dmId, bool forceRead)
 
 bool DbMsgsTblModel::overrideDownloaded(qint64 dmId, bool forceDownloaded)
 {
-	if (WORKING_RCVD != m_type) {
+	if (RCVD_MODEL != m_type) {
 		/* Not a read messages model. */
 		return false;
 	}
@@ -630,7 +623,7 @@ bool DbMsgsTblModel::overrideDownloaded(qint64 dmId, bool forceDownloaded)
 bool DbMsgsTblModel::overrideProcessing(qint64 dmId,
     enum MessageProcessState forceState)
 {
-	if (WORKING_RCVD != m_type) {
+	if (RCVD_MODEL != m_type) {
 		/* Not a read messages model. */
 		return false;
 	}
@@ -729,23 +722,23 @@ bool DbMsgsTblModel::setRecordsManagementIcon(void)
 	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 
 	if (Q_NULLPTR == GlobInstcs::recMgmtDbPtr) {
-		m_dsIco = ico;
+		m_rmIco = ico;
 		return false;
 	}
 
 	RecordsManagementDb::ServiceInfoEntry entry(
 	    GlobInstcs::recMgmtDbPtr->serviceInfo());
 	if (!entry.isValid() || entry.logoSvg.isEmpty()) {
-		m_dsIco = ico;
+		m_rmIco = ico;
 		return false;
 	}
 	QPixmap pixmap(Graphics::pixmapFromSvg(entry.logoSvg, 16));
 	if (pixmap.isNull()) {
-		m_dsIco = ico;
+		m_rmIco = ico;
 		return false;
 	}
 
-	m_dsIco = QIcon(pixmap);
+	m_rmIco = QIcon(pixmap);
 	return true;
 }
 
@@ -830,7 +823,7 @@ QVariant DbMsgsTblModel::recMgmtData(const QModelIndex &index, int role) const
 
 	switch (role) {
 	case Qt::DecorationRole:
-		return locations.isEmpty() ? QVariant() : m_dsIco;
+		return locations.isEmpty() ? QVariant() : m_rmIco;
 		break;
 	case Qt::ToolTipRole:
 		return locations.join(QLatin1String("\n"));

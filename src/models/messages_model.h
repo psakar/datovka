@@ -46,6 +46,14 @@ class DbMsgsTblModel : public TblModel {
 public:
 	/*!
 	 * @brief Identifies the column index.
+	 *
+	 * @Note Non-negative values are directly derived from the message
+	 *     database. Columns identified by negative values are added and
+	 *     are kept in separate database files.
+	 *
+	 * @todo Processing state should be separated from the message database
+	 *     and should be kept in a separate database in a similar fashion
+	 *     as tags or records management information.
 	 */
 	enum ColumnNumbers {
 		DMID_COL = 0, /* Message identifier. */
@@ -61,7 +69,7 @@ public:
 		RECMGMT_NEG_COL = -2, /* 10 */ /* Records management service. */
 		TAGS_NEG_COL = -1, /* 11 */ /* Tags. */
 		BASIC_COLNUM = 10, /* Number of basic columns (convenience value). */
-		COLNUM = 12 /* Maximal number of columns (convenience value). */
+		MAX_COLNUM = 12 /* Maximal number of columns (convenience value). */
 	};
 
 	/*!
@@ -70,8 +78,8 @@ public:
 	 * @note Dummies are used to fake empty models.
 	 */
 	enum Type {
-		WORKING_RCVD = 0, /*!< Ordinary model created from SQL query result. */
-		WORKING_SNT /*!< Ordinary model created from SQL query result. */
+		RCVD_MODEL = 0, /*!< Model created from SQL query result. */
+		SNT_MODEL /*!< Model created from SQL query result. */
 	};
 
 	/*!
@@ -99,7 +107,7 @@ public:
 	 * @param[in] type   Type of the table model.
 	 * @param[in] parent Parent object.
 	 */
-	explicit DbMsgsTblModel(enum Type type = WORKING_RCVD,
+	explicit DbMsgsTblModel(enum Type type = RCVD_MODEL,
 	    QObject *parent = Q_NULLPTR);
 
 	/*!
@@ -278,5 +286,5 @@ private:
 
 	enum Type m_type; /*!< Specifies type of data held in the model. */
 
-	QIcon m_dsIco; /*!< Records management icon. */
+	QIcon m_rmIco; /*!< Records management icon. */
 };
