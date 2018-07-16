@@ -5026,7 +5026,7 @@ void MainWindow::setReceivedColumnWidths(void)
 	ui->messageList->setColumnWidth(DbMsgsTblModel::PROCSNG_COL, ICON_COL_WIDTH);
 	if (GlobInstcs::recMgmtSetPtr->isValid()) {
 		ui->messageList->setColumnWidth(
-		    DbMsgsTblModel::COLNUM + DbMsgsTblModel::RECMGMT_NEG_COL,
+		    DbMsgsTblModel::MAX_COLNUM + DbMsgsTblModel::RECMGMT_NEG_COL,
 		    ICON_COL_WIDTH);
 	}
 
@@ -5056,7 +5056,7 @@ void MainWindow::setSentColumnWidths(void)
 	ui->messageList->setColumnWidth(DbMsgsTblModel::ATTDOWN_COL, ICON_COL_WIDTH);
 	if (GlobInstcs::recMgmtSetPtr->isValid()) {
 		ui->messageList->setColumnWidth(
-		    DbMsgsTblModel::COLNUM + DbMsgsTblModel::RECMGMT_NEG_COL,
+		    DbMsgsTblModel::MAX_COLNUM + DbMsgsTblModel::RECMGMT_NEG_COL,
 		    ICON_COL_WIDTH);
 	}
 

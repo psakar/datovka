@@ -49,16 +49,16 @@ DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
     m_rmIco(ICON_3PARTY_PATH "up_16.png")
 {
 	/* Fixed column size. */
-	m_columnCount = COLNUM;
+	m_columnCount = MAX_COLNUM;
 }
 
 QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 {
 	/* Draw records management and tag information. */
 	/* TODO -- This is only a temporal solution. */
-	if (index.column() == (COLNUM + RECMGMT_NEG_COL)) {
+	if (index.column() == (MAX_COLNUM + RECMGMT_NEG_COL)) {
 		return recMgmtData(index, role);
-	} else if (index.column() == (COLNUM + TAGS_NEG_COL)) {
+	} else if (index.column() == (MAX_COLNUM + TAGS_NEG_COL)) {
 		return tagsData(index, role);
 	}
 
@@ -366,7 +366,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
     int appendedColsNum)
 {
-	if (Q_UNLIKELY(m_columnCount != COLNUM)) {
+	if (Q_UNLIKELY(m_columnCount != MAX_COLNUM)) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -379,7 +379,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 	if (rowCount() == 0) {
 		beginResetModel();
 		m_type = RCVD_MODEL;
-		//m_columnCount = COLNUM;
+		//m_columnCount = MAX_COLNUM;
 		endResetModel();
 	} else {
 		if (Q_UNLIKELY(m_type != RCVD_MODEL)) {
@@ -420,7 +420,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
     int appendedColsNum)
 {
-	if (Q_UNLIKELY(m_columnCount != COLNUM)) {
+	if (Q_UNLIKELY(m_columnCount != MAX_COLNUM)) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -433,7 +433,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 	if (rowCount() == 0) {
 		beginResetModel();
 		m_type = SNT_MODEL;
-		//m_columnCount = COLNUM;
+		//m_columnCount = MAX_COLNUM;
 		endResetModel();
 	} else {
 		if (Q_UNLIKELY(m_type != SNT_MODEL)) {
