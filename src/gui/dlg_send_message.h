@@ -32,8 +32,8 @@
 #include "src/datovka_shared/isds/message_interface.h"
 #include "src/io/message_db.h"
 #include "src/io/message_db_set.h"
+#include "src/models/attachments_model.h"
 #include "src/models/data_box_contacts_model.h"
-#include "src/models/files_model.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
 
@@ -338,7 +338,7 @@ private:
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 
 	BoxContactsModel m_recipTableModel; /*!< Data box table model. */
-	DbFlsTblModel m_attachModel; /*!< Attachment table model. */
+	AttachmentTblModel m_attachModel; /*!< Attachment table model. */
 
 	/* Used to collect sending results. */
 	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */

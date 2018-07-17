@@ -618,12 +618,12 @@ void DlgSendMessage::initContent(enum Action action,
 	m_attachModel.setHeader();
 	m_ui->attachTableView->setModel(&m_attachModel);
 
-	m_ui->attachTableView->setColumnWidth(DbFlsTblModel::FNAME_COL, 150);
-	m_ui->attachTableView->setColumnWidth(DbFlsTblModel::MIME_COL, 120);
+	m_ui->attachTableView->setColumnWidth(AttachmentTblModel::FNAME_COL, 150);
+	m_ui->attachTableView->setColumnWidth(AttachmentTblModel::MIME_COL, 120);
 
-	m_ui->attachTableView->setColumnHidden(DbFlsTblModel::ATTACHID_COL, true);
-	m_ui->attachTableView->setColumnHidden(DbFlsTblModel::MSGID_COL, true);
-	m_ui->attachTableView->setColumnHidden(DbFlsTblModel::CONTENT_COL, true);
+	m_ui->attachTableView->setColumnHidden(AttachmentTblModel::ATTACHID_COL, true);
+	m_ui->attachTableView->setColumnHidden(AttachmentTblModel::MSGID_COL, true);
+	m_ui->attachTableView->setColumnHidden(AttachmentTblModel::BINARY_CONTENT_COL, true);
 
 	/* Enable drag and drop on attachment table. */
 	m_ui->attachTableView->setAcceptDrops(true);
@@ -787,12 +787,12 @@ void DlgSendMessage::fillContentAsForward(const QList<MessageDb::MsgId> &msgIds)
 			m_ui->subjectLine->setText("Fwd: " + envData.dmAnnotation());
 		}
 
-		QByteArray msgBase64(messageDb->getCompleteMessageBase64(msgId.dmId));
-		if (msgBase64.isEmpty()) {
+		QByteArray msgBinary(messageDb->getCompleteMessageRaw(msgId.dmId));
+		if (msgBinary.isEmpty()) {
 			continue;
 		}
 
-		m_attachModel.appendAttachmentEntry(msgBase64,
+		m_attachModel.appendBinaryAttachment(msgBinary,
 		    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId));
 	}
 }
@@ -972,8 +972,8 @@ void DlgSendMessage::fillContentFromTemplate(
 	    messageDb->getMessageAttachments(msgId.dmId);
 
 	foreach (const Isds::Document &file, msgFileList) {
-		m_attachModel.appendAttachmentEntry(
-		    file.base64Content().toUtf8(), file.fileDescr());
+		m_attachModel.appendBinaryAttachment(file.binaryContent(),
+		    file.fileDescr());
 	}
 }
 
@@ -1286,7 +1286,7 @@ bool DlgSendMessage::buildDocuments(QList<Isds::Document> &documents) const
 		Isds::Document document;
 		QModelIndex index;
 
-		index = m_attachModel.index(row, DbFlsTblModel::FNAME_COL);
+		index = m_attachModel.index(row, AttachmentTblModel::FNAME_COL);
 		if (!index.isValid()) {
 			Q_ASSERT(0);
 			continue;
@@ -1306,7 +1306,7 @@ bool DlgSendMessage::buildDocuments(QList<Isds::Document> &documents) const
 		 * be filled up on the ISDS server. It allows sending files
 		 * with special mime types without recognition by application.
 		 */
-		index = m_attachModel.index(row, DbFlsTblModel::MIME_COL);
+		index = m_attachModel.index(row, AttachmentTblModel::MIME_COL);
 		{
 			const QString mimeName(index.data().toString());
 			if ((mimeName == QStringLiteral("application/xml")) ||
@@ -1327,13 +1327,14 @@ bool DlgSendMessage::buildDocuments(QList<Isds::Document> &documents) const
 			}
 		}
 
-		index = m_attachModel.index(row, DbFlsTblModel::CONTENT_COL);
+		index = m_attachModel.index(row,
+		    AttachmentTblModel::BINARY_CONTENT_COL);
 		if (!index.isValid()) {
 			Q_ASSERT(0);
 			continue;
 		}
-		document.setBinaryContent(QByteArray::fromBase64(
-		    index.data(Qt::DisplayRole).toByteArray()));
+		document.setBinaryContent(
+		    index.data(Qt::DisplayRole).toByteArray());
 
 		documents.append(document);
 	}

@@ -120,10 +120,7 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 	/* Detects selection of multiple attachments. */
 	QModelIndexList indexes(
 	    AttachmentInteraction::selectedColumnIndexes(*m_ui->attachmentTable,
-	        DbFlsTblModel::FNAME_COL));
-
-
-
+	        AttachmentTblModel::FNAME_COL));
 
 	if (index.isValid()) {
 		{
@@ -167,7 +164,7 @@ void DlgViewZfo::saveSelectedAttachmentsIntoDirectory(void)
 	AttachmentInteraction::saveAttachmentsToDirectory(this,
 	    *m_ui->attachmentTable,
 	    AttachmentInteraction::selectedColumnIndexes(*m_ui->attachmentTable,
-	        DbFlsTblModel::FNAME_COL));
+	        AttachmentTblModel::FNAME_COL));
 }
 
 void DlgViewZfo::openSelectedAttachment(const QModelIndex &index)
@@ -249,17 +246,17 @@ void DlgViewZfo::setUpDialogue(void)
 		m_ui->attachmentTable->setModel(&m_attachmentModel);
 		/* First three columns contain hidden data. */
 		m_ui->attachmentTable->setColumnHidden(
-		    DbFlsTblModel::ATTACHID_COL, true);
-		m_ui->attachmentTable->setColumnHidden(DbFlsTblModel::MSGID_COL,
-		    true);
+		    AttachmentTblModel::ATTACHID_COL, true);
 		m_ui->attachmentTable->setColumnHidden(
-		    DbFlsTblModel::CONTENT_COL, true);
-		m_ui->attachmentTable->setColumnHidden(DbFlsTblModel::MIME_COL,
-		    true);
-		m_ui->attachmentTable->setColumnHidden(DbFlsTblModel::FPATH_COL,
-		    true);
+		    AttachmentTblModel::MSGID_COL, true);
+		m_ui->attachmentTable->setColumnHidden(
+		    AttachmentTblModel::BINARY_CONTENT_COL, true);
+		m_ui->attachmentTable->setColumnHidden(
+		    AttachmentTblModel::MIME_COL, true);
+		m_ui->attachmentTable->setColumnHidden(
+		    AttachmentTblModel::FPATH_COL, true);
 		m_ui->attachmentTable->resizeColumnToContents(
-		    DbFlsTblModel::FNAME_COL);
+		    AttachmentTblModel::FNAME_COL);
 
 		m_ui->attachmentTable->setContextMenuPolicy(
 		    Qt::CustomContextMenu);

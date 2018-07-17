@@ -30,16 +30,15 @@
 #include <QSqlRecord>
 #include <QUrl>
 
-#include "src/common.h"
 #include "src/io/db_tables.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db.h"
 #include "src/log/log.h"
-#include "src/models/files_model.h"
+#include "src/models/attachments_model.h"
 
 #define LOCAL_DATABASE_STR QLatin1String("local database")
 
-DbFlsTblModel::DbFlsTblModel(QObject *parent)
+AttachmentTblModel::AttachmentTblModel(QObject *parent)
     : TblModel(parent)
 {
 	/* Fixed column count. */
@@ -79,13 +78,13 @@ qint64 getFileSize(const QString &filePath)
 }
 
 /*!
- * @brief Read file content and encode it into base64.
+ * @brief Read file content.
  *
  * @param[in] filePath Path to file.
- * @return Base64-encoded file content.
+ * @return Raw (non-base64-emcoded) file content.
  */
 static
-QByteArray getFileBase64(const QString &filePath)
+QByteArray getFileContent(const QString &filePath)
  {
 	QFile file(filePath);
 	if (file.exists()) {
@@ -94,18 +93,18 @@ QByteArray getFileBase64(const QString &filePath)
 			    filePath.toUtf8().constData());
 			goto fail;
 		}
-		return file.readAll().toBase64();
+		return file.readAll();
 	}
 fail:
 	return QByteArray();
 }
 
-QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
+QVariant AttachmentTblModel::data(const QModelIndex &index, int role) const
 {
 	switch (role) {
 	case Qt::DisplayRole:
 		switch (index.column()) {
-		case CONTENT_COL:
+		case BINARY_CONTENT_COL:
 			{
 				const QString fPath(_data(index.row(), FPATH_COL,
 				    role).toString());
@@ -115,7 +114,7 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 					return _data(index, role);
 				} else if (fileReadable(fPath)) {
 					/* Read file. */
-					return getFileBase64(fPath);
+					return getFileContent(fPath);
 				} else {
 					/*
 					 * This fallback is used when filling model
@@ -125,16 +124,24 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 				}
 			}
 			break;
-		case FSIZE_COL:
+		case BINARY_SIZE_COL:
 			{
-				const QString fPath(_data(index.row(), FPATH_COL,
-				    role).toString());
-				QByteArray b64(_data(index.row(), CONTENT_COL,
-				    role).toByteArray());
+				/* Read size from model if it is set. */
+				qint64 binarySize = _data(index.row(),
+				    BINARY_SIZE_COL, role).toLongLong();
+				if (binarySize > 0) {
+					return binarySize;
+				}
+			}
+			{
+				const QString fPath(_data(index.row(),
+				    FPATH_COL, role).toString());
+				const QByteArray rawData(_data(index.row(),
+				    BINARY_CONTENT_COL, role).toByteArray());
 
 				if (fPath == LOCAL_DATABASE_STR) {
-					/* Get attachment size from base64 length. */
-					return base64RealSize(b64);
+					/* Get attachment size. */
+					return rawData.size();
 				} else if (fileReadable(fPath)) {
 					/* File size. */
 					return getFileSize(fPath);
@@ -143,7 +150,7 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 					 * This fallback is used when filling model
 					 * with zfo content.
 					 */
-					return base64RealSize(b64);
+					return rawData.size();
 				}
 			}
 			break;
@@ -167,7 +174,7 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 			return headerData(index.column(), Qt::Horizontal).toString() +
 			    QLatin1String(" ") + data(index).toString();
 			break;
-		case FSIZE_COL:
+		case BINARY_SIZE_COL:
 			return headerData(index.column(), Qt::Horizontal).toString() +
 			    QLatin1String(" ") + data(index).toString() +
 			    QLatin1String(" ") + tr("bytes");
@@ -182,10 +189,10 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 		if (index.column() == FPATH_COL) {
 			const QString fPath(_data(index.row(), FPATH_COL,
 			    Qt::DisplayRole).toString());
-			QByteArray b64(_data(index.row(), CONTENT_COL,
-			    Qt::DisplayRole).toByteArray());
+			const QByteArray binaryData(_data(index.row(),
+			    BINARY_CONTENT_COL, Qt::DisplayRole).toByteArray());
 
-			if ((fPath == LOCAL_DATABASE_STR) && !b64.isEmpty()) {
+			if ((fPath == LOCAL_DATABASE_STR) && !binaryData.isEmpty()) {
 				return QVariant(); /* No file present. */
 			} else if (fileReadable(fPath)) {
 				return fPath; /* File present. */
@@ -201,13 +208,14 @@ QVariant DbFlsTblModel::data(const QModelIndex &index, int role) const
 	}
 }
 
-Qt::DropActions DbFlsTblModel::DbFlsTblModel::supportedDropActions(void) const
+Qt::DropActions AttachmentTblModel::AttachmentTblModel::supportedDropActions(
+    void) const
 {
 	/* The model must provide removeRows() to be able to use move action. */
 	return Qt::CopyAction | Qt::MoveAction;
 }
 
-Qt::ItemFlags DbFlsTblModel::flags(const QModelIndex &index) const
+Qt::ItemFlags AttachmentTblModel::flags(const QModelIndex &index) const
 {
 	Qt::ItemFlags defaultFlags = TblModel::flags(index);
 
@@ -221,9 +229,9 @@ Qt::ItemFlags DbFlsTblModel::flags(const QModelIndex &index) const
 	return defaultFlags;
 }
 
-QStringList DbFlsTblModel::mimeTypes(void) const
+QStringList AttachmentTblModel::mimeTypes(void) const
 {
-	return QStringList(QLatin1String("text/uri-list"));
+	return QStringList(QStringLiteral("text/uri-list"));
 }
 
 /*!
@@ -244,7 +252,7 @@ QList<QUrl> fileUrls(const QStringList &fileNames)
 	return uriList;
 }
 
-QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
+QMimeData *AttachmentTblModel::mimeData(const QModelIndexList &indexes) const
 {
 	QModelIndexList lineIndexes = sortedUniqueLineIndexes(indexes,
 	    FNAME_COL);
@@ -282,7 +290,7 @@ QMimeData *DbFlsTblModel::mimeData(const QModelIndexList &indexes) const
 	return mimeData;
 }
 
-bool DbFlsTblModel::canDropMimeData(const QMimeData *data,
+bool AttachmentTblModel::canDropMimeData(const QMimeData *data,
     Qt::DropAction action, int row, int column,
     const QModelIndex &parent) const
 {
@@ -328,8 +336,8 @@ QStringList filePaths(const QList<QUrl> &uriList)
 	return filePaths;
 }
 
-bool DbFlsTblModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
-    int row, int column, const QModelIndex &parent)
+bool AttachmentTblModel::dropMimeData(const QMimeData *data,
+    Qt::DropAction action, int row, int column, const QModelIndex &parent)
 {
 	if (!canDropMimeData(data, action, row, column, parent)) {
 		return false;
@@ -351,7 +359,7 @@ bool DbFlsTblModel::dropMimeData(const QMimeData *data, Qt::DropAction action,
 	return true;
 }
 
-void DbFlsTblModel::setHeader(void)
+void AttachmentTblModel::setHeader(void)
 {
 	int i;
 
@@ -367,13 +375,13 @@ void DbFlsTblModel::setHeader(void)
 	}
 
 	/* Columns with missing names. */
-	setHeaderData(FSIZE_COL, Qt::Horizontal, tr("File size"),
+	setHeaderData(BINARY_SIZE_COL, Qt::Horizontal, tr("File size"),
 	    Qt::DisplayRole);
 	setHeaderData(FPATH_COL, Qt::Horizontal, tr("File path"),
 	    Qt::DisplayRole);
 }
 
-void DbFlsTblModel::appendData(
+void AttachmentTblModel::appendData(
     const QList<MessageDb::AttachmentEntry> &entryList)
 {
 	if (Q_UNLIKELY(MessageDb::fileItemIds.size() != 6)) {
@@ -399,10 +407,10 @@ void DbFlsTblModel::appendData(
 
 		row[ATTACHID_COL] = entry.id;
 		row[MSGID_COL] = entry.messageId;
-		row[CONTENT_COL] = entry.dmEncodedContent;
+		row[BINARY_CONTENT_COL] = entry.binaryContent;
 		row[FNAME_COL] = entry.dmFileDescr;
 		row[MIME_COL] = entry.dmMimeType;
-		row[FSIZE_COL] = entry.size;
+		row[BINARY_SIZE_COL] = entry.binaryContent.size();
 
 		m_data[m_rowCount++] = row;
 	}
@@ -410,7 +418,7 @@ void DbFlsTblModel::appendData(
 	endInsertRows();
 }
 
-bool DbFlsTblModel::setMessage(const Isds::Message &message)
+bool AttachmentTblModel::setMessage(const Isds::Message &message)
 {
 	if (Q_UNLIKELY(message.isNull())) {
 		Q_ASSERT(0);
@@ -431,7 +439,7 @@ bool DbFlsTblModel::setMessage(const Isds::Message &message)
 /* File content will be held within model. */
 //#define HOLD_FILE_CONTENT
 
-int DbFlsTblModel::insertAttachmentFile(const QString &filePath, int row)
+int AttachmentTblModel::insertAttachmentFile(const QString &filePath, int row)
 {
 	QFile attFile(filePath);
 
@@ -459,13 +467,17 @@ int DbFlsTblModel::insertAttachmentFile(const QString &filePath, int row)
 	//rowVect[ATTACHID_COL] = QVariant();
 	//rowVect[MSGID_COL] = QVariant();
 #if defined HOLD_FILE_CONTENT
-	rowVect[CONTENT_COL] = getFileBase64(filePath);
+	rowVect[BINARY_CONTENT_COL] = getFileContent(filePath);
 #else /* !defined HOLD_FILE_CONTENT */
-	rowVect[CONTENT_COL] = QByteArray();
+	rowVect[BINARY_CONTENT_COL] = QByteArray();
 #endif /* defined HOLD_FILE_CONTENT */
 	rowVect[FNAME_COL] = fileName;
 	rowVect[MIME_COL] = mimeType.name();
-	rowVect[FSIZE_COL] = fileSize; // QString::number(fileSize)
+#if defined HOLD_FILE_CONTENT
+	rowVect[BINARY_SIZE_COL] = fileSize;
+#else /* !defined HOLD_FILE_CONTENT */
+	rowVect[BINARY_SIZE_COL] = 0;
+#endif /* defined HOLD_FILE_CONTENT */
 	rowVect[FPATH_COL] = filePath;
 
 	/* Check data duplicity. */
@@ -476,10 +488,10 @@ int DbFlsTblModel::insertAttachmentFile(const QString &filePath, int row)
 	}
 }
 
-bool DbFlsTblModel::appendAttachmentEntry(const QByteArray &base64content,
+bool AttachmentTblModel::appendBinaryAttachment(const QByteArray &binaryContent,
     const QString &fName)
 {
-	if (base64content.isEmpty() || fName.isEmpty()) {
+	if (binaryContent.isEmpty() || fName.isEmpty()) {
 		return false;
 	}
 
@@ -487,30 +499,22 @@ bool DbFlsTblModel::appendAttachmentEntry(const QByteArray &base64content,
 
 	//rowVect[ATTACHID_COL] = QVariant();
 	//rowVect[MSGID_COL] = QVariant();
-	rowVect[CONTENT_COL] = base64content;
+	rowVect[BINARY_CONTENT_COL] = binaryContent;
 	rowVect[FNAME_COL] = fName;
-	{
-		QByteArray rawContent(QByteArray::fromBase64(base64content));
-		QMimeType mimeType(QMimeDatabase().mimeTypeForFileNameAndData(fName, rawContent));
-		if (mimeType.isValid()) {
-			rowVect[MIME_COL] = mimeType.name();
-		} else {
-			rowVect[MIME_COL] = tr("unknown");
-		}
-	}
-	rowVect[FSIZE_COL] = base64RealSize(base64content); // QString::number()
+	rowVect[MIME_COL] = mimeStr(fName, binaryContent);
+	rowVect[BINARY_SIZE_COL] = binaryContent.size();
 	rowVect[FPATH_COL] = LOCAL_DATABASE_STR;
 
 	/* Check data duplicity. */
 	return insertVector(rowVect, rowCount(), true);
 }
 
-qint64 DbFlsTblModel::totalAttachmentSize(void) const
+qint64 AttachmentTblModel::totalAttachmentSize(void) const
 {
 	qint64 sum = 0;
 
 	for (int row = 0; row < rowCount(); ++row) {
-		sum += data(index(row, FSIZE_COL),
+		sum += data(index(row, BINARY_SIZE_COL),
 		    Qt::DisplayRole).toLongLong();
 	}
 
@@ -528,7 +532,7 @@ public:
 	}
 };
 
-QModelIndexList DbFlsTblModel::sortedUniqueLineIndexes(
+QModelIndexList AttachmentTblModel::sortedUniqueLineIndexes(
     const QModelIndexList &indexes, int dfltCoumn)
 {
 	QSet<int> lines;
@@ -547,7 +551,21 @@ QModelIndexList DbFlsTblModel::sortedUniqueLineIndexes(
 	return uniqueLines;
 }
 
-bool DbFlsTblModel::appendMessageData(const Isds::Message &message)
+QString AttachmentTblModel::mimeStr(const QString &fileName,
+    const QByteArray &data)
+{
+	if (!fileName.isEmpty() && !data.isEmpty()) {
+		const QMimeType mimeType(
+		    QMimeDatabase().mimeTypeForFileNameAndData(fileName, data));
+		if (mimeType.isValid()) {
+			return mimeType.name();
+		}
+	}
+
+	return tr("unknown");
+}
+
+bool AttachmentTblModel::appendMessageData(const Isds::Message &message)
 {
 	if (Q_UNLIKELY(message.isNull())) {
 		Q_ASSERT(0);
@@ -566,10 +584,10 @@ bool DbFlsTblModel::appendMessageData(const Isds::Message &message)
 
 		QVector<QVariant> row(m_columnCount);
 
-		row[CONTENT_COL] = doc.base64Content();
+		row[BINARY_CONTENT_COL] = doc.binaryContent();
 		row[FNAME_COL] = doc.fileDescr();
-		row[MIME_COL] = tr("unknown");
-		row[FSIZE_COL] = 0;
+		row[MIME_COL] = mimeStr(doc.fileDescr(), doc.binaryContent());
+		row[BINARY_SIZE_COL] = doc.binaryContent().size();
 
 		/* Don't check data duplicity! */
 		insertVector(row, rowCount(), false);
@@ -578,7 +596,7 @@ bool DbFlsTblModel::appendMessageData(const Isds::Message &message)
 	return true;
 }
 
-bool DbFlsTblModel::insertVector(const QVector<QVariant> &rowVect,
+bool AttachmentTblModel::insertVector(const QVector<QVariant> &rowVect,
     int row, bool insertUnique)
 {
 	if (rowVect.size() != m_columnCount) {
@@ -593,7 +611,7 @@ bool DbFlsTblModel::insertVector(const QVector<QVariant> &rowVect,
 		row = rowCount();
 	}
 
-	if (insertUnique && nameAndContentPresent(rowVect.at(CONTENT_COL),
+	if (insertUnique && nameAndContentPresent(rowVect.at(BINARY_CONTENT_COL),
 	        rowVect.at(FNAME_COL), rowVect.at(FPATH_COL))) {
 		/* Fail if data present. */
 		logWarningNL("Same data '%s' already attached.",
@@ -619,7 +637,7 @@ bool DbFlsTblModel::insertVector(const QVector<QVariant> &rowVect,
 	return true;
 }
 
-bool DbFlsTblModel::nameAndContentPresent(const QVariant &base64content,
+bool AttachmentTblModel::nameAndContentPresent(const QVariant &binaryContent,
     const QVariant &fName, const QVariant &fPath) const
 {
 	/* Cannot use foreach (), because contains pre-allocated empty lines. */
@@ -627,7 +645,7 @@ bool DbFlsTblModel::nameAndContentPresent(const QVariant &base64content,
 		const QVector<QVariant> &rowEntry = m_data.at(row);
 		if ((rowEntry.at(FNAME_COL) == fName) &&
 		    (rowEntry.at(FPATH_COL) == fPath) &&
-		    (rowEntry.at(CONTENT_COL) == base64content)) {
+		    (rowEntry.at(BINARY_CONTENT_COL) == binaryContent)) {
 			return true;
 		}
 	}
@@ -670,7 +688,7 @@ QString temporaryFile(const QString &tmpDirPath, const QModelIndex &index,
 	{
 		/* Determine full file path. */
 		QModelIndex fileNameIndex = index.sibling(index.row(),
-		    DbFlsTblModel::FNAME_COL);
+		    AttachmentTblModel::FNAME_COL);
 		if(!fileNameIndex.isValid()) {
 			Q_ASSERT(0);
 			return QString();
@@ -686,13 +704,12 @@ QString temporaryFile(const QString &tmpDirPath, const QModelIndex &index,
 	{
 		/* Obtain data. */
 		QModelIndex dataIndex = index.sibling(index.row(),
-		    DbFlsTblModel::CONTENT_COL);
+		    AttachmentTblModel::BINARY_CONTENT_COL);
 		if (!dataIndex.isValid()) {
 			Q_ASSERT(0);
 			return QString();
 		}
-		attachData = QByteArray::fromBase64(
-		    dataIndex.data().toByteArray());
+		attachData = dataIndex.data().toByteArray();
 		if (attachData.isEmpty()) {
 			Q_ASSERT(0);
 			return QString();
@@ -705,7 +722,7 @@ QString temporaryFile(const QString &tmpDirPath, const QModelIndex &index,
 	return attachAbsPath;
 }
 
-QStringList DbFlsTblModel::accessibleFiles(const QString &tmpDirPath,
+QStringList AttachmentTblModel::accessibleFiles(const QString &tmpDirPath,
     const QModelIndexList &indexes) const
 {
 	QStringList accessibleFileList;

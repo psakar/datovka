@@ -27,7 +27,7 @@
 
 #include "src/datovka_shared/isds/message_interface.h"
 #include "src/isds/message_functions.h"
-#include "src/models/files_model.h"
+#include "src/models/attachments_model.h"
 
 namespace Ui {
 	class DlgViewZfo;
@@ -190,5 +190,5 @@ private:
 	 */
 
 	enum Isds::LoadType m_zfoType; /*!< Type of message. */
-	DbFlsTblModel m_attachmentModel; /*!< Attachment model. */
+	AttachmentTblModel m_attachmentModel; /*!< Attachment model. */
 };

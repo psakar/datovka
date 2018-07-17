@@ -1344,22 +1344,22 @@ void MainWindow::messageItemsSelectionChanged(const QItemSelection &selected,
 	ui->messageAttachmentList->setModel(&m_attachmentModel);
 	/* First three columns contain hidden data. */
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::ATTACHID_COL, true);
+	    AttachmentTblModel::ATTACHID_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::MSGID_COL, true);
+	    AttachmentTblModel::MSGID_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::CONTENT_COL, true);
+	    AttachmentTblModel::BINARY_CONTENT_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::MIME_COL, true);
+	    AttachmentTblModel::MIME_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::FPATH_COL, true);
+	    AttachmentTblModel::FPATH_COL, true);
 
 	if (ui->messageAttachmentList->model()->rowCount() > 0) {
 		ui->actionSave_all_attachments->setEnabled(true);
 	}
 
 	ui->messageAttachmentList->resizeColumnToContents(
-	    DbFlsTblModel::FNAME_COL);
+	    AttachmentTblModel::FNAME_COL);
 
 	/* Connect new slot. */
 	connect(ui->messageAttachmentList->selectionModel(),
@@ -1998,7 +1998,7 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 	}
 
 	QModelIndex fileNameIndex(attIdx.sibling(attIdx.row(),
-	    DbFlsTblModel::FNAME_COL));
+	    AttachmentTblModel::FNAME_COL));
 	Q_ASSERT(fileNameIndex.isValid());
 	if(!fileNameIndex.isValid()) {
 		showStatusTextWithTimeout(
@@ -2062,7 +2062,7 @@ void MainWindow::saveAllAttachmentsToDir(void)
 	MessageDb::MsgId msgId(msgMsgId(currentFrstColMessageIndexes().first()));
 
 	// is complete message downloaded? if not, download now
-	DbFlsTblModel *attachModel = qobject_cast<DbFlsTblModel *>(
+	AttachmentTblModel *attachModel = qobject_cast<AttachmentTblModel *>(
 	    ui->messageAttachmentList->model());
 	if ((!msgId.deliveryTime.isValid()) ||
 	    (attachModel == Q_NULLPTR) || (attachModel->rowCount() == 0)) {
@@ -2460,15 +2460,15 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	ui->messageAttachmentList->setModel(&m_attachmentModel);
 	/* First three columns contain hidden data. */
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::ATTACHID_COL, true);
+	    AttachmentTblModel::ATTACHID_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::MSGID_COL, true);
+	    AttachmentTblModel::MSGID_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::CONTENT_COL, true);
+	    AttachmentTblModel::BINARY_CONTENT_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::MIME_COL, true);
+	    AttachmentTblModel::MIME_COL, true);
 	ui->messageAttachmentList->setColumnHidden(
-	    DbFlsTblModel::FPATH_COL, true);
+	    AttachmentTblModel::FPATH_COL, true);
 
 	if (ui->messageAttachmentList->model()->rowCount() > 0) {
 		ui->actionSave_all_attachments->setEnabled(true);
@@ -2477,7 +2477,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	}
 
 	ui->messageAttachmentList->resizeColumnToContents(
-	    DbFlsTblModel::FNAME_COL);
+	    AttachmentTblModel::FNAME_COL);
 
 	/* Connect new slot. */
 	connect(ui->messageAttachmentList->selectionModel(),
@@ -6140,12 +6140,12 @@ void MainWindow::sendAttachmentsEmail(void)
 
 	foreach (const QModelIndex &attachIdx, attachmentIndexes) {
 		QString attachmentName(attachIdx.sibling(attachIdx.row(),
-		    DbFlsTblModel::FNAME_COL).data().toString());
-		QByteArray base64Data(attachIdx.sibling(attachIdx.row(),
-		    DbFlsTblModel::CONTENT_COL).data().toByteArray());
+		    AttachmentTblModel::FNAME_COL).data().toString());
+		const QByteArray binaryData(attachIdx.sibling(attachIdx.row(),
+		    AttachmentTblModel::BINARY_CONTENT_COL).data().toByteArray());
 
 		addAttachmentToEmailMessage(emailMessage, attachmentName,
-		    base64Data, boundary);
+		    binaryData.toBase64(), boundary);
 	}
 
 	finishEmailMessage(emailMessage, boundary);

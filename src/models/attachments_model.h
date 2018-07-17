@@ -32,25 +32,25 @@
 #include "src/models/table_model.h"
 
 /*!
- * @brief Custom file model class.
+ * @brief Custom attachment table model class.
  *
  * Used for data conversion on display. (Use QIdentityProxyModel?)
  * It is also used for attachment content caching.
  */
-class DbFlsTblModel : public TblModel {
-    Q_OBJECT
+class AttachmentTblModel : public TblModel {
+	Q_OBJECT
 
 public:
 	/*!
 	 * @brief Identifies the column index.
 	 */
 	enum ColumnNumbers {
-		ATTACHID_COL = 0, /* Attachment identifier. */
+		ATTACHID_COL = 0, /* Attachment identifier (as used in local database). Not used for any purpose. */
 		MSGID_COL = 1, /* Message identifier. */
-		CONTENT_COL = 2, /* Base64-encoded attachment content. */
+		BINARY_CONTENT_COL = 2, /* Raw (non-base64-encoded) attachment content. */
 		FNAME_COL = 3, /* Attachment file name. */
 		MIME_COL = 4, /* Mime type description. */
-		FSIZE_COL = 5, /* Attachment file size (base64-decoded). */
+		BINARY_SIZE_COL = 5, /* Attachment binary size. */
 		FPATH_COL = 6, /* Path to origin. */
 		MAX_COL = 7 /* Number of columns. */
 	};
@@ -60,7 +60,7 @@ public:
 	 *
 	 * @param[in] parent Parent object.
 	 */
-	explicit DbFlsTblModel(QObject *parent = Q_NULLPTR);
+	explicit AttachmentTblModel(QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Returns the data stored under the given role.
@@ -169,12 +169,11 @@ public:
 
 	/*!
 	 * @brief Append attachment data line.
-	 *
-	 * @param[in] base64content Base64-encoded attachment content.
+	 * @param[in] binaryContent Raw (non-base64-encoded) attachment content.
 	 * @param[in] fName Attachment name.
 	 * @param True when attachment data successfully added.
 	 */
-	bool appendAttachmentEntry(const QByteArray &base64content,
+	bool appendBinaryAttachment(const QByteArray &binaryContent,
 	    const QString &fName);
 
 	/*!
@@ -195,6 +194,16 @@ public:
 	    int dfltCoumn);
 
 private:
+	/*!
+	 * @brief Determine MIME string.
+	 *
+	 * @param[in] fileName File name.
+	 * @param[in] data Binary content.
+	 * @return MIME name or description that it is unknown.
+	 */
+	static
+	QString mimeStr(const QString &fileName, const QByteArray &data);
+
 	/*!
 	 * @brief Appends data from the supplied message.
 	 *
@@ -218,12 +227,12 @@ private:
 	 * @brief Check whether file name and content combination already
 	 *     exists.
 	 *
-	 * @param[in] base64content Base64-encoded attachment content.
+	 * @param[in] binaryContent Raw (non-base64-encoded) attachment content.
 	 * @param[in] fName Attachment name.
 	 * @param[in] fPath File path.
 	 * @return True if content with name exists in model.
 	 */
-	bool nameAndContentPresent(const QVariant &base64content,
+	bool nameAndContentPresent(const QVariant &binaryContent,
 	    const QVariant &fName, const QVariant &fPath) const;
 
 	/*!

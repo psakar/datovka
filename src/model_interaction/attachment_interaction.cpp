@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set_container.h"
 #include "src/model_interaction/attachment_interaction.h"
-#include "src/models/files_model.h"
+#include "src/models/attachments_model.h"
 
 /*!
  * @brief Returns single line selection index.
@@ -66,14 +66,15 @@ QString createTemporaryFile(QModelIndex index)
 		return QString();
 	}
 
-	if (index.column() != DbFlsTblModel::FNAME_COL) {
-		index = index.sibling(index.row(), DbFlsTblModel::FNAME_COL);
+	if (index.column() != AttachmentTblModel::FNAME_COL) {
+		index = index.sibling(index.row(),
+		    AttachmentTblModel::FNAME_COL);
 		if (!index.isValid()) {
 			Q_ASSERT(0);
 			return QString();
 		}
 	}
-	Q_ASSERT(index.column() == DbFlsTblModel::FNAME_COL);
+	Q_ASSERT(index.column() == AttachmentTblModel::FNAME_COL);
 
 	QString attachName(index.data().toString());
 	if (attachName.isEmpty()) {
@@ -88,14 +89,14 @@ QString createTemporaryFile(QModelIndex index)
 
 	QByteArray data;
 	{
-		/* Get data from base64. */
-		QModelIndex dataIndex(
-		    index.sibling(index.row(), DbFlsTblModel::CONTENT_COL));
+		/* Get binary data. */
+		QModelIndex dataIndex(index.sibling(index.row(),
+		    AttachmentTblModel::BINARY_CONTENT_COL));
 		if (!dataIndex.isValid()) {
 			Q_ASSERT(0);
 			return QString();
 		}
-		data = QByteArray::fromBase64(dataIndex.data().toByteArray());
+		data = dataIndex.data().toByteArray();
 	}
 
 	return writeTemporaryFile(fileName, data);
@@ -113,13 +114,14 @@ bool AttachmentInteraction::openAttachment(QWidget *parent,
 	}
 
 	if (index.isValid()) {
-		if (index.column() != DbFlsTblModel::FNAME_COL) {
+		if (index.column() != AttachmentTblModel::FNAME_COL) {
 			index = index.sibling(index.row(),
-			    DbFlsTblModel::FNAME_COL);
+			    AttachmentTblModel::FNAME_COL);
 		}
 	} else {
 		/* Determine selection. */
-		index = selectedSingleIndex(view, DbFlsTblModel::FNAME_COL);
+		index = selectedSingleIndex(view,
+		    AttachmentTblModel::FNAME_COL);
 		if (!index.isValid()) {
 			return false;
 		}
@@ -128,7 +130,7 @@ bool AttachmentInteraction::openAttachment(QWidget *parent,
 	if (!index.isValid()) {
 		return false;
 	}
-	Q_ASSERT(index.column() == DbFlsTblModel::FNAME_COL);
+	Q_ASSERT(index.column() == AttachmentTblModel::FNAME_COL);
 
 	QString attachName(index.data().toString());
 	if (attachName.isEmpty()) {
@@ -141,8 +143,8 @@ bool AttachmentInteraction::openAttachment(QWidget *parent,
 
 	/* Obtain plain file name from model if contains a file name. */
 	QString fileName(
-	    index.sibling(index.row(),
-	        DbFlsTblModel::FPATH_COL).data(ROLE_PLAIN_DISPLAY).toString());
+	    index.sibling(index.row(), AttachmentTblModel::FPATH_COL)
+	        .data(ROLE_PLAIN_DISPLAY).toString());
 	if (fileName.isEmpty()) {
 		fileName = createTemporaryFile(index);
 	}
@@ -169,15 +171,16 @@ QString AttachmentInteraction::saveAttachmentToFile(QWidget *parent,
 		return QString();
 	}
 
-	if (index.column() != DbFlsTblModel::FNAME_COL) {
-		index = index.sibling(index.row(), DbFlsTblModel::FNAME_COL);
+	if (index.column() != AttachmentTblModel::FNAME_COL) {
+		index = index.sibling(index.row(),
+		    AttachmentTblModel::FNAME_COL);
 	}
 
 	if (!index.isValid()) {
 		Q_ASSERT(0);
 		return QString();
 	}
-	Q_ASSERT(index.column() == DbFlsTblModel::FNAME_COL);
+	Q_ASSERT(index.column() == AttachmentTblModel::FNAME_COL);
 
 	QString fileName;
 	if (suggestedFilePath.isEmpty()) {
@@ -200,13 +203,13 @@ QString AttachmentInteraction::saveAttachmentToFile(QWidget *parent,
 	/* TODO -- Remember directory? */
 
 	QModelIndex dataIndex(index.sibling(index.row(),
-	    DbFlsTblModel::CONTENT_COL));
+	    AttachmentTblModel::BINARY_CONTENT_COL));
 	if (!dataIndex.isValid()) {
 		Q_ASSERT(0);
 		return QString();
 	}
 
-	QByteArray data(QByteArray::fromBase64(dataIndex.data().toByteArray()));
+	const QByteArray data(dataIndex.data().toByteArray());
 
 	if (WF_SUCCESS != writeFile(fileName, data)) {
 		QMessageBox::warning(parent,
@@ -224,7 +227,7 @@ void AttachmentInteraction::saveAttachmentsToFile(QWidget *parent,
 {
 	if (indexList.isEmpty()) {
 		indexList = selectedColumnIndexes(view,
-		    DbFlsTblModel::FNAME_COL);
+		    AttachmentTblModel::FNAME_COL);
 	}
 
 	if (indexList.isEmpty()) {
@@ -253,11 +256,11 @@ QList< QPair<QModelIndex, QString> > renameAttachments(
 
 	foreach (const QModelIndex &index, indexList) {
 		QString attName;
-		if (index.column() == DbFlsTblModel::FNAME_COL) {
+		if (index.column() == AttachmentTblModel::FNAME_COL) {
 			attName = index.data().toString();
 		} else {
 			attName = index.sibling(index.row(),
-			    DbFlsTblModel::FNAME_COL).data().toString();
+			    AttachmentTblModel::FNAME_COL).data().toString();
 		}
 		if (attName.isEmpty()) {
 			Q_ASSERT(0);
@@ -292,7 +295,7 @@ QString AttachmentInteraction::saveAttachmentsToDirectory(QWidget *parent,
 {
 	if (indexList.isEmpty()) {
 		indexList = selectedColumnIndexes(view,
-		    DbFlsTblModel::FNAME_COL);
+		    AttachmentTblModel::FNAME_COL);
 	}
 
 	if (indexList.isEmpty()) {
@@ -304,8 +307,8 @@ QString AttachmentInteraction::saveAttachmentsToDirectory(QWidget *parent,
 
 	/* Sorted index list with unique attachment names. */
 	ListType atts(renameAttachments(
-	    DbFlsTblModel::sortedUniqueLineIndexes(indexList,
-	        DbFlsTblModel::FNAME_COL)));
+	    AttachmentTblModel::sortedUniqueLineIndexes(indexList,
+	        AttachmentTblModel::FNAME_COL)));
 	if (atts.isEmpty()) {
 		return QString();
 	}
@@ -345,12 +348,11 @@ QString AttachmentInteraction::saveAttachmentsToDirectory(QWidget *parent,
 		}
 
 		QModelIndex contIdx(idx.sibling(idx.row(),
-		    DbFlsTblModel::CONTENT_COL));
+		    AttachmentTblModel::BINARY_CONTENT_COL));
 
-		QByteArray content(
-		    QByteArray::fromBase64(contIdx.data().toByteArray()));
+		const QByteArray binaryContent(contIdx.data().toByteArray());
 
-		if (WF_SUCCESS != writeFile(fileName, content)) {
+		if (WF_SUCCESS != writeFile(fileName, binaryContent)) {
 			unsuccessfulAtts.append(att);
 			continue;
 		}

@@ -41,7 +41,7 @@
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_timestamp_expir.h"
 #include "src/models/accounts_model.h"
-#include "src/models/files_model.h"
+#include "src/models/attachments_model.h"
 #include "src/models/messages_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/single/single_instance.h"
@@ -1052,7 +1052,7 @@ private:
 	                                               * Used for message
 	                                               * sorting and filtering.
 	                                               */
-	DbFlsTblModel m_attachmentModel; /*! Attachment table model. */
+	AttachmentTblModel m_attachmentModel; /*! Attachment table model. */
 
 	QTimer m_messageMarker; /*!< Used for marking messages as read. */
 	qint64 m_lastSelectedMessageId; /*!< Id of the last selected message. */
