@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include <QDropEvent>
 #include <QProxyStyle>
 
-#include "src/models/files_model.h"
+#include "src/models/attachments_model.h"
 #if 0
 #include <QApplication>
 #include <QDrag>
@@ -138,7 +138,8 @@ void AttachmentTableView::dropEvent(QDropEvent *event)
 	 */
 
 	/* TODO -- Access the model in a more transparent way. */
-	DbFlsTblModel *attachmentModel = qobject_cast<DbFlsTblModel *>(model());
+	AttachmentTblModel *attachmentModel =
+	    qobject_cast<AttachmentTblModel *>(model());
 	if (attachmentModel == Q_NULLPTR) {
 		return;
 	}
@@ -166,8 +167,8 @@ void AttachmentTableView::mouseMoveEvent(QMouseEvent *event)
 	}
 
 	/* TODO -- Access the model in a more transparent way. */
-	DbFlsTblModel *attachmentModel =
-	    qobject_cast<DbFlsTblModel *>(model());
+	AttachmentTblModel *attachmentModel =
+	    qobject_cast<AttachmentTblModel *>(model());
 	if (0 == attachmentModel) {
 		return;
 	}
@@ -227,7 +228,8 @@ void AttachmentTableView::shuffleOnDrop(QDropEvent *event)
 	Q_ASSERT(event->source() == this);
 
 	/* TODO -- Access the model in a more transparent way. */
-	DbFlsTblModel *attachmentModel = qobject_cast<DbFlsTblModel *>(model());
+	AttachmentTblModel *attachmentModel =
+	    qobject_cast<AttachmentTblModel *>(model());
 	if (attachmentModel == Q_NULLPTR) {
 		Q_ASSERT(0);
 		return;
@@ -251,7 +253,7 @@ void AttachmentTableView::shuffleOnDrop(QDropEvent *event)
 	}
 
 	const QModelIndexList selectedSorted(
-	    DbFlsTblModel::sortedUniqueLineIndexes(
+	    AttachmentTblModel::sortedUniqueLineIndexes(
 	        selectionModel()->selectedIndexes(), 0));
 
 	if (selectedSorted.isEmpty()) {

@@ -236,25 +236,24 @@ public:
 	public:
 		qint64 id; /*!< Entry identifier. */
 		qint64 messageId; /*!< Identifier of the message which the attachment belong to. */
-		QByteArray dmEncodedContent; /*!< Base64-encoded file content. */
+		QByteArray binaryContent; /*!< Raw (non-base64-encoded) attachment content. */
 		QString dmFileDescr; /*!< Attachment file name. */
 		QString dmMimeType; /*!< String holding the mime type. */
-		int size; /*!< Attachment file size (base64-decoded). */
 
 		AttachmentEntry(void)
-		    : id(0), messageId(0), dmEncodedContent(), dmFileDescr(),
-		    dmMimeType(), size(0)
+		    : id(0), messageId(0), binaryContent(), dmFileDescr(),
+		    dmMimeType()
 		{ }
-		AttachmentEntry(qint64 i, qint64 mi, const QByteArray &dec,
-		    const QString &dfd, const QString &dmt, int s)
-		    : id(i), messageId(mi), dmEncodedContent(dec),
-		    dmFileDescr(dfd), dmMimeType(dmt), size(s)
+		AttachmentEntry(qint64 i, qint64 mi, const QByteArray &bc,
+		    const QString &dfd, const QString &dmt)
+		    : id(i), messageId(mi), binaryContent(bc),
+		    dmFileDescr(dfd), dmMimeType(dmt)
 		{ }
 
 		bool isValid(void) const
 		{
 			return (!dmFileDescr.isEmpty()) &&
-			    (!dmEncodedContent.isEmpty());
+			    (!binaryContent.isEmpty());
 		}
 	};
 
@@ -488,7 +487,7 @@ public:
 	/*!
 	 * @brief Get base64 encoded raw message data.
 	 *
-	 * @param[in] dmId  Message identifier.
+	 * @param[in] dmId Message identifier.
 	 * @return Empty byte array on error.
 	 */
 	QByteArray getCompleteMessageBase64(qint64 dmId) const;
@@ -496,7 +495,7 @@ public:
 	/*!
 	 * @brief Check if complete message is in the database.
 	 *
-	 * @param[in] dmId  Message identifier.
+	 * @param[in] dmId Message identifier.
 	 * @return True if complete message is in the database.
 	 */
 	bool isCompleteMessageInDb(qint64 dmId) const;
@@ -504,7 +503,7 @@ public:
 	/*!
 	 * @brief Get message data in DER (raw) format.
 	 *
-	 * @param[in] dmId  Message identifier.
+	 * @param[in] dmId Message identifier.
 	 * @return Empty byte array on error.
 	 */
 	QByteArray getCompleteMessageRaw(qint64 dmId) const;

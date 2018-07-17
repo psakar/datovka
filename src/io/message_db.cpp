@@ -59,7 +59,7 @@
 /* Attachment size is computed from actual data. */
 static
 const QVector<QString> fileItemIdsNoSize = {"id", "message_id",
-    "dmEncodedContent", "_dmFileDescr", "_dmMimeType", "0"};
+    "dmEncodedContent", "_dmFileDescr", "_dmMimeType"};
 
 const QVector<QString> MessageDb::msgPrintedAttribs = {"dmSenderIdent",
     "dmSenderRefNumber", "dmRecipientIdent", "dmRecipientRefNumber",
@@ -1595,9 +1595,9 @@ QList<MessageDb::AttachmentEntry> MessageDb::attachEntries(qint64 msgId) const
 	query.first();
 	while (query.isActive() && query.isValid()) {
 		entryList.append(AttachmentEntry(query.value(0).toLongLong(),
-		    query.value(1).toLongLong(), query.value(2).toByteArray(),
-		    query.value(3).toString(), query.value(4).toString(),
-		    query.value(5).toInt()));
+		    query.value(1).toLongLong(),
+		    QByteArray::fromBase64(query.value(2).toByteArray()),
+		    query.value(3).toString(), query.value(4).toString()));
 		query.next();
 	}
 
