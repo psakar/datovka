@@ -53,7 +53,6 @@ SOURCES += \
 	$${top_srcdir}src/isds/session.cpp \
 	$${top_srcdir}src/isds/type_description.cpp \
 	$${top_srcdir}src/models/accounts_model.cpp \
-	$${top_srcdir}src/models/files_model.cpp \
 	$${top_srcdir}src/models/messages_model.cpp \
 	$${top_srcdir}src/models/table_model.cpp \
 	$${top_srcdir}src/settings/account.cpp \
@@ -106,7 +105,6 @@ HEADERS += \
 	$${top_srcdir}src/isds/session.h \
 	$${top_srcdir}src/isds/type_description.h \
 	$${top_srcdir}src/models/accounts_model.h \
-	$${top_srcdir}src/models/files_model.h \
 	$${top_srcdir}src/models/messages_model.h \
 	$${top_srcdir}src/models/table_model.h \
 	$${top_srcdir}src/settings/account.h \

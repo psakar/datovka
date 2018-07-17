@@ -34,7 +34,6 @@ SOURCES += \
 	$${top_srcdir}src/io/message_db_set_container.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
 	$${top_srcdir}src/isds/type_description.cpp \
-	$${top_srcdir}src/models/files_model.cpp \
 	$${top_srcdir}src/models/messages_model.cpp \
 	$${top_srcdir}src/models/table_model.cpp \
 	$${top_srcdir}src/settings/preferences.cpp \
@@ -65,7 +64,6 @@ HEADERS += \
 	$${top_srcdir}src/io/message_db_set_container.h \
 	$${top_srcdir}src/io/tag_db.h \
 	$${top_srcdir}src/isds/type_description.h \
-	$${top_srcdir}src/models/files_model.h \
 	$${top_srcdir}src/models/messages_model.h \
 	$${top_srcdir}src/models/table_model.h \
 	$${top_srcdir}src/settings/preferences.h \
