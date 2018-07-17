@@ -1318,9 +1318,9 @@ bool DlgSendMessage::buildDocuments(QList<Isds::Document> &documents) const
 				 * the XML documents is not set.
 				 */
 				logDebugLv1NL("Setting '%s' mime type for document '%s'.",
-				    index.data().toString().toUtf8().constData(),
+				    mimeName.toUtf8().constData(),
 				    document.fileDescr().toUtf8().constData());
-				document.setMimeType(index.data().toString());
+				document.setMimeType(mimeName);
 			} else {
 				/* Must be empty non-null string. */
 				document.setMimeType(QStringLiteral(""));
