@@ -489,7 +489,15 @@ bool DbFlsTblModel::appendAttachmentEntry(const QByteArray &base64content,
 	//rowVect[MSGID_COL] = QVariant();
 	rowVect[CONTENT_COL] = base64content;
 	rowVect[FNAME_COL] = fName;
-	rowVect[MIME_COL] = tr("unknown");
+	{
+		QByteArray rawContent(QByteArray::fromBase64(base64content));
+		QMimeType mimeType(QMimeDatabase().mimeTypeForFileNameAndData(fName, rawContent));
+		if (mimeType.isValid()) {
+			rowVect[MIME_COL] = mimeType.name();
+		} else {
+			rowVect[MIME_COL] = tr("unknown");
+		}
+	}
 	rowVect[FSIZE_COL] = base64RealSize(base64content); // QString::number()
 	rowVect[FPATH_COL] = LOCAL_DATABASE_STR;
 
@@ -560,6 +568,7 @@ bool DbFlsTblModel::appendMessageData(const Isds::Message &message)
 
 		row[CONTENT_COL] = doc.base64Content();
 		row[FNAME_COL] = doc.fileDescr();
+		row[MIME_COL] = tr("unknown");
 		row[FSIZE_COL] = 0;
 
 		/* Don't check data duplicity! */
