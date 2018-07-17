@@ -1,3 +1,11 @@
+4.11.0 /
+ * The message search dialogue now allows to search messages according
+   to specified attachment names.
+ * Attachment model holds binary attachment data instead of base64-ecoded
+   documents.
+ * Simplified message model. Each entry type occupies its own column.
+ * Explicitly specifying attachment MIME type when sending XML documents.
+
 4.10.3 / 2018-07-09
  * Added classes based on Qt types encapsulating various ISDS data types and
    structures. Sharing this code with mobile application.
