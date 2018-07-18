@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,30 +21,41 @@
  * the two.
  */
 
-#ifndef _LOG_COMMON_H_
-#define _LOG_COMMON_H_
+#pragma once
+
+/* Cannot use namespaces here as the following is also used in C code. */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*!
- * @brief Identifies the default source.
+ * @brief Identifies the source of the log message.
  */
-#define LOGSRC_DEF 0
+enum LogSource {
+	LOGSRC_ANY = -1, /*!< Identifies all log sources. */
+	LOGSRC_DFLT = 0 /*!< Default log message source. */
+};
 
-/*!
- * @brief Identifies all sources.
+/*
+ * @brief Log level.
+ *
+ * Inspired by syslog.h
  */
-#define LOGSRC_ANY -1
+enum LogLevel {
+	LOG_EMERG = 0, /*!< System is unusable. */
+	LOG_ALERT = 1, /*!< Action must be taken immediately. */
+	LOG_CRIT = 2, /*!< Critical conditions. */
+	LOG_ERR = 3, /*!< Error conditions. */
+	LOG_WARNING = 4, /*!< Warning conditions. */
+	LOG_NOTICE = 5, /*!< Normal but significant condition. */
+	LOG_INFO = 6, /*!< Informational. */
+	LOG_DEBUG = 7 /*!< Debug-level messages. */
+};
 
-/* Taken from syslog.h */
-#define LOG_EMERG   0 /* system is unusable */
-#define LOG_ALERT   1 /* action must be taken immediately */
-#define LOG_CRIT    2 /* critical conditions */
-#define LOG_ERR     3 /* error conditions */
-#define LOG_WARNING 4 /* warning conditions */
-#define LOG_NOTICE  5 /* normal but significant condition */
-#define LOG_INFO    6 /* informational */
-#define LOG_DEBUG   7 /* debug-level messages */
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
 
-#define LOG_MASK(pri) (1 << (pri)) /* mask for one priority */
-#define LOG_UPTO(pri) ((1 << ((pri)+1)) - 1) /* all priorities through pri */
-
-#endif /* _LOG_COMMON_H_ */
+#define LOG_MASK(lvl) (1 << (lvl)) /* Mask for one level. */
+#define LOG_UPTO(lvl) ((1 << ((lvl) + 1)) - 1) /* All levels through lvl. */

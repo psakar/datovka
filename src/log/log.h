@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -25,11 +25,11 @@
 #define _LOG_H_
 
 #include <cstdarg>
-#include <QMutex>
 #include <QString>
 
 #include "src/global.h" /* GlobInstcs::logPtr */
 #include "src/log/log_common.h"
+#include "src/log/log_device.h"
 
 /*!
  * @brief Message output function.
@@ -38,7 +38,7 @@
  * @param[in] context Additional information about a log message.
  * @param[in] msg Message to be handled.
  */
-void globalLogOutput(QtMsgType type, const QMessageLogContext &context,
+void globalLogOutput(enum QtMsgType type, const QMessageLogContext &context,
     const QString &msg);
 
 /*!
@@ -85,225 +85,6 @@ void qDebugCallV(const char *fmt, va_list ap);
 #endif
 
 /*!
- * @brief Maximal number of simultaneously opened files.
- */
-#define MAX_LOG_FILES 64
-
-/*!
- * @brief Maximal number of sources to write to log facility.
- */
-#define MAX_SOURCES 64
-
-/*!
- * @brief Logging device class.
- */
-class LogDevice {
-public:
-	enum LogFac {
-		LF_SYSLOG = 0, /*!< @brief Syslog facility. */
-		LF_STDOUT = 1, /*!< @brief Stdout log target. */
-		LF_STDERR = 2, /*!< @brief Stderr log target. */
-		LF_FILE = 3 /*!< @brief File log target. */
-	};
-
-	enum LogMode {
-		LM_WRONLY, /*!< File will be overwritten. */
-		LM_APPEND, /*!< New content will be appended. */
-	};
-
-	struct FacDesc {
-		uint8_t levels[MAX_SOURCES]; /*!< Up to eight syslog levels. */
-		FILE *fout; /*!< Output file. */
-	};
-
-	LogDevice(void);
-	~LogDevice(void);
-
-	/*!
-	 * @brief Get log verbosity.
-	 *
-	 * @return Log verbosity.
-	 */
-	int logVerbosity(void);
-
-	/*!
-	 * @brief Set log verbosity.
-	 *
-	 * @param[in] verb Verbosity level.
-	 */
-	void setLogVerbosity(int verb);
-
-	/*!
-	 * @brief Get debug verbosity.
-	 *
-	 * @return Debug verbosity.
-	 */
-	int debugVerbosity(void);
-
-	/*!
-	 * @brief Set debug verbosity.
-	 *
-	 * @param[in] verb Verbosity to be set.
-	 */
-	void setDebugVerbosity(int verb);
-
-	/*!
-	 * @brief Opens a log file as a logging facility.
-	 *
-	 * @param[in] fName File name.
-	 * @param[in] mode  Open mode.
-	 * @return -1 on error, facility id else.
-	 */
-	int openFile(const QString &fName, LogMode mode);
-
-	/*!
-	 * @brief Returns the log levels for the given facility and source.
-	 *
-	 * @param[in] facility Facility identifier.
-	 * @param[in] source   Source identifier.
-	 * @return Levels for the selected facility and identifier.
-	 */
-	uint8_t logLevels(int facility, int source);
-
-	/*!
-	 * @brief Sets the log levels for the selected facility and source.
-	 *
-	 * @param[in] facility Facility identifier.
-	 * @param[in] source   Source identifier.
-	 * @param[in] levels   Levels to be set.
-	 */
-	void setLogLevels(int facility, int source, uint8_t levels);
-
-	/*!
-	 * @brief Add log levels to the selected facility and source.
-	 *
-	 * @param[in] facility Facility identifier.
-	 * @param[in] source   Source identifier.
-	 * @param[in] levels   Log levels to be added.
-	 */
-	void addLogLevels(int facility, int source, uint8_t levels);
-
-	/*!
-	 * @brief Returns the id of a new unique source that can be used.
-	 *
-	 * @return -1 when error, id of a new unique source identifier else.
-	 *
-	 * @note After this function returns, the returned source id is
-	 * considered to be used. It cannot be returned as unused.
-	 */
-	int acquireUniqueLogSource(void);
-
-	/*!
-	 * @brief Log message.
-	 *
-	 * @param[in] source Source identifier.
-	 * @param[in] level  Message urgency level.
-	 * @param[in] fmt    Format of the log message -- follows printf(3)
-	 *     format.
-	 * @return -1 if error, 0 else.
-	 */
-	int log(int source, uint8_t level, const char *fmt, ...);
-
-	/*!
-	 * @brief Log message.
-	 *
-	 * @param[in]     source Source identifier.
-	 * @param[in]     level  Message urgency level.
-	 * @param[in]     fmt    Format of the log message -- follows printf(3)
-	 *     format.
-	 * @param[in,out] ap     Variable argument list.
-	 * @return -1 if error, 0 else.
-	 */
-	int logVlog(int source, uint8_t level, const char *fmt, va_list ap);
-
-	/*!
-	 * @brief Log multi-line message.
-	 *
-	 * Every new line is merged with the same prefix.
-	 *
-	 * @param[in] source Source identifier.
-	 * @param[in] level  Message urgency level.
-	 * @param[in] fmt    Format of the log message -- follows printf(3)
-	 *     format.
-	 * @return -1 if error, 0 else.
-	 */
-	int logMl(int source, uint8_t level, const char *fmt, ...);
-
-	/*!
-	 * @brief Log multi-line message.
-	 *
-	 * Every new line is merged with the same prefix.
-	 *
-	 * @param[in]     source Source identifier.
-	 * @param[in]     level  Message urgency level.
-	 * @param[in]     fmt    Format of the log message -- follows printf(3)
-	 *     format.
-	 * @param[in,out] ap     Variable argument list.
-	 * @return -1 if error, 0 else.
-	 */
-	int logVlogMl(int source, uint8_t level, const char *fmt, va_list ap);
-
-	friend void globalLogOutput(QtMsgType type,
-	    const QMessageLogContext &context, const QString &msg);
-
-private:
-	FacDesc facDescVect[MAX_LOG_FILES]; /*!< Facility vector. */
-	int usedSources; /*!<
-	                   * Number of used sources.
-	                   * 0 is the default source id.
-	                   */
-	int openedFiles; /*!< Number of opened files. */
-	QMutex m_mutex; /*!< @brief Mutual exclusion. */
-	const QString m_hostName; /*!< @brief Host name. */
-
-	int m_logVerbosity; /*!< Amount of information in single message. */
-	int m_debugVerbosity; /*!< Verbosity of debugging output. */
-
-	/*!
-	 * @brief Converts log level to urgency prefix.
-	 */
-	static
-	const char *urgencyPrefix(uint8_t level);
-
-	/*!
-	 * @brief converts message type to urgency level.
-	 *
-	 * @param[in] type Message type.
-	 * @return Urgency level.
-	 */
-	static
-	uint8_t levelFromType(QtMsgType type);
-
-	/*!
-	 * @brief Log message.
-	 *
-	 * @param[in]     source Source identifier.
-	 * @param[in]     level  Message urgency level.
-	 * @param[in]     prefix Message prefix.
-	 * @param[in]     format Content of the log message in printf(3)
-	 *     format.
-	 * @param[in,out] ap     Variable argument list.
-	 * @return -1 if error, 0 else.
-	 */
-	void logPrefixVlog(int source, uint8_t level,
-	    const char *prefix, const char *format, va_list ap);
-
-	/*!
-	 * @brief Log multi-line message.
-	 *
-	 * @param[in]     source Source identifier.
-	 * @param[in]     level  Message urgency level.
-	 * @param[in]     prefix Message prefix.
-	 * @param[in]     format Content of the log message -- in printf(3)
-	 *     format.
-	 * @param[in,out] ap     Variable argument list.
-	 * @return -1 if error, 0 else.
-	 */
-	void logPrefixVlogMl(int source, uint8_t level,
-	    const char *prefix, const char *format, va_list ap);
-};
-
-/*!
  * @brief Logging macro used for internal purposes.
  *
  * @param[in] logVerbThresh Logging verbosity threshold.
@@ -338,7 +119,7 @@ private:
 #define logDebugNL(verbThresh, format, ...) \
 	do { \
 		if (GlobInstcs::logPtr->debugVerbosity() > (verbThresh)) { \
-			_internalLogNL(0, LOGSRC_DEF, LOG_DEBUG, \
+			_internalLogNL(0, LOGSRC_DFLT, LOG_DEBUG, \
 			    format, __VA_ARGS__); \
 		} \
 	} while (0)
@@ -392,7 +173,7 @@ private:
 #define logDebugMl(verbThresh, format, ...) \
 	do { \
 		if (GlobInstcs::logPtr->debugVerbosity() > verbThresh) { \
-			GlobInstcs::logPtr->logMl(LOGSRC_DEF, LOG_DEBUG, \
+			GlobInstcs::logPtr->logMl(LOGSRC_DFLT, LOG_DEBUG, \
 			    format, __VA_ARGS__); \
 		} \
 	} while (0)
@@ -441,7 +222,7 @@ private:
  */
 #define logInfo(format, ...) \
 	do { \
-		GlobInstcs::logPtr->log(LOGSRC_DEF, LOG_INFO, format, \
+		GlobInstcs::logPtr->log(LOGSRC_DFLT, LOG_INFO, format, \
 		    __VA_ARGS__); \
 	} while (0)
 
@@ -452,7 +233,7 @@ private:
  * @param[in] ...    Variadic arguments.
  */
 #define logInfoNL(format, ...) \
-	_internalLogNL(0, LOGSRC_DEF, LOG_INFO, format, __VA_ARGS__)
+	_internalLogNL(0, LOGSRC_DFLT, LOG_INFO, format, __VA_ARGS__)
 
 /*!
  * @brief Logs multi-line information message.
@@ -462,7 +243,7 @@ private:
  */
 #define logInfoMl(format, ...) \
 	do { \
-		GlobInstcs::logPtr->logMl(LOGSRC_DEF, LOG_INFO, format, \
+		GlobInstcs::logPtr->logMl(LOGSRC_DFLT, LOG_INFO, format, \
 		    __VA_ARGS__); \
 	} while (0)
 
@@ -474,7 +255,7 @@ private:
  */
 #define logWarning(format, ...) \
 	do { \
-		GlobInstcs::logPtr->log(LOGSRC_DEF, LOG_WARNING, format, \
+		GlobInstcs::logPtr->log(LOGSRC_DFLT, LOG_WARNING, format, \
 		    __VA_ARGS__); \
 	} while (0)
 
@@ -485,7 +266,7 @@ private:
  * @param[in] ...    Variadic arguments.
  */
 #define logWarningNL(format, ...) \
-	_internalLogNL(0, LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__)
+	_internalLogNL(0, LOGSRC_DFLT, LOG_WARNING, format, __VA_ARGS__)
 
 /*!
  * @brief Logs multi-line warning message.
@@ -495,7 +276,7 @@ private:
  */
 #define logWarningMl(format, ...) \
 	do { \
-		GlobInstcs::logPtr->logMl(LOGSRC_DEF, LOG_WARNING, format, \
+		GlobInstcs::logPtr->logMl(LOGSRC_DFLT, LOG_WARNING, format, \
 		    __VA_ARGS__); \
 	} while (0)
 
@@ -507,7 +288,7 @@ private:
  */
 #define logError(format, ...) \
 	do { \
-		GlobInstcs::logPtr->log(LOGSRC_DEF, LOG_ERR, format, \
+		GlobInstcs::logPtr->log(LOGSRC_DFLT, LOG_ERR, format, \
 		    __VA_ARGS__); \
 	} while (0)
 
@@ -518,7 +299,7 @@ private:
  * @param[in] ...    Variadic arguments.
  */
 #define logErrorNL(format, ...) \
-	_internalLogNL(0, LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__)
+	_internalLogNL(0, LOGSRC_DFLT, LOG_ERR, format, __VA_ARGS__)
 
 /*!
  * @brief Logs multi-line error message.
@@ -528,7 +309,7 @@ private:
  */
 #define logErrorMl(format, ...) \
 	do { \
-		GlobInstcs::logPtr->logMl(LOGSRC_DEF, LOG_ERR, format, \
+		GlobInstcs::logPtr->logMl(LOGSRC_DFLT, LOG_ERR, format, \
 		    __VA_ARGS__); \
 	} while (0)
 

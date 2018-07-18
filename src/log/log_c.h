@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -109,11 +109,11 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
 #define log_debug_nl(verb_thresh, format, ...) \
 	if (glob_debug_verbosity() > verb_thresh) { \
 		if (glob_log_verbosity() > 0) { \
-			glob_log(LOGSRC_DEF, LOG_DEBUG, \
+			glob_log(LOGSRC_DFLT, LOG_DEBUG, \
 			    format " (%s:%d, %s())\n", \
 			    __VA_ARGS__, __FILE__, __LINE__, __func__); \
 		} else { \
-			glob_log(LOGSRC_DEF, LOG_DEBUG, \
+			glob_log(LOGSRC_DFLT, LOG_DEBUG, \
 			    format "\n", __VA_ARGS__); \
 		} \
 	}
@@ -166,7 +166,7 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
  */
 #define log_info(format, ...) \
 	do { \
-		glob_log(LOGSRC_DEF, LOG_INFO, format, __VA_ARGS__); \
+		glob_log(LOGSRC_DFLT, LOG_INFO, format, __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -177,7 +177,7 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
  */
 #define log_warning(format, ...) \
 	do { \
-		glob_log(LOGSRC_DEF, LOG_WARNING, format, __VA_ARGS__); \
+		glob_log(LOGSRC_DFLT, LOG_WARNING, format, __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -188,7 +188,7 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
  */
 #define log_error(format, ...) \
 	do { \
-		glob_log(LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__); \
+		glob_log(LOGSRC_DFLT, LOG_ERR, format, __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -199,7 +199,7 @@ int glob_log_ml(int source, uint8_t level, const char *fmt, ...);
  */
 #define log_error_ml(format, ...) \
 	do { \
-		glob_log_ml(LOGSRC_DEF, LOG_ERR, format, __VA_ARGS__); \
+		glob_log_ml(LOGSRC_DFLT, LOG_ERR, format, __VA_ARGS__); \
 	} while (0)
 
 #endif /* _LOG_C_H_ */
