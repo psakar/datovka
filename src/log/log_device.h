@@ -45,13 +45,18 @@
 class LogDevice {
 public:
 	/*!
-	 * @brief Specifies target logging facility type.
+	 * @brief Specifies target logging facility.
 	 */
 	enum LogFac {
 		LF_SYSLOG = 0, /*!< @brief Syslog facility. */
 		LF_STDOUT = 1, /*!< @brief Stdout log target. */
 		LF_STDERR = 2, /*!< @brief Stderr log target. */
-		LF_FILE = 3 /*!< @brief File log target. */
+		LF_FILE = 3 /*!<
+		             * @brief File log target.
+		             * The first opened file is identified by facility
+		             * number LF_FILE. The second opened file
+		             * is identified by facility number (LF_FILE + 1).
+		             */
 	};
 
 	/*!
@@ -121,28 +126,28 @@ public:
 	 * @brief Returns the log levels for the given facility and source.
 	 *
 	 * @param[in] facility Facility identifier.
-	 * @param[in] source   Source identifier.
+	 * @param[in] source Source identifier.
 	 * @return Levels for the selected facility and identifier.
 	 */
-	quint8 logLevels(int facility, int source);
+	quint8 logLevels(int facility, enum LogSource source);
 
 	/*!
 	 * @brief Sets the log levels for the selected facility and source.
 	 *
 	 * @param[in] facility Facility identifier.
-	 * @param[in] source   Source identifier.
-	 * @param[in] levels   Levels to be set.
+	 * @param[in] source Source identifier.
+	 * @param[in] levels Levels to be set.
 	 */
-	void setLogLevels(int facility, int source, quint8 levels);
+	void setLogLevels(int facility, enum LogSource source, quint8 levels);
 
 	/*!
 	 * @brief Add log levels to the selected facility and source.
 	 *
 	 * @param[in] facility Facility identifier.
-	 * @param[in] source   Source identifier.
-	 * @param[in] levels   Log levels to be added.
+	 * @param[in] source Source identifier.
+	 * @param[in] levels Log levels to be added.
 	 */
-	void addLogLevels(int facility, int source, quint8 levels);
+	void addLogLevels(int facility, enum LogSource source, quint8 levels);
 
 	/*!
 	 * @brief Returns the id of a new unique source that can be used.
@@ -158,24 +163,24 @@ public:
 	 * @brief Log message.
 	 *
 	 * @param[in] source Source identifier.
-	 * @param[in] level  Message urgency level.
-	 * @param[in] fmt    Format of the log message -- follows printf(3)
-	 *     format.
+	 * @param[in] level Message urgency level.
+	 * @param[in] fmt Format of the log message -- follows printf(3) format.
 	 * @return -1 if error, 0 else.
 	 */
-	int log(int source, quint8 level, const char *fmt, ...);
+	int log(enum LogSource source, quint8 level, const char *fmt, ...);
 
 	/*!
 	 * @brief Log message.
 	 *
 	 * @param[in]     source Source identifier.
-	 * @param[in]     level  Message urgency level.
-	 * @param[in]     fmt    Format of the log message -- follows printf(3)
+	 * @param[in]     level Message urgency level.
+	 * @param[in]     fmt Format of the log message -- follows printf(3)
 	 *     format.
-	 * @param[in,out] ap     Variable argument list.
+	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	int logVlog(int source, quint8 level, const char *fmt, va_list ap);
+	int logVlog(enum LogSource source, quint8 level, const char *fmt,
+	    va_list ap);
 
 	/*!
 	 * @brief Log multi-line message.
@@ -183,12 +188,11 @@ public:
 	 * Every new line is merged with the same prefix.
 	 *
 	 * @param[in] source Source identifier.
-	 * @param[in] level  Message urgency level.
-	 * @param[in] fmt    Format of the log message -- follows printf(3)
-	 *     format.
+	 * @param[in] level Message urgency level.
+	 * @param[in] fmt Format of the log message -- follows printf(3) format.
 	 * @return -1 if error, 0 else.
 	 */
-	int logMl(int source, quint8 level, const char *fmt, ...);
+	int logMl(enum LogSource source, quint8 level, const char *fmt, ...);
 
 	/*!
 	 * @brief Log multi-line message.
@@ -196,13 +200,13 @@ public:
 	 * Every new line is merged with the same prefix.
 	 *
 	 * @param[in]     source Source identifier.
-	 * @param[in]     level  Message urgency level.
-	 * @param[in]     fmt    Format of the log message -- follows printf(3)
-	 *     format.
-	 * @param[in,out] ap     Variable argument list.
+	 * @param[in]     level Message urgency level.
+	 * @param[in]     fmt Format of the log message in printf(3) format.
+	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	int logVlogMl(int source, quint8 level, const char *fmt, va_list ap);
+	int logVlogMl(enum LogSource source, quint8 level, const char *fmt,
+	    va_list ap);
 
 	friend void globalLogOutput(enum QtMsgType type,
 	    const QMessageLogContext &context, const QString &msg);
@@ -242,27 +246,25 @@ private:
 	 * @brief Log message.
 	 *
 	 * @param[in]     source Source identifier.
-	 * @param[in]     level  Message urgency level.
+	 * @param[in]     level Message urgency level.
 	 * @param[in]     prefix Message prefix.
-	 * @param[in]     format Content of the log message in printf(3)
-	 *     format.
-	 * @param[in,out] ap     Variable argument list.
+	 * @param[in]     format Content of the log message in printf(3) format.
+	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	void logPrefixVlog(int source, quint8 level,
+	void logPrefixVlog(enum LogSource source, quint8 level,
 	    const char *prefix, const char *format, va_list ap);
 
 	/*!
 	 * @brief Log multi-line message.
 	 *
 	 * @param[in]     source Source identifier.
-	 * @param[in]     level  Message urgency level.
+	 * @param[in]     level Message urgency level.
 	 * @param[in]     prefix Message prefix.
-	 * @param[in]     format Content of the log message -- in printf(3)
-	 *     format.
-	 * @param[in,out] ap     Variable argument list.
+	 * @param[in]     format Content of the log message in printf(3) format.
+	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	void logPrefixVlogMl(int source, quint8 level,
+	void logPrefixVlogMl(enum LogSource source, quint8 level,
 	    const char *prefix, const char *format, va_list ap);
 };

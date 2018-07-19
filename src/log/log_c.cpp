@@ -50,7 +50,7 @@ int glob_debug_verbosity(void)
 	return GlobInstcs::logPtr->debugVerbosity();
 }
 
-int glob_log(int source, uint8_t level, const char *fmt, ...)
+int glob_log(enum LogSource source, uint8_t level, const char *fmt, ...)
 {
 	va_list argp;
 
@@ -63,7 +63,7 @@ int glob_log(int source, uint8_t level, const char *fmt, ...)
 	return 0;
 }
 
-int glob_log_ml(int source, uint8_t level, const char *fmt, ...)
+int glob_log_ml(enum LogSource source, uint8_t level, const char *fmt, ...)
 {
 	va_list argp;
 

@@ -165,7 +165,7 @@ fail:
 #define facilityLevels(facility, source) \
 	m_facDescVect[(facility)].levels[(source)]
 
-quint8 LogDevice::logLevels(int facility, int source)
+quint8 LogDevice::logLevels(int facility, enum LogSource source)
 {
 	quint8 ret;
 
@@ -181,7 +181,7 @@ quint8 LogDevice::logLevels(int facility, int source)
 	return ret;
 }
 
-void LogDevice::setLogLevels(int facility, int source, quint8 levels)
+void LogDevice::setLogLevels(int facility, enum LogSource source, quint8 levels)
 {
 	Q_ASSERT((facility >= 0) && (facility < MAX_LOG_FILES));
 	Q_ASSERT((source >= -1) && (source < MAX_SOURCES));
@@ -199,7 +199,7 @@ void LogDevice::setLogLevels(int facility, int source, quint8 levels)
 	m_mutex.unlock();
 }
 
-void LogDevice::addLogLevels(int facility, int source, quint8 levels)
+void LogDevice::addLogLevels(int facility, enum LogSource source, quint8 levels)
 {
 	int i;
 
@@ -237,7 +237,7 @@ int LogDevice::acquireUniqueLogSource(void)
 	return ret;
 }
 
-int LogDevice::log(int source, quint8 level, const char *fmt, ...)
+int LogDevice::log(enum LogSource source, quint8 level, const char *fmt, ...)
 {
 	const char *prefix;
 	va_list argp;
@@ -263,7 +263,8 @@ int LogDevice::log(int source, quint8 level, const char *fmt, ...)
 	return 0;
 }
 
-int LogDevice::logVlog(int source, quint8 level, const char *fmt, va_list ap)
+int LogDevice::logVlog(enum LogSource source, quint8 level, const char *fmt,
+    va_list ap)
 {
 	const char *prefix;
 
@@ -284,7 +285,7 @@ int LogDevice::logVlog(int source, quint8 level, const char *fmt, va_list ap)
 	return 0;
 }
 
-int LogDevice::logMl(int source, quint8 level, const char *fmt, ...)
+int LogDevice::logMl(enum LogSource source, quint8 level, const char *fmt, ...)
 {
 	const char *prefix;
 	va_list argp;
@@ -310,7 +311,8 @@ int LogDevice::logMl(int source, quint8 level, const char *fmt, ...)
 	return 0;
 }
 
-int LogDevice::logVlogMl(int source, quint8 level, const char *fmt, va_list ap)
+int LogDevice::logVlogMl(enum LogSource source, quint8 level, const char *fmt,
+    va_list ap)
 {
 	const char *prefix;
 
@@ -377,7 +379,7 @@ quint8 LogDevice::levelFromType(enum QtMsgType type)
 	}
 }
 
-void LogDevice::logPrefixVlog(int source, quint8 level,
+void LogDevice::logPrefixVlog(enum LogSource source, quint8 level,
     const char *prefix, const char *format, va_list ap)
 {
 	quint8 logMask;
@@ -451,7 +453,7 @@ void LogDevice::logPrefixVlog(int source, quint8 level,
 	}
 }
 
-void LogDevice::logPrefixVlogMl(int source, quint8 level,
+void LogDevice::logPrefixVlogMl(enum LogSource source, quint8 level,
     const char *prefix, const char *format, va_list ap)
 {
 	quint8 logMask;
