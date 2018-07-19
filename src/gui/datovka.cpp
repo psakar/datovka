@@ -7072,34 +7072,24 @@ void MainWindow::showMsgAdvancedSearchDialog(void)
 	QPair <QString, MessageDbSet *> userNameAndMsgDbSet;
 	QList< QPair<QString, MessageDbSet *> > messageDbList;
 
-	/* get pointer to database for current accounts */
+	/* get current account username */
 	const QString currentUserName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!currentUserName.isEmpty());
-	MessageDbSet *dbSet = accountDbSet(currentUserName);
-	if (Q_NULLPTR == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-	userNameAndMsgDbSet.first = currentUserName;
-	userNameAndMsgDbSet.second = dbSet;
-	messageDbList.append(userNameAndMsgDbSet);
 
-	/* get pointer to database for other accounts */
+	/* get pointer to database set of all accounts */
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
 		const QString userName(m_accountModel.userName(index));
 		Q_ASSERT(!userName.isEmpty());
-		if (currentUserName != userName) {
-			MessageDbSet *dbSet = accountDbSet(userName);
-			if (Q_NULLPTR == dbSet) {
-				Q_ASSERT(0);
-				continue;
-			}
-			userNameAndMsgDbSet.first = userName;
-			userNameAndMsgDbSet.second = dbSet;
-			messageDbList.append(userNameAndMsgDbSet);
+		MessageDbSet *dbSet = accountDbSet(userName);
+		if (Q_NULLPTR == dbSet) {
+			Q_ASSERT(0);
+			continue;
 		}
+		userNameAndMsgDbSet.first = userName;
+		userNameAndMsgDbSet.second = dbSet;
+		messageDbList.append(userNameAndMsgDbSet);
 	}
 
 	dlgMsgSearch = new DlgMsgSearch(messageDbList, currentUserName, this,

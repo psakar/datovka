@@ -45,7 +45,7 @@
      <item row="0" column="0">
       <widget class="QLabel" name="crntAcntLabel">
        <property name="text">
-        <string>Current account:</string>
+        <string>Account:</string>
        </property>
       </widget>
      </item>
@@ -57,7 +57,7 @@
    <item>
     <widget class="QCheckBox" name="searchAllAcntCheckBox">
      <property name="text">
-      <string>Search also in other accounts (can be slow).</string>
+      <string>Search also in other accounts (can be slow)</string>
      </property>
     </widget>
    </item>
@@ -115,7 +115,11 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QLineEdit" name="msgIdLine"/>
+           <widget class="QLineEdit" name="msgIdLine">
+            <property name="inputMethodHints">
+             <set>Qt::ImhDigitsOnly</set>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
