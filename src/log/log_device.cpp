@@ -55,8 +55,8 @@ LogDevice::~LogDevice(void)
 
 	for (int i = 0; i < m_openedFiles; ++i) {
 		Q_ASSERT(NULL != m_facDescVect[i + LF_FILE].fout);
-		fflush(m_facDescVect[i + LF_FILE].fout);
-		fclose(m_facDescVect[i + LF_FILE].fout);
+		std::fflush(m_facDescVect[i + LF_FILE].fout);
+		std::fclose(m_facDescVect[i + LF_FILE].fout);
 	}
 }
 
@@ -136,7 +136,7 @@ int LogDevice::openFile(const QString &fName, enum LogMode mode)
 		break;
 	}
 
-	of = fopen(fName.toUtf8().constData(), openMode);
+	of = std::fopen(fName.toUtf8().constData(), openMode);
 	if (of == NULL) {
 		goto fail;
 	}
@@ -246,7 +246,7 @@ int LogDevice::log(enum LogSource source, quint8 level, const char *fmt, ...)
 	Q_ASSERT(level < 8);
 
 	prefix = urgencyPrefix(level);
-	if (prefix == NULL) {
+	if (Q_UNLIKELY(prefix == NULL)) {
 		return -1;
 	}
 
@@ -272,7 +272,7 @@ int LogDevice::logVlog(enum LogSource source, quint8 level, const char *fmt,
 	Q_ASSERT(level < 8);
 
 	prefix = urgencyPrefix(level);
-	if (prefix == NULL) {
+	if (Q_UNLIKELY(prefix == NULL)) {
 		return -1;
 	}
 
@@ -294,7 +294,7 @@ int LogDevice::logMl(enum LogSource source, quint8 level, const char *fmt, ...)
 	Q_ASSERT(level < 8);
 
 	prefix = urgencyPrefix(level);
-	if (prefix == NULL) {
+	if (Q_UNLIKELY(prefix == NULL)) {
 		return -1;
 	}
 
@@ -320,7 +320,7 @@ int LogDevice::logVlogMl(enum LogSource source, quint8 level, const char *fmt,
 	Q_ASSERT(level < 8);
 
 	prefix = urgencyPrefix(level);
-	if (prefix == NULL) {
+	if (Q_UNLIKELY(prefix == NULL)) {
 		return -1;
 	}
 
@@ -420,9 +420,8 @@ void LogDevice::logPrefixVlog(enum LogSource source, quint8 level,
 	int i;
 	FILE *of;
 	va_list aq;
-	QString dateTime = QDateTime::currentDateTime().toString(logTimeFmt);
-	QString msgPrefix = "";
-	QString msgFormatted = "";
+	QString msgPrefix;
+	QString msgFormatted;
 	QString msg;
 	/*!
 	 * @todo Handle case in which no additional memory can be
@@ -430,16 +429,17 @@ void LogDevice::logPrefixVlog(enum LogSource source, quint8 level,
 	 */
 
 	if (m_logVerbosity > 1) {
-		msgPrefix = dateTime;
+		msgPrefix = QDateTime::currentDateTime().toString(logTimeFmt);
 	}
 	if (m_logVerbosity > 2) {
-		msgPrefix += " " + m_hostName + " " +
-		    QCoreApplication::applicationName() + "[" +
+		msgPrefix += QStringLiteral(" ") + m_hostName +
+		    QStringLiteral(" ") + QCoreApplication::applicationName() +
+		    QStringLiteral("[") +
 		    QString::number(QCoreApplication::applicationPid()) +
-		    "]";
+		    QStringLiteral("]");
 	}
 	if (m_logVerbosity > 1) {
-		msgPrefix += ": ";
+		msgPrefix += QStringLiteral(": ");
 	}
 
 	if (NULL != prefix) {
@@ -476,12 +476,12 @@ void LogDevice::logPrefixVlog(enum LogSource source, quint8 level,
 			}
 
 			Q_ASSERT(of != NULL);
-			fputs(msg.toUtf8().constData(), of);
+			std::fputs(msg.toUtf8().constData(), of);
 			/*
 			 * Windows buffers stderr, explicit flush is needed.
 			 */
 			if (stderr == of) {
-				fflush(of);
+				std::fflush(of);
 			}
 		}
 	}
@@ -494,23 +494,23 @@ void LogDevice::logPrefixVlogMl(enum LogSource source, quint8 level,
 	int i;
 	FILE *of;
 	va_list aq;
-	QString dateTime = QDateTime::currentDateTime().toString(logTimeFmt);
-	QString msgPrefix = "";
-	QString msgFormatted = "";
+	QString msgPrefix;
+	QString msgFormatted;
 	QStringList msgLines;
 	QString msg;
 
 	if (m_logVerbosity > 1) {
-		msgPrefix = dateTime;
+		msgPrefix = QDateTime::currentDateTime().toString(logTimeFmt);
 	}
 	if (m_logVerbosity > 2) {
-		msgPrefix += " " + m_hostName + " " +
-		    QCoreApplication::applicationName() + "[" +
+		msgPrefix += QStringLiteral(" ") + m_hostName +
+		    QStringLiteral(" ") + QCoreApplication::applicationName() +
+		    QStringLiteral("[") +
 		    QString::number(QCoreApplication::applicationPid()) +
-		    "]";
+		    QStringLiteral("]");
 	}
 	if (m_logVerbosity > 1) {
-		msgPrefix += ": ";
+		msgPrefix += QStringLiteral(": ");
 	}
 
 	if (NULL != prefix) {
@@ -552,8 +552,8 @@ void LogDevice::logPrefixVlogMl(enum LogSource source, quint8 level,
 				}
 
 				Q_ASSERT(of != NULL);
-				fputs(msg.toUtf8().constData(), of);
-				fputc('\n', of);
+				std::fputs(msg.toUtf8().constData(), of);
+				std::fputc('\n', of);
 				/*
 				 * Windows buffers stderr, explicit flush is
 				 * needed.
@@ -562,7 +562,7 @@ void LogDevice::logPrefixVlogMl(enum LogSource source, quint8 level,
 				 * nothing lost.
 				 */
 				if (stdout != of) {
-					fflush(of);
+					std::fflush(of);
 				}
 			}
 		}
