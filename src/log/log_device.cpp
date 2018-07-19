@@ -333,6 +333,40 @@ int LogDevice::logVlogMl(enum LogSource source, quint8 level, const char *fmt,
 	return 0;
 }
 
+void LogDevice::logQtMessage(enum QtMsgType type,
+    const QMessageLogContext &context, const QString &msg)
+{
+	const QByteArray localMsg(msg.toLocal8Bit());
+	quint8 level = levelFromType(type);
+
+	switch (type) {
+	case QtDebugMsg:
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+	case QtInfoMsg:
+#endif /* >= Qt-5.5 */
+	case QtWarningMsg:
+	case QtCriticalMsg:
+		if (logVerbosity() > 0) {
+			log(LOGSRC_DFLT, level, "%s (%s:%u, %s)\n",
+			    localMsg.constData(), context.file, context.line,
+			    context.function);
+		} else {
+			log(LOGSRC_DFLT, level, "%s\n", localMsg.constData());
+		}
+		break;
+	case QtFatalMsg:
+		if (logVerbosity() > 0) {
+			log(LOGSRC_DFLT, level, "%s (%s:%u, %s)\n",
+			    localMsg.constData(), context.file, context.line,
+			    context.function);
+		} else {
+			log(LOGSRC_DFLT, level, "%s\n", localMsg.constData());
+		}
+		abort();
+		break;
+	}
+}
+
 const char *LogDevice::urgencyPrefix(quint8 level)
 {
 	const char *prefix;

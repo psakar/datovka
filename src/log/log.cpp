@@ -21,50 +21,13 @@
  * the two.
  */
 
-#include <cstdarg>
-#include <cstddef> /* NULL */
-#include <cstdio>
-#include <QDateTime>
-
-#include "src/global.h"
 #include "src/log/log.h"
-
-#define LOG_TIME_FMT "MMM dd hh:mm:ss"
 
 void globalLogOutput(enum QtMsgType type, const QMessageLogContext &context,
     const QString &msg)
 {
-	QByteArray localMsg = msg.toLocal8Bit();
-	QString dateTime = QDateTime::currentDateTime().toString(LOG_TIME_FMT);
-	uint8_t level = LogDevice::levelFromType(type);
-
-	switch (type) {
-	case QtDebugMsg:
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
-	case QtInfoMsg:
-#endif /* >= Qt-5.5 */
-	case QtWarningMsg:
-	case QtCriticalMsg:
-		if (GlobInstcs::logPtr->logVerbosity() > 0) {
-			GlobInstcs::logPtr->log(LOGSRC_DFLT, level,
-			    "%s (%s:%u, %s)\n", localMsg.constData(),
-			    context.file, context.line, context.function);
-		} else {
-			GlobInstcs::logPtr->log(LOGSRC_DFLT, level, "%s\n",
-			    localMsg.constData());
-		}
-		break;
-	case QtFatalMsg:
-		if (GlobInstcs::logPtr->logVerbosity() > 0) {
-			GlobInstcs::logPtr->log(LOGSRC_DFLT, level,
-			    "%s (%s:%u, %s)\n", localMsg.constData(),
-			    context.file, context.line, context.function);
-		} else {
-			GlobInstcs::logPtr->log(LOGSRC_DFLT, level, "%s\n",
-			    localMsg.constData());
-		}
-		abort();
-		break;
+	if (GlobInstcs::logPtr != Q_NULLPTR) {
+		GlobInstcs::logPtr->logQtMessage(type, context, msg);
 	}
 }
 

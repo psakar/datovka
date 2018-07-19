@@ -208,7 +208,14 @@ public:
 	int logVlogMl(enum LogSource source, quint8 level, const char *fmt,
 	    va_list ap);
 
-	friend void globalLogOutput(enum QtMsgType type,
+	/*!
+	 * @brief Provides message handler interface for the Qt library.
+	 *
+	 * @param[in] type Severity level.
+	 * @param[in] context Log message context.
+	 * @param[in] msg Log message.
+	 */
+	void logQtMessage(enum QtMsgType type,
 	    const QMessageLogContext &context, const QString &msg);
 
 private:
