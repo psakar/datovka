@@ -33,7 +33,7 @@ void globalLogOutput(enum QtMsgType type, const QMessageLogContext &context,
 
 void qDebugCall(const char *fmt, ...)
 {
-	va_list argp;
+	std::va_list argp;
 
 	va_start(argp, fmt);
 
@@ -45,7 +45,7 @@ void qDebugCall(const char *fmt, ...)
 	va_end(argp);
 }
 
-void qDebugCallV(const char *fmt, va_list ap)
+void qDebugCallV(const char *fmt, std::va_list ap)
 {
 	QString outStr;
 	outStr.vsprintf(fmt, ap);

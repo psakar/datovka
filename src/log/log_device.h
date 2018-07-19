@@ -72,7 +72,7 @@ public:
 	 */
 	struct FacDesc {
 		quint8 levels[MAX_SOURCES]; /*!< Up to eight syslog levels. */
-		FILE *fout; /*!< Output file. */
+		std::FILE *fout; /*!< Output file. */
 	};
 
 	/*!

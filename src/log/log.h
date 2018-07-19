@@ -57,7 +57,7 @@ void qDebugCall(const char *fmt, ...);
  * @param[in] fmt Format string.
  * @param[in,out] ap Variable arguments list.
  */
-void qDebugCallV(const char *fmt, va_list ap);
+void qDebugCallV(const char *fmt, std::va_list ap);
 
 /*!
  * @brief Generates location debug information.

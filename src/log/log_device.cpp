@@ -112,7 +112,7 @@ void LogDevice::setDebugVerbosity(int verb)
 
 int LogDevice::openFile(const QString &fName, enum LogMode mode)
 {
-	FILE *of;
+	std::FILE *of;
 	const char *openMode;
 	int fidx = -1;
 
@@ -240,7 +240,7 @@ int LogDevice::acquireUniqueLogSource(void)
 int LogDevice::log(enum LogSource source, quint8 level, const char *fmt, ...)
 {
 	const char *prefix;
-	va_list argp;
+	std::va_list argp;
 
 	Q_ASSERT((source >= 0) && (source < MAX_SOURCES));
 	Q_ASSERT(level < 8);
@@ -264,7 +264,7 @@ int LogDevice::log(enum LogSource source, quint8 level, const char *fmt, ...)
 }
 
 int LogDevice::logVlog(enum LogSource source, quint8 level, const char *fmt,
-    va_list ap)
+    std::va_list ap)
 {
 	const char *prefix;
 
@@ -288,7 +288,7 @@ int LogDevice::logVlog(enum LogSource source, quint8 level, const char *fmt,
 int LogDevice::logMl(enum LogSource source, quint8 level, const char *fmt, ...)
 {
 	const char *prefix;
-	va_list argp;
+	std::va_list argp;
 
 	Q_ASSERT((source >= 0) && (source < MAX_SOURCES));
 	Q_ASSERT(level < 8);
@@ -312,7 +312,7 @@ int LogDevice::logMl(enum LogSource source, quint8 level, const char *fmt, ...)
 }
 
 int LogDevice::logVlogMl(enum LogSource source, quint8 level, const char *fmt,
-    va_list ap)
+    std::va_list ap)
 {
 	const char *prefix;
 
@@ -372,15 +372,15 @@ const char *LogDevice::urgencyPrefix(quint8 level)
 	const char *prefix;
 
 	switch (level) {
-	case LOG_EMERG :   prefix = "emergency: "; break;
-	case LOG_ALERT :   prefix = "alert: ";     break;
-	case LOG_CRIT :    prefix = "critical: ";  break;
-	case LOG_ERR :     prefix = "error: ";     break;
-	case LOG_WARNING : prefix = "warning: ";   break;
-	case LOG_NOTICE :  prefix = "notice: ";    break;
-	case LOG_INFO :    prefix = "info: ";      break;
-	case LOG_DEBUG :   prefix = "debug: ";     break;
-	default :          prefix = NULL;          break;
+	case LOG_EMERG:   prefix = "emergency: "; break;
+	case LOG_ALERT:   prefix = "alert: ";     break;
+	case LOG_CRIT:    prefix = "critical: ";  break;
+	case LOG_ERR:     prefix = "error: ";     break;
+	case LOG_WARNING: prefix = "warning: ";   break;
+	case LOG_NOTICE:  prefix = "notice: ";    break;
+	case LOG_INFO:    prefix = "info: ";      break;
+	case LOG_DEBUG:   prefix = "debug: ";     break;
+	default:          prefix = NULL;          break;
 	}
 
 	return prefix;
@@ -414,12 +414,12 @@ quint8 LogDevice::levelFromType(enum QtMsgType type)
 }
 
 void LogDevice::logPrefixVlog(enum LogSource source, quint8 level,
-    const char *prefix, const char *format, va_list ap)
+    const char *prefix, const char *format, std::va_list ap)
 {
 	quint8 logMask;
 	int i;
-	FILE *of;
-	va_list aq;
+	std::FILE *of;
+	std::va_list aq;
 	QString msgPrefix;
 	QString msgFormatted;
 	QString msg;
@@ -488,12 +488,12 @@ void LogDevice::logPrefixVlog(enum LogSource source, quint8 level,
 }
 
 void LogDevice::logPrefixVlogMl(enum LogSource source, quint8 level,
-    const char *prefix, const char *format, va_list ap)
+    const char *prefix, const char *format, std::va_list ap)
 {
 	quint8 logMask;
 	int i;
-	FILE *of;
-	va_list aq;
+	std::FILE *of;
+	std::va_list aq;
 	QString msgPrefix;
 	QString msgFormatted;
 	QStringList msgLines;

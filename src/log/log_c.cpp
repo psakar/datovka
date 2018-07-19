@@ -22,7 +22,6 @@
  */
 
 #include <cstdarg>
-//#include <cstddef> /* NULL */
 #include <cstdint>
 
 #include "src/global.h"
@@ -31,7 +30,7 @@
 
 void q_debug_call(const char *fmt, ...)
 {
-	va_list argp;
+	std::va_list argp;
 
 	va_start(argp, fmt);
 
@@ -52,7 +51,7 @@ int glob_debug_verbosity(void)
 
 int glob_log(enum LogSource source, uint8_t level, const char *fmt, ...)
 {
-	va_list argp;
+	std::va_list argp;
 
 	va_start(argp, fmt);
 
@@ -65,7 +64,7 @@ int glob_log(enum LogSource source, uint8_t level, const char *fmt, ...)
 
 int glob_log_ml(enum LogSource source, uint8_t level, const char *fmt, ...)
 {
-	va_list argp;
+	std::va_list argp;
 
 	va_start(argp, fmt);
 
