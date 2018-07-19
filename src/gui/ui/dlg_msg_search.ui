@@ -41,53 +41,30 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="h0">
-     <item>
+    <layout class="QFormLayout" name="accountFormLayout">
+     <item row="0" column="0">
       <widget class="QLabel" name="crntAcntLabel">
        <property name="text">
         <string>Current account:</string>
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QLabel" name="crntAcntNameLabel">
-       <property name="font">
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="accountComboBox"/>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="searchAllAcntCheckBox">
      <property name="text">
       <string>Search also in other accounts (can be slow).</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>

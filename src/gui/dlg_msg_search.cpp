@@ -252,10 +252,6 @@ void DlgMsgSearch::searchMessages(void)
 		        m_ui->tagLine->text());
 	}
 
-	/* Number of accounts in which to search for messages in. */
-	const int dbCount = m_ui->searchAllAcntCheckBox->isChecked() ?
-	    m_msgSetEntryList.count() : 1;
-
 	/* How many envelope fields (without tags) are supplied. */
 	const int envelopeItems = filledInExceptTags();
 
@@ -275,10 +271,22 @@ void DlgMsgSearch::searchMessages(void)
 	searchEnvelope.setDmRecipientIdent(m_ui->rcpntFileMarkLine->text());
 	searchEnvelope.setDmToHands(m_ui->toHandsLine->text());
 
+	/* Number of accounts in which to search for messages in. */
+	const int dbCount = m_ui->searchAllAcntCheckBox->isChecked() ?
+	    m_msgSetEntryList.count() : 1;
+
 	/* Search in accounts. */
 	for (int i = 0; i < dbCount; ++i) {
-		const QPair<QString, MessageDbSet *> &msgSetEntry(
-		    m_msgSetEntryList.at(i));
+
+		QPair<QString, MessageDbSet *> msgSetEntry;
+
+		/* Get message db set for selected account. */
+		if (dbCount == 1) {
+			msgSetEntry = m_msgSetEntryList.at(
+			    m_ui->accountComboBox->currentIndex());
+		} else {
+			msgSetEntry = m_msgSetEntryList.at(i);
+		}
 
 		envelResults.clear();
 		resultsToBeDisplayed.clear();
@@ -330,10 +338,20 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 
 	Q_ASSERT(!username.isEmpty());
 
-	/* Set account name and user name to label. */
-	m_ui->crntAcntNameLabel->setText(
-	    (*GlobInstcs::acntMapPtr)[username].accountName() +
-	    " (" + username + ")");
+	/* Set accounts into combobox - account name and user name. */
+	typedef QPair<QString, MessageDbSet *> SetPair;
+	foreach (const SetPair &msgSetEntry, m_msgSetEntryList) {
+		const QString accountName =
+		    (*GlobInstcs::acntMapPtr)[msgSetEntry.first].accountName() +
+		    " (" + msgSetEntry.first + ")";
+		m_ui->accountComboBox->addItem(accountName,
+		    QVariant(msgSetEntry.first));
+		if (username == msgSetEntry.first) {
+			int i = m_ui->accountComboBox->count() - 1;
+			Q_ASSERT(0 <= i);
+			m_ui->accountComboBox->setCurrentIndex(i);
+		}
+	}
 
 	/* Only one account available. */
 	if (m_msgSetEntryList.count() <= 1) {
