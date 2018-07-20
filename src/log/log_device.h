@@ -167,7 +167,8 @@ public:
 	 * @param[in] fmt Format of the log message -- follows printf(3) format.
 	 * @return -1 if error, 0 else.
 	 */
-	int log(enum LogSource source, quint8 level, const char *fmt, ...);
+	int log(enum LogSource source, enum LogLevel level, const char *fmt,
+	    ...);
 
 	/*!
 	 * @brief Log message.
@@ -179,8 +180,8 @@ public:
 	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	int logVlog(enum LogSource source, quint8 level, const char *fmt,
-	    va_list ap);
+	int logVlog(enum LogSource source, enum LogLevel level, const char *fmt,
+	    std::va_list ap);
 
 	/*!
 	 * @brief Log multi-line message.
@@ -192,7 +193,8 @@ public:
 	 * @param[in] fmt Format of the log message -- follows printf(3) format.
 	 * @return -1 if error, 0 else.
 	 */
-	int logMl(enum LogSource source, quint8 level, const char *fmt, ...);
+	int logMl(enum LogSource source, enum LogLevel level, const char *fmt,
+	    ...);
 
 	/*!
 	 * @brief Log multi-line message.
@@ -205,8 +207,8 @@ public:
 	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	int logVlogMl(enum LogSource source, quint8 level, const char *fmt,
-	    va_list ap);
+	int logVlogMl(enum LogSource source, enum LogLevel level,
+	    const char *fmt, std::va_list ap);
 
 	/*!
 	 * @brief Provides message handler interface for the Qt library.
@@ -238,7 +240,7 @@ private:
 	 * @brief Converts log level to urgency prefix.
 	 */
 	static
-	const char *urgencyPrefix(quint8 level);
+	const char *urgencyPrefix(enum LogLevel level);
 
 	/*!
 	 * @brief converts message type to urgency level.
@@ -247,31 +249,40 @@ private:
 	 * @return Urgency level.
 	 */
 	static
-	quint8 levelFromType(enum QtMsgType type);
+	enum LogLevel levelFromType(enum QtMsgType type);
+
+	/*!
+	 * @brief Build log line prefix string. Its form depends on
+	 *     the verbosity value.
+	 *
+	 * @param[in] urgPrefix Urgency prefix.
+	 * @return Prefix string.
+	 */
+	QString buildPrefix(const char *urgPrefix) const;
 
 	/*!
 	 * @brief Log message.
 	 *
 	 * @param[in]     source Source identifier.
 	 * @param[in]     level Message urgency level.
-	 * @param[in]     prefix Message prefix.
+	 * @param[in]     urgPrefix Message urgency prefix.
 	 * @param[in]     format Content of the log message in printf(3) format.
 	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	void logPrefixVlog(enum LogSource source, quint8 level,
-	    const char *prefix, const char *format, va_list ap);
+	void logPrefixVlog(enum LogSource source, enum LogLevel level,
+	    const char *urgPrefix, const char *format, std::va_list ap);
 
 	/*!
 	 * @brief Log multi-line message.
 	 *
 	 * @param[in]     source Source identifier.
 	 * @param[in]     level Message urgency level.
-	 * @param[in]     prefix Message prefix.
+	 * @param[in]     urgPrefix Message urgency prefix.
 	 * @param[in]     format Content of the log message in printf(3) format.
 	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	void logPrefixVlogMl(enum LogSource source, quint8 level,
-	    const char *prefix, const char *format, va_list ap);
+	void logPrefixVlogMl(enum LogSource source, enum LogLevel level,
+	    const char *urgPrefix, const char *format, std::va_list ap);
 };

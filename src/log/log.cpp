@@ -37,18 +37,19 @@ void qDebugCall(const char *fmt, ...)
 
 	va_start(argp, fmt);
 
-	QString outStr;
-	outStr.vsprintf(fmt, argp);
-
-	qDebug("%s", outStr.toUtf8().constData());
+	qDebugCallV(fmt, argp);
 
 	va_end(argp);
 }
 
 void qDebugCallV(const char *fmt, std::va_list ap)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+	qDebug("%s", QString::vasprintf(fmt, ap).toUtf8().constData());
+#else /* < Qt-5.5 */
 	QString outStr;
 	outStr.vsprintf(fmt, ap);
 
 	qDebug("%s", outStr.toUtf8().constData());
+#endif /* >= Qt-5.5 */
 }

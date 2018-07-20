@@ -75,7 +75,7 @@ int glob_debug_verbosity(void);
  * @param[in] fmt Format of the log message -- follows printf(3) format.
  * @return -1 if error, 0 else.
  */
-int glob_log(enum LogSource source, uint8_t level, const char *fmt, ...);
+int glob_log(enum LogSource source, enum LogLevel level, const char *fmt, ...);
 
 /*!
  * @brief Log multi-line message.
@@ -87,7 +87,8 @@ int glob_log(enum LogSource source, uint8_t level, const char *fmt, ...);
  * @param[in] fmt Format of the log message -- follows printf(3) format.
  * @return -1 if error, 0 else.
  */
-int glob_log_ml(enum LogSource source, uint8_t level, const char *fmt, ...);
+int glob_log_ml(enum LogSource source, enum LogLevel level, const char *fmt,
+    ...);
 
 #ifdef __cplusplus
 } /* extern "C" */

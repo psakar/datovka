@@ -38,7 +38,7 @@ enum LogSource {
 };
 
 /*
- * @brief Log level.
+ * @brief Log urgency level.
  *
  * Inspired by syslog.h
  */

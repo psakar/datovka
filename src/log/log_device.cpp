@@ -159,10 +159,10 @@ fail:
 }
 
 /*!
- * @brief A convenience macro for getting levels for a given facility
- * and source.
+ * @brief A convenience macro for getting level bits for a given facility and
+ *     source.
  */
-#define facilityLevels(facility, source) \
+#define facilityLevelBits(facility, source) \
 	m_facDescVect[(facility)].levels[(source)]
 
 quint8 LogDevice::logLevels(int facility, enum LogSource source)
@@ -174,7 +174,7 @@ quint8 LogDevice::logLevels(int facility, enum LogSource source)
 
 	m_mutex.lock();
 
-	ret = facilityLevels(facility, source);
+	ret = facilityLevelBits(facility, source);
 
 	m_mutex.unlock();
 
@@ -189,10 +189,10 @@ void LogDevice::setLogLevels(int facility, enum LogSource source, quint8 levels)
 	m_mutex.lock();
 
 	if (source != LOGSRC_ANY) {
-		facilityLevels(facility, source) = levels;
+		facilityLevelBits(facility, source) = levels;
 	} else {
 		for (int i = 0; i < MAX_SOURCES; ++i) {
-			facilityLevels(facility, i) = levels;
+			facilityLevelBits(facility, i) = levels;
 		}
 	}
 
@@ -209,10 +209,10 @@ void LogDevice::addLogLevels(int facility, enum LogSource source, quint8 levels)
 	m_mutex.lock();
 
 	if (source != LOGSRC_ANY) {
-		facilityLevels(facility, source) |= levels;
+		facilityLevelBits(facility, source) |= levels;
 	} else {
 		for (i = 0; i < MAX_SOURCES; ++i) {
-			facilityLevels(facility, i) |= levels;
+			facilityLevelBits(facility, i) |= levels;
 		}
 	}
 
@@ -237,7 +237,8 @@ int LogDevice::acquireUniqueLogSource(void)
 	return ret;
 }
 
-int LogDevice::log(enum LogSource source, quint8 level, const char *fmt, ...)
+int LogDevice::log(enum LogSource source, enum LogLevel level, const char *fmt,
+    ...)
 {
 	const char *prefix;
 	std::va_list argp;
@@ -263,8 +264,8 @@ int LogDevice::log(enum LogSource source, quint8 level, const char *fmt, ...)
 	return 0;
 }
 
-int LogDevice::logVlog(enum LogSource source, quint8 level, const char *fmt,
-    std::va_list ap)
+int LogDevice::logVlog(enum LogSource source, enum LogLevel level,
+    const char *fmt, std::va_list ap)
 {
 	const char *prefix;
 
@@ -285,7 +286,8 @@ int LogDevice::logVlog(enum LogSource source, quint8 level, const char *fmt,
 	return 0;
 }
 
-int LogDevice::logMl(enum LogSource source, quint8 level, const char *fmt, ...)
+int LogDevice::logMl(enum LogSource source, enum LogLevel level,
+    const char *fmt, ...)
 {
 	const char *prefix;
 	std::va_list argp;
@@ -311,8 +313,8 @@ int LogDevice::logMl(enum LogSource source, quint8 level, const char *fmt, ...)
 	return 0;
 }
 
-int LogDevice::logVlogMl(enum LogSource source, quint8 level, const char *fmt,
-    std::va_list ap)
+int LogDevice::logVlogMl(enum LogSource source, enum LogLevel level,
+    const char *fmt, std::va_list ap)
 {
 	const char *prefix;
 
@@ -337,7 +339,7 @@ void LogDevice::logQtMessage(enum QtMsgType type,
     const QMessageLogContext &context, const QString &msg)
 {
 	const QByteArray localMsg(msg.toLocal8Bit());
-	quint8 level = levelFromType(type);
+	enum LogLevel level = levelFromType(type);
 
 	switch (type) {
 	case QtDebugMsg:
@@ -367,7 +369,7 @@ void LogDevice::logQtMessage(enum QtMsgType type,
 	}
 }
 
-const char *LogDevice::urgencyPrefix(quint8 level)
+const char *LogDevice::urgencyPrefix(enum LogLevel level)
 {
 	const char *prefix;
 
@@ -386,7 +388,7 @@ const char *LogDevice::urgencyPrefix(quint8 level)
 	return prefix;
 }
 
-quint8 LogDevice::levelFromType(enum QtMsgType type)
+enum LogLevel LogDevice::levelFromType(enum QtMsgType type)
 {
 	switch (type) {
 	case QtDebugMsg:
@@ -408,25 +410,14 @@ quint8 LogDevice::levelFromType(enum QtMsgType type)
 		break;
 	default:
 		Q_ASSERT(0);
-		return -1;
+		return LOG_EMERG;
 		break;
 	}
 }
 
-void LogDevice::logPrefixVlog(enum LogSource source, quint8 level,
-    const char *prefix, const char *format, std::va_list ap)
+QString LogDevice::buildPrefix(const char *urgPrefix) const
 {
-	quint8 logMask;
-	int i;
-	std::FILE *of;
-	std::va_list aq;
 	QString msgPrefix;
-	QString msgFormatted;
-	QString msg;
-	/*!
-	 * @todo Handle case in which no additional memory can be
-	 * allocated.
-	 */
 
 	if (m_logVerbosity > 1) {
 		msgPrefix = QDateTime::currentDateTime().toString(logTimeFmt);
@@ -442,28 +433,49 @@ void LogDevice::logPrefixVlog(enum LogSource source, quint8 level,
 		msgPrefix += QStringLiteral(": ");
 	}
 
-	if (NULL != prefix) {
-		msgPrefix += prefix;
+	if (NULL != urgPrefix) {
+		msgPrefix += urgPrefix;
 	}
 
-	va_copy(aq, ap);
-	msgFormatted.vsprintf(format, aq);
-	va_end(aq);
+	return msgPrefix;
+}
 
-	msg = msgPrefix + msgFormatted;
+void LogDevice::logPrefixVlog(enum LogSource source, enum LogLevel level,
+    const char *urgPrefix, const char *format, std::va_list ap)
+{
+	quint8 logMask;
+	int i;
+	std::FILE *of;
+	std::va_list aq;
+	QString msgFormatted;
+	QString msg;
+	/*!
+	 * @todo Handle case in which no additional memory can be
+	 * allocated.
+	 */
 
 	/* Convert lo log mask. */
 	logMask = LOG_MASK(level);
 
+	va_copy(aq, ap);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+	msgFormatted = QString::vasprintf(format, aq);
+#else /* < Qt-5.5 */
+	msgFormatted.vsprintf(format, aq);
+#endif /* >= Qt-5.5 */
+	va_end(aq);
+
+	msg = buildPrefix(urgPrefix) + msgFormatted;
+
 	/* Syslog. */
-	if (facilityLevels(LF_SYSLOG, source) & logMask) {
+	if (facilityLevelBits(LF_SYSLOG, source) & logMask) {
 		/* TODO -- Write to syslog. */
 //		syslog(level, "%s", msg.toUtf8().constData());
 	}
 
 	/* Log files. */
 	for (i = LF_STDOUT; i < (LF_FILE + m_openedFiles); ++i) {
-		if (facilityLevels(i, source) & logMask) {
+		if (facilityLevelBits(i, source) & logMask) {
 			switch (i) {
 			case LF_STDOUT:
 				of = stdout;
@@ -487,41 +499,27 @@ void LogDevice::logPrefixVlog(enum LogSource source, quint8 level,
 	}
 }
 
-void LogDevice::logPrefixVlogMl(enum LogSource source, quint8 level,
-    const char *prefix, const char *format, std::va_list ap)
+void LogDevice::logPrefixVlogMl(enum LogSource source, enum LogLevel level,
+    const char *urgPrefix, const char *format, std::va_list ap)
 {
 	quint8 logMask;
 	int i;
 	std::FILE *of;
 	std::va_list aq;
-	QString msgPrefix;
+	const QString msgPrefix(buildPrefix(urgPrefix));
 	QString msgFormatted;
 	QStringList msgLines;
 	QString msg;
-
-	if (m_logVerbosity > 1) {
-		msgPrefix = QDateTime::currentDateTime().toString(logTimeFmt);
-	}
-	if (m_logVerbosity > 2) {
-		msgPrefix += QStringLiteral(" ") + m_hostName +
-		    QStringLiteral(" ") + QCoreApplication::applicationName() +
-		    QStringLiteral("[") +
-		    QString::number(QCoreApplication::applicationPid()) +
-		    QStringLiteral("]");
-	}
-	if (m_logVerbosity > 1) {
-		msgPrefix += QStringLiteral(": ");
-	}
-
-	if (NULL != prefix) {
-		msgPrefix += prefix;
-	}
 
 	/* Convert lo log mask. */
 	logMask = LOG_MASK(level);
 
 	va_copy(aq, ap);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+	msgFormatted = QString::vasprintf(format, aq);
+#else /* < Qt-5.5 */
 	msgFormatted.vsprintf(format, aq);
+#endif /* >= Qt-5.5 */
 	va_end(aq);
 
 	msgLines = msgFormatted.split(QRegExp("(\r\n|\r|\n)"),
@@ -532,14 +530,14 @@ void LogDevice::logPrefixVlogMl(enum LogSource source, quint8 level,
 		msg = msgPrefix + *it;
 
 		/* Syslog. */
-		if (facilityLevels(LF_SYSLOG, source) & logMask) {
+		if (facilityLevelBits(LF_SYSLOG, source) & logMask) {
 			/* TODO -- Write to syslog. */
 //			syslog(level, "%s", msg.toUtf8().constData());
 		}
 
 		/* Log files. */
 		for (i = LF_STDOUT; i < (LF_FILE + m_openedFiles); ++i) {
-			if (facilityLevels(i, source) & logMask) {
+			if (facilityLevelBits(i, source) & logMask) {
 				switch (i) {
 				case LF_STDOUT:
 					of = stdout;
