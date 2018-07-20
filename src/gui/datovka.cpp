@@ -7069,8 +7069,7 @@ void MainWindow::showMsgAdvancedSearchDialog(void)
 		return;
 	}
 
-	QPair <QString, MessageDbSet *> userNameAndMsgDbSet;
-	QList< QPair<QString, MessageDbSet *> > messageDbList;
+	QList<Task::AccountDescr> messageDbList;
 
 	/* get current account username */
 	const QString currentUserName(
@@ -7080,16 +7079,14 @@ void MainWindow::showMsgAdvancedSearchDialog(void)
 	/* get pointer to database set of all accounts */
 	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
 		QModelIndex index = m_accountModel.index(i, 0);
-		const QString userName(m_accountModel.userName(index));
-		Q_ASSERT(!userName.isEmpty());
-		MessageDbSet *dbSet = accountDbSet(userName);
+		const QString uName(m_accountModel.userName(index));
+		Q_ASSERT(!uName.isEmpty());
+		MessageDbSet *dbSet = accountDbSet(uName);
 		if (Q_NULLPTR == dbSet) {
 			Q_ASSERT(0);
 			continue;
 		}
-		userNameAndMsgDbSet.first = userName;
-		userNameAndMsgDbSet.second = dbSet;
-		messageDbList.append(userNameAndMsgDbSet);
+		messageDbList.append(Task::AccountDescr(uName, dbSet));
 	}
 
 	dlgMsgSearch = new DlgMsgSearch(messageDbList, currentUserName, this,

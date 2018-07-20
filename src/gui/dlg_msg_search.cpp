@@ -44,12 +44,11 @@
 
 #define BOX_ID_LEN 7
 
-DlgMsgSearch::DlgMsgSearch(
-    const QList< QPair <QString, MessageDbSet *> > msgSetEntryList,
+DlgMsgSearch::DlgMsgSearch(const QList<Task::AccountDescr> &messageDbSetList,
     const QString &userName, QWidget *parent, Qt::WindowFlags flags)
     : QDialog(parent, flags),
     m_ui(new (std::nothrow) Ui::DlgMsgSearch),
-    m_msgSetEntryList(msgSetEntryList)
+    m_messageDbSetList(messageDbSetList)
 {
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
@@ -167,21 +166,26 @@ void DlgMsgSearch::getSelectedMsg(int row, int col)
  *
  * @param[in] envelData Envelope search result data.
  * @param[in] tagData Tag search data.
- * @param[in] msgSetEntry Username and database set pair.
+ * @param[in] messageDbSet Message database set.
  * @return Intersection data.
  */
 static
 QList<MessageDb::SoughtMsg> dataIntersect(
     const QList<MessageDb::SoughtMsg> &envelData, const QList<qint64> &tagData,
-    const QPair<QString, MessageDbSet *> &msgSetEntry)
+    MessageDbSet *messageDbSet)
 {
+	if (Q_UNLIKELY(messageDbSet == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return QList<MessageDb::SoughtMsg>();
+	}
+
 	QList<MessageDb::SoughtMsg> result;
 
 	foreach (const qint64 msgId, tagData) {
 		foreach (const MessageDb::SoughtMsg msg, envelData) {
 			if (msg.mId.dmId == msgId) {
 				MessageDb::SoughtMsg msgData(
-				    msgSetEntry.second->msgsGetMsgDataFromId(msgId));
+				    messageDbSet->msgsGetMsgDataFromId(msgId));
 				if (msgData.mId.dmId != -1) {
 					result.append(msgData);
 				}
@@ -196,18 +200,23 @@ QList<MessageDb::SoughtMsg> dataIntersect(
  * @brief Obtains data from databases that match found tag data.
  *
  * @param[in] tagData Tag search data.
- * @param[in] msgSetEntry Username and database set pair.
+ * @param[in] messageDbSet Message database set.
  * @return Message data.
  */
 static
 QList<MessageDb::SoughtMsg> displayableTagData(const QList<qint64> &tagData,
-    const QPair<QString, MessageDbSet *> &msgSetEntry)
+    MessageDbSet *messageDbSet)
 {
+	if (Q_UNLIKELY(messageDbSet == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return QList<MessageDb::SoughtMsg>();
+	}
+
 	QList<MessageDb::SoughtMsg> result;
 
 	foreach (const qint64 msgId, tagData) {
 		MessageDb::SoughtMsg msgData(
-		    msgSetEntry.second->msgsGetMsgDataFromId(msgId));
+		    messageDbSet->msgsGetMsgDataFromId(msgId));
 
 		if (msgData.mId.dmId != -1) {
 			result.append(msgData);
@@ -273,29 +282,24 @@ void DlgMsgSearch::searchMessages(void)
 
 	/* Number of accounts in which to search for messages in. */
 	const int dbCount = m_ui->searchAllAcntCheckBox->isChecked() ?
-	    m_msgSetEntryList.count() : 1;
+	    m_messageDbSetList.count() : 1;
 
 	/* Search in accounts. */
 	for (int i = 0; i < dbCount; ++i) {
 
-		QPair<QString, MessageDbSet *> msgSetEntry;
-
-		/* Get message db set for selected account. */
-		if (dbCount == 1) {
-			msgSetEntry = m_msgSetEntryList.at(
-			    m_ui->accountComboBox->currentIndex());
-		} else {
-			msgSetEntry = m_msgSetEntryList.at(i);
-		}
+		/* Get currently selected account if processing only one account. */
+		const Task::AccountDescr &accountDescr((dbCount == 1) ?
+		    m_messageDbSetList.at(m_ui->accountComboBox->currentIndex()) :
+		    m_messageDbSetList.at(i));
 
 		envelResults.clear();
 		resultsToBeDisplayed.clear();
 
 		if (envelopeItems > 0) {
 			/* Search in envelope envelope data. */
-			envelResults =
-			    msgSetEntry.second->msgsSearch(searchEnvelope,
-			    msgType, m_ui->attachNameLine->text(),
+			envelResults = accountDescr.messageDbSet->msgsSearch(
+			    searchEnvelope, msgType,
+			    m_ui->attachNameLine->text(),
 			    m_ui->logicalAndRelationCheckBox->isChecked());
 		}
 
@@ -306,7 +310,7 @@ void DlgMsgSearch::searchMessages(void)
 			 * needed.
 			 */
 			resultsToBeDisplayed = dataIntersect(envelResults,
-			    tagResults, msgSetEntry);
+			    tagResults, accountDescr.messageDbSet);
 		} else if (!searchTags && !envelResults.isEmpty()) {
 			/*
 			 * No tag data were supplied. Envelope were supplied.
@@ -319,11 +323,11 @@ void DlgMsgSearch::searchMessages(void)
 			 * Convert tag results into displayable form.
 			 */
 			resultsToBeDisplayed = displayableTagData(tagResults,
-			    msgSetEntry);
+			    accountDescr.messageDbSet);
 		}
 
 		if (!resultsToBeDisplayed.isEmpty()) {
-			appendMsgsToTable(msgSetEntry, resultsToBeDisplayed);
+			appendMsgsToTable(accountDescr, resultsToBeDisplayed);
 		}
 	}
 }
@@ -339,14 +343,12 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	Q_ASSERT(!username.isEmpty());
 
 	/* Set accounts into combobox - account name and user name. */
-	typedef QPair<QString, MessageDbSet *> SetPair;
-	foreach (const SetPair &msgSetEntry, m_msgSetEntryList) {
+	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
 		const QString accountName =
-		    (*GlobInstcs::acntMapPtr)[msgSetEntry.first].accountName() +
-		    " (" + msgSetEntry.first + ")";
-		m_ui->accountComboBox->addItem(accountName,
-		    QVariant(msgSetEntry.first));
-		if (username == msgSetEntry.first) {
+		    (*GlobInstcs::acntMapPtr)[acnt.userName].accountName() +
+		    " (" + acnt.userName + ")";
+		m_ui->accountComboBox->addItem(accountName, QVariant(acnt.userName));
+		if (username == acnt.userName) {
 			int i = m_ui->accountComboBox->count() - 1;
 			Q_ASSERT(0 <= i);
 			m_ui->accountComboBox->setCurrentIndex(i);
@@ -354,7 +356,7 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	}
 
 	/* Only one account available. */
-	if (m_msgSetEntryList.count() <= 1) {
+	if (m_messageDbSetList.count() <= 1) {
 		m_ui->searchAllAcntCheckBox->setEnabled(false);
 	}
 
@@ -461,13 +463,12 @@ int DlgMsgSearch::filledInExceptTags(void) const
  * @brief Append message entry into message table widget.
  *
  * @param[in,out] tabWid Table widget to put message entries into.
- * @param[in]     msgSetEntry Username and pointer to database set.
+ * @param[in]     accountDescr Username and related database set.
  * @param[in]     msgData Message entry.
  */
 static
 void appendMsgToWidget(QTableWidget *tabWid,
-    const QPair<QString, MessageDbSet *> &msgSetEntry,
-    const MessageDb::SoughtMsg &msgData)
+    const Task::AccountDescr &accountDescr, const MessageDb::SoughtMsg &msgData)
 {
 	if (Q_UNLIKELY(Q_NULLPTR == tabWid)) {
 		Q_ASSERT(0);
@@ -478,12 +479,12 @@ void appendMsgToWidget(QTableWidget *tabWid,
 	tabWid->insertRow(row);
 
 	tabWid->setItem(row, COL_USER_NAME,
-	    new QTableWidgetItem(msgSetEntry.first));
+	    new QTableWidgetItem(accountDescr.userName));
 	QTableWidgetItem *item = new QTableWidgetItem;
 	item->setText(QString::number(msgData.mId.dmId));
 	if (ENABLE_TOOLTIP) {
 		const MessageDb *messageDb =
-		    msgSetEntry.second->constAccessMessageDb(
+		    accountDescr.messageDbSet->constAccessMessageDb(
 		        msgData.mId.deliveryTime);
 		if (Q_NULLPTR != messageDb) {
 			item->setToolTip(messageDb->descriptionHtml(
@@ -507,14 +508,13 @@ void appendMsgToWidget(QTableWidget *tabWid,
 	    new QTableWidgetItem(msgData.dmRecipient));
 }
 
-void DlgMsgSearch::appendMsgsToTable(
-    const QPair<QString, MessageDbSet *> &msgSetEntry,
+void DlgMsgSearch::appendMsgsToTable(const Task::AccountDescr &accountDescr,
     const QList<MessageDb::SoughtMsg> &msgDataList)
 {
 	m_ui->resultsTableWidget->setEnabled(true);
 
 	foreach (const MessageDb::SoughtMsg &msgData, msgDataList) {
-		appendMsgToWidget(m_ui->resultsTableWidget, msgSetEntry,
+		appendMsgToWidget(m_ui->resultsTableWidget, accountDescr,
 		    msgData);
 	}
 
