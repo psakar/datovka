@@ -384,6 +384,7 @@ SOURCES += \
     src/isds/session.cpp \
     src/isds/to_text_conversion.cpp \
     src/isds/type_description.cpp \
+    src/log/global.cpp \
     src/log/log.cpp \
     src/log/log_c.cpp \
     src/log/log_device.cpp \
@@ -536,6 +537,7 @@ HEADERS += \
     src/isds/session.h \
     src/isds/to_text_conversion.h \
     src/isds/type_description.h \
+    src/log/global.h \
     src/log/log_c.h \
     src/log/log_common.h \
     src/log/log_device.h \

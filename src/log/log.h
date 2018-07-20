@@ -27,7 +27,7 @@
 #include <cstdarg>
 #include <QString>
 
-#include "src/global.h" /* GlobInstcs::logPtr */
+#include "src/log/global.h" /* GlobInstcs::logPtr */
 #include "src/log/log_common.h"
 #include "src/log/log_device.h"
 
