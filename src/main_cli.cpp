@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	qsrand(QDateTime::currentDateTime().toTime_t());
 
 	/* Log warnings. */
-	GlobInstcs::logPtr->setLogLevels(LogDevice::LF_STDERR, LOGSRC_ANY,
+	GlobInstcs::logPtr->setLogLevelBits(LogDevice::LF_STDERR, LOGSRC_ANY,
 	    LOG_UPTO(LOG_WARNING));
 
 	setDefaultLocale();

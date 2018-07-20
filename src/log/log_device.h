@@ -71,7 +71,11 @@ public:
 	 * @brief Log facility descriptor.
 	 */
 	struct FacDesc {
-		quint8 levels[MAX_SOURCES]; /*!< Up to eight syslog levels. */
+		quint8 levelBits[MAX_SOURCES]; /*!<
+		                                * Up to eight syslog levels.
+		                                * Use bitwise operation to
+		                                * check for level match.
+		                                */
 		std::FILE *fout; /*!< Output file. */
 	};
 
@@ -123,31 +127,33 @@ public:
 	int openFile(const QString &fName, enum LogMode mode);
 
 	/*!
-	 * @brief Returns the log levels for the given facility and source.
+	 * @brief Returns the log level bits for the given facility and source.
 	 *
 	 * @param[in] facility Facility identifier.
 	 * @param[in] source Source identifier.
 	 * @return Levels for the selected facility and identifier.
 	 */
-	quint8 logLevels(int facility, enum LogSource source);
+	quint8 logLevelBits(int facility, enum LogSource source);
 
 	/*!
-	 * @brief Sets the log levels for the selected facility and source.
+	 * @brief Sets the log level bits for the selected facility and source.
 	 *
 	 * @param[in] facility Facility identifier.
 	 * @param[in] source Source identifier.
-	 * @param[in] levels Levels to be set.
+	 * @param[in] levelBits Bit-masked log levels to be set.
 	 */
-	void setLogLevels(int facility, enum LogSource source, quint8 levels);
+	void setLogLevelBits(int facility, enum LogSource source,
+	    quint8 levelBits);
 
 	/*!
 	 * @brief Add log levels to the selected facility and source.
 	 *
 	 * @param[in] facility Facility identifier.
 	 * @param[in] source Source identifier.
-	 * @param[in] levels Log levels to be added.
+	 * @param[in] levelBits Log level bitss to be added.
 	 */
-	void addLogLevels(int facility, enum LogSource source, quint8 levels);
+	void addLogLevelBits(int facility, enum LogSource source,
+	    quint8 levelBits);
 
 	/*!
 	 * @brief Returns the id of a new unique source that can be used.

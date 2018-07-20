@@ -41,7 +41,7 @@ LogDevice::LogDevice(void)
 {
 	for (int i = 0; i < MAX_LOG_FILES; ++i) {
 		for (int j = 0; j < MAX_SOURCES; ++j) {
-			m_facDescVect[i].levels[j] = 0;
+			m_facDescVect[i].levelBits[j] = 0;
 		}
 		m_facDescVect[i].fout = NULL;
 	}
@@ -146,7 +146,7 @@ int LogDevice::openFile(const QString &fName, enum LogMode mode)
 	fidx = LF_FILE + m_openedFiles - 1;
 
 	for (int i = 0; i < MAX_SOURCES; ++i) {
-		m_facDescVect[fidx].levels[i] = 0;
+		m_facDescVect[fidx].levelBits[i] = 0;
 	}
 	m_facDescVect[fidx].fout = of;
 
@@ -163,9 +163,9 @@ fail:
  *     source.
  */
 #define facilityLevelBits(facility, source) \
-	m_facDescVect[(facility)].levels[(source)]
+	m_facDescVect[(facility)].levelBits[(source)]
 
-quint8 LogDevice::logLevels(int facility, enum LogSource source)
+quint8 LogDevice::logLevelBits(int facility, enum LogSource source)
 {
 	quint8 ret;
 
@@ -181,7 +181,8 @@ quint8 LogDevice::logLevels(int facility, enum LogSource source)
 	return ret;
 }
 
-void LogDevice::setLogLevels(int facility, enum LogSource source, quint8 levels)
+void LogDevice::setLogLevelBits(int facility, enum LogSource source,
+    quint8 levelBits)
 {
 	Q_ASSERT((facility >= 0) && (facility < MAX_LOG_FILES));
 	Q_ASSERT((source >= -1) && (source < MAX_SOURCES));
@@ -189,17 +190,18 @@ void LogDevice::setLogLevels(int facility, enum LogSource source, quint8 levels)
 	m_mutex.lock();
 
 	if (source != LOGSRC_ANY) {
-		facilityLevelBits(facility, source) = levels;
+		facilityLevelBits(facility, source) = levelBits;
 	} else {
 		for (int i = 0; i < MAX_SOURCES; ++i) {
-			facilityLevelBits(facility, i) = levels;
+			facilityLevelBits(facility, i) = levelBits;
 		}
 	}
 
 	m_mutex.unlock();
 }
 
-void LogDevice::addLogLevels(int facility, enum LogSource source, quint8 levels)
+void LogDevice::addLogLevelBits(int facility, enum LogSource source,
+    quint8 levelBits)
 {
 	int i;
 
@@ -209,10 +211,10 @@ void LogDevice::addLogLevels(int facility, enum LogSource source, quint8 levels)
 	m_mutex.lock();
 
 	if (source != LOGSRC_ANY) {
-		facilityLevelBits(facility, source) |= levels;
+		facilityLevelBits(facility, source) |= levelBits;
 	} else {
 		for (i = 0; i < MAX_SOURCES; ++i) {
-			facilityLevelBits(facility, i) |= levels;
+			facilityLevelBits(facility, i) |= levelBits;
 		}
 	}
 
