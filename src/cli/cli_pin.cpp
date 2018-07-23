@@ -35,7 +35,7 @@
 #endif
 
 #include "src/cli/cli_pin.h"
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 
 /*
  * Some code is based on:

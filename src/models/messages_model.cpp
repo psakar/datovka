@@ -27,6 +27,7 @@
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/isds/type_conversion.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/delegates/tag_item.h"
 #include "src/global.h"
 #include "src/io/db_tables.h"
@@ -34,7 +35,6 @@
 #include "src/io/message_db.h"
 #include "src/io/tag_db.h" /* Direct access to tag database, */
 #include "src/isds/type_description.h"
-#include "src/log/log.h"
 #include "src/models/messages_model.h"
 
 /*

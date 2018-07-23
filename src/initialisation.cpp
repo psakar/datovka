@@ -33,6 +33,7 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/localisation/localisation.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/settings/pin.h"
 #include "src/datovka_shared/settings/records_management.h"
 #include "src/datovka_shared/worker/pool.h"

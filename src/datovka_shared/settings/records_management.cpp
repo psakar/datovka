@@ -25,8 +25,8 @@
 
 #include "src/datovka_shared/crypto/crypto_pwd.h"
 #include "src/datovka_shared/crypto/crypto_wrapped.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/settings/records_management.h"
-#include "src/log/log.h"
 
 /* Records management configuration entry names. */
 namespace RMNames {

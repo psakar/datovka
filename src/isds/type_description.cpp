@@ -21,8 +21,8 @@
  * the two.
  */
 
+#include "src/datovka_shared/log/log.h"
 #include "src/isds/type_description.h"
-#include "src/log/log.h"
 
 QString Isds::Description::descrDbType(enum Type::DbType type)
 {

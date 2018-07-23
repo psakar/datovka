@@ -26,12 +26,12 @@
 
 #include "src/datovka_shared/isds/error.h"
 #include "src/datovka_shared/isds/types.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
-#include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_erase_message.h"
 

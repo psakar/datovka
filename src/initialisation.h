@@ -26,7 +26,7 @@
 
 #include <QCommandLineParser>
 
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log_device.h"
 #include "src/settings/preferences.h"
 
 /*!

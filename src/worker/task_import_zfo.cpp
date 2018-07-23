@@ -27,12 +27,12 @@
 
 #include "src/common.h"
 #include "src/datovka_shared/isds/types.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/gui/dlg_import_zfo.h" /* TODO -- Remove this dependency. */
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/isds/message_functions.h"
-#include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_authenticate_message.h"

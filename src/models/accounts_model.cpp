@@ -26,8 +26,8 @@
 #include <QMimeData>
 
 #include "src/common.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/models/accounts_model.h"
 
 /*

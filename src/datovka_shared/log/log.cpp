@@ -21,8 +21,35 @@
  * the two.
  */
 
-#include <QtCore> /* Q_NULLPTR */
+#include "src/datovka_shared/log/log.h"
 
-#include "src/log/global.h"
+void globalLogOutput(enum QtMsgType type, const QMessageLogContext &context,
+    const QString &msg)
+{
+	if (GlobInstcs::logPtr != Q_NULLPTR) {
+		GlobInstcs::logPtr->logQtMessage(type, context, msg);
+	}
+}
 
-class LogDevice *GlobInstcs::logPtr = Q_NULLPTR;
+void qDebugCall(const char *fmt, ...)
+{
+	std::va_list argp;
+
+	va_start(argp, fmt);
+
+	qDebugCallV(fmt, argp);
+
+	va_end(argp);
+}
+
+void qDebugCallV(const char *fmt, std::va_list ap)
+{
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+	qDebug("%s", QString::vasprintf(fmt, ap).toUtf8().constData());
+#else /* < Qt-5.5 */
+	QString outStr;
+	outStr.vsprintf(fmt, ap);
+
+	qDebug("%s", outStr.toUtf8().constData());
+#endif /* >= Qt-5.5 */
+}

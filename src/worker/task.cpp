@@ -24,8 +24,8 @@
 #include <cinttypes>
 
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task.h"

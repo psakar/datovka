@@ -27,10 +27,10 @@
 #include <QSqlRecord>
 
 #include "src/datovka_shared/isds/type_conversion.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
 #include "src/io/db_tables.h"
-#include "src/log/log.h"
 #include "src/settings/preferences.h"
 
 DbEntry::DbEntry(void)

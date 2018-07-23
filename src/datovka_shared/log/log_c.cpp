@@ -21,17 +21,14 @@
  * the two.
  */
 
-#include "src/log/log.h"
+#include <cstdarg>
+#include <cstdint>
 
-void globalLogOutput(enum QtMsgType type, const QMessageLogContext &context,
-    const QString &msg)
-{
-	if (GlobInstcs::logPtr != Q_NULLPTR) {
-		GlobInstcs::logPtr->logQtMessage(type, context, msg);
-	}
-}
+#include "src/datovka_shared/log/global.h"
+#include "src/datovka_shared/log/log.h"
+#include "src/datovka_shared/log/log_c.h"
 
-void qDebugCall(const char *fmt, ...)
+void q_debug_call(const char *fmt, ...)
 {
 	std::va_list argp;
 
@@ -42,14 +39,39 @@ void qDebugCall(const char *fmt, ...)
 	va_end(argp);
 }
 
-void qDebugCallV(const char *fmt, std::va_list ap)
+int glob_log_verbosity(void)
 {
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
-	qDebug("%s", QString::vasprintf(fmt, ap).toUtf8().constData());
-#else /* < Qt-5.5 */
-	QString outStr;
-	outStr.vsprintf(fmt, ap);
+	return GlobInstcs::logPtr->logVerbosity();
+}
 
-	qDebug("%s", outStr.toUtf8().constData());
-#endif /* >= Qt-5.5 */
+int glob_debug_verbosity(void)
+{
+	return GlobInstcs::logPtr->debugVerbosity();
+}
+
+int glob_log(enum LogSource source, enum LogLevel level, const char *fmt, ...)
+{
+	std::va_list argp;
+
+	va_start(argp, fmt);
+
+	GlobInstcs::logPtr->logVlog(source, level, fmt, argp);
+
+	va_end(argp);
+
+	return 0;
+}
+
+int glob_log_ml(enum LogSource source, enum LogLevel level, const char *fmt,
+    ...)
+{
+	std::va_list argp;
+
+	va_start(argp, fmt);
+
+	GlobInstcs::logPtr->logVlogMl(source, level, fmt, argp);
+
+	va_end(argp);
+
+	return 0;
 }

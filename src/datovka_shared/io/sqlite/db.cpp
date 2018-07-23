@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 #include "src/datovka_shared/io/sqlite/db.h"
 #include "src/datovka_shared/io/sqlite/table.h"
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 
 const QString SQLiteDb::memoryLocation(":memory:");
 const QString SQLiteDb::dbDriverType("QSQLITE");

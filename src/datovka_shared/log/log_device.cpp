@@ -26,8 +26,8 @@
 #include <QDateTime>
 #include <QHostInfo>
 
-#include "src/log/log_common.h"
-#include "src/log/log_device.h"
+#include "src/datovka_shared/log/log_common.h"
+#include "src/datovka_shared/log/log_device.h"
 
 const QString LogDevice::logTimeFmt("MMM dd hh:mm:ss");
 

@@ -23,11 +23,11 @@
 
 #include <QMessageBox>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/common.h"
 #include "src/io/imports.h"
-#include "src/log/log.h"
 #include "src/worker/task_import_message.h"
 #include "src/worker/task_import_zfo.h"
 

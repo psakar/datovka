@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-#include "src/log/log_common.h"
+#include "src/datovka_shared/log/log_common.h"
 
 /*!
  * @brief Generates location debug information.

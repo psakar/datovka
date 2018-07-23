@@ -27,10 +27,10 @@
 
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/datovka_shared/io/records_management_db.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/json/upload_file.h"
 #include "src/datovka_shared/records_management/json/upload_hierarchy.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
 #include "ui_dlg_records_management_upload.h"

@@ -21,11 +21,11 @@
  * the two.
  */
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/gui/dlg_msg_search.h"
 #include "src/io/message_db.h"
 #include "src/io/tag_db.h"
-#include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_tab_ignore_filter.h"

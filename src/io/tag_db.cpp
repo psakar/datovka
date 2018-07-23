@@ -28,9 +28,9 @@
 #include <QSqlRecord>
 #include <QVariant>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/tag_db.h"
-#include "src/log/log.h"
 
 #define DFLT_COLOUR "ffffff"
 

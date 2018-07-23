@@ -26,8 +26,8 @@
 #include <QSystemSemaphore>
 #include <QTimer>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/single/single_instance.h"
 
 #define UNIQUE_SEM_ID "CZ.NIC_Datovka_(e-gov_client)_semaphore"

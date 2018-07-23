@@ -23,8 +23,8 @@
 
 #include <QFileInfo>
 
-#include "message_db_set_container.h"
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
+#include "src/io/message_db_set_container.h"
 
 DbContainer::DbContainer(const QString &connectionPrefix)
     : QMap<QString, MessageDbSet *>(),

@@ -21,57 +21,8 @@
  * the two.
  */
 
-#include <cstdarg>
-#include <cstdint>
+#include <QtCore> /* Q_NULLPTR */
 
-#include "src/log/global.h"
-#include "src/log/log.h"
-#include "src/log/log_c.h"
+#include "src/datovka_shared/log/global.h"
 
-void q_debug_call(const char *fmt, ...)
-{
-	std::va_list argp;
-
-	va_start(argp, fmt);
-
-	qDebugCallV(fmt, argp);
-
-	va_end(argp);
-}
-
-int glob_log_verbosity(void)
-{
-	return GlobInstcs::logPtr->logVerbosity();
-}
-
-int glob_debug_verbosity(void)
-{
-	return GlobInstcs::logPtr->debugVerbosity();
-}
-
-int glob_log(enum LogSource source, enum LogLevel level, const char *fmt, ...)
-{
-	std::va_list argp;
-
-	va_start(argp, fmt);
-
-	GlobInstcs::logPtr->logVlog(source, level, fmt, argp);
-
-	va_end(argp);
-
-	return 0;
-}
-
-int glob_log_ml(enum LogSource source, enum LogLevel level, const char *fmt,
-    ...)
-{
-	std::va_list argp;
-
-	va_start(argp, fmt);
-
-	GlobInstcs::logPtr->logVlogMl(source, level, fmt, argp);
-
-	va_end(argp);
-
-	return 0;
-}
+class LogDevice *GlobInstcs::logPtr = Q_NULLPTR;

@@ -28,10 +28,10 @@
 #include <QFileInfo>
 
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/isds_login.h"
 #include "src/isds/services_login.h"
-#include "src/log/log.h"
 #include "src/settings/preferences.h"
 
 IsdsLogin::IsdsLogin(IsdsSessions &isdsSessions, AcntSettings &acntSettings)

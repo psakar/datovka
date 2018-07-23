@@ -25,11 +25,11 @@
 #include <QPrinter>
 #include <QTextDocument>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/exports.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db_set.h"
-#include "src/log/log.h"
 #include "src/settings/preferences.h"
 
 QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,

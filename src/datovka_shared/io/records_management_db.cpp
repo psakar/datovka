@@ -29,7 +29,7 @@
 
 #include "src/io/db_tables.h"
 #include "src/datovka_shared/io/records_management_db.h"
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 
 /*!
  * @brief Delete all entries from table.

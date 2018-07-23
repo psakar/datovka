@@ -25,6 +25,7 @@
 #include <QDropEvent>
 #include <QProxyStyle>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/models/attachments_model.h"
 #if 0
 #include <QApplication>
@@ -34,10 +35,8 @@
 #include <QPixmap>
 
 #include "src/common.h"
-#include "src/log/log.h"
 #include "src/models/files_model.h"
 #endif
-#include "src/log/log.h"
 #include "src/views/attachment_table_view.h"
 
 /*!

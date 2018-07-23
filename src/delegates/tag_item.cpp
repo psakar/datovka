@@ -25,9 +25,9 @@
 #include <QPainter>
 
 #include "src/datovka_shared/localisation/localisation.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/delegates/tag_item.h"
 #include "src/dimensions/dimensions.h"
-#include "src/log/log.h"
 
 TagItem::TagItem(void)
     : TagDb::TagEntry()

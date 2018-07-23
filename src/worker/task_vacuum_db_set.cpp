@@ -31,8 +31,8 @@
 #endif /* >= Qt-5.4 */
 #include <QThread>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_vacuum_db_set.h"
 

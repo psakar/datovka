@@ -28,11 +28,11 @@
 #include <QThread>
 
 #include "src/datovka_shared/io/records_management_db.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/io/records_management_connection.h"
 #include "src/datovka_shared/records_management/json/entry_error.h"
 #include "src/datovka_shared/records_management/json/stored_files.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_records_management_stored_messages.h"
 

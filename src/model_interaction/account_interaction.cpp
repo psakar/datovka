@@ -21,10 +21,10 @@
  * the two.
  */
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/message_db_set.h"
 #include "src/io/message_db_set_container.h"
-#include "src/log/log.h"
 #include "src/model_interaction/account_interaction.h"
 #include "src/settings/account.h"
 #include "src/settings/accounts.h"

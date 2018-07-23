@@ -27,9 +27,9 @@
 #include <cstdarg>
 #include <QString>
 
-#include "src/log/global.h" /* GlobInstcs::logPtr */
-#include "src/log/log_common.h"
-#include "src/log/log_device.h"
+#include "src/datovka_shared/log/global.h" /* GlobInstcs::logPtr */
+#include "src/datovka_shared/log/log_common.h"
+#include "src/datovka_shared/log/log_device.h"
 
 /*!
  * @brief Message handler.
