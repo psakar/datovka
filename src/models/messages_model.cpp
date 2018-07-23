@@ -347,13 +347,13 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 	case Qt::DecorationRole:
 		switch (section) {
 		case PRSNLDLVR_COL: /* 'personal delivery' */
-		        {
-			        QIcon ico;
+			{
+				QIcon ico;
 				ico.addFile(QStringLiteral(ICON_16x16_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
 				ico.addFile(QStringLiteral(ICON_24x24_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
 				ico.addFile(QStringLiteral(ICON_32x32_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
 				return ico;
-		        }
+			}
 			break;
 		case READLOC_COL: /* 'read locally' */
 			{
