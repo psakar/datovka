@@ -24,9 +24,9 @@
 #include <QDir>
 #include <QtTest/QtTest>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/message_db_set_container.h"
-#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "tests/test_db_container.h"
 

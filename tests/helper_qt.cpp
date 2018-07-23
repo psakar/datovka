@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 #include <QFileInfo>
 #include <QTextStream>
 
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 #include "tests/helper_qt.h"
 
 /* First position is an empty string. */

@@ -27,10 +27,10 @@
 
 #include "src/common.h"
 #include "src/datovka_shared/isds/message_interface.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db_set.h"
-#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "tests/test_message_db_set.h"
 
