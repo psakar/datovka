@@ -57,19 +57,20 @@ public:
 	 */
 	enum ColumnNumbers {
 		DMID_COL = 0, /* Message identifier. */
-		ANNOT_COL = 1, /* Annotation column. */
-		SENDER_COL = 2, /* Sender name column. */
-		RECIP_COL = 3, /* Recipient name column. */
-		DELIVERY_COL = 4, /* Delivery time column. */
-		ACCEPT_COL = 5, /* Acceptance time column. */
-		READLOC_COL = 6, /* Read locally. */
-		MSGSTAT_COL = 7, /* Message status. */
-		ATTDOWN_COL = 8, /* Attachments downloaded. */
-		PROCSNG_COL = 9, /* Processing state. */
-		RECMGMT_NEG_COL = -2, /* 10 */ /* Records management service. */
-		TAGS_NEG_COL = -1, /* 11 */ /* Tags. */
-		BASIC_COLNUM = 10, /* Number of basic columns (convenience value). */
-		MAX_COLNUM = 12 /* Maximal number of columns (convenience value). */
+		PRSNLDLVR_COL = 1, /* Personal delivery. */
+		ANNOT_COL = 2, /* Annotation column. */
+		SENDER_COL = 3, /* Sender name column. */
+		RECIP_COL = 4, /* Recipient name column. */
+		DELIVERY_COL = 5, /* Delivery time column. */
+		ACCEPT_COL = 6, /* Acceptance time column. */
+		READLOC_COL = 7, /* Read locally. */
+		MSGSTAT_COL = 8, /* Message status. */
+		ATTDOWN_COL = 9, /* Attachments downloaded. */
+		PROCSNG_COL = 10, /* Processing state. */
+		RECMGMT_NEG_COL = -2, /* 11 */ /* Records management service. */
+		TAGS_NEG_COL = -1, /* 12 */ /* Tags. */
+		BASIC_COLNUM = 11, /* Number of basic columns (convenience value). */
+		MAX_COLNUM = 13 /* Maximal number of columns (convenience value). */
 	};
 
 	/*!

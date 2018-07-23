@@ -72,9 +72,9 @@ const QVector<QString> MessageDb::msgDeliveryBoolAttribs = {"dmPersonalDelivery"
 const QVector<QString> MessageDb::msgStatus = {"dmDeliveryTime",
     "dmAcceptanceTime", "dmMessageStatus"};
 
-const QVector<QString> MessageDb::rcvdItemIds = {"dmID", "dmAnnotation",
-    "dmSender", "dmDeliveryTime", "dmAcceptanceTime", "read_locally",
-    "is_downloaded", "process_status"};
+const QVector<QString> MessageDb::rcvdItemIds = {"dmID", "dmPersonalDelivery",
+    "dmAnnotation", "dmSender", "dmDeliveryTime", "dmAcceptanceTime",
+    "read_locally", "is_downloaded", "process_status"};
 
 const QVector<QString> MessageDb::sntItemIds = {"dmID", "dmAnnotation",
     "dmRecipient", "dmDeliveryTime", "dmAcceptanceTime", "dmMessageStatus",
@@ -95,10 +95,11 @@ void MessageDb::appendRcvdEntryList(QList<RcvdEntry> &entryList,
 	query.first();
 	while (query.isActive() && query.isValid()) {
 		entryList.append(MessageDb::RcvdEntry(
-		    query.value(0).toLongLong(), query.value(1).toString(),
-		    query.value(2).toString(), query.value(3).toString(),
-		    query.value(4).toString(), query.value(5).toBool(),
-		    query.value(6).toBool(), query.value(7).toInt()));
+		    query.value(0).toLongLong(),
+		    query.value(1).toBool(), query.value(2).toString(),
+		    query.value(3).toString(), query.value(4).toString(),
+		    query.value(5).toString(), query.value(6).toBool(),
+		    query.value(7).toBool(), query.value(8).toInt()));
 		query.next();
 	}
 }

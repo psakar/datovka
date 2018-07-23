@@ -190,6 +190,7 @@ public:
 	class RcvdEntry {
 	public:
 		qint64 dmId; /*!< Message identifier. */
+		bool dmPersonalDelivery; /*!< Personal delivery. */
 		QString dmAnnotation; /*!< Message annotation. */
 		QString dmSender; /*!< Message sender. */
 		QString dmDeliveryTime; /*!< Delivery time as stored in the database. */
@@ -198,12 +199,12 @@ public:
 		bool isDownloaded; /*!< True if complete message has been downloaded. */
 		int processStatus; /*!< Brief processing status. */
 
-		RcvdEntry(qint64 i, const QString &a, const QString &s,
+		RcvdEntry(qint64 i, bool pd, const QString &a, const QString &s,
 		    const QString &dt, const QString &at, bool rl, bool id,
 		    int ps)
-		    : dmId(i), dmAnnotation(a), dmSender(s), dmDeliveryTime(dt),
-		    dmAcceptanceTime(at), readLocally(rl), isDownloaded(id),
-		    processStatus(ps)
+		    : dmId(i), dmPersonalDelivery(pd), dmAnnotation(a),
+		    dmSender(s), dmDeliveryTime(dt), dmAcceptanceTime(at),
+		    readLocally(rl), isDownloaded(id), processStatus(ps)
 		{ }
 	};
 
