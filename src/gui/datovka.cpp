@@ -4592,6 +4592,49 @@ void MainWindow::createAndSendMessageFromTmpl(void)
 	showSendMessageDialog(DlgSendMessage::ACT_NEW_FROM_TMP);
 }
 
+/*!
+ * @brief Return list of available usernames and associated database sets.
+ *
+ * @param[in,out] mainWindow Pointer to main window instance.
+ * @param[in]     accountModel Account model.
+ * @param[in]     accountList Account list view.
+ * @param[in]     onlyConnected If true then only connected accounts are
+ *                              inserted into the list.
+ * @return Account descriptor list. Empty list on any error.
+ */
+static
+QList<Task::AccountDescr> messageDbListForAllAccounts(MainWindow *mainWindow,
+    const AccountModel &accountModel, const QTreeView *accountList,
+    bool onlyConnected)
+{
+	if (Q_UNLIKELY((mainWindow == Q_NULLPTR) || (accountList == Q_NULLPTR))) {
+		Q_ASSERT(0);
+		return QList<Task::AccountDescr>();
+	}
+
+	QList<Task::AccountDescr> messageDbList;
+
+	for (int i = 0; i < accountList->model()->rowCount(); ++i) {
+		const QModelIndex index(accountModel.index(i, 0));
+		const QString uName(accountModel.userName(index));
+		MessageDbSet *dbSet = mainWindow->accountDbSet(uName);
+		if (Q_UNLIKELY(uName.isEmpty() || (Q_NULLPTR == dbSet))) {
+			Q_ASSERT(0);
+			QList<Task::AccountDescr>();
+		}
+		if (onlyConnected) {
+			/* Don't push into list if the user is unable to log in. */
+			if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(uName) &&
+			    !mainWindow->connectToIsds(uName)) {
+				continue;
+			}
+		}
+		messageDbList.append(Task::AccountDescr(uName, dbSet));
+	}
+
+	return messageDbList;
+}
+
 void MainWindow::showSendMessageDialog(int action)
 {
 	debugFuncCall();
@@ -4606,20 +4649,11 @@ void MainWindow::showSendMessageDialog(int action)
 
 	/* if not reply, get pointers to database for other accounts */
 	if (DlgSendMessage::ACT_REPLY != action) {
-		for (int i=0; i < ui->accountList->model()->rowCount(); i++) {
-			QModelIndex index = m_accountModel.index(i, 0);
-			const QString uName(m_accountModel.userName(index));
-			Q_ASSERT(!uName.isEmpty());
-			MessageDbSet *dbSet = accountDbSet(uName);
-			if (Q_NULLPTR == dbSet) {
-				Q_ASSERT(0);
-				return;
-			}
-			messageDbList.append(Task::AccountDescr(uName, dbSet));
-		}
+		messageDbList = messageDbListForAllAccounts(this,
+		    m_accountModel, ui->accountList, false);
 	} else {
 		MessageDbSet *dbSet = accountDbSet(userName);
-		if (Q_NULLPTR == dbSet) {
+		if (Q_UNLIKELY(Q_NULLPTR == dbSet)) {
 			Q_ASSERT(0);
 			return;
 		}
@@ -5615,24 +5649,8 @@ void MainWindow::showImportZFOActionDialog(void)
 	}
 
 	// get userName and pointer to database for all accounts from settings
-	QList<Task::AccountDescr> accountList;
-	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
-
-		QModelIndex index = m_accountModel.index(i, 0);
-		QString userName(m_accountModel.userName(index));
-		Q_ASSERT(!userName.isEmpty());
-
-		if ((!checkZfoOnServer) ||
-		    GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) ||
-		    connectToIsds(userName)) {
-			MessageDbSet *dbSet = accountDbSet(userName);
-			if (Q_NULLPTR == dbSet) {
-				Q_ASSERT(0);
-				continue;
-			}
-			accountList.append(Task::AccountDescr(userName, dbSet));
-		}
-	}
+	const QList<Task::AccountDescr> accountList(messageDbListForAllAccounts(
+	    this, m_accountModel, ui->accountList, checkZfoOnServer));
 
 	bool includeSubdir = false;
 	QString importDir;
@@ -7069,38 +7087,15 @@ void MainWindow::showMsgAdvancedSearchDialog(void)
 		return;
 	}
 
-	QPair <QString, MessageDbSet *> userNameAndMsgDbSet;
-	QList< QPair<QString, MessageDbSet *> > messageDbList;
+	/* Get pointers to database sets of all accounts. */
+	const QList<Task::AccountDescr> messageDbList(
+	    messageDbListForAllAccounts(this, m_accountModel, ui->accountList,
+	        false));
 
-	/* get pointer to database for current accounts */
+	/* get current account username */
 	const QString currentUserName(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!currentUserName.isEmpty());
-	MessageDbSet *dbSet = accountDbSet(currentUserName);
-	if (Q_NULLPTR == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-	userNameAndMsgDbSet.first = currentUserName;
-	userNameAndMsgDbSet.second = dbSet;
-	messageDbList.append(userNameAndMsgDbSet);
-
-	/* get pointer to database for other accounts */
-	for (int i = 0; i < ui->accountList->model()->rowCount(); i++) {
-		QModelIndex index = m_accountModel.index(i, 0);
-		const QString userName(m_accountModel.userName(index));
-		Q_ASSERT(!userName.isEmpty());
-		if (currentUserName != userName) {
-			MessageDbSet *dbSet = accountDbSet(userName);
-			if (Q_NULLPTR == dbSet) {
-				Q_ASSERT(0);
-				continue;
-			}
-			userNameAndMsgDbSet.first = userName;
-			userNameAndMsgDbSet.second = dbSet;
-			messageDbList.append(userNameAndMsgDbSet);
-		}
-	}
 
 	dlgMsgSearch = new DlgMsgSearch(messageDbList, currentUserName, this,
 	    Qt::Window);

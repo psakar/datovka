@@ -74,7 +74,7 @@ public:
 		 */
 		bool isValid(void) const
 		{
-			return !userName.isEmpty() && (0 != messageDbSet);
+			return !userName.isEmpty() && (Q_NULLPTR != messageDbSet);
 		}
 
 		QString userName; /*!< Account identifier (user login name). */

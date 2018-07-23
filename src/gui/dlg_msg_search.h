@@ -25,6 +25,7 @@
 
 #include <QDialog>
 
+#include "src/worker/task.h"
 #include "src/io/message_db_set.h"
 
 namespace Ui {
@@ -41,13 +42,12 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
-	 * @param[in] msgSetEntryList List of username and database set pairs.
+	 * @param[in] messageDbSetList List of available accounts.
 	 * @param[in] userName Username.
 	 * @param[in] parent Parent widget.
 	 * @param[in] flags Window flags.
 	 */
-	DlgMsgSearch(
-	    const QList< QPair<QString, MessageDbSet *> > msgSetEntryList,
+	DlgMsgSearch(const QList<Task::AccountDescr> &messageDbSetList,
 	    const QString &userName, QWidget *parent = Q_NULLPTR,
 	    Qt::WindowFlags flags = Qt::WindowFlags());
 
@@ -112,14 +112,13 @@ private:
 	/*!
 	 * @brief Append message list to result table.
 	 *
-	 * @param[in] msgSetEntry Pair of username and related database set.
+	 * @param[in] accountDescr Username and related database set.
 	 * @param[in] msgDataList Message data list.
 	 */
-	void appendMsgsToTable(
-	    const QPair<QString, MessageDbSet *> &msgSetEntry,
+	void appendMsgsToTable(const Task::AccountDescr &accountDescr,
 	    const QList<MessageDb::SoughtMsg> &msgDataList);
 
 	Ui::DlgMsgSearch *m_ui; /*!< UI generated from UI file. */
 
-	const QList< QPair<QString, MessageDbSet *> > m_msgSetEntryList; /*!< Usernames and database sets. */
+	const QList<Task::AccountDescr> m_messageDbSetList; /*!< Available accounts.*/
 };
