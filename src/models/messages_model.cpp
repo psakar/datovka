@@ -349,9 +349,9 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 		case PERSDELIV_COL: /* 'personal delivery' */
 			{
 				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
 				return ico;
 			}
 			break;
