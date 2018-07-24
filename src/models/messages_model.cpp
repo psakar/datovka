@@ -86,6 +86,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			    _data(index, role).toString(),
 			    dateTimeDisplayFormat);
 			break;
+		case PERSDELIV_COL: /* 'personal delivery' */
 		case READLOC_COL: /* 'read locally' */
 		case PROCSNG_COL: /* 'process status' */
 		case ATTDOWN_COL: /* 'is downloaded' */
@@ -100,6 +101,18 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 
 	case Qt::DecorationRole:
 		switch (index.column()) {
+		case PERSDELIV_COL:
+			/* Show icon for 'personal delivery'. */
+			if (_data(index).toBool()) {
+				QIcon ico;
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
+			} else {
+				return QVariant(); /* No icon. */
+			}
+			break;
 		case READLOC_COL:
 			/* Show icon for 'read locally'. */
 			if (_data(index).toBool()) {
@@ -212,6 +225,13 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			break;
 		}
 		switch (index.column()) {
+		case PERSDELIV_COL: /* 'personal delivery' */
+			if (_data(index).toBool()) {
+				return tr("personal delivery");
+			} else {
+				return tr("not a personal delivery");
+			}
+			break;
 		case DELIVERY_COL:
 		case ACCEPT_COL:
 			return headerData(index.column(), Qt::Horizontal).toString() +
@@ -271,6 +291,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 
 	case ROLE_MSGS_DB_PROXYSORT:
 		switch (index.column()) {
+		case PERSDELIV_COL:
 		case READLOC_COL:
 		case ATTDOWN_COL:
 			return sortRank(
@@ -310,6 +331,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 	switch (role) {
 	case Qt::DisplayRole:
 		switch (section) {
+		case PERSDELIV_COL: /* 'personal delivery' */
 		case READLOC_COL: /* 'read locally' */
 		case ATTDOWN_COL: /* 'is downloaded' */
 		case PROCSNG_COL: /* 'process status' */
@@ -324,6 +346,15 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 
 	case Qt::DecorationRole:
 		switch (section) {
+		case PERSDELIV_COL: /* 'personal delivery' */
+			{
+				QIcon ico;
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
+			}
+			break;
 		case READLOC_COL: /* 'read locally' */
 			{
 				QIcon ico;
@@ -359,6 +390,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 
 	case Qt::ToolTipRole:
 		switch (section) {
+		case PERSDELIV_COL: /* 'personal delivery' */
 		case READLOC_COL: /* 'read locally' */
 		case ATTDOWN_COL: /* 'is downloaded' */
 		case PROCSNG_COL: /* 'process status' */
@@ -417,6 +449,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 		QVector<QVariant> row(m_columnCount);
 
 		row[DMID_COL] = entry.dmId;
+		row[PERSDELIV_COL] = entry.dmPersonalDelivery;
 		row[ANNOT_COL] = entry.dmAnnotation;
 		row[SENDER_COL] = entry.dmSender;
 		row[DELIVERY_COL] = entry.dmDeliveryTime;
@@ -530,18 +563,25 @@ bool DbMsgsTblModel::setHeader(const QList<AppendedCol> &appendedCols)
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[0]).type,
 	    ROLE_MSGS_DB_ENTRY_TYPE);
 
-	setHeaderData(ANNOT_COL, Qt::Horizontal,
+	setHeaderData(PERSDELIV_COL, Qt::Horizontal,
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[1]).desc,
 	    Qt::DisplayRole);
-	setHeaderData(ANNOT_COL, Qt::Horizontal,
+	setHeaderData(PERSDELIV_COL, Qt::Horizontal,
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[1]).type,
 	    ROLE_MSGS_DB_ENTRY_TYPE);
 
-	setHeaderData(SENDER_COL, Qt::Horizontal,
+	setHeaderData(ANNOT_COL, Qt::Horizontal,
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[2]).desc,
 	    Qt::DisplayRole);
-	setHeaderData(SENDER_COL, Qt::Horizontal,
+	setHeaderData(ANNOT_COL, Qt::Horizontal,
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[2]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
+
+	setHeaderData(SENDER_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[3]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(SENDER_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[3]).type,
 	    ROLE_MSGS_DB_ENTRY_TYPE);
 
 	setHeaderData(RECIP_COL, Qt::Horizontal,
@@ -552,24 +592,24 @@ bool DbMsgsTblModel::setHeader(const QList<AppendedCol> &appendedCols)
 	    ROLE_MSGS_DB_ENTRY_TYPE);
 
 	setHeaderData(DELIVERY_COL, Qt::Horizontal,
-	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[3]).desc,
-	    Qt::DisplayRole);
-	setHeaderData(DELIVERY_COL, Qt::Horizontal,
-	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[3]).type,
-	    ROLE_MSGS_DB_ENTRY_TYPE);
-
-	setHeaderData(ACCEPT_COL, Qt::Horizontal,
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[4]).desc,
 	    Qt::DisplayRole);
-	setHeaderData(ACCEPT_COL, Qt::Horizontal,
+	setHeaderData(DELIVERY_COL, Qt::Horizontal,
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[4]).type,
 	    ROLE_MSGS_DB_ENTRY_TYPE);
 
+	setHeaderData(ACCEPT_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[5]).desc,
+	    Qt::DisplayRole);
+	setHeaderData(ACCEPT_COL, Qt::Horizontal,
+	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[5]).type,
+	    ROLE_MSGS_DB_ENTRY_TYPE);
+
 	setHeaderData(READLOC_COL, Qt::Horizontal,
-	    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[5]).desc,
+	    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[6]).desc,
 	    Qt::DisplayRole);
 	setHeaderData(READLOC_COL, Qt::Horizontal,
-	    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[5]).type,
+	    smsgdtTbl.attrProps.value(MessageDb::rcvdItemIds[6]).type,
 	    ROLE_MSGS_DB_ENTRY_TYPE);
 
 	setHeaderData(MSGSTAT_COL, Qt::Horizontal,

@@ -754,6 +754,7 @@ void showMessageColumnsAccordingToFunctionality(QTableView *view,
 		hideCols.append(DbMsgsTblModel::RECIP_COL);
 		hideCols.append(DbMsgsTblModel::MSGSTAT_COL);
 	} else if (type == DbMsgsTblModel::SNT_MODEL) {
+		hideCols.append(DbMsgsTblModel::PERSDELIV_COL);
 		hideCols.append(DbMsgsTblModel::SENDER_COL);
 		hideCols.append(DbMsgsTblModel::READLOC_COL);
 		hideCols.append(DbMsgsTblModel::PROCSNG_COL);
@@ -5055,6 +5056,7 @@ void MainWindow::setReceivedColumnWidths(void)
 	ui->messageList->resizeColumnToContents(DbMsgsTblModel::ACCEPT_COL);
 
 	/* These columns display an icon. */
+	ui->messageList->setColumnWidth(DbMsgsTblModel::PERSDELIV_COL, ICON_COL_WIDTH);
 	ui->messageList->setColumnWidth(DbMsgsTblModel::READLOC_COL, ICON_COL_WIDTH);
 	ui->messageList->setColumnWidth(DbMsgsTblModel::ATTDOWN_COL, ICON_COL_WIDTH);
 	ui->messageList->setColumnWidth(DbMsgsTblModel::PROCSNG_COL, ICON_COL_WIDTH);
