@@ -57,7 +57,7 @@ public:
 	 */
 	enum ColumnNumbers {
 		DMID_COL = 0, /* Message identifier. */
-		PRSNLDLVR_COL = 1, /* Personal delivery. */
+		PERSDELIV_COL = 1, /* Personal delivery. */
 		ANNOT_COL = 2, /* Annotation column. */
 		SENDER_COL = 3, /* Sender name column. */
 		RECIP_COL = 4, /* Recipient name column. */

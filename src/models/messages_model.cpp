@@ -86,7 +86,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			    _data(index, role).toString(),
 			    dateTimeDisplayFormat);
 			break;
-		case PRSNLDLVR_COL: /* 'personal delivery' */
+		case PERSDELIV_COL: /* 'personal delivery' */
 		case READLOC_COL: /* 'read locally' */
 		case PROCSNG_COL: /* 'process status' */
 		case ATTDOWN_COL: /* 'is downloaded' */
@@ -101,7 +101,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 
 	case Qt::DecorationRole:
 		switch (index.column()) {
-		case PRSNLDLVR_COL:
+		case PERSDELIV_COL:
 			/* Show icon for 'personal delivery'. */
 			if (_data(index).toBool()) {
 				QIcon ico;
@@ -225,6 +225,13 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 			break;
 		}
 		switch (index.column()) {
+		case PERSDELIV_COL: /* 'personal delivery' */
+			if (_data(index).toBool()) {
+				return tr("personal delivery");
+			} else {
+				return tr("not a personal delivery");
+			}
+			break;
 		case DELIVERY_COL:
 		case ACCEPT_COL:
 			return headerData(index.column(), Qt::Horizontal).toString() +
@@ -245,13 +252,6 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 				return tr("attachments downloaded");
 			} else {
 				return tr("attachments not downloaded");
-			}
-			break;
-		case PRSNLDLVR_COL: /* 'personal delivery' */
-			if (_data(index).toBool()) {
-				return tr("personal delivery");
-			} else {
-				return tr("no personal delivery");
 			}
 			break;
 		case PROCSNG_COL: /* 'process status' */
@@ -291,7 +291,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 
 	case ROLE_MSGS_DB_PROXYSORT:
 		switch (index.column()) {
-		case PRSNLDLVR_COL:
+		case PERSDELIV_COL:
 		case READLOC_COL:
 		case ATTDOWN_COL:
 			return sortRank(
@@ -331,7 +331,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 	switch (role) {
 	case Qt::DisplayRole:
 		switch (section) {
-		case PRSNLDLVR_COL: /* 'personal delivery' */
+		case PERSDELIV_COL: /* 'personal delivery' */
 		case READLOC_COL: /* 'read locally' */
 		case ATTDOWN_COL: /* 'is downloaded' */
 		case PROCSNG_COL: /* 'process status' */
@@ -346,7 +346,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 
 	case Qt::DecorationRole:
 		switch (section) {
-		case PRSNLDLVR_COL: /* 'personal delivery' */
+		case PERSDELIV_COL: /* 'personal delivery' */
 			{
 				QIcon ico;
 				ico.addFile(QStringLiteral(ICON_16x16_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
@@ -390,7 +390,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 
 	case Qt::ToolTipRole:
 		switch (section) {
-		case PRSNLDLVR_COL: /* 'personal delivery' */
+		case PERSDELIV_COL: /* 'personal delivery' */
 		case READLOC_COL: /* 'read locally' */
 		case ATTDOWN_COL: /* 'is downloaded' */
 		case PROCSNG_COL: /* 'process status' */
@@ -449,7 +449,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 		QVector<QVariant> row(m_columnCount);
 
 		row[DMID_COL] = entry.dmId;
-		row[PRSNLDLVR_COL] = entry.dmPersonalDelivery;
+		row[PERSDELIV_COL] = entry.dmPersonalDelivery;
 		row[ANNOT_COL] = entry.dmAnnotation;
 		row[SENDER_COL] = entry.dmSender;
 		row[DELIVERY_COL] = entry.dmDeliveryTime;
@@ -563,10 +563,10 @@ bool DbMsgsTblModel::setHeader(const QList<AppendedCol> &appendedCols)
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[0]).type,
 	    ROLE_MSGS_DB_ENTRY_TYPE);
 
-	setHeaderData(PRSNLDLVR_COL, Qt::Horizontal,
+	setHeaderData(PERSDELIV_COL, Qt::Horizontal,
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[1]).desc,
 	    Qt::DisplayRole);
-	setHeaderData(PRSNLDLVR_COL, Qt::Horizontal,
+	setHeaderData(PERSDELIV_COL, Qt::Horizontal,
 	    msgsTbl.attrProps.value(MessageDb::rcvdItemIds[1]).type,
 	    ROLE_MSGS_DB_ENTRY_TYPE);
 
