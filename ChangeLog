@@ -1,4 +1,8 @@
 4.11.0 /
+ * The received message table displays an icon if the received message is a
+   personal delivery.
+ * The search-related account can be changed directly in the message search
+   dialogue.
  * The message search dialogue now allows to search messages according
    to specified attachment names.
  * Attachment model holds binary attachment data instead of base64-ecoded
