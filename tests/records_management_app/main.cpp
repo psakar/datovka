@@ -24,12 +24,33 @@
 #include <QApplication>
 #include <QCommandLineParser>
 
+#include "src/datovka_shared/log/log.h"
 #include "tests/records_management_app/gui/app.h"
 
 #define BASE_URL_OPT "base-url"
 #define TOKEN_OPT "token"
 #define CA_CERT_OPT "ca-cert"
 #define IGNORE_SSL_ERRORS "ignore-ssl-errors"
+
+static
+int allocGlobLog(void)
+{
+	GlobInstcs::logPtr = new (std::nothrow) LogDevice;
+	if (Q_NULLPTR == GlobInstcs::logPtr) {
+		return -1;
+	}
+
+	return 0;
+}
+
+static
+void deallocGlobLog(void)
+{
+	if (Q_NULLPTR != GlobInstcs::logPtr) {
+		delete GlobInstcs::logPtr;
+		GlobInstcs::logPtr = Q_NULLPTR;
+	}
+}
 
 static
 int setupCmdLineParser(QCommandLineParser &parser)
@@ -62,6 +83,17 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 
+	if (0 != allocGlobLog()) {
+		/* Cannot continue without logging facility. */
+		return EXIT_FAILURE;
+	}
+
+	{
+		/* Use default Qt handler. */
+		QtMessageHandler oldHandler = qInstallMessageHandler(globalLogOutput);
+		GlobInstcs::logPtr->installMessageHandler(oldHandler);
+	}
+
 	QCoreApplication::setApplicationName("ds_test_app");
 	QCoreApplication::setApplicationVersion(VERSION);
 
@@ -80,5 +112,9 @@ int main(int argc, char *argv[])
 	    parser.isSet(CA_CERT_OPT) ? parser.value(CA_CERT_OPT) : QString(),
 	    parser.isSet(IGNORE_SSL_ERRORS));
 	mainWin.show();
-	return app.exec();
+	int ret = app.exec();
+
+	deallocGlobLog();
+
+	return ret;
 }
