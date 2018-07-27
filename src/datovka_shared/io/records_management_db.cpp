@@ -27,9 +27,9 @@
 #include <QSqlRecord>
 #include <QVariant>
 
-#include "src/io/db_tables.h"
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/log/log.h"
+#include "src/io/db_tables.h"
 
 /*!
  * @brief Delete all entries from table.

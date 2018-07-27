@@ -31,25 +31,39 @@ void globalLogOutput(enum QtMsgType type, const QMessageLogContext &context,
 	}
 }
 
-void qDebugCall(const char *fmt, ...)
+void qDebugCall(const QMessageLogContext &logCtx, const char *fmt, ...)
 {
 	std::va_list argp;
 
 	va_start(argp, fmt);
 
-	qDebugCallV(fmt, argp);
+	qDebugCallV(logCtx, fmt, argp);
 
 	va_end(argp);
 }
 
-void qDebugCallV(const char *fmt, std::va_list ap)
+/*!
+ * @brief Similar to qDebug. Takes explicit QMessageLogger object.
+ *
+ * @note See qtbase/src/corelib/global/qglobal.h of Qt sources.
+ */
+#define qDebugOverride(logCtx) \
+	QMessageLogger((logCtx).file, (logCtx).line, (logCtx).function).debug
+
+#if defined(QT_NO_DEBUG_OUTPUT)
+#  undef qDebugOverride
+#  define qDebugOverride(logCtx) QT_NO_QDEBUG_MACRO
+#endif
+
+void qDebugCallV(const QMessageLogContext &logCtx, const char *fmt,
+    std::va_list ap)
 {
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
-	qDebug("%s", QString::vasprintf(fmt, ap).toUtf8().constData());
+	qDebugOverride(logCtx)("%s", QString::vasprintf(fmt, ap).toUtf8().constData());
 #else /* < Qt-5.5 */
 	QString outStr;
 	outStr.vsprintf(fmt, ap);
 
-	qDebug("%s", outStr.toUtf8().constData());
+	qDebugOverride(logCtx)("%s", outStr.toUtf8().constData());
 #endif /* >= Qt-5.5 */
 }

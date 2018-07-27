@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _LOG_H_
-#define _LOG_H_
+#pragma once
 
 #include <cstdarg>
 #include <QString>
@@ -30,6 +29,15 @@
 #include "src/datovka_shared/log/global.h" /* GlobInstcs::logPtr */
 #include "src/datovka_shared/log/log_common.h"
 #include "src/datovka_shared/log/log_device.h"
+
+/*
+ * Don't use the macros defined in <QtGlobal> such as qDebug() and others.
+ * When the application is build in release mode then the functionality of those
+ * macros is limited (e.g. they don't receive the information about the
+ * location in the source code).
+ *
+ * Use the following macros instead.
+ */
 
 /*!
  * @brief Message handler.
@@ -47,17 +55,25 @@ void globalLogOutput(enum QtMsgType type, const QMessageLogContext &context,
 /*!
  * @brief Debugging using Qt-defined output.
  *
+ * @param[in] logCtx Message log context.
  * @param[in] fmt Format string.
  */
-void qDebugCall(const char *fmt, ...);
+void qDebugCall(const QMessageLogContext &logCtx, const char *fmt,
+    ...) Q_ATTRIBUTE_FORMAT_PRINTF(2, 3);
 
 /*!
  * @brief Debugging using Qt-defined output.
  *
- * @param[in] fmt Format string.
+ * @param[in]     logCtx Message log context.
+ * @param[in]     fmt Format string.
  * @param[in,out] ap Variable arguments list.
  */
-void qDebugCallV(const char *fmt, std::va_list ap);
+void qDebugCallV(const QMessageLogContext &logCtx, const char *fmt,
+    std::va_list ap);
+
+//#define MESSAGELOG_FUNCTION Q_FUNC_INFO /* Causes excessive round brackets (parentheses) to be added. */
+//#define MESSAGELOG_FUNCTION __func__ "()" /* FIXME -- Causes wrong macro expansion. */
+#define MESSAGELOG_FUNCTION __func__
 
 /*!
  * @brief Generates location debug information.
@@ -65,8 +81,10 @@ void qDebugCallV(const char *fmt, std::va_list ap);
 #ifdef DEBUG
 #  define debugSlotCall() \
 	do { \
-		/* qDebugCall("<SLOT> %s() '%s'", __func__, __FILE__); */ \
-		logDebugLv1NL("<SLOT> %s() '%s'", __func__, __FILE__); \
+		/* qDebugCall( \
+		    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+		    "<SLOT> %s() '%s'", MESSAGELOG_FUNCTION, __FILE__); */ \
+		logDebugLv1NL("<SLOT> %s() '%s'", (MESSAGELOG_FUNCTION), __FILE__); \
 	} while(0)
 #else
    /* Forces the semicolon after the macro. */
@@ -79,8 +97,10 @@ void qDebugCallV(const char *fmt, std::va_list ap);
 #ifdef DEBUG
 #  define debugFuncCall() \
 	do { \
-		/* qDebugCall("<FUNC> %s() '%s'", __func__, __FILE__); */ \
-		logDebugLv2NL("<FUNC> %s() '%s'", __func__, __FILE__); \
+		/* qDebugCall( \
+		    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+		    "<FUNC> %s() '%s'", MESSAGELOG_FUNCTION, __FILE__); */ \
+		logDebugLv2NL("<FUNC> %s() '%s'", MESSAGELOG_FUNCTION, __FILE__); \
 	} while(0)
 #else
    /* Forces the semicolon after the macro. */
@@ -98,12 +118,12 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  */
 #define _internalLogNL(logVerbThresh, logSrc, logUrg, format, ...) \
 	if (GlobInstcs::logPtr->logVerbosity() > (logVerbThresh)) { \
-		GlobInstcs::logPtr->log((logSrc), (logUrg), \
-		    format " (%s:%d, %s())\n", \
-		    __VA_ARGS__, __FILE__, __LINE__, __func__); \
+		GlobInstcs::logPtr->log( \
+		    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+		    (logSrc), (logUrg), format "\n", __VA_ARGS__); \
 	} else { \
-		GlobInstcs::logPtr->log((logSrc), (logUrg), format "\n", \
-		    __VA_ARGS__); \
+		GlobInstcs::logPtr->log(QMessageLogContext(), \
+		    (logSrc), (logUrg), format "\n", __VA_ARGS__); \
 	}
 
 /*!
@@ -122,7 +142,7 @@ void qDebugCallV(const char *fmt, std::va_list ap);
 #define logDebugNL(verbThresh, format, ...) \
 	do { \
 		if (GlobInstcs::logPtr->debugVerbosity() > (verbThresh)) { \
-			_internalLogNL(0, LOGSRC_DFLT, LOG_DEBUG, \
+			_internalLogNL(-1, LOGSRC_DFLT, LOG_DEBUG, \
 			    format, __VA_ARGS__); \
 		} \
 	} while (0)
@@ -176,8 +196,9 @@ void qDebugCallV(const char *fmt, std::va_list ap);
 #define logDebugMl(verbThresh, format, ...) \
 	do { \
 		if (GlobInstcs::logPtr->debugVerbosity() > verbThresh) { \
-			GlobInstcs::logPtr->logMl(LOGSRC_DFLT, LOG_DEBUG, \
-			    format, __VA_ARGS__); \
+			GlobInstcs::logPtr->logMl( \
+			    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+			    LOGSRC_DFLT, LOG_DEBUG, format, __VA_ARGS__); \
 		} \
 	} while (0)
 
@@ -225,8 +246,9 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  */
 #define logInfo(format, ...) \
 	do { \
-		GlobInstcs::logPtr->log(LOGSRC_DFLT, LOG_INFO, format, \
-		    __VA_ARGS__); \
+		GlobInstcs::logPtr->log( \
+		    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+		    LOGSRC_DFLT, LOG_INFO, format, __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -236,7 +258,7 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  * @param[in] ...    Variadic arguments.
  */
 #define logInfoNL(format, ...) \
-	_internalLogNL(0, LOGSRC_DFLT, LOG_INFO, format, __VA_ARGS__)
+	_internalLogNL(-1, LOGSRC_DFLT, LOG_INFO, format, __VA_ARGS__)
 
 /*!
  * @brief Logs multi-line information message.
@@ -246,8 +268,9 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  */
 #define logInfoMl(format, ...) \
 	do { \
-		GlobInstcs::logPtr->logMl(LOGSRC_DFLT, LOG_INFO, format, \
-		    __VA_ARGS__); \
+		GlobInstcs::logPtr->logMl( \
+		    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+		    LOGSRC_DFLT, LOG_INFO, format, __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -258,8 +281,9 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  */
 #define logWarning(format, ...) \
 	do { \
-		GlobInstcs::logPtr->log(LOGSRC_DFLT, LOG_WARNING, format, \
-		    __VA_ARGS__); \
+		GlobInstcs::logPtr->log( \
+		    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+		    LOGSRC_DFLT, LOG_WARNING, format, __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -269,7 +293,7 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  * @param[in] ...    Variadic arguments.
  */
 #define logWarningNL(format, ...) \
-	_internalLogNL(0, LOGSRC_DFLT, LOG_WARNING, format, __VA_ARGS__)
+	_internalLogNL(-1, LOGSRC_DFLT, LOG_WARNING, format, __VA_ARGS__)
 
 /*!
  * @brief Logs multi-line warning message.
@@ -279,8 +303,9 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  */
 #define logWarningMl(format, ...) \
 	do { \
-		GlobInstcs::logPtr->logMl(LOGSRC_DFLT, LOG_WARNING, format, \
-		    __VA_ARGS__); \
+		GlobInstcs::logPtr->logMl( \
+		    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+		    LOGSRC_DFLT, LOG_WARNING, format, __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -291,8 +316,9 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  */
 #define logError(format, ...) \
 	do { \
-		GlobInstcs::logPtr->log(LOGSRC_DFLT, LOG_ERR, format, \
-		    __VA_ARGS__); \
+		GlobInstcs::logPtr->log( \
+		    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+		    LOGSRC_DFLT, LOG_ERR, format, __VA_ARGS__); \
 	} while (0)
 
 /*!
@@ -302,7 +328,7 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  * @param[in] ...    Variadic arguments.
  */
 #define logErrorNL(format, ...) \
-	_internalLogNL(0, LOGSRC_DFLT, LOG_ERR, format, __VA_ARGS__)
+	_internalLogNL(-1, LOGSRC_DFLT, LOG_ERR, format, __VA_ARGS__)
 
 /*!
  * @brief Logs multi-line error message.
@@ -312,8 +338,7 @@ void qDebugCallV(const char *fmt, std::va_list ap);
  */
 #define logErrorMl(format, ...) \
 	do { \
-		GlobInstcs::logPtr->logMl(LOGSRC_DFLT, LOG_ERR, format, \
-		    __VA_ARGS__); \
+		GlobInstcs::logPtr->logMl( \
+		    QMessageLogContext(__FILE__, __LINE__, MESSAGELOG_FUNCTION, "default"), \
+		    LOGSRC_DFLT, LOG_ERR, format, __VA_ARGS__); \
 	} while (0)
-
-#endif /* _LOG_H_ */

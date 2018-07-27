@@ -28,6 +28,7 @@
 #include <QMessageLogContext>
 #include <QMutex>
 #include <QString>
+#include <QtGlobal> /* QtMessageHandler */
 
 /*!
  * @brief Maximal number of simultaneously opened files.
@@ -168,17 +169,19 @@ public:
 	/*!
 	 * @brief Log message.
 	 *
+	 * @param[in] logCtx Message log context.
 	 * @param[in] source Source identifier.
 	 * @param[in] level Message urgency level.
 	 * @param[in] fmt Format of the log message -- follows printf(3) format.
 	 * @return -1 if error, 0 else.
 	 */
-	int log(enum LogSource source, enum LogLevel level, const char *fmt,
-	    ...);
+	int log(const QMessageLogContext &logCtx, enum LogSource source,
+	    enum LogLevel level, const char *fmt, ...) Q_ATTRIBUTE_FORMAT_PRINTF(5, 6);
 
 	/*!
 	 * @brief Log message.
 	 *
+	 * @param[in]     logCtx Message log context.
 	 * @param[in]     source Source identifier.
 	 * @param[in]     level Message urgency level.
 	 * @param[in]     fmt Format of the log message -- follows printf(3)
@@ -186,35 +189,37 @@ public:
 	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	int logVlog(enum LogSource source, enum LogLevel level, const char *fmt,
-	    std::va_list ap);
+	int logVlog(const QMessageLogContext &logCtx, enum LogSource source,
+	    enum LogLevel level, const char *fmt, std::va_list ap);
 
 	/*!
 	 * @brief Log multi-line message.
 	 *
 	 * Every new line is merged with the same prefix.
 	 *
+	 * @param[in] logCtx Message log context.
 	 * @param[in] source Source identifier.
 	 * @param[in] level Message urgency level.
 	 * @param[in] fmt Format of the log message -- follows printf(3) format.
 	 * @return -1 if error, 0 else.
 	 */
-	int logMl(enum LogSource source, enum LogLevel level, const char *fmt,
-	    ...);
+	int logMl(const QMessageLogContext &logCtx, enum LogSource source,
+	    enum LogLevel level, const char *fmt, ...) Q_ATTRIBUTE_FORMAT_PRINTF(5, 6);
 
 	/*!
 	 * @brief Log multi-line message.
 	 *
 	 * Every new line is merged with the same prefix.
 	 *
+	 * @param[in]     logCtx Message log context.
 	 * @param[in]     source Source identifier.
 	 * @param[in]     level Message urgency level.
 	 * @param[in]     fmt Format of the log message in printf(3) format.
 	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	int logVlogMl(enum LogSource source, enum LogLevel level,
-	    const char *fmt, std::va_list ap);
+	int logVlogMl(const QMessageLogContext &logCtx, enum LogSource source,
+	    enum LogLevel level, const char *fmt, std::va_list ap);
 
 	/*!
 	 * @brief Provides message handler interface for the Qt library.
@@ -226,7 +231,18 @@ public:
 	void logQtMessage(enum QtMsgType type,
 	    const QMessageLogContext &context, const QString &msg);
 
+	/*!
+	 * @brief Installs additional message handler. This handler may be
+	 *     needed for passing messages into debugger e.g. on Android.
+	 *
+	 * @param[in] handler Message handler to be called.
+	 * @return Previously installed message handler.
+	 */
+	QtMessageHandler installMessageHandler(QtMessageHandler handler);
+
 private:
+	QtMessageHandler m_handler; /*!< Additional message handler. */
+
 	FacDesc m_facDescVect[MAX_LOG_FILES]; /*!< Facility vector. */
 	int m_usedSources; /*!<
 	                    * Number of used sources.
@@ -239,23 +255,32 @@ private:
 	int m_logVerbosity; /*!< Amount of information in single message. */
 	int m_debugVerbosity; /*!< Verbosity of debugging output. */
 
-	static
-	const QString logTimeFmt; /*!< Format of time to be used in log output. */
-
 	/*!
 	 * @brief Converts log level to urgency prefix.
+	 *
+	 * @param[in] level Urgency level.
+	 * @return Pointer to string of NULL on error.
 	 */
 	static
 	const char *urgencyPrefix(enum LogLevel level);
 
 	/*!
-	 * @brief converts message type to urgency level.
+	 * @brief Converts message type to urgency level.
 	 *
 	 * @param[in] type Message type.
 	 * @return Urgency level.
 	 */
 	static
 	enum LogLevel levelFromType(enum QtMsgType type);
+
+	/*!
+	 * @brief Converts urgency level to message type.
+	 *
+	 * @param[in] level Urgency level.
+	 * @return Message type.
+	 */
+	static
+	enum QtMsgType typeFromLevel(enum LogLevel level);
 
 	/*!
 	 * @brief Build log line prefix string. Its form depends on
@@ -267,28 +292,50 @@ private:
 	QString buildPrefix(const char *urgPrefix) const;
 
 	/*!
+	 * @brief Build log line postfix string. Its content depends on
+	 *     the supplied context data.
+	 *
+	 * @param[in] logCtx Message log context.
+	 * @return Postfix string.
+	 */
+	static
+	QString buildPostfix(const QMessageLogContext &logCtx);
+
+	/*!
+	 * @brief Log already formatted message.
+	 *
+	 * @param[in] source Source identifier.
+	 * @param[in] level Message urgency level.
+	 * @param[in] msg Log line.
+	 */
+	void logString(enum LogSource source, enum LogLevel level,
+	    const QString &msg);
+
+	/*!
 	 * @brief Log message.
 	 *
+	 * @param[in]     logCtx Message log context.
 	 * @param[in]     source Source identifier.
 	 * @param[in]     level Message urgency level.
-	 * @param[in]     urgPrefix Message urgency prefix.
 	 * @param[in]     format Content of the log message in printf(3) format.
 	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	void logPrefixVlog(enum LogSource source, enum LogLevel level,
-	    const char *urgPrefix, const char *format, std::va_list ap);
+	int logPrefixVlog(const QMessageLogContext &logCtx,
+	    enum LogSource source, enum LogLevel level, const char *format,
+	    std::va_list ap);
 
 	/*!
 	 * @brief Log multi-line message.
 	 *
+	 * @param[in]     logCtx Message log context.
 	 * @param[in]     source Source identifier.
 	 * @param[in]     level Message urgency level.
-	 * @param[in]     urgPrefix Message urgency prefix.
 	 * @param[in]     format Content of the log message in printf(3) format.
 	 * @param[in,out] ap Variable argument list.
 	 * @return -1 if error, 0 else.
 	 */
-	void logPrefixVlogMl(enum LogSource source, enum LogLevel level,
-	    const char *urgPrefix, const char *format, std::va_list ap);
+	int logPrefixVlogMl(const QMessageLogContext &logCtx,
+	    enum LogSource source, enum LogLevel level, const char *format,
+	    std::va_list ap);
 };

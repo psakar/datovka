@@ -26,13 +26,11 @@
 #include <QTimer>
 #include <QUrl>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/io/records_management_connection.h"
 
 /* Must be set to false for production releases. */
 const bool RecordsManagementConnection::ignoreSslErrorsDflt = false;
-
-#define logFuncCall() \
-	qDebug("%s()", __func__)
 
 /*!
  * @brief Converts service identifier onto service name.
@@ -109,7 +107,7 @@ void RecordsManagementConnection::setConnection(const QString &baseUrl,
 bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
     const QByteArray &requestData, QByteArray &replyData)
 {
-	logFuncCall();
+	debugFuncCall();
 
 	QNetworkRequest request(createRequest(srvcId));
 
@@ -127,13 +125,13 @@ bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
 	timer.start(m_timeOut);
 	eventLoop.exec();
 
-	qDebug("Loop exited, reply finished: %d", reply->isFinished());
+	logDebugLv0NL("Loop exited, reply finished: %d", reply->isFinished());
 	QList<QByteArray> headerList(reply->rawHeaderList());
 	if (!reply->rawHeaderPairs().isEmpty()) {
-		qDebug("%s", "Received raw headers:");
+		logDebugLv0NL("%s", "Received raw headers:");
 		foreach (const QNetworkReply::RawHeaderPair &pair,
 		         reply->rawHeaderPairs()) {
-			qDebug("%s: %s", pair.first.constData(),
+			logDebugLv0NL("%s: %s", pair.first.constData(),
 			    pair.second.constData());
 		}
 	}
@@ -150,7 +148,8 @@ bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
 	} else {
 		/* Timeout expired. */
 		disconnect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-		qCritical("Connection timed out. Check your internet connection.");
+		logErrorNL("%s",
+		    "Connection timed out. Check your internet connection.");
 		reply->abort();
 	}
 
@@ -194,23 +193,23 @@ bool RecordsManagementConnection::addTrustedCertificate(const QString &filePath)
 	}
 
 	if (readAndAddCert(certData, QSsl::Pem)) {
-		qDebug("Read PEN certificate '%s'.",
+		logDebugLv0NL("Read PEN certificate '%s'.",
 		    filePath.toUtf8().constData());
 		return true;
 	} else {
-		qWarning("Supplied certificate '%s' is not in PEM format.",
+		logWarningNL("Supplied certificate '%s' is not in PEM format.",
 		    filePath.toUtf8().constData());
 	}
 	if (readAndAddCert(certData, QSsl::Der)) {
-		qDebug("Read DER certificate '%s'.",
+		logDebugLv0NL("Read DER certificate '%s'.",
 		    filePath.toUtf8().constData());
 		return true;
 	} else {
-		qWarning("Supplied certificate '%s' is not in DER format.",
+		logWarningNL("Supplied certificate '%s' is not in DER format.",
 		    filePath.toUtf8().constData());
 	}
 
-	qCritical("Could not read certificate '%s'.",
+	logErrorNL("Could not read certificate '%s'.",
 	    filePath.toUtf8().constData());
 	return false;
 }
@@ -230,11 +229,11 @@ void RecordsManagementConnection::handleSslErrors(QNetworkReply *reply,
 		errMsg = errList.join(QStringLiteral("; "));
 	}
 
-	qCritical("%s", errMsg.toUtf8().constData());
+	logErrorNL("%s", errMsg.toUtf8().constData());
 	emit connectionError(errMsg);
 
 	if (m_ignoreSslErrors) {
-		qWarning("Ignoring obtained SSL errors.");
+		logWarningNL("%s", "Ignoring obtained SSL errors.");
 		emit connectionError(QStringLiteral("Ignoring obtained SSL errors."));
 
 		if (reply != Q_NULLPTR) {
@@ -246,7 +245,7 @@ void RecordsManagementConnection::handleSslErrors(QNetworkReply *reply,
 QNetworkRequest RecordsManagementConnection::createRequest(
     enum ServiceId srvcId) const
 {
-	logFuncCall();
+	debugFuncCall();
 
 	QNetworkRequest request;
 
@@ -265,12 +264,12 @@ QNetworkRequest RecordsManagementConnection::createRequest(
 QNetworkReply *RecordsManagementConnection::sendRequest(
     const QNetworkRequest &request, const QByteArray &data)
 {
-	logFuncCall();
+	debugFuncCall();
 
 	switch (m_nam.networkAccessible()) {
 	case QNetworkAccessManager::UnknownAccessibility:
 	case QNetworkAccessManager::NotAccessible:
-		qCritical("%s",
+		logErrorNL("%s",
 		    "Internet connection is probably not available. Check your network settings.");
 		return Q_NULLPTR;
 		break;
@@ -287,7 +286,7 @@ QNetworkReply *RecordsManagementConnection::sendRequest(
 	}
 
 	if (reply == Q_NULLPTR) {
-		qCritical("%s", "No reply.");
+		logErrorNL("%s", "No reply.");
 		return Q_NULLPTR;
 	}
 
@@ -297,7 +296,7 @@ QNetworkReply *RecordsManagementConnection::sendRequest(
 bool RecordsManagementConnection::processReply(QNetworkReply *reply,
     QByteArray &replyData)
 {
-	logFuncCall();
+	debugFuncCall();
 
 	if (reply == Q_NULLPTR) {
 		Q_ASSERT(0);
@@ -325,12 +324,12 @@ bool RecordsManagementConnection::processReply(QNetworkReply *reply,
 	case 302: /* 302 Found */
 		possibleRedirectUrl = reply->attribute(
 		    QNetworkRequest::RedirectionTargetAttribute);
-		qWarning("Redirection '%s'?",
+		logWarningNL("Redirection '%s'?",
 		    possibleRedirectUrl.toString().toUtf8().constData());
 		// possibleRedirectUrl.toString();
 		break;
 	default: /* Any other error. */
-		qCritical("%s", reply->errorString().toUtf8().constData());
+		logErrorNL("%s", reply->errorString().toUtf8().constData());
 		return false;
 		break;
 	}

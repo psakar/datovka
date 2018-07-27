@@ -28,13 +28,14 @@
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/log/log_c.h"
 
-void q_debug_call(const char *fmt, ...)
+void q_debug_call(const char *file, int line, const char *func, const char *fmt,
+    ...)
 {
 	std::va_list argp;
 
 	va_start(argp, fmt);
 
-	qDebugCallV(fmt, argp);
+	qDebugCallV(QMessageLogContext(file, line, func, "default"), fmt, argp);
 
 	va_end(argp);
 }
@@ -49,27 +50,32 @@ int glob_debug_verbosity(void)
 	return GlobInstcs::logPtr->debugVerbosity();
 }
 
-int glob_log(enum LogSource source, enum LogLevel level, const char *fmt, ...)
+int glob_log(const char *file, int line, const char *func,
+    enum LogSource source, enum LogLevel level, const char *fmt, ...)
 {
 	std::va_list argp;
 
 	va_start(argp, fmt);
 
-	GlobInstcs::logPtr->logVlog(source, level, fmt, argp);
+	GlobInstcs::logPtr->logVlog(
+	    QMessageLogContext(file, line, func, "default"),
+	    source, level, fmt, argp);
 
 	va_end(argp);
 
 	return 0;
 }
 
-int glob_log_ml(enum LogSource source, enum LogLevel level, const char *fmt,
-    ...)
+int glob_log_ml(const char *file, int line, const char *func,
+    enum LogSource source, enum LogLevel level, const char *fmt, ...)
 {
 	std::va_list argp;
 
 	va_start(argp, fmt);
 
-	GlobInstcs::logPtr->logVlogMl(source, level, fmt, argp);
+	GlobInstcs::logPtr->logVlogMl(
+	    QMessageLogContext(file, line, func, "default"),
+	    source, level, fmt, argp);
 
 	va_end(argp);
 

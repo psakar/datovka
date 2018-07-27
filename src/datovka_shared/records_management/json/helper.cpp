@@ -26,6 +26,7 @@
 #include <QJsonParseError>
 #include <QJsonValue>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/json/helper.h"
 
 bool JsonHelper::readRootObject(const QByteArray &json, QJsonObject &jsonObj)
@@ -35,19 +36,19 @@ bool JsonHelper::readRootObject(const QByteArray &json, QJsonObject &jsonObj)
 		QJsonParseError parseErr;
 		jsonDoc = QJsonDocument::fromJson(json, &parseErr);
 		if (jsonDoc.isNull()) {
-			qCritical("Error parsing JSON: %s",
+			logErrorNL("Error parsing JSON: %s",
 			    parseErr.errorString().toUtf8().constData());
 			return false;
 		}
 	}
 	if (!jsonDoc.isObject()) {
-		qCritical("%s", "JSON document contains no object.");
+		logErrorNL("%s", "JSON document contains no object.");
 		return false;
 	}
 
 	QJsonObject jsonTmpObj(jsonDoc.object());
 	if (jsonTmpObj.isEmpty()) {
-		qCritical("%s", "JSON object is empty.");
+		logErrorNL("%s", "JSON object is empty.");
 		return false;
 	}
 
@@ -59,13 +60,13 @@ bool JsonHelper::readValue(const QJsonObject &jsonObj, const QString &key,
     QJsonValue &jsonVal)
 {
 	if (jsonObj.isEmpty() || key.isEmpty()) {
-		qCritical("%s", "JSON object or sought key is empty.");
+		logErrorNL("%s", "JSON object or sought key is empty.");
 		return false;
 	}
 
 	jsonVal = jsonObj.value(key);
 	if (jsonVal.isUndefined()) {
-		qCritical("Missing key '%s' in JSON object.",
+		logErrorNL("Missing key '%s' in JSON object.",
 		    key.toUtf8().constData());
 		return false;
 	}
@@ -86,7 +87,7 @@ bool JsonHelper::readInt(const QJsonObject &jsonObj, const QString &key,
 	}
 	int readVal = jsonVal.toInt(-1);
 	if (readVal == -1) {
-		qCritical("Value related to key '%s' is not an integer.",
+		logErrorNL("Value related to key '%s' is not an integer.",
 		    key.toUtf8().constData());
 		return false;
 	}
@@ -107,7 +108,7 @@ bool JsonHelper::readString(const QJsonObject &jsonObj, const QString &key,
 		return acceptNull;
 	}
 	if (!jsonVal.isString()) {
-		qCritical("Value related to key '%s' is not a string.",
+		logErrorNL("Value related to key '%s' is not a string.",
 		    key.toUtf8().constData());
 		return false;
 	}
@@ -128,7 +129,7 @@ bool JsonHelper::readArray(const QJsonObject &jsonObj, const QString &key,
 		return acceptNull;
 	}
 	if (!jsonVal.isArray()) {
-		qCritical("Value related to key '%s' is not an array.",
+		logErrorNL("Value related to key '%s' is not an array.",
 		    key.toUtf8().constData());
 		return false;
 	}
@@ -149,11 +150,11 @@ bool JsonHelper::readStringList(const QJsonObject &jsonObj, const QString &key,
 
 	foreach (const QJsonValue &jsonVal, jsonArr) {
 		if (jsonVal.isNull()) {
-			qCritical("%s", "Found null value in array.");
+			logErrorNL("%s", "Found null value in array.");
 			return false;
 		}
 		if (!jsonVal.isString()) {
-			qCritical("%s", "Found non-string value in array.");
+			logErrorNL("%s", "Found non-string value in array.");
 			return false;
 		}
 
@@ -175,7 +176,7 @@ QString JsonHelper::toIndentedString(const QByteArray &json)
 		QJsonParseError parseErr;
 		jsonDoc = QJsonDocument::fromJson(json, &parseErr);
 		if (jsonDoc.isNull()) {
-			qCritical("Error parsing JSON: %s",
+			logErrorNL("Error parsing JSON: %s",
 			    parseErr.errorString().toUtf8().constData());
 			return QString();
 		}
