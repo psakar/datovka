@@ -39,6 +39,19 @@
  * Use the following macros instead.
  */
 
+/*
+ * The type int64_t is defined in <cstdint> or <cinttypes>.
+ * The macro PRId64 is defined in  <cinttypes>.
+ *
+ * Use the following macro when printing qint64 using the PRId64 format
+ * specifier. Qt defines 'qint64' as 'long long int' whereas gcc defines
+ * 'PRId64' as 'ld' on x86_64. This generates tols of similar compiler warnings:
+ *   format '%ld' expects argument of type 'long int', but argument ... has type 'qint64 {aka long long int}'.
+ * See:
+ *   https://forum.qt.io/topic/84399/warning-when-using-qint64-with-prii64-on-64-bit-linux/2
+ */
+#define UGLY_QINT64_CAST (int64_t)
+
 /*!
  * @brief Message handler.
  *

@@ -182,7 +182,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		    QString(), MessageDirection::MSG_SENT)) {
 			logErrorNL(
 			    "Cannot insert newly sent message '%" PRId64 "' into database.",
-			    dmId);
+			    UGLY_QINT64_CAST dmId);
 			ret = SM_DB_INS_ERR;
 			goto fail;
 		}

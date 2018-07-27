@@ -103,7 +103,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 		error = Isds::Description::descrError(err.code());
 		longError = err.longDescr();
 		logErrorNL("Error downloading hash of message '%" PRId64 "'.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 		return VERIFY_ISDS_ERR;
 	}
 	Q_ASSERT(!hashIsds.isNull());

@@ -152,7 +152,7 @@ bool receivedRequestedContent(const StoredFilesResp &sfRes,
 		if (!sentDmIdSet.remove(entry.dmId())) {
 			logErrorNL(
 			    "Obtained response for message '%" PRId64 "'that has not been requested.",
-			    entry.dmId());
+			    UGLY_QINT64_CAST entry.dmId());
 			return false;
 		}
 	}
@@ -201,7 +201,7 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 		        entry.locations())) {
 			logErrorNL(
 			    "Could not update information about message '%" PRId64 "'.",
-			    entry.dmId());
+			    UGLY_QINT64_CAST entry.dmId());
 			goto fail;
 		}
 	}

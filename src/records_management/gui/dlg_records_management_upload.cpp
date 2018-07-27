@@ -259,7 +259,7 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 	if (!ufRes.locations().isEmpty()) {
 		logInfoNL(
 		    "Message '%" PRId64 "'has been stored into records management service.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 		if (Q_NULLPTR != GlobInstcs::recMgmtDbPtr) {
 			return GlobInstcs::recMgmtDbPtr->updateStoredMsg(dmId,
 			    ufRes.locations());
@@ -270,7 +270,7 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 	} else {
 		logErrorNL(
 		    "Received empty location list when uploading message '%" PRId64 "'.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 	}
 
 	return false;

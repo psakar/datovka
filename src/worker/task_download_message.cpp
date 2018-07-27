@@ -82,7 +82,8 @@ void TaskDownloadMessage::run(void)
 
 	logDebugLv1NL("%s", "-----------------------------------------------");
 	logDebugLv1NL("Downloading %s message '%" PRId64 "' for account '%s'.",
-	    (MSG_RECEIVED == m_msgDirect) ? "received" : "sent", m_mId.dmId,
+	    (MSG_RECEIVED == m_msgDirect) ? "received" : "sent",
+	    UGLY_QINT64_CAST m_mId.dmId,
 	    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	logDebugLv1NL("%s", "-----------------------------------------------");
 
@@ -92,11 +93,11 @@ void TaskDownloadMessage::run(void)
 	if (DM_SUCCESS == m_result) {
 		logDebugLv1NL(
 		    "Done downloading message '%" PRId64 "' for account '%s'.",
-		    m_mId.dmId,
+		    UGLY_QINT64_CAST m_mId.dmId,
 		    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	} else {
 		logErrorNL("Downloading message '%" PRId64 "' for account '%s' failed.",
-		    m_mId.dmId,
+		    UGLY_QINT64_CAST m_mId.dmId,
 		    (*GlobInstcs::acntMapPtr)[m_userName].accountName().toUtf8().constData());
 	}
 
@@ -164,7 +165,7 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 	debugFuncCall();
 
 	logDebugLv0NL("Trying to download complete message '%" PRId64 "'",
-	    mId.dmId);
+	    UGLY_QINT64_CAST mId.dmId);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(progressLabel, 0);
 
@@ -243,11 +244,11 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 	        dbSet, error, longError)) {
 		logDebugLv0NL(
 		    "Delivery info of message '%" PRId64 "' processed.",
-		    mId.dmId);
+		    UGLY_QINT64_CAST mId.dmId);
 	} else {
 		logErrorNL(
 		    "Processing delivery info of message '%" PRId64 "' failed.",
-		    mId.dmId);
+		    UGLY_QINT64_CAST mId.dmId);
 	}
 
 	Q_ASSERT(mId.deliveryTime.isValid());
@@ -262,11 +263,11 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessage(
 		        error, longError)) {
 			logDebugLv0NL(
 			    "Message '%" PRId64 "' marked as downloaded.",
-			    mId.dmId);
+			    UGLY_QINT64_CAST mId.dmId);
 		} else {
 			logErrorNL(
 			    "Marking message '%" PRId64 "' as downloaded failed.",
-			    mId.dmId);
+			    UGLY_QINT64_CAST mId.dmId);
 		}
 	}
 
@@ -303,11 +304,11 @@ enum TaskDownloadMessage::Result TaskDownloadMessage::downloadMessageAuthor(
 	if (messageDb.updateMessageAuthorInfo(dmId, senderType, senderName)) {
 		logDebugLv0NL(
 		    "Author information of message '%" PRId64 "' were updated.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 	} else {
 		logErrorNL(
 		    "Updating author information of message '%" PRId64 "' failed.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 	}
 
 	return DM_SUCCESS;

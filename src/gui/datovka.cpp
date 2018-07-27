@@ -21,7 +21,7 @@
  * the two.
  */
 
-#include <cinttypes>
+#include <cinttypes> /* PRId64 */
 #include <cstdlib> /* exit(3) */
 #include <QCloseEvent>
 #include <QDesktopServices>
@@ -1581,7 +1581,7 @@ void MainWindow::viewSelectedMessage(void)
 			Q_ASSERT(0);
 			logErrorNL(
 			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-			    msgId.dmId);
+			    UGLY_QINT64_CAST msgId.dmId);
 			return;
 		}
 
@@ -3067,7 +3067,7 @@ bool MainWindow::eraseMessage(const QString &userName,
 	    !connectToIsds(userName)) {
 		logErrorNL(
 		    "Couldn't connect to ISDS when erasing message '%" PRId64 "'.",
-		    msgId.dmId);
+		    UGLY_QINT64_CAST msgId.dmId);
 		return false;
 	}
 
@@ -3087,14 +3087,14 @@ bool MainWindow::eraseMessage(const QString &userName,
 	switch (result) {
 	case TaskEraseMessage::NOT_DELETED:
 		logErrorNL("Message '%" PRId64 "' couldn't be deleted.",
-		    msgId.dmId);
+		    UGLY_QINT64_CAST msgId.dmId);
 		showStatusTextWithTimeout(tr("Message \"%1\" was not deleted.")
 		    .arg(msgId.dmId));
 		return false;
 		break;
 	case TaskEraseMessage::DELETED_ISDS:
 		logWarning("Message '%" PRId64 "' deleted only from ISDS.\n",
-		    msgId.dmId);
+		    UGLY_QINT64_CAST msgId.dmId);
 		showStatusTextWithTimeout(tr(
 		    "Message \"%1\" was deleted only from ISDS.")
 		    .arg(msgId.dmId));
@@ -3104,14 +3104,14 @@ bool MainWindow::eraseMessage(const QString &userName,
 		if (delFromIsds) {
 			logWarning(
 			    "Message '%" PRId64 "' deleted only from local database.\n",
-			    msgId.dmId);
+			    UGLY_QINT64_CAST msgId.dmId);
 			showStatusTextWithTimeout(tr(
 			    "Message \"%1\" was deleted only from local database.")
 			    .arg(msgId.dmId));
 		} else {
 			logInfo(
 			    "Message '%" PRId64 "' deleted from local database.\n",
-			    msgId.dmId);
+			    UGLY_QINT64_CAST msgId.dmId);
 			showStatusTextWithTimeout(tr(
 			    "Message \"%1\" was deleted from local database.")
 			    .arg(msgId.dmId));
@@ -3121,7 +3121,7 @@ bool MainWindow::eraseMessage(const QString &userName,
 	case TaskEraseMessage::DELETED_ISDS_LOCAL:
 		logInfo(
 		    "Message '%" PRId64 "' deleted from ISDS and local database.\n",
-		    msgId.dmId);
+		    UGLY_QINT64_CAST msgId.dmId);
 		showStatusTextWithTimeout(tr(
 		    "Message \"%1\" was deleted from ISDS and local database.")
 		    .arg(msgId.dmId));
@@ -5524,7 +5524,7 @@ void MainWindow::verifySelectedMessage(void)
 	if (hashDb.isNull()) {
 		logErrorNL(
 		    "Error obtaining hash of message '%" PRId64 "' from local database.",
-		    msgId.dmId);
+		    UGLY_QINT64_CAST msgId.dmId);
 		showStatusTextWithTimeout(tr("Message verification failed."));
 		QMessageBox::warning(this, tr("Verification error"),
 		    tr("The message hash is not in local database.\n"
@@ -6002,7 +6002,7 @@ void MainWindow::sendMessagesZfoEmail(void)
 				Q_ASSERT(0);
 				logErrorNL(
 				    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-				    msgId.dmId);
+				    UGLY_QINT64_CAST msgId.dmId);
 				return;
 			}
 
@@ -6098,7 +6098,7 @@ void MainWindow::sendAllAttachmentsEmail(void)
 				Q_ASSERT(0);
 				logErrorNL(
 				    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-				    msgId.dmId);
+				    UGLY_QINT64_CAST msgId.dmId);
 				return;
 			}
 
@@ -6411,7 +6411,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 			Q_ASSERT(0);
 			logErrorNL(
 			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-			    msgId.dmId);
+			    UGLY_QINT64_CAST msgId.dmId);
 			return;
 		}
 

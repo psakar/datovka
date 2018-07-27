@@ -1843,7 +1843,7 @@ enum Isds::Type::DmState MessageDb::getMessageStatus(qint64 dmId) const
 		} else {
 			logWarningNL(
 			    "Status of message '%" PRId64 "' is not stored in database.",
-			    dmId);
+			    UGLY_QINT64_CAST dmId);
 			return Isds::Type::MS_NULL;
 		}
 	} else {
@@ -3952,7 +3952,7 @@ bool MessageDb::msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
 	if (ignoreMissingCrlCheck) {
 		logWarning(
 		    "CRL check is not performed for message '%" PRId64 "'.\n",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 	}
 	time_t utcTime = dateTime.toTime_t();
 
