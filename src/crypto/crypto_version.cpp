@@ -165,12 +165,12 @@ int crypto_compiled_lib_ver_check(void)
 	struct ssl_ver_nums app_cmp_nums, run_nums;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
-	logInfoNL("Qt compile-time OpenSSL version 0x%x (%s).", qt_cmp_ssl_ver,
+	logInfoNL("Qt compile-time OpenSSL version 0x%lx (%s).", qt_cmp_ssl_ver,
 	    QSslSocket::sslLibraryBuildVersionString().toUtf8().constData());
 #endif /* >= Qt-5.4 */
-	logInfoNL("Application compile-time OpenSSL version 0x%x (%s).",
+	logInfoNL("Application compile-time OpenSSL version 0x%lx (%s).",
 	    appSslBuildVerNum, appSslBuildVerStr.toUtf8().constData());
-	logInfoNL("Run-time OpenSSL version 0x%x (%s).",
+	logInfoNL("Run-time OpenSSL version 0x%lx (%s).",
 	    run_ssl_ver, _SSLeay_version_str());
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
