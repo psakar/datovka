@@ -317,6 +317,7 @@ SOURCES += \
     src/datovka_shared/log/log.cpp \
     src/datovka_shared/log/log_c.cpp \
     src/datovka_shared/log/log_device.cpp \
+    src/datovka_shared/log/memory_log.cpp \
     src/datovka_shared/records_management/conversion.cpp \
     src/datovka_shared/records_management/io/records_management_connection.cpp \
     src/datovka_shared/records_management/json/entry_error.cpp \
@@ -472,6 +473,7 @@ HEADERS += \
     src/datovka_shared/log/log_common.h \
     src/datovka_shared/log/log_device.h \
     src/datovka_shared/log/log.h \
+    src/datovka_shared/log/memory_log.h \
     src/datovka_shared/records_management/conversion.h \
     src/datovka_shared/records_management/io/records_management_connection.h \
     src/datovka_shared/records_management/json/entry_error.h \
