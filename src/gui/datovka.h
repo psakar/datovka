@@ -620,6 +620,16 @@ private slots:
 	void msgSetSelectedMessageProcessState(int stateIndex);
 
 	/*!
+	 * @brief Show log dialogue.
+	 */
+	void viewLogDlg(void);
+
+	/*!
+	 * @brief On log dialogue closed.
+	 */
+	void viewLogDlgClosed(int result);
+
+	/*!
 	 * @brief Show advanced message search dialogue.
 	 */
 	void showMsgAdvancedSearchDialog(void);
@@ -1062,6 +1072,7 @@ private:
 	enum AccountModel::NodeType
 	    m_lastStoredAccountNodeType; /*!< Last stored account position. */
 
+	QDialog *m_viewLogDlg; /*!< Non-null if view log dialogue is active. */
 	bool m_searchDlgActive; /*!< True if search dialogue is active. */
 
 	QVector<int> m_colWidthRcvd; /*!< Received list column widths. */

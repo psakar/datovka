@@ -28,6 +28,7 @@
 
 #include "src/datovka_shared/log/log_common.h"
 #include "src/datovka_shared/log/log_device.h"
+#include "src/datovka_shared/log/memory_log.h"
 
 static
 const QString logTimeFmt("MMM dd hh:mm:ss"); /*!< Format of time to be used in log output. */
@@ -39,6 +40,7 @@ const QRegExp trailingNewlineRegExp("(\r\n|\r|\n)$"); /*!< Trailing newline regu
 
 LogDevice::LogDevice(void)
     : m_handler(Q_NULLPTR),
+    m_memLog(Q_NULLPTR),
     m_usedSources(1),
     m_openedFiles(0),
     m_mutex(),
@@ -355,6 +357,33 @@ QtMessageHandler LogDevice::installMessageHandler(QtMessageHandler handler)
 	return oldHandler;
 }
 
+MemoryLog *LogDevice::installMemoryLog(MemoryLog *memLog)
+{
+	MemoryLog *oldMemLog;
+
+	m_mutex.lock();
+
+	oldMemLog = m_memLog;
+	m_memLog = memLog;
+
+	m_mutex.unlock();
+
+	return oldMemLog;
+}
+
+MemoryLog *LogDevice::memoryLog(void)
+{
+	MemoryLog *memLog;
+
+	m_mutex.lock();
+
+	memLog = m_memLog;
+
+	m_mutex.unlock();
+
+	return memLog;
+}
+
 const char *LogDevice::urgencyPrefix(enum LogLevel level)
 {
 	const char *prefix;
@@ -563,6 +592,11 @@ int LogDevice::logPrefixVlog(const QMessageLogContext &logCtx,
 		m_handler(typeFromLevel(level), logCtx, msgFormatted);
 	}
 
+	/* Memory log. */
+	if (m_memLog != Q_NULLPTR) {
+		m_memLog->log(msg);
+	}
+
 	logString(source, level, msg);
 
 	return 0;
@@ -601,8 +635,14 @@ int LogDevice::logPrefixVlogMl(const QMessageLogContext &logCtx,
 	}
 
 	foreach (const QString &msgLine, msgLines) {
-		logString(source, level,
-		    msgPrefix + msgLine + QStringLiteral("\n"));
+		QString msg(msgPrefix + msgLine + QStringLiteral("\n"));
+
+		/* Memory log. */
+		if (m_memLog != Q_NULLPTR) {
+			m_memLog->log(msg);
+		}
+
+		logString(source, level, msg);
 	}
 
 	return 0;

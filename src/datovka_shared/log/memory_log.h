@@ -112,8 +112,8 @@ private:
 	 */
 	void storeMsg(quint64 key, const QString &msg);
 
-	quint64 m_chars; /*!< Number of logged string characters. */
-	quint64 m_maxChars; /*!< Maximal number of characters to be held. */
+	qint64 m_chars; /*!< Number of logged string characters. */
+	qint64 m_maxChars; /*!< Maximal number of characters to be held. */
 
 	QHash<quint64, QString> m_loggedMsgs;
 	QQueue<quint64> m_keys;

@@ -37,7 +37,10 @@ MemoryLog::MemoryLog(QObject *parent)
 void MemoryLog::setMaxMemory(int bytes)
 {
 	/* QStrings are UTF-16 encoded. */
-	m_maxChars = (bytes > 0) ? ((quint64)bytes) / 2 : 0;
+	m_maxChars = (bytes > 0) ? (bytes / 2) : 0;
+
+	/* If already filled and setting smaller. */
+	assureSpace(0);
 }
 
 int MemoryLog::maxMemory(void) const
@@ -60,7 +63,7 @@ bool MemoryLog::log(const QString &msg)
 	 * A single message may exceed the entire log capacity. In such cases
 	 * the message is not accepted.
 	 */
-	if (Q_UNLIKELY(((quint64)msg.size()) > m_maxChars)) {
+	if (Q_UNLIKELY(msg.size() > m_maxChars)) {
 		return false;
 	}
 
@@ -106,7 +109,7 @@ quint64 MemoryLog::uniqueKey(void) const
 
 void MemoryLog::assureSpace(quint64 charNum)
 {
-	while ((m_maxChars - m_chars) < charNum) {
+	while ((m_maxChars - m_chars) < (qint64)charNum) {
 		const quint64 key = m_keys.dequeue();
 		const QHash<quint64, QString>::const_iterator iter(m_loggedMsgs.find(key));
 		if (Q_UNLIKELY(iter == m_loggedMsgs.end())) {

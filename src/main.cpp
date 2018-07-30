@@ -38,6 +38,7 @@
 #include "src/crypto/crypto_version.h"
 #include "src/datovka_shared/io/sqlite/db.h"
 #include "src/datovka_shared/log/log.h"
+#include "src/datovka_shared/log/memory_log.h"
 #include "src/datovka_shared/settings/pin.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
@@ -92,6 +93,11 @@ int main(int argc, char *argv[])
 	/* Log warnings. */
 	GlobInstcs::logPtr->setLogLevelBits(LogDevice::LF_STDERR, LOGSRC_ANY,
 	    LOG_UPTO(LOG_WARNING));
+
+	/* Memory log. */
+	MemoryLog memLog;
+	memLog.setMaxMemory(80 * 1024 * 1024);
+	GlobInstcs::logPtr->installMemoryLog(&memLog);
 
 	setDefaultLocale();
 
