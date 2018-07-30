@@ -27,6 +27,7 @@
 #include <QThread>
 
 #include "src/datovka_shared/isds/error.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
@@ -34,7 +35,6 @@
 #include "src/isds/message_conversion.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
-#include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_send_message.h"
@@ -182,7 +182,7 @@ enum TaskSendMessage::Result TaskSendMessage::sendMessage(
 		    QString(), MessageDirection::MSG_SENT)) {
 			logErrorNL(
 			    "Cannot insert newly sent message '%" PRId64 "' into database.",
-			    dmId);
+			    UGLY_QINT64_CAST dmId);
 			ret = SM_DB_INS_ERR;
 			goto fail;
 		}

@@ -27,10 +27,10 @@
 
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/io/message_db.h"
-#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "ui_dlg_signature_detail.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,9 @@
  * the two.
  */
 
+#include "src/datovka_shared/log/log.h"
 #include "src/delegates/tag_item.h"
 #include "src/delegates/tags_delegate.h"
-#include "src/log/log.h"
 
 TagsDelegate::TagsDelegate(QWidget *parent)
     : QStyledItemDelegate(parent)

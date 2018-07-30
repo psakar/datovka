@@ -30,10 +30,10 @@
 #include <QSqlRecord>
 #include <QUrl>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/io/db_tables.h"
 #include "src/io/filesystem.h"
 #include "src/io/message_db.h"
-#include "src/log/log.h"
 #include "src/models/attachments_model.h"
 
 #define LOCAL_DATABASE_STR QLatin1String("local database")

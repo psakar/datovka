@@ -27,8 +27,8 @@
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_version.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "tests/helper.h"
 #include "tests/test_crypto_message.h"
 

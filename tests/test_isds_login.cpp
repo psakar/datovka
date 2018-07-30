@@ -24,9 +24,9 @@
 #include <QtTest/QtTest>
 
 #include "src/common.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/isds_login.h"
-#include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
 #include "tests/helper_qt.h"

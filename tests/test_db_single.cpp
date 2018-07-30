@@ -26,9 +26,9 @@
 #include <QFileInfo>
 #include <QtTest/QtTest>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/tag_db.h"
-#include "src/log/log.h"
 #include "tests/test_db_single.h"
 
 class TestDbSingle : public QObject {

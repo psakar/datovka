@@ -23,7 +23,7 @@
 
 #include <QSettings>
 
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/settings/registry.h"
 
 /*

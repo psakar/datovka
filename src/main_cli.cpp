@@ -35,13 +35,13 @@
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
 #include "src/datovka_shared/io/sqlite/db.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/settings/pin.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/initialisation.h"
 #include "src/io/db_tables.h"
 #include "src/io/filesystem.h"
-#include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/settings/proxy.h"
 #include "src/single/single_instance.h"
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	qsrand(QDateTime::currentDateTime().toTime_t());
 
 	/* Log warnings. */
-	GlobInstcs::logPtr->setLogLevels(LogDevice::LF_STDERR, LOGSRC_ANY,
+	GlobInstcs::logPtr->setLogLevelBits(LogDevice::LF_STDERR, LOGSRC_ANY,
 	    LOG_UPTO(LOG_WARNING));
 
 	setDefaultLocale();

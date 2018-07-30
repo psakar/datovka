@@ -28,6 +28,7 @@
 
 #include "src/crypto/crypto_funcs.h"
 #include "src/datovka_shared/isds/type_conversion.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_signature_detail.h"
@@ -35,7 +36,6 @@
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/isds/type_description.h"
-#include "src/log/log.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/settings/preferences.h"
 #include "src/views/table_home_end_filter.h"

@@ -23,11 +23,11 @@
 
 #include "src/common.h" /* ISDS_CONNECT_TIMEOUT_MS */
 #include "src/cli/cli_login.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/account_db.h"
 #include "src/io/isds_helper.h"
 #include "src/io/isds_login.h"
-#include "src/log/log.h"
 #include "src/settings/preferences.h"
 
 /*!

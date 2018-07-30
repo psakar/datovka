@@ -26,12 +26,12 @@
 
 #include "src/datovka_shared/isds/error.h"
 #include "src/datovka_shared/isds/types.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/io/message_db.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
-#include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_erase_message.h"
 
@@ -119,14 +119,15 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 		if (err.code() == Isds::Type::ERR_SUCCESS) {
 			logDebugLv1NL(
 			    "Message '%" PRId64 "' was deleted from ISDS.",
-			    msgId.dmId);
+			    UGLY_QINT64_CAST msgId.dmId);
 		} else {
 			error = Isds::Description::descrError(err.code());
 			longError = err.longDescr();
 
 			logErrorNL(
 			    "Erasing message '%" PRId64 "'from ISDS returned status '%d': '%s'",
-			    msgId.dmId, err.code(), error.toUtf8().constData());
+			    UGLY_QINT64_CAST msgId.dmId, err.code(),
+			    error.toUtf8().constData());
 		}
 	}
 
@@ -137,12 +138,12 @@ enum TaskEraseMessage::Result TaskEraseMessage::eraseMessage(
 	if (messageDb->msgsDeleteMessageData(msgId.dmId)) {
 		logDebugLv1NL(
 		    "Message '%" PRId64 "' was deleted from local database.",
-		    msgId.dmId);
+		    UGLY_QINT64_CAST msgId.dmId);
 		return (delFromIsds && (Isds::Type::ERR_SUCCESS == err.code())) ? DELETED_ISDS_LOCAL : DELETED_LOCAL;
 	} else {
 		logErrorNL(
 		    "Could not delete message '%" PRId64 "' from local database.",
-		    msgId.dmId);
+		    UGLY_QINT64_CAST msgId.dmId);
 		return (delFromIsds && (Isds::Type::ERR_SUCCESS == err.code())) ? DELETED_ISDS : NOT_DELETED;
 	}
 }

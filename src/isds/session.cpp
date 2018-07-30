@@ -28,12 +28,10 @@
 #  include <cstdbool>
 #endif /* __APPLE__ */
 
-//#include <cstdlib> /* malloc(3) */
-//#include <cstring> /* memset(3) */
 #include <isds.h>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/isds/session.h"
-#include "src/log/log.h"
 
 Isds::Session::Session(void)
     : m_ctx(NULL),

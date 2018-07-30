@@ -30,8 +30,8 @@
 #include <QRegExp>
 #include <QSqlDatabase>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/io/message_db_set.h"
-#include "src/log/log.h"
 
 MessageDbSet::MessageDbSet(const QString &locDir, const QString &primaryKey,
     bool testing, enum Organisation organisation,

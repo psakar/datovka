@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,57 +21,26 @@
  * the two.
  */
 
-#include <cstdarg>
-//#include <cstddef> /* NULL */
-#include <cstdint>
+#pragma once
 
-#include "src/global.h"
-#include "src/log/log.h"
-#include "src/log/log_c.h"
+/*
+ * The log facility is a global instance with code shared between the desktop
+ * and mobile application. Therefore the global log instance must be located
+ * in a separate compilation unit.
+ */
 
-void q_debug_call(const char *fmt, ...)
-{
-	va_list argp;
+/*
+ * Forward class declaration.
+ * These classes must be declared before the following namespace.
+ */
+class LogDevice;
 
-	va_start(argp, fmt);
+/*!
+ * @brief The namespace holds pointers to all globally accessible structures.
+ */
+namespace GlobInstcs {
 
-	qDebugCallV(fmt, argp);
+	extern
+	class LogDevice *logPtr; /*!< Log device. */
 
-	va_end(argp);
-}
-
-int glob_log_verbosity(void)
-{
-	return GlobInstcs::logPtr->logVerbosity();
-}
-
-int glob_debug_verbosity(void)
-{
-	return GlobInstcs::logPtr->debugVerbosity();
-}
-
-int glob_log(int source, uint8_t level, const char *fmt, ...)
-{
-	va_list argp;
-
-	va_start(argp, fmt);
-
-	GlobInstcs::logPtr->logVlog(source, level, fmt, argp);
-
-	va_end(argp);
-
-	return 0;
-}
-
-int glob_log_ml(int source, uint8_t level, const char *fmt, ...)
-{
-	va_list argp;
-
-	va_start(argp, fmt);
-
-	GlobInstcs::logPtr->logVlogMl(source, level, fmt, argp);
-
-	va_end(argp);
-
-	return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include <QSslSocket>
 
 #include "src/crypto/crypto_version.h"
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 
@@ -165,12 +165,12 @@ int crypto_compiled_lib_ver_check(void)
 	struct ssl_ver_nums app_cmp_nums, run_nums;
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
-	logInfoNL("Qt compile-time OpenSSL version 0x%x (%s).", qt_cmp_ssl_ver,
+	logInfoNL("Qt compile-time OpenSSL version 0x%lx (%s).", qt_cmp_ssl_ver,
 	    QSslSocket::sslLibraryBuildVersionString().toUtf8().constData());
 #endif /* >= Qt-5.4 */
-	logInfoNL("Application compile-time OpenSSL version 0x%x (%s).",
+	logInfoNL("Application compile-time OpenSSL version 0x%lx (%s).",
 	    appSslBuildVerNum, appSslBuildVerStr.toUtf8().constData());
-	logInfoNL("Run-time OpenSSL version 0x%x (%s).",
+	logInfoNL("Run-time OpenSSL version 0x%lx (%s).",
 	    run_ssl_ver, _SSLeay_version_str());
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))

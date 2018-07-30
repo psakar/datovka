@@ -26,8 +26,8 @@
 
 #include "src/common.h"
 #include "src/datovka_shared/localisation/localisation.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/io/filesystem.h"
-#include "src/log/log.h"
 #include "src/settings/preferences.h"
 #include "src/settings/registry.h"
 

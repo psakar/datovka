@@ -37,7 +37,7 @@
 #include "src/compat/compat_win.h"
 #include "src/crypto/crypto.h"
 #include "src/crypto/crypto_funcs.h"
-#include "src/log/log_c.h"
+#include "src/datovka_shared/log/log_c.h"
 
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
 

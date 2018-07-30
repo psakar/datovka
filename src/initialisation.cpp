@@ -33,6 +33,7 @@
 #include "src/crypto/crypto_funcs.h"
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/localisation/localisation.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/settings/pin.h"
 #include "src/datovka_shared/settings/records_management.h"
 #include "src/datovka_shared/worker/pool.h"
@@ -90,15 +91,15 @@ int preferencesSetUp(const QCommandLineParser &parser, Preferences &prefs,
 			return -1;
 		}
 		/* Log warnings. */
-		log.setLogLevels(logFileId, LOGSRC_ANY,
+		log.setLogLevelBits(logFileId, LOGSRC_ANY,
 		    LOG_UPTO(LOG_WARNING));
 	}
 #ifdef DEBUG
 	if (parser.isSet(DEBUG_OPT) || parser.isSet(DEBUG_VERBOSITY_OPT)) {
-		log.setLogLevels(LogDevice::LF_STDERR, LOGSRC_ANY,
+		log.setLogLevelBits(LogDevice::LF_STDERR, LOGSRC_ANY,
 		    LOG_UPTO(LOG_DEBUG));
 		if (-1 != logFileId) {
-			log.setLogLevels(logFileId, LOGSRC_ANY,
+			log.setLogLevelBits(logFileId, LOGSRC_ANY,
 			    LOG_UPTO(LOG_DEBUG));
 		}
 	}

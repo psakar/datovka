@@ -23,9 +23,9 @@
 
 #include <QThread>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
-#include "src/log/log.h"
 #include "src/worker/task_keep_alive.h"
 
 TaskKeepAlive::TaskKeepAlive(const QString &userName)

@@ -33,12 +33,12 @@
 
 #include "src/common.h"
 #include "src/datovka_shared/isds/error.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/imports.h"
 #include "src/io/isds_sessions.h"
 #include "src/isds/services.h"
 #include "src/isds/session.h"
-#include "src/log/log.h"
 #include "src/models/accounts_model.h"
 #include "src/settings/preferences.h"
 

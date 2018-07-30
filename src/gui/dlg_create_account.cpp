@@ -25,11 +25,11 @@
 #include <QFileInfo>
 
 #include "src/common.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/settings/pin.h"
 #include "src/global.h"
 #include "src/gui/dlg_create_account.h"
 #include "src/gui/dlg_pin_input.h"
-#include "src/log/log.h"
 #include "ui_dlg_create_account.h"
 
 /*!

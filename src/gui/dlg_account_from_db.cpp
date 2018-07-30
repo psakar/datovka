@@ -25,9 +25,9 @@
 #include <QMessageBox>
 
 #include "src/common.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/gui/dlg_account_from_db.h"
-#include "src/log/log.h"
 #include "src/settings/account.h"
 #include "src/settings/preferences.h"
 #include "ui_dlg_account_from_db.h"

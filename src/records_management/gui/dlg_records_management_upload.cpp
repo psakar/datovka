@@ -27,10 +27,10 @@
 
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/datovka_shared/io/records_management_db.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/json/upload_file.h"
 #include "src/datovka_shared/records_management/json/upload_hierarchy.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
 #include "ui_dlg_records_management_upload.h"
@@ -259,7 +259,7 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 	if (!ufRes.locations().isEmpty()) {
 		logInfoNL(
 		    "Message '%" PRId64 "'has been stored into records management service.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 		if (Q_NULLPTR != GlobInstcs::recMgmtDbPtr) {
 			return GlobInstcs::recMgmtDbPtr->updateStoredMsg(dmId,
 			    ufRes.locations());
@@ -270,7 +270,7 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 	} else {
 		logErrorNL(
 		    "Received empty location list when uploading message '%" PRId64 "'.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 	}
 
 	return false;

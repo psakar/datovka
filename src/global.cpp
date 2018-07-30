@@ -25,8 +25,6 @@
 
 #include "src/global.h"
 
-class LogDevice *GlobInstcs::logPtr = Q_NULLPTR;
-
 class SingleInstanceEmitter *GlobInstcs::snglInstEmitterPtr = Q_NULLPTR;
 
 class MessageProcessingEmitter *GlobInstcs::msgProcEmitterPtr = Q_NULLPTR;

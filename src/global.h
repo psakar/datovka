@@ -23,42 +23,61 @@
 
 #pragma once
 
-/*!
- * @brief The class holds pointers to all globally accessible structures.
+/*
+ * Forward class declaration.
+ * These classes must be declared before the following namespace.
  */
-class GlobInstcs {
+class SingleInstanceEmitter;
 
-public:
-	static
-	class LogDevice *logPtr; /*!< Log device. */
+class MessageProcessingEmitter;
+class WorkerPool;
 
-	static
+class Preferences;
+class ProxiesSettings;
+class PinSettings;
+class RecordsManagementSettings;
+
+class IsdsSessions;
+
+class AccountDb;
+class DbContainer;
+class TagDb;
+class RecordsManagementDb;
+
+class AccountsMap;
+
+/*!
+ * @brief The namespace holds pointers to all globally accessible structures.
+ */
+namespace GlobInstcs {
+
+	extern
 	class SingleInstanceEmitter *snglInstEmitterPtr; /*!< Single instance message emitter. */
 
-	static
+	extern
 	class MessageProcessingEmitter *msgProcEmitterPtr; /*!< Task message emitter. */
-	static
+	extern
 	class WorkerPool *workPoolPtr; /*!< Worker pool. */
 
-	static
+	extern
 	class Preferences *prefsPtr; /*!< Preferences. */
-	static
+	extern
 	class ProxiesSettings *proxSetPtr; /*!< Proxy settings. */
-	static
+	extern
 	class PinSettings *pinSetPtr; /*!< PIN settings. */
-	static
+	extern
 	class RecordsManagementSettings *recMgmtSetPtr; /*!< Records management settings. */
 
-	static
+	extern
 	class IsdsSessions *isdsSessionsPtr; /*!< ISDS session container. */
 
-	static
+	extern
 	class AccountDb *accntDbPtr; /*!< Account database. */
-	static
+	extern
 	class DbContainer *msgDbsPtr; /*!< Message database container. */
-	static
+	extern
 	class TagDb *tagDbPtr; /*!< Tag database. */
-	static
+	extern
 	class RecordsManagementDb *recMgmtDbPtr; /*!< Records management database. */
 
 	/*!
@@ -66,12 +85,7 @@ public:
 	 *
 	 * @note Key is userName. The user name is held by the user name list.
 	 */
-	static
+	extern
 	class AccountsMap *acntMapPtr;
 
-private:
-	/*!
-	 * @brief Private constructor.
-	 */
-	GlobInstcs(void);
-};
+}

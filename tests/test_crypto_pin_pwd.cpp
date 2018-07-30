@@ -26,8 +26,8 @@
 #include <QtTest/QtTest>
 
 #include "src/datovka_shared/settings/pin.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/settings/account.h"
 #include "src/settings/accounts.h"
 #include "tests/test_crypto_pin_pwd.h"

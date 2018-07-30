@@ -25,8 +25,8 @@
 #include <QtTest/QtTest>
 
 #include "src/about.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
-#include "src/log/log.h"
 
 class TestVersion : public QObject {
 	Q_OBJECT

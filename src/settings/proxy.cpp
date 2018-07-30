@@ -25,7 +25,7 @@
 #include <QUrl>
 
 #include "src/common.h"
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/settings/proxy.h"
 
 #define HTTP_PROXY_VARMAME "http_proxy"

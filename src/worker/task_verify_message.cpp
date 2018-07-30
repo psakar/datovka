@@ -27,11 +27,11 @@
 
 #include "src/datovka_shared/isds/error.h"
 #include "src/datovka_shared/isds/types.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/isds_sessions.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
-#include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_verify_message.h"
 
@@ -103,7 +103,7 @@ enum TaskVerifyMessage::Result TaskVerifyMessage::verifyMessage(
 		error = Isds::Description::descrError(err.code());
 		longError = err.longDescr();
 		logErrorNL("Error downloading hash of message '%" PRId64 "'.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 		return VERIFY_ISDS_ERR;
 	}
 	Q_ASSERT(!hashIsds.isNull());

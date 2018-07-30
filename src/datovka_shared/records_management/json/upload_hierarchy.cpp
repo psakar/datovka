@@ -26,6 +26,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/json/helper.h"
 #include "src/datovka_shared/records_management/json/upload_hierarchy.h"
 
@@ -164,7 +165,7 @@ UploadHierarchyResp::NodeEntry *UploadHierarchyResp::NodeEntry::fromJsonRecursiv
 
 		foreach (const QJsonValue &jsonVal, jsonArr) {
 			if (!jsonVal.isObject()) {
-				qCritical("%s",
+				logErrorNL("%s",
 				    "Sub-node array holds a non-object value.");
 				ok = false;
 				deleteRecursive(newEntry);

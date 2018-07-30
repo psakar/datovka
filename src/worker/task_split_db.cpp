@@ -23,9 +23,9 @@
 
 #include <QThread>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/io/message_db_set_container.h"
-#include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_split_db.h"
 

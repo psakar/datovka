@@ -119,7 +119,7 @@ char *fread_file(FILE *fstream, size_t *length)
 					alloc = SIZE_MAX;
 				}
 
-				if (!(new_buf = realloc (buf, alloc))) {
+				if (!(new_buf = realloc(buf, alloc))) {
 					save_errno = errno;
 					break;
 				}
@@ -136,7 +136,7 @@ char *fread_file(FILE *fstream, size_t *length)
 
 char *internal_read_file(const char *fname, size_t *length, const char *mode)
 {
-	FILE *stream = fopen (fname, mode);
+	FILE *stream = fopen(fname, mode);
 	char *out;
 	int save_errno;
 
@@ -148,10 +148,10 @@ char *internal_read_file(const char *fname, size_t *length, const char *mode)
 
 	save_errno = errno;
 
-	if (fclose (stream) != 0) {
+	if (fclose(stream) != 0) {
 		if (out) {
 			save_errno = errno;
-			free (out);
+			free(out);
 		}
 		errno = save_errno;
 		return NULL;

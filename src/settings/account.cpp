@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "src/common.h"
 #include "src/datovka_shared/crypto/crypto_pwd.h"
 #include "src/datovka_shared/crypto/crypto_wrapped.h"
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/settings/account.h"
 
 namespace CredNames {

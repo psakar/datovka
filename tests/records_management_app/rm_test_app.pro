@@ -37,6 +37,10 @@ INCLUDEPATH += \
 
 SOURCES += \
 	$${top_srcdir}/src/datovka_shared/localisation/localisation.cpp \
+	$${top_srcdir}/src/datovka_shared/log/global.cpp \
+	$${top_srcdir}/src/datovka_shared/log/log.cpp \
+	$${top_srcdir}/src/datovka_shared/log/log_c.cpp \
+	$${top_srcdir}/src/datovka_shared/log/log_device.cpp \
 	$${top_srcdir}/src/datovka_shared/records_management/conversion.cpp \
 	$${top_srcdir}/src/datovka_shared/records_management/io/records_management_connection.cpp \
 	$${top_srcdir}/src/datovka_shared/records_management/json/entry_error.cpp \
@@ -55,6 +59,11 @@ SOURCES += \
 
 HEADERS += \
 	$${top_srcdir}/src/datovka_shared/localisation/localisation.h \
+	$${top_srcdir}/src/datovka_shared/log/global.h \
+	$${top_srcdir}/src/datovka_shared/log/log_c.h \
+	$${top_srcdir}/src/datovka_shared/log/log_common.h \
+	$${top_srcdir}/src/datovka_shared/log/log_device.h \
+	$${top_srcdir}/src/datovka_shared/log/log.h \
 	$${top_srcdir}/src/datovka_shared/records_management/conversion.h \
 	$${top_srcdir}/src/datovka_shared/records_management/io/records_management_connection.h \
 	$${top_srcdir}/src/datovka_shared/records_management/json/entry_error.h \

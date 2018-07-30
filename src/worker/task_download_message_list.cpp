@@ -25,6 +25,7 @@
 #include <QThread>
 
 #include "src/datovka_shared/isds/error.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/worker/pool.h" /* List with whole messages. */
 #include "src/global.h"
 #include "src/io/dbs.h"
@@ -32,7 +33,6 @@
 #include "src/isds/message_conversion.h"
 #include "src/isds/services.h"
 #include "src/isds/type_description.h"
-#include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_message.h" /* List with whole messages. */
@@ -431,12 +431,12 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 	if (Q_UNLIKELY(!deliveryTime.isValid())) {
 		logWarningNL(
 		    "Updating state of message '%" PRId64 "' with invalid delivery time.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 	}
 	MessageDb *messageDb = dbSet.accessMessageDb(deliveryTime, true);
 	if (Q_UNLIKELY(Q_NULLPTR == messageDb)) {
 		logErrorNL("Cannot access message database for message '%" PRId64 "'.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 		Q_ASSERT(0);
 		return DL_ERR;
 	}
@@ -465,11 +465,11 @@ enum TaskDownloadMessageList::Result TaskDownloadMessageList::updateMessageState
 		/* Updated message envelope delivery info in db. */
 		logDebugLv0NL(
 		    "Delivery information of message '%" PRId64 "' were updated.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 	} else {
 		logErrorNL(
 		    "Updating delivery information of message '%" PRId64 "' failed.",
-		    dmId);
+		    UGLY_QINT64_CAST dmId);
 	}
 
 	const QList<Isds::Event> &events(envel.dmEvents());

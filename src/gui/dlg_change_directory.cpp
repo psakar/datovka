@@ -24,10 +24,10 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/gui/dlg_change_directory.h"
 #include "src/io/message_db_set.h"
-#include "src/log/log.h"
 #include "src/settings/accounts.h"
 #include "src/settings/preferences.h"
 #include "ui_dlg_change_directory.h"

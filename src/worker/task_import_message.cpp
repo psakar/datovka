@@ -25,8 +25,8 @@
 
 #include "src/common.h"
 #include "src/datovka_shared/isds/types.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_import_message.h"
 

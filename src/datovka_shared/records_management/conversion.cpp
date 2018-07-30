@@ -23,6 +23,7 @@
 
 #include <QString>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/conversion.h"
 
 QList<qint64> createIdList(const QStringList &strList, bool *ok)
@@ -36,7 +37,7 @@ QList<qint64> createIdList(const QStringList &strList, bool *ok)
 			if (ok != Q_NULLPTR) {
 				*ok = false;
 			}
-			qCritical("Cannot convert '%s' into qint64.",
+			logErrorNL("Cannot convert '%s' into qint64.",
 			    str.toUtf8().constData());
 			return QList<qint64>();
 		}
@@ -44,7 +45,7 @@ QList<qint64> createIdList(const QStringList &strList, bool *ok)
 			if (ok != Q_NULLPTR) {
 				*ok = false;
 			}
-			qCritical("%s", "Received negative identifier.");
+			logErrorNL("%s", "Received negative identifier.");
 			return QList<qint64>();
 		}
 	}

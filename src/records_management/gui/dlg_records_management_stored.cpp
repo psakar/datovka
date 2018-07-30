@@ -25,9 +25,9 @@
 
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/datovka_shared/io/records_management_db.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_records_management_stored_messages.h"

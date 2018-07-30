@@ -26,8 +26,7 @@
 
 #include "src/cli/cli.h"
 #include "src/cli/cli_parser.h"
-#include "src/global.h"
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 
 int CLIParser::setupCmdLineParser(QCommandLineParser &parser)
 {

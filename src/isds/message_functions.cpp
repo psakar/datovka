@@ -31,9 +31,9 @@
 #include <isds.h>
 #include <QFile>
 
+#include "src/datovka_shared/log/log.h"
 #include "src/isds/message_conversion.h"
 #include "src/isds/message_functions.h"
-#include "src/log/log.h"
 
 Isds::Message Isds::messageFromData(const QByteArray &rawMsgData,
     enum LoadType zfoType)

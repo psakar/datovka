@@ -21,10 +21,10 @@
  * the two.
  */
 
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/io/isds_helper.h"
-#include "src/log/log.h"
 #include "src/worker/task_download_owner_info.h"
 #include "src/worker/task_download_password_info.h"
 #include "src/worker/task_download_user_info.h"

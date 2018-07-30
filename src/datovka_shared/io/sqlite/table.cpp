@@ -27,7 +27,7 @@
 #include <QVariant>
 
 #include "src/datovka_shared/io/sqlite/table.h"
-#include "src/log/log.h"
+#include "src/datovka_shared/log/log.h"
 
 SQLiteTbl::SQLiteTbl(const QString &name,
     const QVector< QPair<QString, enum EntryType> > &attrs,

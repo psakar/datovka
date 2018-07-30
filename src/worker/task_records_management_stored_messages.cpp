@@ -28,11 +28,11 @@
 #include <QThread>
 
 #include "src/datovka_shared/io/records_management_db.h"
+#include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/io/records_management_connection.h"
 #include "src/datovka_shared/records_management/json/entry_error.h"
 #include "src/datovka_shared/records_management/json/stored_files.h"
 #include "src/global.h"
-#include "src/log/log.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_records_management_stored_messages.h"
 
@@ -152,7 +152,7 @@ bool receivedRequestedContent(const StoredFilesResp &sfRes,
 		if (!sentDmIdSet.remove(entry.dmId())) {
 			logErrorNL(
 			    "Obtained response for message '%" PRId64 "'that has not been requested.",
-			    entry.dmId());
+			    UGLY_QINT64_CAST entry.dmId());
 			return false;
 		}
 	}
@@ -201,7 +201,7 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 		        entry.locations())) {
 			logErrorNL(
 			    "Could not update information about message '%" PRId64 "'.",
-			    entry.dmId());
+			    UGLY_QINT64_CAST entry.dmId());
 			goto fail;
 		}
 	}

@@ -313,6 +313,10 @@ SOURCES += \
     src/datovka_shared/isds/message_interface.cpp \
     src/datovka_shared/isds/type_conversion.cpp \
     src/datovka_shared/localisation/localisation.cpp \
+    src/datovka_shared/log/global.cpp \
+    src/datovka_shared/log/log.cpp \
+    src/datovka_shared/log/log_c.cpp \
+    src/datovka_shared/log/log_device.cpp \
     src/datovka_shared/records_management/conversion.cpp \
     src/datovka_shared/records_management/io/records_management_connection.cpp \
     src/datovka_shared/records_management/json/entry_error.cpp \
@@ -384,8 +388,6 @@ SOURCES += \
     src/isds/session.cpp \
     src/isds/to_text_conversion.cpp \
     src/isds/type_description.cpp \
-    src/log/log.cpp \
-    src/log/log_c.cpp \
     src/main.cpp \
     src/model_interaction/account_interaction.cpp \
     src/model_interaction/attachment_interaction.cpp \
@@ -465,6 +467,11 @@ HEADERS += \
     src/datovka_shared/isds/type_conversion.h \
     src/datovka_shared/isds/types.h \
     src/datovka_shared/localisation/localisation.h \
+    src/datovka_shared/log/global.h \
+    src/datovka_shared/log/log_c.h \
+    src/datovka_shared/log/log_common.h \
+    src/datovka_shared/log/log_device.h \
+    src/datovka_shared/log/log.h \
     src/datovka_shared/records_management/conversion.h \
     src/datovka_shared/records_management/io/records_management_connection.h \
     src/datovka_shared/records_management/json/entry_error.h \
@@ -535,9 +542,6 @@ HEADERS += \
     src/isds/session.h \
     src/isds/to_text_conversion.h \
     src/isds/type_description.h \
-    src/log/log_c.h \
-    src/log/log_common.h \
-    src/log/log.h \
     src/model_interaction/account_interaction.h \
     src/model_interaction/attachment_interaction.h \
     src/models/accounts_model.h \
