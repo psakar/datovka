@@ -282,6 +282,15 @@ private:
 	const char *urgencyPrefix(enum LogLevel level);
 
 	/*!
+	 * @brief Converts log level to urgency prefix.
+	 *
+	 * @param[in] level Urgency level.
+	 * @return Prefix string or null string on error.
+	 */
+	static
+	const QString &urgencyPrefixStr(enum LogLevel level);
+
+	/*!
 	 * @brief Converts message type to urgency level.
 	 *
 	 * @param[in] type Message type.
@@ -306,7 +315,7 @@ private:
 	 * @param[in] urgPrefix Urgency prefix.
 	 * @return Prefix string.
 	 */
-	QString buildPrefix(const char *urgPrefix) const;
+	QString buildPrefix(const QString &urgPrefix) const;
 
 	/*!
 	 * @brief Build log line postfix string. Its content depends on
