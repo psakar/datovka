@@ -24,6 +24,7 @@
 #include "src/datovka_shared/log/global.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/log/memory_log.h"
+#include "src/dimensions/dimensions.h"
 #include "src/gui/dlg_view_log.h"
 #include "ui_dlg_view_log.h"
 
@@ -40,6 +41,11 @@ DlgViewLog::DlgViewLog(QWidget *parent, Qt::WindowFlags flags)
 		    this, SLOT(handleNewMsg(quint64)));
 
 		fillLogContent();
+	}
+
+	{
+		const QRect dimensions(Dimensions::windowDimensions(this, 60, 30));
+		resize(dimensions.width(), dimensions.height());
 	}
 
 	m_ui->logTextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
