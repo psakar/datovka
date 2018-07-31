@@ -1252,12 +1252,11 @@ sent reply on this message</string>
    </property>
   </action>
   <action name="actionViewLog">
-   <property name="icon">
-    <iconset resource="../../../res/resources.qrc">
-     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
-   </property>
    <property name="text">
     <string>View log</string>
+   </property>
+   <property name="toolTip">
+    <string>View log content</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

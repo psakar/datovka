@@ -66,6 +66,11 @@ private:
 	 */
 	void appendNewMsg(const QString &msg);
 
+	/*!
+	 * @brief Fill with log content.
+	 */
+	void fillLogContent(void);
+
 	Ui::DlgViewLog *m_ui; /*!< UI generated from UI file. */
 
 	MemoryLog *m_memLog; /*!< Pointer to memory log. */

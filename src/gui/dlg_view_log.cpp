@@ -38,7 +38,14 @@ DlgViewLog::DlgViewLog(QWidget *parent, Qt::WindowFlags flags)
 	if (m_memLog != Q_NULLPTR) {
 		connect(m_memLog, SIGNAL(logged(quint64)),
 		    this, SLOT(handleNewMsg(quint64)));
+
+		fillLogContent();
 	}
+
+	/* Set fixed width font. */
+	QTextDocument *doc = m_ui->logTextEdit->document();
+	const QFont fixedFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+	doc->setDefaultFont(fixedFont);
 }
 
 DlgViewLog::~DlgViewLog(void)
@@ -58,7 +65,16 @@ void DlgViewLog::handleNewMsg(quint64 key)
 
 void DlgViewLog::appendNewMsg(const QString &msg)
 {
-	m_ui->plainTextEdit->moveCursor (QTextCursor::End);
-	m_ui->plainTextEdit->insertPlainText(msg);
-	m_ui->plainTextEdit->moveCursor (QTextCursor::End);
+	m_ui->logTextEdit->moveCursor(QTextCursor::End);
+	m_ui->logTextEdit->insertPlainText(msg);
+	m_ui->logTextEdit->moveCursor(QTextCursor::End);
+}
+
+void DlgViewLog::fillLogContent(void)
+{
+	const QList<quint64> keys(m_memLog->keys());
+
+	foreach (quint64 key, keys) {
+		appendNewMsg(m_memLog->message(key));
+	}
 }
