@@ -96,6 +96,7 @@ int main(int argc, char *argv[])
 
 	/* Memory log. */
 	MemoryLog memLog;
+	/* At least 2 or 3 maximum-sized (20 MB) ZFOs should fit into 80 MB. */
 	memLog.setMaxMemory(80 * 1024 * 1024);
 	GlobInstcs::logPtr->installMemoryLog(&memLog);
 
