@@ -25,9 +25,11 @@
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QHostInfo>
+#include <QStringBuilder>
 
 #include "src/datovka_shared/log/log_common.h"
 #include "src/datovka_shared/log/log_device.h"
+#include "src/datovka_shared/log/memory_log.h"
 
 static
 const QString logTimeFmt("MMM dd hh:mm:ss"); /*!< Format of time to be used in log output. */
@@ -39,6 +41,7 @@ const QRegExp trailingNewlineRegExp("(\r\n|\r|\n)$"); /*!< Trailing newline regu
 
 LogDevice::LogDevice(void)
     : m_handler(Q_NULLPTR),
+    m_memLog(Q_NULLPTR),
     m_usedSources(1),
     m_openedFiles(0),
     m_mutex(),
@@ -355,6 +358,33 @@ QtMessageHandler LogDevice::installMessageHandler(QtMessageHandler handler)
 	return oldHandler;
 }
 
+MemoryLog *LogDevice::installMemoryLog(MemoryLog *memLog)
+{
+	MemoryLog *oldMemLog;
+
+	m_mutex.lock();
+
+	oldMemLog = m_memLog;
+	m_memLog = memLog;
+
+	m_mutex.unlock();
+
+	return oldMemLog;
+}
+
+MemoryLog *LogDevice::memoryLog(void)
+{
+	MemoryLog *memLog;
+
+	m_mutex.lock();
+
+	memLog = m_memLog;
+
+	m_mutex.unlock();
+
+	return memLog;
+}
+
 const char *LogDevice::urgencyPrefix(enum LogLevel level)
 {
 	const char *prefix;
@@ -372,6 +402,31 @@ const char *LogDevice::urgencyPrefix(enum LogLevel level)
 	}
 
 	return prefix;
+}
+
+const QString &LogDevice::urgencyPrefixStr(enum LogLevel level)
+{
+	static const QString emergPref("emergency: ");
+	static const QString alertPref("alert: ");
+	static const QString critPref("critical: ");
+	static const QString errPref("error: ");
+	static const QString warnPref("warning: ");
+	static const QString noticPref("notice: ");
+	static const QString infoPref("info: ");
+	static const QString debugPref("debug: ");
+	static const QString nullStr;
+
+	switch (level) {
+	case LOG_EMERG:   return emergPref; break;
+	case LOG_ALERT:   return alertPref; break;
+	case LOG_CRIT:    return critPref;  break;
+	case LOG_ERR:     return errPref;   break;
+	case LOG_WARNING: return warnPref;  break;
+	case LOG_NOTICE:  return noticPref; break;
+	case LOG_INFO:    return infoPref;  break;
+	case LOG_DEBUG:   return debugPref; break;
+	default:          return nullStr;   break;
+	}
 }
 
 enum LogLevel LogDevice::levelFromType(enum QtMsgType type)
@@ -431,29 +486,23 @@ enum QtMsgType LogDevice::typeFromLevel(enum LogLevel level)
 	}
 }
 
-QString LogDevice::buildPrefix(const char *urgPrefix) const
+QString LogDevice::buildPrefix(const QString &urgPrefix) const
 {
-	QString msgPrefix;
-
-	if (m_logVerbosity > 1) {
-		msgPrefix = QDateTime::currentDateTime().toString(logTimeFmt);
-	}
 	if (m_logVerbosity > 2) {
-		msgPrefix += QStringLiteral(" ") + m_hostName +
-		    QStringLiteral(" ") + QCoreApplication::applicationName() +
-		    QStringLiteral("[") +
-		    QString::number(QCoreApplication::applicationPid()) +
-		    QStringLiteral("]");
+		return QDateTime::currentDateTime().toString(logTimeFmt) % /* 1 */
+		    QStringLiteral(" ") % m_hostName % QStringLiteral(" ") %
+		    QCoreApplication::applicationName() % QStringLiteral("[") %
+		    QString::number(QCoreApplication::applicationPid()) %
+		    QStringLiteral("]") %
+		    QStringLiteral(": ") % /* 1 */
+		    urgPrefix; /* 0 */
+	} else if (m_logVerbosity > 1) {
+		return QDateTime::currentDateTime().toString(logTimeFmt) % /* 1 */
+		    QStringLiteral(": ") % /* 1 */
+		    urgPrefix; /* 0 */
+	} else {
+		return urgPrefix; /* 0 */
 	}
-	if (m_logVerbosity > 1) {
-		msgPrefix += QStringLiteral(": ");
-	}
-
-	if (NULL != urgPrefix) {
-		msgPrefix += urgPrefix;
-	}
-
-	return msgPrefix;
 }
 
 QString LogDevice::buildPostfix(const QMessageLogContext &logCtx)
@@ -536,8 +585,8 @@ int LogDevice::logPrefixVlog(const QMessageLogContext &logCtx,
 	 * allocated.
 	 */
 
-	const char *urgPrefix = urgencyPrefix(level);
-	if (Q_UNLIKELY(urgPrefix == NULL)) {
+	const QString &urgPrefix(urgencyPrefixStr(level));
+	if (Q_UNLIKELY(urgPrefix.isNull())) {
 		return -1;
 	}
 
@@ -550,17 +599,21 @@ int LogDevice::logPrefixVlog(const QMessageLogContext &logCtx,
 	va_end(aq);
 	bool removed = removeTrailingNewline(msgFormatted);
 
-	msg = buildPrefix(urgPrefix) + msgFormatted;
 	if (m_logVerbosity > 0) {
-		msg += buildPostfix(logCtx);
+		msg = buildPrefix(urgPrefix) % msgFormatted % buildPostfix(logCtx);
 	}
 	if (removed) {
-		msg += QStringLiteral("\n");
+		msg = buildPrefix(urgPrefix) % msgFormatted % QStringLiteral("\n");
 	}
 
 	/* Message handler. */
 	if (m_handler != Q_NULLPTR) {
 		m_handler(typeFromLevel(level), logCtx, msgFormatted);
+	}
+
+	/* Memory log. */
+	if (m_memLog != Q_NULLPTR) {
+		m_memLog->log(msg);
 	}
 
 	logString(source, level, msg);
@@ -577,8 +630,8 @@ int LogDevice::logPrefixVlogMl(const QMessageLogContext &logCtx,
 	QStringList msgLines;
 	QString msg;
 
-	const char *urgPrefix = urgencyPrefix(level);
-	if (Q_UNLIKELY(urgPrefix == NULL)) {
+	const QString &urgPrefix(urgencyPrefixStr(level));
+	if (Q_UNLIKELY(urgPrefix.isNull())) {
 		return -1;
 	}
 
@@ -601,8 +654,14 @@ int LogDevice::logPrefixVlogMl(const QMessageLogContext &logCtx,
 	}
 
 	foreach (const QString &msgLine, msgLines) {
-		logString(source, level,
-		    msgPrefix + msgLine + QStringLiteral("\n"));
+		QString msg(msgPrefix % msgLine % QStringLiteral("\n"));
+
+		/* Memory log. */
+		if (m_memLog != Q_NULLPTR) {
+			m_memLog->log(msg);
+		}
+
+		logString(source, level, msg);
 	}
 
 	return 0;

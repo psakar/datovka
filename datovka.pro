@@ -317,6 +317,7 @@ SOURCES += \
     src/datovka_shared/log/log.cpp \
     src/datovka_shared/log/log_c.cpp \
     src/datovka_shared/log/log_device.cpp \
+    src/datovka_shared/log/memory_log.cpp \
     src/datovka_shared/records_management/conversion.cpp \
     src/datovka_shared/records_management/io/records_management_connection.cpp \
     src/datovka_shared/records_management/json/entry_error.cpp \
@@ -356,6 +357,7 @@ SOURCES += \
     src/gui/dlg_tag.cpp \
     src/gui/dlg_tags.cpp \
     src/gui/dlg_timestamp_expir.cpp \
+    src/gui/dlg_view_log.cpp \
     src/gui/dlg_view_zfo.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
     src/initialisation.cpp \
@@ -472,6 +474,7 @@ HEADERS += \
     src/datovka_shared/log/log_common.h \
     src/datovka_shared/log/log_device.h \
     src/datovka_shared/log/log.h \
+    src/datovka_shared/log/memory_log.h \
     src/datovka_shared/records_management/conversion.h \
     src/datovka_shared/records_management/io/records_management_connection.h \
     src/datovka_shared/records_management/json/entry_error.h \
@@ -511,6 +514,7 @@ HEADERS += \
     src/gui/dlg_tag.h \
     src/gui/dlg_tags.h \
     src/gui/dlg_timestamp_expir.h \
+    src/gui/dlg_view_log.h \
     src/gui/dlg_view_zfo.h \
     src/gui/dlg_yes_no_checkbox.h \
     src/initialisation.h \
@@ -616,6 +620,7 @@ FORMS += \
     src/gui/ui/dlg_tag.ui \
     src/gui/ui/dlg_tags.ui \
     src/gui/ui/dlg_timestamp_expir.ui \
+    src/gui/ui/dlg_view_log.ui \
     src/gui/ui/dlg_view_zfo.ui \
     src/records_management/ui/dlg_records_management.ui \
     src/records_management/ui/dlg_records_management_stored.ui \

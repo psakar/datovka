@@ -448,6 +448,8 @@ sent reply on this message</string>
     <addaction name="actionMsgAdvancedSearch"/>
     <addaction name="separator"/>
     <addaction name="actionTag_settings"/>
+    <addaction name="separator"/>
+    <addaction name="actionViewLog"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="layoutDirection">
@@ -1244,6 +1246,17 @@ sent reply on this message</string>
    </property>
    <property name="text">
     <string>Update records management information</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionViewLog">
+   <property name="text">
+    <string>View log</string>
+   </property>
+   <property name="toolTip">
+    <string>View log content</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

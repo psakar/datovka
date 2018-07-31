@@ -70,6 +70,7 @@
 #include "src/gui/dlg_preferences.h"
 #include "src/gui/dlg_proxysets.h"
 #include "src/gui/dlg_send_message.h"
+#include "src/gui/dlg_view_log.h"
 #include "src/gui/dlg_view_zfo.h"
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_import_zfo_result.h"
@@ -310,6 +311,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_lastStoredMessageId(-1),
     m_lastSelectedAccountNodeType(AccountModel::nodeUnknown),
     m_lastStoredAccountNodeType(AccountModel::nodeUnknown),
+    m_viewLogDlg(Q_NULLPTR),
     m_searchDlgActive(false),
     m_colWidthRcvd(COL_WIDTH_COUNT),
     m_colWidthSnt(COL_WIDTH_COUNT),
@@ -4048,6 +4050,9 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionTag_settings, SIGNAL(triggered()),
 	    this, SLOT(showTagDialog()));
+	    /* Separator. */
+	connect(ui->actionViewLog, SIGNAL(triggered()),
+	    this, SLOT(viewLogDlg()));
 
 	/* Help. */
 	connect(ui->actionAbout_Datovka, SIGNAL(triggered()),
@@ -7064,6 +7069,41 @@ void MainWindow::messageItemsSetProcessStatus(
 	 * affected account.
 	 */
 	updateExistingAccountModelUnread(currentAccountModelIndex());
+}
+
+void MainWindow::viewLogDlg(void)
+{
+	debugSlotCall();
+
+	if (m_viewLogDlg != Q_NULLPTR) {
+		if (!m_viewLogDlg->isMinimized()) {
+			m_viewLogDlg->show();
+		} else {
+			m_viewLogDlg->showNormal();
+		}
+		m_viewLogDlg->raise();
+		m_viewLogDlg->activateWindow();
+		return;
+	}
+
+	m_viewLogDlg = new (std::nothrow) DlgViewLog(this, Qt::Window);
+	if (Q_UNLIKELY(m_viewLogDlg == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+	connect(m_viewLogDlg, SIGNAL(finished(int)),
+	    this, SLOT(viewLogDlgClosed(int)));
+	m_viewLogDlg->show();
+}
+
+void MainWindow::viewLogDlgClosed(int result)
+{
+	Q_UNUSED(result);
+	debugSlotCall();
+
+	m_viewLogDlg->setAttribute(Qt::WA_DeleteOnClose, true);
+	m_viewLogDlg->deleteLater();
+	m_viewLogDlg = Q_NULLPTR;
 }
 
 void MainWindow::showMsgAdvancedSearchDialog(void)

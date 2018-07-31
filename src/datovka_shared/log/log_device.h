@@ -40,6 +40,8 @@
  */
 #define MAX_SOURCES 64
 
+class MemoryLog; /* Forward declaration. */
+
 /*!
  * @brief Logging device class.
  */
@@ -240,8 +242,23 @@ public:
 	 */
 	QtMessageHandler installMessageHandler(QtMessageHandler handler);
 
+	/*!
+	 * @brief Installs additional memory log. This device may be needed
+	 *     for viewing the log content form inside the application.
+	 *
+	 * @param[in] memLog Memory log device.
+	 * @return Previously installed memory log device.
+	 */
+	MemoryLog *installMemoryLog(MemoryLog *memLog);
+
+	/*!
+	 * @brief get pointer of installed memory log.
+	 */
+	MemoryLog *memoryLog(void);
+
 private:
 	QtMessageHandler m_handler; /*!< Additional message handler. */
+	MemoryLog *m_memLog; /*!< Log message memory storage. */
 
 	FacDesc m_facDescVect[MAX_LOG_FILES]; /*!< Facility vector. */
 	int m_usedSources; /*!<
@@ -263,6 +280,15 @@ private:
 	 */
 	static
 	const char *urgencyPrefix(enum LogLevel level);
+
+	/*!
+	 * @brief Converts log level to urgency prefix.
+	 *
+	 * @param[in] level Urgency level.
+	 * @return Prefix string or null string on error.
+	 */
+	static
+	const QString &urgencyPrefixStr(enum LogLevel level);
 
 	/*!
 	 * @brief Converts message type to urgency level.
@@ -289,7 +315,7 @@ private:
 	 * @param[in] urgPrefix Urgency prefix.
 	 * @return Prefix string.
 	 */
-	QString buildPrefix(const char *urgPrefix) const;
+	QString buildPrefix(const QString &urgPrefix) const;
 
 	/*!
 	 * @brief Build log line postfix string. Its content depends on

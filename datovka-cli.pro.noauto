@@ -107,6 +107,7 @@ SOURCES += \
 	src/datovka_shared/log/log.cpp \
 	src/datovka_shared/log/log_c.cpp \
 	src/datovka_shared/log/log_device.cpp \
+	src/datovka_shared/log/memory_log.cpp \
 	src/datovka_shared/settings/pin.cpp \
 	src/datovka_shared/settings/records_management.cpp \
 	src/datovka_shared/utility/strings.cpp \
@@ -187,6 +188,7 @@ HEADERS += \
 	src/datovka_shared/log/log_common.h \
 	src/datovka_shared/log/log_device.h \
 	src/datovka_shared/log/log.h \
+	src/datovka_shared/log/memory_log.h \
 	src/datovka_shared/settings/pin.h \
 	src/datovka_shared/settings/records_management.h \
 	src/datovka_shared/utility/strings.h \
