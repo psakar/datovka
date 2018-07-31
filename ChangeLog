@@ -1,4 +1,9 @@
 4.11.0 /
+ * Sharing log device code with mobile application.
+ * Most recent log entries are held in memory and can be displayed directly in
+   the application.
+ * Fixed a potential bug when writing version of the used OpenSSL library into
+   application log.
  * The received message table displays an icon if the received message is a
    personal delivery.
  * The search-related account can be changed directly in the message search
