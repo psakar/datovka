@@ -42,6 +42,8 @@ DlgViewLog::DlgViewLog(QWidget *parent, Qt::WindowFlags flags)
 		fillLogContent();
 	}
 
+	m_ui->logTextEdit->setLineWrapMode(QPlainTextEdit::NoWrap);
+
 	/* Set fixed width font. */
 	QTextDocument *doc = m_ui->logTextEdit->document();
 	const QFont fixedFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
