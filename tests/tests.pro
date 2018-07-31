@@ -58,6 +58,7 @@ SOURCES = \
 	$${top_srcdir}src/datovka_shared/log/log.cpp \
 	$${top_srcdir}src/datovka_shared/log/log_c.cpp \
 	$${top_srcdir}src/datovka_shared/log/log_device.cpp \
+	$${top_srcdir}src/datovka_shared/log/memory_log.cpp \
 	$${top_srcdir}src/global.cpp \
 	$${top_srcdir}tests/helper.c \
 	$${top_srcdir}tests/helper_qt.cpp \
@@ -69,6 +70,7 @@ HEADERS = \
 	$${top_srcdir}src/datovka_shared/log/log_common.h \
 	$${top_srcdir}src/datovka_shared/log/log_device.h \
 	$${top_srcdir}src/datovka_shared/log/log.h \
+	$${top_srcdir}src/datovka_shared/log/memory_log.h \
 	$${top_srcdir}src/global.h \
 	$${top_srcdir}tests/helper.h \
 	$${top_srcdir}tests/helper_qt.h
