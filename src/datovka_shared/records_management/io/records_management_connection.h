@@ -115,6 +115,27 @@ private:
 	QNetworkReply *sendRequest(const QNetworkRequest &request,
 	    const QByteArray &data);
 
+	/*!
+	 * @brief Blocks until all data are sent and received or until timed out.
+	 *
+	 * @note The reply is aborted when it times out. In this case the reply
+	 *     is not deleted.
+	 *
+	 * @param[in,out] reply Communication context.
+	 * @param[in]     timeOut Communication timeout.
+	 * @return True if all data have been received,
+	 *     false if communication timed out.
+	 */
+	static
+	bool waitReplyFinished(QNetworkReply *reply, unsigned int timeOut);
+
+	/*!
+	 * @brief Process reply data.
+	 *
+	 * @param[in,out] reply Obtained reply.
+	 * @param[out]    replyData Obtained reply data.
+	 * @return True on success, false on error.
+	 */
 	static
 	bool processReply(QNetworkReply *reply, QByteArray &replyData);
 
