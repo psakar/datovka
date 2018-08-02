@@ -39,19 +39,6 @@ extern "C" {
 struct x509_crt;
 
 /*!
- * @brief Holds locations of the CRL files.
- */
-struct crl_location {
-	const char *file_name; /*!< CRL file name. */
-	const char **urls; /*!< NULL-terminated list of URLs. */
-};
-
-/*!
- * @brief NULL-terminated list of CRL files.
- */
-extern const struct crl_location crl_locations[];
-
-/*!
  * @brief Certificate issuer information.
  */
 struct crt_issuer_info {
