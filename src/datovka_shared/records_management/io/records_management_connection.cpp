@@ -105,7 +105,7 @@ void RecordsManagementConnection::setConnection(const QString &baseUrl,
 }
 
 bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
-    const QByteArray &requestData, QByteArray &replyData)
+    const QByteArray &requestData, QByteArray &replyData, QObject *cbObj)
 {
 	debugFuncCall();
 
@@ -116,7 +116,25 @@ bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
 		return false;
 	}
 
+	if (cbObj != Q_NULLPTR) {
+		connect(cbObj, SIGNAL(callAbort()), reply, SLOT(abort()));
+
+		connect(reply, SIGNAL(downloadProgress(qint64, qint64)),
+		    cbObj, SLOT(onDownloadProgress(qint64, qint64)));
+		connect(reply, SIGNAL(uploadProgress(qint64, qint64)),
+		    cbObj, SLOT(onUploadProgress(qint64, qint64)));
+	}
+
 	bool retVal = waitReplyFinished(reply, m_timeOut);
+
+	if (cbObj != Q_NULLPTR) {
+		cbObj->disconnect(SIGNAL(callAbort()), reply, SLOT(abort()));
+
+		reply->disconnect(SIGNAL(downloadProgress(qint64, qint64)),
+		    cbObj, SLOT(onDownloadProgress(qint64, qint64)));
+		reply->disconnect(SIGNAL(uploadProgress(qint64, qint64)),
+		    cbObj, SLOT(onUploadProgress(qint64, qint64)));
+	}
 
 	logDebugLv0NL("Loop exited, reply finished: %d", reply->isFinished());
 	QList<QByteArray> headerList(reply->rawHeaderList());
