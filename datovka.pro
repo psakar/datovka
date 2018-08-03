@@ -625,7 +625,7 @@ FORMS += \
     src/gui/ui/dlg_view_log.ui \
     src/gui/ui/dlg_view_zfo.ui \
     src/records_management/ui/dlg_records_management.ui \
-    src/records_management/ui/dlg_records_management_stored.ui \
+    src/records_management/ui/dlg_records_management_progress.ui \
     src/records_management/ui/dlg_records_management_upload.ui
 
 RESOURCES += \
