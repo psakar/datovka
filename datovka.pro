@@ -298,6 +298,7 @@ SOURCES += \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
     src/crypto/crypto_version.cpp \
+    src/datovka_shared/crypto/crypto_trusted_certs.c \
     src/datovka_shared/crypto/crypto_pin.c \
     src/datovka_shared/crypto/crypto_pwd.c \
     src/datovka_shared/crypto/crypto_wrapped.cpp \
@@ -453,6 +454,7 @@ HEADERS += \
     src/crypto/crypto_funcs.h \
     src/crypto/crypto_threads.h \
     src/crypto/crypto_version.h \
+    src/datovka_shared/crypto/crypto_trusted_certs.h \
     src/datovka_shared/crypto/crypto_pin.h \
     src/datovka_shared/crypto/crypto_pwd.h \
     src/datovka_shared/crypto/crypto_wrapped.h \

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ static
 int pbkdf2_sha256_func(const void *in, size_t in_len,
     const void *salt, size_t salt_len, int iter, void *out, size_t out_len)
 {
-	if ((in_len > INT_MAX) || (in_len > INT_MAX) || (out_len > INT_MAX)) {
+	if ((in_len > INT_MAX) || (salt_len > INT_MAX) || (out_len > INT_MAX)) {
 		/*
 		 * These arguments are passes as int into underlying function.
 		 */
