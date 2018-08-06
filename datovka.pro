@@ -405,6 +405,7 @@ SOURCES += \
     src/records_management/gui/dlg_records_management.cpp \
     src/records_management/gui/dlg_records_management_stored.cpp \
     src/records_management/gui/dlg_records_management_upload.cpp \
+    src/records_management/gui/dlg_records_management_upload_progress.cpp \
     src/records_management/models/upload_hierarchy_model.cpp \
     src/records_management/widgets/svg_view.cpp \
     src/settings/account.cpp \
@@ -561,6 +562,7 @@ HEADERS += \
     src/records_management/gui/dlg_records_management.h \
     src/records_management/gui/dlg_records_management_stored.h \
     src/records_management/gui/dlg_records_management_upload.h \
+    src/records_management/gui/dlg_records_management_upload_progress.h \
     src/records_management/models/upload_hierarchy_model.h \
     src/records_management/widgets/svg_view.h \
     src/settings/account.h \
@@ -625,7 +627,7 @@ FORMS += \
     src/gui/ui/dlg_view_log.ui \
     src/gui/ui/dlg_view_zfo.ui \
     src/records_management/ui/dlg_records_management.ui \
-    src/records_management/ui/dlg_records_management_stored.ui \
+    src/records_management/ui/dlg_records_management_progress.ui \
     src/records_management/ui/dlg_records_management_upload.ui
 
 RESOURCES += \

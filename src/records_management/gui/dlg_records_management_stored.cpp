@@ -31,7 +31,7 @@
 #include "src/records_management/gui/dlg_records_management_stored.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_records_management_stored_messages.h"
-#include "ui_dlg_records_management_stored.h"
+#include "ui_dlg_records_management_progress.h"
 
 #define LOGO_EDGE 64
 
@@ -43,7 +43,7 @@
 DlgRecordsManagementStored::DlgRecordsManagementStored(const QString &urlStr,
     const QString &tokenStr, const QList<AcntData> &accounts, QWidget *parent)
     : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgRecordsManagementStored),
+    m_ui(new (std::nothrow) Ui::DlgRecordsManagementProgress),
     m_url(urlStr),
     m_token(tokenStr),
     m_accounts(accounts),
@@ -55,6 +55,7 @@ DlgRecordsManagementStored::DlgRecordsManagementStored(const QString &urlStr,
 	Q_ASSERT(!m_token.isEmpty());
 
 	m_ui->setupUi(this);
+	setWindowTitle(tr("Records Management Stored Messages"));
 
 	/* Just to make the progress bar stationary. */
 	m_ui->taskLabel->setText(QStringLiteral("\n"));

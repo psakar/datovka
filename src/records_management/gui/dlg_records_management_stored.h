@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_RECORDS_MANAGEMENT_STORED_H_
-#define _DLG_RECORDS_MANAGEMENT_STORED_H_
+#pragma once
 
 #include <QDialog>
 #include <QList>
@@ -31,7 +30,7 @@
 #include "src/datovka_shared/settings/records_management.h"
 
 namespace Ui {
-	class DlgRecordsManagementStored;
+	class DlgRecordsManagementProgress;
 }
 
 class MessageDbSet; /* Forward declaration. */
@@ -115,7 +114,7 @@ private:
 	 */
 	void loadRecordsManagementPixmap(int width);
 
-	Ui::DlgRecordsManagementStored *m_ui; /*!< UI generated from UI file. */
+	Ui::DlgRecordsManagementProgress *m_ui; /*!< UI generated from UI file. */
 
 	const QString m_url; /*!< Records management service URL. */
 	const QString m_token; /*!< Records management service access token. */
@@ -126,5 +125,3 @@ private:
 
 	bool m_cancel; /*!< Set by slot to cancel loop. */
 };
-
-#endif /* _DLG_RECORDS_MANAGEMENT_STORED_H_ */

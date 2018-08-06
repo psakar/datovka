@@ -105,7 +105,7 @@ void RecordsManagementConnection::setConnection(const QString &baseUrl,
 }
 
 bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
-    const QByteArray &requestData, QByteArray &replyData)
+    const QByteArray &requestData, QByteArray &replyData, QObject *cbObj)
 {
 	debugFuncCall();
 
@@ -116,14 +116,25 @@ bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
 		return false;
 	}
 
-	/* Set timeout timer */
-	QTimer timer;
-	timer.setSingleShot(true);
-	QEventLoop eventLoop;
-	connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
-	connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-	timer.start(m_timeOut);
-	eventLoop.exec();
+	if (cbObj != Q_NULLPTR) {
+		connect(cbObj, SIGNAL(callAbort()), reply, SLOT(abort()));
+
+		connect(reply, SIGNAL(downloadProgress(qint64, qint64)),
+		    cbObj, SLOT(onDownloadProgress(qint64, qint64)));
+		connect(reply, SIGNAL(uploadProgress(qint64, qint64)),
+		    cbObj, SLOT(onUploadProgress(qint64, qint64)));
+	}
+
+	bool retVal = waitReplyFinished(reply, m_timeOut);
+
+	if (cbObj != Q_NULLPTR) {
+		cbObj->disconnect(SIGNAL(callAbort()), reply, SLOT(abort()));
+
+		reply->disconnect(SIGNAL(downloadProgress(qint64, qint64)),
+		    cbObj, SLOT(onDownloadProgress(qint64, qint64)));
+		reply->disconnect(SIGNAL(uploadProgress(qint64, qint64)),
+		    cbObj, SLOT(onUploadProgress(qint64, qint64)));
+	}
 
 	logDebugLv0NL("Loop exited, reply finished: %d", reply->isFinished());
 	QList<QByteArray> headerList(reply->rawHeaderList());
@@ -136,21 +147,14 @@ bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
 		}
 	}
 
-	bool retVal = false;
 	replyData.clear();
 
-	if (timer.isActive()) {
-		timer.stop();
+	if (retVal) {
+		/* Finished successfully. */
 		retVal = processReply(reply, replyData);
 		if (!retVal && (Q_NULLPTR != reply)) {
 			emit connectionError(reply->errorString());
 		}
-	} else {
-		/* Timeout expired. */
-		disconnect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-		logErrorNL("%s",
-		    "Connection timed out. Check your internet connection.");
-		reply->abort();
 	}
 
 	reply->deleteLater(); reply = Q_NULLPTR;
@@ -291,6 +295,37 @@ QNetworkReply *RecordsManagementConnection::sendRequest(
 	}
 
 	return reply;
+}
+
+bool RecordsManagementConnection::waitReplyFinished(QNetworkReply *reply,
+    unsigned int timeOut)
+{
+	if (Q_UNLIKELY(reply == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	/* Set timeout timer */
+	QTimer timer;
+	timer.setSingleShot(true);
+	QEventLoop eventLoop;
+	connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
+	connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+	timer.start(timeOut);
+	eventLoop.exec();
+
+	if (timer.isActive()) {
+		timer.stop();
+		return true;
+	} else {
+		/* Timeout expired. */
+		disconnect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+		logErrorNL("%s",
+		    "Connection timed out. Check your internet connection.");
+		reply->abort();
+	}
+
+	return false;
 }
 
 bool RecordsManagementConnection::processReply(QNetworkReply *reply,

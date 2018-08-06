@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>DlgRecordsManagementStored</class>
- <widget class="QDialog" name="DlgRecordsManagementStored">
+ <class>DlgRecordsManagementProgress</class>
+ <widget class="QDialog" name="DlgRecordsManagementProgress">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -9,9 +9,6 @@
     <width>400</width>
     <height>120</height>
    </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Records Management Stored Messages</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>

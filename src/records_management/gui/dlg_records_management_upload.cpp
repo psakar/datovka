@@ -33,6 +33,7 @@
 #include "src/global.h"
 #include "src/models/sort_filter_proxy_model.h"
 #include "src/records_management/gui/dlg_records_management_upload.h"
+#include "src/records_management/gui/dlg_records_management_upload_progress.h"
 #include "ui_dlg_records_management_upload.h"
 
 #define LOGO_EDGE 64
@@ -288,8 +289,15 @@ bool DlgRecordsManagementUpload::uploadFile(RecordsManagementConnection &rmc,
 
 	QByteArray response;
 
-	if (rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_FILE,
-	        ufReq.toJson(), response)) {
+	DlgRecordsManagementUploadProgress progressDlg(dmId, parent);
+	progressDlg.show();
+
+	bool res = rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_FILE,
+	    ufReq.toJson(), response, &progressDlg);
+
+	progressDlg.hide();
+
+	if (res) {
 		if (!response.isEmpty()) {
 			bool ok = false;
 			UploadFileResp ufRes(
