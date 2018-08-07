@@ -14,6 +14,7 @@ LIBS += \
 SOURCES += \
 	$${top_srcdir}src/common.cpp \
 	$${top_srcdir}src/crypto/crypto.c \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_trusted_certs.c \
 	$${top_srcdir}src/datovka_shared/isds/account_interface.cpp \
 	$${top_srcdir}src/datovka_shared/isds/box_interface.cpp \
 	$${top_srcdir}src/datovka_shared/isds/error.cpp \
@@ -44,6 +45,7 @@ HEADERS += \
 	$${top_srcdir}src/common.h \
 	$${top_srcdir}src/crypto/crypto.h \
 	$${top_srcdir}src/crypto/crypto_funcs.h \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_trusted_certs.h \
 	$${top_srcdir}src/datovka_shared/isds/account_interface.h \
 	$${top_srcdir}src/datovka_shared/isds/box_interface.h \
 	$${top_srcdir}src/datovka_shared/isds/error.h \

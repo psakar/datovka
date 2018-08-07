@@ -18,6 +18,7 @@ SOURCES += \
 	$${top_srcdir}src/crypto/crypto.c \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.c \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.c \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_trusted_certs.c \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.cpp \
 	$${top_srcdir}src/datovka_shared/graphics/graphics.cpp \
 	$${top_srcdir}src/datovka_shared/io/records_management_db.cpp \
@@ -72,6 +73,7 @@ HEADERS += \
 	$${top_srcdir}src/crypto/crypto_funcs.h \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pin.h \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_pwd.h \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_trusted_certs.h \
 	$${top_srcdir}src/datovka_shared/crypto/crypto_wrapped.h \
 	$${top_srcdir}src/datovka_shared/graphics/graphics.h \
 	$${top_srcdir}src/datovka_shared/io/records_management_db.h \

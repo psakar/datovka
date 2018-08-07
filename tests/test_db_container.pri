@@ -15,6 +15,7 @@ LIBS += \
 SOURCES += \
 	$${top_srcdir}src/common.cpp \
 	$${top_srcdir}src/crypto/crypto.c \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_trusted_certs.c \
 	$${top_srcdir}src/datovka_shared/graphics/graphics.cpp \
 	$${top_srcdir}src/datovka_shared/io/records_management_db.cpp \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db.cpp \
@@ -44,6 +45,7 @@ HEADERS += \
 	$${top_srcdir}src/common.h \
 	$${top_srcdir}src/crypto/crypto.h \
 	$${top_srcdir}src/crypto/crypto_funcs.h \
+	$${top_srcdir}src/datovka_shared/crypto/crypto_trusted_certs.h \
 	$${top_srcdir}src/datovka_shared/graphics/graphics.h \
 	$${top_srcdir}src/datovka_shared/io/records_management_db.h \
 	$${top_srcdir}src/datovka_shared/io/sqlite/db.h \
