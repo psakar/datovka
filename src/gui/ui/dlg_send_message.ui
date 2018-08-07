@@ -723,10 +723,11 @@ of postal data messages active.</string>
     <widget class="QCheckBox" name="immDownloadCheckBox">
      <property name="toolTip">
       <string>The complete sent message is going to be downloaded together with
-all necessary digital signatures.
+all necessary digital signatures immediately after it has been successfully
+accepted by the ISDS system.
 
 Downloading the content of the sent message won't cause the acceptance
-any delivered message.</string>
+of any delivered message.</string>
      </property>
      <property name="text">
       <string>Immediately download sent message content</string>
@@ -736,7 +737,7 @@ any delivered message.</string>
    <item>
     <widget class="QCheckBox" name="immRecMgmtUploadCheckBox">
      <property name="toolTip">
-      <string>Before uploading the newly sent message into the document service
+      <string>Before uploading the newly sent message into the records management service
 the application needs to download the newly sent message from
 the ISDS server. This is because the application needs to acquire all
 necessary digital signatures.</string>
