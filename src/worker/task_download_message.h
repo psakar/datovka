@@ -55,10 +55,12 @@ public:
 	 * @param[in]     msgId         Message identifier.
 	 * @param[in]     listScheduled True if the task has been scheduled
 	 *                              from TaskDownloadMessageList.
+	 * @param[in]     processFlags Message processing flags.
 	 */
 	explicit TaskDownloadMessage(const QString &userName,
 	    MessageDbSet *dbSet, enum MessageDirection msgDirect,
-	    const MessageDb::MsgId &msgId, bool listScheduled);
+	    const MessageDb::MsgId &msgId, bool listScheduled,
+	    int processFlags = Task::PROC_NOTHING);
 
 	/*!
 	 * @brief Performs actual message download.
@@ -158,6 +160,7 @@ private:
 	                       * Whether the task has been scheduled from
 	                       * download message list task.
 	                       */
+	const int m_processFlags; /*!< Message processing flags. */
 };
 
 #endif /* _TASK_DOWNLOAD_MESSAGE_H_ */

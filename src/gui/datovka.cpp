@@ -356,9 +356,9 @@ MainWindow::MainWindow(QWidget *parent)
 	/* Worker-related processing signals. */
 	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(downloadMessageFinished(QString, qint64, QDateTime, int,
-	        QString, bool)), this,
+	        QString, bool, int)), this,
 	    SLOT(collectDownloadMessageStatus(QString, qint64, QDateTime, int,
-	        QString, bool)));
+	        QString, bool, int)));
 	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(downloadMessageListFinished(QString, int, int, QString,
 	        bool, int, int, int, int)), this,
@@ -2179,7 +2179,7 @@ void MainWindow::backgroundWorkersFinished(void)
 
 void MainWindow::collectDownloadMessageStatus(const QString &usrName,
     qint64 msgId, const QDateTime &deliveryTime, int result,
-    const QString &errDesc, bool listScheduled)
+    const QString &errDesc, bool listScheduled, int processFlags)
 {
 	debugSlotCall();
 
@@ -2211,6 +2211,11 @@ void MainWindow::collectDownloadMessageStatus(const QString &usrName,
 			showStatusTextWithTimeout(
 			    tr("Couldn't download message '%1'.").arg(msgId));
 		}
+	}
+
+	if ((TaskDownloadMessage::DM_SUCCESS == result) &&
+	    (processFlags & Task::PROC_IMM_RM_UPLOAD)) {
+		sendMessageToRecordsManagement(usrName, MessageDb::MsgId(msgId, deliveryTime));
 	}
 }
 
@@ -2370,12 +2375,14 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 
 	clearProgressBar();
 
-	if (processFlags & Task::PROC_IMM_DOWNLOAD) {
+	if ((TaskSendMessage::SM_SUCCESS == result) &&
+	    (processFlags & Task::PROC_IMM_DOWNLOAD)) {
 		/* Schedule message download. */
 		TaskDownloadMessage *task =
 		    new (std::nothrow) TaskDownloadMessage(
 		        userName, accountDbSet(userName), MSG_SENT,
-		        MessageDb::MsgId(dmId, QDateTime()), false);
+		        MessageDb::MsgId(dmId, QDateTime()), false,
+		        processFlags & ~Task::PROC_IMM_DOWNLOAD);
 		if (Q_UNLIKELY(task == Q_NULLPTR)) {
 			Q_ASSERT(0);
 			return;
@@ -5401,6 +5408,63 @@ void MainWindow::showImportDatabaseDialog(void)
 	ui->accountList->expandAll();
 }
 
+void MainWindow::sendMessageToRecordsManagement(const QString &userName,
+    MessageDb::MsgId msgId)
+{
+	if (Q_UNLIKELY(userName.isEmpty() || (msgId.dmId < 0))) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
+	    false);
+	if (Q_NULLPTR == messageDb) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QByteArray msgRaw(messageDb->getCompleteMessageRaw(msgId.dmId));
+	if (msgRaw.isEmpty()) {
+
+		if (!messageMissingOfferDownload(msgId,
+		        tr("Message export error!"))) {
+			return;
+		}
+
+		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
+		if (Q_NULLPTR == messageDb) {
+			Q_ASSERT(0);
+			logErrorNL(
+			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
+			    UGLY_QINT64_CAST msgId.dmId);
+			return;
+		}
+
+		msgRaw = messageDb->getCompleteMessageRaw(msgId.dmId);
+		if (msgRaw.isEmpty()) {
+			Q_ASSERT(0);
+			return;
+		}
+	}
+
+	/* Show send to records management dialogue. */
+	DlgRecordsManagementUpload::uploadMessage(*GlobInstcs::recMgmtSetPtr,
+	    msgId.dmId,
+	    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId),
+	    msgRaw, this);
+
+	QList<qint64> msgIdList;
+	msgIdList.append(msgId.dmId);
+
+	m_messageTableModel.refillRecordsManagementColumn(msgIdList,
+	    DbMsgsTblModel::RECMGMT_NEG_COL);
+}
+
 /* ========================================================================= */
 /*
  * Authenticate message from ZFO file.
@@ -6405,53 +6469,7 @@ void MainWindow::sendSelectedMessageToRecordsManagement(void)
 	MessageDb::MsgId msgId(msgMsgId(msgIndex));
 	Q_ASSERT(msgId.dmId >= 0);
 
-	MessageDbSet *dbSet = accountDbSet(userName);
-	if (Q_NULLPTR == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-	MessageDb *messageDb = dbSet->accessMessageDb(msgId.deliveryTime,
-	    false);
-	if (Q_NULLPTR == messageDb) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	QByteArray msgRaw(messageDb->getCompleteMessageRaw(msgId.dmId));
-	if (msgRaw.isEmpty()) {
-
-		if (!messageMissingOfferDownload(msgId,
-		        tr("Message export error!"))) {
-			return;
-		}
-
-		messageDb = dbSet->accessMessageDb(msgId.deliveryTime, false);
-		if (Q_NULLPTR == messageDb) {
-			Q_ASSERT(0);
-			logErrorNL(
-			    "Could not access database of freshly downloaded message '%" PRId64 "'.",
-			    UGLY_QINT64_CAST msgId.dmId);
-			return;
-		}
-
-		msgRaw = messageDb->getCompleteMessageRaw(msgId.dmId);
-		if (msgRaw.isEmpty()) {
-			Q_ASSERT(0);
-			return;
-		}
-	}
-
-	/* Show send to records management dialogue. */
-	DlgRecordsManagementUpload::uploadMessage(*GlobInstcs::recMgmtSetPtr,
-	    msgId.dmId,
-	    QString("%1_%2.zfo").arg(dzPrefix(messageDb, msgId.dmId)).arg(msgId.dmId),
-	    msgRaw, this);
-
-	QList<qint64> msgIdList;
-	msgIdList.append(msgId.dmId);
-
-	m_messageTableModel.refillRecordsManagementColumn(msgIdList,
-	    DbMsgsTblModel::RECMGMT_NEG_COL);
+	sendMessageToRecordsManagement(userName, msgId);
 }
 
 void MainWindow::showSignatureDetailsDialog(void)

@@ -43,10 +43,11 @@ signals:
 	 *                          (enum TaskDownloadMessage::Result).
 	 * @param[in] errDesc       Error description string.
 	 * @param[in] listScheduled True if ran from download message list.
+	 * @param[in] processFlags Message processing flags.
 	 */
 	void downloadMessageFinished(const QString &usrName, qint64 msgId,
 	   const QDateTime &deliveryTime, int result, const QString &errDesc,
-	   bool listScheduled);
+	   bool listScheduled, int processFlags);
 
 	/*!
 	 * @brief Emitted when download message finishes.

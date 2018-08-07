@@ -39,7 +39,7 @@
 
 TaskDownloadMessage::TaskDownloadMessage(const QString &userName,
     MessageDbSet *dbSet, enum MessageDirection msgDirect,
-    const MessageDb::MsgId &msgId, bool listScheduled)
+    const MessageDb::MsgId &msgId, bool listScheduled, int processFlags)
     : m_result(DM_ERR),
     m_isdsError(),
     m_isdsLongError(),
@@ -47,7 +47,8 @@ TaskDownloadMessage::TaskDownloadMessage(const QString &userName,
     m_userName(userName),
     m_dbSet(dbSet),
     m_msgDirect(msgDirect),
-    m_listScheduled(listScheduled)
+    m_listScheduled(listScheduled),
+    m_processFlags(processFlags)
 {
 	Q_ASSERT(0 != dbSet);
 	Q_ASSERT(0 <= msgId.dmId);
@@ -105,7 +106,7 @@ void TaskDownloadMessage::run(void)
 	    m_mId.dmId, m_mId.deliveryTime, m_result,
 	    (!m_isdsError.isEmpty() || !m_isdsLongError.isEmpty()) ?
 	        m_isdsError + " " + m_isdsLongError : "",
-	    m_listScheduled);
+	    m_listScheduled, m_processFlags);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 
