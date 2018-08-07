@@ -720,6 +720,19 @@ of postal data messages active.</string>
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="recMgmtUploadCheckBox">
+     <property name="toolTip">
+      <string>Before uploading the newly sent message into the document service
+the application needs to download the newly sent message from
+the ISDS server. This is because the application needs to acquire all
+necessary digital signatures.</string>
+     </property>
+     <property name="text">
+      <string>Upload sent message immediatelly into records management service.</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QLabel" name="attachmentSizeInfo">
@@ -810,6 +823,7 @@ of postal data messages active.</string>
   <tabstop>addAttachButton</tabstop>
   <tabstop>removeAttachButton</tabstop>
   <tabstop>openAttachButton</tabstop>
+  <tabstop>recMgmtUploadCheckBox</tabstop>
   <tabstop>sendButton</tabstop>
   <tabstop>cancelButton</tabstop>
   <tabstop>fromComboBox</tabstop>

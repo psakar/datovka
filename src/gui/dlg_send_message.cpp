@@ -34,6 +34,7 @@
 #include "src/datovka_shared/isds/types.h"
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/log/log.h"
+#include "src/datovka_shared/settings/records_management.h"
 #include "src/datovka_shared/utility/strings.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
@@ -167,6 +168,9 @@ void DlgSendMessage::checkInputFields(void)
 		/* cannot send message when not logged in. */
 		m_ui->sendButton->setEnabled(false);
 	}
+
+	/* Enable only when sending a message to a single recipient. */
+	m_ui->recMgmtUploadCheckBox->setEnabled(m_recipTableModel.rowCount() <= 1);
 }
 
 void DlgSendMessage::addRecipientFromLocalContact(void)
@@ -635,6 +639,9 @@ void DlgSendMessage::initContent(enum Action action,
 
 	m_ui->prepaidReplyLabel->setEnabled(false);
 	m_ui->prepaidReplyLabel->hide();
+
+	m_ui->recMgmtUploadCheckBox->setCheckState(Qt::Unchecked);
+	m_ui->recMgmtUploadCheckBox->setVisible(GlobInstcs::recMgmtSetPtr->isValid());
 
 	Q_ASSERT(!m_userName.isEmpty());
 
