@@ -103,6 +103,16 @@ signals:
 
 private slots:
 	/*!
+	 * @brief Disable records management upload if immediate download is disabled.
+	 */
+	void immDownloadStateChanged(int state);
+
+	/*!
+	 * @brief Enable immediate download if records management upload is enabled.
+	 */
+	void immRecMgmtUploadStateChanged(int state);
+
+	/*!
 	 * @brief Check input fields' sanity and activate search button.
 	 */
 	void checkInputFields(void);

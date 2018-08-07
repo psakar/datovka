@@ -145,6 +145,20 @@ DlgSendMessage::~DlgSendMessage(void)
 	delete m_ui;
 }
 
+void DlgSendMessage::immDownloadStateChanged(int state)
+{
+	if (state == Qt::Unchecked) {
+		m_ui->immRecMgmtUploadCheckBox->setCheckState(Qt::Unchecked);
+	}
+}
+
+void DlgSendMessage::immRecMgmtUploadStateChanged(int state)
+{
+	if (state == Qt::Checked) {
+		m_ui->immDownloadCheckBox->setCheckState(Qt::Checked);
+	}
+}
+
 void DlgSendMessage::checkInputFields(void)
 {
 	bool enable = calculateAndShowTotalAttachSize() &&
@@ -170,7 +184,7 @@ void DlgSendMessage::checkInputFields(void)
 	}
 
 	/* Enable only when sending a message to a single recipient. */
-	m_ui->recMgmtUploadCheckBox->setEnabled(m_recipTableModel.rowCount() <= 1);
+	m_ui->immRecMgmtUploadCheckBox->setEnabled(m_recipTableModel.rowCount() <= 1);
 }
 
 void DlgSendMessage::addRecipientFromLocalContact(void)
@@ -641,8 +655,9 @@ void DlgSendMessage::initContent(enum Action action,
 	m_ui->prepaidReplyLabel->setEnabled(false);
 	m_ui->prepaidReplyLabel->hide();
 
-	m_ui->recMgmtUploadCheckBox->setCheckState(Qt::Unchecked);
-	m_ui->recMgmtUploadCheckBox->setVisible(GlobInstcs::recMgmtSetPtr->isValid());
+	m_ui->immDownloadCheckBox->setCheckState(Qt::Unchecked);
+	m_ui->immRecMgmtUploadCheckBox->setCheckState(Qt::Unchecked);
+	m_ui->immRecMgmtUploadCheckBox->setVisible(GlobInstcs::recMgmtSetPtr->isValid());
 
 	Q_ASSERT(!m_userName.isEmpty());
 
@@ -724,6 +739,11 @@ void DlgSendMessage::initContent(enum Action action,
 	    new TableHomeEndFilter(m_ui->attachTableView));
 	m_ui->attachTableView->installEventFilter(
 	    new TableTabIgnoreFilter(m_ui->attachTableView));
+
+	connect(m_ui->immDownloadCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(immDownloadStateChanged(int)));
+	connect(m_ui->immRecMgmtUploadCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(immRecMgmtUploadStateChanged(int)));
 
 	connect(m_ui->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
@@ -1422,10 +1442,13 @@ void DlgSendMessage::sendMessageISDS(
 		envelope.setDmToHands(m_ui->dmToHands->text());
 		message.setEnvelope(envelope);
 
-		int processFlags =
-		    (m_ui->recMgmtUploadCheckBox->checkState() == Qt::Checked) ?
-		        (Task::PROC_IMM_DOWNLOAD | Task::PROC_IMM_RM_UPLOAD) :
-		         Task::PROC_NOTHING;
+		int processFlags = Task::PROC_NOTHING;
+		if (m_ui->immDownloadCheckBox->checkState() == Qt::Checked) {
+			processFlags |= Task::PROC_IMM_DOWNLOAD;
+		}
+		if (m_ui->immRecMgmtUploadCheckBox->checkState() == Qt::Checked) {
+			processFlags |= Task::PROC_IMM_RM_UPLOAD;
+		}
 		TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
 		    m_userName, m_dbSet, taskIdentifiers.at(i), message,
 		    e.name, e.address, e.pdz, processFlags);
