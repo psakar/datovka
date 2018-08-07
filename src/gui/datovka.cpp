@@ -377,9 +377,9 @@ MainWindow::MainWindow(QWidget *parent)
 	    this, SLOT(updateStatusBarText(QString)));
 	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
-	        QString, QString, bool, qint64)), this,
+	        QString, QString, bool, qint64, int)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
-	        QString, QString, bool, qint64)));
+	        QString, QString, bool, qint64, int)));
 	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(refreshAccountList(QString)), this,
 	    SLOT(refreshAccountList(QString)));
@@ -2343,7 +2343,7 @@ void MainWindow::collectImportZfoStatus(const QString &fileName, int result,
 void MainWindow::collectSendMessageStatus(const QString &userName,
     const QString &transactId, int result, const QString &resultDesc,
     const QString &dbIDRecipient, const QString &recipientName,
-    bool isPDZ, qint64 dmId)
+    bool isPDZ, qint64 dmId, int processFlags)
 {
 	debugSlotCall();
 
@@ -2369,6 +2369,20 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 	}
 
 	clearProgressBar();
+
+	if (processFlags & Task::PROC_IMM_DOWNLOAD) {
+		/* Schedule message download. */
+		TaskDownloadMessage *task =
+		    new (std::nothrow) TaskDownloadMessage(
+		        userName, accountDbSet(userName), MSG_SENT,
+		        MessageDb::MsgId(dmId, QDateTime()), false);
+		if (Q_UNLIKELY(task == Q_NULLPTR)) {
+			Q_ASSERT(0);
+			return;
+		}
+		task->setAutoDelete(true);
+		GlobInstcs::workPoolPtr->assignHi(task, WorkerPool::PREPEND);
+	}
 }
 
 /* ========================================================================= */

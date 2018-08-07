@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -78,12 +78,13 @@ public:
 	 * @param[in]     recipientName    Message recipient name.
 	 * @param[in]     recipientAddress Message recipient address.
 	 * @param[in]     isPDZ            True if message is a PDZ.
+	 * @param[in]     processFlags Message processing flags.
 	 */
 	explicit TaskSendMessage(const QString &userName,
 	    MessageDbSet *dbSet, const QString &transactId,
 	    const Isds::Message &message,
 	    const QString &recipientName, const QString &recipientAddress,
-	    bool isPDZ);
+	    bool isPDZ, int processFlags = Task::PROC_NOTHING);
 
 	/*!
 	 * @brief Performs actual message sending.
@@ -126,4 +127,5 @@ private:
 	const QString m_recipientName; /*!< Message recipient name. */
 	const QString m_recipientAddress; /*!< Message recipient address. */
 	const bool m_isPDZ; /*!< True if message is a PDZ. */
+	const int m_processFlags; /*!< Message processing flags. */
 };

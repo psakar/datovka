@@ -517,11 +517,12 @@ void DlgSendMessage::sendMessage(void)
 void DlgSendMessage::collectSendMessageStatus(const QString &userName,
     const QString &transactId, int result, const QString &resultDesc,
     const QString &dbIDRecipient, const QString &recipientName,
-    bool isPDZ, qint64 dmId)
+    bool isPDZ, qint64 dmId, int processFlags)
 {
 	debugSlotCall();
 
 	Q_UNUSED(userName);
+	Q_UNUSED(processFlags);
 
 	if (m_transactIds.end() == m_transactIds.find(transactId)) {
 		/* Nothing found. */
@@ -728,9 +729,9 @@ void DlgSendMessage::initContent(enum Action action,
 	connect(m_ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
 	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
-	        QString, QString, bool, qint64)), this,
+	        QString, QString, bool, qint64, int)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
-	        QString, QString, bool, qint64)));
+	        QString, QString, bool, qint64, int)));
 
 	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
@@ -1421,9 +1422,13 @@ void DlgSendMessage::sendMessageISDS(
 		envelope.setDmToHands(m_ui->dmToHands->text());
 		message.setEnvelope(envelope);
 
+		int processFlags =
+		    (m_ui->recMgmtUploadCheckBox->checkState() == Qt::Checked) ?
+		        (Task::PROC_IMM_DOWNLOAD | Task::PROC_IMM_RM_UPLOAD) :
+		         Task::PROC_NOTHING;
 		TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
 		    m_userName, m_dbSet, taskIdentifiers.at(i), message,
-		    e.name, e.address, e.pdz);
+		    e.name, e.address, e.pdz, processFlags);
 		if (task != Q_NULLPTR) {
 			task->setAutoDelete(true);
 			GlobInstcs::workPoolPtr->assignHi(task);

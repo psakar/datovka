@@ -146,7 +146,7 @@ private slots:
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
-	    bool isPDZ, qint64 dmId);
+	    bool isPDZ, qint64 dmId, int processFlags);
 
 	/*!
 	 * @brief Version response slot.

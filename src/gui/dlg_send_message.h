@@ -199,11 +199,12 @@ private slots:
 	 * @param[in] isPDZ True if message was attempted to send as commercial
 	 *                  message.
 	 * @param[in] dmId Sent message identifier.
+	 * @param[in] processFlags Message processig flags.
 	 */
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
-	    bool isPDZ, qint64 dmId);
+	    bool isPDZ, qint64 dmId, int processFlags);
 
 private:
 	/*!

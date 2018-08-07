@@ -62,7 +62,8 @@ TaskSendMessage::ResultData::ResultData(enum Result res, const QString &eInfo,
 
 TaskSendMessage::TaskSendMessage(const QString &userName,
     MessageDbSet *dbSet, const QString &transactId, const Isds::Message &message,
-    const QString &recipientName, const QString &recipientAddress, bool isPDZ)
+    const QString &recipientName, const QString &recipientAddress, bool isPDZ,
+    int processFlags)
     : m_resultData(),
     m_userName(userName),
     m_dbSet(dbSet),
@@ -70,7 +71,8 @@ TaskSendMessage::TaskSendMessage(const QString &userName,
     m_message(message),
     m_recipientName(recipientName),
     m_recipientAddress(recipientAddress),
-    m_isPDZ(isPDZ)
+    m_isPDZ(isPDZ),
+    m_processFlags(processFlags)
 {
 	Q_ASSERT(0 != m_dbSet);
 }
@@ -98,7 +100,7 @@ void TaskSendMessage::run(void)
 	emit GlobInstcs::msgProcEmitterPtr->sendMessageFinished(m_userName,
 	    m_transactId, m_resultData.result, m_resultData.errInfo,
 	    m_resultData.dbIDRecipient, m_resultData.recipientName,
-	    m_isPDZ, m_resultData.dmId);
+	    m_isPDZ, m_resultData.dmId, m_processFlags);
 
 	emit GlobInstcs::msgProcEmitterPtr->progressChange(PL_IDLE, 0);
 

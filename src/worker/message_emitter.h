@@ -116,11 +116,12 @@ signals:
 	 * @param[in] recipientName Recipient name.
 	 * @param[in] isPDZ         True if message was a PDZ.
 	 * @param[in] dmId          Message identifier if message has been sent.
+	 * @param[in] processFlags Message processing flags.
 	 */
 	void sendMessageFinished(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
-	    bool isPDZ, qint64 dmId);
+	    bool isPDZ, qint64 dmId, int processFlags);
 
 	/*!
 	 * @brief This signal is emitted when status bar text is changed
