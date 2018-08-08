@@ -42,7 +42,7 @@ public:
 	 * @param[in] dmId Message identifier.
 	 * @param[in] parent Parent widget.
 	 */
-	DlgRecordsManagementUploadProgress(qint64 dmId,
+	explicit DlgRecordsManagementUploadProgress(qint64 dmId,
 	    QWidget *parent = Q_NULLPTR);
 
 	/*!

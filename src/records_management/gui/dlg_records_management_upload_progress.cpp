@@ -56,6 +56,8 @@ DlgRecordsManagementUploadProgress::DlgRecordsManagementUploadProgress(
 
 	m_ui->buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 
+	/* Abort when dialogue closed or cancelled. */
+	connect(this, SIGNAL(rejected()), this, SLOT(emitAbort()));
 	connect(m_ui->buttonBox, SIGNAL(rejected()), this, SLOT(emitAbort()));
 }
 
