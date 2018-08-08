@@ -600,10 +600,10 @@ int LogDevice::logPrefixVlog(const QMessageLogContext &logCtx,
 	bool removed = removeTrailingNewline(msgFormatted);
 
 	if (m_logVerbosity > 0) {
-		msg = buildPrefix(urgPrefix) % msgFormatted % buildPostfix(logCtx);
-	}
-	if (removed) {
-		msg = buildPrefix(urgPrefix) % msgFormatted % QStringLiteral("\n");
+		msg = buildPrefix(urgPrefix) % msgFormatted % buildPostfix(logCtx) %
+		    (removed ? QStringLiteral("\n") : QString());
+	} else {
+		msg = msgFormatted % (removed ? QStringLiteral("\n") : QString());
 	}
 
 	/* Message handler. */
