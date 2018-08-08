@@ -91,6 +91,7 @@ SOURCES += \
 	src/crypto/crypto_version.cpp \
 	src/datovka_shared/crypto/crypto_pin.c \
 	src/datovka_shared/crypto/crypto_pwd.c \
+	src/datovka_shared/crypto/crypto_trusted_certs.c \
 	src/datovka_shared/crypto/crypto_wrapped.cpp \
 	src/datovka_shared/io/records_management_db.cpp \
 	src/datovka_shared/io/sqlite/db.cpp \
@@ -170,6 +171,7 @@ HEADERS += \
 	src/crypto/crypto_version.h \
 	src/datovka_shared/crypto/crypto_pin.h \
 	src/datovka_shared/crypto/crypto_pwd.h \
+	src/datovka_shared/crypto/crypto_trusted_certs.h \
 	src/datovka_shared/crypto/crypto_wrapped.h \
 	src/datovka_shared/io/records_management_db.h \
 	src/datovka_shared/io/sqlite/db.h \

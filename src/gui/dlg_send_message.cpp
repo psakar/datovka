@@ -34,6 +34,7 @@
 #include "src/datovka_shared/isds/types.h"
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/log/log.h"
+#include "src/datovka_shared/settings/records_management.h"
 #include "src/datovka_shared/utility/strings.h"
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
@@ -144,6 +145,20 @@ DlgSendMessage::~DlgSendMessage(void)
 	delete m_ui;
 }
 
+void DlgSendMessage::immDownloadStateChanged(int state)
+{
+	if (state == Qt::Unchecked) {
+		m_ui->immRecMgmtUploadCheckBox->setCheckState(Qt::Unchecked);
+	}
+}
+
+void DlgSendMessage::immRecMgmtUploadStateChanged(int state)
+{
+	if (state == Qt::Checked) {
+		m_ui->immDownloadCheckBox->setCheckState(Qt::Checked);
+	}
+}
+
 void DlgSendMessage::checkInputFields(void)
 {
 	bool enable = calculateAndShowTotalAttachSize() &&
@@ -167,6 +182,9 @@ void DlgSendMessage::checkInputFields(void)
 		/* cannot send message when not logged in. */
 		m_ui->sendButton->setEnabled(false);
 	}
+
+	/* Enable only when sending a message to a single recipient. */
+	m_ui->immRecMgmtUploadCheckBox->setEnabled(m_recipTableModel.rowCount() <= 1);
 }
 
 void DlgSendMessage::addRecipientFromLocalContact(void)
@@ -513,11 +531,12 @@ void DlgSendMessage::sendMessage(void)
 void DlgSendMessage::collectSendMessageStatus(const QString &userName,
     const QString &transactId, int result, const QString &resultDesc,
     const QString &dbIDRecipient, const QString &recipientName,
-    bool isPDZ, qint64 dmId)
+    bool isPDZ, qint64 dmId, int processFlags)
 {
 	debugSlotCall();
 
 	Q_UNUSED(userName);
+	Q_UNUSED(processFlags);
 
 	if (m_transactIds.end() == m_transactIds.find(transactId)) {
 		/* Nothing found. */
@@ -636,6 +655,10 @@ void DlgSendMessage::initContent(enum Action action,
 	m_ui->prepaidReplyLabel->setEnabled(false);
 	m_ui->prepaidReplyLabel->hide();
 
+	m_ui->immDownloadCheckBox->setCheckState(Qt::Unchecked);
+	m_ui->immRecMgmtUploadCheckBox->setCheckState(Qt::Unchecked);
+	m_ui->immRecMgmtUploadCheckBox->setVisible(GlobInstcs::recMgmtSetPtr->isValid());
+
 	Q_ASSERT(!m_userName.isEmpty());
 
 	foreach (const Task::AccountDescr &acnt, m_messageDbSetList) {
@@ -717,13 +740,18 @@ void DlgSendMessage::initContent(enum Action action,
 	m_ui->attachTableView->installEventFilter(
 	    new TableTabIgnoreFilter(m_ui->attachTableView));
 
+	connect(m_ui->immDownloadCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(immDownloadStateChanged(int)));
+	connect(m_ui->immRecMgmtUploadCheckBox, SIGNAL(stateChanged(int)),
+	    this, SLOT(immRecMgmtUploadStateChanged(int)));
+
 	connect(m_ui->sendButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()), this, SLOT(close()));
 	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
-	        QString, QString, bool, qint64)), this,
+	        QString, QString, bool, qint64, int)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
-	        QString, QString, bool, qint64)));
+	        QString, QString, bool, qint64, int)));
 
 	m_keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
 
@@ -1414,9 +1442,16 @@ void DlgSendMessage::sendMessageISDS(
 		envelope.setDmToHands(m_ui->dmToHands->text());
 		message.setEnvelope(envelope);
 
+		int processFlags = Task::PROC_NOTHING;
+		if (m_ui->immDownloadCheckBox->checkState() == Qt::Checked) {
+			processFlags |= Task::PROC_IMM_DOWNLOAD;
+		}
+		if (m_ui->immRecMgmtUploadCheckBox->checkState() == Qt::Checked) {
+			processFlags |= Task::PROC_IMM_RM_UPLOAD;
+		}
 		TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
 		    m_userName, m_dbSet, taskIdentifiers.at(i), message,
-		    e.name, e.address, e.pdz);
+		    e.name, e.address, e.pdz, processFlags);
 		if (task != Q_NULLPTR) {
 			task->setAutoDelete(true);
 			GlobInstcs::workPoolPtr->assignHi(task);

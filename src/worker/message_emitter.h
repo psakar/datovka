@@ -43,10 +43,11 @@ signals:
 	 *                          (enum TaskDownloadMessage::Result).
 	 * @param[in] errDesc       Error description string.
 	 * @param[in] listScheduled True if ran from download message list.
+	 * @param[in] processFlags Message processing flags.
 	 */
 	void downloadMessageFinished(const QString &usrName, qint64 msgId,
 	   const QDateTime &deliveryTime, int result, const QString &errDesc,
-	   bool listScheduled);
+	   bool listScheduled, int processFlags);
 
 	/*!
 	 * @brief Emitted when download message finishes.
@@ -116,11 +117,12 @@ signals:
 	 * @param[in] recipientName Recipient name.
 	 * @param[in] isPDZ         True if message was a PDZ.
 	 * @param[in] dmId          Message identifier if message has been sent.
+	 * @param[in] processFlags Message processing flags.
 	 */
 	void sendMessageFinished(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
-	    bool isPDZ, qint64 dmId);
+	    bool isPDZ, qint64 dmId, int processFlags);
 
 	/*!
 	 * @brief This signal is emitted when status bar text is changed

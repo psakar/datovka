@@ -125,7 +125,7 @@ private slots:
 	 */
 	void collectDownloadMessageStatus(const QString &usrName, qint64 msgId,
 	    const QDateTime &deliveryTime, int result, const QString &errDesc,
-	    bool listScheduled);
+	    bool listScheduled, int processFlags);
 
 	/*!
 	 * @brief Performs action depending on message list download outcome.
@@ -146,7 +146,7 @@ private slots:
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
-	    bool isPDZ, qint64 dmId);
+	    bool isPDZ, qint64 dmId, int processFlags);
 
 	/*!
 	 * @brief Version response slot.
@@ -970,6 +970,12 @@ private:
 	 */
 	bool eraseMessage(const QString &userName,
 	    const MessageDb::MsgId &msgId, bool delFromIsds);
+
+	/*!
+	 * @brief Send message to records management.
+	 */
+	void sendMessageToRecordsManagement(const QString &userName,
+	    MessageDb::MsgId msgId);
 
 	/*!
 	 * @brief Authenticate message from ZFO file.

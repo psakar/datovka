@@ -103,6 +103,16 @@ signals:
 
 private slots:
 	/*!
+	 * @brief Disable records management upload if immediate download is disabled.
+	 */
+	void immDownloadStateChanged(int state);
+
+	/*!
+	 * @brief Enable immediate download if records management upload is enabled.
+	 */
+	void immRecMgmtUploadStateChanged(int state);
+
+	/*!
 	 * @brief Check input fields' sanity and activate search button.
 	 */
 	void checkInputFields(void);
@@ -199,11 +209,12 @@ private slots:
 	 * @param[in] isPDZ True if message was attempted to send as commercial
 	 *                  message.
 	 * @param[in] dmId Sent message identifier.
+	 * @param[in] processFlags Message processig flags.
 	 */
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,
 	    const QString &dbIDRecipient, const QString &recipientName,
-	    bool isPDZ, qint64 dmId);
+	    bool isPDZ, qint64 dmId, int processFlags);
 
 private:
 	/*!

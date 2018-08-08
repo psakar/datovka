@@ -55,6 +55,12 @@
  */
 class Task : public QRunnable {
 public:
+	enum ProcessFlag {
+		PROC_NOTHING = 0x00, /*< Nothing to be processed. */
+		PROC_IMM_DOWNLOAD = 0x01, /*!< Download immediately after the message has been sent. */
+		PROC_IMM_RM_UPLOAD = 0x02 /*!< Upload into records management after the message has been downloaded. */
+	};
+
 	/*!
 	 * @brief Describes accounts that should be processed.
 	 */
