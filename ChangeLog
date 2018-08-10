@@ -1,4 +1,10 @@
 4.11.0 /
+ * The operations 'send message', 'download sent message' and
+   'upload into records management service' can be chained together to be
+   performed in a consecutive sequence.
+ * Showing progress bar dialogue when uploading message data into records
+   management service.
+ * Sharing bundled certificate code with mobile application.
  * Sharing log device code with mobile application.
  * Most recent log entries are held in memory and can be displayed directly in
    the application.
