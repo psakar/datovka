@@ -294,6 +294,8 @@ SOURCES += \
     src/cli/cli_login.cpp \
     src/cli/cli_parser.cpp \
     src/cli/cli_pin.cpp \
+    src/cli/cmd_compose.cpp \
+    src/cli/cmd_tokeniser.cpp \
     src/common.cpp \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
@@ -450,6 +452,8 @@ HEADERS += \
     src/cli/cli_login.h \
     src/cli/cli_parser.h \
     src/cli/cli_pin.h \
+    src/cli/cmd_compose.h \
+    src/cli/cmd_tokeniser.h \
     src/common.h \
     src/crypto/crypto.h \
     src/crypto/crypto_funcs.h \
