@@ -26,13 +26,16 @@
 
 #include "src/cli/cmd_compose.h"
 #include "src/cli/cmd_tokeniser.h"
+#include "src/datovka_shared/log/log.h"
 
 static const QString longOpt("compose");
 
 static const QString dmAnnotationStr("dmAnnotation");
+static const QString dmAttachmentStr("dmAttachment");
 
 /* Null objects - for convenience. */
 static const QString nullString;
+static const QStringList emptyList;
 
 /*!
  * @brief PIMPL CmdCompose class.
@@ -41,10 +44,12 @@ class CLI::CmdComposePrivate {
 	//Q_DISABLE_COPY(CmdComposePrivate)
 public:
 	CmdComposePrivate(void)
-	    : m_dmAnnotation()
+	    : m_dmAnnotation(),
+	    m_dmAttachment()
 	{ }
 
 	QString m_dmAnnotation;
+	QStringList m_dmAttachment;
 };
 
 CLI::CmdCompose::CmdCompose(void)
@@ -137,7 +142,6 @@ CLI::CmdCompose CLI::CmdCompose::value(const QCommandLineParser &parser)
 		return CmdCompose();
 	}
 
-	fprintf(stderr, "GGG %s\n", parser.value(longOpt).toUtf8().constData());
 	return deserialise(parser.value(longOpt));
 }
 
@@ -158,15 +162,24 @@ CLI::CmdCompose CLI::CmdCompose::deserialise(const QString &content)
 
 	typedef QPair<QString, QString> TokenPair;
 	foreach (const TokenPair &pair, opts) {
+		if (Q_UNLIKELY(pair.second.isEmpty())) {
+			return CmdCompose();
+		}
+
 		if (dmAnnotationStr == pair.first) {
 			if (!cmdCompose.dmAnnotation().isNull()) {
-				/* Already set. */
-				return CmdCompose();
-			}
-			if (pair.second.isEmpty()) {
-				return CmdCompose();
+				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDmAnnotation(pair.second);
+		} else if (dmAttachmentStr == pair.first) {
+			if (!cmdCompose.dmAttachment().isEmpty()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDmAttachment(pair.second.split(QChar(';')));
+		} else {
+			logErrorNL("Unknown option '%s'.",
+			    pair.first.toUtf8().constData());
+			return CmdCompose();
 		}
 	}
 
@@ -179,6 +192,9 @@ QString CLI::CmdCompose::serialise(void) const
 
 	if (!dmAnnotation().isEmpty()) {
 		serialised.append(dmAnnotationStr % QStringLiteral("='") % dmAnnotation() % QStringLiteral("'"));
+	}
+	if (!dmAttachment().isEmpty()) {
+		serialised.append(dmAttachmentStr % QStringLiteral("='") % dmAttachment().join(QChar(';')) % QStringLiteral("'"));
 	}
 
 	return serialised.join(QStringLiteral(","));
@@ -206,6 +222,31 @@ void CLI::CmdCompose::setDmAnnotation(QString &&a)
 	ensureCmdComposePrivate();
 	Q_D(CmdCompose);
 	d->m_dmAnnotation = a;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QStringList &CLI::CmdCompose::dmAttachment(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return emptyList;
+	}
+	return d->m_dmAttachment;
+}
+
+void CLI::CmdCompose::setDmAttachment(const QStringList &al)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmAttachment = al;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDmAttachment(QStringList &&al)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmAttachment = al;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 

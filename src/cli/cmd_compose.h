@@ -25,6 +25,7 @@
 
 #include <QCommandLineParser>
 #include <QString>
+#include <QStringList>
 
 namespace CLI {
 
@@ -75,6 +76,12 @@ namespace CLI {
 		void setDmAnnotation(const QString &a);
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setDmAnnotation(QString &&a);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmAttachment */
+		const QStringList &dmAttachment(void) const;
+		void setDmAttachment(const QStringList &al);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmAttachment(QStringList &&al);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
 	private:
