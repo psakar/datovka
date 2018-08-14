@@ -817,8 +817,10 @@ private:
 	 * @brief Show send message dialog and send message(s).
 	 *
 	 * @param[in] action Defines send action (new,reply,forward,template).
+	 * @param[in] composeSerialised Serialised content data.
 	 */
-	void showSendMessageDialog(int action);
+	void showSendMessageDialog(int action,
+	    const QString &composeSerialised = QString());
 
 	/*!
 	 * @brief Active/Inactive account menu and buttons in the mainwindow.

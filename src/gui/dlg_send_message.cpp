@@ -29,6 +29,7 @@
 #include <QDir>
 #include <QMimeDatabase>
 
+#include "src/cli/cmd_compose.h"
 #include "src/datovka_shared/isds/box_interface.h"
 #include "src/datovka_shared/isds/type_conversion.h"
 #include "src/datovka_shared/isds/types.h"
@@ -97,7 +98,8 @@ const QString &dzPrefix(const MessageDb *messageDb, qint64 dmId)
 DlgSendMessage::DlgSendMessage(
     const QList<Task::AccountDescr> &messageDbSetList,
     enum Action action, const QList<MessageDb::MsgId> &msgIds,
-    const QString &userName, class MainWindow *mw, QWidget *parent)
+    const QString &userName, const QString &composeSerialised,
+    class MainWindow *mw, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgSendMessage),
     m_keepAliveTimer(),
@@ -135,6 +137,9 @@ DlgSendMessage::DlgSendMessage(
 	    QAbstractItemView::SelectRows);
 
 	initContent(action, msgIds);
+	if ((action == ACT_NEW) && !composeSerialised.isEmpty()) {
+		fillContentCompose(composeSerialised);
+	}
 
 	Q_ASSERT(!m_boxId.isEmpty());
 	Q_ASSERT(Q_NULLPTR != m_dbSet);
@@ -1002,6 +1007,22 @@ void DlgSendMessage::fillContentFromTemplate(
 	foreach (const Isds::Document &file, msgFileList) {
 		m_attachModel.appendBinaryAttachment(file.binaryContent(),
 		    file.fileDescr());
+	}
+}
+
+void DlgSendMessage::fillContentCompose(const QString &composeSerialised)
+{
+	debugFuncCall();
+
+	const CLI::CmdCompose composeCmd(
+	    CLI::CmdCompose::deserialise(composeSerialised));
+	if (composeCmd.isNull()) {
+		logErrorNL("%s", "Could not deserialise compose data.");
+		return;
+	}
+
+	if (!composeCmd.dmAnnotation().isEmpty()) {
+		m_ui->subjectLine->setText(composeCmd.dmAnnotation());
 	}
 }
 

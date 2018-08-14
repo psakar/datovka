@@ -77,13 +77,14 @@ public:
 	 * @param[in] action What king of action should be performed.
 	 * @param[in] msgIds  List of messages used to fill the dialogue.
 	 * @param[in] userName The account the dialogue has been invoked from.
+	 * @param[in] composeSerialised Serialised content data.
 	 * @param[in] mw Pointer to main window.
 	 * @param[in] parent Parent widget.
 	 */
 	DlgSendMessage(const QList<Task::AccountDescr> &messageDbSetList,
 	    enum Action action, const QList<MessageDb::MsgId> &msgIds,
-	    const QString &userName, class MainWindow *mw,
-	    QWidget *parent = Q_NULLPTR);
+	    const QString &userName, const QString &composeSerialised,
+	    class MainWindow *mw, QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
@@ -246,6 +247,13 @@ private:
 	 * @param[in] msgIds Identifiers of messages to fill the dialogue with.
 	 */
 	void fillContentFromTemplate(const QList<MessageDb::MsgId> &msgIds);
+
+	/*!
+	 * @brief Set the dilaogue content according to serialised compose data.
+	 *
+	 * @param[in] composeSerialised Serialised CLI::CmdCompose data.
+	 */
+	void fillContentCompose(const QString &composeSerialised);
 
 	/*!
 	 * @brief Creates a notification QMessageBox informing the user about

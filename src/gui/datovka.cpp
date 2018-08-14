@@ -2155,7 +2155,7 @@ void MainWindow::processSingleInstanceMessages(int msgType,
 		this->activateWindow();
 		break;
 	case SingleInstance::MTYPE_COMPOSE:
-		showSendMessageDialog(DlgSendMessage::ACT_NEW);
+		showSendMessageDialog(DlgSendMessage::ACT_NEW, msgVal);
 		break;
 	default:
 		break;
@@ -4671,7 +4671,8 @@ QList<Task::AccountDescr> messageDbListForAllAccounts(MainWindow *mainWindow,
 	return messageDbList;
 }
 
-void MainWindow::showSendMessageDialog(int action)
+void MainWindow::showSendMessageDialog(int action,
+    const QString &composeSerialised)
 {
 	debugFuncCall();
 
@@ -4738,7 +4739,8 @@ void MainWindow::showSendMessageDialog(int action)
 	}
 
 	QDialog *sendMsgDialog = new DlgSendMessage(messageDbList,
-	    (DlgSendMessage::Action) action, msgIds, userName, this);
+	    (DlgSendMessage::Action) action, msgIds, userName,
+	    composeSerialised, this);
 
 	showStatusTextWithTimeout(tr("Create and send a message."));
 
