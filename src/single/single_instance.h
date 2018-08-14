@@ -39,10 +39,11 @@ public:
 	 */
 	enum MsgType {
 		MTYPE_UNKNOWN = -1, /*! Convenience value. */
-		MTYPE_RAISE_MAIN_WIN = 0 /*!<
-		                          * Notification that the main window
-		                          * ought to be raised.
-		                          */
+		MTYPE_RAISE_MAIN_WIN = 0, /*!<
+		                           * Notification that the main window
+		                           * ought to be raised.
+		                           */
+		MTYPE_COMPOSE = 1 /*!< Open send message dialogue. */
 	};
 
 	/*!

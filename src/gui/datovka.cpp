@@ -2154,6 +2154,9 @@ void MainWindow::processSingleInstanceMessages(int msgType,
 		this->raise();
 		this->activateWindow();
 		break;
+	case SingleInstance::MTYPE_COMPOSE:
+		showSendMessageDialog(DlgSendMessage::ACT_NEW);
+		break;
 	default:
 		break;
 	}

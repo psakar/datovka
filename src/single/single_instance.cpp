@@ -37,6 +37,7 @@
 #define MAX_MSG_SIZE 1024
 
 static const QString msgRaiseMainWindow("RaiseMainWindow");
+static const QString msgCompose("Compose");
 
 static const QChar msgTypeSep('>'); /*!< Separator used to divide message type name and the value. */
 
@@ -120,6 +121,9 @@ const QString &msgTypeToStr(int msgType)
 	case SingleInstance::MTYPE_RAISE_MAIN_WIN:
 		return msgRaiseMainWindow;
 		break;
+	case SingleInstance::MTYPE_COMPOSE:
+		return msgCompose;
+		break;
 	default:
 		/* Default to raise main window. */
 		Q_ASSERT(0);
@@ -195,6 +199,8 @@ enum SingleInstance::MsgType strToMsgType(const QStringRef &typeStrRef)
 {
 	if (typeStrRef == msgRaiseMainWindow) {
 		return SingleInstance::MTYPE_RAISE_MAIN_WIN;
+	} else if (typeStrRef == msgCompose) {
+		return SingleInstance::MTYPE_COMPOSE;
 	} else {
 		Q_ASSERT(0);
 		return SingleInstance::MTYPE_UNKNOWN;
@@ -230,7 +236,7 @@ bool decomposeMessage(const QString &message,
 	msgType = strToMsgType(message.leftRef(sepIdx));
 	if ((sepIdx + 1) < message.size()) {
 		/* Separator is not the last character in the message. */
-		msgValRef = message.midRef(sepIdx);
+		msgValRef = message.midRef(sepIdx + 1);
 	} else {
 		msgValRef.clear();
 	}
