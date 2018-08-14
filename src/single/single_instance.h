@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _SINGLE_INSTANCE_H_
-#define _SINGLE_INSTANCE_H_
+#pragma once
 
 #include <QObject>
 #include <QSharedMemory>
@@ -32,9 +31,20 @@
  * @brief Class for checking whether the is another application instance.
  */
 class SingleInstance : public QObject {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
+	/*!
+	 * @brief Defines action described by the message.
+	 */
+	enum MsgType {
+		MTYPE_UNKNOWN = -1, /*! Convenience value. */
+		MTYPE_RAISE_MAIN_WIN = 0 /*!<
+		                          * Notification that the main window
+		                          * ought to be raised.
+		                          */
+	};
+
 	/*!
 	 * @brief Constructor.
 	 *
@@ -70,14 +80,12 @@ public:
 
 	/*!
 	 * @brief Sends a message to the first instance.
+	 *
+	 * @param[in] msgType Type of the message (enum MsgType).
+	 * @param[in] msgVal Message parameter.
+	 * @return True is message has been sent.
 	 */
-	bool sendMessage(const QString &message);
-
-	static
-	const QString msgRaiseMainWindow; /*!<
-	                                   * Notification that the main window
-	                                   * ought to be raised.
-	                                   */
+	bool sendMessage(int msgType, const QString &msgVal = QString());
 
 private slots:
 	/*!
@@ -94,15 +102,14 @@ private:
  * @brief Single instance signal emitter.
  */
 class SingleInstanceEmitter : public QObject {
-    Q_OBJECT
+	Q_OBJECT
 
 signals:
 	/*!
 	 * @brief Emitted when message received.
 	 *
-	 * @param[in] message Received message.
+	 * @param[in] msgType Type of the message (enum MsgType).
+	 * @param[in] msgVal Received message parameter.
 	 */
-	void messageReceived(const QString &message);
+	void messageReceived(int msgType, const QString &msgVal);
 };
-
-#endif /* _SINGLE_INSTANCE_H_ */

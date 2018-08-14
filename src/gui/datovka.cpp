@@ -350,8 +350,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Single instance emitter. */
 	connect(GlobInstcs::snglInstEmitterPtr,
-	    SIGNAL(messageReceived(QString)), this,
-	    SLOT(processSingleInstanceMessages(QString)));
+	    SIGNAL(messageReceived(int, QString)), this,
+	    SLOT(processSingleInstanceMessages(int, QString)));
 
 	/* Worker-related processing signals. */
 	connect(GlobInstcs::msgProcEmitterPtr,
@@ -2140,16 +2140,22 @@ void MainWindow::openSelectedAttachment(const QModelIndex &index)
 	}
 }
 
-void MainWindow::processSingleInstanceMessages(const QString &message)
+void MainWindow::processSingleInstanceMessages(int msgType,
+    const QString &msgVal)
 {
 	debugSlotCall();
 
-	logDebugLv0NL("Received message '%s'.", message.toUtf8().constData());
+	logDebugLv0NL("Received message '%d>%s'.", msgType,
+	    msgVal.toUtf8().constData());
 
-	if (SingleInstance::msgRaiseMainWindow == message) {
+	switch (msgType) {
+	case SingleInstance::MTYPE_RAISE_MAIN_WIN:
 		this->show();
 		this->raise();
 		this->activateWindow();
+		break;
+	default:
+		break;
 	}
 }
 

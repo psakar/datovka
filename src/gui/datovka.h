@@ -112,7 +112,7 @@ private slots:
 	/*!
 	 * @brief Processes messages from single instance emitter.
 	 */
-	void processSingleInstanceMessages(const QString &message);
+	void processSingleInstanceMessages(int msgType, const QString &msgVal);
 
 	/*!
 	 * @brief Fired when workers performing tasks on background have
