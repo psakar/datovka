@@ -143,10 +143,12 @@ QString composeMessage(int msgType, const QString &msgVal)
 
 bool SingleInstance::sendMessage(int msgType, const QString &msgVal)
 {
+#if 0
 	/* Master process cannot send messages. */
 	if (!m_memoryExisted){
 		return false;
 	}
+#endif
 
 	const QString message(composeMessage(msgType, msgVal));
 
