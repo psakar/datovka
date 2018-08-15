@@ -331,19 +331,7 @@ void DlgSendMessage::addAttachmentFile(void)
 		}
 	}
 
-	foreach (const QString &fileName, fileNames) {
-		int fileSize = m_attachModel.insertAttachmentFile(fileName,
-		    m_attachModel.rowCount());
-		if (fileSize <= 0) {
-			logWarningNL(
-			    "Cannot add empty file '%s' to attachments.",
-			    fileName.toUtf8().constData());
-			QMessageBox::warning(this, tr("Empty file"),
-			    tr("Cannot add empty file '%1' to attachments.").arg(fileName),
-			    QMessageBox::Ok, QMessageBox::Ok);
-			continue;
-		}
-	}
+	insertAttachmentFiles(fileNames);
 }
 
 void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
@@ -1023,6 +1011,42 @@ void DlgSendMessage::fillContentCompose(const QString &composeSerialised)
 
 	if (!composeCmd.dmAnnotation().isEmpty()) {
 		m_ui->subjectLine->setText(composeCmd.dmAnnotation());
+	}
+
+	if (!composeCmd.dmAttachment().isEmpty()) {
+		insertAttachmentFiles(composeCmd.dmAttachment());
+	}
+}
+
+void DlgSendMessage::insertAttachmentFiles(const QStringList &filePaths)
+{
+	foreach (const QString &filePath, filePaths) {
+		int fileSize = m_attachModel.insertAttachmentFile(filePath,
+		    m_attachModel.rowCount());
+		switch (fileSize) {
+		case AttachmentTblModel::FILE_NOT_EXISTENT:
+			QMessageBox::warning(this, tr("Non-existent file"),
+			    tr("Cannot add non-existent file '%1' to attachments.").arg(filePath),
+			    QMessageBox::Ok, QMessageBox::Ok);
+			break;
+		case AttachmentTblModel::FILE_NOT_READABLE:
+			QMessageBox::warning(this, tr("File not readable"),
+			    tr("Cannot add file '%1' without readable permissions to attachments.").arg(filePath),
+			    QMessageBox::Ok, QMessageBox::Ok);
+			break;
+		case AttachmentTblModel::FILE_ALREADY_PRESENT:
+			QMessageBox::warning(this, tr("File already present"),
+			    tr("Cannot add file '%1' because the file already in the attachments.").arg(filePath),
+			    QMessageBox::Ok, QMessageBox::Ok);
+			break;
+		case AttachmentTblModel::FILE_ZERO_SIZE:
+			QMessageBox::warning(this, tr("Empty file"),
+			    tr("Cannot add empty file '%1' to attachments.").arg(filePath),
+			    QMessageBox::Ok, QMessageBox::Ok);
+			break;
+		default:
+			break;
+		}
 	}
 }
 

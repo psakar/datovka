@@ -256,6 +256,13 @@ private:
 	void fillContentCompose(const QString &composeSerialised);
 
 	/*!
+	 * @brief Inserts attachment files.
+	 *
+	 * @param[in] filePaths List of file paths.
+	 */
+	void insertAttachmentFiles(const QStringList &filePaths);
+
+	/*!
 	 * @brief Creates a notification QMessageBox informing the user about
 	 *     the number of created commercial messages.
 	 * @return QMessageBox::StandardButton value describing the pressed
