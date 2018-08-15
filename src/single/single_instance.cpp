@@ -25,6 +25,7 @@
 #include <QByteArray>
 #include <QStringBuilder>
 #include <QSystemSemaphore>
+#include <QtEndian>
 #include <QTimer>
 
 #include "src/datovka_shared/log/log.h"
@@ -167,8 +168,8 @@ bool SingleInstance::sendMessage(int msgType, const QString &msgVal)
 	char *begin = (char *) m_shMem.data();
 	char *to = begin;
 	while(((to - begin) < MEM_SIZE) && (*to != '\0')) {
-		int sizeToRead = *to;
-		to += sizeToRead + 1;
+		qint32 sizeToRead = qFromBigEndian(*(qint32 *)to);
+		to += sizeToRead + sizeof(sizeToRead);
 	}
 
 	/* Compute the remaining space. */
@@ -177,7 +178,8 @@ bool SingleInstance::sendMessage(int msgType, const QString &msgVal)
 	}
 
 	QByteArray byteArray;
-	byteArray.append((char) message.size());
+	qint32 beSize = qToBigEndian((qint32)message.size());
+	byteArray.append((char *)&beSize, sizeof(beSize));
 	byteArray.append(message.toUtf8());
 	byteArray.append('\0');
 
@@ -250,10 +252,13 @@ void SingleInstance::checkMessage(void)
 	char *begin = (char *) m_shMem.data();
 	char *from = begin;
 
-	while(((from - begin) < MEM_SIZE) && (*from != '\0')){
-		int sizeToRead = (int) *from;
+	while(((from - begin) < MEM_SIZE) ){
+		qint32 sizeToRead = qFromBigEndian(*(qint32 *)from);
+		if (sizeToRead == 0) {
+			break;
+		}
 
-		++from;
+		from += sizeof(sizeToRead);
 		QByteArray byteArray(from, sizeToRead);
 		from += sizeToRead;
 
