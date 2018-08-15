@@ -30,6 +30,7 @@
 
 static const QString longOpt("compose");
 
+static const QString dbIDRecipientStr("dbIDRecipient");
 static const QString dmAnnotationStr("dmAnnotation");
 static const QString dmAttachmentStr("dmAttachment");
 
@@ -44,10 +45,12 @@ class CLI::CmdComposePrivate {
 	//Q_DISABLE_COPY(CmdComposePrivate)
 public:
 	CmdComposePrivate(void)
-	    : m_dmAnnotation(),
+	    : m_dbIDRecipient(),
+	    m_dmAnnotation(),
 	    m_dmAttachment()
 	{ }
 
+	QStringList m_dbIDRecipient;
 	QString m_dmAnnotation;
 	QStringList m_dmAttachment;
 };
@@ -166,7 +169,12 @@ CLI::CmdCompose CLI::CmdCompose::deserialise(const QString &content)
 			return CmdCompose();
 		}
 
-		if (dmAnnotationStr == pair.first) {
+		if (dbIDRecipientStr == pair.first) {
+			if (!cmdCompose.dbIDRecipient().isEmpty()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDbIDRecipient(pair.second.split(QChar(';')));
+		} else if (dmAnnotationStr == pair.first) {
 			if (!cmdCompose.dmAnnotation().isNull()) {
 				return CmdCompose(); /* Already set. */
 			}
@@ -190,6 +198,9 @@ QString CLI::CmdCompose::serialise(void) const
 {
 	QStringList serialised;
 
+	if (!dbIDRecipient().isEmpty()) {
+		serialised.append(dbIDRecipientStr % QStringLiteral("='") % dbIDRecipient().join(QChar(';')) % QStringLiteral("'"));
+	}
 	if (!dmAnnotation().isEmpty()) {
 		serialised.append(dmAnnotationStr % QStringLiteral("='") % dmAnnotation() % QStringLiteral("'"));
 	}
@@ -199,6 +210,31 @@ QString CLI::CmdCompose::serialise(void) const
 
 	return serialised.join(QStringLiteral(","));
 }
+
+const QStringList &CLI::CmdCompose::dbIDRecipient(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return emptyList;
+	}
+	return d->m_dbIDRecipient;
+}
+
+void CLI::CmdCompose::setDbIDRecipient(const QStringList &rbil)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dbIDRecipient = rbil;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDbIDRecipient(QStringList &&rbil)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dbIDRecipient = rbil;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 const QString &CLI::CmdCompose::dmAnnotation(void) const
 {

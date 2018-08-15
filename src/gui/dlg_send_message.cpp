@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -215,13 +215,6 @@ void DlgSendMessage::addRecipientManually(void)
 	    QString(), &ok, Qt::WindowStaysOnTopHint);
 
 	if (!ok) {
-		return;
-	}
-
-	if (dbID.isEmpty() || dbID.length() != 7) {
-		QMessageBox::critical(this, tr("Wrong data box ID"),
-		    tr("Wrong data box ID '%1'!").arg(dbID),
-		    QMessageBox::Ok, QMessageBox::Ok);
 		return;
 	}
 
@@ -1009,6 +1002,10 @@ void DlgSendMessage::fillContentCompose(const QString &composeSerialised)
 		return;
 	}
 
+	if (!composeCmd.dbIDRecipient().isEmpty()) {
+		addRecipientBoxes(composeCmd.dbIDRecipient());
+	}
+
 	if (!composeCmd.dmAnnotation().isEmpty()) {
 		m_ui->subjectLine->setText(composeCmd.dmAnnotation());
 	}
@@ -1123,8 +1120,15 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 
 void DlgSendMessage::addRecipientBox(const QString &boxId)
 {
+	if (boxId.isEmpty() || boxId.length() != 7) {
+		QMessageBox::critical(this, tr("Wrong data box ID"),
+		    tr("Wrong data box ID '%1'!").arg(boxId),
+		    QMessageBox::Ok, QMessageBox::Ok);
+		return;
+	}
+
 	/* Ignore existent entry. */
-	if (boxId.isEmpty() || m_recipTableModel.containsBoxId(boxId)) {
+	if (m_recipTableModel.containsBoxId(boxId)) {
 		return;
 	}
 

@@ -71,6 +71,12 @@ namespace CLI {
 
 		QString serialise(void) const;
 
+		/* dbIDRecipient */
+		const QStringList &dbIDRecipient(void) const;
+		void setDbIDRecipient(const QStringList &rbil);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDbIDRecipient(QStringList &&rbil);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmAnnotation */
 		const QString &dmAnnotation(void) const;
 		void setDmAnnotation(const QString &a);
