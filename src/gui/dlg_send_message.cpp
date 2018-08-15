@@ -1002,14 +1002,35 @@ void DlgSendMessage::fillContentCompose(const QString &composeSerialised)
 		return;
 	}
 
+	if (!composeCmd.dmToHands().isEmpty() ||
+	    !composeCmd.dmRecipientRefNumber().isEmpty() ||
+	    !composeCmd.dmSenderRefNumber().isEmpty() ||
+	    !composeCmd.dmRecipientIdent().isEmpty() ||
+	    !composeCmd.dmSenderIdent().isEmpty()) {
+		m_ui->optionalFormCheckBox->setCheckState(Qt::Checked);
+	}
+
 	if (!composeCmd.dbIDRecipient().isEmpty()) {
 		addRecipientBoxes(composeCmd.dbIDRecipient());
 	}
-
 	if (!composeCmd.dmAnnotation().isEmpty()) {
 		m_ui->subjectLine->setText(composeCmd.dmAnnotation());
 	}
-
+	if (!composeCmd.dmToHands().isEmpty()) {
+		m_ui->dmToHands->setText(composeCmd.dmToHands());
+	}
+	if (!composeCmd.dmRecipientRefNumber().isEmpty()) {
+		m_ui->dmRecipientRefNumber->setText(composeCmd.dmRecipientRefNumber());
+	}
+	if (!composeCmd.dmSenderRefNumber().isEmpty()) {
+		m_ui->dmSenderRefNumber->setText(composeCmd.dmSenderRefNumber());
+	}
+	if (!composeCmd.dmRecipientIdent().isEmpty()) {
+		m_ui->dmRecipientIdent->setText(composeCmd.dmRecipientIdent());
+	}
+	if (!composeCmd.dmSenderIdent().isEmpty()) {
+		m_ui->dmSenderIdent->setText(composeCmd.dmSenderIdent());
+	}
 	if (!composeCmd.dmAttachment().isEmpty()) {
 		insertAttachmentFiles(composeCmd.dmAttachment());
 	}

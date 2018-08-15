@@ -83,6 +83,36 @@ namespace CLI {
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setDmAnnotation(QString &&a);
 #endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmToHands -- optional */
+		const QString &dmToHands(void) const;
+		void setDmToHands(const QString &th);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmToHands(QString &&th);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmRecipientRefNumber */
+		const QString &dmRecipientRefNumber(void) const;
+		void setDmRecipientRefNumber(const QString &rrn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmRecipientRefNumber(QString &&rrn);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmSenderRefNumber */
+		const QString &dmSenderRefNumber(void) const;
+		void setDmSenderRefNumber(const QString &srn);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmSenderRefNumber(QString &&srn);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmRecipientIdent */
+		const QString &dmRecipientIdent(void) const;
+		void setDmRecipientIdent(const QString &ri);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmRecipientIdent(QString &&ri);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmSenderIdent */
+		const QString &dmSenderIdent(void) const;
+		void setDmSenderIdent(const QString &si);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmSenderIdent(QString &&si);
+#endif /* Q_COMPILER_RVALUE_REFS */
 		/* dmAttachment */
 		const QStringList &dmAttachment(void) const;
 		void setDmAttachment(const QStringList &al);

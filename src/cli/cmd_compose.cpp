@@ -32,6 +32,11 @@ static const QString longOpt("compose");
 
 static const QString dbIDRecipientStr("dbIDRecipient");
 static const QString dmAnnotationStr("dmAnnotation");
+static const QString dmToHandsStr("dmToHands");
+static const QString dmRecipientRefNumberStr("dmRecipientRefNumber");
+static const QString dmSenderRefNumberStr("dmSenderRefNumber");
+static const QString dmRecipientIdentStr("dmRecipientIdent");
+static const QString dmSenderIdentStr("dmSenderIdent");
 static const QString dmAttachmentStr("dmAttachment");
 
 /* Null objects - for convenience. */
@@ -47,11 +52,21 @@ public:
 	CmdComposePrivate(void)
 	    : m_dbIDRecipient(),
 	    m_dmAnnotation(),
+	    m_dmToHands(),
+	    m_dmRecipientRefNumber(),
+	    m_dmSenderRefNumber(),
+	    m_dmRecipientIdent(),
+	    m_dmSenderIdent(),
 	    m_dmAttachment()
 	{ }
 
 	QStringList m_dbIDRecipient;
 	QString m_dmAnnotation;
+	QString m_dmToHands;
+	QString m_dmRecipientRefNumber;
+	QString m_dmSenderRefNumber;
+	QString m_dmRecipientIdent;
+	QString m_dmSenderIdent;
 	QStringList m_dmAttachment;
 };
 
@@ -179,6 +194,31 @@ CLI::CmdCompose CLI::CmdCompose::deserialise(const QString &content)
 				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDmAnnotation(pair.second);
+		} else if (dmToHandsStr == pair.first) {
+			if (!cmdCompose.dmToHands().isNull()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDmToHands(pair.second);
+		} else if (dmRecipientRefNumberStr == pair.first) {
+			if (!cmdCompose.dmRecipientRefNumber().isNull()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDmRecipientRefNumber(pair.second);
+		} else if (dmSenderRefNumberStr == pair.first) {
+			if (!cmdCompose.dmSenderRefNumber().isNull()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDmSenderRefNumber(pair.second);
+		} else if (dmRecipientIdentStr == pair.first) {
+			if (!cmdCompose.dmRecipientIdent().isNull()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDmRecipientIdent(pair.second);
+		} else if (dmSenderIdentStr == pair.first) {
+			if (!cmdCompose.dmSenderIdent().isNull()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDmSenderIdent(pair.second);
 		} else if (dmAttachmentStr == pair.first) {
 			if (!cmdCompose.dmAttachment().isEmpty()) {
 				return CmdCompose(); /* Already set. */
@@ -203,6 +243,21 @@ QString CLI::CmdCompose::serialise(void) const
 	}
 	if (!dmAnnotation().isEmpty()) {
 		serialised.append(dmAnnotationStr % QStringLiteral("='") % dmAnnotation() % QStringLiteral("'"));
+	}
+	if (!dmToHands().isEmpty()) {
+		serialised.append(dmToHandsStr % QStringLiteral("='") % dmToHands() % QStringLiteral("'"));
+	}
+	if (!dmRecipientRefNumber().isEmpty()) {
+		serialised.append(dmRecipientRefNumberStr % QStringLiteral("='") % dmRecipientRefNumber() % QStringLiteral("'"));
+	}
+	if (!dmSenderRefNumber().isEmpty()) {
+		serialised.append(dmSenderRefNumberStr % QStringLiteral("='") % dmSenderRefNumber() % QStringLiteral("'"));
+	}
+	if (!dmRecipientIdent().isEmpty()) {
+		serialised.append(dmRecipientIdentStr % QStringLiteral("='") % dmRecipientIdent() % QStringLiteral("'"));
+	}
+	if (!dmSenderIdent().isEmpty()) {
+		serialised.append(dmSenderIdentStr % QStringLiteral("='") % dmSenderIdent() % QStringLiteral("'"));
 	}
 	if (!dmAttachment().isEmpty()) {
 		serialised.append(dmAttachmentStr % QStringLiteral("='") % dmAttachment().join(QChar(';')) % QStringLiteral("'"));
@@ -258,6 +313,131 @@ void CLI::CmdCompose::setDmAnnotation(QString &&a)
 	ensureCmdComposePrivate();
 	Q_D(CmdCompose);
 	d->m_dmAnnotation = a;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &CLI::CmdCompose::dmToHands(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dmToHands;
+}
+
+void CLI::CmdCompose::setDmToHands(const QString &th)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmToHands = th;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDmToHands(QString &&th)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmToHands = th;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &CLI::CmdCompose::dmRecipientRefNumber(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dmRecipientRefNumber;
+}
+
+void CLI::CmdCompose::setDmRecipientRefNumber(const QString &rrn)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmRecipientRefNumber = rrn;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDmRecipientRefNumber(QString &&rrn)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmRecipientRefNumber = rrn;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &CLI::CmdCompose::dmSenderRefNumber(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dmSenderRefNumber;
+}
+
+void CLI::CmdCompose::setDmSenderRefNumber(const QString &srn)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmSenderRefNumber = srn;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDmSenderRefNumber(QString &&srn)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmSenderRefNumber = srn;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &CLI::CmdCompose::dmRecipientIdent(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dmRecipientIdent;
+}
+
+void CLI::CmdCompose::setDmRecipientIdent(const QString &ri)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmRecipientIdent = ri;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDmRecipientIdent(QString &&ri)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmRecipientIdent = ri;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &CLI::CmdCompose::dmSenderIdent(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dmSenderIdent;
+}
+
+void CLI::CmdCompose::setDmSenderIdent(const QString &si)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmSenderIdent = si;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDmSenderIdent(QString &&si)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmSenderIdent = si;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
