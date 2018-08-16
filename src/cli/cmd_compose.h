@@ -27,6 +27,8 @@
 #include <QString>
 #include <QStringList>
 
+#include "src/datovka_shared/isds/types.h"
+
 namespace CLI {
 
 	class CmdComposePrivate;
@@ -71,6 +73,16 @@ namespace CLI {
 
 		QString serialise(void) const;
 
+		/*
+		 * Convenience methods for number to string conversion.
+		 */
+		QString dmLegalTitleLawStr(void) const;
+		bool setDmLegalTitleLawStr(const QString &l);
+		QString dmLegalTitleYearStr(void) const;
+		bool setDmLegalTitleYearStr(const QString &y);
+		QString dmPersonalDeliveryStr(void) const;
+		bool setDmPersonalDeliveryStr(const QString &pd);
+
 		/* dbIDRecipient */
 		const QStringList &dbIDRecipient(void) const;
 		void setDbIDRecipient(const QStringList &rbil);
@@ -113,6 +125,33 @@ namespace CLI {
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setDmSenderIdent(QString &&si);
 #endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmLegalTitleLaw */
+		qint64 dmLegalTitleLaw(void) const;
+		void setDmLegalTitleLaw(qint64 l);
+		/* dmLegalTitleYear */
+		qint64 dmLegalTitleYear(void) const;
+		void setDmLegalTitleYear(qint64 y);
+		/* dmLegalTitleSect */
+		const QString &dmLegalTitleSect(void) const;
+		void setDmLegalTitleSect(const QString &s);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmLegalTitleSect(QString &&s);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmLegalTitlePar */
+		const QString &dmLegalTitlePar(void) const;
+		void setDmLegalTitlePar(const QString &p);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmLegalTitlePar(QString &&p);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmLegalTitlePoint */
+		const QString &dmLegalTitlePoint(void) const;
+		void setDmLegalTitlePoint(const QString &p);
+#ifdef Q_COMPILER_RVALUE_REFS
+		void setDmLegalTitlePoint(QString &&p);
+#endif /* Q_COMPILER_RVALUE_REFS */
+		/* dmPersonalDelivery */
+		enum Isds::Type::NilBool dmPersonalDelivery(void) const;
+		void setDmPersonalDelivery(enum Isds::Type::NilBool pd);
 		/* dmAttachment */
 		const QStringList &dmAttachment(void) const;
 		void setDmAttachment(const QStringList &al);

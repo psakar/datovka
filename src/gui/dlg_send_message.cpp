@@ -1006,7 +1006,13 @@ void DlgSendMessage::fillContentCompose(const QString &composeSerialised)
 	    !composeCmd.dmRecipientRefNumber().isEmpty() ||
 	    !composeCmd.dmSenderRefNumber().isEmpty() ||
 	    !composeCmd.dmRecipientIdent().isEmpty() ||
-	    !composeCmd.dmSenderIdent().isEmpty()) {
+	    !composeCmd.dmSenderIdent().isEmpty() ||
+	    !composeCmd.dmLegalTitleLawStr().isEmpty() ||
+	    !composeCmd.dmLegalTitleYearStr().isEmpty() ||
+	    !composeCmd.dmLegalTitleSect().isEmpty() ||
+	    !composeCmd.dmLegalTitlePar().isEmpty() ||
+	    !composeCmd.dmLegalTitlePoint().isEmpty() ||
+	    (composeCmd.dmPersonalDelivery() == Isds::Type::BOOL_TRUE)) {
 		m_ui->optionalFormCheckBox->setCheckState(Qt::Checked);
 	}
 
@@ -1030,6 +1036,24 @@ void DlgSendMessage::fillContentCompose(const QString &composeSerialised)
 	}
 	if (!composeCmd.dmSenderIdent().isEmpty()) {
 		m_ui->dmSenderIdent->setText(composeCmd.dmSenderIdent());
+	}
+	if (!composeCmd.dmLegalTitleLawStr().isEmpty()) {
+		m_ui->dmLegalTitleLaw->setText(composeCmd.dmLegalTitleLawStr());
+	}
+	if (!composeCmd.dmLegalTitleYearStr().isEmpty()) {
+		m_ui->dmLegalTitleYear->setText(composeCmd.dmLegalTitleYearStr());
+	}
+	if (!composeCmd.dmLegalTitleSect().isEmpty()) {
+		m_ui->dmLegalTitleSect->setText(composeCmd.dmLegalTitleSect());
+	}
+	if (!composeCmd.dmLegalTitlePar().isEmpty()) {
+		m_ui->dmLegalTitlePar->setText(composeCmd.dmLegalTitlePar());
+	}
+	if (!composeCmd.dmLegalTitlePoint().isEmpty()) {
+		m_ui->dmLegalTitlePoint->setText(composeCmd.dmLegalTitlePoint());
+	}
+	if (composeCmd.dmPersonalDelivery() == Isds::Type::BOOL_TRUE) {
+		m_ui->dmPersonalDelivery->setCheckState(Qt::Checked);
 	}
 	if (!composeCmd.dmAttachment().isEmpty()) {
 		insertAttachmentFiles(composeCmd.dmAttachment());

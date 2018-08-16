@@ -26,6 +26,7 @@
 
 #include "src/cli/cmd_compose.h"
 #include "src/cli/cmd_tokeniser.h"
+#include "src/datovka_shared/isds/internal_conversion.h"
 #include "src/datovka_shared/log/log.h"
 
 static const QString longOpt("compose");
@@ -37,6 +38,12 @@ static const QString dmRecipientRefNumberStr("dmRecipientRefNumber");
 static const QString dmSenderRefNumberStr("dmSenderRefNumber");
 static const QString dmRecipientIdentStr("dmRecipientIdent");
 static const QString dmSenderIdentStr("dmSenderIdent");
+static const QString dmLegalTitleLawStr("dmLegalTitleLaw");
+static const QString dmLegalTitleYearStr("dmLegalTitleYear");
+static const QString dmLegalTitleSectStr("dmLegalTitleSect");
+static const QString dmLegalTitleParStr("dmLegalTitlePar");
+static const QString dmLegalTitlePointStr("dmLegalTitlePoint");
+static const QString dmPersonalDeliveryStr("dmPersonalDelivery");
 static const QString dmAttachmentStr("dmAttachment");
 
 /* Null objects - for convenience. */
@@ -50,13 +57,11 @@ class CLI::CmdComposePrivate {
 	//Q_DISABLE_COPY(CmdComposePrivate)
 public:
 	CmdComposePrivate(void)
-	    : m_dbIDRecipient(),
-	    m_dmAnnotation(),
-	    m_dmToHands(),
-	    m_dmRecipientRefNumber(),
-	    m_dmSenderRefNumber(),
-	    m_dmRecipientIdent(),
-	    m_dmSenderIdent(),
+	    : m_dbIDRecipient(), m_dmAnnotation(), m_dmToHands(),
+	    m_dmRecipientRefNumber(), m_dmSenderRefNumber(),
+	    m_dmRecipientIdent(), m_dmSenderIdent(), m_dmLegalTitleLaw(-1),
+	    m_dmLegalTitleYear(-1), m_dmLegalTitleSect(), m_dmLegalTitlePar(),
+	    m_dmLegalTitlePoint(), m_dmPersonalDelivery(Isds::Type::BOOL_NULL),
 	    m_dmAttachment()
 	{ }
 
@@ -67,6 +72,12 @@ public:
 	QString m_dmSenderRefNumber;
 	QString m_dmRecipientIdent;
 	QString m_dmSenderIdent;
+	qint64 m_dmLegalTitleLaw;
+	qint64 m_dmLegalTitleYear;
+	QString m_dmLegalTitleSect;
+	QString m_dmLegalTitlePar;
+	QString m_dmLegalTitlePoint;
+	enum Isds::Type::NilBool m_dmPersonalDelivery;
 	QStringList m_dmAttachment;
 };
 
@@ -144,14 +155,14 @@ bool CLI::CmdCompose::isNull(void) const
 
 bool CLI::CmdCompose::installParserOpt(QCommandLineParser &parser)
 {
-	return parser.addOption(QCommandLineOption(longOpt,
+	return parser.addOption(QCommandLineOption(::longOpt,
 	    tr("Brings up the create message window and fill in the supplied data."),
 	    tr("message-options")));
 }
 
 bool CLI::CmdCompose::isSet(const QCommandLineParser &parser)
 {
-	return parser.isSet(longOpt);
+	return parser.isSet(::longOpt);
 }
 
 CLI::CmdCompose CLI::CmdCompose::value(const QCommandLineParser &parser)
@@ -160,7 +171,7 @@ CLI::CmdCompose CLI::CmdCompose::value(const QCommandLineParser &parser)
 		return CmdCompose();
 	}
 
-	return deserialise(parser.value(longOpt));
+	return deserialise(parser.value(::longOpt));
 }
 
 CLI::CmdCompose CLI::CmdCompose::deserialise(const QString &content)
@@ -184,46 +195,76 @@ CLI::CmdCompose CLI::CmdCompose::deserialise(const QString &content)
 			return CmdCompose();
 		}
 
-		if (dbIDRecipientStr == pair.first) {
+		if (::dbIDRecipientStr == pair.first) {
 			if (!cmdCompose.dbIDRecipient().isEmpty()) {
 				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDbIDRecipient(pair.second.split(QChar(';')));
-		} else if (dmAnnotationStr == pair.first) {
+		} else if (::dmAnnotationStr == pair.first) {
 			if (!cmdCompose.dmAnnotation().isNull()) {
 				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDmAnnotation(pair.second);
-		} else if (dmToHandsStr == pair.first) {
+		} else if (::dmToHandsStr == pair.first) {
 			if (!cmdCompose.dmToHands().isNull()) {
 				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDmToHands(pair.second);
-		} else if (dmRecipientRefNumberStr == pair.first) {
+		} else if (::dmRecipientRefNumberStr == pair.first) {
 			if (!cmdCompose.dmRecipientRefNumber().isNull()) {
 				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDmRecipientRefNumber(pair.second);
-		} else if (dmSenderRefNumberStr == pair.first) {
+		} else if (::dmSenderRefNumberStr == pair.first) {
 			if (!cmdCompose.dmSenderRefNumber().isNull()) {
 				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDmSenderRefNumber(pair.second);
-		} else if (dmRecipientIdentStr == pair.first) {
+		} else if (::dmRecipientIdentStr == pair.first) {
 			if (!cmdCompose.dmRecipientIdent().isNull()) {
 				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDmRecipientIdent(pair.second);
-		} else if (dmSenderIdentStr == pair.first) {
+		} else if (::dmSenderIdentStr == pair.first) {
 			if (!cmdCompose.dmSenderIdent().isNull()) {
 				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDmSenderIdent(pair.second);
+		} else if (::dmLegalTitleLawStr == pair.first) {
+			if (!cmdCompose.dmLegalTitleLawStr().isNull() ||
+			    !cmdCompose.setDmLegalTitleLawStr(pair.second)) {
+				return CmdCompose(); /* Already set or not a number. */
+			}
+		} else if (::dmLegalTitleYearStr == pair.first) {
+			if (!cmdCompose.dmLegalTitleYearStr().isNull() ||
+			    !cmdCompose.setDmLegalTitleYearStr(pair.second)) {
+				return CmdCompose(); /* Already set or not a number. */
+			}
+		} else if (::dmLegalTitleSectStr == pair.first) {
+			if (!cmdCompose.dmLegalTitleSect().isNull()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDmLegalTitleSect(pair.second);
+		} else if (::dmLegalTitleParStr == pair.first) {
+			if (!cmdCompose.dmLegalTitlePar().isNull()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDmLegalTitlePar(pair.second);
+		} else if (::dmLegalTitlePointStr == pair.first) {
+			if (!cmdCompose.dmLegalTitlePoint().isNull()) {
+				return CmdCompose(); /* Already set. */
+			}
+			cmdCompose.setDmLegalTitlePoint(pair.second);
 		} else if (dmAttachmentStr == pair.first) {
 			if (!cmdCompose.dmAttachment().isEmpty()) {
 				return CmdCompose(); /* Already set. */
 			}
 			cmdCompose.setDmAttachment(pair.second.split(QChar(';')));
+		} else if (::dmPersonalDeliveryStr == pair.first) {
+			if (!cmdCompose.dmPersonalDeliveryStr().isNull() ||
+			    !cmdCompose.setDmPersonalDeliveryStr(pair.second)) {
+				return CmdCompose(); /* Already set or cannot be converted. */
+			}
 		} else {
 			logErrorNL("Unknown option '%s'.",
 			    pair.first.toUtf8().constData());
@@ -239,31 +280,123 @@ QString CLI::CmdCompose::serialise(void) const
 	QStringList serialised;
 
 	if (!dbIDRecipient().isEmpty()) {
-		serialised.append(dbIDRecipientStr % QStringLiteral("='") % dbIDRecipient().join(QChar(';')) % QStringLiteral("'"));
+		serialised.append(::dbIDRecipientStr % QStringLiteral("='") % dbIDRecipient().join(QChar(';')) % QStringLiteral("'"));
 	}
 	if (!dmAnnotation().isEmpty()) {
-		serialised.append(dmAnnotationStr % QStringLiteral("='") % dmAnnotation() % QStringLiteral("'"));
+		serialised.append(::dmAnnotationStr % QStringLiteral("='") % dmAnnotation() % QStringLiteral("'"));
 	}
 	if (!dmToHands().isEmpty()) {
-		serialised.append(dmToHandsStr % QStringLiteral("='") % dmToHands() % QStringLiteral("'"));
+		serialised.append(::dmToHandsStr % QStringLiteral("='") % dmToHands() % QStringLiteral("'"));
 	}
 	if (!dmRecipientRefNumber().isEmpty()) {
-		serialised.append(dmRecipientRefNumberStr % QStringLiteral("='") % dmRecipientRefNumber() % QStringLiteral("'"));
+		serialised.append(::dmRecipientRefNumberStr % QStringLiteral("='") % dmRecipientRefNumber() % QStringLiteral("'"));
 	}
 	if (!dmSenderRefNumber().isEmpty()) {
-		serialised.append(dmSenderRefNumberStr % QStringLiteral("='") % dmSenderRefNumber() % QStringLiteral("'"));
+		serialised.append(::dmSenderRefNumberStr % QStringLiteral("='") % dmSenderRefNumber() % QStringLiteral("'"));
 	}
 	if (!dmRecipientIdent().isEmpty()) {
-		serialised.append(dmRecipientIdentStr % QStringLiteral("='") % dmRecipientIdent() % QStringLiteral("'"));
+		serialised.append(::dmRecipientIdentStr % QStringLiteral("='") % dmRecipientIdent() % QStringLiteral("'"));
 	}
 	if (!dmSenderIdent().isEmpty()) {
-		serialised.append(dmSenderIdentStr % QStringLiteral("='") % dmSenderIdent() % QStringLiteral("'"));
+		serialised.append(::dmSenderIdentStr % QStringLiteral("='") % dmSenderIdent() % QStringLiteral("'"));
+	}
+	if (!dmLegalTitleLawStr().isEmpty()) {
+		serialised.append(::dmLegalTitleLawStr % QStringLiteral("='") % dmLegalTitleLawStr() % QStringLiteral("'"));
+	}
+	if (!dmLegalTitleYearStr().isEmpty()) {
+		serialised.append(::dmLegalTitleYearStr % QStringLiteral("='") % dmLegalTitleYearStr() % QStringLiteral("'"));
+	}
+	if (!dmLegalTitleSect().isEmpty()) {
+		serialised.append(::dmLegalTitleSectStr % QStringLiteral("='") % dmLegalTitleSect() % QStringLiteral("'"));
+	}
+	if (!dmLegalTitlePar().isEmpty()) {
+		serialised.append(::dmLegalTitleParStr % QStringLiteral("='") % dmLegalTitlePar() % QStringLiteral("'"));
+	}
+	if (!dmLegalTitlePoint().isEmpty()) {
+		serialised.append(::dmLegalTitlePointStr % QStringLiteral("='") % dmLegalTitlePoint() % QStringLiteral("'"));
+	}
+	if (!dmPersonalDeliveryStr().isEmpty()) {
+		serialised.append(::dmPersonalDeliveryStr % QStringLiteral("='") % dmPersonalDeliveryStr() % QStringLiteral("'"));
 	}
 	if (!dmAttachment().isEmpty()) {
 		serialised.append(dmAttachmentStr % QStringLiteral("='") % dmAttachment().join(QChar(';')) % QStringLiteral("'"));
 	}
 
 	return serialised.join(QStringLiteral(","));
+}
+
+QString CLI::CmdCompose::dmLegalTitleLawStr(void) const
+{
+	return Isds::nonNegativeLong2String(dmLegalTitleLaw());
+}
+
+bool CLI::CmdCompose::setDmLegalTitleLawStr(const QString &l)
+{
+	bool ok = false;
+	qint64 num = Isds::string2NonNegativeLong(l, &ok);
+	if (!ok) {
+		return false;
+	}
+	setDmLegalTitleLaw(num);
+	return true;
+}
+
+QString CLI::CmdCompose::dmLegalTitleYearStr(void) const
+{
+	return Isds::nonNegativeLong2String(dmLegalTitleYear());
+}
+
+bool CLI::CmdCompose::setDmLegalTitleYearStr(const QString &y)
+{
+	bool ok = false;
+	qint64 num = Isds::string2NonNegativeLong(y, &ok);
+	if (!ok) {
+		return false;
+	}
+	setDmLegalTitleYear(num);
+	return true;
+}
+
+QString CLI::CmdCompose::dmPersonalDeliveryStr(void) const
+{
+	switch (dmPersonalDelivery()) {
+	case Isds::Type::BOOL_NULL:
+		return QString();
+		break;
+	case Isds::Type::BOOL_FALSE:
+		return QStringLiteral("0");
+		break;
+	case Isds::Type::BOOL_TRUE:
+		return QStringLiteral("1");
+		break;
+	default:
+		Q_ASSERT(0);
+		return QString();
+		break;
+	}
+}
+
+bool CLI::CmdCompose::setDmPersonalDeliveryStr(const QString &pd)
+{
+	if (pd.isEmpty()) {
+		setDmPersonalDelivery(Isds::Type::BOOL_NULL);
+		return true;
+	}
+
+	const QString lower(pd.toLower());
+	if ((lower == QStringLiteral("0")) ||
+	    (lower == QStringLiteral("false")) ||
+	    (lower == QStringLiteral("no"))) {
+		setDmPersonalDelivery(Isds::Type::BOOL_FALSE);
+		return true;
+	} else if ((lower == QStringLiteral("1")) ||
+	    (lower == QStringLiteral("true")) ||
+	    (lower == QStringLiteral("yes"))) {
+		setDmPersonalDelivery(Isds::Type::BOOL_TRUE);
+		return true;
+	} else {
+		return false;
+	}
 }
 
 const QStringList &CLI::CmdCompose::dbIDRecipient(void) const
@@ -440,6 +573,129 @@ void CLI::CmdCompose::setDmSenderIdent(QString &&si)
 	d->m_dmSenderIdent = si;
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+qint64 CLI::CmdCompose::dmLegalTitleLaw(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return -1;
+	}
+	return d->m_dmLegalTitleLaw;
+}
+
+void CLI::CmdCompose::setDmLegalTitleLaw(qint64 l)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmLegalTitleLaw = (l >= 0) ? l : -1;
+}
+
+qint64 CLI::CmdCompose::dmLegalTitleYear(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return -1;
+	}
+	return d->m_dmLegalTitleYear;
+}
+
+void CLI::CmdCompose::setDmLegalTitleYear(qint64 y)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmLegalTitleYear = (y >= 0) ? y : -1;
+}
+
+const QString &CLI::CmdCompose::dmLegalTitleSect(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dmLegalTitleSect;
+}
+
+void CLI::CmdCompose::setDmLegalTitleSect(const QString &s)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmLegalTitleSect = s;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDmLegalTitleSect(QString &&s)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmLegalTitleSect = s;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &CLI::CmdCompose::dmLegalTitlePar(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dmLegalTitlePar;
+}
+
+void CLI::CmdCompose::setDmLegalTitlePar(const QString &p)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmLegalTitlePar = p;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDmLegalTitlePar(QString &&p)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmLegalTitlePar = p;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &CLI::CmdCompose::dmLegalTitlePoint(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+	return d->m_dmLegalTitlePoint;
+}
+
+void CLI::CmdCompose::setDmLegalTitlePoint(const QString &p)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmLegalTitlePoint = p;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void CLI::CmdCompose::setDmLegalTitlePoint(QString &&p)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmLegalTitlePoint = p;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+enum Isds::Type::NilBool CLI::CmdCompose::dmPersonalDelivery(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Isds::Type::BOOL_NULL;
+	}
+	return d->m_dmPersonalDelivery;
+}
+
+void CLI::CmdCompose::setDmPersonalDelivery(enum Isds::Type::NilBool pd)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmPersonalDelivery = pd;
+}
 
 const QStringList &CLI::CmdCompose::dmAttachment(void) const
 {
