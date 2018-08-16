@@ -44,6 +44,10 @@ static const QString dmLegalTitleSectStr("dmLegalTitleSect");
 static const QString dmLegalTitleParStr("dmLegalTitlePar");
 static const QString dmLegalTitlePointStr("dmLegalTitlePoint");
 static const QString dmPersonalDeliveryStr("dmPersonalDelivery");
+static const QString dmAllowSubstDeliveryStr("dmAllowSubstDelivery");
+//static const QString dmTypeStr("dmType"); /* payReplyCheckBox? */
+//static const QString dmOVMStr("dmOVM");
+static const QString dmPublishOwnIDStr("dmPublishOwnID");
 static const QString dmAttachmentStr("dmAttachment");
 
 /* Null objects - for convenience. */
@@ -62,7 +66,8 @@ public:
 	    m_dmRecipientIdent(), m_dmSenderIdent(), m_dmLegalTitleLaw(-1),
 	    m_dmLegalTitleYear(-1), m_dmLegalTitleSect(), m_dmLegalTitlePar(),
 	    m_dmLegalTitlePoint(), m_dmPersonalDelivery(Isds::Type::BOOL_NULL),
-	    m_dmAttachment()
+	    m_dmAllowSubstDelivery(Isds::Type::BOOL_NULL),
+	    m_dmPublishOwnID(Isds::Type::BOOL_NULL), m_dmAttachment()
 	{ }
 
 	QStringList m_dbIDRecipient;
@@ -78,6 +83,8 @@ public:
 	QString m_dmLegalTitlePar;
 	QString m_dmLegalTitlePoint;
 	enum Isds::Type::NilBool m_dmPersonalDelivery;
+	enum Isds::Type::NilBool m_dmAllowSubstDelivery;
+	enum Isds::Type::NilBool m_dmPublishOwnID;
 	QStringList m_dmAttachment;
 };
 
@@ -265,6 +272,16 @@ CLI::CmdCompose CLI::CmdCompose::deserialise(const QString &content)
 			    !cmdCompose.setDmPersonalDeliveryStr(pair.second)) {
 				return CmdCompose(); /* Already set or cannot be converted. */
 			}
+		} else if (::dmAllowSubstDeliveryStr == pair.first) {
+			if (!cmdCompose.dmAllowSubstDeliveryStr().isNull() ||
+			    !cmdCompose.setDmAllowSubstDeliveryStr(pair.second)) {
+				return CmdCompose(); /* Already set or cannot be converted. */
+			}
+		} else if (::dmPublishOwnIDStr == pair.first) {
+			if (!cmdCompose.dmPublishOwnIDStr().isNull() ||
+			    !cmdCompose.setDmPublishOwnIDStr(pair.second)) {
+				return CmdCompose(); /* Already set or cannot be converted. */
+			}
 		} else {
 			logErrorNL("Unknown option '%s'.",
 			    pair.first.toUtf8().constData());
@@ -318,6 +335,12 @@ QString CLI::CmdCompose::serialise(void) const
 	if (!dmPersonalDeliveryStr().isEmpty()) {
 		serialised.append(::dmPersonalDeliveryStr % QStringLiteral("='") % dmPersonalDeliveryStr() % QStringLiteral("'"));
 	}
+	if (!dmAllowSubstDeliveryStr().isEmpty()) {
+		serialised.append(::dmAllowSubstDeliveryStr % QStringLiteral("='") % dmAllowSubstDeliveryStr() % QStringLiteral("'"));
+	}
+	if (!dmPublishOwnIDStr().isEmpty()) {
+		serialised.append(::dmPublishOwnIDStr % QStringLiteral("='") % dmPublishOwnIDStr() % QStringLiteral("'"));
+	}
 	if (!dmAttachment().isEmpty()) {
 		serialised.append(dmAttachmentStr % QStringLiteral("='") % dmAttachment().join(QChar(';')) % QStringLiteral("'"));
 	}
@@ -357,46 +380,115 @@ bool CLI::CmdCompose::setDmLegalTitleYearStr(const QString &y)
 	return true;
 }
 
-QString CLI::CmdCompose::dmPersonalDeliveryStr(void) const
+/*!
+ * @brief Converts boolean type to string.
+ *
+ * @param[in] nilBool Boolean value.
+ * @return String equivalent.
+ */
+static
+const QString &nilBoolToString(enum Isds::Type::NilBool nilBool)
 {
-	switch (dmPersonalDelivery()) {
+	static const QString zeroStr("0");
+	static const QString oneStr("1");
+
+	switch (nilBool) {
 	case Isds::Type::BOOL_NULL:
-		return QString();
+		return nullString;
 		break;
 	case Isds::Type::BOOL_FALSE:
-		return QStringLiteral("0");
+		return zeroStr;
 		break;
 	case Isds::Type::BOOL_TRUE:
-		return QStringLiteral("1");
+		return oneStr;
 		break;
 	default:
 		Q_ASSERT(0);
-		return QString();
+		return nullString;
 		break;
 	}
 }
 
-bool CLI::CmdCompose::setDmPersonalDeliveryStr(const QString &pd)
+/*!
+ * @brief Converts string to boolean type.
+ */
+static
+enum Isds::Type::NilBool stringToNilBool(const QString &str,
+    bool *ok = Q_NULLPTR)
 {
-	if (pd.isEmpty()) {
-		setDmPersonalDelivery(Isds::Type::BOOL_NULL);
-		return true;
+	if (str.isEmpty()) {
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::Type::BOOL_NULL;
 	}
 
-	const QString lower(pd.toLower());
+	const QString lower(str.toLower());
 	if ((lower == QStringLiteral("0")) ||
 	    (lower == QStringLiteral("false")) ||
 	    (lower == QStringLiteral("no"))) {
-		setDmPersonalDelivery(Isds::Type::BOOL_FALSE);
-		return true;
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::Type::BOOL_FALSE;
 	} else if ((lower == QStringLiteral("1")) ||
 	    (lower == QStringLiteral("true")) ||
 	    (lower == QStringLiteral("yes"))) {
-		setDmPersonalDelivery(Isds::Type::BOOL_TRUE);
-		return true;
+		if (ok != Q_NULLPTR) {
+			*ok = true;
+		}
+		return Isds::Type::BOOL_TRUE;
 	} else {
-		return false;
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return Isds::Type::BOOL_NULL;
 	}
+}
+
+const QString &CLI::CmdCompose::dmPersonalDeliveryStr(void) const
+{
+	return nilBoolToString(dmPersonalDelivery());
+}
+
+bool CLI::CmdCompose::setDmPersonalDeliveryStr(const QString &pd)
+{
+	bool iOk = false;
+	enum Isds::Type::NilBool nilBool = stringToNilBool(pd, &iOk);
+	if (iOk) {
+		setDmPersonalDelivery(nilBool);
+	}
+	return iOk;
+}
+
+const QString &CLI::CmdCompose::dmAllowSubstDeliveryStr(void) const
+{
+	return nilBoolToString(dmAllowSubstDelivery());
+}
+
+bool CLI::CmdCompose::setDmAllowSubstDeliveryStr(const QString &sd)
+{
+	bool iOk = false;
+	enum Isds::Type::NilBool nilBool = stringToNilBool(sd, &iOk);
+	if (iOk) {
+		setDmAllowSubstDelivery(nilBool);
+	}
+	return iOk;
+}
+
+const QString &CLI::CmdCompose::dmPublishOwnIDStr(void) const
+{
+	return nilBoolToString(dmPublishOwnID());
+}
+
+bool CLI::CmdCompose::setDmPublishOwnIDStr(const QString &poi)
+{
+	bool iOk = false;
+	enum Isds::Type::NilBool nilBool = stringToNilBool(poi, &iOk);
+	if (iOk) {
+		setDmPublishOwnID(nilBool);
+	}
+	return iOk;
 }
 
 const QStringList &CLI::CmdCompose::dbIDRecipient(void) const
@@ -695,6 +787,38 @@ void CLI::CmdCompose::setDmPersonalDelivery(enum Isds::Type::NilBool pd)
 	ensureCmdComposePrivate();
 	Q_D(CmdCompose);
 	d->m_dmPersonalDelivery = pd;
+}
+
+enum Isds::Type::NilBool CLI::CmdCompose::dmAllowSubstDelivery(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Isds::Type::BOOL_NULL;
+	}
+	return d->m_dmAllowSubstDelivery;
+}
+
+void CLI::CmdCompose::setDmAllowSubstDelivery(enum Isds::Type::NilBool sd)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmAllowSubstDelivery = sd;
+}
+
+enum Isds::Type::NilBool CLI::CmdCompose::dmPublishOwnID(void) const
+{
+	Q_D(const CmdCompose);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return Isds::Type::BOOL_NULL;
+	}
+	return d->m_dmPublishOwnID;
+}
+
+void CLI::CmdCompose::setDmPublishOwnID(enum Isds::Type::NilBool poi)
+{
+	ensureCmdComposePrivate();
+	Q_D(CmdCompose);
+	d->m_dmPublishOwnID = poi;
 }
 
 const QStringList &CLI::CmdCompose::dmAttachment(void) const

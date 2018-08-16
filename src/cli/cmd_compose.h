@@ -80,8 +80,12 @@ namespace CLI {
 		bool setDmLegalTitleLawStr(const QString &l);
 		QString dmLegalTitleYearStr(void) const;
 		bool setDmLegalTitleYearStr(const QString &y);
-		QString dmPersonalDeliveryStr(void) const;
+		const QString &dmPersonalDeliveryStr(void) const;
 		bool setDmPersonalDeliveryStr(const QString &pd);
+		const QString &dmAllowSubstDeliveryStr(void) const;
+		bool setDmAllowSubstDeliveryStr(const QString &sd);
+		const QString &dmPublishOwnIDStr(void) const;
+		bool setDmPublishOwnIDStr(const QString &poi);
 
 		/* dbIDRecipient */
 		const QStringList &dbIDRecipient(void) const;
@@ -152,6 +156,12 @@ namespace CLI {
 		/* dmPersonalDelivery */
 		enum Isds::Type::NilBool dmPersonalDelivery(void) const;
 		void setDmPersonalDelivery(enum Isds::Type::NilBool pd);
+		/* dmAllowSubstDelivery */
+		enum Isds::Type::NilBool dmAllowSubstDelivery(void) const;
+		void setDmAllowSubstDelivery(enum Isds::Type::NilBool sd);
+		/* dmPublishOwnID */
+		enum Isds::Type::NilBool dmPublishOwnID(void) const;
+		void setDmPublishOwnID(enum Isds::Type::NilBool poi);
 		/* dmAttachment */
 		const QStringList &dmAttachment(void) const;
 		void setDmAttachment(const QStringList &al);

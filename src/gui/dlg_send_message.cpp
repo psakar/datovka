@@ -1052,8 +1052,20 @@ void DlgSendMessage::fillContentCompose(const QString &composeSerialised)
 	if (!composeCmd.dmLegalTitlePoint().isEmpty()) {
 		m_ui->dmLegalTitlePoint->setText(composeCmd.dmLegalTitlePoint());
 	}
-	if (composeCmd.dmPersonalDelivery() == Isds::Type::BOOL_TRUE) {
-		m_ui->dmPersonalDelivery->setCheckState(Qt::Checked);
+	if (composeCmd.dmPersonalDelivery() != Isds::Type::BOOL_NULL) {
+		m_ui->dmPersonalDelivery->setCheckState(
+		    (composeCmd.dmPersonalDelivery() == Isds::Type::BOOL_TRUE) ?
+		        Qt::Checked : Qt::Unchecked);
+	}
+	if (composeCmd.dmAllowSubstDelivery() != Isds::Type::BOOL_NULL) {
+		m_ui->dmAllowSubstDelivery->setCheckState(
+		    (composeCmd.dmAllowSubstDelivery() == Isds::Type::BOOL_TRUE) ?
+		        Qt::Checked : Qt::Unchecked);
+	}
+	if (composeCmd.dmPublishOwnID() != Isds::Type::BOOL_NULL) {
+		m_ui->dmPublishOwnID->setCheckState(
+		    (composeCmd.dmPublishOwnID() == Isds::Type::BOOL_TRUE) ?
+		        Qt::Checked : Qt::Unchecked);
 	}
 	if (!composeCmd.dmAttachment().isEmpty()) {
 		insertAttachmentFiles(composeCmd.dmAttachment());
