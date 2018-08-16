@@ -33,6 +33,12 @@ namespace CLI {
 
 	class CmdComposePrivate;
 
+	/*!
+	 * @brief Encapsulates the --compose CLI option and the arguments.
+	 *
+	 * @note The class is used to pass content to the send message dialogue
+	 * from command line.
+	 */
 	class CmdCompose {
 		Q_DECLARE_PRIVATE(CmdCompose)
 		Q_DECLARE_TR_FUNCTIONS(CmdCompose)
@@ -62,15 +68,33 @@ namespace CLI {
 		static
 		bool isSet(const QCommandLineParser &parser);
 
-		/*
-		 * @brief
+		/*!
+		 * @brief Creates an object instance from command line options.
+		 *
+		 * @param[in] parser Command-line option parser.
+		 * @return Non-null instance if all options recognised,
+		 *     null instance on error.
 		 */
 		static
 		CmdCompose value(const QCommandLineParser &parser);
 
+		/*!
+		 * @brief Creates an object from a string containing serialised
+		 *     data.
+		 *
+		 * @param[in] content Serialised content. Follows same syntax
+		 *                    as the command-line option argument.
+		 * @return Null instance on any error.
+		 */
 		static
 		CmdCompose deserialise(const QString &content);
 
+		/*!
+		 * @brief Dumps content into a string. The string follows
+		 *     the same syntax as the command-line option argument.
+		 *
+		 * @return Serialised data.
+		 */
 		QString serialise(void) const;
 
 		/*

@@ -163,7 +163,7 @@ bool CLI::CmdCompose::isNull(void) const
 bool CLI::CmdCompose::installParserOpt(QCommandLineParser &parser)
 {
 	return parser.addOption(QCommandLineOption(::longOpt,
-	    tr("Brings up the create message window and fill in the supplied data."),
+	    tr("Brings up the send message dialogue window and fills in the supplied data."),
 	    tr("message-options")));
 }
 
@@ -411,6 +411,10 @@ const QString &nilBoolToString(enum Isds::Type::NilBool nilBool)
 
 /*!
  * @brief Converts string to boolean type.
+ *
+ * @param[in]  str String containing a boolean value description.
+ * @param[out] ok Set to true if value was successfully converted.
+ * @return Boolean value.
  */
 static
 enum Isds::Type::NilBool stringToNilBool(const QString &str,
