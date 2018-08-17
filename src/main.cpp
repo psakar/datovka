@@ -166,6 +166,7 @@ int main(int argc, char *argv[])
 	/* Ensure only one instance with given configuration file. */
 	SingleInstance singleInstance(GlobInstcs::prefsPtr->loadConfPath());
 	if (singleInstance.existsInSystem()) {
+		int ret = EXIT_FAILURE;
 		logErrorNL("%s",
 		    "Another application already uses same configuration.");
 		logInfoNL("%s", "Notifying key owner and exiting.");
@@ -174,14 +175,16 @@ int main(int argc, char *argv[])
 			logErrorNL("%s", "Could not send message to owner.");
 		}
 		if (CLI::CmdCompose::isSet(parser)) {
-			if (!singleInstance.sendMessage(
+			if (singleInstance.sendMessage(
 			        SingleInstance::MTYPE_COMPOSE,
 			        CLI::CmdCompose::value(parser).serialise())) {
+				ret = EXIT_SUCCESS;
+			} else {
 				logErrorNL("%s",
 				    "Could not send message to owner.");
 			}
 		}
-		return EXIT_FAILURE;
+		return ret;
 	}
 
 	qint64 start, stop, diff;

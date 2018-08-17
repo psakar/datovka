@@ -26,6 +26,8 @@
 
 #include "src/cli/cmd_tokeniser.h"
 
+/* QStringRef::operator[] is avaliable from Qt-5.7. */
+
 /*!
  * @brief Returns s list of substrings which have been divided by separator.
  *
@@ -57,7 +59,7 @@ QList<QStringRef> separatedItemsQuotes(const QChar &sep,
 	int stop = 0;
 	bool inSingeQuotes = false;
 	while (stop < strRef.size()) {
-		const QChar ch(strRef[stop]);
+		const QChar ch(strRef.at(stop));
 
 		if (ch == quote) {
 			/* Start or end of single quotes. */
@@ -82,7 +84,7 @@ QList<QStringRef> separatedItemsQuotes(const QChar &sep,
 			*ok = false;
 		}
 		return QList<QStringRef>();
-	} else if ((start < strRef.size()) || (strRef[strRef.size() - 1] == sep)) {
+	} else if ((start < strRef.size()) || (strRef.at(strRef.size() - 1) == sep)) {
 		QStringRef ref(strRef.mid(start).trimmed());
 		if (!ignoreEmpty || !ref.isEmpty()) {
 			refList.append(ref);
@@ -126,7 +128,7 @@ QList<QStringRef> blocksQuotes(const QStringRef &strRef, bool ignoreEmpty,
 	int stop = 0;
 	bool inSingeQuotes = false;
 	while (stop < strRef.size()) {
-		const QChar ch(strRef[stop]);
+		const QChar ch(strRef.at(stop));
 
 		if (ch == quote) {
 			QStringRef ref(strRef.mid(start, stop - start).trimmed());
