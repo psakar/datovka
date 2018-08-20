@@ -179,10 +179,15 @@ bool SingleInstance::sendMessage(int msgType, const QString &msgVal)
 	}
 #endif
 
-	const QString message(composeMessage(msgType, msgVal));
+	QByteArray byteArray;
+	{
+		const QString message(composeMessage(msgType, msgVal));
+		byteArray.append(message.toUtf8());
+		byteArray.append('\0');
+	}
 
 	/* Only short messages can be sent. */
-	if (message.size() > MAX_MSG_SIZE) {
+	if (byteArray.size() > MAX_MSG_SIZE) {
 		return false;
 	}
 
@@ -199,18 +204,16 @@ bool SingleInstance::sendMessage(int msgType, const QString &msgVal)
 		to += sizeToRead + sizeof(sizeToRead);
 	}
 
+	qint32 beSize = qToBigEndian((qint32)byteArray.size());
+
 	/* Compute the remaining space. */
-	if ((MEM_SIZE - (to - begin)) < (message.size() + 2)) {
+	if ((MEM_SIZE - (to - begin)) < (byteArray.size() + (int)sizeof(beSize))) {
 		return false;
 	}
 
-	QByteArray byteArray;
-	qint32 beSize = qToBigEndian((qint32)message.size());
-	byteArray.append((char *)&beSize, sizeof(beSize));
-	byteArray.append(message.toUtf8());
-	byteArray.append('\0');
-
-	memcpy(to, byteArray.data(), byteArray.size());
+	std::memcpy(to, &beSize, sizeof(beSize));
+	to += sizeof(beSize);
+	std::memcpy(to, byteArray.constData(), byteArray.size());
 
 	m_shMem.unlock();
 
