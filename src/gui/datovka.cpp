@@ -2155,7 +2155,14 @@ void MainWindow::processSingleInstanceMessages(int msgType,
 		this->activateWindow();
 		break;
 	case SingleInstance::MTYPE_COMPOSE:
-		showSendMessageDialog(DlgSendMessage::ACT_NEW, msgVal);
+		if (m_accountModel.rowCount() > 0) {
+			showSendMessageDialog(DlgSendMessage::ACT_NEW, msgVal);
+		} else {
+			QMessageBox::information(this,
+			    tr("Cannot create message"),
+			    tr("Create an user account first before trying to create and send a message."),
+			    QMessageBox::Ok, QMessageBox::Ok);
+		}
 		break;
 	default:
 		break;
