@@ -146,6 +146,30 @@ QString composeMessage(int msgType, const QString &msgVal)
 	return msgTypeToStr(msgType) % msgTypeSep % msgVal;
 }
 
+/*!
+ * @brief Reads message length from the point in memory.
+ *
+ * @param[in] loc Memory location.
+ * @return Message length.
+ */
+static
+qint32 readMsgLen(const char *loc)
+{
+	if (Q_UNLIKELY(loc == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	/*
+	 * Cannot use
+	 * sizeToRead = qFromBigEndian(*(qint32 *)loc);
+	 * because of memory alignment issues.
+	 */
+	qint32 bi32;
+	std::memcpy(&bi32, loc, sizeof(bi32));
+	return qFromBigEndian(bi32);
+}
+
 bool SingleInstance::sendMessage(int msgType, const QString &msgVal)
 {
 #if 0
@@ -167,8 +191,11 @@ bool SingleInstance::sendMessage(int msgType, const QString &msgVal)
 	/* Find the end of the buffer. */
 	char *begin = (char *) m_shMem.data();
 	char *to = begin;
-	while(((to - begin) < MEM_SIZE) && (*to != '\0')) {
-		qint32 sizeToRead = qFromBigEndian(*(qint32 *)to);
+	while ((to - begin) < MEM_SIZE) {
+		qint32 sizeToRead = readMsgLen(to);
+		if (sizeToRead == 0) {
+			break;
+		}
 		to += sizeToRead + sizeof(sizeToRead);
 	}
 
@@ -252,8 +279,8 @@ void SingleInstance::checkMessage(void)
 	char *begin = (char *) m_shMem.data();
 	char *from = begin;
 
-	while(((from - begin) < MEM_SIZE) ){
-		qint32 sizeToRead = qFromBigEndian(*(qint32 *)from);
+	while ((from - begin) < MEM_SIZE) {
+		qint32 sizeToRead = readMsgLen(from);
 		if (sizeToRead == 0) {
 			break;
 		}
