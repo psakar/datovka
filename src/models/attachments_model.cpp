@@ -46,6 +46,21 @@ AttachmentTblModel::AttachmentTblModel(QObject *parent)
 }
 
 /*!
+ * @brief Check whether file exists.
+ *
+ * @param[in] filePath Path to file.
+ * @return True if file exists.
+ */
+static inline
+bool fileExistent(const QString &filePath)
+{
+	if (filePath.isEmpty()) {
+		return false;
+	}
+	return QFileInfo(filePath).exists();
+}
+
+/*!
  * @brief Check whether file exists and is readable.
  *
  * @param[in] filePath Path to file.
@@ -441,24 +456,34 @@ bool AttachmentTblModel::setMessage(const Isds::Message &message)
 
 int AttachmentTblModel::insertAttachmentFile(const QString &filePath, int row)
 {
+	if (!fileExistent(filePath)) {
+		logWarningNL("Ignoring non-existent file '%s'.",
+		    filePath.toUtf8().constData());
+		return FILE_NOT_EXISTENT;
+	} else if (!fileReadable(filePath)) {
+		logWarningNL("Ignoring file '%s' which cannot be read.",
+		    filePath.toUtf8().constData());
+		return FILE_NOT_READABLE;
+	}
+
 	QFile attFile(filePath);
 
 	int fileSize = attFile.size();
 	if (0 == fileSize) {
-		logWarning("Ignoring file '%s' with zero size.\n",
+		logWarningNL("Ignoring file '%s' with zero size.",
 		    filePath.toUtf8().constData());
-		return 0;
+		return FILE_ZERO_SIZE;
 	}
 
-	QString fileName(QFileInfo(attFile.fileName()).fileName());
-	QMimeType mimeType(QMimeDatabase().mimeTypeForFile(attFile));
+	const QString fileName(QFileInfo(attFile.fileName()).fileName());
+	const QMimeType mimeType(QMimeDatabase().mimeTypeForFile(attFile));
 
 	for (int i = 0; i < rowCount(); ++i) {
 		if (_data(i, FPATH_COL).toString() == filePath) {
 			/* Already in table. */
 			logWarning("File '%s' already in table.\n",
 			    filePath.toUtf8().constData());
-			return -1;
+			return FILE_ALREADY_PRESENT;
 		}
 	}
 
@@ -484,7 +509,7 @@ int AttachmentTblModel::insertAttachmentFile(const QString &filePath, int row)
 	if (insertVector(rowVect, row, true)) {
 		return fileSize;
 	} else {
-		return -1;
+		return OTHER_ERROR;
 	}
 }
 

@@ -350,8 +350,8 @@ MainWindow::MainWindow(QWidget *parent)
 
 	/* Single instance emitter. */
 	connect(GlobInstcs::snglInstEmitterPtr,
-	    SIGNAL(messageReceived(QString)), this,
-	    SLOT(processSingleInstanceMessages(QString)));
+	    SIGNAL(messageReceived(int, QString)), this,
+	    SLOT(processSingleInstanceMessages(int, QString)));
 
 	/* Worker-related processing signals. */
 	connect(GlobInstcs::msgProcEmitterPtr,
@@ -2140,16 +2140,32 @@ void MainWindow::openSelectedAttachment(const QModelIndex &index)
 	}
 }
 
-void MainWindow::processSingleInstanceMessages(const QString &message)
+void MainWindow::processSingleInstanceMessages(int msgType,
+    const QString &msgVal)
 {
 	debugSlotCall();
 
-	logDebugLv0NL("Received message '%s'.", message.toUtf8().constData());
+	logDebugLv0NL("Received message '%d>%s'.", msgType,
+	    msgVal.toUtf8().constData());
 
-	if (SingleInstance::msgRaiseMainWindow == message) {
+	switch (msgType) {
+	case SingleInstance::MTYPE_RAISE_MAIN_WIN:
 		this->show();
 		this->raise();
 		this->activateWindow();
+		break;
+	case SingleInstance::MTYPE_COMPOSE:
+		if (m_accountModel.rowCount() > 0) {
+			showSendMessageDialog(DlgSendMessage::ACT_NEW, msgVal);
+		} else {
+			QMessageBox::information(this,
+			    tr("Cannot create message"),
+			    tr("Create an user account first before trying to create and send a message."),
+			    QMessageBox::Ok, QMessageBox::Ok);
+		}
+		break;
+	default:
+		break;
 	}
 }
 
@@ -4662,7 +4678,8 @@ QList<Task::AccountDescr> messageDbListForAllAccounts(MainWindow *mainWindow,
 	return messageDbList;
 }
 
-void MainWindow::showSendMessageDialog(int action)
+void MainWindow::showSendMessageDialog(int action,
+    const QString &composeSerialised)
 {
 	debugFuncCall();
 
@@ -4729,7 +4746,8 @@ void MainWindow::showSendMessageDialog(int action)
 	}
 
 	QDialog *sendMsgDialog = new DlgSendMessage(messageDbList,
-	    (DlgSendMessage::Action) action, msgIds, userName, this);
+	    (DlgSendMessage::Action) action, msgIds, userName,
+	    composeSerialised, this);
 
 	showStatusTextWithTimeout(tr("Create and send a message."));
 

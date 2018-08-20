@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -23,7 +23,9 @@
 
 #include <cstring>
 #include <QByteArray>
+#include <QStringBuilder>
 #include <QSystemSemaphore>
+#include <QtEndian>
 #include <QTimer>
 
 #include "src/datovka_shared/log/log.h"
@@ -32,9 +34,13 @@
 
 #define UNIQUE_SEM_ID "CZ.NIC_Datovka_(e-gov_client)_semaphore"
 #define UNIQUE_MEM_ID "CZ.NIC_Datovka_(e-gov_client)_shared_mem"
-#define MEM_SIZE 4096
+#define MEM_SIZE (1024 * 1024)
+#define MAX_MSG_SIZE 1024
 
-const QString SingleInstance::msgRaiseMainWindow("RaiseMainWindow");
+static const QString msgRaiseMainWindow("RaiseMainWindow");
+static const QString msgCompose("Compose");
+
+static const QChar msgTypeSep('>'); /*!< Separator used to divide message type name and the value. */
 
 SingleInstance::SingleInstance(const QString &shMemKey, QObject *parent)
     : QObject(parent),
@@ -46,15 +52,15 @@ SingleInstance::SingleInstance(const QString &shMemKey, QObject *parent)
 	 * For now let's assume that the code does not crash here.
 	 */
 	QSystemSemaphore sema(UNIQUE_SEM_ID, 1);
-	logInfo("Trying to acquire semaphore '%s'.\n", UNIQUE_SEM_ID);
+	logInfoNL("Trying to acquire semaphore '%s'.", UNIQUE_SEM_ID);
 	sema.acquire();
-	logInfo("Semaphore '%s' acquired.\n", UNIQUE_SEM_ID);
+	logInfoNL("Semaphore '%s' acquired.", UNIQUE_SEM_ID);
 
 	QString memKey(UNIQUE_MEM_ID);
 	if (!shMemKey.isEmpty()) {
 		memKey += "[" + shMemKey + "]";
 	}
-	logInfo("Shared memory key is '%s'.\n", memKey.toUtf8().constData());
+	logInfoNL("Shared memory key is '%s'.", memKey.toUtf8().constData());
 
 #if !defined(Q_OS_WIN)
 	/*
@@ -81,21 +87,21 @@ SingleInstance::SingleInstance(const QString &shMemKey, QObject *parent)
 		connect(timer, SIGNAL(timeout()), this, SLOT(checkMessage()));
 		timer->start(200);
 
-		logInfo("Application owns shared memory under key '%s'.\n",
+		logInfoNL("Application owns shared memory under key '%s'.",
 		    memKey.toUtf8().constData());
 	} else if (m_shMem.attach()) {
 		m_memoryExisted = true;
 
-		logInfo(
-		    "Another application owns shared memory under key '%s'.\n",
+		logInfoNL(
+		    "Another application owns shared memory under key '%s'.",
 		    memKey.toUtf8().constData());
 	} else {
-		logErrorNL("Cannot access shared memory under key '%s'.\n",
+		logErrorNL("Cannot access shared memory under key '%s'.",
 		    memKey.toUtf8().constData());
 	}
 
 	sema.release();
-	logInfo("Semaphore '%s' released.\n", UNIQUE_SEM_ID);
+	logInfoNL("Semaphore '%s' released.", UNIQUE_SEM_ID);
 }
 
 bool SingleInstance::existsInSystem(void) const
@@ -103,15 +109,85 @@ bool SingleInstance::existsInSystem(void) const
 	return m_memoryExisted;
 }
 
-bool SingleInstance::sendMessage(const QString &message)
+/*!
+ * @brief Converts message type to string description.
+ *
+ * @param[in] msgType Message type identifier.
+ * @return String description.
+ */
+static
+const QString &msgTypeToStr(int msgType)
 {
+	switch (msgType) {
+	case SingleInstance::MTYPE_RAISE_MAIN_WIN:
+		return msgRaiseMainWindow;
+		break;
+	case SingleInstance::MTYPE_COMPOSE:
+		return msgCompose;
+		break;
+	default:
+		/* Default to raise main window. */
+		Q_ASSERT(0);
+		return msgRaiseMainWindow;
+		break;
+	}
+}
+
+/*!
+ * @brief Composes a message.
+ *
+ * @param[in] msgType Message type identifier.
+ * @param[in] msgVal Message value (serialised data).
+ * @return Message string.
+ */
+static
+QString composeMessage(int msgType, const QString &msgVal)
+{
+	return msgTypeToStr(msgType) % msgTypeSep % msgVal;
+}
+
+/*!
+ * @brief Reads message length from the point in memory.
+ *
+ * @param[in] loc Memory location.
+ * @return Message length.
+ */
+static
+qint32 readMsgLen(const char *loc)
+{
+	if (Q_UNLIKELY(loc == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return 0;
+	}
+
+	/*
+	 * Cannot use
+	 * sizeToRead = qFromBigEndian(*(qint32 *)loc);
+	 * because of memory alignment issues.
+	 */
+	qint32 bi32;
+	std::memcpy(&bi32, loc, sizeof(bi32));
+	return qFromBigEndian(bi32);
+}
+
+bool SingleInstance::sendMessage(int msgType, const QString &msgVal)
+{
+#if 0
 	/* Master process cannot send messages. */
 	if (!m_memoryExisted){
 		return false;
 	}
+#endif
+
+	QByteArray byteArray;
+	{
+		const QString message(composeMessage(msgType, msgVal));
+		byteArray.append(message.toUtf8());
+		byteArray.append('\0');
+	}
 
 	/* Only short messages can be sent. */
-	if (message.size() > 255) {
+	if (byteArray.size() > MAX_MSG_SIZE) {
 		return false;
 	}
 
@@ -120,26 +196,83 @@ bool SingleInstance::sendMessage(const QString &message)
 	/* Find the end of the buffer. */
 	char *begin = (char *) m_shMem.data();
 	char *to = begin;
-	while(((to - begin) < MEM_SIZE) && (*to != '\0')) {
-		int sizeToRead = *to;
-		to += sizeToRead + 1;
+	while ((to - begin) < MEM_SIZE) {
+		qint32 sizeToRead = readMsgLen(to);
+		if (sizeToRead == 0) {
+			break;
+		}
+		to += sizeToRead + sizeof(sizeToRead);
 	}
 
+	qint32 beSize = qToBigEndian((qint32)byteArray.size());
+
 	/* Compute the remaining space. */
-	if ((MEM_SIZE - (to - begin)) < (message.size() + 2)) {
+	if ((MEM_SIZE - (to - begin)) < (byteArray.size() + (int)sizeof(beSize))) {
 		return false;
 	}
 
-	QByteArray byteArray;
-	byteArray.append((char) message.size());
-	byteArray.append(message.toUtf8());
-	byteArray.append('\0');
-
-	memcpy(to, byteArray.data(), byteArray.size());
+	std::memcpy(to, &beSize, sizeof(beSize));
+	to += sizeof(beSize);
+	std::memcpy(to, byteArray.constData(), byteArray.size());
 
 	m_shMem.unlock();
 
 	return true;
+}
+
+/*!
+ * @brief Converts message description string to numerical value.
+ *
+ * @param[in] typeStrRef String containing operation name.
+ * @return Message type.
+ */
+static
+enum SingleInstance::MsgType strToMsgType(const QStringRef &typeStrRef)
+{
+	if (typeStrRef == msgRaiseMainWindow) {
+		return SingleInstance::MTYPE_RAISE_MAIN_WIN;
+	} else if (typeStrRef == msgCompose) {
+		return SingleInstance::MTYPE_COMPOSE;
+	} else {
+		Q_ASSERT(0);
+		return SingleInstance::MTYPE_UNKNOWN;
+	}
+}
+
+/*!
+ * @brief Decomposes a message.
+ *
+ * @param[in]  message Received message.
+ * @param[out] msgType Message type.
+ * @param[out] msgValRef Message value (serialised data).
+ * @return True if message type has been recognised.
+ */
+static
+bool decomposeMessage(const QString &message,
+    enum SingleInstance::MsgType &msgType, QStringRef &msgValRef)
+{
+	if (Q_UNLIKELY(message.isEmpty())) {
+		Q_ASSERT(0);
+		msgType = SingleInstance::MTYPE_UNKNOWN;
+		msgValRef.clear();
+		return false;
+	}
+
+	int sepIdx = message.indexOf(msgTypeSep);
+	if (Q_UNLIKELY(sepIdx < 0)) {
+		msgType = SingleInstance::MTYPE_UNKNOWN;
+		msgValRef.clear();
+		return false;
+	}
+
+	msgType = strToMsgType(message.leftRef(sepIdx));
+	if ((sepIdx + 1) < message.size()) {
+		/* Separator is not the last character in the message. */
+		msgValRef = message.midRef(sepIdx + 1);
+	} else {
+		msgValRef.clear();
+	}
+	return msgType != SingleInstance::MTYPE_UNKNOWN;
 }
 
 void SingleInstance::checkMessage(void)
@@ -149,15 +282,25 @@ void SingleInstance::checkMessage(void)
 	char *begin = (char *) m_shMem.data();
 	char *from = begin;
 
-	while(((from - begin) < MEM_SIZE) && (*from != '\0')){
-		int sizeToRead = (int) *from;
+	while ((from - begin) < MEM_SIZE) {
+		qint32 sizeToRead = readMsgLen(from);
+		if (sizeToRead == 0) {
+			break;
+		}
 
-		++from;
+		from += sizeof(sizeToRead);
 		QByteArray byteArray(from, sizeToRead);
 		from += sizeToRead;
 
-		emit GlobInstcs::snglInstEmitterPtr->messageReceived(
+		const QString message(
 		    QString::fromUtf8((byteArray + '\0').constData()));
+
+		enum MsgType msgType = MTYPE_UNKNOWN;
+		QStringRef msgValRef;
+		if (decomposeMessage(message, msgType, msgValRef)) {
+			emit GlobInstcs::snglInstEmitterPtr->messageReceived(
+			    msgType, msgValRef.toString());
+		}
 	}
 
 	memset(m_shMem.data(), 0, MEM_SIZE);

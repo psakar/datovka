@@ -33,6 +33,7 @@
 #include "src/about.h"
 #include "src/cli/cli_parser.h"
 #include "src/cli/cli_pin.h"
+#include "src/cli/cmd_compose.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/crypto/crypto_threads.h"
 #include "src/crypto/crypto_version.h"
@@ -121,6 +122,10 @@ int main(int argc, char *argv[])
 		logErrorNL("%s", "Cannot set up command-line parser.");
 		return EXIT_FAILURE;
 	}
+	if (!CLI::CmdCompose::installParserOpt(parser)) {
+		logErrorNL("%s", "Cannot set up command-line parser.");
+		return EXIT_FAILURE;
+	}
 
 	/* Process command-line arguments. */
 	parser.process(app);
@@ -135,6 +140,15 @@ int main(int argc, char *argv[])
 	const QStringList cmdLineFileNames(parser.positionalArguments());
 	const QStringList srvcArgs(
 	    CLIParser::CLIServiceArgs(parser.optionNames()));
+
+	if (CLI::CmdCompose::isSet(parser)) {
+		CLI::CmdCompose composeCmd(CLI::CmdCompose::value(parser));
+		/* Check basic sanity of compose parameters. */
+		if (composeCmd.isNull()) {
+			logErrorNL("%s", "Invalid compose command parameters.");
+			return EXIT_FAILURE;
+		}
+	}
 
 	enum RunMode runMode = RM_GUI;
 	QSplashScreen *splash = Q_NULLPTR; /* Used only in GUI mode. */
@@ -152,15 +166,25 @@ int main(int argc, char *argv[])
 	/* Ensure only one instance with given configuration file. */
 	SingleInstance singleInstance(GlobInstcs::prefsPtr->loadConfPath());
 	if (singleInstance.existsInSystem()) {
+		int ret = EXIT_FAILURE;
 		logErrorNL("%s",
 		    "Another application already uses same configuration.");
-		logInfo("%s\n", "Notifying key owner and exiting");
+		logInfoNL("%s", "Notifying key owner and exiting.");
 		if (!singleInstance.sendMessage(
-		        SingleInstance::msgRaiseMainWindow)) {
-			logErrorNL("%s",
-			    "Could not send message to owner.");
+		        SingleInstance::MTYPE_RAISE_MAIN_WIN)) {
+			logErrorNL("%s", "Could not send message to owner.");
 		}
-		return EXIT_FAILURE;
+		if (CLI::CmdCompose::isSet(parser)) {
+			if (singleInstance.sendMessage(
+			        SingleInstance::MTYPE_COMPOSE,
+			        CLI::CmdCompose::value(parser).serialise())) {
+				ret = EXIT_SUCCESS;
+			} else {
+				logErrorNL("%s",
+				    "Could not send message to owner.");
+			}
+		}
+		return ret;
 	}
 
 	qint64 start, stop, diff;
@@ -336,6 +360,15 @@ int main(int argc, char *argv[])
 		mainwin.show();
 		splash->finish(&mainwin);
 		delete splash;
+		/* Main window connects the required slots in its constructor. */
+		if (CLI::CmdCompose::isSet(parser)) {
+			if (!singleInstance.sendMessage(
+			        SingleInstance::MTYPE_COMPOSE,
+			        CLI::CmdCompose::value(parser).serialise())) {
+				logErrorNL("%s",
+				    "Could not send message to owner.");
+			}
+		}
 		ret = (0 == app.exec()) ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 

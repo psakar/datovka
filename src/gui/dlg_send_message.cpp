@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -29,6 +29,7 @@
 #include <QDir>
 #include <QMimeDatabase>
 
+#include "src/cli/cmd_compose.h"
 #include "src/datovka_shared/isds/box_interface.h"
 #include "src/datovka_shared/isds/type_conversion.h"
 #include "src/datovka_shared/isds/types.h"
@@ -97,7 +98,8 @@ const QString &dzPrefix(const MessageDb *messageDb, qint64 dmId)
 DlgSendMessage::DlgSendMessage(
     const QList<Task::AccountDescr> &messageDbSetList,
     enum Action action, const QList<MessageDb::MsgId> &msgIds,
-    const QString &userName, class MainWindow *mw, QWidget *parent)
+    const QString &userName, const QString &composeSerialised,
+    class MainWindow *mw, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgSendMessage),
     m_keepAliveTimer(),
@@ -135,6 +137,9 @@ DlgSendMessage::DlgSendMessage(
 	    QAbstractItemView::SelectRows);
 
 	initContent(action, msgIds);
+	if ((action == ACT_NEW) && !composeSerialised.isEmpty()) {
+		fillContentCompose(composeSerialised);
+	}
 
 	Q_ASSERT(!m_boxId.isEmpty());
 	Q_ASSERT(Q_NULLPTR != m_dbSet);
@@ -210,13 +215,6 @@ void DlgSendMessage::addRecipientManually(void)
 	    QString(), &ok, Qt::WindowStaysOnTopHint);
 
 	if (!ok) {
-		return;
-	}
-
-	if (dbID.isEmpty() || dbID.length() != 7) {
-		QMessageBox::critical(this, tr("Wrong data box ID"),
-		    tr("Wrong data box ID '%1'!").arg(dbID),
-		    QMessageBox::Ok, QMessageBox::Ok);
 		return;
 	}
 
@@ -326,19 +324,7 @@ void DlgSendMessage::addAttachmentFile(void)
 		}
 	}
 
-	foreach (const QString &fileName, fileNames) {
-		int fileSize = m_attachModel.insertAttachmentFile(fileName,
-		    m_attachModel.rowCount());
-		if (fileSize <= 0) {
-			logWarningNL(
-			    "Cannot add empty file '%s' to attachments.",
-			    fileName.toUtf8().constData());
-			QMessageBox::warning(this, tr("Empty file"),
-			    tr("Cannot add empty file '%1' to attachments.").arg(fileName),
-			    QMessageBox::Ok, QMessageBox::Ok);
-			continue;
-		}
-	}
+	insertAttachmentFiles(fileNames);
 }
 
 void DlgSendMessage::attachmentSelectionChanged(const QItemSelection &selected,
@@ -1005,6 +991,119 @@ void DlgSendMessage::fillContentFromTemplate(
 	}
 }
 
+void DlgSendMessage::fillContentCompose(const QString &composeSerialised)
+{
+	debugFuncCall();
+
+	const CLI::CmdCompose composeCmd(
+	    CLI::CmdCompose::deserialise(composeSerialised));
+	if (composeCmd.isNull()) {
+		logErrorNL("%s", "Could not deserialise compose data.");
+		return;
+	}
+
+	if (!composeCmd.dmToHands().isEmpty() ||
+	    !composeCmd.dmRecipientRefNumber().isEmpty() ||
+	    !composeCmd.dmSenderRefNumber().isEmpty() ||
+	    !composeCmd.dmRecipientIdent().isEmpty() ||
+	    !composeCmd.dmSenderIdent().isEmpty() ||
+	    !composeCmd.dmLegalTitleLawStr().isEmpty() ||
+	    !composeCmd.dmLegalTitleYearStr().isEmpty() ||
+	    !composeCmd.dmLegalTitleSect().isEmpty() ||
+	    !composeCmd.dmLegalTitlePar().isEmpty() ||
+	    !composeCmd.dmLegalTitlePoint().isEmpty() ||
+	    (composeCmd.dmPersonalDelivery() == Isds::Type::BOOL_TRUE)) {
+		m_ui->optionalFormCheckBox->setCheckState(Qt::Checked);
+	}
+
+	if (!composeCmd.dbIDRecipient().isEmpty()) {
+		addRecipientBoxes(composeCmd.dbIDRecipient());
+	}
+	if (!composeCmd.dmAnnotation().isEmpty()) {
+		m_ui->subjectLine->setText(composeCmd.dmAnnotation());
+	}
+	if (!composeCmd.dmToHands().isEmpty()) {
+		m_ui->dmToHands->setText(composeCmd.dmToHands());
+	}
+	if (!composeCmd.dmRecipientRefNumber().isEmpty()) {
+		m_ui->dmRecipientRefNumber->setText(composeCmd.dmRecipientRefNumber());
+	}
+	if (!composeCmd.dmSenderRefNumber().isEmpty()) {
+		m_ui->dmSenderRefNumber->setText(composeCmd.dmSenderRefNumber());
+	}
+	if (!composeCmd.dmRecipientIdent().isEmpty()) {
+		m_ui->dmRecipientIdent->setText(composeCmd.dmRecipientIdent());
+	}
+	if (!composeCmd.dmSenderIdent().isEmpty()) {
+		m_ui->dmSenderIdent->setText(composeCmd.dmSenderIdent());
+	}
+	if (!composeCmd.dmLegalTitleLawStr().isEmpty()) {
+		m_ui->dmLegalTitleLaw->setText(composeCmd.dmLegalTitleLawStr());
+	}
+	if (!composeCmd.dmLegalTitleYearStr().isEmpty()) {
+		m_ui->dmLegalTitleYear->setText(composeCmd.dmLegalTitleYearStr());
+	}
+	if (!composeCmd.dmLegalTitleSect().isEmpty()) {
+		m_ui->dmLegalTitleSect->setText(composeCmd.dmLegalTitleSect());
+	}
+	if (!composeCmd.dmLegalTitlePar().isEmpty()) {
+		m_ui->dmLegalTitlePar->setText(composeCmd.dmLegalTitlePar());
+	}
+	if (!composeCmd.dmLegalTitlePoint().isEmpty()) {
+		m_ui->dmLegalTitlePoint->setText(composeCmd.dmLegalTitlePoint());
+	}
+	if (composeCmd.dmPersonalDelivery() != Isds::Type::BOOL_NULL) {
+		m_ui->dmPersonalDelivery->setCheckState(
+		    (composeCmd.dmPersonalDelivery() == Isds::Type::BOOL_TRUE) ?
+		        Qt::Checked : Qt::Unchecked);
+	}
+	if (composeCmd.dmAllowSubstDelivery() != Isds::Type::BOOL_NULL) {
+		m_ui->dmAllowSubstDelivery->setCheckState(
+		    (composeCmd.dmAllowSubstDelivery() == Isds::Type::BOOL_TRUE) ?
+		        Qt::Checked : Qt::Unchecked);
+	}
+	if (composeCmd.dmPublishOwnID() != Isds::Type::BOOL_NULL) {
+		m_ui->dmPublishOwnID->setCheckState(
+		    (composeCmd.dmPublishOwnID() == Isds::Type::BOOL_TRUE) ?
+		        Qt::Checked : Qt::Unchecked);
+	}
+	if (!composeCmd.dmAttachment().isEmpty()) {
+		insertAttachmentFiles(composeCmd.dmAttachment());
+	}
+}
+
+void DlgSendMessage::insertAttachmentFiles(const QStringList &filePaths)
+{
+	foreach (const QString &filePath, filePaths) {
+		int fileSize = m_attachModel.insertAttachmentFile(filePath,
+		    m_attachModel.rowCount());
+		switch (fileSize) {
+		case AttachmentTblModel::FILE_NOT_EXISTENT:
+			QMessageBox::warning(this, tr("Non-existent file"),
+			    tr("Cannot add non-existent file '%1' to attachments.").arg(filePath),
+			    QMessageBox::Ok, QMessageBox::Ok);
+			break;
+		case AttachmentTblModel::FILE_NOT_READABLE:
+			QMessageBox::warning(this, tr("File not readable"),
+			    tr("Cannot add file '%1' without readable permissions to attachments.").arg(filePath),
+			    QMessageBox::Ok, QMessageBox::Ok);
+			break;
+		case AttachmentTblModel::FILE_ALREADY_PRESENT:
+			QMessageBox::warning(this, tr("File already present"),
+			    tr("Cannot add file '%1' because the file already in the attachments.").arg(filePath),
+			    QMessageBox::Ok, QMessageBox::Ok);
+			break;
+		case AttachmentTblModel::FILE_ZERO_SIZE:
+			QMessageBox::warning(this, tr("Empty file"),
+			    tr("Cannot add empty file '%1' to attachments.").arg(filePath),
+			    QMessageBox::Ok, QMessageBox::Ok);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 int DlgSendMessage::notifyOfPDZ(int pdzCnt)
 {
 	QString title;
@@ -1078,8 +1177,15 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 
 void DlgSendMessage::addRecipientBox(const QString &boxId)
 {
+	if (boxId.isEmpty() || boxId.length() != 7) {
+		QMessageBox::critical(this, tr("Wrong data box ID"),
+		    tr("Wrong data box ID '%1'!").arg(boxId),
+		    QMessageBox::Ok, QMessageBox::Ok);
+		return;
+	}
+
 	/* Ignore existent entry. */
-	if (boxId.isEmpty() || m_recipTableModel.containsBoxId(boxId)) {
+	if (m_recipTableModel.containsBoxId(boxId)) {
 		return;
 	}
 

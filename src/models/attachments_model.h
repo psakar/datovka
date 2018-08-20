@@ -56,6 +56,17 @@ public:
 	};
 
 	/*!
+	 * @brief Error values when inserting file into model.
+	 */
+	enum InsertError {
+		OTHER_ERROR = -4, /*!< Generic error. */
+		FILE_NOT_EXISTENT = -3, /*!< File does nto exist. */
+		FILE_NOT_READABLE = -2, /*!< File cannot be read. */
+		FILE_ALREADY_PRESENT = -1, /*!< File is already held in the model. */
+		FILE_ZERO_SIZE = 0 /*!< File has zero size (i.e. is empty). */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] parent Parent object.
@@ -163,7 +174,7 @@ public:
 	 *
 	 * @param[in] filePath Path to attachment file.
 	 * @param[in] row Row to insert the data into.
-	 * @return Positive size of added file, 0 or -1 on error.
+	 * @return Positive size of added file, error code otherwise (enum InsertError).
 	 */
 	int insertAttachmentFile(const QString &filePath, int row);
 
