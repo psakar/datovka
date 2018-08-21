@@ -117,6 +117,8 @@ int main(int argc, char *argv[])
 	/* Create configuration file if file is missing. */
 	GlobInstcs::prefsPtr->ensureConfPresence();
 
+	logQtVersion();
+
 	switch (crypto_compiled_lib_ver_check()) {
 	case 1:
 		logErrorNL("%s", "Cryptographic library mismatch.");

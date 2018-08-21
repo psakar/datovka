@@ -222,6 +222,12 @@ void loadLocalisation(const Preferences &prefs)
 	QCoreApplication::installTranslator(&qtTranslator);
 }
 
+void logQtVersion(void)
+{
+	logInfoNL("Compile-time Qt version 0x%x (%s).", QT_VERSION, QT_VERSION_STR);
+	logInfoNL("Run-time Qt version %s.", qVersion());
+}
+
 int allocGlobLog(void)
 {
 	GlobInstcs::logPtr = new (std::nothrow) LogDevice;

@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _INITIALISATION_H_
-#define _INITIALISATION_H_
+#pragma once
 
 #include <QCommandLineParser>
 
@@ -56,6 +55,11 @@ void downloadCRL(void);
  * @param[in] prefs Preferences structure.
  */
 void loadLocalisation(const Preferences &prefs);
+
+/*!
+ * @brief Writes Qt versions to log.
+ */
+void logQtVersion(void);
 
 /*!
  * @brief Allocates global log facility.
@@ -99,5 +103,3 @@ int allocGlobContainers(const Preferences &prefs);
  * @brief Deallocates global database objects and containers.
  */
 void deallocGlobContainers(void);
-
-#endif /* _INITIALISATION_H_ */
