@@ -7147,7 +7147,7 @@ sent reply on this message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="313"/>
+        <location filename="../src/main.cpp" line="317"/>
         <source>Application is loading...</source>
         <translation type="unfinished"></translation>
     </message>

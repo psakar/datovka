@@ -7260,7 +7260,7 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
         <translation>Přečteno lokálně</translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="313"/>
+        <location filename="../src/main.cpp" line="317"/>
         <source>Application is loading...</source>
         <translation>Aplikace se načítá...</translation>
     </message>
