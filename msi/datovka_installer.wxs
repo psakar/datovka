@@ -107,9 +107,9 @@
                 Icon="ProductIcon.exe"
                 IconIndex="0"/>
             <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall"/>
-            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
-            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="AppLocation" Type="string" Value="[FileInstallPath]datovka.exe" KeyPath="no"/>
-            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="AppLocationCLI" Type="string" Value="[FileInstallPath]datovka-cli.exe" KeyPath="no"/>
+            <RegistryValue Root="HKLM" Key="Software\$(var.ProductParentDir)\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+            <RegistryValue Root="HKLM" Key="Software\$(var.ProductParentDir)\$(var.ProductName)" Name="AppLocation" Type="string" Value="[FileInstallPath]datovka.exe" KeyPath="no"/>
+            <RegistryValue Root="HKLM" Key="Software\$(var.ProductParentDir)\$(var.ProductName)" Name="AppLocationCLI" Type="string" Value="[FileInstallPath]datovka-cli.exe" KeyPath="no"/>
         </Component>
     </DirectoryRef>
     <!--Desktop Shortcut-->
@@ -123,9 +123,9 @@
                 Icon="ProductIcon.exe"
                 IconIndex="0"/>
             <RemoveFolder Id="RemoveDesktopFolder" Directory="DesktopFolder" On="uninstall"/>
-            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
-            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="AppLocation" Type="string" Value="[FileInstallPath]datovka.exe" KeyPath="no"/>
-            <RegistryValue Root="HKLM" Key="Software\[Manufacturer]\[ProductName]" Name="AppLocationCLI" Type="string" Value="[FileInstallPath]datovka-cli.exe" KeyPath="no"/>
+            <RegistryValue Root="HKLM" Key="Software\$(var.ProductParentDir)\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+            <RegistryValue Root="HKLM" Key="Software\$(var.ProductParentDir)\$(var.ProductName)" Name="AppLocation" Type="string" Value="[FileInstallPath]datovka.exe" KeyPath="no"/>
+            <RegistryValue Root="HKLM" Key="Software\$(var.ProductParentDir)\$(var.ProductName)" Name="AppLocationCLI" Type="string" Value="[FileInstallPath]datovka-cli.exe" KeyPath="no"/>
         </Component>
     </DirectoryRef>
 </Fragment>
