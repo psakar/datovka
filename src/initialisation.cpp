@@ -26,6 +26,7 @@
 #endif /* !WIN32 */
 #include <QCoreApplication>
 #include <QProcessEnvironment>
+#include <QTimeZone>
 #include <QTranslator>
 
 #include "src/cli/cli_parser.h"
@@ -222,10 +223,23 @@ void loadLocalisation(const Preferences &prefs)
 	QCoreApplication::installTranslator(&qtTranslator);
 }
 
+void logAppVersion(void)
+{
+	logInfoNL("Application version %s.", VERSION);
+}
+
 void logQtVersion(void)
 {
 	logInfoNL("Compile-time Qt version 0x%x (%s).", QT_VERSION, QT_VERSION_STR);
 	logInfoNL("Run-time Qt version %s.", qVersion());
+}
+
+void logTimeZone(void)
+{
+	const QTimeZone sysZone(QTimeZone::systemTimeZone());
+	int offset = sysZone.offsetFromUtc(QDateTime::currentDateTime());
+	logInfoNL("Local time zone is %s (UTC%+ds).", sysZone.id().constData(),
+	    offset);
 }
 
 int allocGlobLog(void)

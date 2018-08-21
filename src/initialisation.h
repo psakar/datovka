@@ -57,9 +57,19 @@ void downloadCRL(void);
 void loadLocalisation(const Preferences &prefs);
 
 /*!
+ * @brief Log application version.
+ */
+void logAppVersion(void);
+
+/*!
  * @brief Writes Qt versions to log.
  */
 void logQtVersion(void);
+
+/*!
+ * @brief Writes time-zone information to log.
+ */
+void logTimeZone(void);
 
 /*!
  * @brief Allocates global log facility.
