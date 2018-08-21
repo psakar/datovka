@@ -236,7 +236,13 @@ void logQtVersion(void)
 
 void logTimeZone(void)
 {
-	const QTimeZone sysZone(QTimeZone::systemTimeZone());
+	const QTimeZone sysZone(
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
+	    QTimeZone::systemTimeZone()
+#else /* < Qt-5.5 */
+	    QTimeZone::systemTimeZoneId()
+#endif /* >= Qt-5.5 */
+	);
 	int offset = sysZone.offsetFromUtc(QDateTime::currentDateTime());
 	logInfoNL("Local time zone is %s (UTC%+ds).", sysZone.id().constData(),
 	    offset);
