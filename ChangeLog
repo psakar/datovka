@@ -1,4 +1,6 @@
 4.11.0 /
+ * Added the '--compose' command line option. This option is available only
+   in the GUI app; it raises the send message dialogue window.
  * The operations 'send message', 'download sent message' and
    'upload into records management service' can be chained together to be
    performed in a consecutive sequence.
