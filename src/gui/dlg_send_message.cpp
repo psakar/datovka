@@ -1090,7 +1090,7 @@ void DlgSendMessage::insertAttachmentFiles(const QStringList &filePaths)
 			break;
 		case AttachmentTblModel::FILE_ALREADY_PRESENT:
 			QMessageBox::warning(this, tr("File already present"),
-			    tr("Cannot add file '%1' because the file already in the attachments.").arg(filePath),
+			    tr("Cannot add file '%1' because the file is already present in the attachments.").arg(filePath),
 			    QMessageBox::Ok, QMessageBox::Ok);
 			break;
 		case AttachmentTblModel::FILE_ZERO_SIZE:
