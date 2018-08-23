@@ -31,6 +31,7 @@
 #include <QProgressBar>
 #include <QTimer>
 #include <QPushButton>
+#include <QMenu>
 #include <QNetworkReply>
 
 #include "src/common.h"
@@ -676,6 +677,16 @@ private slots:
 	void showImportMessageResults(const QString &userName,
 	    const QStringList &errImportList, int totalMsgs, int importedMsgs);
 
+	/*!
+	 * @brief Populates the dock menu with active windows.
+	 */
+	void dockMenuPopulate(void);
+
+	/*!
+	 * @brief Handles the raise window actions.
+	 */
+	void dockMenuActionTriggerred(QAction *action);
+
 private:
 
 	QTimer m_timerSyncAccounts;
@@ -1104,6 +1115,7 @@ private:
 	QLabel *mui_statusDbMode; /*!< Database status label. */
 	QLabel *mui_statusOnlineLabel; /*< On-line/off-line status label. */
 	QProgressBar *mui_statusProgressBar; /*!< Progress bar. */
+	QMenu mui_dockMenu; /*!< Dock menu for macOS. */
 
 	/*!
 	 * @brief Performs initial user interface initialisation.
