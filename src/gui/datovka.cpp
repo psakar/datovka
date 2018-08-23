@@ -8451,6 +8451,7 @@ void MainWindow::dockMenuPopulate(void)
 	action->setCheckable(true);
 	action->setChecked(this->isActiveWindow());
 #ifdef Q_OS_OSX
+	action->setIconVisibleInMenu(true);
 	action->setIcon(winIco);
 #endif /* Q_OS_OSX */
 
@@ -8465,6 +8466,7 @@ void MainWindow::dockMenuPopulate(void)
 		action->setCheckable(true);
 		action->setChecked(dialogue->isActiveWindow());
 #ifdef Q_OS_OSX
+		action->setIconVisibleInMenu(true);
 		action->setIcon(winIco);
 #endif /* Q_OS_OSX */
 	}
