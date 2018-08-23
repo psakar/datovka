@@ -8435,6 +8435,13 @@ void MainWindow::showImportMessageResults(const QString &userName,
 
 void MainWindow::dockMenuPopulate(void)
 {
+	static QIcon winIco;
+	if (winIco.isNull()) {
+		winIco.addFile(QStringLiteral(ICON_16x16_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
+		winIco.addFile(QStringLiteral(ICON_24x24_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
+		winIco.addFile(QStringLiteral(ICON_32x32_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
+	}
+
 	mui_dockMenu.clear();
 	QAction *action;
 
@@ -8443,6 +8450,9 @@ void MainWindow::dockMenuPopulate(void)
 	action->setData(QVariant::fromValue(this));
 	action->setCheckable(true);
 	action->setChecked(this->isActiveWindow());
+#ifdef Q_OS_OSX
+	action->setIcon(winIco);
+#endif /* Q_OS_OSX */
 
 	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
 		QDialog *dialogue = qobject_cast<QDialog *>(widget);
@@ -8454,6 +8464,9 @@ void MainWindow::dockMenuPopulate(void)
 		action->setData(QVariant::fromValue(dialogue));
 		action->setCheckable(true);
 		action->setChecked(dialogue->isActiveWindow());
+#ifdef Q_OS_OSX
+		action->setIcon(winIco);
+#endif /* Q_OS_OSX */
 	}
 }
 
