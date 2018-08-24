@@ -4123,7 +4123,7 @@ void MainWindow::connectMessageActionBarSlots(void)
 	ui->signatureDetails->setDefaultAction(ui->actionSignature_detail);
 
 	/* Sets message processing state. */
-	connect(ui->messageStateCombo, SIGNAL(currentIndexChanged(int)),
+	connect(ui->messageStateCombo, SIGNAL(activated(int)),
 	    this, SLOT(msgSetSelectedMessageProcessState(int)));
 
 	/* Message/attachment related buttons. */
