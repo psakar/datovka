@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,7 +24,6 @@
 #pragma once
 
 #include <QDialog>
-#include <QItemSelection>
 #include <QThread>
 
 #include "src/datovka_shared/isds/types.h"
@@ -108,15 +107,6 @@ private slots:
 	 * @brief Activates confirmation button.
 	 */
 	void enableOkButton(void);
-
-	/*!
-	 * @brief Set first column containing checkboxes active.
-	 *
-	 * @param[in] selected Newly selected items.
-	 * @param[in] deselected Deselected items.
-	 */
-	void setFirstColumnActive(const QItemSelection &selected,
-	    const QItemSelection &deselected);
 
 	/*!
 	 * @brief Check input fields sanity and activate search button.
