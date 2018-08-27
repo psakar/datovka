@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -141,10 +141,6 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	}
 	m_ui->contactTableView->setModel(&m_contactListProxyModel);
 
-	connect(m_ui->contactTableView->selectionModel(),
-	    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
-	    this, SLOT(setFirstColumnActive(QItemSelection, QItemSelection)));
-
 	connect(m_ui->textLineEdit, SIGNAL(textChanged(QString)),
 	    this, SLOT(checkInputFields()));
 	connect(m_ui->iDLineEdit, SIGNAL(textChanged(QString)),
@@ -218,18 +214,6 @@ void DlgDsSearch::enableOkButton(void)
 {
 	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
 	    m_contactTableModel.somethingChecked());
-}
-
-void DlgDsSearch::setFirstColumnActive(const QItemSelection &selected,
-    const QItemSelection &deselected)
-{
-	Q_UNUSED(deselected);
-
-	if (selected.isEmpty()) {
-		return;
-	}
-	m_ui->contactTableView->selectColumn(BoxContactsModel::CHECKBOX_COL);
-	m_ui->contactTableView->selectRow(selected.first().top());
 }
 
 void DlgDsSearch::checkInputFields(void)

@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -48,7 +48,7 @@ private:
 	 * @param[out] dbIdList List of selected box identifiers to be set.
 	 * @param[in]  parent Parent object.
 	 */
-	DlgContacts(const MessageDbSet &dbSet,
+	explicit DlgContacts(const MessageDbSet &dbSet,
 	    QStringList *dbIdList = Q_NULLPTR, QWidget *parent = Q_NULLPTR);
 
 public:
@@ -74,15 +74,6 @@ private slots:
 	 * @brief Activates confirmation button.
 	 */
 	void enableOkButton(void);
-
-	/*!
-	 * @brief Set first column containing checkboxes active.
-	 *
-	 * @param[in] selected Newly selected items.
-	 * @param[in] deselected Deselected items.
-	 */
-	void setFirstColumnActive(const QItemSelection &selected,
-	    const QItemSelection &deselected);
 
 	/*!
 	 * @brief Makes a selection and closes the dialogue.
