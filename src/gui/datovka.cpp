@@ -31,7 +31,6 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QInputDialog>
-#include <QMenu>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -330,7 +329,8 @@ MainWindow::MainWindow(QWidget *parent)
     mui_statusBar(0),
     mui_statusDbMode(0),
     mui_statusOnlineLabel(0),
-    mui_statusProgressBar(0)
+    mui_statusProgressBar(0),
+    mui_dockMenu()
 {
 	m_colWidthRcvd[1] = m_colWidthRcvd[2] = DFLT_COL_WIDTH;
 	m_colWidthSnt[1] = m_colWidthSnt[2] = DFLT_COL_WIDTH;
@@ -347,6 +347,14 @@ MainWindow::MainWindow(QWidget *parent)
 	}
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
 	    tr("Tags"), QIcon(), tr("User-assigned tags")));
+
+	connect(&mui_dockMenu, SIGNAL(aboutToShow()),
+	    this, SLOT(dockMenuPopulate()));
+	connect(&mui_dockMenu, SIGNAL(triggered(QAction *)),
+	    this, SLOT(dockMenuActionTriggerred(QAction *)));
+#ifdef Q_OS_OSX
+	mui_dockMenu.setAsDockMenu();
+#endif /* Q_OS_OSX */
 
 	/* Single instance emitter. */
 	connect(GlobInstcs::snglInstEmitterPtr,
@@ -8423,4 +8431,73 @@ void MainWindow::showImportMessageResults(const QString &userName,
 	        tr("Imported messages: %1").arg(importedMsgs) + "<br/>" +
 	        tr("Non-imported messages: %1").arg(errImportList.count()) + "</b><br/>",
 	    detailText, QMessageBox::Ok);
+}
+
+void MainWindow::dockMenuPopulate(void)
+{
+	static QIcon winIco;
+	if (winIco.isNull()) {
+		winIco.addFile(QStringLiteral(ICON_16x16_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
+		winIco.addFile(QStringLiteral(ICON_24x24_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
+		winIco.addFile(QStringLiteral(ICON_32x32_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
+	}
+
+	mui_dockMenu.clear();
+	QAction *action;
+
+	/* Main window. */
+	action = mui_dockMenu.addAction(this->windowTitle());
+	action->setData(QVariant::fromValue(this));
+	action->setCheckable(true);
+	action->setChecked(this->isActiveWindow());
+#ifdef Q_OS_OSX
+	action->setIconVisibleInMenu(true);
+	action->setIcon(winIco);
+#endif /* Q_OS_OSX */
+
+	foreach (QWidget *widget, QApplication::topLevelWidgets()) {
+		QDialog *dialogue = qobject_cast<QDialog *>(widget);
+		if (dialogue == Q_NULLPTR) {
+			continue;
+		}
+		/* Remaining dialogue windows. */
+		action = mui_dockMenu.addAction(dialogue->windowTitle());
+		action->setData(QVariant::fromValue(dialogue));
+		action->setCheckable(true);
+		action->setChecked(dialogue->isActiveWindow());
+#ifdef Q_OS_OSX
+		action->setIconVisibleInMenu(true);
+		action->setIcon(winIco);
+#endif /* Q_OS_OSX */
+	}
+}
+
+void MainWindow::dockMenuActionTriggerred(QAction *action)
+{
+	if (Q_UNLIKELY(action == Q_NULLPTR)) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QObject *object = Q_NULLPTR;
+	{
+		QVariant data(action->data());
+		if (data.canConvert<QObject *>()) {
+			object = qvariant_cast<QObject *>(data);
+		}
+	}
+	if (Q_UNLIKELY(object == Q_NULLPTR)) {
+		return;
+	}
+	QWidget *widget = qobject_cast<QWidget *>(object);
+	if (Q_UNLIKELY(widget == Q_NULLPTR)) {
+		return;
+	}
+	if (!widget->isMinimized()) {
+		widget->show();
+	} else {
+		widget->showNormal();
+	}
+	widget->raise();
+	widget->activateWindow();
 }

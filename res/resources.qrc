@@ -15,8 +15,9 @@
         <file>icons/16x16/flag.png</file>
         <file>icons/16x16/green.png</file>
         <file>icons/16x16/grey.png</file>
-	<file>icons/16x16/hand.png</file>
-	<file>icons/16x16/hand_grey.png</file>
+        <file>icons/16x16/hand.png</file>
+        <file>icons/16x16/hand_grey.png</file>
+        <file>icons/16x16/macos_window.png</file>
         <file>icons/16x16/readcol.png</file>
         <file>icons/16x16/red.png</file>
         <file>icons/16x16/yellow.png</file>
@@ -35,8 +36,9 @@
         <file>icons/24x24/flag.png</file>
         <file>icons/24x24/green.png</file>
         <file>icons/24x24/grey.png</file>
-	<file>icons/24x24/hand.png</file>
-	<file>icons/24x24/hand_grey.png</file>
+        <file>icons/24x24/hand.png</file>
+        <file>icons/24x24/hand_grey.png</file>
+        <file>icons/24x24/macos_window.png</file>
         <file>icons/24x24/readcol.png</file>
         <file>icons/24x24/red.png</file>
         <file>icons/24x24/save-all.png</file>
@@ -56,8 +58,9 @@
         <file>icons/32x32/flag.png</file>
         <file>icons/32x32/green.png</file>
         <file>icons/32x32/grey.png</file>
-	<file>icons/32x32/hand.png</file>
-	<file>icons/32x32/hand_grey.png</file>
+        <file>icons/32x32/hand.png</file>
+        <file>icons/32x32/hand_grey.png</file>
+        <file>icons/32x32/macos_window.png</file>
         <file>icons/32x32/readcol.png</file>
         <file>icons/32x32/red.png</file>
         <file>icons/32x32/yellow.png</file>
@@ -178,8 +181,9 @@
         <file>icons/svg/blue.svg</file>
         <file>icons/svg/green.svg</file>
         <file>icons/svg/grey.svg</file>
-	<file>icons/svg/hand.svg</file>
-	<file>icons/svg/hand_grey.svg</file>
+        <file>icons/svg/hand.svg</file>
+        <file>icons/svg/hand_grey.svg</file>
+        <file>icons/svg/macos_window.svg</file>
         <file>icons/svg/readcol.svg</file>
         <file>icons/svg/red.svg</file>
         <file>icons/svg/sphere_monochrome_simple.svg</file>
