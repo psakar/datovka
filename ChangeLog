@@ -1,4 +1,9 @@
 4.11.0 /
+ * Fixed receiver box selection when using Shift+End in the contacts and data
+   box search dialogues.
+ * Fixed problem when changing the processing state of multiple selected
+   messages using the combo box in the main window.
+ * Showing active windows in macOS dock menu.
  * Added the '--compose' command line option. This option is available only
    in the GUI app; it raises the send message dialogue window.
  * The operations 'send message', 'download sent message' and
@@ -18,7 +23,7 @@
    dialogue.
  * The message search dialogue now allows to search messages according
    to specified attachment names.
- * Attachment model holds binary attachment data instead of base64-ecoded
+ * Attachment model holds binary attachment data instead of base64-encoded
    documents.
  * Simplified message model. Each entry type occupies its own column.
  * Explicitly specifying attachment MIME type when sending XML documents.
