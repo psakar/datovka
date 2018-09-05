@@ -33,7 +33,7 @@ _GETTEXT_SHA256=""
 _GETTEXT_SIG_SUFF=".sig"
 _GETTEXT_KEY_FP="462225C3B46F34879FC8496CD605848ED7E69871" # "Daiki Ueno <ueno@unixuser.org>"
 
-_LIBCURL_ARCHIVE="curl-7.61.1.tar.xz"
+_LIBCURL_ARCHIVE="curl-7.59.0.tar.xz"
 _LIBCURL_URL_PREFIX="https://curl.haxx.se/download/"
 _LIBCURL_SHA256=""
 _LIBCURL_SIG_SUFF=".asc"
