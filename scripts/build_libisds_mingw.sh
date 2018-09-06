@@ -372,6 +372,7 @@ build_libcurl () {
 	if [ "x${TYPE}" = "xshared" ]; then
 		CONFOPTS="${CONFOPTS} --disable-static"
 	fi
+	#CONFOPTS="${CONFOPTS} --enable-crypto-auth" # ?
 	CONFOPTS="${CONFOPTS} --enable-http"
 	CONFOPTS="${CONFOPTS} --enable-ipv6"
 	CONFOPTS="${CONFOPTS} --enable-proxy"
@@ -390,7 +391,11 @@ build_libcurl () {
 	CONFOPTS="${CONFOPTS} --disable-telnet"
 	CONFOPTS="${CONFOPTS} --disable-tftp"
 	CONFOPTS="${CONFOPTS} --without-axtls"
+	CONFOPTS="${CONFOPTS} --without-cyassl"
+	CONFOPTS="${CONFOPTS} --without-ssl" # without OpenSSL
+	CONFOPTS="${CONFOPTS} --without-wolfssl" # since curl-7.60.0
 	CONFOPTS="${CONFOPTS} --without-zsh-functions-dir"
+	#CONFOPTS="${CONFOPTS} --with-ca-fallback" # ?
 	CONFOPTS="${CONFOPTS} --with-winssl"
 
 	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}" \
