@@ -396,6 +396,12 @@ if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
 	if target_scheduled shared; then build_openssl shared || exit 1; fi
 fi
 
+# Windows Xp and Vista don't support TLS 1.2 which is required since 1.9.2018.
+# https://www.datoveschranky.info/-/konec-podpory-protokolu-tls-ve-verzich-1-0-a-1-1-
+USE_WINSSL="yes"
+USE_OPENSSL_LOCAL_CA_STORE="no"
+LOCAL_CA_STORE_DIR="ssl/certs"
+LOCAL_CA_STORE_FILE="ca-certificates.crt"
 
 build_libcurl () {
 	TYPE=$1
@@ -434,11 +440,21 @@ build_libcurl () {
 	CONFOPTS="${CONFOPTS} --disable-tftp"
 	CONFOPTS="${CONFOPTS} --without-axtls"
 	CONFOPTS="${CONFOPTS} --without-cyassl"
-	CONFOPTS="${CONFOPTS} --without-ssl" # without OpenSSL
+	if [ "x${USE_OPENSSL_LOCAL_CA_STORE}" = "xno" ]; then
+		CONFOPTS="${CONFOPTS} --without-ssl" # without OpenSSL
+	else
+		CONFOPTS="${CONFOPTS} --with-ssl=${BUILTDIR}"
+		CONFOPTS="${CONFOPTS} --with-ca-path=${LOCAL_CA_STORE_DIR}"
+		CONFOPTS="${CONFOPTS} --with-ca-bundle=${LOCAL_CA_STORE_DIR}/${LOCAL_CA_STORE_FILE}"
+	fi
 	CONFOPTS="${CONFOPTS} --without-wolfssl" # since curl-7.60.0
 	CONFOPTS="${CONFOPTS} --without-zsh-functions-dir"
 	#CONFOPTS="${CONFOPTS} --with-ca-fallback" # ?
-	CONFOPTS="${CONFOPTS} --with-winssl"
+	if [ "x${USE_WINSSL}" = "xyes" ]; then
+		CONFOPTS="${CONFOPTS} --with-winssl"
+	else
+		CONFOPTS="${CONFOPTS} --without-winssl"
+	fi
 
 	./configure ${CONFOPTS} --host="${X86_MINGV_HOST}" \
 	    CPPFLAGS="-DWINVER=${WIN_VER}"
