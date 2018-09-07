@@ -355,6 +355,48 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 fi
 
 
+build_openssl () {
+	TYPE=$1
+	check_params "${TYPE}" || exit 1
+	WORKDIR=$(workdir_name "${TYPE}")
+	BUILTDIR=$(builtdir_name "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR}" openssl
+	cd "${WORKDIR}"/openssl*
+
+	CONFOPTS=""
+	#CONFOPTS="${CONFOPTS} no-asm"
+	CONFOPTS="${CONFOPTS} mingw"
+	CONFOPTS="${CONFOPTS} enable-static-engine"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} no-shared"
+	fi
+	if [ "x${TYPE}" = "xshared" ]; then
+		CONFOPTS="${CONFOPTS} shared"
+	fi
+	CONFOPTS="${CONFOPTS} no-krb5"
+
+	./Configure ${CONFOPTS} --prefix="${BUILTDIR}" --cross-compile-prefix="${X86_MINGW_PREFIX}"
+	make depend || exit 1
+	make ${MAKEOPTS} && make install_sw || exit 1
+
+	if [ "x${TYPE}" = "xshared" ]; then
+		cp libeay32.dll "${BUILTDIR}/bin/"
+		cp ssleay32.dll "${BUILTDIR}/bin/"
+	fi
+
+	unset CONFOPTS
+
+	return 0
+}
+
+if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
+	echo "Building openssl."
+	if target_scheduled static; then build_openssl static || exit 1; fi
+	if target_scheduled shared; then build_openssl shared || exit 1; fi
+fi
+
+
 build_libcurl () {
 	TYPE=$1
 	check_params "${TYPE}" || exit 1
@@ -411,48 +453,6 @@ if [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	echo "Building libcurl."
 	if target_scheduled static; then build_libcurl static || exit 1; fi
 	if target_scheduled shared; then build_libcurl shared || exit 1; fi
-fi
-
-
-build_openssl () {
-	TYPE=$1
-	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
-
-	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR}" openssl
-	cd "${WORKDIR}"/openssl*
-
-	CONFOPTS=""
-	#CONFOPTS="${CONFOPTS} no-asm"
-	CONFOPTS="${CONFOPTS} mingw"
-	CONFOPTS="${CONFOPTS} enable-static-engine"
-	if [ "x${TYPE}" = "xstatic" ]; then
-		CONFOPTS="${CONFOPTS} no-shared"
-	fi
-	if [ "x${TYPE}" = "xshared" ]; then
-		CONFOPTS="${CONFOPTS} shared"
-	fi
-	CONFOPTS="${CONFOPTS} no-krb5"
-
-	./Configure ${CONFOPTS} --prefix="${BUILTDIR}" --cross-compile-prefix="${X86_MINGW_PREFIX}"
-	make depend || exit 1
-	make ${MAKEOPTS} && make install_sw || exit 1
-
-	if [ "x${TYPE}" = "xshared" ]; then
-		cp libeay32.dll "${BUILTDIR}/bin/"
-		cp ssleay32.dll "${BUILTDIR}/bin/"
-	fi
-
-	unset CONFOPTS
-
-	return 0
-}
-
-if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
-	echo "Building openssl."
-	if target_scheduled static; then build_openssl static || exit 1; fi
-	if target_scheduled shared; then build_openssl shared || exit 1; fi
 fi
 
 

@@ -381,6 +381,58 @@ if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 fi
 
 
+build_openssl () {
+	ARCH=$1
+	TYPE=$2
+	check_params "${ARCH}" "${TYPE}" || exit 1
+	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+
+	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR}" openssl
+	cd "${WORKDIR}"/openssl*
+
+	CONFOPTS=""
+	#CONFOPTS="${CONFOPTS} no-asm"
+	if [ "x${ARCH}" = "xi386" ]; then
+		CONFOPTS="${CONFOPTS} darwin-i386-cc"
+	fi
+	if [ "x${ARCH}" = "xx86_64" ]; then
+		CONFOPTS="${CONFOPTS} darwin64-x86_64-cc"
+	fi
+	CONFOPTS="${CONFOPTS} enable-static-engine"
+	if [ "x${TYPE}" = "xstatic" ]; then
+		CONFOPTS="${CONFOPTS} no-shared"
+	fi
+	if [ "x${TYPE}" = "xshared" ]; then
+		CONFOPTS="${CONFOPTS} shared"
+	fi
+	CONFOPTS="${CONFOPTS} no-krb5"
+
+	./Configure ${CONFOPTS} --prefix="${BUILTDIR}"
+	# Patch Makefile
+	sed -ie "s/^CFLAG= -/CFLAG=  -mmacosx-version-min=${OSX_MIN_VER} -/" Makefile
+	make depend || exit 1
+	make ${MAKEOPTS} && make install_sw || exit 1
+
+	if [ "x${TYPE}" = "xshared" ]; then
+		rm -rf "${BUILTDIR}"/lib/libcrypto.a
+		rm -rf "${BUILTDIR}"/lib/libssl.a
+	fi
+
+	unset CONFOPTS
+
+	return 0
+}
+
+if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
+	echo "Building openssl."
+	if target_scheduled i386 static; then build_openssl i386 static || exit 1; fi
+	if target_scheduled i386 shared; then build_openssl i386 shared || exit 1; fi
+	if target_scheduled x86_64 static; then build_openssl x86_64 static || exit 1; fi
+	if target_scheduled x86_64 shared; then build_openssl x86_64 shared || exit 1; fi
+fi
+
+
 build_libcurl () {
 	ARCH=$1
 	TYPE=$2
@@ -440,58 +492,6 @@ if [ "x${USE_SYSTEM_CURL}" != "xyes" ] && [ ! -z "${LIBCURL_ARCHIVE}" ]; then
 	if target_scheduled i386 shared; then build_libcurl i386 shared || exit 1; fi
 	if target_scheduled x86_64 static; then build_libcurl x86_64 static || exit 1; fi
 	if target_scheduled x86_64 shared; then build_libcurl x86_64 shared || exit 1; fi
-fi
-
-
-build_openssl () {
-	ARCH=$1
-	TYPE=$2
-	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
-
-	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR}" openssl
-	cd "${WORKDIR}"/openssl*
-
-	CONFOPTS=""
-	#CONFOPTS="${CONFOPTS} no-asm"
-	if [ "x${ARCH}" = "xi386" ]; then
-		CONFOPTS="${CONFOPTS} darwin-i386-cc"
-	fi
-	if [ "x${ARCH}" = "xx86_64" ]; then
-		CONFOPTS="${CONFOPTS} darwin64-x86_64-cc"
-	fi
-	CONFOPTS="${CONFOPTS} enable-static-engine"
-	if [ "x${TYPE}" = "xstatic" ]; then
-		CONFOPTS="${CONFOPTS} no-shared"
-	fi
-	if [ "x${TYPE}" = "xshared" ]; then
-		CONFOPTS="${CONFOPTS} shared"
-	fi
-	CONFOPTS="${CONFOPTS} no-krb5"
-
-	./Configure ${CONFOPTS} --prefix="${BUILTDIR}"
-	# Patch Makefile
-	sed -ie "s/^CFLAG= -/CFLAG=  -mmacosx-version-min=${OSX_MIN_VER} -/" Makefile
-	make depend || exit 1
-	make ${MAKEOPTS} && make install_sw || exit 1
-
-	if [ "x${TYPE}" = "xshared" ]; then
-		rm -rf "${BUILTDIR}"/lib/libcrypto.a
-		rm -rf "${BUILTDIR}"/lib/libssl.a
-	fi
-
-	unset CONFOPTS
-
-	return 0
-}
-
-if [ ! -z "${OPENSSL_ARCHIVE}" ]; then
-	echo "Building openssl."
-	if target_scheduled i386 static; then build_openssl i386 static || exit 1; fi
-	if target_scheduled i386 shared; then build_openssl i386 shared || exit 1; fi
-	if target_scheduled x86_64 static; then build_openssl x86_64 static || exit 1; fi
-	if target_scheduled x86_64 shared; then build_openssl x86_64 shared || exit 1; fi
 fi
 
 
