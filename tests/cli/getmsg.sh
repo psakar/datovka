@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 #pwd
 
@@ -10,10 +10,38 @@ CMDARGS="${CMDARGS} --conf-subdir .dsgui"
 CMDARGS="${CMDARGS} --debug-verbosity 2"
 CMDARGS="${CMDARGS} --log-verbosity 2"
 
-APP_BINARY_NAME="/../../datovka"
-ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
-ATTACH_SAVE_PATH="${SCRIPTPATH}/../../tmp/"
 . "${SCRIPTPATH}/../../untracked/logins.sh"
+
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+	OS_NAME="Linux"
+	APP_BINARY_NAME="datovka"
+	ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
+	APP_PATH="${SCRIPTPATH}/../.."
+	ATTACH_SAVE_PATH="${SCRIPTPATH}/../../tmp/"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+	OS_NAME="macOS"
+	APP_BINARY_NAME="datovka"
+	ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
+	APP_PATH="${SCRIPTPATH}/../.."
+	ATTACH_SAVE_PATH="${SCRIPTPATH}/../../tmp/"
+elif [[ "$OSTYPE" == "msys" ]]; then
+	OS_NAME="Windows"
+	APP_BINARY_NAME="datovka-cli.exe"
+	ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
+	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"
+	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:0:1}:${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"  
+	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"  
+elif [[ "$OSTYPE" == "win32" ]]; then
+	OS_NAME="Windows"
+	APP_BINARY_NAME="datovka-cli.exe"
+	ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
+	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"
+	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:0:1}:${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"  
+	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"
+else
+	echo "ERROR: Unknown platform"
+	exit
+fi
 
 rm -rf $ATTACH_SAVE_PATH
 mkdir $ATTACH_SAVE_PATH
@@ -25,7 +53,7 @@ echo "              for selected accounts."
 echo "***********************************************************************"
 #---Get message list for account with username and pwd---
 for login in $USERNAMES_MSGLIST_ONLY; do
-	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	MSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='received'" \
 		2>/dev/null`
@@ -35,7 +63,7 @@ for login in $USERNAMES_MSGLIST_ONLY; do
 	else
 		echo "GetMsgList (received): $login - OK $MSGIDS"
 	fi
-	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	MSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='sent'" \
 		2>/dev/null`
@@ -55,7 +83,7 @@ echo "              for selected accounts."
 echo "***********************************************************************"
 #---Get message list for account with username and pwd---
 for login in $USERNAMES_MSGLIST_COMPLETE; do
-	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	MSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='received',complete='yes'" \
 		2>/dev/null`
@@ -65,7 +93,7 @@ for login in $USERNAMES_MSGLIST_COMPLETE; do
 	else
 		echo "GetMsgList (received) + complete download: $login - OK $MSGIDS"
 	fi
-	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	MSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='sent',complete='yes'" \
 		2>/dev/null`
@@ -89,7 +117,7 @@ DTIME=$(date +"%Y-%m-%d %T")
 DMANNOTATION="Datovka - test CLI - ${DTIME}"
 DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
 ${ATTACH_LOAD_PATH}/obrazek.png;${ATTACH_LOAD_PATH}/datova-zprava.zfo"
-MSGID=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
 	2>/dev/null`
@@ -107,7 +135,7 @@ sleep 5
 echo ""
 echo "---Get received message list for user '$USERNAME_SEND2'---"
 #----must be success and return msg ID/IDs
-RMSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+RMSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND2'" \
 	--get-msg-list "dmType='received'" \
 	2>/dev/null`
@@ -122,7 +150,7 @@ echo ""
 #----Export complete new messages from database------------------------------
 #----must fails
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
 		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID.zfo'" \
 		2>/dev/null`
@@ -137,7 +165,7 @@ done
 #----Export delivery info of new messages from database----------------------
 #----must fails
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID.zfo'" \
 		2>/dev/null`
@@ -152,7 +180,7 @@ done
 #-----Download complete new messages ISDS-------------------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
 		--get-msg "dmID='$dmID',dmType='received',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-isds.zfo'" \
 		2>/dev/null`
@@ -168,7 +196,7 @@ done
 #----Download delivery info of new messages from ISDS------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
 		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-isds.zfo'" \
 		2>/dev/null`
@@ -184,7 +212,7 @@ done
 #----Export complete messages from database again-----------------------
 #----must be success and save zfo file and save attachment
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
 		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-db.zfo',attachmentDir='${ATTACH_SAVE_PATH}'" \
 		2>/dev/null`
@@ -200,7 +228,7 @@ done
 #----Export delivery info of messages from again----------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-db.zfo'" \
 		2>/dev/null`
@@ -220,7 +248,7 @@ done
 #
 echo ""
 echo "---Get sent message list for user '$USERNAME_SEND'---"
-SMSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+SMSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 	--get-msg-list "dmType='sent'" \
 	2>/dev/null`

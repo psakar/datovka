@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 #pwd
 
@@ -10,15 +10,31 @@ CMDARGS="${CMDARGS} --conf-subdir .dsgui"
 CMDARGS="${CMDARGS} --debug-verbosity 2"
 CMDARGS="${CMDARGS} --log-verbosity 2"
 
-APP_BINARY_NAME="/../../datovka"
 . "${SCRIPTPATH}/../../untracked/logins.sh"
+
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+	APP_BINARY_NAME="datovka"
+	APP_PATH="${SCRIPTPATH}/../.."  
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+	APP_BINARY_NAME="datovka"
+	APP_PATH="${SCRIPTPATH}/../.." 
+elif [[ "$OSTYPE" == "msys" ]]; then
+	APP_BINARY_NAME="datovka-cli.exe"
+	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"  
+elif [[ "$OSTYPE" == "win32" ]]; then
+	APP_BINARY_NAME="datovka-cli.exe"
+	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"
+else
+	echo "ERROR: Unknown platform"
+	exit
+fi
 
 echo ""
 echo "***********************************************************************"
 echo "FIND DATABOX TEST: Find databoxes by ic, firmname, ... ($USERNAME_FIND_DATABOX1)"
 echo "***********************************************************************"
 # this request must finish with success
-"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_FIND_DATABOX1'" \
 	--find-databox "dbType='OVM',ic='12345678'" \
 	2>/dev/null
@@ -31,7 +47,7 @@ fi
 echo ""
 
 # this request must finish with success
-"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_FIND_DATABOX1'" \
 	--find-databox "dbType='OVM',ic='00000001'" \
 	2>/dev/null
@@ -44,7 +60,7 @@ fi
 echo ""
 
 # this request must finish with success
-"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_FIND_DATABOX2'" \
 	--find-databox "dbType='OVM',firmName='Ministerstvo dopravy'" \
 	2>/dev/null
@@ -57,7 +73,7 @@ fi
 echo ""
 
 # this request must finish with error
-"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_FIND_DATABOX2'" \
 	--find-databox "dbType='FO',firmName='Ministerstvo dopravy'" \
 	2>/dev/null
