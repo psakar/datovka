@@ -266,7 +266,7 @@ echo "---Download new sent messages for user '$USERNAME_SEND'---"
 #----Export complete new messages from database------------------------------
 #----must fails
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID.zfo'" \
 		2>/dev/null`
@@ -281,7 +281,7 @@ done
 #----Export delivery info of new messages from database----------------------
 #----must fails
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID.zfo'" \
 		2>/dev/null`
@@ -296,7 +296,7 @@ done
 #-----Download complete new messages ISDS-------------------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 		--get-msg "dmID='$dmID',dmType='sent',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo'" \
 		2>/dev/null`
@@ -312,7 +312,7 @@ done
 #----Download delivery info of new messages from ISDS------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo'" \
 		2>/dev/null`
@@ -328,7 +328,7 @@ done
 #----Export complete messages from database again-----------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-db.zfo'" \
 		2>/dev/null`
@@ -344,7 +344,7 @@ done
 #----Export delivery info of messages from again----------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-db.zfo'" \
 		2>/dev/null`
@@ -366,7 +366,7 @@ echo "***********************************************************************"
 #-----Download complete new messages ISDS-------------------------------------
 #----must be success and save zfo file
 for dmID in $MSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
 		--get-msg "dmID='$dmID',dmType='received',markDownload='yes',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo'" \
 		2>/dev/null`
@@ -382,7 +382,7 @@ done
 #----Download delivery info of new messages from ISDS------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
 		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo'" \
 		2>/dev/null`
@@ -400,7 +400,7 @@ echo "***********************************************************************"
 echo "* GET MSG LIST:: Check messages where attachment missing (via all accounts)."
 echo "***********************************************************************"
 for login in $USERNAMES; do
-	"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
 		--check-attachment \
 		2>/dev/null
@@ -418,7 +418,7 @@ echo "***********************************************************************"
 echo "* GET MSG ID LIST FROM DB:: Get all received message IDs (via all accounts)."
 echo "***********************************************************************"
 for login in $USERNAMES; do
-	"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-ids "dmType='received'" \
 		2>/dev/null
@@ -436,7 +436,7 @@ echo "***********************************************************************"
 echo "* GET MSG ID LIST FROM DB:: Get all sent message IDs (via all accounts)."
 echo "***********************************************************************"
 for login in $USERNAMES; do
-	"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-ids "dmType='sent'" \
 		2>/dev/null
