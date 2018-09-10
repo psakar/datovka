@@ -12,39 +12,48 @@ CMDARGS="${CMDARGS} --log-verbosity 2"
 
 . "${SCRIPTPATH}/../../untracked/logins.sh"
 
+# You can change save location
+AT_FILE_SAVE_PATH="${SCRIPTPATH}/../../tmp/"
+
+rm -rf $AT_FILE_SAVE_PATH
+mkdir $AT_FILE_SAVE_PATH
+
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
 	OS_NAME="Linux"
 	APP_BINARY_NAME="datovka"
 	ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
 	APP_PATH="${SCRIPTPATH}/../.."
-	ATTACH_SAVE_PATH="${SCRIPTPATH}/../../tmp/"
+	ATTACH_SAVE_PATH="${AT_FILE_SAVE_PATH}"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
 	OS_NAME="macOS"
 	APP_BINARY_NAME="datovka"
 	ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
 	APP_PATH="${SCRIPTPATH}/../.."
-	ATTACH_SAVE_PATH="${SCRIPTPATH}/../../tmp/"
+	ATTACH_SAVE_PATH="${AT_FILE_SAVE_PATH}"
 elif [[ "$OSTYPE" == "msys" ]]; then
 	OS_NAME="Windows"
 	APP_BINARY_NAME="datovka-cli.exe"
 	ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
 	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"
-	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:0:1}:${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"  
+	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:0:1}:${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}" 
+	ATTACH_SAVE_PATH="${AT_FILE_SAVE_PATH}"
+	ATTACH_SAVE_PATH="${ATTACH_SAVE_PATH:1:${#ATTACH_SAVE_PATH}}"
+	ATTACH_SAVE_PATH="${ATTACH_SAVE_PATH:0:1}:${ATTACH_SAVE_PATH:1:${#ATTACH_SAVE_PATH}}"    
 	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"  
 elif [[ "$OSTYPE" == "win32" ]]; then
 	OS_NAME="Windows"
 	APP_BINARY_NAME="datovka-cli.exe"
 	ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
 	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"
-	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:0:1}:${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"  
+	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:0:1}:${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"
+	ATTACH_SAVE_PATH="${AT_FILE_SAVE_PATH}"
+	ATTACH_SAVE_PATH="${ATTACH_SAVE_PATH:1:${#ATTACH_SAVE_PATH}}"
+	ATTACH_SAVE_PATH="${ATTACH_SAVE_PATH:0:1}:${ATTACH_SAVE_PATH:1:${#ATTACH_SAVE_PATH}}"     
 	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"
 else
 	echo "ERROR: Unknown platform"
 	exit
 fi
-
-rm -rf $ATTACH_SAVE_PATH
-mkdir $ATTACH_SAVE_PATH
 
 echo ""
 echo "***********************************************************************"
