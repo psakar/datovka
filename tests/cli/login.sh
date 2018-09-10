@@ -14,13 +14,13 @@ CMDARGS="${CMDARGS} --log-verbosity 2"
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
 	APP_BINARY_NAME="datovka"
-	APP_PATH="${SCRIPTPATH}/../.."  
+	APP_PATH="${SCRIPTPATH}/../.."
 elif [[ "$OSTYPE" == "darwin"* ]]; then
 	APP_BINARY_NAME="datovka"
-	APP_PATH="${SCRIPTPATH}/../.." 
+	APP_PATH="${SCRIPTPATH}/../../datovka.app/Contents/MacOS"
 elif [[ "$OSTYPE" == "msys" ]]; then
 	APP_BINARY_NAME="datovka-cli.exe"
-	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"  
+	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"
 elif [[ "$OSTYPE" == "win32" ]]; then
 	APP_BINARY_NAME="datovka-cli.exe"
 	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"
