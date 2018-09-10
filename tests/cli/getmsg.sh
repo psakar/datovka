@@ -25,7 +25,7 @@ if [[ "$OSTYPE" == "linux-gnu" ]]; then
 	APP_PATH="${SCRIPTPATH}/../.."
 	ATTACH_SAVE_PATH="${AT_FILE_SAVE_PATH}"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-	OS_NAME="macOS"
+	OS_NAME="MacOS"
 	APP_BINARY_NAME="datovka"
 	ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
 	APP_PATH="${SCRIPTPATH}/../../datovka.app/Contents/MacOS"
