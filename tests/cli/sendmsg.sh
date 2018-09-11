@@ -49,8 +49,7 @@ echo "***********************************************************************"
 echo "---Create and send a new message from user '$USERNAME_SEND'---"
 DTIME=$(date +"%Y-%m-%d %T")
 DMANNOTATION="Datovka: test CLI ${OS_NAME} - ${DTIME}"
-DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
-${ATTACH_LOAD_PATH}/obrazek.png;${ATTACH_LOAD_PATH}/datova-zprava.zfo"
+DMATACHMENT="${ATTACH_LOAD_PATH}/obrazek.jpg"
 MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
@@ -73,8 +72,7 @@ echo "***********************************************************************"
 echo "---Create and send a new message from user '$USERNAME_SEND2'---"
 DTIME=$(date +"%Y-%m-%d %T")
 DMANNOTATION="Datovka: test CLI ${OS_NAME} - ${DTIME}"
-DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
-${ATTACH_LOAD_PATH}/obrazek.png;${ATTACH_LOAD_PATH}/datova-zprava.zfo"
+DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.png"
 MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} -D \
 	--login "username='$USERNAME_SEND2'" \
 	--send-msg "dbIDRecipient='$RECIPIENTS_SEND2',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'"  \
@@ -97,8 +95,7 @@ echo "***********************************************************************"
 echo "---Create and send a new message from user '$USERNAME_SEND'---"
 DTIME=$(date +"%Y-%m-%d %T")
 DMANNOTATION="Datovka: test CLI ${OS_NAME} - ${DTIME}"
-DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
-${ATTACH_LOAD_PATH}/obrazek.png;;;${ATTACH_LOAD_PATH}/datova-zprava.zfo"
+DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/obrazek.png"
 MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND',dmAttachment='${DMATACHMENT}',dmAnnotation='${DMANNOTATION}',dmPersonalDelivery='1',dmAllowSubstDelivery='1',dmOVM='0',dmPublishOwnID='1',dmToHands='Jan Pokušitel Červeň',dmRecipientRefNumber='98765',dmSenderRefNumber='123456',dmRecipientIdent='CZ98765',dmSenderIdent='CZ123456',dmLegalTitleLaw='1',dmLegalTitleYear='2',dmLegalTitleSect='3',dmLegalTitlePar='4',dmLegalTitlePoint='5'" \
@@ -121,8 +118,7 @@ echo "***********************************************************************"
 echo "---Create and send a new message from user '$USERNAME_SEND'---"
 DTIME=$(date +"%Y-%m-%d %T")
 DMANNOTATION="Datovka: test CLI ${OS_NAME} - ${DTIME}"
-DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
-${ATTACH_LOAD_PATH}/obrazek.png;${ATTACH_LOAD_PATH}/datova-zprava.zfo"
+DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.pdf"
 MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND_NOTEXIST',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
@@ -141,8 +137,7 @@ echo "***********************************************************************"
 # this request must finish with error
 echo "---Create and send a new message from user '$USERNAME_SEND'---"
 DMANNOTATION="Datovka: test CLI ${OS_NAME} - Error"
-DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
-${ATTACH_LOAD_PATH}/obrazek.png;${ATTACH_LOAD_PATH}/datova-zprava.zfo;${ATTACH_LOAD_PATH}/xxxxxxxx.zfo"
+DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/xxxxxxxx.zfo"
 "${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--login "username='$TEST_USER_SEND1'" \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
