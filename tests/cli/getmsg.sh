@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-#pwd
-
 SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=$(dirname "${SCRIPT}")
 
@@ -14,6 +12,21 @@ CMDARGS="${CMDARGS} --log-verbosity 2"
 
 # You can change save location
 AT_FILE_SAVE_PATH="${SCRIPTPATH}/../../tmp/"
+
+SOME_ERROR=false
+
+print_error() {
+	SOME_ERROR=true
+	RED='\033[1;31m' # Set Color
+	NC='\033[0m' # No Color
+	echo -e ${RED}$1${NC}
+}
+
+print_success() {
+	GREEN='\033[1;32m' # Set Color
+	NC='\033[0m' # No Color
+	echo -e ${GREEN}$1${NC}
+}
 
 rm -rf $AT_FILE_SAVE_PATH
 mkdir $AT_FILE_SAVE_PATH
@@ -51,8 +64,8 @@ elif [[ "$OSTYPE" == "win32" ]]; then
 	ATTACH_SAVE_PATH="${ATTACH_SAVE_PATH:0:1}:${ATTACH_SAVE_PATH:1:${#ATTACH_SAVE_PATH}}"
 	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"
 else
-	echo "ERROR: Unknown platform"
-	exit
+	print_error "ERROR: Unknown platform"
+	exit 1
 fi
 
 echo ""
@@ -67,20 +80,18 @@ for login in $USERNAMES_MSGLIST_ONLY; do
 		--get-msg-list "dmType='received'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgList (received): $login - ERROR"
-		exit
+		print_error "GetMsgList (received): $login - ERROR"		
 	else
-		echo "GetMsgList (received): $login - OK $MSGIDS"
+		print_success "GetMsgList (received): $login - OK $MSGIDS"
 	fi
 	MSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='sent'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgList (sent): $login - ERROR"
-		exit
+		print_error "GetMsgList (sent): $login - ERROR"
 	else
-		echo "GetMsgList (sent): $login - OK $MSGID"
+		print_success "GetMsgList (sent): $login - OK $MSGID"
 	fi
 done
 
@@ -97,20 +108,18 @@ for login in $USERNAMES_MSGLIST_COMPLETE; do
 		--get-msg-list "dmType='received',complete='yes'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgList (received) + complete download: $login - ERROR"
-		exit
+		print_error "GetMsgList (received) + complete download: $login - ERROR"
 	else
-		echo "GetMsgList (received) + complete download: $login - OK $MSGIDS"
+		print_success "GetMsgList (received) + complete download: $login - OK $MSGIDS"
 	fi
 	MSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='sent',complete='yes'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgList (sent) + complete download: $login - ERROR"
-		exit
+		print_error "GetMsgList (sent) + complete download: $login - ERROR"
 	else
-		echo "GetMsgList (sent) + complete download: $login - OK $MSGID"
+		print_success "GetMsgList (sent) + complete download: $login - OK $MSGID"
 	fi
 done
 
@@ -130,10 +139,9 @@ MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "SendMsg: $USERNAME_SEND - ERROR"
-	exit
+	print_error "SendMsg: $USERNAME_SEND - ERROR"
 else
-	echo "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - OK"
+	print_success "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - OK"
 fi
 echo ""
 echo "Waiting for the server DS - 5 seconds ..."
@@ -148,10 +156,9 @@ RMSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--get-msg-list "dmType='received'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "GetMsgList (received): $USERNAME_SEND2 - ERROR"
-	exit
+	print_error "GetMsgList (received): $USERNAME_SEND2 - ERROR"
 else
-	echo "GetMsgList (received): $USERNAME_SEND2 - OK $RMSGIDS"
+	print_success "GetMsgList (received): $USERNAME_SEND2 - OK $RMSGIDS"
 fi
 
 echo ""
@@ -163,10 +170,9 @@ for dmID in $RMSGIDS; do
 		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND2 - failed - it is OK"
+		print_success "GetMsgFromDb '$dmID': $USERNAME_SEND2 - failed - it is OK"
 	else
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		print_error "GetMsgFromDb '$dmID': $USERNAME_SEND2 - ERROR"
 	fi
 done
 
@@ -178,10 +184,9 @@ for dmID in $RMSGIDS; do
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfo '$dmID': $USERNAME_SEND2 - failed - it is OK"
+		print_success "GetMsgDelInfo '$dmID': $USERNAME_SEND2 - failed - it is OK"
 	else
-		echo "GetMsgDelInfo '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		print_error "GetMsgDelInfo '$dmID': $USERNAME_SEND2 - ERROR"
 	fi
 done
 
@@ -193,11 +198,10 @@ for dmID in $RMSGIDS; do
 		--get-msg "dmID='$dmID',dmType='received',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		print_error "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		print_success "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
@@ -209,11 +213,10 @@ for dmID in $RMSGIDS; do
 		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2- ERROR"
-		exit
+		print_error "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2- ERROR"
 	else
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		print_success "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
@@ -225,11 +228,10 @@ for dmID in $RMSGIDS; do
 		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-db.zfo',attachmentDir='${ATTACH_SAVE_PATH}'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		print_error "GetMsgFromDb '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		print_success "GetMsgFromDb '$dmID': $USERNAME_SEND2 - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
@@ -241,11 +243,10 @@ for dmID in $RMSGIDS; do
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-db.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		print_error "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		print_success "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND2 - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
@@ -261,10 +262,9 @@ SMSGIDS=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--get-msg-list "dmType='sent'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "GetMsgList (sent): $USERNAME_SEND - ERROR"
-	exit
+	print_error "GetMsgList (sent): $USERNAME_SEND - ERROR"
 else
-	echo "GetMsgList (sent): $USERNAME_SEND - OK $SMSGIDS"
+	print_success "GetMsgList (sent): $USERNAME_SEND - OK $SMSGIDS"
 fi
 #--------------------------------------------------------------------------
 
@@ -279,10 +279,9 @@ for dmID in $RMSGIDS; do
 		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND - failed - it is OK"
+		print_success "GetMsgFromDb '$dmID': $USERNAME_SEND - failed - it is OK"
 	else
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		print_error "GetMsgFromDb '$dmID': $USERNAME_SEND - ERROR"
 	fi
 done
 
@@ -294,10 +293,9 @@ for dmID in $RMSGIDS; do
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfo '$dmID': $USERNAME_SEND - failed - it is OK"
+		print_success "GetMsgDelInfo '$dmID': $USERNAME_SEND - failed - it is OK"
 	else
-		echo "GetMsgDelInfo '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		print_error "GetMsgDelInfo '$dmID': $USERNAME_SEND - ERROR"
 	fi
 done
 
@@ -309,11 +307,10 @@ for dmID in $RMSGIDS; do
 		--get-msg "dmID='$dmID',dmType='sent',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		print_error "GetMsgFromISDS '$dmID': $USERNAME_SEND - ERROR"
 	else
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND - OK"
+		print_success "GetMsgFromISDS '$dmID': $USERNAME_SEND - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND - OK"
 	fi
 done
 
@@ -325,11 +322,10 @@ for dmID in $RMSGIDS; do
 		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		print_error "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND - ERROR"
 	else
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND - OK"
+		print_success "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND - OK"
 	fi
 done
 
@@ -341,11 +337,10 @@ for dmID in $RMSGIDS; do
 		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-db.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		print_error "GetMsgFromDb '$dmID': $USERNAME_SEND - ERROR"
 	else
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND - OK"
+		print_success "GetMsgFromDb '$dmID': $USERNAME_SEND - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND - OK"
 	fi
 done
 
@@ -357,14 +352,12 @@ for dmID in $RMSGIDS; do
 		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-db.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		print_error "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND - ERROR"
 	else
-		echo "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND - OK"
+		print_success "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND - OK"
 	fi
 done
-
 
 echo ""
 echo "***********************************************************************"
@@ -379,11 +372,10 @@ for dmID in $MSGIDS; do
 		--get-msg "dmID='$dmID',dmType='received',markDownload='yes',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		print_error "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		print_success "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
@@ -395,15 +387,14 @@ for dmID in $RMSGIDS; do
 		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo'" \
 		2>/dev/null`
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		print_error "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		print_success "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - OK"
+		print_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
-
+echo ""
 echo "***********************************************************************"
 echo "* GET MSG LIST:: Check messages where attachment missing (via all accounts)."
 echo "***********************************************************************"
@@ -413,15 +404,15 @@ for login in $USERNAMES; do
 		--check-attachment \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo "CheckAttach: $login - ERROR"
+		print_error "CheckAttach: $login - ERROR"
 		echo ""
-		exit
 	else
-		echo "CheckAttach: $login - OK"
+		print_success "CheckAttach: $login - OK"
 		echo ""
 	fi
 done
 
+echo ""
 echo "***********************************************************************"
 echo "* GET MSG ID LIST FROM DB:: Get all received message IDs (via all accounts)."
 echo "***********************************************************************"
@@ -431,15 +422,15 @@ for login in $USERNAMES; do
 		--get-msg-ids "dmType='received'" \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo "GetMsgIDs-received: $login - ERROR"
+		print_error "GetMsgIDs-received: $login - ERROR"
 		echo ""
-		exit
 	else
-		echo "GetMsgIDs-received: $login - OK"
+		print_success "GetMsgIDs-received: $login - OK"
 		echo ""
 	fi
 done
 
+echo ""
 echo "***********************************************************************"
 echo "* GET MSG ID LIST FROM DB:: Get all sent message IDs (via all accounts)."
 echo "***********************************************************************"
@@ -449,18 +440,26 @@ for login in $USERNAMES; do
 		--get-msg-ids "dmType='sent'" \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo "GetMsgIDs-sent: $login - ERROR"
+		print_error "GetMsgIDs-sent: $login - ERROR"
 		echo ""
-		exit
 	else
-		echo "GetMsgIDs-sent: $login - OK"
+		print_success "GetMsgIDs-sent: $login - OK"
 		echo ""
 	fi
 done
 
-echo ""
-echo ""
-echo "------------------------------------------------------------------------"
-echo "CONGRATULATION: All get/download message tests were done with success."
-echo "------------------------------------------------------------------------"
-echo ""
+if [ "$SOME_ERROR" = false ] ; then
+	echo ""
+	print_success "-----------------------------------------------------------------------"
+	print_success "SUCCESS: All get message list and download message tests were done."
+	print_success "-----------------------------------------------------------------------"
+	echo ""
+	exit 0
+else 
+	echo ""
+	print_error "-----------------------------------------------------------------------"
+	print_error "FAIL: Some get message list and download message tests have been failed!"
+	print_error "-----------------------------------------------------------------------"
+	echo ""
+	exit 1
+fi

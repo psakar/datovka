@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-#pwd
-
 SCRIPT=$(readlink -f "$0")
 SCRIPTPATH=$(dirname "${SCRIPT}")
 
@@ -11,6 +9,21 @@ CMDARGS="${CMDARGS} --debug-verbosity 2"
 CMDARGS="${CMDARGS} --log-verbosity 2"
         
 . "${SCRIPTPATH}/../../untracked/logins.sh"
+
+SOME_ERROR=false
+
+print_error() {
+	SOME_ERROR=true
+	RED='\033[1;31m' # Set Color
+	NC='\033[0m' # No Color
+	echo -e ${RED}$1${NC}
+}
+
+print_success() {
+	GREEN='\033[1;32m' # Set Color
+	NC='\033[0m' # No Color
+	echo -e ${GREEN}$1${NC}
+}
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
 	OS_NAME="Linux"
@@ -37,8 +50,8 @@ elif [[ "$OSTYPE" == "win32" ]]; then
 	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:0:1}:${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"
 	APP_PATH="C:\Program Files (x86)\CZ.NIC\Datovka"
 else
-	echo "ERROR: Unknown platform"
-	exit
+	print_error "ERROR: Unknown platform"
+	exit 1
 fi
 
 echo ""
@@ -55,10 +68,9 @@ MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "SendMsg: $USERNAME_SEND - ERROR"
-	exit
+	print_error "SendMsg: $USERNAME_SEND - ERROR"
 else
-	echo "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - OK"
+	print_success "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - OK"
 fi
 echo ""
 echo "Waiting for the server DS - 3 seconds ..."
@@ -78,10 +90,9 @@ MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} -D \
 	--send-msg "dbIDRecipient='$RECIPIENTS_SEND2',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'"  \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "SendMultiMsg: $USERNAME_SEND2- ERROR"
-	exit
+	print_error "SendMultiMsg: $USERNAME_SEND2- ERROR"
 else
-	echo "SendMultiMsg: $USERNAME_SEND2 - msgIDs: - $MSGID - OK"
+	print_success "SendMultiMsg: $USERNAME_SEND2 - msgIDs: - $MSGID - OK"
 fi
 echo ""
 echo "Waiting for the server DS - 3 seconds ..."
@@ -101,10 +112,9 @@ MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND',dmAttachment='${DMATACHMENT}',dmAnnotation='${DMANNOTATION}',dmPersonalDelivery='1',dmAllowSubstDelivery='1',dmOVM='0',dmPublishOwnID='1',dmToHands='Jan Pokušitel Červeň',dmRecipientRefNumber='98765',dmSenderRefNumber='123456',dmRecipientIdent='CZ98765',dmSenderIdent='CZ123456',dmLegalTitleLaw='1',dmLegalTitleYear='2',dmLegalTitleSect='3',dmLegalTitlePar='4',dmLegalTitlePoint='5'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "SendMsg: $USERNAME_SEND - ERROR"
-	exit
+	print_error "SendMsg: $USERNAME_SEND - ERROR"
 else
-	echo "SendMsg: $USERNAME_SEND - msgID: - $MSGID - OK"
+	print_success "SendMsg: $USERNAME_SEND - msgID: - $MSGID - OK"
 fi
 echo ""
 echo "Waiting for the server DS - 3 seconds ..."
@@ -124,10 +134,9 @@ MSGID=`"${APP_PATH}/${APP_BINARY_NAME}" ${CMDARGS} \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND_NOTEXIST',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
 	2>/dev/null`
 if [ 0 != $? ]; then
-	echo "SendMsg: $USERNAME_SEND - recipient NOT exists - OK"
+	print_success "SendMsg: $USERNAME_SEND - recipient NOT exists - OK"
 else
-	echo "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - ERROR"
-	exit
+	print_error "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - ERROR"
 fi
 
 echo ""
@@ -143,15 +152,23 @@ DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/xxxxxxxx.zfo"
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo "SendMsg: $USERNAME_SEND - this message has wrong attachment path - OK"
+	print_success "SendMsg: $USERNAME_SEND - this message has wrong attachment path - OK"
 else
-	echo "SendMsg: $USERNAME_SEND - ERROR"
-	exit
+	print_error "SendMsg: $USERNAME_SEND - ERROR"
 fi
 
-echo ""
-echo ""
-echo "------------------------------------------------------------------------"
-echo "CONGRATULATION: All send message tests were done with success."
-echo "------------------------------------------------------------------------"
-echo ""
+if [ "$SOME_ERROR" = false ] ; then
+	echo ""
+	print_success "-----------------------------------------------------------------------"
+	print_success "SUCCESS: All send message tests were done with success."
+	print_success "-----------------------------------------------------------------------"
+	echo ""
+	exit 0
+else 
+	echo ""
+	print_error "-----------------------------------------------------------------------"
+	print_error "FAIL: Some send message tests have been failed!"
+	print_error "-----------------------------------------------------------------------"
+	echo ""
+	exit 1
+fi
