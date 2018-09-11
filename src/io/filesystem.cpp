@@ -83,9 +83,9 @@ void replaceIllegalChars(QString &str, bool replaceSeparators)
 #undef ILL_FNAME_REP
 
 QString fileSubpathFromFormat(QString format, bool prohibitDirSep, qint64 dmId,
-    const QString &dbId, const QString &userName, const QString &attachName,
-    const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
-    QString dmAnnotation, QString dmSender)
+    const QString &dbId, const QString &userName, const QString &accountName,
+    const QString &attachName, const QDateTime &dmDeliveryTime,
+    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmSender)
 {
 	Q_UNUSED(dmDeliveryTime);
 
@@ -122,6 +122,7 @@ QString fileSubpathFromFormat(QString format, bool prohibitDirSep, qint64 dmId,
 	knowAtrrList.append(StringPairType(QStringLiteral("%d"), dbId));
 	knowAtrrList.append(StringPairType(QStringLiteral("%u"), userName));
 	knowAtrrList.append(StringPairType(QStringLiteral("%f"), attachName));
+	knowAtrrList.append(StringPairType(QStringLiteral("%n"), accountName));
 
 	for (int i = 0; i < knowAtrrList.length(); ++i) {
 		format.replace(knowAtrrList[i].first, knowAtrrList[i].second);

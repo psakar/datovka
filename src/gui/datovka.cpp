@@ -2037,8 +2037,11 @@ void MainWindow::saveAttachmentToFile(const QString &userName,
 		return;
 	}
 
+	const QString accountName(
+	    (*GlobInstcs::acntMapPtr)[userName].accountName());
+
 	QString fileName(Exports::attachmentSavePathWithFileName(*dbSet,
-	    saveAttachPath, filename, dbId, userName, msgId, true));
+	    saveAttachPath, filename, dbId, userName, accountName, msgId, true));
 
 	QString savedFileName(AttachmentInteraction::saveAttachmentToFile(this,
 	    attIdx, fileName));
@@ -2115,10 +2118,13 @@ void MainWindow::saveAllAttachmentsToDir(void)
 		storeExportPath(userName);
 	}
 
+	const QString accountName(
+	    (*GlobInstcs::acntMapPtr)[userName].accountName());
+
 	// save attachments and export zfo/pdf files
 	if (Exports::EXP_SUCCESS ==
 	    Exports::saveAttachmentsWithExports(*dbSet, attSaveDir,
-	    userName, dbId, msgId, errStr)) {
+	    userName, accountName, dbId, msgId, errStr)) {
 		showStatusTextWithTimeout(errStr);
 	} else {
 		showStatusTextWithTimeout(errStr);
@@ -6033,14 +6039,18 @@ void MainWindow::exportSelectedMessageEnvelopeAttachments(void)
 	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	QString errStr;
 
+	const QString accountName(
+	    (*GlobInstcs::acntMapPtr)[userName].accountName());
+
 	foreach (MessageDb::MsgId msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
 		if (Exports::EXP_NOT_MSG_DATA ==
 		    Exports::exportEnvAndAttachments(*dbSet, newDir,
-		    userName, dbId, msgId, errStr)) {
+		    userName, accountName, dbId, msgId, errStr)) {
 			if (messageMissingOfferDownload(msgId, errStr)) {
 				Exports::exportEnvAndAttachments(*dbSet,
-				    newDir, userName, dbId, msgId, errStr);
+				    newDir, userName, accountName, dbId, msgId,
+				    errStr);
 			}
 		}
 	}
@@ -7552,17 +7562,20 @@ void MainWindow::exportExpirMessagesToZFO(const QString &userName,
 	    GlobInstcs::accntDbPtr->dbId(AccountDb::keyFromLogin(userName)));
 	Exports::ExportError ret;
 
+	const QString accountName(
+	    (*GlobInstcs::acntMapPtr)[userName].accountName());
+
 	foreach (MessageDb::MsgId mId, expirMsgIds) {
 		ret = Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE,
-		    newDir, QString(), userName, dbId, mId, false, lastPath,
-		    errStr);
+		    newDir, QString(), userName, accountName, dbId, mId, false,
+		    lastPath, errStr);
 		if (Exports::EXP_CANCELED == ret) {
 			break;
 		} else if(Exports::EXP_NOT_MSG_DATA == ret) {
 			if (messageMissingOfferDownload(mId, errStr)) {
 			    Exports::exportAs(this, *dbSet, Exports::ZFO_MESSAGE,
-			    newDir, QString(), userName, dbId, mId, false,
-			    lastPath, errStr);
+			    newDir, QString(), userName, accountName, dbId, mId,
+			    false, lastPath, errStr);
 			}
 		}
 		if (!lastPath.isEmpty()) {
@@ -8388,18 +8401,21 @@ void MainWindow::doExportOfSelectedFiles(
 	lastPath = m_on_export_zfo_activate;
 	Exports::ExportError ret;
 
+	const QString accountName(
+	    (*GlobInstcs::acntMapPtr)[userName].accountName());
+
 	foreach (MessageDb::MsgId msgId, msgIds) {
 		Q_ASSERT(msgId.dmId >= 0);
 		ret = Exports::exportAs(this, *dbSet, expFileType,
-		    m_on_export_zfo_activate, QString(), userName, dbId, msgId,
-		    true, lastPath, errStr);
+		    m_on_export_zfo_activate, QString(), userName, accountName,
+		    dbId, msgId, true, lastPath, errStr);
 		if (Exports::EXP_CANCELED == ret) {
 			break;
 		} else if (Exports::EXP_NOT_MSG_DATA == ret) {
 			if (messageMissingOfferDownload(msgId, errStr)) {
 				Exports::exportAs(this, *dbSet, expFileType,
 				    m_on_export_zfo_activate, QString(), userName,
-				    dbId, msgId, true, lastPath, errStr);
+				    accountName, dbId, msgId, true, lastPath, errStr);
 			}
 		}
 		if (!lastPath.isEmpty()) {

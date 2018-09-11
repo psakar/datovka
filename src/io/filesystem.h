@@ -42,7 +42,7 @@
  * @brief Create partial file path according to the format string.
  *
  * @note The format string knows these attributes:
- *     "%Y", "%M", "%D", "%h", "%m", "%i", "%s", "%S", "%d", "%u", "%f"
+ *     "%Y", "%M", "%D", "%h", "%m", "%n", "%i", "%s", "%S", "%d", "%u", "%f"
  * @note Directory structure must be created explicitly.
  *
  * @param[in] format           Format string, DEFAULT_TMP_FORMAT is used when
@@ -51,6 +51,7 @@
  * @param[in] dmId             Message id.
  * @param[in] dbId             Data box identifier.
  * @param[in] userName         User identifier (login).
+ * @param[in] accountName      Account name.
  * @param[in] attachName       Attachment file name.
  * @param[in] dmDeliveryTime   Message delivery time.
  * @param[in] dmAcceptanceTime Message acceptance time, current time when
@@ -60,9 +61,9 @@
  * @return File name.
  */
 QString fileSubpathFromFormat(QString format, bool prohibitDirSep, qint64 dmId,
-    const QString &dbId, const QString &userName, const QString &attachName,
-    const QDateTime &dmDeliveryTime, QDateTime dmAcceptanceTime,
-    QString dmAnnotation, QString dmSender);
+    const QString &dbId, const QString &userName, const QString &accountName,
+    const QString &attachName, const QDateTime &dmDeliveryTime,
+    QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmSender);
 
 /*!
  * @brief Creates directory structure to store file into.
