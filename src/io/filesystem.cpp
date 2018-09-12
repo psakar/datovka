@@ -83,7 +83,7 @@ void replaceIllegalChars(QString &str, bool replaceSeparators)
 #undef ILL_FNAME_REP
 
 QString fileSubpathFromFormat(QString format, bool prohibitDirSep, qint64 dmId,
-    const QString &dbId, const QString &userName, const QString &accountName,
+    const QString &dbId, const QString &userName, QString accountName,
     const QString &attachName, const QDateTime &dmDeliveryTime,
     QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmSender)
 {
@@ -100,6 +100,7 @@ QString fileSubpathFromFormat(QString format, bool prohibitDirSep, qint64 dmId,
 	/* Replace problematic characters. */
 	replaceNameChars(dmAnnotation);
 	replaceNameChars(dmSender);
+	replaceNameChars(accountName);
 
 	/* Construct list of format attributes that can be replaced. */
 	typedef QPair<QString, QString> StringPairType;

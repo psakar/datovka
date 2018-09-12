@@ -1601,7 +1601,7 @@ match the original file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>account name</string>
+                 <string>account name (separated by &quot;-&quot;)</string>
                 </property>
                </widget>
               </item>

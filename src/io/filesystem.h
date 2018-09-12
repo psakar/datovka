@@ -61,7 +61,7 @@
  * @return File name.
  */
 QString fileSubpathFromFormat(QString format, bool prohibitDirSep, qint64 dmId,
-    const QString &dbId, const QString &userName, const QString &accountName,
+    const QString &dbId, const QString &userName, QString accountName,
     const QString &attachName, const QDateTime &dmDeliveryTime,
     QDateTime dmAcceptanceTime, QString dmAnnotation, QString dmSender);
 
