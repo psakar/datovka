@@ -428,7 +428,7 @@ for login in $USERNAMES; do
 	fi
 done
 
-if [ "${HAVE_ERROR}" = "xfalse" ]; then
+if [ "x${HAVE_ERROR}" = "xfalse" ]; then
 	echo ""
 	echo_success "-----------------------------------------------------------------------"
 	echo_success "SUCCESS: All get message list and download message tests finished as expected."
