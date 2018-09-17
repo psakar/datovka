@@ -1,215 +1,232 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-#pwd
+# Obtain location of source root.
+src_root () {
+	local SCRIPT_LOCATION=""
+	local SYSTEM=$(uname -s)
+	if [ ! "x${SYSTEM}" = "xDarwin" ]; then
+		local SCRIPT=$(readlink -f "$0")
+		SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
+	else
+		SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
+	fi
 
-SCRIPT=$(readlink -f "$0")
-SCRIPTPATH=$(dirname "${SCRIPT}")
+	echo $(cd "$(dirname "${SCRIPT_LOCATION}")"; cd ..; pwd)
+}
+
+SRC_ROOT=$(src_root)
+cd "${SRC_ROOT}"
+
+SCRIPT_PATH="${SRC_ROOT}/tests/cli"
+
+. "${SCRIPT_PATH}/helper.sh" # Contains HAVE_ERROR variable.
+
+
+. "${SRC_ROOT}/untracked/logins.sh"
+
+APP_BINARY_PATH="$1"
+if [ ! -e "${APP_BINARY_PATH}" ]; then
+	echo_error "ERROR: Cannot locate tested binary."
+	exit 1
+fi
+OS_NAME="$2"
+ATTACH_LOAD_PATH="$3"
+if [ "x${ATTACH_LOAD_PATH}" = "x" -o ! -d "${ATTACH_LOAD_PATH}" ]; then
+	echo_error "ERROR: Cannot locate directory where to load attachments from."
+	exit 1
+fi
+ATTACH_SAVE_DIR="$4"
+if [ "x${ATTACH_SAVE_DIR}" = "x" -o ! -d "${ATTACH_SAVE_DIR}" ]; then
+	echo_error "ERROR: cannot access directory which to save attachments into."
+	exit 1
+fi
 
 CMDARGS="${CMDARGS} -D"
 CMDARGS="${CMDARGS} --conf-subdir .dsgui"
 CMDARGS="${CMDARGS} --debug-verbosity 2"
 CMDARGS="${CMDARGS} --log-verbosity 2"
 
-APP_BINARY_NAME="/../../datovka"
-ATTACH_LOAD_PATH="${SCRIPTPATH}/attachment"
-ATTACH_SAVE_PATH="${SCRIPTPATH}/../../tmp/"
-. "${SCRIPTPATH}/../../untracked/logins.sh"
-
-rm -rf $ATTACH_SAVE_PATH
-mkdir $ATTACH_SAVE_PATH
 
 echo ""
 echo "***********************************************************************"
-echo "MSGLIST TEST: Get received/sent message list only"
+echo "MSGLIST TEST: Get lists of received and sent messages"
 echo "              for selected accounts."
 echo "***********************************************************************"
 #---Get message list for account with username and pwd---
 for login in $USERNAMES_MSGLIST_ONLY; do
-	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	MSGIDS=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='received'" \
-		2>/dev/null`
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgList (received): $login - ERROR"
-		exit
+		echo_error "GetMsgList (received): $login - ERROR"
 	else
-		echo "GetMsgList (received): $login - OK $MSGIDS"
+		echo_success "GetMsgList (received): $login - OK $MSGIDS"
 	fi
-	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	MSGIDS=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='sent'" \
-		2>/dev/null`
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgList (sent): $login - ERROR"
-		exit
+		echo_error "GetMsgList (sent): $login - ERROR"
 	else
-		echo "GetMsgList (sent): $login - OK $MSGID"
+		echo_success "GetMsgList (sent): $login - OK $MSGID"
 	fi
 done
 
 
 echo ""
 echo "***********************************************************************"
-echo "MSGLIST TEST: Get received/sent message list + complete msgs"
-echo "              for selected accounts."
+echo "MSGLIST TEST: Get lists of received and sent messages and complete"
+echo "              messages for selected accounts."
 echo "***********************************************************************"
 #---Get message list for account with username and pwd---
 for login in $USERNAMES_MSGLIST_COMPLETE; do
-	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	MSGIDS=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='received',complete='yes'" \
-		2>/dev/null`
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgList (received) + complete download: $login - ERROR"
-		exit
+		echo_error "GetMsgList (received) + complete download: $login - ERROR"
 	else
-		echo "GetMsgList (received) + complete download: $login - OK $MSGIDS"
+		echo_success "GetMsgList (received) + complete download: $login - OK $MSGIDS"
 	fi
-	MSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	MSGIDS=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-list "dmType='sent',complete='yes'" \
-		2>/dev/null`
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgList (sent) + complete download: $login - ERROR"
-		exit
+		echo_error "GetMsgList (sent) + complete download: $login - ERROR"
 	else
-		echo "GetMsgList (sent) + complete download: $login - OK $MSGID"
+		echo_success "GetMsgList (sent) + complete download: $login - OK $MSGID"
 	fi
 done
 
 
 echo ""
 echo "***********************************************************************"
-echo "MSGLIST TEST: Create and send a new message from account with"
-echo "              usename and password and download this message"
-echo "              by recipient, save attachment and export to ZFO."
+echo "MSGLIST TEST: Create and send a new message from an account with"
+echo "              a usename and password and download this message"
+echo "              using the recipient account, save the attachments"
+echo "              and export to ZFO."
 echo "***********************************************************************"
 echo "---Create and send a new message from user '$USERNAME_SEND'---"
 DTIME=$(date +"%Y-%m-%d %T")
-DMANNOTATION="Datovka - test CLI - ${DTIME}"
-DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/notification.mp3;${ATTACH_LOAD_PATH}/obrazek.jpg;\
-${ATTACH_LOAD_PATH}/obrazek.png;${ATTACH_LOAD_PATH}/datova-zprava.zfo"
-MSGID=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+DMANNOTATION="Datovka: test CLI ${OS_NAME} - ${DTIME}"
+DMATACHMENT="${ATTACH_LOAD_PATH}/dokument.odt;${ATTACH_LOAD_PATH}/dokument.pdf;${ATTACH_LOAD_PATH}/obrazek.png"
+MSGID=$("${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 	--send-msg "dbIDRecipient='$RECIPIENT_SEND',dmAnnotation='${DMANNOTATION}',dmAttachment='${DMATACHMENT}'" \
-	2>/dev/null`
+	2>/dev/null)
 if [ 0 != $? ]; then
-	echo "SendMsg: $USERNAME_SEND - ERROR"
-	exit
+	echo_error "SendMsg: $USERNAME_SEND - ERROR"
 else
-	echo "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - OK"
+	echo_success "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - OK"
 fi
 echo ""
-echo "Waiting for the server DS - 5 seconds ..."
+echo "Waiting for the ISDS server - 5 seconds ..."
 sleep 5
 
 #----must be success and return msg ID/IDs
 echo ""
 echo "---Get received message list for user '$USERNAME_SEND2'---"
 #----must be success and return msg ID/IDs
-RMSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+RMSGIDS=$("${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND2'" \
 	--get-msg-list "dmType='received'" \
-	2>/dev/null`
+	2>/dev/null)
 if [ 0 != $? ]; then
-	echo "GetMsgList (received): $USERNAME_SEND2 - ERROR"
-	exit
+	echo_error "GetMsgList (received): $USERNAME_SEND2 - ERROR"
 else
-	echo "GetMsgList (received): $USERNAME_SEND2 - OK $RMSGIDS"
+	echo_success "GetMsgList (received): $USERNAME_SEND2 - OK $RMSGIDS"
 fi
 
 echo ""
 #----Export complete new messages from database------------------------------
 #----must fails
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
-		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID.zfo'" \
-		2>/dev/null`
+		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_DIR}/DMr_$dmID.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND2 - failed - it is OK"
+		echo_success "GetMsgFromDb '$dmID': $USERNAME_SEND2 - failed - it is OK"
 	else
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		echo_error "GetMsgFromDb '$dmID': $USERNAME_SEND2 - ERROR"
 	fi
 done
 
 #----Export delivery info of new messages from database----------------------
 #----must fails
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
-		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID.zfo'" \
-		2>/dev/null`
+		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_DIR}/DMr-info_$dmID.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfo '$dmID': $USERNAME_SEND2 - failed - it is OK"
+		echo_success "GetMsgDelInfo '$dmID': $USERNAME_SEND2 - failed - it is OK"
 	else
-		echo "GetMsgDelInfo '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		echo_error "GetMsgDelInfo '$dmID': $USERNAME_SEND2 - ERROR"
 	fi
 done
 
 #-----Download complete new messages ISDS-------------------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
-		--get-msg "dmID='$dmID',dmType='received',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-isds.zfo'" \
-		2>/dev/null`
+		--get-msg "dmID='$dmID',dmType='received',zfoFile='${ATTACH_SAVE_DIR}/DMr_$dmID-isds.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		echo_error "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
 #----Download delivery info of new messages from ISDS------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
-		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-isds.zfo'" \
-		2>/dev/null`
+		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_DIR}/DMr-info_$dmID-isds.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2- ERROR"
-		exit
+		echo_error "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2- ERROR"
 	else
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
 #----Export complete messages from database again-----------------------
 #----must be success and save zfo file and save attachment
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
-		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr_$dmID-db.zfo',attachmentDir='${ATTACH_SAVE_PATH}'" \
-		2>/dev/null`
+		--get-msg "dmID='$dmID',dmType='received',download='no',zfoFile='${ATTACH_SAVE_DIR}/DMr_$dmID-db.zfo',attachmentDir='${ATTACH_SAVE_DIR}'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		echo_error "GetMsgFromDb '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "GetMsgFromDb '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
 #----Export delivery info of messages from again----------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
-		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMr-info_$dmID-db.zfo'" \
-		2>/dev/null`
+		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_DIR}/DMr-info_$dmID-db.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		echo_error "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
@@ -220,115 +237,107 @@ done
 #
 echo ""
 echo "---Get sent message list for user '$USERNAME_SEND'---"
-SMSGIDS=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+SMSGIDS=$("${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
 	--get-msg-list "dmType='sent'" \
-	2>/dev/null`
+	2>/dev/null)
 if [ 0 != $? ]; then
-	echo "GetMsgList (sent): $USERNAME_SEND - ERROR"
-	exit
+	echo_error "GetMsgList (sent): $USERNAME_SEND - ERROR"
 else
-	echo "GetMsgList (sent): $USERNAME_SEND - OK $SMSGIDS"
+	echo_success "GetMsgList (sent): $USERNAME_SEND - OK $SMSGIDS"
 fi
 #--------------------------------------------------------------------------
 
 
 echo ""
-echo "---Download new sent messages for user '$USERNAME_SEND'---"
+echo "---Download messages newly sent to user '$USERNAME_SEND'---"
 #----Export complete new messages from database------------------------------
 #----must fails
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
-		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID.zfo'" \
-		2>/dev/null`
+		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_DIR}/DMs_$dmID.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND - failed - it is OK"
+		echo_success "GetMsgFromDb '$dmID': $USERNAME_SEND - failed - it is OK"
 	else
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		echo_error "GetMsgFromDb '$dmID': $USERNAME_SEND - ERROR"
 	fi
 done
 
 #----Export delivery info of new messages from database----------------------
 #----must fails
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
-		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID.zfo'" \
-		2>/dev/null`
+		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_DIR}/DMs-info_$dmID.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfo '$dmID': $USERNAME_SEND - failed - it is OK"
+		echo_success "GetMsgDelInfo '$dmID': $USERNAME_SEND - failed - it is OK"
 	else
-		echo "GetMsgDelInfo '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		echo_error "GetMsgDelInfo '$dmID': $USERNAME_SEND - ERROR"
 	fi
 done
 
 #-----Download complete new messages ISDS-------------------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
-		--get-msg "dmID='$dmID',dmType='sent',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo'" \
-		2>/dev/null`
+		--get-msg "dmID='$dmID',dmType='sent',zfoFile='${ATTACH_SAVE_DIR}/DMs_$dmID-isds.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		echo_error "GetMsgFromISDS '$dmID': $USERNAME_SEND - ERROR"
 	else
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND - OK"
+		echo_success "GetMsgFromISDS '$dmID': $USERNAME_SEND - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND - OK"
 	fi
 done
 
 #----Download delivery info of new messages from ISDS------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
-		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo'" \
-		2>/dev/null`
+		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_DIR}/DMs-info_$dmID-isds.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		echo_error "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND - ERROR"
 	else
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND - OK"
+		echo_success "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND - OK"
 	fi
 done
 
 #----Export complete messages from database again-----------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
-		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-db.zfo'" \
-		2>/dev/null`
+		--get-msg "dmID='$dmID',dmType='sent',download='no',zfoFile='${ATTACH_SAVE_DIR}/DMs_$dmID-db.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		echo_error "GetMsgFromDb '$dmID': $USERNAME_SEND - ERROR"
 	else
-		echo "GetMsgFromDb '$dmID': $USERNAME_SEND - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND - OK"
+		echo_success "GetMsgFromDb '$dmID': $USERNAME_SEND - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND - OK"
 	fi
 done
 
 #----Export delivery info of messages from again----------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_SEND'" \
-		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-db.zfo'" \
-		2>/dev/null`
+		--get-delivery-info "dmID='$dmID',download='no',zfoFile='${ATTACH_SAVE_DIR}/DMs-info_$dmID-db.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND - ERROR"
-		exit
+		echo_error "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND - ERROR"
 	else
-		echo "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND - OK"
+		echo_success "GetMsgDelInfoFromDb '$dmID': $USERNAME_SEND - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND - OK"
 	fi
 done
-
 
 echo ""
 echo "***********************************************************************"
@@ -338,93 +347,99 @@ echo "***********************************************************************"
 #-----Download complete new messages ISDS-------------------------------------
 #----must be success and save zfo file
 for dmID in $MSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
-		--get-msg "dmID='$dmID',dmType='received',markDownload='yes',zfoFile='${ATTACH_SAVE_PATH}/DMs_$dmID-isds.zfo'" \
-		2>/dev/null`
+		--get-msg "dmID='$dmID',dmType='received',markDownload='yes',zfoFile='${ATTACH_SAVE_DIR}/DMs_$dmID-isds.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		echo_error "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "GetMsgFromISDS '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
 #----Download delivery info of new messages from ISDS------------------------
 #----must be success and save zfo file
 for dmID in $RMSGIDS; do
-	RET=`"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	RET=$("${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$USERNAME_SEND2'" \
-		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_PATH}/DMs-info_$dmID-isds.zfo'" \
-		2>/dev/null`
+		--get-delivery-info "dmID='$dmID',zfoFile='${ATTACH_SAVE_DIR}/DMs-info_$dmID-isds.zfo'" \
+		2>/dev/null)
 	if [ 0 != $? ]; then
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
-		exit
+		echo_error "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - ERROR"
 	else
-		echo "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - OK"
-		echo "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "GetMsgDelInfoFromISDS '$dmID': $USERNAME_SEND2 - OK"
+		echo_success "ExportToZFO '$dmID': $USERNAME_SEND2 - OK"
 	fi
 done
 
-
+echo ""
 echo "***********************************************************************"
-echo "* GET MSG LIST:: Check messages where attachment missing (via all accounts)."
+echo "* GET MSG LIST:: Check messages with missing attachments (all accounts)."
 echo "***********************************************************************"
 for login in $USERNAMES; do
-	"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	"${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$login'" \
 		--check-attachment \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo "CheckAttach: $login - ERROR"
+		echo_error "CheckAttach: $login - ERROR"
 		echo ""
-		exit
 	else
-		echo "CheckAttach: $login - OK"
+		echo_success "CheckAttach: $login - OK"
 		echo ""
 	fi
 done
 
+echo ""
 echo "***********************************************************************"
-echo "* GET MSG ID LIST FROM DB:: Get all received message IDs (via all accounts)."
+echo "* GET MSG ID LIST FROM DB:: Get all received message IDs (all accounts)."
 echo "***********************************************************************"
 for login in $USERNAMES; do
-	"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	"${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-ids "dmType='received'" \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo "GetMsgIDs-received: $login - ERROR"
+		echo_error "GetMsgIDs-received: $login - ERROR"
 		echo ""
-		exit
 	else
-		echo "GetMsgIDs-received: $login - OK"
+		echo_success "GetMsgIDs-received: $login - OK"
 		echo ""
 	fi
 done
 
+echo ""
 echo "***********************************************************************"
-echo "* GET MSG ID LIST FROM DB:: Get all sent message IDs (via all accounts)."
+echo "* GET MSG ID LIST FROM DB:: Get all sent message IDs (all accounts)."
 echo "***********************************************************************"
 for login in $USERNAMES; do
-	"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+	"${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$login'" \
 		--get-msg-ids "dmType='sent'" \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo "GetMsgIDs-sent: $login - ERROR"
+		echo_error "GetMsgIDs-sent: $login - ERROR"
 		echo ""
-		exit
 	else
-		echo "GetMsgIDs-sent: $login - OK"
+		echo_success "GetMsgIDs-sent: $login - OK"
 		echo ""
 	fi
 done
 
-echo ""
-echo ""
-echo "------------------------------------------------------------------------"
-echo "CONGRATULATION: All get/download message tests were done with success."
-echo "------------------------------------------------------------------------"
-echo ""
+if [ "x${HAVE_ERROR}" = "xfalse" ]; then
+	echo ""
+	echo_success "-----------------------------------------------------------------------"
+	echo_success "SUCCESS: All get message list and download message tests finished as expected."
+	echo_success "-----------------------------------------------------------------------"
+	echo ""
+	exit 0
+else
+	echo ""
+	echo_error "-----------------------------------------------------------------------"
+	echo_error "FAILURE: Some get message list and download message tests have failed!"
+	echo_error "-----------------------------------------------------------------------"
+	echo ""
+	exit 1
+fi

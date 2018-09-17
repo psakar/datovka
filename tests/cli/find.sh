@@ -1,76 +1,104 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
-#pwd
+# Obtain location of source root.
+src_root () {
+	local SCRIPT_LOCATION=""
+	local SYSTEM=$(uname -s)
+	if [ ! "x${SYSTEM}" = "xDarwin" ]; then
+		local SCRIPT=$(readlink -f "$0")
+		SCRIPT_LOCATION=$(dirname $(readlink -f "$0"))
+	else
+		SCRIPT_LOCATION=$(cd "$(dirname "$0")"; pwd)
+	fi
 
-SCRIPT=$(readlink -f "$0")
-SCRIPTPATH=$(dirname "${SCRIPT}")
+	echo $(cd "$(dirname "${SCRIPT_LOCATION}")"; cd ..; pwd)
+}
+
+SRC_ROOT=$(src_root)
+cd "${SRC_ROOT}"
+
+SCRIPT_PATH="${SRC_ROOT}/tests/cli"
+
+. "${SCRIPT_PATH}/helper.sh" # Contains HAVE_ERROR variable.
+
+
+. "${SRC_ROOT}/untracked/logins.sh"
+
+APP_BINARY_PATH="$1"
+if [ ! -e "${APP_BINARY_PATH}" ]; then
+	echo_error "ERROR: Cannot locate tested binary."
+	exit 1
+fi
 
 CMDARGS="${CMDARGS} -D"
 CMDARGS="${CMDARGS} --conf-subdir .dsgui"
 CMDARGS="${CMDARGS} --debug-verbosity 2"
 CMDARGS="${CMDARGS} --log-verbosity 2"
 
-APP_BINARY_NAME="/../../datovka"
-. "${SCRIPTPATH}/../../untracked/logins.sh"
 
 echo ""
 echo "***********************************************************************"
-echo "FIND DATABOX TEST: Find databoxes by ic, firmname, ... ($USERNAME_FIND_DATABOX1)"
+echo "FIND DATA BOX TEST: Find data boxes by ic, firmname"
 echo "***********************************************************************"
 # this request must finish with success
-"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+"${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_FIND_DATABOX1'" \
 	--find-databox "dbType='OVM',ic='12345678'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo "FindDatabox: $USERNAME_FIND_DATABOX1 - ERROR"
-	exit
+	echo_error "FindDatabox: $USERNAME_FIND_DATABOX1 - ERROR"
 else
-	echo "FindDatabox: $USERNAME_FIND_DATABOX1 - OK"
+	echo_success "FindDatabox: $USERNAME_FIND_DATABOX1 - OK"
 fi
 echo ""
 
 # this request must finish with success
-"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+"${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_FIND_DATABOX1'" \
 	--find-databox "dbType='OVM',ic='00000001'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo "FindDatabox: $USERNAME_FIND_DATABOX1 - ERROR"
-	exit
+	echo_error "FindDatabox: $USERNAME_FIND_DATABOX1 - ERROR"
 else
-	echo "FindDatabox: $USERNAME_FIND_DATABOX1 - OK"
+	echo_success "FindDatabox: $USERNAME_FIND_DATABOX1 - OK"
 fi
 echo ""
 
 # this request must finish with success
-"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+"${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_FIND_DATABOX2'" \
 	--find-databox "dbType='OVM',firmName='Ministerstvo dopravy'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo "FindDatabox: $USERNAME_FIND_DATABOX2 - ERROR"
-	exit
+	echo_error "FindDatabox: $USERNAME_FIND_DATABOX2 - ERROR"
 else
-	echo "FindDatabox: $USERNAME_FIND_DATABOX2 - OK"
+	echo_success "FindDatabox: $USERNAME_FIND_DATABOX2 - OK"
 fi
 echo ""
 
 # this request must finish with error
-"${SCRIPTPATH}/${APP_BINARY_NAME}" ${CMDARGS} \
+"${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_FIND_DATABOX2'" \
 	--find-databox "dbType='FO',firmName='Ministerstvo dopravy'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo "FindDatabox: $USERNAME_FIND_DATABOX2 - ERROR: it is OK"
+	echo_success "FindDatabox: $USERNAME_FIND_DATABOX2 - ERROR: it is OK"
 else
-	echo "FindDatabox: $USERNAME_FIND_DATABOX2 - ERROR"
-	exit
+	echo_error "FindDatabox: $USERNAME_FIND_DATABOX2 - ERROR"
 fi
 
-echo ""
-echo ""
-echo "-------------------------------------------------"
-echo "CONGRATULATION: All find tests were done with success."
-echo "-------------------------------------------------"
-echo ""
+if [ "x${HAVE_ERROR}" = "xfalse" ]; then
+	echo ""
+	echo_success "-----------------------------------------------------------------------"
+	echo_success "SUCCESS: All find data box tests have finished as expected."
+	echo_success "-----------------------------------------------------------------------"
+	echo ""
+	exit 0
+else
+	echo ""
+	echo_error "-----------------------------------------------------------------------"
+	echo_error "FAILURE: Some find data box tests have failed!"
+	echo_error "-----------------------------------------------------------------------"
+	echo ""
+	exit 1
+fi
