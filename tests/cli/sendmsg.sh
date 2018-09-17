@@ -45,8 +45,8 @@ CMDARGS="${CMDARGS} --log-verbosity 2"
 
 echo ""
 echo "***********************************************************************"
-echo "SEND MSG TEST: Create and send a new message from account with"
-echo "               usename and password."
+echo "SEND MSG TEST: Create and send a new message from account using"
+echo "               a usename and password."
 echo "***********************************************************************"
 echo "---Create and send a new message from user '$USERNAME_SEND'---"
 DTIME=$(date +"%Y-%m-%d %T")
@@ -62,13 +62,13 @@ else
 	echo_success "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - OK"
 fi
 echo ""
-echo "Waiting for the server DS - 3 seconds ..."
+echo "Waiting for the ISDS server - 3 seconds ..."
 sleep 3
 
 echo ""
 echo "***********************************************************************"
-echo "SEND MSG TEST: Create and send a new message from account (OVM) with"
-echo "               certificate to multiple recipients (OVM, FO, PO)."
+echo "SEND MSG TEST: Create and send a new message from account (OVM) using"
+echo "               a certificate to multiple recipients (OVM, FO, PO)."
 echo "***********************************************************************"
 echo "---Create and send a new message from user '$USERNAME_SEND2'---"
 DTIME=$(date +"%Y-%m-%d %T")
@@ -84,7 +84,7 @@ else
 	echo_success "SendMultiMsg: $USERNAME_SEND2 - msgIDs: - $MSGID - OK"
 fi
 echo ""
-echo "Waiting for the server DS - 3 seconds ..."
+echo "Waiting for the ISDS server - 3 seconds ..."
 sleep 3
 
 echo ""
@@ -106,12 +106,12 @@ else
 	echo_success "SendMsg: $USERNAME_SEND - msgID: - $MSGID - OK"
 fi
 echo ""
-echo "Waiting for the server DS - 3 seconds ..."
+echo "Waiting for the ISDS server - 3 seconds ..."
 sleep 3
 
 echo ""
 echo "***********************************************************************"
-echo "SEND MSG TEST: Create and send a new message non exist recipient."
+echo "SEND MSG TEST: Create and send a new message to a non-existent recipient."
 echo "***********************************************************************"
 # this request must finish with error
 echo "---Create and send a new message from user '$USERNAME_SEND'---"
@@ -130,7 +130,7 @@ fi
 
 echo ""
 echo "***********************************************************************"
-echo "SEND MSG TEST: Create and send a new message - wrong parametrs."
+echo "SEND MSG TEST: Create and send a new message - wrong parameters."
 echo "***********************************************************************"
 # this request must finish with error
 echo "---Create and send a new message from user '$USERNAME_SEND'---"
@@ -153,7 +153,7 @@ if [ "x${HAVE_ERROR}" = "xfalse" ]; then
 	echo_success "-----------------------------------------------------------------------"
 	echo ""
 	exit 0
-else 
+else
 	echo ""
 	echo_error "-----------------------------------------------------------------------"
 	echo_error "FAILURE: Some send message tests have failed!"

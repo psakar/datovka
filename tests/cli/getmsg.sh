@@ -49,7 +49,7 @@ CMDARGS="${CMDARGS} --log-verbosity 2"
 
 echo ""
 echo "***********************************************************************"
-echo "MSGLIST TEST: Get received/sent message list only"
+echo "MSGLIST TEST: Get lists of received and sent messages"
 echo "              for selected accounts."
 echo "***********************************************************************"
 #---Get message list for account with username and pwd---
@@ -77,8 +77,8 @@ done
 
 echo ""
 echo "***********************************************************************"
-echo "MSGLIST TEST: Get received/sent message list + complete msgs"
-echo "              for selected accounts."
+echo "MSGLIST TEST: Get lists of received and sent messages and complete"
+echo "              messages for selected accounts."
 echo "***********************************************************************"
 #---Get message list for account with username and pwd---
 for login in $USERNAMES_MSGLIST_COMPLETE; do
@@ -105,9 +105,10 @@ done
 
 echo ""
 echo "***********************************************************************"
-echo "MSGLIST TEST: Create and send a new message from account with"
-echo "              usename and password and download this message"
-echo "              by recipient, save attachment and export to ZFO."
+echo "MSGLIST TEST: Create and send a new message from an account with"
+echo "              a usename and password and download this message"
+echo "              using the recipient account, save the attachments"
+echo "              and export to ZFO."
 echo "***********************************************************************"
 echo "---Create and send a new message from user '$USERNAME_SEND'---"
 DTIME=$(date +"%Y-%m-%d %T")
@@ -123,7 +124,7 @@ else
 	echo_success "SendMsg: $USERNAME_SEND, msgID: '$MSGID' - OK"
 fi
 echo ""
-echo "Waiting for the server DS - 5 seconds ..."
+echo "Waiting for the ISDS server - 5 seconds ..."
 sleep 5
 
 #----must be success and return msg ID/IDs
@@ -249,7 +250,7 @@ fi
 
 
 echo ""
-echo "---Download new sent messages for user '$USERNAME_SEND'---"
+echo "---Download messages newly sent to user '$USERNAME_SEND'---"
 #----Export complete new messages from database------------------------------
 #----must fails
 for dmID in $RMSGIDS; do
@@ -375,7 +376,7 @@ done
 
 echo ""
 echo "***********************************************************************"
-echo "* GET MSG LIST:: Check messages where attachment missing (via all accounts)."
+echo "* GET MSG LIST:: Check messages with missing attachments (all accounts)."
 echo "***********************************************************************"
 for login in $USERNAMES; do
 	"${APP_BINARY_PATH}" ${CMDARGS} \
@@ -393,7 +394,7 @@ done
 
 echo ""
 echo "***********************************************************************"
-echo "* GET MSG ID LIST FROM DB:: Get all received message IDs (via all accounts)."
+echo "* GET MSG ID LIST FROM DB:: Get all received message IDs (all accounts)."
 echo "***********************************************************************"
 for login in $USERNAMES; do
 	"${APP_BINARY_PATH}" ${CMDARGS} \
@@ -411,7 +412,7 @@ done
 
 echo ""
 echo "***********************************************************************"
-echo "* GET MSG ID LIST FROM DB:: Get all sent message IDs (via all accounts)."
+echo "* GET MSG ID LIST FROM DB:: Get all sent message IDs (all accounts)."
 echo "***********************************************************************"
 for login in $USERNAMES; do
 	"${APP_BINARY_PATH}" ${CMDARGS} \
@@ -434,7 +435,7 @@ if [ "${HAVE_ERROR}" = "xfalse" ]; then
 	echo_success "-----------------------------------------------------------------------"
 	echo ""
 	exit 0
-else 
+else
 	echo ""
 	echo_error "-----------------------------------------------------------------------"
 	echo_error "FAILURE: Some get message list and download message tests have failed!"

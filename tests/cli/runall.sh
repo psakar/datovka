@@ -96,7 +96,7 @@ if [ "x${HAVE_ERROR}" = "xfalse" ]; then
 	echo_success "======================================================================="
 	echo ""
 	exit 0
-else 
+else
 	echo ""
 	echo_error "======================================================================="
 	echo_error "FAILURE: Some CLI tests have failed!"

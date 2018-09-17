@@ -39,30 +39,30 @@ CMDARGS="${CMDARGS} --log-verbosity 2"
 
 echo ""
 echo "***********************************************************************"
-echo "LOGIN TEST: Login into non exist accounts and usernames."
+echo "LOGIN TEST: Log in to non-existent accounts and usernames."
 echo "***********************************************************************"
 for username in $NOEXIST_USERNAMES; do
 	"${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$username'" \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo_success "Login: '$username' - username not exists in datovka - OK"
+		echo_success "Login: '$username' - username doesn't exist in datovka - OK"
 	else
-		echo_error "Login: '$username' - ERROR: username shouldn't exists in datovka!"
+		echo_error "Login: '$username' - ERROR: username shouldn't exist in datovka!"
 	fi
 done
 
 echo ""
 echo "***********************************************************************"
-echo "LOGIN TEST: Login into data box for all existing accounts where"
-echo "            username and password is used and remembered." 
+echo "LOGIN TEST: Log in to data box for all existing accounts where"
+echo "            username and password is used and remembered."
 echo "***********************************************************************"
 for username in $USERNAMES; do
 	"${APP_BINARY_PATH}" ${CMDARGS} \
 		--login "username='$username'" \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo_error "Login: '$username' - ERROR: username not exists or required data missing!"
+		echo_error "Login: '$username' - ERROR: username doesn't exist or required data missing!"
 	else
 		echo_success "Login: '$username' - OK"
 	fi
@@ -70,21 +70,21 @@ done
 
 echo ""
 echo "***********************************************************************"
-echo "LOGIN TEST: Login into data box with certificate."
+echo "LOGIN TEST: Log in to data box using a certificate."
 echo "            Note: certificate password is required."
 echo "***********************************************************************"
 "${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_CERT',otpcode='$USERNAME_CERT_PWD'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo_error "Login: '$USERNAME_CERT' - ERROR: username not exists or certificate is wrong/missing!"
+	echo_error "Login: '$USERNAME_CERT' - ERROR: username doesn't exist or certificate is wrong or missing!"
 else
 	echo_success "Login: $USERNAME_CERT - OK"
 fi
 
 echo ""
 echo "***********************************************************************"
-echo "LOGIN TEST: Login into data box for all existing accounts where"
+echo "LOGIN TEST: Log in to data box for all existing accounts where"
 echo "            user has restricted privileges."
 echo "***********************************************************************"
 for username in $RESTRICT_USERNAMES; do
@@ -92,7 +92,7 @@ for username in $RESTRICT_USERNAMES; do
 		--login "username='$username'" \
 		2>/dev/null
 	if [ 0 != $? ]; then
-		echo_error "Login: '$username' - ERROR: username not exists or required data missing!"
+		echo_error "Login: '$username' - ERROR: username doesn't exist or required data missing!"
 	else
 		echo_success "Login: '$username' - OK"
 	fi
@@ -100,14 +100,14 @@ done
 
 echo ""
 echo "***********************************************************************"
-echo "LOGIN TEST: Login into data box where password"
+echo "LOGIN TEST: Log in to data box where password"
 echo "            is not stored in the dsgui.conf."
 echo "***********************************************************************"
 "${APP_BINARY_PATH}" ${CMDARGS} \
 	--login "username='$USERNAME_NOPWD',password='$USERNAME_PWD'" \
 	2>/dev/null
 if [ 0 != $? ]; then
-	echo_error "Login: '$USERNAME_NOPWD' - ERROR: account not exists or required password is wrong or missing!"
+	echo_error "Login: '$USERNAME_NOPWD' - ERROR: account doesn't exist or required password is wrong or missing!"
 else
 	echo_success "Login: $USERNAME_NOPWD - external password was used - OK"
 fi
@@ -153,7 +153,7 @@ if [ "x${HAVE_ERROR}" = "xfalse" ]; then
 	echo_success "-----------------------------------------------------------------------"
 	echo ""
 	exit 0
-else 
+else
 	echo ""
 	echo_error "-----------------------------------------------------------------------"
 	echo_error "FAILURE: Some login tests have failed!"
