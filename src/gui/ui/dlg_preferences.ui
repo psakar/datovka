@@ -1326,7 +1326,7 @@ match the original file name including its suffix).</string>
                </font>
               </property>
               <property name="text">
-               <string>Message file name:</string>
+               <string>Message filename:</string>
               </property>
              </widget>
             </item>
@@ -1366,7 +1366,7 @@ match the original file name including its suffix).</string>
                </font>
               </property>
               <property name="text">
-               <string>Acceptance info file name:</string>
+               <string>Acceptance info filename:</string>
               </property>
              </widget>
             </item>
@@ -1379,7 +1379,7 @@ match the original file name including its suffix).</string>
                </font>
               </property>
               <property name="text">
-               <string>Attachment file name:</string>
+               <string>Attachment filename:</string>
               </property>
              </widget>
             </item>
@@ -1601,7 +1601,7 @@ match the original file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>account name (separated by &quot;-&quot;)</string>
+                 <string>account name (separated by '-')</string>
                 </property>
                </widget>
               </item>
@@ -1675,7 +1675,7 @@ match the original file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>message subject (separated by &quot;-&quot;)</string>
+                 <string>message subject (separated by '-')</string>
                 </property>
                </widget>
               </item>
@@ -1689,7 +1689,7 @@ match the original file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>databox ID</string>
+                 <string>data-box ID</string>
                 </property>
                </widget>
               </item>
@@ -1717,7 +1717,7 @@ match the original file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>attachment filename (with suffix)</string>
+                 <string>attachment filename (including suffix)</string>
                 </property>
                </widget>
               </item>
@@ -1759,7 +1759,7 @@ match the original file name including its suffix).</string>
                  </font>
                 </property>
                 <property name="text">
-                 <string>name of sender (separated by &quot;-&quot;)</string>
+                 <string>sender name (separated by '-')</string>
                 </property>
                </widget>
               </item>
@@ -1864,7 +1864,7 @@ match the original file name including its suffix).</string>
              </font>
             </property>
             <property name="text">
-             <string>Note: Illegal characters in the name of file will be replaced.</string>
+             <string>Note: Illegal characters in the resulting filenames will be replaced.</string>
             </property>
            </widget>
           </item>

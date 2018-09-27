@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _FILESYSTEM_H_
-#define _FILESYSTEM_H_
+#pragma once
 
 #include <QByteArray>
 #include <QDateTime>
@@ -178,5 +177,3 @@ QString expectedTextFilePath(enum TextFile textFile);
  * @param[in] textFile Text file identifier.
  */
 QString suppliedTextFileContent(enum TextFile textFile);
-
-#endif /* _FILESYSTEM_H_ */

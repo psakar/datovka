@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _EXPORTS_H_
-#define _EXPORTS_H_
+#pragma once
 
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 
@@ -64,13 +63,13 @@ public:
 	 * @brief Generates file path containing attachment name according
 	 *     to set format.
 	 *
-	 * @param[in] dbSet       Account database set.
-	 * @param[in] targetPath  Path to target folder for export.
-	 * @param[in] attachName  Attachment file name.
-	 * @param[in] userName    Account username.
+	 * @param[in] dbSet Account database set.
+	 * @param[in] targetPath Path to target folder for export.
+	 * @param[in] attachName Attachment file name.
+	 * @param[in] userName Account username.
 	 * @param[in] accountName Account name.
-	 * @param[in] dbId        Data box ID for export.
-	 * @param[in] msgId       Message ID for export.
+	 * @param[in] dbId Data box ID for export.
+	 * @param[in] msgId Message ID for export.
 	 * @param[in] prohibitDirSep True if directory separators should be
 	 *                           prohibited when generating file name.
 	 * @return New target path with file name for saving.
@@ -85,18 +84,18 @@ public:
 	/*!
 	 * @brief Export message data as ZFO/PDF file.
 	 *
-	 * @param[in,out] parent     Parent widget to call object from.
-	 * @param[in] dbSet          Account database set.
-	 * @param[in] fileType       Type of export file.
-	 * @param[in] targetPath     Path to target folder for export.
-	 * @param[in] attachFileName Attachment file name.
-	 * @param[in] userName       Account username.
-	 * @param[in] accountName    Account name.
-	 * @param[in] dbId           Databox ID for export.
-	 * @param[in] msgId          Message ID for export.
-	 * @param[in] askLocation    Ask to new location for export.
-	 * @param[out] lastPath      Last export path.
-	 * @param[out] errTxt        Error text.
+	 * @param[in,out] parent Parent widget to call object from.
+	 * @param[in]     dbSet Account database set.
+	 * @param[in]     fileType Type of export file.
+	 * @param[in]     targetPath Path to target folder for export.
+	 * @param[in]     attachFileName Attachment file name.
+	 * @param[in]     userName Account username.
+	 * @param[in]     accountName Account name.
+	 * @param[in]     dbId Data-box ID for export.
+	 * @param[in]     msgId Message ID for export.
+	 * @param[in]     askLocation Ask to new location for export.
+	 * @param[out]    lastPath Last export path.
+	 * @param[out]    errTxt Error text.
 	 * @return Result operation code.
 	 */
 	static
@@ -110,13 +109,13 @@ public:
 	/*!
 	 * @brief Export message envelope together with attachments.
 	 *
-	 * @param[in] dbSet       Account database set.
-	 * @param[in] targetPath  Path to target folder for export.
-	 * @param[in] userName    Account username.
-	 * @param[in] accountName Account name.
-	 * @param[in] dbId        Databox ID for export.
-	 * @param[in] msgId       Message ID for export.
-	 * @param[out] errTxt     Error text.
+	 * @param[in]  dbSet Account database set.
+	 * @param[in]  targetPath Path to target folder for export.
+	 * @param[in]  userName Account username.
+	 * @param[in]  accountName Account name.
+	 * @param[in]  dbId Data-box ID for export.
+	 * @param[in]  msgId Message ID for export.
+	 * @param[out] errTxt Error text.
 	 * @return Result operation code.
 	 */
 	static
@@ -128,13 +127,13 @@ public:
 	/*!
 	 * @brief Save message attachments and export ZFO/PDF files as well.
 	 *
-	 * @param[in] dbSet       Account database set.
-	 * @param[in] targetPath  Path to target folder for export.
-	 * @param[in] userName    Account username.
-	 * @param[in] accountName Account name.
-	 * @param[in] dbId        Databox ID for export.
-	 * @param[in] msgId       Message ID for export.
-	 * @param[out] errTxt     Error text.
+	 * @param[in]  dbSet Account database set.
+	 * @param[in]  targetPath Path to target folder for export.
+	 * @param[in]  userName Account username.
+	 * @param[in]  accountName Account name.
+	 * @param[in]  dbId Data-box ID for export.
+	 * @param[in]  msgId Message ID for export.
+	 * @param[out] errTxt Error text.
 	 * @return Result operation code.
 	 */
 	static
@@ -171,5 +170,3 @@ private:
 	static
 	bool writeZFO(const QString &fileName, const QByteArray &data);
 };
-
-#endif /* _EXPORTS_H_ */
