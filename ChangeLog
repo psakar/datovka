@@ -1,3 +1,9 @@
+4.12.0 /
+ * Account name '%n' can be used when constructing file names.
+ * Extended CLI testing scripts - using an account with certificate log-in
+   method.
+ * Scripts are able to compile Windows version of libcurl with OpenSSL support.
+
 4.11.0 / 2018-09-06
  * Fixed receiver box selection when using Shift+End in the contacts and data
    box search dialogues.
