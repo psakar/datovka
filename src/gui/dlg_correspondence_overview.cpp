@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -580,9 +580,13 @@ int exportMessageData(const QList<MessageDb::MsgId> &mIds,
 	int successCnt = 0;
 	Exports::ExportError ret;
 
+	const QString accountName(
+	    (*GlobInstcs::acntMapPtr)[userName].accountName());
+
 	foreach (const MessageDb::MsgId &mId, mIds) {
 		ret = Exports::exportAs(parent, dbSet, fileType, targetPath,
-		    QString(), userName, dbId, mId, false, lastPath, errStr);
+		    QString(), userName, accountName, dbId, mId, false,
+		    lastPath, errStr);
 		if (Exports::EXP_SUCCESS == ret) {
 			++successCnt;
 		} else if (Exports::EXP_CANCELED == ret) {

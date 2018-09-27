@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -34,7 +34,7 @@
 
 QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,
     const QString &targetPath, const QString &attachName,
-    const QString &dbId, const QString &userName,
+    const QString &dbId, const QString &userName, const QString &accountName,
     const MessageDb::MsgId &msgId, bool prohibitDirSep)
 {
 	debugFuncCall();
@@ -54,8 +54,9 @@ QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,
 
 	QString fileName = fileSubpathFromFormat(
 	    GlobInstcs::prefsPtr->attachmentFilenameFormat, prohibitDirSep,
-	    msgId.dmId, dbId, userName, attachName, entry.dmDeliveryTime,
-	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
+	    msgId.dmId, dbId, userName, accountName, attachName,
+	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
+	    entry.dmSender);
 	if (fileName.isEmpty()) {
 		return QString();
 	}
@@ -65,8 +66,9 @@ QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,
 enum Exports::ExportError Exports::exportAs(QWidget *parent,
     const MessageDbSet &dbSet, enum ExportFileType fileType,
     const QString &targetPath, const QString &attachFileName,
-    const QString &userName, const QString &dbId, const MessageDb::MsgId &msgId,
-    bool askLocation, QString &lastPath, QString &errStr)
+    const QString &userName, const QString &accountName, const QString &dbId,
+    const MessageDb::MsgId &msgId, bool askLocation, QString &lastPath,
+    QString &errStr)
 {
 	debugFuncCall();
 
@@ -157,8 +159,9 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 	 * if the user should not be asked after location.
 	 */
 	QString fileName = fileSubpathFromFormat(fileNameformat, prohibitDirSep,
-	    msgId.dmId, dbId, userName, attachFileName, entry.dmDeliveryTime,
-	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
+	    msgId.dmId, dbId, userName, accountName, attachFileName,
+	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
+	    entry.dmSender);
 
 	fileName = targetPath + QDir::separator() + fileName + fileSufix;
 
@@ -220,8 +223,8 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 
 enum Exports::ExportError Exports::exportEnvAndAttachments(
     const MessageDbSet &dbSet, const QString &targetPath,
-    const QString &userName, const QString &dbId, const MessageDb::MsgId &msgId,
-    QString &errStr)
+    const QString &userName, const QString &accountName, const QString &dbId,
+    const MessageDb::MsgId &msgId, QString &errStr)
 {
 	debugFuncCall();
 
@@ -270,7 +273,7 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 
 		// create new file name with format string
 		attName = attachmentSavePathWithFileName(dbSet, newTargetPath,
-		    attName, dbId, userName, msgId, true);
+		    attName, dbId, userName, accountName, msgId, true);
 
 		/* Don't create subdirectories. */
 
@@ -289,8 +292,9 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 	// create new file name with format string
 	QString fileName = fileSubpathFromFormat(
 	    GlobInstcs::prefsPtr->messageFilenameFormat, true,
-	    msgId.dmId, dbId, userName, QString(), entry.dmDeliveryTime,
-	    entry.dmAcceptanceTime, entry.dmAnnotation, entry.dmSender);
+	    msgId.dmId, dbId, userName, accountName, QString(),
+	    entry.dmDeliveryTime, entry.dmAcceptanceTime, entry.dmAnnotation,
+	    entry.dmSender);
 
 	fileName = newTargetPath + QDir::separator() + fileName + ".pdf";
 
@@ -316,8 +320,8 @@ enum Exports::ExportError Exports::exportEnvAndAttachments(
 
 enum Exports::ExportError Exports::saveAttachmentsWithExports(
     const MessageDbSet &dbSet, const QString &targetPath,
-    const QString &userName, const QString &dbId, const MessageDb::MsgId &msgId,
-    QString &errStr)
+    const QString &userName, const QString &accountName, const QString &dbId,
+    const MessageDb::MsgId &msgId, QString &errStr)
 {
 	debugFuncCall();
 
@@ -354,7 +358,7 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 
 		// create new file name with format string
 		attName = attachmentSavePathWithFileName(dbSet, targetPath,
-		    attName, dbId, userName, msgId, false);
+		    attName, dbId, userName, accountName, msgId, false);
 
 		/* Recursively create subdirectories. */
 		createDirStructureRecursive(attName);
@@ -374,38 +378,40 @@ enum Exports::ExportError Exports::saveAttachmentsWithExports(
 			if (GlobInstcs::prefsPtr->allAttachmentsSaveZfoDelinfo) {
 				exportAs(0, dbSet, Exports::ZFO_DELIV_ATTACH,
 				    targetPath, attach.fileDescr(), userName,
-				    dbId, msgId, false, lastPath, errStr);
+				    accountName, dbId, msgId, false, lastPath,
+				    errStr);
 			}
 			if (GlobInstcs::prefsPtr->allAttachmentsSavePdfDelinfo) {
 				exportAs(0, dbSet, Exports::PDF_DELIV_ATTACH,
 				    targetPath, attach.fileDescr(), userName,
-				    dbId, msgId, false, lastPath, errStr);
+				    accountName, dbId, msgId, false, lastPath,
+				    errStr);
 			}
 		}
 	}
 
 	if (GlobInstcs::prefsPtr->allAttachmentsSaveZfoMsg) {
 		exportAs(0, dbSet, Exports::ZFO_MESSAGE,
-		    targetPath, QString(), userName, dbId, msgId, false,
-		    lastPath, errStr);
+		    targetPath, QString(), userName, accountName, dbId, msgId,
+		    false, lastPath, errStr);
 	}
 
 	if (GlobInstcs::prefsPtr->allAttachmentsSavePdfMsgenvel) {
 		exportAs(0, dbSet, Exports::PDF_ENVELOPE,
-		    targetPath, QString(), userName, dbId, msgId, false,
-		    lastPath, errStr);
+		    targetPath, QString(), userName, accountName, dbId, msgId,
+		    false, lastPath, errStr);
 	}
 
 	if (!GlobInstcs::prefsPtr->deliveryInfoForEveryFile) {
 		if (GlobInstcs::prefsPtr->allAttachmentsSaveZfoDelinfo) {
 			exportAs(0, dbSet, Exports::ZFO_DELIVERY,
-			    targetPath, QString(), userName, dbId, msgId, false,
-			    lastPath, errStr);
+			    targetPath, QString(), userName, accountName, dbId,
+			    msgId, false, lastPath, errStr);
 		}
 		if (GlobInstcs::prefsPtr->allAttachmentsSavePdfDelinfo) {
 			exportAs(0, dbSet, Exports::PDF_DELIVERY,
-			    targetPath, QString(), userName, dbId, msgId,
-			    false, lastPath, errStr);
+			    targetPath, QString(), userName, accountName, dbId,
+			    msgId, false, lastPath, errStr);
 		}
 	}
 

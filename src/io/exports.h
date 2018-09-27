@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _EXPORTS_H_
-#define _EXPORTS_H_
+#pragma once
 
 #include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 
@@ -68,6 +67,7 @@ public:
 	 * @param[in] targetPath Path to target folder for export.
 	 * @param[in] attachName Attachment file name.
 	 * @param[in] userName Account username.
+	 * @param[in] accountName Account name.
 	 * @param[in] dbId Data box ID for export.
 	 * @param[in] msgId Message ID for export.
 	 * @param[in] prohibitDirSep True if directory separators should be
@@ -78,64 +78,69 @@ public:
 	QString attachmentSavePathWithFileName(const MessageDbSet &dbSet,
 	    const QString &targetPath, const QString &attachName,
 	    const QString &dbId, const QString &userName,
-	    const MessageDb::MsgId &msgId, bool prohibitDirSep);
+	    const QString &accountName, const MessageDb::MsgId &msgId,
+	    bool prohibitDirSep);
 
 	/*!
 	 * @brief Export message data as ZFO/PDF file.
 	 *
-	 * @param[in,out] parent - Parent widget to call object from.
-	 * @param[in] dbSet      - Account database set.
-	 * @param[in] fileType   - Type of export file.
-	 * @param[in] targetPath - Path to target folder for export.
-	 * @param[in] attachFileName - Attachment file name.
-	 * @param[in] userName     - Account username.
-	 * @param[in] dbId         - Databox ID for export.
-	 * @param[in] msgId        - Message ID for export.
-	 * @param[in] askLocation  - Ask to new location for export.
-	 * @param[out] lastPath    - Last export path.
-	 * @param[out] errTxt      - Error text.
+	 * @param[in,out] parent Parent widget to call object from.
+	 * @param[in]     dbSet Account database set.
+	 * @param[in]     fileType Type of export file.
+	 * @param[in]     targetPath Path to target folder for export.
+	 * @param[in]     attachFileName Attachment file name.
+	 * @param[in]     userName Account username.
+	 * @param[in]     accountName Account name.
+	 * @param[in]     dbId Data-box ID for export.
+	 * @param[in]     msgId Message ID for export.
+	 * @param[in]     askLocation Ask to new location for export.
+	 * @param[out]    lastPath Last export path.
+	 * @param[out]    errTxt Error text.
 	 * @return Result operation code.
 	 */
 	static
 	enum ExportError exportAs(QWidget *parent, const MessageDbSet &dbSet,
 	    enum ExportFileType fileType, const QString &targetPath,
 	    const QString &attachFileName, const QString &userName,
-	    const QString &dbId, const MessageDb::MsgId &msgId,
-	    bool askLocation, QString &lastPath, QString &errStr);
+	    const QString &accountName, const QString &dbId,
+	    const MessageDb::MsgId &msgId, bool askLocation,
+	    QString &lastPath, QString &errStr);
 
 	/*!
 	 * @brief Export message envelope together with attachments.
 	 *
-	 * @param[in] dbSet      - Account database set.
-	 * @param[in] targetPath - Path to target folder for export.
-	 * @param[in] userName   - Account username.
-	 * @param[in] dbId       - Databox ID for export.
-	 * @param[in] msgId      - Message ID for export.
-	 * @param[out] errTxt    - Error text.
+	 * @param[in]  dbSet Account database set.
+	 * @param[in]  targetPath Path to target folder for export.
+	 * @param[in]  userName Account username.
+	 * @param[in]  accountName Account name.
+	 * @param[in]  dbId Data-box ID for export.
+	 * @param[in]  msgId Message ID for export.
+	 * @param[out] errTxt Error text.
 	 * @return Result operation code.
 	 */
 	static
 	enum ExportError exportEnvAndAttachments(const MessageDbSet &dbSet,
 	    const QString &targetPath, const QString &userName,
-	    const QString &dbId, const MessageDb::MsgId &msgId,
-	    QString &errStr);
+	    const QString &accountName, const QString &dbId,
+	    const MessageDb::MsgId &msgId, QString &errStr);
 
 	/*!
 	 * @brief Save message attachments and export ZFO/PDF files as well.
 	 *
-	 * @param[in] dbSet      - Account database set.
-	 * @param[in] targetPath - Path to target folder for export.
-	 * @param[in] userName   - Account username.
-	 * @param[in] dbId       - Databox ID for export.
-	 * @param[in] msgId      - Message ID for export.
-	 * @param[out] errTxt    - Error text.
+	 * @param[in]  dbSet Account database set.
+	 * @param[in]  targetPath Path to target folder for export.
+	 * @param[in]  userName Account username.
+	 * @param[in]  accountName Account name.
+	 * @param[in]  dbId Data-box ID for export.
+	 * @param[in]  msgId Message ID for export.
+	 * @param[out] errTxt Error text.
 	 * @return Result operation code.
 	 */
 	static
 	enum ExportError saveAttachmentsWithExports(const MessageDbSet &dbSet,
 	    const QString &targetPath, const QString &userName,
-	    const QString &dbId, const MessageDb::MsgId &msgId,
-	    QString &errStr);
+	    const QString &accountName, const QString &dbId,
+	    const MessageDb::MsgId &msgId, QString &errStr);
 
 private:
 	/*!
@@ -165,5 +170,3 @@ private:
 	static
 	bool writeZFO(const QString &fileName, const QByteArray &data);
 };
-
-#endif /* _EXPORTS_H_ */
