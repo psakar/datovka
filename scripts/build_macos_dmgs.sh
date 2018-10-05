@@ -125,7 +125,7 @@ while [ $# -gt 0 ]; do
 		if [ "x${ARCH_NAME}" = "x" ]; then
 			ARCH_NAME="${ARCH_I386}"
 		else
-			echo "Architecture already specified of in conflict." >&2
+			echo "Architecture already specified or in conflict." >&2
 			exit 1
 		fi
 		;;
@@ -133,7 +133,7 @@ while [ $# -gt 0 ]; do
 		if [ "x${ARCH_NAME}" = "x" ]; then
 			ARCH_NAME="${ARCH_X86_64}"
 		else
-			echo "Architecture already specified of in conflict." >&2
+			echo "Architecture already specified or in conflict." >&2
 			exit 1
 		fi
 		;;
@@ -181,8 +181,11 @@ else
 	exit 1
 fi
 
+APP_NAME="datovka"
 PKG_VER=$(cat pri/version.pri | grep '^VERSION\ =\ ' | sed -e 's/VERSION\ =\ //g')
-APP="datovka.app"
+APP="${APP_NAME}.app"
+
+PROJECT_FILE="${APP_NAME}.pro"
 
 
 if [ "x${COMPILE_SRC}" = "xyes" ]; then
@@ -216,13 +219,13 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 		STATIC="1"
 	fi
 
-	${LRELEASE} datovka.pro
+	${LRELEASE} "${PROJECT_FILE}"
 	DEBUG_INFO_OPT=""
 	if [ "x${BUILD_TYPE}" = "x${BUILD_SHARED}" ]; then
 		# https://stackoverflow.com/a/35704181
 		DEBUG_INFO_OPT="CONFIG+=force_debug_info"
 	fi
-	${QMAKE} SDK_VER="${SDK_VER}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${DEBUG_INFO_OPT} datovka.pro
+	${QMAKE} SDK_VER="${SDK_VER}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${DEBUG_INFO_OPT} "${PROJECT_FILE}"
 	rm -rf "${APP}"
 	# Erase -DQT_NO_DEBUG from Makefile.
 	cp Makefile Makefile.qt_no_debug
@@ -243,8 +246,8 @@ if [ "x${BUILD_DMG}" != "xno" ]; then
 
 	# You must be logged in into a desktop session in order to create
 	# dmg files.
-	TGT="datovka-${PKG_VER}-${CLANG_BITS}bit-osx${SDK_VER}.dmg"
+	TGT="${APP_NAME}-${PKG_VER}-${CLANG_BITS}bit-osx${SDK_VER}.dmg"
 	rm -rf "${TGT}"
-	"${SRC_ROOT}"/scripts/build_dmg.sh
-	mv datovka-installer.dmg "${TGT}"
+	"${SRC_ROOT}"/scripts/macos_build_dmg.sh
+	mv "${APP_NAME}-installer.dmg" "${TGT}"
 fi

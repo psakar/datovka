@@ -338,7 +338,7 @@ adjust_sources () {
 		_LIBCURL_SHA256=""
 		echo "Using '${_LIBCURL_ARCHIVE}'."
 		;;
-	osx)
+	macos)
 		# libxml2 past version 2.9.2, which does compile, fail
 		# to compile on OS X with the error:
 		# xmlIO.c:1357:52: error: use of undeclared identifier 'LZMA_OK'
