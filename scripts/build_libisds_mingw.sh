@@ -609,7 +609,7 @@ builddir_copy () {
 
 	local TGT_BUILT_DIR="${TYPE}_built"
 
-	rm -r "${LIB_ROOT}/built"
+	rm -r "${LIB_ROOT}/${TGT_BUILT_DIR}"
 	cp -r "${BUILTDIR}" "${LIB_ROOT}/${TGT_BUILT_DIR}"
 	cd "${LIB_ROOT}"
 	local DATE=$(date -u '+%Y%m%d_%H%M%S')
