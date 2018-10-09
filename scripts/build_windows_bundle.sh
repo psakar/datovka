@@ -30,6 +30,8 @@ USAGE="${USAGE}\t--shared (default)\n\t\tCompile with shared libraries.\n"
 USAGE="${USAGE}\t--i386 (default)\n\t\tCompile for i386 architecture.\n"
 USAGE="${USAGE}\t--debug\n\t\tCompile in debug mode.\n"
 USAGE="${USAGE}\t--release (default)\n\t\tCompile in release mode.\n"
+USAGE="${USAGE}\t--home-dir-data (default)\n\t\tCompile default (i.e. installation) variant.\n"
+USAGE="${USAGE}\t--portable-data\n\t\tCompile portable variant.\n"
 
 cd "${SRC_ROOT}"
 
@@ -48,6 +50,10 @@ MODE=""
 MODE_DEBUG="debug"
 MODE_RELEASE="release"
 
+VARIANT=""
+VARIANT_HOME_DIR="home-dir-data"
+VARIANT_PORTABLE="portable-data"
+
 if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
 	echo "The default getopt does not support long options." >&2
 	echo "You may provide such getopt version via the GETOPT variable e.g.:" >&2
@@ -56,7 +62,7 @@ if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
 fi
 
 # Parse rest of command line
-set -- $("${GETOPT}" -l help -l shared -l i386 -l debug -l release -u -o dDh -- "$@")
+set -- $("${GETOPT}" -l help -l shared -l i386 -l debug -l release -l home-dir-data -l portable-data -u -o dDh -- "$@")
 if [ $# -lt 1 ]; then
 	echo -e ${USAGE} >&2
 	exit 1
@@ -109,6 +115,22 @@ while [ $# -gt 0 ]; do
 			exit 1
 		fi
 		;;
+	--home-dir-data)
+		if [ "x${VARIANT}" = "x" ]; then
+			VARIANT="${VARIANT_HOME_DIR}"
+		else
+			echo "Variant already specified or in conflict." >&2
+			exit 1
+		fi
+		;;
+	--portable-data)
+		if [ "x${VARIANT}" = "x" ]; then
+			VARIANT="${VARIANT_PORTABLE}"
+		else
+			echo "Variant already specified or in conflict." >&2
+			exit 1
+		fi
+		;;
 	--)
 		shift
 		break
@@ -142,6 +164,11 @@ if [ "x${MODE}" = "x" ]; then
 	MODE="${MODE_RELEASE}"
 fi
 
+# Use data in home directory by default.
+if [ "x${VARIANT}" = "x" ]; then
+	VARIANT="${VARIANT_HOME_DIR}"
+fi
+
 APP_NAME="datovka"
 PKG_VER=$(cat pri/version.pri | grep '^VERSION\ =\ ' | sed -e 's/VERSION\ =\ //g')
 APP_DIR="${APP_NAME}.built"
@@ -150,6 +177,14 @@ PROJECT_FILE="${APP_NAME}.pro"
 
 CLI_APP_NAME="datovka-cli"
 CLI_PROJECT_FILE="${CLI_APP_NAME}.pro.noauto"
+
+QMAKE_PORTABLE_OPT=""
+if [ "x${VARIANT}" = "x${VARIANT_PORTABLE}" ]; then
+	APP_NAME="${APP_NAME}-portable"
+	APP_DIR="${APP_NAME}.built"
+	CLI_APP_NAME="${CLI_APP_NAME}-portable"
+	QMAKE_PORTABLE_OPT="PORTABLE_APPLICATION=1"
+fi
 
 if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	QMAKE="qmake.exe"
@@ -191,8 +226,8 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	#	# https://stackoverflow.com/a/35704181
 	#	DEBUG_INFO_OPT="CONFIG+=force_debug_info"
 	#fi
-	echo ${QMAKE} CONFIG+="${MODE}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${DEBUG_INFO_OPT} "${PROJECT_FILE}" -r -spec win32-g++
-	${QMAKE} CONFIG+="${MODE}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${DEBUG_INFO_OPT} "${PROJECT_FILE}" -r -spec win32-g++
+	echo ${QMAKE} CONFIG+="${MODE}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${QMAKE_PORTABLE_OPT} ${DEBUG_INFO_OPT} "${PROJECT_FILE}" -r -spec win32-g++
+	${QMAKE} CONFIG+="${MODE}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${QMAKE_PORTABLE_OPT} ${DEBUG_INFO_OPT} "${PROJECT_FILE}" -r -spec win32-g++
 	${MAKE} clean
 	${MAKE} ${MAKE_OPTS} || exit 1
 
@@ -202,12 +237,14 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	cp "${MODE}/${APP_NAME}.exe" "${APP_DIR}/" || exit 1
 
 	# Build CLI version.
-	${QMAKE} CONFIG+="${MODE}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${DEBUG_INFO_OPT} "${CLI_PROJECT_FILE}" -r -spec win32-g++
+	echo ${QMAKE} CONFIG+="${MODE}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${QMAKE_PORTABLE_OPT} ${DEBUG_INFO_OPT} "${CLI_PROJECT_FILE}" -r -spec win32-g++
+	${QMAKE} CONFIG+="${MODE}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${QMAKE_PORTABLE_OPT} ${DEBUG_INFO_OPT} "${CLI_PROJECT_FILE}" -r -spec win32-g++
 	${MAKE} clean
 	${MAKE} ${MAKE_OPTS} || exit 1
 	cp "${MODE}/${CLI_APP_NAME}.exe" "${APP_DIR}/" || exit 1
 
 	if [ "x${BUILD_TYPE}" = "x${BUILD_SHARED}" ]; then
-		"${SRC_ROOT}"/scripts/windows_bundle_shared_libs.sh -a "${APP_NAME}" -b "${APP_DIR}" -m ${MODE} --deployqt "${WINDEPLOYQT}" || exit 1
+		echo "${SRC_ROOT}"/scripts/windows_bundle_shared_libs.sh -a "${APP_NAME}" -b "${APP_DIR}" -m "${MODE}" -v "${VARIANT}" --deployqt "${WINDEPLOYQT}"
+		"${SRC_ROOT}"/scripts/windows_bundle_shared_libs.sh -a "${APP_NAME}" -b "${APP_DIR}" -m "${MODE}" -v "${VARIANT}" --deployqt "${WINDEPLOYQT}" || exit 1
 	fi
 fi

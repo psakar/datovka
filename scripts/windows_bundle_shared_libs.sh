@@ -25,6 +25,8 @@ BUNDLE=""
 DFLT_BUNDLE="app.built"
 MODE=""
 DFLT_MODE="release"
+VARIANT=""
+DFLT_VARIANT="home-dir-data"
 DEPLOYQT_EXE=""
 DFLT_DEPLOYQT_EXE="windeployqt.exe"
 
@@ -34,6 +36,7 @@ USAGE="${USAGE}\t-a NAME, --app NAME\n\t\tSupply app executable name (without tr
 USAGE="${USAGE}\t-b NAME, --bundle NAME\n\t\tSupply bundle name. Default is '${DFLT_BUNDLE}'.\n"
 USAGE="${USAGE}\t-h, --help\n\t\tPrints help message.\n"
 USAGE="${USAGE}\t-m MODE, --mode MODE\n\t\tBuild mode (debug or release). Default is '${DFLT_MODE}'.\n"
+USAGE="${USAGE}\t-v VARIANT, --variant VARIANT\n\t\tBuild variant (home-dir-data or portable-data). Default is '${DFLT_VARIANT}'.\n"
 USAGE="${USAGE}\t--deployqt EXECUTABLE\n\t\tName (can be full path) of the Qt deployment executable. Default is '${DFLT_DEPLOYQT_EXE}'.\n"
 
 cd "${SRC_ROOT}"
@@ -170,7 +173,8 @@ dylibs_copy () {
 bundled_data_copy() {
 	local TGT_LOC="$1"
 	local SRC_ROOT_LOC="$2"
-	if [ "x${TGT_LOC}" = "x" -o "x${SRC_ROOT_LOC}" = "x" ]; then
+	local APP_VARIANT="$3"
+	if [ "x${TGT_LOC}" = "x" -o "x${SRC_ROOT_LOC}" = "x" -o "x${APP_VARIANT}" = "x" ]; then
 		echo "Invalid input." >&2
 		return 1
 	fi
@@ -179,7 +183,11 @@ bundled_data_copy() {
 	cp "${SRC_ROOT_LOC}/AUTHORS" "${TGT_LOC}/" || return 1
 	cp "${SRC_ROOT_LOC}/COPYING" "${TGT_LOC}/" || return 1
 	cp "${SRC_ROOT_LOC}/ChangeLog" "${TGT_LOC}/" || return 1
-	cp "${SRC_ROOT_LOC}/scripts/datovka-log.bat" "${TGT_LOC}/" || return 1
+	if [ "x${APP_VARIANT}" = "xportable-data" ]; then
+		cp "${SRC_ROOT_LOC}/scripts/datovka-portable-log.bat" "${TGT_LOC}/" || return 1
+	else
+		cp "${SRC_ROOT_LOC}/scripts/datovka-log.bat" "${TGT_LOC}/" || return 1
+	fi
 
 	return 0
 }
@@ -222,7 +230,7 @@ if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
 fi
 
 # Parse rest of command line
-set -- $("${GETOPT}" -l app:,bundle:,help,mode:,deployqt: -u -o a:b:hm: -- "$@")
+set -- $("${GETOPT}" -l app:,bundle:,help,mode:,variant:,deployqt: -u -o a:b:hm:v: -- "$@")
 if [ $# -lt 1 ]; then
 	echo ${USAGE} >&2
 	exit 1
@@ -264,8 +272,28 @@ while [ $# -gt 0 ]; do
 				exit 1
 				;;
 			esac
+			unset MODE_PARAM
 		else
 			echo "Mode is already set." >&2
+			exit 1
+		fi
+		shift
+		;;
+	-v|--variant)
+		if [ "x${VARIANT}" = "x" ]; then
+			VARIANT_PARAM="$2"
+			case "${VARIANT_PARAM}" in
+			home-dir-data|portable-data)
+				VARIANT="${VARIANT_PARAM}"
+				;;
+			*)
+				echo "Unknown variant '${VARIANT_PARAM}'." >&2
+				exit 1
+				;;
+			esac
+			unset VARIANT_PARAM
+		else
+			echo "Variant is already set." >&2
 			exit 1
 		fi
 		shift
@@ -314,6 +342,11 @@ if [ "x${MODE}" = "x" ]; then
 	MODE="${DFLT_MODE}"
 fi
 
+# Use default variant in none specified.
+if [ "x${VARIANT}" = "x" ]; then
+	VARIANT="${DFLT_VARIANT}"
+fi
+
 # Use default deployment tool if not specified.
 if [ "x${DEPLOYQT_EXE}" = "x" ]; then
 	DEPLOYQT_EXE="${DFLT_DEPLOYQT_EXE}"
@@ -350,7 +383,7 @@ dylibs_copy "${DIR_BUNDLE}" "${DLL_LOC}" "${DYLIBS}" || exit 1
 qt_conf_copy "${DIR_BUNDLE}" "${SRC_ROOT}/res/qt.conf_windows" || exit 1
 mkdir -p "${DIR_BUNDLE}/locale"
 locale_copy "${DIR_BUNDLE}/locale" "${SRC_ROOT}/locale" || exit 1
-bundled_data_copy "${DIR_BUNDLE}" "${SRC_ROOT}" || exit 1
+bundled_data_copy "${DIR_BUNDLE}" "${SRC_ROOT}" "${VARIANT}" || exit 1
 
 # This library must be located (manually added) in the libs/ directory:
 dylibs_copy "${DIR_BUNDLE}" "${DIR_LIBS}" "libgcc_s_sjlj-1.dll" || exit 1
