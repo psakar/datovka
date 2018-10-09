@@ -166,6 +166,24 @@ dylibs_copy () {
 	return 0
 }
 
+# Copy bundled data.
+bundled_data_copy() {
+	local TGT_LOC="$1"
+	local SRC_ROOT_LOC="$2"
+	if [ "x${TGT_LOC}" = "x" -o "x${SRC_ROOT_LOC}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	# Copy various files and scripts.
+	cp "${SRC_ROOT_LOC}/AUTHORS" "${TGT_LOC}/" || return 1
+	cp "${SRC_ROOT_LOC}/COPYING" "${TGT_LOC}/" || return 1
+	cp "${SRC_ROOT_LOC}/ChangeLog" "${TGT_LOC}/" || return 1
+	cp "${SRC_ROOT_LOC}/scripts/datovka-log.bat" "${TGT_LOC}/" || return 1
+
+	return 0
+}
+
 # Check presence of subdirectories in the application bundle.
 have_only_directories () {
 	local BASE_DIR="$1"
@@ -332,6 +350,7 @@ dylibs_copy "${DIR_BUNDLE}" "${DLL_LOC}" "${DYLIBS}" || exit 1
 qt_conf_copy "${DIR_BUNDLE}" "${SRC_ROOT}/res/qt.conf_windows" || exit 1
 mkdir -p "${DIR_BUNDLE}/locale"
 locale_copy "${DIR_BUNDLE}/locale" "${SRC_ROOT}/locale" || exit 1
+bundled_data_copy "${DIR_BUNDLE}" "${SRC_ROOT}" || exit 1
 
 # This library must be located (manually added) in the libs/ directory:
 dylibs_copy "${DIR_BUNDLE}" "${DIR_LIBS}" "libgcc_s_sjlj-1.dll" || exit 1

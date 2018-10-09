@@ -148,6 +148,9 @@ APP_DIR="${APP_NAME}.built"
 
 PROJECT_FILE="${APP_NAME}.pro"
 
+CLI_APP_NAME="datovka-cli"
+CLI_PROJECT_FILE="${CLI_APP_NAME}.pro.noauto"
+
 if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	QMAKE="qmake.exe"
 	LRELEASE="lrelease.exe"
@@ -197,6 +200,12 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	rm -rf "${APP_DIR}"
 	mkdir -p "${APP_DIR}"
 	cp "${MODE}/${APP_NAME}.exe" "${APP_DIR}/" || exit 1
+
+	# Build CLI version.
+	${QMAKE} CONFIG+="${MODE}" WITH_BUILT_LIBS=1 STATIC="${STATIC}" ${DEBUG_INFO_OPT} "${CLI_PROJECT_FILE}" -r -spec win32-g++
+	${MAKE} clean
+	${MAKE} ${MAKE_OPTS} || exit 1
+	cp "${MODE}/${CLI_APP_NAME}.exe" "${APP_DIR}/" || exit 1
 
 	if [ "x${BUILD_TYPE}" = "x${BUILD_SHARED}" ]; then
 		"${SRC_ROOT}"/scripts/windows_bundle_shared_libs.sh -a "${APP_NAME}" -b "${APP_DIR}" -m ${MODE} --deployqt "${WINDEPLOYQT}" || exit 1
