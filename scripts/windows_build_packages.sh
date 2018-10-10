@@ -88,18 +88,41 @@ get_exe_path () {
 # The user may specify the variable LOC_7Z variable to provide the path to
 # the executable.
 exe_7z_path () {
-	local DFLT_LOC_7Z="c:/Program Files/7-Zip/7z.exe"
-	local DFLT_LOC_7Z_32="c:/Program Files (x86)/7-Zip/7z.exe"
+	local EXE="7z.exe"
+	local DFLT_LOC_7Z="c:/Program Files/7-Zip/${EXE}"
+	local DFLT_LOC_7Z_32="c:/Program Files (x86)/7-Zip/${EXE}"
 
 	local EXE_7Z=""
-	EXE_7Z=$(get_exe_path "7z.exe" "${LOC_7Z}" "${DFLT_LOC_7Z}" "${DFLT_LOC_7Z_32}")
+	EXE_7Z=$(get_exe_path "${EXE}" "${LOC_7Z}" "${DFLT_LOC_7Z}" "${DFLT_LOC_7Z_32}")
 
 	if [ "x${EXE_7Z}" = "x" ]; then
 		echo ""
-		echo "Cannot locate 7z.exe. Please set the 'LOC_7Z' variable to the proper executable." >&2
+		echo "Cannot locate '${EXE}'." >&2
+		echo "Please set the 'LOC_7Z' variable to point to the proper executable." >&2
 		return 1
 	fi
 	echo "${EXE_7Z}"
+	return 1
+}
+
+# Return path to the makensis.exe.
+# The user may specify the variable LOC_MAKENSIS variable to provide the path to
+# the executable.
+exe_makensis_path () {
+	local EXE="makensis.exe"
+	local DFLT_LOC_MAKENSIS="c:/Program Files/NSIS/${EXE}"
+	local DFLT_LOC_MAKENSIS_32="c:/Program Files (x86)/NSIS/${EXE}"
+
+	local EXE_MAKENSIS=""
+	EXE_MAKENSIS=$(get_exe_path "${EXE}" "${LOC_MAKENSIS}" "${DFLT_LOC_MAKENSIS}" "${DFLT_LOC_MAKENSIS_32}")
+
+	if [ "x${EXE_MAKENSIS}" = "x" ]; then
+		echo ""
+		echo "Cannot locate '${EXE}'." >&2
+		echo "Please set the 'LOC_MAKENSIS' variable to point to the proper executable." >&2
+		return 1
+	fi
+	echo "${EXE_MAKENSIS}"
 	return 1
 }
 
@@ -122,11 +145,33 @@ create_zip_package () {
 	local EXE_7Z=$(exe_7z_path)
 
 	rm -r "${TGT_ZIP_ROOT_NAME}"
-	rm "${TGT_ZIP_ROOT_NAME}.zip"
+	rm "${TGT_ZIP_NAME}"
 	cp -r "${SRC_DIR_ROOT}" "${TGT_ZIP_ROOT_NAME}"
 
 	"${EXE_7Z}" a -tzip "${TGT_ZIP_NAME}" "${TGT_ZIP_ROOT_NAME}"
 	rm -r "${TGT_ZIP_ROOT_NAME}"
+}
+
+# Build NSIS installer.
+build_nsis_installer () {
+	local PKG_VERSION="$1"
+
+	if [ "x${PKG_VERSION}" = "x" ]; then
+		echo "Missing parameter." >&2
+		return 1
+	fi
+
+	local NSIS_ROOT="nsis"
+	local NSI_TMPL="${NSIS_ROOT}/datovka-install/datovka-install.template"
+	local NSI_FILE="${NSIS_ROOT}/datovka-install/datovka-install.nsi"
+
+	local EXE_MAKENSIS=$(exe_makensis_path)
+
+	sed -e "s/VERSIONXXX/${PKG_VERSION}/g" < "${NSI_TMPL}" > "${NSI_FILE}"
+	rm "datovka-${PKG_VERSION}-windows.exe"
+
+	"${EXE_MAKENSIS}" "${NSI_FILE}"
+	rm "${NSI_FILE}"
 }
 
 if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
@@ -241,8 +286,8 @@ directory_exists "${BUNDLE}" || exit 1
 
 case "${VARIANT}" in
 home-dir-data)
-	echo "Variant '${VARIANT}' not supported yet." >&2
-	exit 1
+	create_zip_package "${APP}-${PKG_VERSION}-windows.zip" "${APP}-${PKG_VERSION}" "${BUNDLE}" || exit 1
+	build_nsis_installer "${PKG_VERSION}" || exit 1
 	;;
 portable-data)
 	APP=$(echo "${APP}" | sed -e 's/-portable//g') # Remove the '-portable' from the name.
