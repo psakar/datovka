@@ -54,19 +54,19 @@ directory_exists () {
 
 # Try to locate the executable in supplied arguments.
 get_exe_path () {
-	local EXE_NAME="$1" # First arduments is the excutable name.
+	local EXE_NAME="$1" # First arguments is the executable name.
 	# Remaining arguments may be full paths or directories.
 	shift
 
 	for P in "$@"; do
-		if [ -e "${P}" ]; then
+		if [ ! -d "${P}" -a -x "${P}" ]; then
 			local FOUND=$(echo "${P}" | grep "${EXE_NAME}")
 			if [ "x${FOUND}" != "x" ]; then
 				# The executable may be found.
 				echo "${P}"
 				return 0
 			fi
-		elif [ -d "${P}" -a -e "${P}/${EXE_NAME}" ]; then
+		elif [ -d "${P}" -a -x "${P}/${EXE_NAME}" ]; then
 			echo "${P}/${EXE_NAME}"
 			return 0
 		fi
@@ -97,12 +97,14 @@ exe_7z_path () {
 
 	if [ "x${EXE_7Z}" = "x" ]; then
 		echo ""
-		echo "Cannot locate '${EXE}'." >&2
-		echo "Please set the 'LOC_7Z' variable to point to the proper executable." >&2
+		echo "Cannot locate '${EXE}' from the 7-Zip package." >&2
+		echo "Download at https://www.7-zip.org/ ." >&2
+		echo "Set the 'LOC_7Z' variable to point to the proper executable -" >&2
+		echo "or set PATH to point to the directory where '${EXE}' can be found." >&2
 		return 1
 	fi
 	echo "${EXE_7Z}"
-	return 1
+	return 0
 }
 
 # Return path to the makensis.exe.
@@ -118,12 +120,39 @@ exe_makensis_path () {
 
 	if [ "x${EXE_MAKENSIS}" = "x" ]; then
 		echo ""
-		echo "Cannot locate '${EXE}'." >&2
-		echo "Please set the 'LOC_MAKENSIS' variable to point to the proper executable." >&2
+		echo "Cannot locate '${EXE}' from the Nullsoft Scriptable Install System." >&2
+		echo "Download at https://sourceforge.net/projects/nsis/ ." >&2
+		echo "Set the 'LOC_MAKENSIS' variable to point to the proper executable -" >&2
+		echo "or set PATH to point to the directory where '${EXE}' can be found." >&2
 		return 1
 	fi
 	echo "${EXE_MAKENSIS}"
-	return 1
+	return 0
+}
+
+# Return path to the WiX Toolset.
+# The user may specify the variable LOC_WIX to provide the path to
+# the executables.
+dir_wix_path() {
+	local EXE="heat.exe"
+	local DFLT_LOC_WIX="c:/Program Files/WiX Toolset v3.11/bin"
+	local DFLT_LOC_WIX_32="c:/Program Files (x86)/WiX Toolset v3.11/bin"
+
+	local EXE_HEAT=""
+	EXE_HEAT=$(get_exe_path "${EXE}" "${LOC_WIX}" "${DFLT_LOC_WIX}" "${DFLT_LOC_WIX_32}")
+
+	if [ "x${EXE_HEAT}" = "x" ]; then
+		echo ""
+		echo "Cannot locate '${EXE}' from the WiX Toolset." >&2
+		echo "Download at http://wixtoolset.org/ ." >&2
+		echo "Set the 'LOC_WIX' variable to point to the proper executable -" >&2
+		echo "or set PATH to point to the directory where '${EXE}' can be found." >&2
+		return 1
+	fi
+
+	# Strip executable from the path and return the directory only.
+	echo "${EXE_HEAT}" | sed -s "s/[/]${EXE}$//g"
+	return 0
 }
 
 # Create zip package.
@@ -172,6 +201,54 @@ build_nsis_installer () {
 
 	"${EXE_MAKENSIS}" "${NSI_FILE}"
 	rm "${NSI_FILE}"
+}
+
+# Build MSI installer.
+build_msi_installer () {
+	local APP_NAME="$1"
+	local PKG_VERSION="$2"
+	local BUNDLE_DIR="$3"
+
+	if [ "x${APP_NAME}" = "x" -o "x${PKG_VERSION}" = "x" -o "x${BUNDLE_DIR}" = "x" ]; then
+		echo "Missing parameter." >&2
+		return 1
+	fi
+
+	if [ ! -d "${BUNDLE_DIR}" ]; then
+		echo "'${BUNDLE_DIR}' is not a directory." >&2
+		return 1
+	fi
+
+	local WIX_PATH=$(dir_wix_path)
+	local EXE_HEAT="${WIX_PATH}/heat.exe"
+	local EXE_CANDLE="${WIX_PATH}/candle.exe"
+	local EXE_LIGHT="${WIX_PATH}/light.exe"
+
+	local SOURCE_DIR="SourceDir"
+	local TMPFILELISTNAME="tmpfilelist"
+	local SCRIPTNAME="${APP_NAME}_installer"
+	local MSIFILENAME="${APP_NAME}-${PKG_VERSION}-windows"
+	local PACKAGENAME="${MSIFILENAME}.msi"
+
+	rm -rf "msi/${SOURCE_DIR}"
+	rm "${PACKAGENAME}"
+	cp -r "${BUNDLE_DIR}" "msi/${SOURCE_DIR}"
+	cp "nsis/datovka-install/datovka.ico" "msi/${SOURCE_DIR}/" # TODO -- Why?
+
+	pushd "msi"
+
+	# Run heat.exe to obtain XML file hierarchy.
+	"${EXE_HEAT}" dir "${SOURCE_DIR}" -cg FileList -gg -ke -scom -sreg -sfrag -srd -dr FileInstallPath -out "${TMPFILELISTNAME}.wxs"
+	# Run WiX compiler.
+	"${EXE_CANDLE}" "${TMPFILELISTNAME}.wxs" "${SCRIPTNAME}.wxs" -dProductVersion="${PKG_VERSION}"
+	# Run WiX linker.
+	"${EXE_LIGHT}" "${SCRIPTNAME}.wixobj" -ext WixUIExtension -out "${PACKAGENAME}" -v "${TMPFILELISTNAME}.wixobj" -cultures:cs-cz
+
+	popd
+
+	mv "msi/${PACKAGENAME}" "./"
+	rm -r "msi/${SOURCE_DIR}"
+	rm msi/*.wixpdb msi/*.wixobj msi/tmpfilelist.*
 }
 
 if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
@@ -288,6 +365,7 @@ case "${VARIANT}" in
 home-dir-data)
 	create_zip_package "${APP}-${PKG_VERSION}-windows.zip" "${APP}-${PKG_VERSION}" "${BUNDLE}" || exit 1
 	build_nsis_installer "${PKG_VERSION}" || exit 1
+	build_msi_installer "${APP}" "${PKG_VERSION}" "${BUNDLE}" || exit 1
 	;;
 portable-data)
 	APP=$(echo "${APP}" | sed -e 's/-portable//g') # Remove the '-portable' from the name.

@@ -260,7 +260,7 @@ fi
 
 if [ "x${BUILD_PACKAGES}" != "xno" ]; then
 	BINARY="${APP_DIR}/${APP_NAME}.exe"
-	if [ ! -e "${BINARY}" ]; then
+	if [ ! -x "${BINARY}" ]; then
 		echo "Cannot find '${BINARY}'. Run the compilation." >&2
 		exit 1
 	fi
