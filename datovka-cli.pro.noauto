@@ -63,13 +63,15 @@ win32 {
 		INRC_FILEDESCR=\\\"Datovka-CLI\\\" \
 		INRC_ORIG_FNAME=\\\"$${APP_NAME}.exe\\\"
 
+	LIB_LOCATION=libs/shared_built
+
 	INCLUDEPATH = \
-		mingw32built/include/libxml2 \
-		mingw32built/include/
+		$${LIB_LOCATION}/include/ \
+		$${LIB_LOCATION}/include/libxml2
 
 	LIBS = \
-		$${_PRO_FILE_PWD_}/mingw32built/bin/libisds-5.dll \
-		$${_PRO_FILE_PWD_}/mingw32built/bin/libeay32.dll
+		$${_PRO_FILE_PWD_}/$${LIB_LOCATION}/bin/libisds-5.dll \
+		$${_PRO_FILE_PWD_}/$${LIB_LOCATION}/bin/libeay32.dll
 
 	SOURCES += src/compat/compat_win.c
 

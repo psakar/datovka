@@ -15,6 +15,7 @@ src_root () {
 }
 
 SRC_ROOT=$(src_root)
+cd "${SRC_ROOT}"
 
 . "${SRC_ROOT}"/scripts/helper_dependency_sources.sh
 
@@ -24,11 +25,24 @@ WIN_VER="0x0501" #https://msdn.microsoft.com/en-us/library/windows/desktop/aa383
 MAKEOPTS="-j 4"
 
 LIB_ROOT="${SRC_ROOT}"/libs
+mkdir -p "${LIB_ROOT}"
 if [ ! -d "${LIB_ROOT}" ]; then
 	echo "Cannot find directory '${LIB_ROOT}'" >&2
 	exit 1
 fi
 cd "${LIB_ROOT}"
+
+
+WIN_MAKE=mingw32-make.exe
+runnning_on_win () {
+	local FOUND_WIN_MAKE=$(which "${WIN_MAKE}")
+	if [ "x${FOUND_WIN_MAKE}" != "x" ]; then
+		echo "true"
+	else
+		echo "false"
+	fi
+}
+RUNNING_ON_WIN=$(runnning_on_win)
 
 SRCDIR="${LIB_ROOT}/srcs"
 PATCHDIR="${SRC_ROOT}/scripts/patches"
@@ -45,8 +59,16 @@ X86_MINGW_LD=${X86_MINGV_HOST}-ld
 X86_MINGW_STRIP=${X86_MINGV_HOST}-strip
 X86_MINGW_RANLIB=${X86_MINGV_HOST}-ranlib
 
-WORKDIR_PREFIX="${WORKDIR_PREFIX}_${X86_MINGV_HOST}"
-BUILTDIR_PREFIX="${BUILTDIR_PREFIX}_${X86_MINGV_HOST}"
+if [ "x${RUNNING_ON_WIN}" != "xtrue" ]; then
+	WORKDIR_PREFIX="${WORKDIR_PREFIX}_${X86_MINGV_HOST}"
+	BUILTDIR_PREFIX="${BUILTDIR_PREFIX}_${X86_MINGV_HOST}"
+else
+	X86_MINGV_HOST=""
+	WORKDIR_PREFIX="${WORKDIR_PREFIX}_qt-mingw"
+	BUILTDIR_PREFIX="${BUILTDIR_PREFIX}_qt-mingw"
+	echo "The libraries cannot be currently built on Windows." >&2
+	exit 1
+fi
 
 if [ ! -d "${SRCDIR}" ]; then
 	mkdir "${SRCDIR}"
@@ -62,7 +84,7 @@ TARGETS="${TARGETS} shared"
 
 # Return 0 if targets are OK.
 check_params () {
-	TYPE=$1
+	local TYPE="$1"
 	if [ "x${TYPE}" != "xstatic" -a "x${TYPE}" != "xshared" ]; then
 		echo "Unknown type '${TYPE}'." >&2
 		return 1
@@ -72,8 +94,9 @@ check_params () {
 
 # Return 0 if target is scheduled for build.
 target_scheduled () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || return 1
+	local RES=""
 	RES=$(echo "${TARGETS}" | grep "${TYPE}")
 	if [ "x${RES}" != "x" ]; then
 		return 0
@@ -83,12 +106,12 @@ target_scheduled () {
 }
 
 workdir_name () {
-	TYPE=$1
+	local TYPE="$1"
 	echo "${WORKDIR_PREFIX}_${TYPE}"
 }
 
 builtdir_name () {
-	TYPE=$1
+	local TYPE="$1"
 	echo "${BUILTDIR_PREFIX}_${TYPE}"
 }
 
@@ -104,9 +127,9 @@ target_scheduled shared && ensure_dir_presence $(builtdir_name shared)
 
 # Store information about build.
 store_build_info () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	${X86_MINGW_PREFIX}gcc -v 2> "${BUILTDIR}/gcc-version.txt"
 	${X86_MINGW_PREFIX}g++ -v 2> "${BUILTDIR}/g++-version.txt"
@@ -139,15 +162,15 @@ LIBISDS_ARCHIVE_PATCHES="${_LIBISDS_ARCHIVE_PATCHES}"
 
 
 build_zlib () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local WORKDIR=$(workdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${ZLIB_ARCHIVE}" "${WORKDIR}" zlib
 	cd "${WORKDIR}"/zlib*
 
-	SHARED="1"
+	local SHARED="1"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		SHARED="0"
 	fi
@@ -175,15 +198,15 @@ fi
 
 
 build_expat () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local WORKDIR=$(workdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${EXPAT_ARCHIVE}" "${WORKDIR}" expat
 	cd "${WORKDIR}"/expat*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -208,15 +231,15 @@ fi
 
 
 build_libtool () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local WORKDIR=$(workdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${LIBTOOL_ARCHIVE}" "${WORKDIR}" libtool
 	cd "${WORKDIR}"/libtool*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -241,15 +264,15 @@ fi
 
 
 build_libiconv () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local WORKDIR=$(workdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${LIBICONV_ARCHIVE}" "${WORKDIR}" libiconv
 	cd "${WORKDIR}"/libiconv*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -274,15 +297,15 @@ fi
 
 
 build_libxml2 () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local WORKDIR=$(workdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${LIBXML2_ARCHIVE}" "${WORKDIR}" libxml2
 	cd "${WORKDIR}"/libxml2*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -311,15 +334,15 @@ fi
 
 
 build_gettext () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local WORKDIR=$(workdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${GETTEXT_ARCHIVE}" "${WORKDIR}" gettext
 	cd "${WORKDIR}"/gettext*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -332,7 +355,7 @@ build_gettext () {
 	CONFOPTS="${CONFOPTS} --enable-relocatable"
 	CONFOPTS="${CONFOPTS} --enable-threads=win32"
 
-	DEFINES=""
+	local DEFINES=""
 	if [ "x${TYPE}" = "xstatic" ]; then
 		DEFINES="${DEFINES} -DLIBXML_STATIC"
 	fi
@@ -356,15 +379,15 @@ fi
 
 
 build_openssl () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local WORKDIR=$(workdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR}" openssl
 	cd "${WORKDIR}"/openssl*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	#CONFOPTS="${CONFOPTS} no-asm"
 	CONFOPTS="${CONFOPTS} mingw"
 	CONFOPTS="${CONFOPTS} enable-static-engine"
@@ -404,15 +427,15 @@ LOCAL_CA_STORE_DIR="ssl/certs"
 LOCAL_CA_STORE_FILE="ca-certificates.crt"
 
 build_libcurl () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local WORKDIR=$(workdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${LIBCURL_ARCHIVE}" "${WORKDIR}" curl
 	cd "${WORKDIR}"/curl*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -473,10 +496,10 @@ fi
 
 
 build_libisds () {
-	TYPE=$1
+	local TYPE="$1"
 	check_params "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${TYPE}")
-	BUILTDIR=$(builtdir_name "${TYPE}")
+	local WORKDIR=$(workdir_name "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${TYPE}")
 
 	if [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 		erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR}" libisds
@@ -485,7 +508,7 @@ build_libisds () {
 		if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
 			# Apply patches.
 			for f in ${LIBISDS_ARCHIVE_PATCHES}; do
-				PATCHFILE="${PATCHDIR}/${f}"
+				local PATCHFILE="${PATCHDIR}/${f}"
 				if [ ! -f "${PATCHFILE}" ]; then
 					echo "Missing ${PATCHFILE}" >&2
 					exit 1
@@ -493,6 +516,7 @@ build_libisds () {
 				cp "${PATCHFILE}" ./
 				echo "Applying ${f}"
 				patch -p1 < ${f}
+				unset PATCHFILE
 			done
 		fi
 	elif [ ! -z "${LIBISDS_GIT}" ]; then
@@ -509,7 +533,7 @@ build_libisds () {
 		exit 1
 	fi
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -524,16 +548,16 @@ build_libisds () {
 	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
 
-	LINTL=""
-	NLS="--disable-nls"
+	local LINTL=""
+	local NLS="--disable-nls"
 	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 		LINTL="-lintl"
 		NLS=""
 	fi
 	CONFOPTS="${CONFOPTS} ${NLS}"
 
-	DEFINES=""
-	LINKER=""
+	local DEFINES=""
+	local LINKER=""
 	if [ "x${TYPE}" = "xstatic" ]; then
 		DEFINES="${DEFINES} -DLIBXML_STATIC"
 		LINKER="${LINKER} -mwindows"
@@ -575,3 +599,23 @@ elif [ ! -z "${LIBISDS_ARCHIVE}" -o ! -z "${LIBISDS_GIT}" ]; then
 	if target_scheduled static; then build_libisds static || exit 1; fi
 	if target_scheduled shared; then build_libisds shared || exit 1; fi
 fi
+
+
+# Create copy of build directory.
+builddir_copy () {
+	local TYPE="$1"
+	check_params "${TYPE}" || exit 1
+	local BUILTDIR=$(builtdir_name "${TYPE}")
+
+	local TGT_BUILT_DIR="${TYPE}_built"
+
+	rm -r "${LIB_ROOT}/${TGT_BUILT_DIR}"
+	cp -r "${BUILTDIR}" "${LIB_ROOT}/${TGT_BUILT_DIR}"
+	cd "${LIB_ROOT}"
+	local DATE=$(date -u '+%Y%m%d_%H%M%S')
+	tar -czf "${TGT_BUILT_DIR}_${DATE}.tar.gz" "${TGT_BUILT_DIR}/"
+}
+
+# Copy build directory.
+if target_scheduled static; then builddir_copy static; fi
+if target_scheduled shared; then builddir_copy shared; fi

@@ -38,7 +38,7 @@ cd "${SRC_ROOT}"
 
 # Return 0 if param is a directory.
 directory_exists () {
-	local DIR=$1
+	local DIR="$1"
 	if [ "x${DIR}" = "x" ]; then
 		echo "Missing parameter." >&2
 		return 1
@@ -56,7 +56,7 @@ directory_exists () {
 
 # Return 0 if param is an executable file.
 executable_exists () {
-	local EXE=$1
+	local EXE="$1"
 	if [ "x${EXE}" = "x" ]; then
 		echo "Missing parameter." >&2
 		return 1
@@ -421,7 +421,7 @@ qt_plugins_loc () {
 
 	if [ ! -d "${FW_LOC}" ]; then
 		echo ""
-		echo "Supplied parameter if not a directory." >&2
+		echo "Supplied parameter is not a directory." >&2
 		return 1
 	fi
 
@@ -543,6 +543,57 @@ qt_plugins_copy () {
 	fi
 
 	return 0
+}
+
+# Get location of Qt QML files.
+qt_qml_loc () {
+	local FW_LOC="$1"
+	if [ "x${FW_LOC}" = "x" ]; then
+		echo ""
+		echo "Missing parameter." >&2
+		return 1
+	fi
+
+	if [ ! -d "${FW_LOC}" ]; then
+		echo ""
+		echo "Supplied parameter is not a directory." >&2
+		return 1
+	fi
+
+	local QML_LOC=$(echo "$FW_LOC" | sed -e 's/[/][^/]*[/]*$//g')
+	QML_LOC="${QML_LOC}/qml"
+	if [ ! -d "$QML_LOC" ]; then
+		echo ""
+		echo "Could not determine Qt QML directory." >&2
+		return 1
+	fi
+
+	echo "$QML_LOC"
+	return 0
+}
+
+# Copy QML packages into bundle.
+qt_qml_copy () {
+	local TGT_LOC="$1"
+	local SRC_LOC="$2"
+	if [ "x${TGT_LOC}" = "x" -o "x${SRC_LOC}" = "x" ]; then
+		echo "Invalid input." >&2
+		return 1
+	fi
+
+	if [ ! -d "${TGT_LOC}" -o ! -d "${SRC_LOC}" ]; then
+		echo "Supplied parameters are not directories." >&2
+		return 1
+	fi
+
+	# Whole directories:
+	cp -R "${SRC_LOC}/QtGraphicalEffects" "${TGT_LOC}" && \
+	cp -R "${SRC_LOC}/QtQuick" "${TGT_LOC}" && \
+	cp -R "${SRC_LOC}/QtQuick.2" "${TGT_LOC}"
+	if [ "$?" != "0" ]; then
+		rm -rf "${TGT_LOC}/"
+		return 1
+	fi
 }
 
 # Copy Qt configuration file.
@@ -798,6 +849,7 @@ DIR_CONTENTS="${DIR_BUNDLE}/Contents"
 DIR_FRAMEWORKS="${DIR_CONTENTS}/Frameworks"
 DIR_MACOS="${DIR_CONTENTS}/MacOs"
 DIR_PLUGINS="${DIR_CONTENTS}/PlugIns"
+DIR_QML="${DIR_CONTENTS}/Qml"
 DIR_RESOURCES="${DIR_CONTENTS}/Resources"
 FILE_APP="${DIR_MACOS}/${APP}"
 
@@ -847,6 +899,11 @@ if directory_exists "${DIR_PLUGINS}"; then
 fi
 mkdir -p "${DIR_PLUGINS}"
 directory_exists "${DIR_PLUGINS}" || exit 1
+# No need to add the QML directory.
+#if directory_exists "${DIR_QML}"; then
+#	rm -rf "${DIR_QML}"
+#fi
+#mkdir -p "${DIR_QML}"
 directory_exists "${DIR_RESOURCES}" || exit 1
 executable_exists "${FILE_APP}" || exit 1
 
@@ -879,8 +936,9 @@ fi
 QT_FRAMEWORKS=$(qt_frameworks_all "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}")
 
 QT_PLUGINS_LOC=$(qt_plugins_loc "${QT_FRAMEWORK_LOC}")
+QT_QML_LOC=$(qt_qml_loc "${QT_FRAMEWORK_LOC}")
 
-dylibs_copy "${DIR_FRAMEWORKS}" "${DYLIBS_LOC}" "${DYLIBS}" || exit 0
+dylibs_copy "${DIR_FRAMEWORKS}" "${DYLIBS_LOC}" "${DYLIBS}" || exit 1
 qt_frameworks_copy "${DIR_FRAMEWORKS}" "${QT_FRAMEWORK_LOC}" "${QT_FRAMEWORKS}" || exit 1
 qt_plugins_copy "${DIR_PLUGINS}" "${QT_PLUGINS_LOC}"
 qt_conf_copy "${DIR_RESOURCES}" "${SRC_ROOT}/res/qt.conf_macos"

@@ -19,7 +19,7 @@ cd "${SRC_ROOT}"
 
 . "${SRC_ROOT}"/scripts/helper_dependency_sources.sh
 
-adjust_sources "osx"
+adjust_sources "macos"
 
 OSX_MIN_VER=10.7
 MAKEOPTS="-j 2"
@@ -40,6 +40,7 @@ if [ ! -d "${ISYSROOT}" ]; then
 fi
 
 LIB_ROOT="${SRC_ROOT}"/libs
+mkdir -p "${LIB_ROOT}"
 if [ ! -d "${LIB_ROOT}" ]; then
 	echo "Cannot find directory '${LIB_ROOT}'" >&2
 	exit 1
@@ -67,8 +68,8 @@ TARGETS="${TARGETS} x86_64_shared"
 
 # Return 0 if targets are OK.
 check_params () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	if [ "x${ARCH}" != "xi386" -a "x${ARCH}" != "xx86_64" ]; then
 		echo "Unknown architecture '${ARCH}'." >&2
 		return 1
@@ -82,9 +83,10 @@ check_params () {
 
 # Return 0 if target is scheduled for build.
 target_scheduled () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || return 1
+	local RES=""
 	RES=$(echo "${TARGETS}" | grep "${ARCH}" | grep "${TYPE}")
 	if [ "x${RES}" != "x" ]; then
 		return 0
@@ -94,14 +96,14 @@ target_scheduled () {
 }
 
 workdir_name () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	echo "${WORKDIR_PREFIX}_${ARCH}_${TYPE}"
 }
 
 builtdir_name () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	echo "${BUILTDIR_PREFIX}_${ARCH}_${TYPE}"
 }
 
@@ -142,16 +144,16 @@ LIBISDS_ARCHIVE_PATCHES="${_LIBISDS_ARCHIVE_PATCHES}"
 # otool -L
 
 build_zlib () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+	local WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${ZLIB_ARCHIVE}" "${WORKDIR}" zlib
 	cd "${WORKDIR}"/zlib*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --static"
@@ -179,16 +181,16 @@ fi
 
 
 build_expat () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+	local WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${EXPAT_ARCHIVE}" "${WORKDIR}" expat
 	cd "${WORKDIR}"/expat*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -218,16 +220,16 @@ fi
 
 
 build_libtool () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+	local WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${LIBTOOL_ARCHIVE}" "${WORKDIR}" libtool
 	cd "${WORKDIR}"/libtool*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -257,16 +259,16 @@ fi
 
 
 build_libiconv () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+	local WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${LIBICONV_ARCHIVE}" "${WORKDIR}" libiconv
 	cd "${WORKDIR}"/libiconv*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -296,16 +298,16 @@ fi
 
 
 build_libxml2 () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+	local WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${LIBXML2_ARCHIVE}" "${WORKDIR}" libxml2
 	cd "${WORKDIR}"/libxml2*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -339,16 +341,16 @@ fi
 
 
 build_gettext () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+	local WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${GETTEXT_ARCHIVE}" "${WORKDIR}" gettext
 	cd "${WORKDIR}"/gettext*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -382,16 +384,16 @@ fi
 
 
 build_openssl () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+	local WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${OPENSSL_ARCHIVE}" "${WORKDIR}" openssl
 	cd "${WORKDIR}"/openssl*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	#CONFOPTS="${CONFOPTS} no-asm"
 	if [ "x${ARCH}" = "xi386" ]; then
 		CONFOPTS="${CONFOPTS} darwin-i386-cc"
@@ -434,16 +436,16 @@ fi
 
 
 build_libcurl () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+	local WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	erase_and_decompress "${SRCDIR}" "${LIBCURL_ARCHIVE}" "${WORKDIR}" curl
 	cd "${WORKDIR}"/curl*
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	# Leave shared version as this is required to configure libisds.
 	#if [ "x${TYPE}" = "xstatic" ]; then
@@ -496,11 +498,11 @@ fi
 
 
 build_libisds () {
-	ARCH=$1
-	TYPE=$2
+	local ARCH="$1"
+	local TYPE="$2"
 	check_params "${ARCH}" "${TYPE}" || exit 1
-	WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
-	BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
+	local WORKDIR=$(workdir_name "${ARCH}" "${TYPE}")
+	local BUILTDIR=$(builtdir_name "${ARCH}" "${TYPE}")
 
 	if [ ! -z "${LIBISDS_ARCHIVE}" ]; then
 		erase_and_decompress "${SRCDIR}" "${LIBISDS_ARCHIVE}" "${WORKDIR}" libisds
@@ -509,7 +511,7 @@ build_libisds () {
 		if [ "x${LIBISDS_ARCHIVE_PATCHES}" != "x" ]; then
 			# Apply patches.
 			for f in ${LIBISDS_ARCHIVE_PATCHES}; do
-				PATCHFILE="${PATCHDIR}/${f}"
+				local PATCHFILE="${PATCHDIR}/${f}"
 				if [ ! -f "${PATCHFILE}" ]; then
 					echo "Missing ${PATCHFILE}" >&2
 					exit 1
@@ -517,6 +519,7 @@ build_libisds () {
 				cp "${PATCHFILE}" ./
 				echo "Applying ${f}"
 				patch -p1 < ${f}
+				unset PATCHFILE
 			done
 		fi
 	elif [ ! -z "${LIBISDS_GIT}" ]; then
@@ -533,7 +536,7 @@ build_libisds () {
 		exit 1
 	fi
 
-	CONFOPTS=""
+	local CONFOPTS=""
 	CONFOPTS="${CONFOPTS} --prefix=${BUILTDIR}"
 	if [ "x${TYPE}" = "xstatic" ]; then
 		CONFOPTS="${CONFOPTS} --disable-shared"
@@ -548,7 +551,7 @@ build_libisds () {
 	CONFOPTS="${CONFOPTS} --with-libcurl=${BUILTDIR}"
 	CONFOPTS="${CONFOPTS} --with-libiconv-prefix=${BUILTDIR}"
 
-	NLS="--disable-nls"
+	local NLS="--disable-nls"
 	if [ ! -z "${GETTEXT_ARCHIVE}" ]; then
 		NLS=""
 	fi
