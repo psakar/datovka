@@ -84,7 +84,7 @@ while [ $# -gt 0 ]; do
 			COMPILE_SRC=no
 			BUILD_DMG=yes
 		else
-			echo "Option -n already set." >&2
+			echo "Option -D already set." >&2
 			exit 1
 		fi
 		;;
