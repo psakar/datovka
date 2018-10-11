@@ -45,7 +45,7 @@ darwin*)
 	;;
 msys|win32)
 	APP_BINARY_NAME="datovka-cli.exe"
-	BINARY_LOCATION="C:/Program Files (x86)/CZ.NIC/Datovka"
+	BINARY_LOCATION="${SRC_ROOT}/datovka.built"
 	OS_NAME="Windows"
 	ATTACH_LOAD_PATH="${SCRIPT_PATH}/attachment"
 	ATTACH_LOAD_PATH="${ATTACH_LOAD_PATH:1:${#ATTACH_LOAD_PATH}}"
