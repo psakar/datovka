@@ -3,10 +3,9 @@
 <!-- 
 ******************************************************************************
 * Project: Datovka
-* Author: CZ.NIC, z.s.p.o. 2017
+* Copyright: 2014-2018 CZ.NIC, z.s.p.o.
 * FileInfo: Datovka MSI installer source XML for Windows.
-* Description: The XML file describes structure of MSI installer (*.msi)
-*              for application Datovka.
+* Description: The XML file describes the structure of the MSI installer.
 ******************************************************************************
 -->
 
@@ -49,7 +48,7 @@
     <!--Define cab properties of msi-->
     <Media Id="1" Cabinet="datovka.cab" EmbedCab="yes" CompressionLevel="mszip"/>
     <!--Define icons (ID should not be longer than 18 chars and must end with ".exe")-->
-    <Icon Id="ProductIcon.exe" SourceFile="SourceDir\datovka.ico"/>
+    <Icon Id="ProductIcon.exe" SourceFile="datovka.ico"/>
     <!--Define properties of msi package-->
     <Property Id="ARPPRODUCTICON" Value="ProductIcon.exe"/>
     <Property Id="ARPHELPLINK" Value="http://www.datovka.cz"/>

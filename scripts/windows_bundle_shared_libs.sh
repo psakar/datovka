@@ -373,6 +373,7 @@ DYLIBS="${DYLIBS} libisds.dll"
 DYLIBS="${DYLIBS} libltdl.dll"
 DYLIBS="${DYLIBS} libxml2.dll"
 DYLIBS="${DYLIBS} ssleay32.dll"
+DYLIBS="${DYLIBS} zlib.dll"
 
 directory_exists "${DIR_LIBS}" || exit 1
 directory_exists "${DLL_LOC}" || exit 1
@@ -394,6 +395,13 @@ ${DEPLOYQT_EXE} --${MODE} --libdir ./ --plugindir plugins/ "${APP}.exe" || exit 
 
 # Remove all Qt translations except Czech and English.
 rm $(find translations/ | grep qt_ | grep -v 'qt_cs\|qt_en')
+# Move the files from 'tranlsations/' to 'locale/'.
+for QT_QM in translations/*; do
+	QTBASE_QM=$(echo "${QT_QM}" | sed -e 's/qt_/qtbase_/g' -e 's/translations[/]//g')
+	mv "${QT_QM}" "locale/${QTBASE_QM}"
+	unset QTBASE_QM
+done
+rm -r "translations"
 
 # Ensure that there are only the specified subdirectories.
-have_only_directories "." "locale" "plugins" "translations" || exit 1
+have_only_directories "." "locale" "plugins" || exit 1

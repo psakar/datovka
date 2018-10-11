@@ -22,10 +22,11 @@ fi
 
 MAKE_OPTS="-j 4"
 
-USAGE="Usage:\n\t$0 -s SDK_VERSION_NUMBER [options]\n\n"
+USAGE="Usage:\n\t$0 [options]\n\n"
 USAGE="${USAGE}Supported options:\n"
-USAGE="${USAGE}\t-D\n\t\tDon't compile, just build the package. This implies -d.\n"
 USAGE="${USAGE}\t-h, --help\n\t\tPrints help message.\n"
+USAGE="${USAGE}\t-p\n\t\tAlso build packages ansd installers.\n"
+USAGE="${USAGE}\t-P\n\t\tDon't compile, just build the packages and installers. This implies -p.\n"
 USAGE="${USAGE}\t--shared (default)\n\t\tCompile with shared libraries.\n"
 USAGE="${USAGE}\t--i386 (default)\n\t\tCompile for i386 architecture.\n"
 USAGE="${USAGE}\t--debug\n\t\tCompile in debug mode.\n"
@@ -36,7 +37,7 @@ USAGE="${USAGE}\t--portable-data\n\t\tCompile portable variant.\n"
 cd "${SRC_ROOT}"
 
 COMPILE_SRC="yes"
-BUILD_PACKAGE="no"
+BUILD_PACKAGES="no"
 
 BUILD_TYPE=""
 BUILD_SHARED="shared"
@@ -62,7 +63,7 @@ if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
 fi
 
 # Parse rest of command line
-set -- $("${GETOPT}" -l help -l shared -l i386 -l debug -l release -l home-dir-data -l portable-data -u -o dDh -- "$@")
+set -- $("${GETOPT}" -l help -l shared -l i386 -l debug -l release -l home-dir-data -l portable-data -u -o hpP -- "$@")
 if [ $# -lt 1 ]; then
 	echo -e ${USAGE} >&2
 	exit 1
@@ -70,18 +71,26 @@ fi
 
 while [ $# -gt 0 ]; do
 	case "$1" in
-	-D)
-		if [ "x${COMPILE_SRC}" = "xyes" ]; then
-			COMPILE_SRC=no
-			BUILD_PACKAGE=yes
-		else
-			echo "Option -n already set." >&2
-			exit 1
-		fi
-		;;
 	-h|--help)
 		echo -e ${USAGE}
 		exit 0
+		;;
+	-p)
+		if [ "x${BUILD_PACKAGES}" = "xno" ]; then
+			BUILD_PACKAGES=yes
+		else
+			echo "Option -d already set." >&2
+			exit 1
+		fi
+		;;
+	-P)
+		if [ "x${COMPILE_SRC}" = "xyes" ]; then
+			COMPILE_SRC=no
+			BUILD_PACKAGES=yes
+		else
+			echo "Option -P already set." >&2
+			exit 1
+		fi
 		;;
 	--shared)
 		if [ "x${BUILD_TYPE}" = "x" ]; then
@@ -247,4 +256,16 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 		echo "${SRC_ROOT}"/scripts/windows_bundle_shared_libs.sh -a "${APP_NAME}" -b "${APP_DIR}" -m "${MODE}" -v "${VARIANT}" --deployqt "${WINDEPLOYQT}"
 		"${SRC_ROOT}"/scripts/windows_bundle_shared_libs.sh -a "${APP_NAME}" -b "${APP_DIR}" -m "${MODE}" -v "${VARIANT}" --deployqt "${WINDEPLOYQT}" || exit 1
 	fi
+fi
+
+if [ "x${BUILD_PACKAGES}" != "xno" ]; then
+	BINARY="${APP_DIR}/${APP_NAME}.exe"
+	if [ ! -x "${BINARY}" ]; then
+		echo "Cannot find '${BINARY}'. Run the compilation." >&2
+		exit 1
+	fi
+	unset BINARY
+
+	echo "${SRC_ROOT}"/scripts/windows_build_packages.sh --app "${APP_NAME}" --bundle "${APP_DIR}" --variant "${VARIANT}" --pkg-version "${PKG_VER}" || exit 1
+	"${SRC_ROOT}"/scripts/windows_build_packages.sh --app "${APP_NAME}" --bundle "${APP_DIR}" --variant "${VARIANT}" --pkg-version "${PKG_VER}" || exit 1
 fi
