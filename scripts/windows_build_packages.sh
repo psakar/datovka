@@ -190,7 +190,7 @@ build_nsis_installer () {
 		return 1
 	fi
 
-	local NSIS_ROOT="nsis"
+	local NSIS_ROOT="win/nsis"
 	local NSI_TMPL="${NSIS_ROOT}/datovka-install/datovka-install.template"
 	local NSI_FILE="${NSIS_ROOT}/datovka-install/datovka-install.nsi"
 
@@ -224,33 +224,35 @@ build_msi_installer () {
 	local EXE_CANDLE="${WIX_PATH}/candle.exe"
 	local EXE_LIGHT="${WIX_PATH}/light.exe"
 
+	local MSI_ROOT="win/msi"
+
 	local SOURCE_DIR="SourceDir"
-	local TMPFILELISTNAME="tmpfilelist"
-	local SCRIPTNAME="${APP_NAME}_installer"
-	local MSIFILENAME="${APP_NAME}-${PKG_VERSION}-windows"
-	local PACKAGENAME="${MSIFILENAME}.msi"
+	local TMP_FILE_LIST_NAME="tmpfilelist"
+	local SCRIPT_NAME="${APP_NAME}_installer"
+	local MSI_FILE_NAME="${APP_NAME}-${PKG_VERSION}-windows"
+	local PACKAGE_NAME="${MSI_FILE_NAME}.msi"
 
-	rm -rf "msi/${SOURCE_DIR}"
-	rm "${PACKAGENAME}"
-	cp -r "${BUNDLE_DIR}" "msi/${SOURCE_DIR}"
-	cp "nsis/datovka-install/datovka.ico" "msi/"
+	rm -rf "${MSI_ROOT}/${SOURCE_DIR}"
+	rm "${PACKAGE_NAME}"
+	cp -r "${BUNDLE_DIR}" "${MSI_ROOT}/${SOURCE_DIR}"
+	cp "win/nsis/datovka-install/datovka.ico" "${MSI_ROOT}/" || return 1
 
-	pushd "msi"
+	pushd "${MSI_ROOT}"
 
 	# Run heat.exe to obtain XML file hierarchy.
-	"${EXE_HEAT}" dir "${SOURCE_DIR}" -cg FileList -gg -ke -scom -sreg -sfrag -srd -dr FileInstallPath -out "${TMPFILELISTNAME}.wxs"
+	"${EXE_HEAT}" dir "${SOURCE_DIR}" -cg FileList -gg -ke -scom -sreg -sfrag -srd -dr FileInstallPath -out "${TMP_FILE_LIST_NAME}.wxs"
 	# Run WiX compiler.
-	"${EXE_CANDLE}" "${TMPFILELISTNAME}.wxs" "${SCRIPTNAME}.wxs" -dProductVersion="${PKG_VERSION}"
+	"${EXE_CANDLE}" "${TMP_FILE_LIST_NAME}.wxs" "${SCRIPT_NAME}.wxs" -dProductVersion="${PKG_VERSION}"
 	# Run WiX linker.
-	"${EXE_LIGHT}" "${SCRIPTNAME}.wixobj" -ext WixUIExtension -out "${PACKAGENAME}" -v "${TMPFILELISTNAME}.wixobj" -cultures:cs-cz
+	"${EXE_LIGHT}" "${SCRIPT_NAME}.wixobj" -ext WixUIExtension -out "${PACKAGE_NAME}" -v "${TMP_FILE_LIST_NAME}.wixobj" -cultures:cs-cz
 
 	popd
 
-	mv "msi/${PACKAGENAME}" "./"
-	rm "msi/datovka.ico"
-	rm -r "msi/${SOURCE_DIR}"
-	rm msi/tmpfilelist.*
-	rm msi/*.wixpdb msi/*.wixobj
+	mv "${MSI_ROOT}/${PACKAGE_NAME}" "./"
+	rm "${MSI_ROOT}/datovka.ico"
+	rm -r "${MSI_ROOT}/${SOURCE_DIR}"
+	rm "${MSI_ROOT}/${TMP_FILE_LIST_NAME}".*
+	rm "${MSI_ROOT}"/*.wixpdb "${MSI_ROOT}"/*.wixobj
 }
 
 if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
