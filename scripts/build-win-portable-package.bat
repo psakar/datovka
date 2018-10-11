@@ -2,52 +2,55 @@
 
 :: ===========================================================================
 :: Datovka build script
-:: The script builds Portable Datovka binary and creates and archive (*.zip)
-:: with all dependencies.
-:: CZ.NIC, z.s.p.o. 2017
+:: The script builds portable Datovka binary and creates an archive (*.zip)
+:: containing all dependencies.
+:: Copyright: 2014-2018 CZ.NIC, z.s.p.o.
 :: ===========================================================================
 
 :: ---------------------------------------------------------------------------
 :: How to use it?
 :: ---------------------------------------------------------------------------
-:: First, install Qt and 7-ZIP tools on you computer.
-:: Set path to Qt, Qt compiler executables to Windows Environment Variables (section PATH).
-:: See https://www.computerhope.com/issues/ch000549.htm for exmaple.
-:: Set to PATH following paths (5.9.1 replace for your version of Qt): 
-::      "C:\Qt\5.9.1\mingw53_32\bin\" and "C:\Qt\Tools\mingw530_32\bin\" 
-:: Set your path to 7ZIP executables into variables below:
+:: First, install Qt and 7-Zip tools on you computer.
+:: Set the location of the Qt tools to the Windows PATH (system or user)
+:: environment variable. See
+:: https://www.computerhope.com/issues/ch000549.htm for example.
+:: Add the location of Qt tools to the PATH variable (e.g.
+::     'c:\Qt\5.9.1\mingw53_32\bin\' and 'c:\Qt\Tools\mingw530_32\bin\').
+:: Set path to the 7-Zip executables (set the ZIPPATH variable):
 set ZIPPATH="C:\Program Files (x86)\7-Zip\7z.exe"
-:: You must have built libisds, openssl and other dependencies in the folder "mingw32built"   
+:: You must provide built version of libisds, OpenSSL and other dependencies
+:: in the 'libs\' directory.
 :: Then you can run this script.
 :: ---------------------------------------------------------------------------
 
-:: Obtain current version from datovka.pro
 cd ..
+
+:: Obtain current version from datovka.pro
 findstr /C:"VERSION =" pri\version.pri > version.txt
 set "string=var1;var2;var3;"
 for /f "tokens=1,2,3 delims= " %%i in (version.txt) do set "variable1=%%i" &set "variable2=%%j" &set "VERSION=%%k"
 endlocal
 del version.txt
 
-::  Define package name, User can change it if needed 
+:: Define the package name. You can change it if needed.
 set DATOVKAPZIP="datovka-portable-%VERSION%-windows.zip"
 
 @echo -------------------------------------------------------------------------
-@echo This batch creates portable Datovka package for Windows in several steps:
-@echo 1) Build Portable Datovka binary (datovka.exe) with QT tool (requires Qt)
-@echo 2) Create application bundle with dependencies to "packages" folder
-@echo 3) Create ZIP package to "packages" folder (requires 7-ZIP tool)
+@echo This batch creates portable Datovka package for Windows in a few steps:
+@echo 1) Builds datovka-portable.exe executable (requires Qt tools).
+@echo 2) Creates application bundle inside the 'datovka-portable.built' directory.
+@echo 3) Creates ZIP package inside source root (requires 7-Zip application).
 @echo -------------------------------------------------------------------------
 @echo WARNING:
-@echo You must set path to Qt, Qt compiler executables to Windows Environment
-@echo Variables (section PATH) otherwise the script will not run correctly.
-@echo Add to Windows PATH following paths (replace 5.9.1 for your Qt version): 
-@echo   "C:\Qt\5.9.1\mingw53_32\bin\"
-@echo   "C:\Qt\Tools\mingw530_32\bin\"
+@echo You must set the location of the Qt tools to the Windows PATH (system or
+@echo user) environment variable - otherwise the script will not run correctly.
+@echo E.g. Add to the PATH variable the following entries (replace with actual
+@echo location):
+@echo   "c:\Qt\5.9.1\mingw53_32\bin\"
+@echo   "c:\Qt\Tools\mingw530_32\bin\"
 @echo -------------------------------------------------------------------------
-@echo Current path to 7-ZIP: %ZIPPATH% 
-@echo NOTE: If path to 7-ZIP is wrong, you must set correct path in the script
-@echo       before running.
+@echo Current path to 7-Zip: %ZIPPATH%
+@echo NOTE: If path to 7-Zip is wrong then modify this script before running.
 @echo -------------------------------------------------------------------------
 @echo Portable Datovka version to build: %VERSION%
 @echo -------------------------------------------------------------------------
@@ -63,15 +66,16 @@ if NOT "%1" == "nopause" (
 :: Datovka portable version
 @echo.
 @echo -------------------------------------------------------------
-@echo Build Portable Datovka binary and CLI binary (v%VERSION%) ...
-@echo ------------------------------------------------------------- 
-mingw32-make.exe clean
+@echo Build portable Datovka binary and CLI binary (v%VERSION%) ...
+@echo -------------------------------------------------------------
 lupdate datovka.pro
 lrelease datovka.pro
-qmake.exe datovka.pro -r -spec win32-g++ PORTABLE_APPLICATION=1 
+qmake.exe CONFIG+=release datovka.pro -r -spec win32-g++ PORTABLE_APPLICATION=1
+mingw32-make.exe clean
 mingw32-make.exe -j 4
 mingw32-make.exe clean
-qmake.exe datovka-cli.pro.noauto -r -spec win32-g++ PORTABLE_APPLICATION=1 
+qmake.exe CONFIG+=release datovka-cli.pro.noauto -r -spec win32-g++ PORTABLE_APPLICATION=1
+mingw32-make.exe clean
 mingw32-make.exe -j 4
 mingw32-make.exe clean
 @echo Build done.
@@ -79,35 +83,43 @@ mingw32-make.exe clean
 @echo --------------------------------------------------------------
 @echo Create application bundle and copy all files and libraries ...
 @echo --------------------------------------------------------------
-:: Create app packege folder
-set DATOVKAPORTPATH=packages\datovka-%VERSION%-portable
+:: Create app package folder.
+set DATOVKAPORTPATH="datovka-portable.built"
+rmdir /S /Q %DATOVKAPORTPATH%
 mkdir %DATOVKAPORTPATH%
 mkdir "%DATOVKAPORTPATH%\locale"
-:: copy all required app files and libraries
+:: Copy all required app files and libraries.
 copy "release\datovka-portable.exe" %DATOVKAPORTPATH%
 copy "release\datovka-cli-portable.exe" %DATOVKAPORTPATH%
 copy "AUTHORS" %DATOVKAPORTPATH%
-copy "copyING" %DATOVKAPORTPATH%
-copy "Changelog" %DATOVKAPORTPATH%
+copy "COPYING" %DATOVKAPORTPATH%
+copy "ChangeLog" %DATOVKAPORTPATH%
+copy "res\qt.conf_windows" "%DATOVKAPORTPATH%\qt.conf"
 copy "scripts\datovka-portable-log.bat" %DATOVKAPORTPATH%
-copy "nsis\datovka-install\datovka.ico" %DATOVKAPORTPATH%
+::copy "nsis\datovka-install\datovka.ico" %DATOVKAPORTPATH%
 copy "locale\datovka_cs.qm" "%DATOVKAPORTPATH%\locale"
-for /R "mingw32built\bin\" %%x in (*.dll) do copy "%%x" %DATOVKAPORTPATH% /Y
-windeployqt --release "%DATOVKAPORTPATH%\datovka-portable.exe"
+copy "locale\datovka_en.qm" "%DATOVKAPORTPATH%\locale"
+for /R "libs\shared_built\bin\" %%x in (*.dll) do copy "%%x" %DATOVKAPORTPATH% /Y
+copy "libs\libgcc_s_sjlj-1.dll" %DATOVKAPORTPATH%
+cd %DATOVKAPORTPATH%
+windeployqt --release --libdir "./" --plugindir "plugins/" "datovka-portable.exe"
+cd ..
 copy "%DATOVKAPORTPATH%\translations\qt_cs.qm" "%DATOVKAPORTPATH%\locale\qtbase_cs.qm"
+copy "%DATOVKAPORTPATH%\translations\qt_en.qm" "%DATOVKAPORTPATH%\locale\qtbase_en.qm"
 rmdir /S /Q "%DATOVKAPORTPATH%\translations"
 @echo Bundle done.
 @echo.
 @echo --------------------------------------------------------
-@echo Run 7-ZIP and create ZIP archive of Portable Datovka ...
+@echo Run 7-Zip and create ZIP archive of Portable Datovka ...
 @echo --------------------------------------------------------
-cd packages
-start /wait /Min "Create portable Datovka ZIP archive" %ZIPPATH% a -tzip %DATOVKAPZIP% datovka-%VERSION%-portable
-cd ..
+del %DATOVKAPZIP%
+set ZIPPACKAGEDIR="datovka-%VERSION%-portable"
+xcopy /s /i /q /y /c /d %DATOVKAPORTPATH% %ZIPPACKAGEDIR%
+start /wait /Min "Create portable Datovka ZIP archive" %ZIPPATH% a -tzip %DATOVKAPZIP% %ZIPPACKAGEDIR%
+rmdir /S /Q %ZIPPACKAGEDIR%
 @echo ZIP archive done.
 @echo.
 rmdir /S /Q release
-rmdir /S /Q debug
 if NOT "%1" == "nopause" (
-  cd packages
+  cd .
 )
