@@ -3,10 +3,9 @@
 <!-- 
 ******************************************************************************
 * Project: Datovka
-* Author: CZ.NIC, z.s.p.o. 2017
+* Copyright: 2014-2018 CZ.NIC, z.s.p.o.
 * FileInfo: Datovka MSI installer source XML for Windows.
-* Description: The XML file describes structure of MSI installer (*.msi)
-*              for application Datovka.
+* Description: The XML file describes the structure of the MSI installer.
 ******************************************************************************
 -->
 
