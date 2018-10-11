@@ -49,7 +49,7 @@
     <!--Define cab properties of msi-->
     <Media Id="1" Cabinet="datovka.cab" EmbedCab="yes" CompressionLevel="mszip"/>
     <!--Define icons (ID should not be longer than 18 chars and must end with ".exe")-->
-    <Icon Id="ProductIcon.exe" SourceFile="SourceDir\datovka.ico"/>
+    <Icon Id="ProductIcon.exe" SourceFile="datovka.ico"/>
     <!--Define properties of msi package-->
     <Property Id="ARPPRODUCTICON" Value="ProductIcon.exe"/>
     <Property Id="ARPHELPLINK" Value="http://www.datovka.cz"/>

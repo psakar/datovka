@@ -233,7 +233,7 @@ build_msi_installer () {
 	rm -rf "msi/${SOURCE_DIR}"
 	rm "${PACKAGENAME}"
 	cp -r "${BUNDLE_DIR}" "msi/${SOURCE_DIR}"
-	cp "nsis/datovka-install/datovka.ico" "msi/${SOURCE_DIR}/" # TODO -- Why?
+	cp "nsis/datovka-install/datovka.ico" "msi/"
 
 	pushd "msi"
 
@@ -247,8 +247,10 @@ build_msi_installer () {
 	popd
 
 	mv "msi/${PACKAGENAME}" "./"
+	rm "msi/datovka.ico"
 	rm -r "msi/${SOURCE_DIR}"
-	rm msi/*.wixpdb msi/*.wixobj msi/tmpfilelist.*
+	rm msi/tmpfilelist.*
+	rm msi/*.wixpdb msi/*.wixobj
 }
 
 if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
