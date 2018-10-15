@@ -6,6 +6,9 @@ SIGN_CERT_ID="CZ.NIC, z.s.p.o."
 APP_NAME="datovka"
 SIG_PREF="signed_"
 
+DMG_TITLE="${APP_NAME} installer"
+VOLUME_DIR="/Volumes/${DMG_TITLE}"
+
 ESCAPED_ECHO_CMD="echo"
 if [ ! $(uname -s) = "xDarwin" ]; then
 	ESCAPED_ECHO_CMD="echo -e"
@@ -205,7 +208,7 @@ sign_zip_content () {
 	fi
 
 	UNSIGNED_ZIP=$(realpath "${UNSIGNED_ZIP}")
-	SIGNED_ZIP=$(signed_absolute_file_path "${UNSIGNED_ZIP}")
+	local SIGNED_ZIP=$(signed_absolute_file_path "${UNSIGNED_ZIP}")
 
 	echo "'${UNSIGNED_ZIP}' -> '${SIGNED_ZIP}'"
 
@@ -237,6 +240,99 @@ sign_zip_content () {
 	return 0
 }
 
+# Brief create temporary file copy.
+tmp_file_copy () {
+	local ORIG_FILE="$1"
+	if [ "x${ORIG_FILE}" = "x" ]; then
+		echo "Expected non-empty file name." >&2
+		return 1
+	fi
+
+	if [ ! -f "${ORIG_FILE}" ]; then
+		echo "'${ORIG_FILE}' is not a file." >&2
+		return 1
+	fi
+
+	local FILE_NAME=$(file_name ${ORIG_FILE})
+	FILE_NAME=$(echo ${FILE_NAME} | sed -e 's/[.]/_/g')
+	local TMP_FILE=$(mktemp "/tmp/tmp_${FILE_NAME}_XXXX")
+	if [ "x${TMP_FILE}" = "x" ]; then
+		echo "Cannot create temporary file." >&2
+		return 1
+	fi
+
+	cp "${ORIG_FILE}" "${TMP_FILE}" || return 1
+
+	echo "${TMP_FILE}"
+	return 0
+}
+
+remove_symlinks () {
+	local FILE_LIST="$@"
+	for FILE in ${FILE_LIST}; do
+		if [ -e "${FILE}" -a ! -L "${FILE}" ]; then
+			echo "${FILE}"
+		fi
+	done
+}
+
+# Sign content of dmg package and the package itself.
+sign_dmg () {
+	local UNSIGNED_DMG="$1"
+	if [ "x${UNSIGNED_DMG}" = "x" ]; then
+		echo "Expected non-empty dmg file name." >&2
+		return 1
+	fi
+
+	UNSIGNED_DMG=$(realpath "${UNSIGNED_DMG}")
+	local TMP_DMG=$(tmp_file_copy "${UNSIGNED_DMG}") # Temporary copy.
+	local SIGNED_DMG=$(signed_absolute_file_path "${UNSIGNED_DMG}")
+
+	echo "'${UNSIGNED_DMG}' -> '${SIGNED_DMG}'"
+
+	echo "Opening dmg package '${TMP_DMG}'"
+	local DEVICE=$(hdiutil attach -owners on "${TMP_DMG}" -shadow | egrep '^/dev/' | sed 1q | awk '{print $1}')
+	if [ "x${DEVICE}" = "x" ]; then
+		echo "Error opening dmg package '${TMP_DMG}'." >&2
+		return 1
+	fi
+	echo "Dmg package opened as device '${DEVICE}'."
+
+	pushd "${VOLUME_DIR}" > /dev/null
+
+	local APP_ROOT="${APP_NAME}.app"
+	local DYLIB_FILES=$(insensitive_match_suffix "dylib" $(find "${APP_ROOT}"))
+	DYLIB_FILES=$(remove_symlinks ${DYLIB_FILES})
+	local FRAMEWORKS=""
+	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtCore.framework/Versions/5/QtCore"
+	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtGui.framework/Versions/5/QtGui"
+	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork"
+	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport"
+	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtSql.framework/Versions/5/QtSql"
+	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtSvg.framework/Versions/5/QtSvg"
+	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtWidgets.framework/Versions/5/QtWidgets"
+
+	# Sign libraries and frameworks.
+	${SIGN_CMD} "${SIGN_CERT_ID}" ${DYLIB_FILES} || return 1
+	${SIGN_CMD} "${SIGN_CERT_ID}" ${FRAMEWORKS} || return 1
+	# Sign the whole application.
+	${SIGN_CMD} "${SIGN_CERT_ID}" "${APP_ROOT}" || return 1
+
+	codesign -dv --verbose=4 "${APP_ROOT}" || return 1
+
+	popd > /dev/null
+
+	hdiutil detach "${DEVICE}"
+	hdiutil convert -format UDZO -o "${SIGNED_DMG}" "${TMP_DMG}" -shadow || return 1
+	rm "${TMP_DMG}" "${TMP_DMG}.shadow"
+
+	# Sign whole package.
+	${SIGN_CMD} "${SIGN_CERT_ID}" "${SIGNED_DMG}" || return 1
+	${SIGN_VERIFY_CMD} "${SIGNED_DMG}" || return 1
+
+	return 0
+}
+
 # Sign provided files.
 sign_files () {
 	local FILE_LIST="$@"
@@ -248,6 +344,13 @@ sign_files () {
 	for FILE in ${FILE_LIST}; do
 		local LOWER_CASE_FILE=$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')
 		case "${LOWER_CASE_FILE}" in
+		*.dmg)
+			sign_dmg "${FILE}"
+			if [ "$?" -ne "0" ]; then
+				echo "Error while signing dmg file '${FILE}'." >&2
+				return 1
+			fi
+			;;
 		*.zip)
 			sign_zip_content "${FILE}"
 			if [ "$?" -ne "0" ]; then
