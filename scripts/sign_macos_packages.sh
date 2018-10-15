@@ -224,15 +224,17 @@ sign_zip_content () {
 	local EXE_FILES=$(insensitive_match_suffix "exe" $(find ./))
 
 	# Sign all libraries and executables.
-	${SIGN_CMD} "${SIGN_CERT_ID}" ${DLL_FILES}
-	${SIGN_CMD} "${SIGN_CERT_ID}" ${EXE_FILES}
+	${SIGN_CMD} "${SIGN_CERT_ID}" ${DLL_FILES} || return 1
+	${SIGN_CMD} "${SIGN_CERT_ID}" ${EXE_FILES} || return 1
 
-	${SIGN_VERIFY_CMD} "${SIGN_CERT_ID}" ${EXE_FILES}
+	${SIGN_VERIFY_CMD} "${SIGN_CERT_ID}" ${EXE_FILES} || return 1
 
 	zip -9 -r -X "${SIGNED_ZIP}" .
 
 	popd > /dev/null
-	#rm -r "${TMP_DIR}"
+	rm -r "${TMP_DIR}"
+
+	return 0
 }
 
 # Sign provided files.
@@ -249,7 +251,7 @@ sign_files () {
 		*.zip)
 			sign_zip_content "${FILE}"
 			if [ "$?" -ne "0" ]; then
-				echo "Error while sizning zip file '${FILE}'." >&2
+				echo "Error while signing zip file '${FILE}'." >&2
 				return 1
 			fi
 			;;
