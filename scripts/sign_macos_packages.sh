@@ -23,6 +23,7 @@ USAGE="${USAGE}\t\t '/tmp/${SIG_PREF}datovka-4.11.0-windows.zip'.)\n"
 USAGE="${USAGE}\tIt accepts these file names:\n"
 USAGE="${USAGE}\t\t*.dmg - macOS software package\n"
 USAGE="${USAGE}\t\t*.exe - NSIS installer for Windows\n"
+USAGE="${USAGE}\t\t*.msi - MSI installer for Windows\n"
 USAGE="${USAGE}\t\t*.zip - archive containing Windows package\n"
 
 CODESIGN_CMD="codesign"
@@ -56,7 +57,7 @@ have_supported_suffixes () {
 
 	for FILE in ${FILE_LIST}; do
 		local LOWER_CASE_FILE=$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')
-		local NO_MATCH=$(echo "${LOWER_CASE_FILE}" | grep -v -e '\.dmg$' -e '\.exe$' -e '\.zip$')
+		local NO_MATCH=$(echo "${LOWER_CASE_FILE}" | grep -v -e '\.dmg$' -e '\.exe$' -e '\.msi$' -e '\.zip$')
 		if [ "x${NO_MATCH}" != "x" ]; then
 			echo "File '${FILE}' cannot be signed." >&2
 			RETVAL="1"
@@ -333,6 +334,25 @@ sign_dmg () {
 	return 0
 }
 
+# Sign windows installer file.
+sign_win_installer () {
+	local UNSIGNED_INST="$1"
+	if [ "x${UNSIGNED_INST}" = "x" ]; then
+		echo "Expected non-empty dmg file name." >&2
+		return 1
+	fi
+
+	UNSIGNED_INST=$(realpath "${UNSIGNED_INST}")
+	local TMP_INST=$(tmp_file_copy "${UNSIGNED_INST}") # Temporary copy.
+	local SIGNED_INST=$(signed_absolute_file_path "${UNSIGNED_INST}")
+
+	${SIGN_CMD} "${SIGN_CERT_ID}" "${TMP_INST}" || return 1
+	mv "${TMP_INST}" "${SIGNED_INST}"
+	${SIGN_VERIFY_CMD} "${SIGNED_INST}" || return 1
+
+	return 0
+}
+
 # Sign provided files.
 sign_files () {
 	local FILE_LIST="$@"
@@ -348,6 +368,13 @@ sign_files () {
 			sign_dmg "${FILE}"
 			if [ "$?" -ne "0" ]; then
 				echo "Error while signing dmg file '${FILE}'." >&2
+				return 1
+			fi
+			;;
+		*.exe|*.msi)
+			sign_win_installer "${FILE}"
+			if [ "$?" -ne "0" ]; then
+				echo "Error while signing Windows installer file '${FILE}'." >&2
 				return 1
 			fi
 			;;
