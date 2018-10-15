@@ -227,7 +227,7 @@ sign_zip_content () {
 	${SIGN_CMD} "${SIGN_CERT_ID}" ${DLL_FILES} || return 1
 	${SIGN_CMD} "${SIGN_CERT_ID}" ${EXE_FILES} || return 1
 
-	${SIGN_VERIFY_CMD} "${SIGN_CERT_ID}" ${EXE_FILES} || return 1
+	${SIGN_VERIFY_CMD} ${EXE_FILES} || return 1
 
 	zip -9 -r -X "${SIGNED_ZIP}" .
 
