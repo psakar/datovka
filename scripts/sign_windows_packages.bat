@@ -14,10 +14,11 @@
 set ZIPPATH="C:\Program Files (x86)\7-Zip\7z.exe"
 :: 3. Install SafeNet Authentication Client and restart computer.
 ::    see https://support.comodo.com/index.php?/Knowledgebase/Article/View/1211/106/safenet-download-for-ev-codesigning-certificates
-:: 4. Connect your sign token to USB.
+:: 4. Connect your sign token to USB and run SafeNet Authentication Client software.
 :: 5. Run "VS2015 x86 Native Tools Command Prompt" from start menu.
-:: 6. Move to script location and run the script with files to be signed.
+:: 6. In prompt navigate to script location and run the script with files to be signed.
 :: 7. Enter usb token password when will need.
+:: NOTE: Active connection to internet is required (for timestamp of signature)
 :: ---------------------------------------------------------------------------
 
 :: Not change these variables
@@ -86,6 +87,7 @@ goto :eof
 	echo Sign %2 installer: "%1"
 	for /r %SIGNDIR% %%B in (*.*) DO call :AppendFile "%%~fB"
 	signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n %SIGN_CERT_ID% %signFiles%
+	if %ERRORLEVEL% EQU 1 goto IsError
 	move /Y %signFiles% %FILEPATH%%SIGN_PREFIX%%FILENAME%
 	rmdir /Q /S %SIGNDIR%
 	echo Done.
@@ -107,6 +109,7 @@ goto :eof
 	for /r %SIGNDIR% %%B in (*.dll) DO call :AppendFile "%%~fB"
 	for /r %SIGNDIR% %%B in (*.exe) DO call :AppendFile "%%~fB"
 	signtool sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /n %SIGN_CERT_ID% %signFiles%
+	if %ERRORLEVEL% EQU 1 goto IsError
 	for /r %SIGNDIR% %%B in (*.exe) DO call :VerifySignature "%%~fB"
 	echo.
 	echo Create signed zip packeage: "%FILEPATH%%SIGN_PREFIX%%FILENAME%"
@@ -129,3 +132,13 @@ goto :eof
 	signtool verify /pa /v %1
 	echo Signature has been verified.
 goto :eof
+
+:: Error during sign
+:IsError
+	echo.
+	echo ERROR: Packages have not been signed!
+	rmdir /Q /S %SIGNDIR%
+	exit /b
+goto :eof
+
+
