@@ -18,13 +18,13 @@ USAGE=""
 USAGE="${USAGE}Usage:\n\t$0 file1 [file2 ...]\n\n"
 USAGE="${USAGE}\tScript for signing ${APP_NAME} software packages.\n"
 USAGE="${USAGE}\tIt fill create signed counterparts in same location as the original file.\n"
-USAGE="${USAGE}\t\t(E.g. for '/tmp/datovka-4.11.0-windows.zip' it will create\n"
-USAGE="${USAGE}\t\t '/tmp/${SIG_PREF}datovka-4.11.0-windows.zip'.)\n"
+USAGE="${USAGE}\t\t(E.g. for '/tmp/datovka-4.11.0-64bit-osx10.7.dmg' it will create\n"
+USAGE="${USAGE}\t\t '/tmp/${SIG_PREF}datovka-4.11.0-64bit-osx10.7.dmg'.)\n"
 USAGE="${USAGE}\tIt accepts these file names:\n"
 USAGE="${USAGE}\t\t*.dmg - macOS software package\n"
-USAGE="${USAGE}\t\t*.exe - NSIS installer for Windows\n"
-USAGE="${USAGE}\t\t*.msi - MSI installer for Windows\n"
-USAGE="${USAGE}\t\t*.zip - archive containing Windows package\n"
+#USAGE="${USAGE}\t\t*.exe - NSIS installer for Windows\n"
+#USAGE="${USAGE}\t\t*.msi - MSI installer for Windows\n"
+#USAGE="${USAGE}\t\t*.zip - archive containing Windows package\n"
 
 CODESIGN_CMD="codesign"
 
@@ -57,7 +57,7 @@ have_supported_suffixes () {
 
 	for FILE in ${FILE_LIST}; do
 		local LOWER_CASE_FILE=$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')
-		local NO_MATCH=$(echo "${LOWER_CASE_FILE}" | grep -v -e '\.dmg$' -e '\.exe$' -e '\.msi$' -e '\.zip$')
+		local NO_MATCH=$(echo "${LOWER_CASE_FILE}" | grep -v -e '\.dmg$')
 		if [ "x${NO_MATCH}" != "x" ]; then
 			echo "File '${FILE}' cannot be signed." >&2
 			RETVAL="1"
@@ -345,6 +345,8 @@ sign_win_installer () {
 	UNSIGNED_INST=$(realpath "${UNSIGNED_INST}")
 	local TMP_INST=$(tmp_file_copy "${UNSIGNED_INST}") # Temporary copy.
 	local SIGNED_INST=$(signed_absolute_file_path "${UNSIGNED_INST}")
+
+	echo "'${UNSIGNED_INST}' -> '${SIGNED_INST}'"
 
 	${SIGN_CMD} "${SIGN_CERT_ID}" "${TMP_INST}" || return 1
 	mv "${TMP_INST}" "${SIGNED_INST}"
