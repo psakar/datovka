@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,11 @@
  * the two.
  */
 
-#ifndef _ACCOUNT_H_
-#define _ACCOUNT_H_
+#pragma once
 
-#include <QMap>
+#include <QScopedPointer>
 #include <QSettings>
 #include <QString>
-#include <QVariant>
 
 /*!
  * @brief Defines labels used in credentials.
@@ -55,10 +53,13 @@ namespace CredNames {
 	extern const QString lstZfoPath;
 }
 
+class AcntSettingsPrivate;
 /*!
  * @brief Holds account settings.
  */
-class AcntSettings : public QMap<QString, QVariant> {
+class AcntSettings {
+	Q_DECLARE_PRIVATE(AcntSettings)
+
 public:
 	/*!
 	 * @brief Login method identifier.
@@ -76,52 +77,115 @@ public:
 	 * @brief Constructor.
 	 */
 	AcntSettings(void);
-	AcntSettings(const QMap<QString, QVariant> &map);
+	AcntSettings(const AcntSettings &other);
+#ifdef Q_COMPILER_RVALUE_REFS
+	AcntSettings(AcntSettings &&other) Q_DECL_NOEXCEPT;
+#endif /* Q_COMPILER_RVALUE_REFS */
+	~AcntSettings(void);
+
+	AcntSettings &operator=(const AcntSettings &other) Q_DECL_NOTHROW;
+#ifdef Q_COMPILER_RVALUE_REFS
+	AcntSettings &operator=(AcntSettings &&other) Q_DECL_NOTHROW;
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+	bool operator==(const AcntSettings &other) const;
+	bool operator!=(const AcntSettings &other) const;
+
+	friend void swap(AcntSettings &first, AcntSettings &second) Q_DECL_NOTHROW;
+
+	bool isNull(void) const;
+
+	void clear(void);
 
 	bool isValid(void) const;
-	QString accountName(void) const;
-	void setAccountName(const QString &name);
-	QString userName(void) const;
-	void setUserName(const QString &userName);
+	const QString &accountName(void) const;
+	void setAccountName(const QString &an);
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setAccountName(QString &&an);
+#endif /* Q_COMPILER_RVALUE_REFS */
+	const QString &userName(void) const;
+	void setUserName(const QString &un);
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setUserName(QString &&un);
+#endif /* Q_COMPILER_RVALUE_REFS */
 	enum LogInMethod loginMethod(void) const;
 	void setLoginMethod(enum LogInMethod method);
-	QString password(void) const;
+	const QString &password(void) const;
 	void setPassword(const QString &pwd);
-	QString pwdAlg(void) const;
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setPassword(QString &&pwd);
+#endif /* Q_COMPILER_RVALUE_REFS */
+	const QString &pwdAlg(void) const;
 	void setPwdAlg(const QString &pwdAlg);
-	QByteArray pwdSalt(void) const;
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setPwdAlg(QString &&pwdAlg);
+#endif /* Q_COMPILER_RVALUE_REFS */
+	const QByteArray &pwdSalt(void) const;
 	void setPwdSalt(const QByteArray &pwdSalt);
-	QByteArray pwdIv(void) const;
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setPwdSalt(QByteArray &&pwdSalt);
+#endif /* Q_COMPILER_RVALUE_REFS */
+	const QByteArray &pwdIv(void) const;
 	void setPwdIv(const QByteArray &pwdIv);
-	QByteArray pwdCode(void) const;
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setPwdIv(QByteArray &&pwdIv);
+#endif /* Q_COMPILER_RVALUE_REFS */
+	const QByteArray &pwdCode(void) const;
 	void setPwdCode(const QByteArray &pwdCode);
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setPwdCode(QByteArray &&pwdCode);
+#endif /* Q_COMPILER_RVALUE_REFS */
 	bool isTestAccount(void) const;
 	void setTestAccount(bool isTesting);
 	bool rememberPwd(void) const;
 	void setRememberPwd(bool remember);
-	QString dbDir(void) const;
+	const QString &dbDir(void) const;
 	void setDbDir(const QString &path, const QString &confDir);
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setDbDir(QString &&path, const QString &confDir);
+#endif /* Q_COMPILER_RVALUE_REFS */
 	bool syncWithAll(void) const;
 	void setSyncWithAll(bool sync);
-	QString p12File(void) const;
+	const QString &p12File(void) const;
 	void setP12File(const QString &p12);
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setP12File(QString &&p12);
+#endif /* Q_COMPILER_RVALUE_REFS */
 	qint64 lastMsg(void) const;
 	void setLastMsg(qint64 dmId);
-	QString lastAttachSavePath(void) const;
+	const QString &lastAttachSavePath(void) const;
 	void setLastAttachSavePath(const QString &path);
-	QString lastAttachAddPath(void) const;
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setLastAttachSavePath(QString &&path);
+#endif /* Q_COMPILER_RVALUE_REFS */
+	const QString &lastAttachAddPath(void) const;
 	void setLastAttachAddPath(const QString &path);
-	QString lastCorrespPath(void) const;
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setLastAttachAddPath(QString &&path);
+#endif /* Q_COMPILER_RVALUE_REFS */
+	const QString &lastCorrespPath(void) const;
 	void setLastCorrespPath(const QString &path);
-	QString lastZFOExportPath(void) const;
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setLastCorrespPath(QString &&path);
+#endif /* Q_COMPILER_RVALUE_REFS */
+	const QString &lastZFOExportPath(void) const;
 	void setLastZFOExportPath(const QString &path);
+#ifdef Q_COMPILER_RVALUE_REFS
+	void setLastZFOExportPath(QString &&path);
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 	bool _createdFromScratch(void) const;
 	void _setCreatedFromScratch(bool fromScratch);
-	QString _passphrase(void) const;
+	const QString &_passphrase(void) const;
 	void _setPassphrase(const QString &passphrase);
-	QString _otp(void) const;
+#ifdef Q_COMPILER_RVALUE_REFS
+	void _setPassphrase(QString &&passphrase);
+#endif /* Q_COMPILER_RVALUE_REFS */
+	const QString &_otp(void) const;
 	void _setOtp(const QString &otpCode);
+#ifdef Q_COMPILER_RVALUE_REFS
+	void _setOtp(QString &&otpCode);
+#endif /* Q_COMPILER_RVALUE_REFS */
 	bool _pwdExpirDlgShown(void) const;
 	void _setPwdExpirDlgShown(bool pwdExpirDlgShown);
 
@@ -170,11 +234,5 @@ public:
 	bool credentialsLessThan(const QString &s1, const QString &s2);
 
 private:
-	/* Prohibit these methods in public interface. */
-	QVariant operator[](const QString &key);
-	const QVariant operator[](const QString &key) const;
-
-	typedef QMap<QString, QVariant> m_parentType;
+	QScopedPointer<AcntSettingsPrivate> d_ptr; // std::unique_ptr ?
 };
-
-#endif /* _ACCOUNT_H_ */
