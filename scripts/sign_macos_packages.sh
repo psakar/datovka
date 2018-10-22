@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Identifier of the signing certificate.
-SIGN_CERT_ID="CZ.NIC, z.s.p.o."
+SIGN_CERT_ID="Developer ID Application: CZ.NIC, z.s.p.o."
 
 APP_NAME="datovka"
 SIG_PREF="signed_"
@@ -27,12 +27,16 @@ USAGE="${USAGE}\t\t*.dmg - macOS software package\n"
 #USAGE="${USAGE}\t\t*.zip - archive containing Windows package\n"
 
 CODESIGN_CMD="codesign"
+GATEKEEPR_CMD="spctl"
 
 # Sign command.
-SIGN_CMD="${CODESIGN_CMD} --force --verify --verbose --sign"
+SIGN_CMD="${CODESIGN_CMD} --force --verify --deep --verbose --sign"
 
 # Sign verify command.
-SIGN_VERIFY_CMD="${CODESIGN_CMD} -dv --verbose=4"
+SIGN_VERIFY_CMD="${CODESIGN_CMD} --verify --deep --strict --verbose=4"
+
+# Sign verify command for gatekeepr.
+SIGN_VERIFY_GATEKEEPR="${GATEKEEPR_CMD} -a -t open --context context:primary-signature -v"
 
 # Check presence of codesign command.
 codesign_present () {
@@ -267,24 +271,13 @@ sign_dmg_content () {
 	pushd "${VOLUME_DIR}" > /dev/null
 
 	local APP_ROOT="${APP_NAME}.app"
-	local DYLIB_FILES=$(insensitive_match_suffix "dylib" $(find "${APP_ROOT}"))
-	DYLIB_FILES=$(exclude_symlinks ${DYLIB_FILES})
-	local FRAMEWORKS=""
-	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtCore.framework/Versions/5/QtCore"
-	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtGui.framework/Versions/5/QtGui"
-	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtNetwork.framework/Versions/5/QtNetwork"
-	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport"
-	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtSql.framework/Versions/5/QtSql"
-	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtSvg.framework/Versions/5/QtSvg"
-	FRAMEWORKS="${FRAMEWORKS} ${APP_ROOT}/Contents/Frameworks/QtWidgets.framework/Versions/5/QtWidgets"
 
-	# Sign libraries and frameworks.
-	${SIGN_CMD} "${SIGN_CERT_ID}" ${DYLIB_FILES} || return 1
-	${SIGN_CMD} "${SIGN_CERT_ID}" ${FRAMEWORKS} || return 1
 	# Sign the whole application.
 	${SIGN_CMD} "${SIGN_CERT_ID}" "${APP_ROOT}" || return 1
 
+	# Verify app signature and sign for gatekeepr.
 	${SIGN_VERIFY_CMD} "${APP_ROOT}" || return 1
+	${SIGN_VERIFY_GATEKEEPR} "${APP_ROOT}" || return 1
 
 	popd > /dev/null
 
@@ -327,7 +320,10 @@ sign_dmg () {
 
 	# Sign whole package.
 	${SIGN_CMD} "${SIGN_CERT_ID}" "${SIGNED_DMG}" || return 1
+
+	# Verify package sign and sign for gatekeepr.
 	${SIGN_VERIFY_CMD} "${SIGNED_DMG}" || return 1
+	${SIGN_VERIFY_GATEKEEPR} "${SIGNED_DMG}" || return 1
 
 	return 0
 }
