@@ -1,4 +1,12 @@
-4.12.0 /
+4.11.1 /
+ * Added scripts for signing the Windows and macOS executables and software
+   packages.
+ * Using the macdeployqt tool to deploy libraries into the application
+   package on macOS.
+ * Modified the structure of the Windows executable bundle. The file 'qt.conf'
+   has been added. Qt plug-ins are located inside the 'plugins' directory.
+ * Fixed a problem on Windows 10 (October 2018 Update) when the application
+   failed to start because it couldn't load required Qt libraries.
  * Account name '%n' can be used when constructing file names.
  * Extended CLI testing scripts - using an account with certificate log-in
    method.
