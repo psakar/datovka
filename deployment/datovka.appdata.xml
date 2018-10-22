@@ -8,33 +8,38 @@
 	<name>Datovka</name>
 	<name xml:lang="cs">Datovka</name>
 
-	<summary>A free graphical user interface for Datove schranky</summary>
-	<summary xml:lang="cs">Svobodné uživatelské rozhraní pro Datové schránky</summary>
+	<summary>A free graphical user interface for data boxes</summary>
+	<summary xml:lang="cs">Svobodné uživatelské rozhraní pro datové schránky</summary>
 
 	<description>
 		<p>
-			Datovka is a multiplatform desktop application to access Datove schranky.
+			Datovka is a multiplatform desktop application for accessing data boxes.
+			A data box is an electronic storage site in Czech Republic. It is intended
+			for delivery of official documents and for communication with public
+			authority bodies.
 		</p>
 		<p xml:lang="cs">
-			Datovka je multiplatformní desktopová aplikace pro přístup k Datovým schránkám.
+			Datovka je multiplatformní desktopová aplikace pro přístup k datovým schránkám.
+			Datová schránka v České republice je elektronické úložiště, které je určeno
+			k doručování dokumentů a pro komunikaci s orgány veřejné moci.
 		</p>
 
 		<p>
-			Datovka allows receiving, sending, and checking integrity of messages,
+			Datovka allows receiving, sending, and checking the integrity of data messages,
 			exporting proofs of delivery or full messages, exporting complete
 			coresspondence for a defined period, etc..
 		</p>
 		<p xml:lang="cs">
-			Z Datovky je možné číst zprávy, odesílat zprávy, kontrolovat integritu zpráv,
+			Z Datovky je možné číst zprávy, odesílat zprávy, kontrolovat integritu datových zpráv,
 			exportovat doručenky i celé zprávy, exportovat přehled korespondence za určité
 			časové období, apod.
 		</p>
 
 		<p>
-			The user interface is very similar to common e-mail clients.
+			The user interface resembles the interface of common e-mail clients.
 		</p>
 		<p xml:lang="cs">
-			Uživatelské rozhraní aplikace se velice podobá běžným poštovním klientům. 
+			Uživatelské rozhraní aplikace se podobá rozhraní běžných poštovních klientů.
 		</p>
 	</description>
 
@@ -45,12 +50,12 @@
 
 	<screenshots>
 		<screenshot type="default">
-			<image>https://www.nic.cz/files/labs/datove_schranky/datovka4.png</image>
-			<caption>The main window showing the application in action</caption>
+			<image>https://www.datovka.cz/images/desktop-main.png</image>
+			<caption>Main window of the application</caption>
 			<caption xml:lang="cs">Hlavní okno aplikace</caption>
 		</screenshot>
 	</screenshots>
 
 	<updatecontact>datove-schranky@labs.nic.cz</updatecontact>
-	<url type="homepage">https://labs.nic.cz/cs/datovka.html</url>
+	<url type="homepage">https://www.datovka.cz</url>
 </application>
