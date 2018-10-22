@@ -24,12 +24,14 @@ APP="datovka"
 BUNDLE=""
 DFLT_BUNDLE="${APP}.app"
 NO_DEBUG="no"
+DEPLOYQT=""
 
 USAGE="Usage:\n\t$0\n\n"
 USAGE="${USAGE}Supported options:\n"
 USAGE="${USAGE}\t-b NAME, --bundle NAME\n\t\tSupply bundle name. Default is '${DFLT_BUNDLE}'.\n"
 USAGE="${USAGE}\t-h, --help\n\t\tPrints help message.\n"
 USAGE="${USAGE}\t-n, --no-debug\n\t\tRemoves Qt debug libraries from the bundle.\n"
+USAGE="${USAGE}\t--deployqt EXECUTABLE\n\t\tName (can be full path) of the Qt deployment executable.\n\t\tIf not specified then the script deploys all content by itself.\n"
 
 # otool -L
 # otool -l
@@ -790,7 +792,7 @@ if ! "${GETOPT}" -l test: -u -o t: -- --test test > /dev/null; then
 fi
 
 # Parse rest of command line
-set -- $("${GETOPT}" -l bundle:,help,no-debug -u -o b:hn -- "$@")
+set -- $("${GETOPT}" -l bundle:,help,no-debug,deployqt: -u -o b:hn -- "$@")
 if [ $# -lt 1 ]; then
 	echo ${USAGE} >&2
 	exit 1
@@ -819,6 +821,15 @@ while [ $# -gt 0 ]; do
 			exit 1
 		fi
 		;;
+	--deployqt)
+		if [ "x${DEPLOYQT}" = "x" ]; then
+			DEPLOYQT="$2"
+		else
+			echo "Qt deployment tool already specified." >&2
+			exit
+		fi
+		shift
+		;;
 	--)
 		shift
 		break
@@ -841,6 +852,14 @@ fi
 # Use default bundle name if not specified.
 if [ "x${BUNDLE}" = "x" ]; then
 	BUNDLE="${DFLT_BUNDLE}"
+fi
+
+# Prefer Qt deployment tool if specified.
+if [ "x${DEPLOYQT}" != "x" ]; then
+	"${DEPLOYQT}" "${BUNDLE}" -no-strip -always-overwrite -appstore-compliant
+	DEPLOYQT_RET="$?"
+	rm "${BUNDLE}/Contents/PlugIns/sqldrivers/"libqsqlmysql.dylib # Depends on a library in '/usr/local'.
+	exit ${DEPLOYQT_RET}
 fi
 
 DIR_LIBS="${SRC_ROOT}/libs"

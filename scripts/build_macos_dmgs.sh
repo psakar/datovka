@@ -192,6 +192,7 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	QT_PATH="/usr/local/Qt-${QT_VER}-macx-clang-${CLANG_BITS}-macosx${SDK_VER}-${BUILD_TYPE}"
 	QMAKE="${QT_PATH}/bin/qmake"
 	LRELEASE="${QT_PATH}/bin/lrelease"
+	MACDEPLOYQT="${QT_PATH}/bin/macdeployqt"
 
 	# Test command presence.
 	for CMD in "${LRELEASE}" "${QMAKE}"; do
@@ -234,7 +235,7 @@ if [ "x${COMPILE_SRC}" = "xyes" ]; then
 	make ${MAKE_OPTS} || exit 1
 
 	if [ "x${BUILD_TYPE}" = "x${BUILD_SHARED}" ]; then
-		"${SRC_ROOT}"/scripts/macos_bundle_shared_libs.sh -b "${APP}" -n || exit 1
+		"${SRC_ROOT}"/scripts/macos_bundle_shared_libs.sh -b "${APP}" -n --deployqt "${MACDEPLOYQT}" || exit 1
 	fi
 fi
 
