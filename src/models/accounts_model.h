@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _ACCOUNTS_MODEL_H_
-#define _ACCOUNTS_MODEL_H_
+#pragma once
 
 #include <QAbstractItemModel>
 #include <QList>
@@ -294,7 +293,8 @@ public:
 	 *         -1 if account could not be added,
 	 *          0 if account was added.
 	 */
-	int addAccount(const AcntSettings &acntSettings, QModelIndex *idx = 0);
+	int addAccount(const AcntSettings &acntSettings,
+	    QModelIndex *idx = Q_NULLPTR);
 
 	/*!
 	 * @brief Delete account.
@@ -515,5 +515,3 @@ private:
 
 	QMap<QString, AccountCounters> m_countersMap; /*!< Unread counters. */
 };
-
-#endif /* _ACCOUNTS_MODEL_H_ */

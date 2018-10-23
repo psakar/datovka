@@ -810,7 +810,7 @@ int AccountModel::addAccount(const AcntSettings &acntSettings, QModelIndex *idx)
 
 	endInsertRows();
 
-	if (0 != idx) {
+	if (Q_NULLPTR != idx) {
 		*idx = index(m_row2UserNameIdx.size() - 1, 0, QModelIndex());
 	}
 
@@ -959,8 +959,8 @@ bool AccountModel::appendYear(const QString &userName,
 	}
 
 	AccountCounters &cntrs(m_countersMap[userName]);
-	QList<QString> *groups = 0;
-	QMap<QString, unsigned> *unreadGroups = 0;
+	QList<QString> *groups = Q_NULLPTR;
+	QMap<QString, unsigned> *unreadGroups = Q_NULLPTR;
 	QModelIndex childTopIndex;
 
 	if (nodeReceivedYear == nodeType) {
@@ -978,8 +978,8 @@ bool AccountModel::appendYear(const QString &userName,
 		return false;
 	}
 
-	Q_ASSERT(0 != groups);
-	Q_ASSERT(0 != unreadGroups);
+	Q_ASSERT(Q_NULLPTR != groups);
+	Q_ASSERT(Q_NULLPTR != unreadGroups);
 	Q_ASSERT(childTopIndex.isValid());
 
 	int rows = groups->size();
@@ -1053,8 +1053,8 @@ bool AccountModel::updateYearNodes(const QString &userName,
 	}
 
 	AccountCounters &cntrs(m_countersMap[userName]);
-	QList<QString> *groups = 0;
-	QMap<QString, unsigned> *unreadGroups = 0;
+	QList<QString> *groups = Q_NULLPTR;
+	QMap<QString, unsigned> *unreadGroups = Q_NULLPTR;
 	QModelIndex childTopIndex;
 
 	if (nodeReceivedYear == nodeType) {
@@ -1072,8 +1072,8 @@ bool AccountModel::updateYearNodes(const QString &userName,
 		return false;
 	}
 
-	Q_ASSERT(0 != groups);
-	Q_ASSERT(0 != unreadGroups);
+	Q_ASSERT(Q_NULLPTR != groups);
+	Q_ASSERT(Q_NULLPTR != unreadGroups);
 	Q_ASSERT(childTopIndex.isValid());
 
 	/*
@@ -1145,8 +1145,8 @@ bool AccountModel::updateYear(const QString &userName,
 	}
 
 	AccountCounters &cntrs(m_countersMap[userName]);
-	QList<QString> *groups = 0;
-	QMap<QString, unsigned> *unreadGroups = 0;
+	QList<QString> *groups = Q_NULLPTR;
+	QMap<QString, unsigned> *unreadGroups = Q_NULLPTR;
 	QModelIndex childIndex; /* Top index of children. */
 
 	if (nodeReceivedYear == nodeType) {
@@ -1164,8 +1164,8 @@ bool AccountModel::updateYear(const QString &userName,
 		return false;
 	}
 
-	Q_ASSERT(0 != groups);
-	Q_ASSERT(0 != unreadGroups);
+	Q_ASSERT(Q_NULLPTR != groups);
+	Q_ASSERT(Q_NULLPTR != unreadGroups);
 	Q_ASSERT(childIndex.isValid());
 
 	int row = 0;
@@ -1340,13 +1340,13 @@ enum AccountModel::NodeType AccountModel::parentNodeType(
 	switch (childType) {
 	case nodeUnknown:
 	case nodeRoot:
-		if (0 != parentRow) {
+		if (Q_NULLPTR != parentRow) {
 			*parentRow = -1;
 		}
 		return nodeUnknown;
 		break;
 	case nodeAccountTop:
-		if (0 != parentRow) {
+		if (Q_NULLPTR != parentRow) {
 			*parentRow = -1;
 		}
 		return nodeRoot;
@@ -1354,33 +1354,33 @@ enum AccountModel::NodeType AccountModel::parentNodeType(
 	case nodeRecentReceived:
 	case nodeRecentSent:
 	case nodeAll:
-		if (0 != parentRow) {
+		if (Q_NULLPTR != parentRow) {
 			*parentRow = -1;
 		}
 		return nodeAccountTop;
 		break;
 	case nodeReceived:
 	case nodeSent:
-		if (0 != parentRow) {
+		if (Q_NULLPTR != parentRow) {
 			*parentRow = 2;
 		}
 		return nodeAll;
 		break;
 	case nodeReceivedYear:
-		if (0 != parentRow) {
+		if (Q_NULLPTR != parentRow) {
 			*parentRow = 0;
 		}
 		return nodeReceived;
 		break;
 	case nodeSentYear:
-		if (0 != parentRow) {
+		if (Q_NULLPTR != parentRow) {
 			*parentRow = 1;
 		}
 		return nodeSent;
 		break;
 	default:
 		Q_ASSERT(0);
-		if (0 != parentRow) {
+		if (Q_NULLPTR != parentRow) {
 			*parentRow = -1;
 		}
 		return nodeUnknown;
