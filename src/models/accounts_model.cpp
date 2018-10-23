@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -1403,53 +1403,4 @@ int AccountModel::topAcntRow(const QString &userName) const
 	}
 
 	return foundRow;
-}
-
-enum AccountModel::NodeType AccountModel::nodeTypeTraversed(
-    const QModelIndex &index)
-{
-	if (-1 == index.parent().row()) {
-		return nodeAccountTop;
-	} else if (-1 == index.parent().parent().row()) {
-		switch (index.row()) {
-		case 0:
-			return nodeRecentReceived;
-			break;
-		case 1:
-			return nodeRecentSent;
-			break;
-		case 2:
-			return nodeAll;
-			break;
-		default:
-			return nodeUnknown;
-			break;
-		}
-	} else if (-1 == index.parent().parent().parent().row()) {
-		switch (index.row()) {
-		case 0:
-			return nodeReceived;
-			break;
-		case 1:
-			return nodeSent;
-			break;
-		default:
-			return nodeUnknown;
-			break;
-		}
-	} else if (-1 == index.parent().parent().parent().parent().row()) {
-		switch (index.parent().row()) {
-		case 0:
-			return nodeReceivedYear;
-			break;
-		case 1:
-			return nodeSentYear;
-			break;
-		default:
-			return nodeUnknown;
-			break;
-		}
-	} else {
-		return nodeUnknown;
-	}
 }

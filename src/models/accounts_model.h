@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -456,15 +456,6 @@ private:
 	 * @return Top node row or -1 if no such name found.
 	 */
 	int topAcntRow(const QString &userName) const;
-
-	/*!
-	 * @brief Determines node type by traversing node structure.
-	 *
-	 * @param[in] index Data index.
-	 * @return Node type related to the supplied index.
-	 */
-	static
-	enum NodeType nodeTypeTraversed(const QModelIndex &index);
 
 	/*
 	 * Model indexes hold a value that is effectively the index into this
