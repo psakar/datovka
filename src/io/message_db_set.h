@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -329,7 +329,7 @@ private:
 	 *
 	 * @param[in] secondaryKey Secondary key.
 	 * @param[in] create       Whether to create the file.
-	 * @return Message database or zero pointer on error.
+	 * @return Message database or Q_NULLPTR on error.
 	 */
 	MessageDb *_accessMessageDb(const QString &secondaryKey, bool create);
 

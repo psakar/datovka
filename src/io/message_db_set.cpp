@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -134,7 +134,7 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 	m_locDir = newLocDir;
 	m_organisation = organisation;
 
-	MessageDb *db = NULL;
+	MessageDb *db = Q_NULLPTR;
 	if (matchingFiles.size()) {
 		/* Load files that have been found. */
 		foreach (const QString &fileName, matchingFiles) {
@@ -143,7 +143,7 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 			Q_ASSERT(!secondaryKey.isNull());
 
 			db = _accessMessageDb(secondaryKey, false);
-			if (db == NULL) {
+			if (db == Q_NULLPTR) {
 				logErrorNL("Failed to open database file '%s'.",
 				    fileName.toUtf8().constData());
 				/* TODO -- How can be this operation aborted? */
@@ -155,7 +155,7 @@ bool MessageDbSet::openLocation(const QString &newLocDir,
 		Q_ASSERT(!secKey.isNull());
 
 		db = _accessMessageDb(secKey, true);
-		if (db == NULL) {
+		if (db == Q_NULLPTR) {
 			QString fileName(constructDbFileName(m_locDir,
 			    m_primaryKey, secKey, m_testing, m_organisation));
 			logErrorNL("Failed to open database file '%s'.",
@@ -313,14 +313,14 @@ bool MessageDbSet::reopenLocation(const QString &newLocDir,
 	m_locDir = newLocDir;
 	m_organisation = organisation;
 
-	MessageDb *db = NULL;
+	MessageDb *db = Q_NULLPTR;
 	if (manner == CM_CREATE_EMPTY_CURRENT) {
 		/* Create empty file matching current date. */
 		QString secKey = secondaryKey(QDateTime::currentDateTime());
 		Q_ASSERT(!secKey.isNull());
 
 		db = _accessMessageDb(secKey, true);
-		if (db == NULL) {
+		if (db == Q_NULLPTR) {
 			QString fileName(constructDbFileName(m_locDir,
 			    m_primaryKey, secKey, m_testing, m_organisation));
 			logErrorNL("Failed to open database file '%s'.",
@@ -559,14 +559,14 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 	}
 
 	/* Create database set. */
-	dbSet = new(std::nothrow) MessageDbSet(locDir, primaryKey, testing,
+	dbSet = new (std::nothrow) MessageDbSet(locDir, primaryKey, testing,
 	    organisation, connectionPrefix);
-	if (dbSet == Q_NULLPTR) {
+	if (Q_UNLIKELY(dbSet == Q_NULLPTR)) {
 		Q_ASSERT(0);
 		return Q_NULLPTR;
 	}
 
-	MessageDb *db = NULL;
+	MessageDb *db = Q_NULLPTR;
 	if (matchingFiles.size()) {
 		/* Load files that have been found. */
 		foreach (const QString &fileName, matchingFiles) {
@@ -575,7 +575,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 			Q_ASSERT(!secondaryKey.isNull());
 
 			db = dbSet->_accessMessageDb(secondaryKey, false);
-			if (db == NULL) {
+			if (db == Q_NULLPTR) {
 				logErrorNL("Failed to open database file '%s'.",
 				    fileName.toUtf8().constData());
 				delete dbSet;
@@ -589,7 +589,7 @@ MessageDbSet *MessageDbSet::createNew(const QString &locDir,
 		Q_ASSERT(!secKey.isNull());
 
 		db = dbSet->_accessMessageDb(secKey, true);
-		if (db == NULL) {
+		if (db == Q_NULLPTR) {
 			QString fileName(constructDbFileName(dbSet->m_locDir,
 			    dbSet->m_primaryKey, secKey, dbSet->m_testing,
 			    dbSet->m_organisation));
@@ -846,7 +846,7 @@ QString MessageDbSet::constructDbFileName(const QString &locDir,
 MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
     bool create)
 {
-	MessageDb *db = NULL;
+	MessageDb *db = Q_NULLPTR;
 	bool openRet;
 
 	/* Already opened. */
@@ -856,7 +856,7 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 
 	if (create && (m_organisation == DO_UNKNOWN)) {
 		/* Organisation structure must be set. */
-		return NULL;
+		return Q_NULLPTR;
 	}
 
 	if (!create && (m_organisation == DO_UNKNOWN)) {
@@ -867,7 +867,7 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 			logErrorNL("The organisation structure of the database '%s' in '%s' could not be determined.",
 			    m_primaryKey.toUtf8().constData(),
 			    m_locDir.toUtf8().constData());
-			return NULL;
+			return Q_NULLPTR;
 		}
 		m_organisation = org;
 	}
@@ -878,10 +878,10 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 		connectionName = m_connectionPrefix + "_" + connectionName;
 	}
 
-	db = new(std::nothrow) MessageDb(connectionName);
-	if (NULL == db) {
+	db = new (std::nothrow) MessageDb(connectionName);
+	if (Q_UNLIKELY(Q_NULLPTR == db)) {
 		Q_ASSERT(0);
-		return NULL;
+		return Q_NULLPTR;
 	}
 
 	/* TODO -- Handle file name deviations! */
@@ -895,7 +895,7 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 
 	if (!create && !fileInfo.isFile()) {
 		delete db;
-		return NULL;
+		return Q_NULLPTR;
 	} else if (!fileInfo.isFile()) {
 		/* Create missing directory. */
 		QDir dir = fileInfo.absoluteDir().absolutePath();
@@ -904,7 +904,7 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 			if (!dir.mkpath(dir.absolutePath())) {
 				/* Cannot create directory. */
 				delete db;
-				return NULL;
+				return Q_NULLPTR;
 			}
 		}
 	}
@@ -912,7 +912,7 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 	openRet = db->openDb(dbFileName);
 	if (!openRet) {
 		delete db;
-		return NULL;
+		return Q_NULLPTR;
 	}
 
 	this->insert(secondaryKey, db);
