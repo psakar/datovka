@@ -145,7 +145,7 @@ x${P_DATOVKA})
 		echo "" > /dev/null
 	else
 		# Use latest release as default.
-		VERSION="4.11.0"
+		VERSION="4.11.1"
 	fi
 	RELEASE="1"
 	;;
