@@ -393,6 +393,9 @@ dylibs_copy "${DIR_BUNDLE}" "${DIR_LIBS}" "libgcc_s_sjlj-1.dll" || exit 1
 cd "${DIR_BUNDLE}"
 ${DEPLOYQT_EXE} --${MODE} --libdir ./ --plugindir plugins/ "${APP}.exe" || exit 1
 
+# Remove all SQL drivers except the SQLite driver.
+rm $(find plugins/sqldrivers/ | grep 'dll$' | grep -v 'sqlite')
+
 # Remove all Qt translations except Czech and English.
 rm $(find translations/ | grep qt_ | grep -v 'qt_cs\|qt_en')
 # Move the files from 'tranlsations/' to 'locale/'.
@@ -405,3 +408,5 @@ rm -r "translations"
 
 # Ensure that there are only the specified subdirectories.
 have_only_directories "." "locale" "plugins" || exit 1
+# Ensure that there are all required plug-in directories.
+have_only_directories "plugins" "bearer" "iconengines" "imageformats" "platforms" "printsupport" "sqldrivers" || exit 1
