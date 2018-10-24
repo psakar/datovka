@@ -383,6 +383,11 @@ private slots:
 	void createAndSendMessage(void);
 
 	/*!
+	 * @brief Create and send a goverment service.
+	 */
+	void createGovMessage(void);
+
+	/*!
 	 * @brief Create reply from the selected message.
 	 */
 	void createAndSendMessageReply(void);

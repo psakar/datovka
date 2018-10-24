@@ -353,6 +353,9 @@ SOURCES += \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
     src/global.cpp \
+    src/gov_services/gui/dlg_gov_services.cpp \
+    src/gov_services/models/gov_form_list_model.cpp \
+    src/gov_services/models/gov_service_list_model.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -528,6 +531,9 @@ HEADERS += \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
     src/global.h \
+    src/gov_services/gui/dlg_gov_services.h \
+    src/gov_services/models/gov_form_list_model.h \
+    src/gov_services/models/gov_service_list_model.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \
@@ -637,6 +643,7 @@ HEADERS += \
     src/worker/task_verify_message.h
 
 FORMS += \
+    src/gov_services/ui/dlg_gov_services.ui \
     src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
     src/gui/ui/dlg_account_from_db.ui \

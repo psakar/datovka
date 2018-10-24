@@ -56,6 +56,7 @@
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
 #include "src/global.h"
+#include "src/gov_services/gui/dlg_gov_services.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -1175,6 +1176,8 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 
 		menu->addAction(ui->actionGet_messages);
 		menu->addAction(ui->actionSend_message);
+		menu->addSeparator();
+		menu->addAction(ui->actionCreate_gov_message);
 		menu->addSeparator();
 		if (received) {
 			QMenu *submenu = menu->addMenu(tr("Mark"));
@@ -3968,6 +3971,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 			ui->actionSync_all_accounts->setEnabled(true);
 			ui->actionGet_messages->setEnabled(true);
 			ui->actionSend_message->setEnabled(true);
+			ui->actionCreate_gov_message->setEnabled(true);
 			ui->actionFind_databox->setEnabled(true);
 			ui->actionMsgAdvancedSearch->setEnabled(true);
 			ui->actionImport_ZFO_file_into_database->
@@ -4022,6 +4026,9 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(synchroniseSelectedAccount()));
 	connect(ui->actionSend_message, SIGNAL(triggered()),
 	    this, SLOT(createAndSendMessage()));
+	    /* Separator. */
+	connect(ui->actionCreate_gov_message, SIGNAL(triggered()),
+	    this, SLOT(createGovMessage()));
 	    /* Separator. */
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()),
 	    this, SLOT(accountMarkReceivedRead()));
@@ -4196,6 +4203,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	//ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
 	ui->actionSend_message->setEnabled(false);
+	ui->actionCreate_gov_message->setEnabled(false);
 	ui->actionReply->setEnabled(false);
 	ui->actionAuthenticate_message->setEnabled(false);
 	//ui->actionMsgAdvancedSearch->setEnabled(false);
@@ -4266,6 +4274,7 @@ void MainWindow::activeAccountMenuAndButtons(bool action) const
 	ui->actionSync_all_accounts->setEnabled(action);
 	ui->actionGet_messages->setEnabled(action);
 	ui->actionSend_message->setEnabled(action);
+	ui->actionCreate_gov_message->setEnabled(action);
 	ui->actionDelete_account->setEnabled(action);
 	ui->actionFind_databox->setEnabled(action);
 	ui->actionMsgAdvancedSearch->setEnabled(action);
@@ -4602,6 +4611,14 @@ void MainWindow::createAndSendMessage(void)
 {
 	debugSlotCall();
 	showSendMessageDialog(DlgSendMessage::ACT_NEW);
+}
+
+void MainWindow::createGovMessage(void)
+{
+	debugSlotCall();
+
+	QDialog *govServicesDialog = new DlgGovServices(this);
+	govServicesDialog->exec();
 }
 
 void MainWindow::createAndSendMessageReply(void)
@@ -7977,6 +7994,13 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSend_message->setIcon(ico);
+	}	
+	    /* Separator. */
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "present_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "present_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionCreate_gov_message->setIcon(ico);
 	}
 	    /* Separator. */
 	{

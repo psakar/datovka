@@ -349,7 +349,7 @@ sent reply on this message</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>27</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -381,6 +381,8 @@ sent reply on this message</string>
     </property>
     <addaction name="actionGet_messages"/>
     <addaction name="actionSend_message"/>
+    <addaction name="separator"/>
+    <addaction name="actionCreate_gov_message"/>
     <addaction name="separator"/>
     <addaction name="actionMark_all_as_read"/>
     <addaction name="separator"/>
@@ -1260,6 +1262,15 @@ sent reply on this message</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionCreate_gov_message">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
+   </property>
+   <property name="text">
+    <string>Create gov message</string>
    </property>
   </action>
  </widget>
