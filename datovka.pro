@@ -306,6 +306,19 @@ SOURCES += \
     src/datovka_shared/crypto/crypto_pwd.c \
     src/datovka_shared/crypto/crypto_trusted_certs.c \
     src/datovka_shared/crypto/crypto_wrapped.cpp \
+    src/datovka_shared/gov_services/helper.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_crr_vbh.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_ir_vp.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_rt_vt.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_rtpo_vt.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_skd_vp.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_vr_vp.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_zr_vp.cpp \
+    src/datovka_shared/gov_services/service/gov_service_form_field.cpp \
+    src/datovka_shared/gov_services/service/gov_service.cpp \
+    src/datovka_shared/gov_services/service/gov_szr_rob_vu.cpp \
+    src/datovka_shared/gov_services/service/gov_szr_rob_vvu.cpp \
+    src/datovka_shared/gov_services/service/gov_szr_ros_vv.cpp \
     src/datovka_shared/graphics/graphics.cpp \
     src/datovka_shared/io/records_management_db.cpp \
     src/datovka_shared/io/sqlite/db.cpp \
@@ -466,6 +479,19 @@ HEADERS += \
     src/datovka_shared/crypto/crypto_pwd.h \
     src/datovka_shared/crypto/crypto_trusted_certs.h \
     src/datovka_shared/crypto/crypto_wrapped.h \
+    src/datovka_shared/gov_services/helper.h \
+    src/datovka_shared/gov_services/service/gov_mv_crr_vbh.h \
+    src/datovka_shared/gov_services/service/gov_mv_ir_vp.h \
+    src/datovka_shared/gov_services/service/gov_mv_rt_vt.h \
+    src/datovka_shared/gov_services/service/gov_mv_rtpo_vt.h \
+    src/datovka_shared/gov_services/service/gov_mv_skd_vp.h \
+    src/datovka_shared/gov_services/service/gov_mv_vr_vp.h \
+    src/datovka_shared/gov_services/service/gov_mv_zr_vp.h \
+    src/datovka_shared/gov_services/service/gov_service_form_field.h \
+    src/datovka_shared/gov_services/service/gov_service.h \
+    src/datovka_shared/gov_services/service/gov_szr_rob_vu.h \
+    src/datovka_shared/gov_services/service/gov_szr_rob_vvu.h \
+    src/datovka_shared/gov_services/service/gov_szr_ros_vv.h \
     src/datovka_shared/graphics/graphics.h \
     src/datovka_shared/io/records_management_db.h \
     src/datovka_shared/io/sqlite/db.h \
