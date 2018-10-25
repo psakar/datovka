@@ -48,15 +48,36 @@ DlgGovServices::DlgGovServices(QWidget *parent)
 
 	initGovServices();
 
-	m_ui->govServiceListView->setModel(m_govServiceModel);
-
 	loadServicesToModel();
+
+	m_govServiceListProxyModel.setSourceModel(m_govServiceModel);
+	m_ui->govServiceListView->setModel(&m_govServiceListProxyModel);
+
+	connect(m_ui->filterLine, SIGNAL(textChanged(QString)),
+	    this, SLOT(filterServices(QString)));
 }
 
 DlgGovServices::~DlgGovServices(void)
 {
 	clearGovServices();
 	delete m_ui;
+}
+
+void DlgGovServices::filterServices(const QString &text)
+{
+	m_govServiceListProxyModel.setFilterRegExp(QRegExp(text,
+	    Qt::CaseInsensitive, QRegExp::FixedString));
+	/* Set filter field background colour. */
+	if (text.isEmpty()) {
+		m_ui->filterLine->setStyleSheet(
+		    SortFilterProxyModel::blankFilterEditStyle);
+	} else if (m_govServiceListProxyModel.rowCount() != 0) {
+		m_ui->filterLine->setStyleSheet(
+		    SortFilterProxyModel::foundFilterEditStyle);
+	} else {
+		m_ui->filterLine->setStyleSheet(
+		    SortFilterProxyModel::notFoundFilterEditStyle);
+	}
 }
 
 /*!

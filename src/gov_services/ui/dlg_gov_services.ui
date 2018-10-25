@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>493</width>
-    <height>575</height>
+    <width>427</width>
+    <height>494</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Goverment Services</string>
+   <string>Government Services</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../../res/resources.qrc">
@@ -33,7 +33,14 @@
     </layout>
    </item>
    <item>
-    <widget class="QListView" name="govServiceListView"/>
+    <widget class="QListView" name="govServiceListView">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <property name="modelColumn">
+      <number>0</number>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

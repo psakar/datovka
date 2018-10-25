@@ -28,6 +28,7 @@
 #include <QString>
 
 #include "src/gov_services/models/gov_service_list_model.h"
+#include "src/models/sort_filter_proxy_model.h"
 
 namespace Ui {
 	class DlgGovServices;
@@ -56,6 +57,13 @@ public:
 	 */
 	~DlgGovServices(void);
 
+private slots:
+
+	/*!
+	 * @brief Apply filter text on the Gov service list.
+	 */
+	void filterServices(const QString &text);
+
 private:
 
 	/*!
@@ -74,8 +82,7 @@ private:
 	void loadServicesToModel(void) const;
 
 	QMap<QString, const Gov::Service *> m_govServices; /*!< Holds pointers to all available Gov services. */
-
+	SortFilterProxyModel m_govServiceListProxyModel; /*!< Used for Gov service filtering. */
 	GovServiceListModel *m_govServiceModel; /*!< Gov service model. */
-
 	Ui::DlgGovServices *m_ui; /*!< UI generated from UI file. */
 };

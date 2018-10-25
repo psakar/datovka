@@ -25,13 +25,14 @@
 
 #include <QAbstractListModel>
 #include <QString>
+#include <QVariant>
 
 namespace Gov {
 	class Service; /* Forward declaration. */
 }
 
 /*!
- * @brief Holds information about available gov services.
+ * @brief Holds information about available Gov services.
  */
 class GovServiceListModel : public QAbstractListModel {
 	Q_OBJECT
@@ -59,32 +60,11 @@ public:
 	};
 
 	/*!
-	 * @brief Roles which this model supports.
-	 */
-	enum Roles {
-		ROLE_GOV_SRVC_INTERN_ID = Qt::UserRole,
-		ROLE_GOV_SRVC_FULL_NAME,
-		ROLE_GOV_SRVC_INST_NAME,
-		ROLE_GOV_SRVC_BOXID
-	};
-
-	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] parent Pointer to parent object.
 	 */
 	explicit GovServiceListModel(QObject *parent = Q_NULLPTR);
-
-	/*!
-	 * @brief Copy constructor.
-	 *
-	 * @note Needed for QVariant conversion.
-	 *
-	 * @param[in] model Model to be copied.
-	 * @param[in] parent Pointer to parent object.
-	 */
-	explicit GovServiceListModel(const GovServiceListModel &model,
-	    QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Return number of rows under the given parent.
@@ -97,14 +77,6 @@ public:
 	    Q_DECL_OVERRIDE;
 
 	/*!
-	 * @brief Returns the model's role names.
-	 *
-	 * @return Model's role names.
-	 */
-	virtual
-	QHash<int, QByteArray> roleNames(void) const Q_DECL_OVERRIDE;
-
-	/*!
 	 * @brief Return data stored in given location under given role.
 	 *
 	 * @param[in] index Index specifying the item.
@@ -112,14 +84,8 @@ public:
 	 * @return Data from model.
 	 */
 	virtual
-	QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
-
-	/*!
-	 * @brief Return list of all entries.
-	 *
-	 * @return List of all entries.
-	 */
-	const QList<Entry> &allEntries(void) const;
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole)
+	    const Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Returns item flags for given index.
@@ -133,7 +99,7 @@ public:
 	/*!
 	 * @brief Appends service to model.
 	 *
-	 * @param[in] gg E-gov service data.
+	 * @param[in] gs Gov service data.
 	 */
 	void appendService(const Gov::Service *gs);
 
@@ -143,5 +109,5 @@ public:
 	void clearAll(void);
 
 private:
-	QList<Entry> m_services; /*!< List of service entries. */
+	QList<Entry> m_services; /*!< List of Gov service entries. */
 };

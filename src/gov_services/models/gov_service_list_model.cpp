@@ -69,28 +69,9 @@ GovServiceListModel::GovServiceListModel(QObject *parent)
 {
 }
 
-GovServiceListModel::GovServiceListModel(const GovServiceListModel &model,
-    QObject *parent)
-    : QAbstractListModel(parent),
-    m_services(model.m_services)
-{
-}
-
 int GovServiceListModel::rowCount(const QModelIndex &parent) const
 {
 	return !parent.isValid() ? m_services.size() : 0;
-}
-
-QHash<int, QByteArray> GovServiceListModel::roleNames(void) const
-{
-	static QHash<int, QByteArray> roles;
-	if (roles.isEmpty()) {
-		roles[ROLE_GOV_SRVC_INTERN_ID] = "gsInternId";
-		roles[ROLE_GOV_SRVC_FULL_NAME] = "gsFullName";
-		roles[ROLE_GOV_SRVC_INST_NAME] = "gsInstName";
-		roles[ROLE_GOV_SRVC_BOXID] = "gsBoxId";
-	}
-	return roles;
 }
 
 QVariant GovServiceListModel::data(const QModelIndex &index, int role) const
@@ -104,17 +85,9 @@ QVariant GovServiceListModel::data(const QModelIndex &index, int role) const
 	const Entry &e(m_services[row]);
 
 	switch (role) {
-	case ROLE_GOV_SRVC_INTERN_ID:
-		return e.srvcInternId();
-		break;
-	case ROLE_GOV_SRVC_FULL_NAME:
-		return e.srvcFullName();
-		break;
-	case ROLE_GOV_SRVC_INST_NAME:
-		return e.instName();
-		break;
-	case ROLE_GOV_SRVC_BOXID:
-		return e.srvcBoxId();
+	case Qt::DisplayRole:
+	case Qt::AccessibleTextRole:
+		return QString("%1\nDS: %2 -- %3").arg(e.srvcFullName()).arg(e.srvcBoxId()).arg(e.instName());
 		break;
 	default:
 		/* Do nothing. */
@@ -122,12 +95,6 @@ QVariant GovServiceListModel::data(const QModelIndex &index, int role) const
 	}
 
 	return QVariant();
-}
-
-const QList<GovServiceListModel::Entry> &GovServiceListModel::allEntries(
-    void) const
-{
-	return m_services;
 }
 
 Qt::ItemFlags GovServiceListModel::flags(const QModelIndex &index) const
