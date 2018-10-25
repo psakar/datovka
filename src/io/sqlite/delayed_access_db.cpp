@@ -64,6 +64,9 @@ bool DelayedAccessSQLiteDb::openDb(const QString &fileName,
 
 	/* A database in memory is opened immediately. */
 	if (flags & SQLiteDb::FORCE_IN_MEMORY) {
+		logInfoNL("Opening connection '%s' to database file '%s'.",
+		    m_db.connectionName().toUtf8().constData(),
+		    fileName.toUtf8().constData());
 		const bool ret = SQLiteDb::openDb(fileName, flags);
 		if (ret) {
 			m_fileName = fileName;
@@ -76,6 +79,10 @@ bool DelayedAccessSQLiteDb::openDb(const QString &fileName,
 	}
 
 	/* Delay the opening of the database file. */
+	logInfoNL(
+	    "Delaying the opening of connection '%s' to database file '%s'.",
+	    m_db.connectionName().toUtf8().constData(),
+	    fileName.toUtf8().constData());
 	m_fileName = fileName;
 	m_flags = flags;
 	return true;
@@ -98,15 +105,19 @@ const QSqlDatabase &DelayedAccessSQLiteDb::accessDb(void)
 bool DelayedAccessSQLiteDb::_accessDb(void)
 {
 	if (Q_UNLIKELY(!isOpen())) {
+		const char *cCName = m_db.connectionName().toUtf8().constData();
 		if (Q_UNLIKELY(m_fileName.isEmpty())) {
-			logErrorNL("Trying to access unopened database '%s'.",
-			    m_db.connectionName().toUtf8().constData());
+			logErrorNL(
+			    "Missing file name to unopened database '%s'.",
+			    cCName);
 			Q_ASSERT(0);
 			return false;
 		}
+		const char *cFileName = m_fileName.toUtf8().constData();
+		logInfoNL("Opening connection '%s' to database file '%s'.",
+		    cCName, cFileName);
 		if (Q_UNLIKELY(!SQLiteDb::openDb(m_fileName, m_flags))) {
-			logErrorNL("Cannot open database '%s'.",
-			    m_fileName.toUtf8().constData());
+			logErrorNL("Cannot open database '%s'.", cFileName);
 			return false;
 		}
 	}

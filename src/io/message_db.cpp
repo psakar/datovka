@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -85,7 +85,7 @@ const QVector<QString> MessageDb::fileItemIds = {"id", "message_id",
     "LENGTH(dmEncodedContent)"};
 
 MessageDb::MessageDb(const QString &connectionName)
-    : SQLiteDb(connectionName)
+    : DelayedAccessSQLiteDb(connectionName)
 {
 }
 
@@ -104,10 +104,10 @@ void MessageDb::appendRcvdEntryList(QList<RcvdEntry> &entryList,
 	}
 }
 
-QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(void) const
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntries(void)
 {
 	QList<RcvdEntry> entryList;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (rcvdItemIds.size() - 2); ++i) {
 		queryStr += rcvdItemIds[i] + ", ";
@@ -141,10 +141,10 @@ fail:
 	return QList<RcvdEntry>();
 }
 
-QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesWithin90Days(void) const
+QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesWithin90Days(void)
 {
 	QList<RcvdEntry> entryList;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 
 	if (!msgsRcvdWithin90DaysQuery(query)) {
 		goto fail;
@@ -157,10 +157,10 @@ fail:
 }
 
 QList<MessageDb::RcvdEntry> MessageDb::msgsRcvdEntriesInYear(
-    const QString &year) const
+    const QString &year)
 {
 	QList<RcvdEntry> entryList;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (rcvdItemIds.size() - 2); ++i) {
 		queryStr += rcvdItemIds[i] + ", ";
@@ -198,10 +198,10 @@ fail:
 }
 
 QStringList MessageDb::msgsYears(enum MessageDb::MessageType type,
-    enum Sorting sorting) const
+    enum Sorting sorting)
 {
 	QStringList yearList;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT DISTINCT "
 	    "ifnull(strftime('%Y', m.dmDeliveryTime), '" INVALID_YEAR "') "
 	    "FROM messages AS m "
@@ -242,11 +242,11 @@ fail:
 }
 
 QList< QPair<QString, int> > MessageDb::msgsYearlyCounts(enum MessageType type,
-    enum Sorting sorting) const
+    enum Sorting sorting)
 {
 	QList< QPair<QString, int> > yearlyCounts;
 	QList<QString> yearList = msgsYears(type, sorting);
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	for (int i = 0; i < yearList.size(); ++i) {
@@ -285,9 +285,9 @@ fail:
 	return yearlyCounts;
 }
 
-int MessageDb::msgsUnreadWithin90Days(enum MessageType type) const
+int MessageDb::msgsUnreadWithin90Days(enum MessageType type)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT COUNT(*) AS nrUnread "
 	    "FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
@@ -314,10 +314,9 @@ fail:
 	return -1;
 }
 
-int MessageDb::msgsUnreadInYear(enum MessageType type,
-    const QString &year) const
+int MessageDb::msgsUnreadInYear(enum MessageType type, const QString &year)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT COUNT(*) AS nrUnread "
 	    "FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
@@ -358,10 +357,10 @@ void MessageDb::appendSntEntryList(QList<SntEntry> &entryList, QSqlQuery &query)
 	}
 }
 
-QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(void) const
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntries(void)
 {
 	QList<SntEntry> entryList;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (sntItemIds.size() - 1); ++i) {
 		queryStr += sntItemIds[i] + ", ";
@@ -392,10 +391,10 @@ fail:
 	return QList<SntEntry>();
 }
 
-QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesWithin90Days(void) const
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesWithin90Days(void)
 {
 	QList<SntEntry> entryList;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 
 	if (!msgsSntWithin90DaysQuery(query)) {
 		goto fail;
@@ -407,11 +406,10 @@ fail:
 	return QList<SntEntry>();
 }
 
-QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesInYear(
-    const QString &year) const
+QList<MessageDb::SntEntry> MessageDb::msgsSntEntriesInYear(const QString &year)
 {
 	QList<SntEntry> entryList;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT ";
 	for (int i = 0; i < (sntItemIds.size() - 1); ++i) {
 		queryStr += sntItemIds[i] + ", ";
@@ -445,10 +443,10 @@ fail:
 	return QList<SntEntry>();
 }
 
-const Isds::Envelope MessageDb::getMessageReplyData(qint64 dmId) const
+const Isds::Envelope MessageDb::getMessageReplyData(qint64 dmId)
 {
 	Isds::Envelope envData;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT dbIDSender, dmSender, dmSenderAddress, "
 	    "dmSenderType, dbIDRecipient, dmRecipient, dmRecipientAddress, "
 	    "dmAnnotation, dmSenderRefNumber, dmSenderIdent, "
@@ -497,9 +495,9 @@ fail:
 	return Isds::Envelope();
 }
 
-int MessageDb::getMessageType(qint64 dmId) const
+int MessageDb::getMessageType(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT message_type "
 	    "FROM supplementary_message_data WHERE message_id = :dmId";
 
@@ -522,10 +520,9 @@ fail:
 	return -1;
 }
 
-enum MessageDb::MsgVerificationResult
-    MessageDb::isMessageVerified(qint64 dmId) const
+enum MessageDb::MsgVerificationResult MessageDb::isMessageVerified(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT is_verified FROM messages "
 	    "WHERE dmID = :dmId";
 
@@ -552,9 +549,9 @@ fail:
 	return MSG_NOT_PRESENT;
 }
 
-bool MessageDb::messageLocallyRead(qint64 dmId) const
+bool MessageDb::messageLocallyRead(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT read_locally "
 	    "FROM supplementary_message_data WHERE message_id = :dmId";
 
@@ -578,7 +575,7 @@ fail:
 
 bool MessageDb::setMessageLocallyRead(qint64 dmId, bool read)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "UPDATE supplementary_message_data "
 	    "SET read_locally = :read WHERE message_id = :dmId";
 
@@ -601,7 +598,7 @@ fail:
 
 bool MessageDb::smsgdtSetAllReceivedLocallyRead(bool read)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 
 	QString queryStr = "UPDATE supplementary_message_data "
 	    "SET read_locally = :read WHERE message_type = :message_type";
@@ -626,7 +623,7 @@ fail:
 bool MessageDb::smsgdtSetReceivedYearLocallyRead(const QString &year,
     bool read)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	queryStr = "INSERT OR REPLACE INTO supplementary_message_data ("
@@ -657,7 +654,7 @@ fail:
 
 bool MessageDb::smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	queryStr = "INSERT OR REPLACE INTO supplementary_message_data ("
@@ -685,9 +682,9 @@ fail:
 	return false;
 }
 
-MessageDb::MsgId MessageDb::msgsMsgId(qint64 dmId) const
+MessageDb::MsgId MessageDb::msgsMsgId(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	MsgId ret;
 	QString queryStr = "SELECT dmID, dmDeliveryTime FROM messages "
 	    "WHERE dmID = :dmId";
@@ -712,11 +709,11 @@ fail:
 	return ret;
 }
 
-QList<MessageDb::ContactEntry> MessageDb::uniqueContacts(void) const
+QList<MessageDb::ContactEntry> MessageDb::uniqueContacts(void)
 {
 	QMap<QString, ContactEntry> mapOfBoxes;
 	QList<ContactEntry> contactList;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT m.dmID AS id, m.dbIDRecipient, "
 	    "m.dmRecipient, m.dmRecipientAddress "
 	    "FROM messages AS m "
@@ -772,10 +769,10 @@ fail:
 	return contactList;
 }
 
-QString MessageDb::descriptionHtml(qint64 dmId, bool verSignature) const
+QString MessageDb::descriptionHtml(qint64 dmId, bool verSignature)
 {
 	QString html;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	html += indentDivStart;
@@ -1122,11 +1119,10 @@ fail:
 	return QString();
 }
 
-QString MessageDb::envelopeInfoHtmlToPdf(qint64 dmId,
-    const QString &dbType) const
+QString MessageDb::envelopeInfoHtmlToPdf(qint64 dmId, const QString &dbType)
 {
 	QString html;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 	QString tmp;
 
@@ -1305,10 +1301,10 @@ fail:
 	return QString();
 }
 
-QString MessageDb::fileListHtmlToPdf(qint64 dmId) const
+QString MessageDb::fileListHtmlToPdf(qint64 dmId)
 {
 	QString html;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT _dmFileDescr FROM files "
 	    "WHERE message_id = :dmId";
 
@@ -1339,10 +1335,10 @@ fail:
 	return QString();
 }
 
-QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId) const
+QString MessageDb::deliveryInfoHtmlToPdf(qint64 dmId)
 {
 	QString html;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 	QString tmp;
 
@@ -1530,20 +1526,20 @@ fail:
 	return QString();
 }
 
-QList<Isds::Document> MessageDb::getMessageAttachments(qint64 msgId) const
+QList<Isds::Document> MessageDb::getMessageAttachments(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QList<Isds::Document> documents;
 	QString queryStr = "SELECT _dmFileDescr, _dmUpFileGuid, _dmFileGuid, "
 	    "_dmMimeType, _dmFormat, _dmFileMetaType, dmEncodedContent "
-	    "FROM files WHERE message_id = :msgId";
+	    "FROM files WHERE message_id = :dmId";
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":msgId", msgId);
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		while (query.isValid()) {
@@ -1567,24 +1563,24 @@ fail:
 	return QList<Isds::Document>();
 }
 
-QList<MessageDb::AttachmentEntry> MessageDb::attachEntries(qint64 msgId) const
+QList<MessageDb::AttachmentEntry> MessageDb::attachEntries(qint64 dmId)
 {
 	QList<AttachmentEntry> entryList;
 	int i;
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT ";
 	for (i = 0; i < (fileItemIdsNoSize.size() - 1); ++i) {
 		queryStr += fileItemIdsNoSize[i] + ", ";
 	}
 	queryStr += fileItemIdsNoSize.last();
 	queryStr += " FROM files WHERE "
-	    "message_id = :msgId";
+	    "message_id = :dmId";
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":msgId", msgId);
+	query.bindValue(":dmId", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot execute SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -1596,7 +1592,7 @@ QList<MessageDb::AttachmentEntry> MessageDb::attachEntries(qint64 msgId) const
 	query.first();
 	while (query.isActive() && query.isValid()) {
 		entryList.append(AttachmentEntry(query.value(0).toLongLong(),
-		    msgId, QByteArray::fromBase64(query.value(1).toByteArray()),
+		    dmId, QByteArray::fromBase64(query.value(1).toByteArray()),
 		    query.value(2).toString(), query.value(3).toString()));
 		query.next();
 	}
@@ -1609,7 +1605,7 @@ fail:
 bool MessageDb::insertMessageEnvelope(const Isds::Envelope &envelope,
     const QString &_origin, enum MessageDirection msgDirect)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 
 	if (Q_UNLIKELY(envelope.dmId() < 0)) {
 		Q_ASSERT(0);
@@ -1723,7 +1719,7 @@ fail:
 bool MessageDb::updateMessageEnvelope(const Isds::Envelope &envelope,
     const QString &_origin, enum MessageDirection msgDirect)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "UPDATE messages SET "
 	    "_origin = :_origin, "
 	    "dbIDSender = :dbIDSender, dmSender = :dmSender, "
@@ -1825,9 +1821,9 @@ fail:
 	return false;
 }
 
-enum Isds::Type::DmState MessageDb::getMessageStatus(qint64 dmId) const
+enum Isds::Type::DmState MessageDb::getMessageStatus(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr =
 	    "SELECT dmMessageStatus FROM messages WHERE dmID = :dmId";
 
@@ -1855,9 +1851,9 @@ enum Isds::Type::DmState MessageDb::getMessageStatus(qint64 dmId) const
 
 QList<MessageDb::SoughtMsg> MessageDb::msgsSearch(const Isds::Envelope &envel,
     enum MessageDirection msgDirect, const QString &attachPhrase,
-    bool logicalAnd) const
+    bool logicalAnd)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 
 	int i = 0;
 	bool isMultiSelect = false;
@@ -2185,9 +2181,9 @@ QList<MessageDb::SoughtMsg> MessageDb::msgsSearch(const Isds::Envelope &envel,
 	return msgList;
 }
 
-MessageDb::SoughtMsg MessageDb::msgsGetMsgDataFromId(const qint64 msgId) const
+MessageDb::SoughtMsg MessageDb::msgsGetMsgDataFromId(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT "
 	    "m.dmID, m.dmDeliveryTime, "
 	    "m.dmAnnotation, m.dmSender, m.dmRecipient, "
@@ -2202,7 +2198,7 @@ MessageDb::SoughtMsg MessageDb::msgsGetMsgDataFromId(const qint64 msgId) const
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":dmID", msgId);
+	query.bindValue(":dmID", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -2224,7 +2220,7 @@ bool MessageDb::msgsUpdateMessageState(qint64 dmId,
     const QString &dmDeliveryTime, const QString &dmAcceptanceTime,
     enum Isds::Type::DmState dmMessageStatus)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "UPDATE messages SET "
 	    "dmDeliveryTime = :dmDeliveryTime, "
 	    "dmAcceptanceTime = :dmAcceptanceTime, "
@@ -2253,7 +2249,7 @@ fail:
 bool MessageDb::insertOrUpdateMessageAttachment(qint64 dmId,
     const Isds::Document &document)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	int fileId = -1;
 	QString queryStr = "SELECT id FROM files WHERE "
 	    "message_id = :message_id AND _dmFileDescr = :dmFileDescr AND "
@@ -2326,7 +2322,7 @@ fail:
 
 bool MessageDb::deleteMessageAttachments(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "DELETE FROM files WHERE message_id = :message_id";
 
 	if (!query.prepare(queryStr)) {
@@ -2348,7 +2344,7 @@ fail:
 bool MessageDb::insertOrUpdateMessageHash(qint64 dmId,
      const Isds::Hash &hash)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	int hashId= -1;
 	QString queryStr = "SELECT id FROM hashes WHERE "
 	    "message_id = :message_id";
@@ -2401,7 +2397,7 @@ fail:
 bool MessageDb::insertOrUpdateMessageEvent(qint64 dmId,
     const Isds::Event &event)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	int eventId = -1;
 	QString queryStr = "SELECT id FROM events WHERE "
 	    "message_id = :message_id AND dmEventTime = :dmEventTime";
@@ -2459,7 +2455,7 @@ fail:
 bool MessageDb::insertOrReplaceCompleteMessageRaw(qint64 dmId,
     const QByteArray &raw, int messageType)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	struct x509_crt *crt = NULL;
 	QString	queryStr = "INSERT OR REPLACE INTO raw_message_data "
 	    "(message_id, message_type, data) "
@@ -2499,9 +2495,9 @@ fail:
 	return false;
 }
 
-QByteArray MessageDb::getCompleteMessageBase64(qint64 dmId) const
+QByteArray MessageDb::getCompleteMessageBase64(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT data FROM raw_message_data "
 	    "WHERE message_id = :dmId";
 
@@ -2523,9 +2519,9 @@ fail:
 	return QByteArray();
 }
 
-bool MessageDb::isCompleteMessageInDb(qint64 dmId) const
+bool MessageDb::isCompleteMessageInDb(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT count(*) FROM raw_message_data "
 	    "WHERE message_id = :dmId";
 
@@ -2547,14 +2543,14 @@ fail:
 	return false;
 }
 
-QByteArray MessageDb::getCompleteMessageRaw(qint64 dmId) const
+QByteArray MessageDb::getCompleteMessageRaw(qint64 dmId)
 {
 	return QByteArray::fromBase64(getCompleteMessageBase64(dmId));
 }
 
-QByteArray MessageDb::getDeliveryInfoBase64(qint64 dmId) const
+QByteArray MessageDb::getDeliveryInfoBase64(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT data FROM raw_delivery_info_data "
 	    "WHERE message_id = :dmId";
 
@@ -2576,9 +2572,9 @@ fail:
 	return QByteArray();
 }
 
-QList<qint64> MessageDb::getAllMessageIDsWithoutAttach(void) const
+QList<qint64> MessageDb::getAllMessageIDsWithoutAttach(void)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT dmID FROM messages AS m "
 	    "LEFT JOIN raw_message_data AS r ON (m.dmID = r.message_id) "
 	    "WHERE r.message_id IS null";
@@ -2603,9 +2599,9 @@ fail:
 	return QList<qint64>();
 }
 
-QList<qint64> MessageDb::getAllMessageIDs(enum MessageType messageType) const
+QList<qint64> MessageDb::getAllMessageIDs(enum MessageType messageType)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QList<qint64> msgIdList;
 	QString queryStr = "SELECT dmID FROM messages AS m "
 	    "LEFT JOIN supplementary_message_data AS s "
@@ -2634,9 +2630,9 @@ fail:
 	return QList<qint64>();
 }
 
-QList<MessageDb::MsgId> MessageDb::getAllMessageIDsFromDB(void) const
+QList<MessageDb::MsgId> MessageDb::getAllMessageIDsFromDB(void)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QList<MessageDb::MsgId> msgIdList;
 	QString queryStr = "SELECT dmID, dmDeliveryTime FROM messages";
 
@@ -2664,9 +2660,9 @@ fail:
 	return QList<MessageDb::MsgId>();
 }
 
-QList<qint64> MessageDb::getAllMsgsIDEqualWithYear(const QString &year) const
+QList<qint64> MessageDb::getAllMsgsIDEqualWithYear(const QString &year)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QList<qint64> msgList;
 	QString queryStr;
 
@@ -2704,7 +2700,7 @@ fail:
 bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
     const QString &year)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	bool attached = false;
 	bool transaction = false;
 	QString queryStr;
@@ -2889,7 +2885,7 @@ fail:
 bool MessageDb::insertOrReplaceDeliveryInfoRaw(qint64 dmId,
     const QByteArray &raw)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "INSERT OR REPLACE INTO raw_delivery_info_data "
 	    "(message_id, data) VALUES (:dmId, :data)";
 
@@ -2913,7 +2909,7 @@ fail:
 bool MessageDb::updateMessageAuthorInfo(qint64 dmId,
     enum Isds::Type::SenderType senderType, const QString &senderName)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 
 	QJsonObject authorObject;
 	authorObject.insert("userType", (senderType != Isds::Type::ST_NULL) ?
@@ -2947,9 +2943,9 @@ fail:
 	return false;
 }
 
-const Isds::Hash MessageDb::getMessageHash(qint64 dmId) const
+const Isds::Hash MessageDb::getMessageHash(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	Isds::Hash hash;
 
 	QString queryStr = "SELECT value, _algorithm FROM hashes WHERE "
@@ -2976,11 +2972,11 @@ fail:
 	return Isds::Hash();
 }
 
-bool MessageDb::msgsDeleteMessageData(qint64 dmId) const
+bool MessageDb::msgsDeleteMessageData(qint64 dmId)
 {
 	/* TODO -- The whole operation must fail or succeed. */
 
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	int certificateId = -1;
@@ -3190,11 +3186,11 @@ fail:
 }
 
 QList<MessageDb::MsgId> MessageDb::msgsDateInterval(const QDate &fromDate,
-    const QDate &toDate, enum MessageDirection msgDirect) const
+    const QDate &toDate, enum MessageDirection msgDirect)
 {
 	/* TODO -- Check whether time is interpreted in correct time zone! */
 
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 	QList<MessageDb::MsgId> dmIDs;
 
@@ -3237,9 +3233,9 @@ fail:
 	return QList<MessageDb::MsgId>();
 }
 
-QStringList MessageDb::getMessageForHtmlExport(qint64 dmId) const
+QStringList MessageDb::getMessageForHtmlExport(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QStringList messageItems;
 	QString queryStr = "SELECT dmSender, dmRecipient, dmAnnotation, "
 	    "dmDeliveryTime, dmAcceptanceTime "
@@ -3272,9 +3268,9 @@ fail:
 	return QStringList();
 }
 
-QStringList MessageDb::getMessageForCsvExport(qint64 dmId) const
+QStringList MessageDb::getMessageForCsvExport(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QStringList messageItems;
 	QString queryStr = "SELECT dmMessageStatus, _dmType, dmDeliveryTime, "
 	    "dmAcceptanceTime, dmAnnotation, dmSender, dmSenderAddress, "
@@ -3311,7 +3307,7 @@ fail:
 
 bool MessageDb::setMessageVerified(qint64 dmId, bool verified)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "UPDATE messages SET is_verified = :verified "
 	    "WHERE dmID = :dmId";
 
@@ -3335,7 +3331,7 @@ fail:
 bool MessageDb::setMessageProcessState(qint64 dmId,
     enum MessageProcessState state)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "INSERT OR REPLACE INTO process_state "
 	    "(message_id, state) VALUES (:dmId, :state)";
 
@@ -3356,9 +3352,9 @@ fail:
 	return false;
 }
 
-int MessageDb::getMessageProcessState(qint64 dmId) const
+int MessageDb::getMessageProcessState(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT state FROM process_state "
 	    "WHERE message_id = :dmId";
 
@@ -3382,7 +3378,7 @@ fail:
 
 bool MessageDb::setReceivedMessagesProcessState(enum MessageProcessState state)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	queryStr = "INSERT OR REPLACE INTO process_state (message_id, state)"
@@ -3410,7 +3406,7 @@ fail:
 bool MessageDb::smsgdtSetReceivedYearProcessState(const QString &year,
     enum MessageProcessState state)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	queryStr = "INSERT OR REPLACE INTO process_state (message_id, state)"
@@ -3441,7 +3437,7 @@ fail:
 bool MessageDb::smsgdtSetWithin90DaysReceivedProcessState(
     enum MessageProcessState state)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	queryStr = "INSERT OR REPLACE INTO process_state (message_id, state)"
@@ -3468,9 +3464,9 @@ fail:
 	return false;
 }
 
-QByteArray MessageDb::getMessageTimestampRaw(qint64 dmId) const
+QByteArray MessageDb::getMessageTimestampRaw(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT dmQTimestamp FROM messages "
 	    "WHERE dmID = :dmId";
 
@@ -3503,12 +3499,12 @@ bool MessageDb::openDb(const QString &fileName, bool createMissing)
 	flags |= GlobInstcs::prefsPtr->storeMessagesOnDisk ?
 	    SQLiteDb::NO_OPTIONS : SQLiteDb::FORCE_IN_MEMORY;
 
-	return SQLiteDb::openDb(fileName, flags);
+	return DelayedAccessSQLiteDb::openDb(fileName, flags);
 }
 
 bool MessageDb::copyDb(const QString &newFileName)
 {
-	return SQLiteDb::copyDb(newFileName, SQLiteDb::CREATE_MISSING);
+	return DelayedAccessSQLiteDb::copyDb(newFileName, SQLiteDb::CREATE_MISSING);
 }
 
 bool MessageDb::msgsRcvdWithin90DaysQuery(QSqlQuery &query)
@@ -3611,7 +3607,7 @@ QList<class SQLiteTbl *> MessageDb::listOfTables(void) const
  *     of the programme.
  */
 static
-bool ensurePrimaryKeyInProcessStateTable(QSqlDatabase &db)
+bool ensurePrimaryKeyInProcessStateTable(const QSqlDatabase &db)
 {
 	QSqlQuery query(db);
 	QString queryStr;
@@ -3710,13 +3706,14 @@ bool MessageDb::assureConsistency(void)
 	    "Assuring primary key in process_state table in database '%s'.",
 	    fileName().toUtf8().constData());
 
-	return ensurePrimaryKeyInProcessStateTable(m_db);
+	return ensurePrimaryKeyInProcessStateTable(
+	    DelayedAccessSQLiteDb::accessDb());
 }
 
 bool MessageDb::msgsInsertUpdateMessageCertBase64(qint64 dmId,
     const QByteArray &crtBase64)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	int certId = -1;
 	bool certEntryFound = false;
 
@@ -3847,9 +3844,9 @@ fail:
 	return false;
 }
 
-QDateTime MessageDb::msgsVerificationDate(qint64 dmId) const
+QDateTime MessageDb::msgsVerificationDate(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	if (Preferences::DOWNLOAD_DATE ==
@@ -3884,9 +3881,8 @@ fail:
 }
 
 MessageDb::FilenameEntry MessageDb::msgsGetAdditionalFilenameEntry(qint64 dmId)
-    const
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 	MessageDb::FilenameEntry entry;
 
@@ -3915,18 +3911,18 @@ fail:
 	return MessageDb::FilenameEntry();
 }
 
-QJsonDocument MessageDb::getMessageCustomData(qint64 msgId) const
+QJsonDocument MessageDb::getMessageCustomData(qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr = "SELECT custom_data FROM supplementary_message_data "
-	    "WHERE message_id = :msgId";
+	    "WHERE message_id = :dmId";
 
 	if (!query.prepare(queryStr)) {
 		logErrorNL("Cannot prepare SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":msgId", msgId);
+	query.bindValue(":dmId", dmId);
 	if (query.exec() && query.isActive()) {
 		query.first();
 		if (query.isValid()) {
@@ -3942,7 +3938,7 @@ fail:
 }
 
 bool MessageDb::msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
-    bool ignoreMissingCrlCheck) const
+    bool ignoreMissingCrlCheck)
 {
 	debugFuncCall();
 
@@ -3961,10 +3957,9 @@ bool MessageDb::msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
 	    ignoreMissingCrlCheck ? 0 : 1);
 }
 
-bool MessageDb::isRelevantMsgForImport(qint64 msgId, const QString databoxId)
-    const
+bool MessageDb::isRelevantMsgForImport(qint64 dmId, const QString databoxId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QString queryStr;
 
 	queryStr = "SELECT dmID FROM messages WHERE dmID = :dmID AND "
@@ -3975,7 +3970,7 @@ bool MessageDb::isRelevantMsgForImport(qint64 msgId, const QString databoxId)
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":dmID", msgId);
+	query.bindValue(":dmID", dmId);
 	query.bindValue(":dbIDSender", databoxId);
 	query.bindValue(":dbIDRecipient", databoxId);
 	if (query.exec() && query.isActive()) {
@@ -3992,9 +3987,9 @@ fail:
 }
 
 bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
-    qint64 msgId)
+    qint64 dmId)
 {
-	QSqlQuery query(m_db);
+	QSqlQuery query(DelayedAccessSQLiteDb::accessDb());
 	QByteArray der_data;
 	bool attached = false;
 	bool transaction = false;
@@ -4018,7 +4013,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":dmID", msgId);
+	query.bindValue(":dmID", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4039,7 +4034,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":message_id", msgId);
+	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4057,7 +4052,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":message_id", msgId);
+	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4075,7 +4070,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":message_id", msgId);
+	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4090,7 +4085,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":message_id", msgId);
+	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4105,7 +4100,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":message_id", msgId);
+	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4121,7 +4116,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":message_id", msgId);
+	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4136,7 +4131,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":message_id", msgId);
+	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4152,7 +4147,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":message_id", msgId);
+	query.bindValue(":message_id", dmId);
 	if (!query.exec()) {
 		logErrorNL("Cannot exec SQL query: %s.",
 		    query.lastError().text().toUtf8().constData());
@@ -4168,7 +4163,7 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 		    query.lastError().text().toUtf8().constData());
 		goto fail;
 	}
-	query.bindValue(":message_id", msgId);
+	query.bindValue(":message_id", dmId);
 	if (query.exec() && query.isActive() &&
 	    query.first() && query.isValid()) {
 		der_data = query.value(0).toByteArray();
@@ -4179,10 +4174,11 @@ bool MessageDb::copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
 	}
 
 	if (!der_data.isEmpty()) {
-		/* check if der_data exists in the target database and update
-		* message certificate_id
-		*/
-		if (!msgsInsertUpdateMessageCertBase64(msgId, der_data)) {
+		/*
+		 * Check if der_data exist in the target database and update
+		 * the message certificate_id.
+		 */
+		if (!msgsInsertUpdateMessageCertBase64(dmId, der_data)) {
 			goto fail;
 		}
 	}

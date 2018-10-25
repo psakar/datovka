@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -483,7 +483,7 @@ void appendMsgToWidget(QTableWidget *tabWid,
 	QTableWidgetItem *item = new QTableWidgetItem;
 	item->setText(QString::number(msgData.mId.dmId));
 	if (ENABLE_TOOLTIP) {
-		const MessageDb *messageDb =
+		MessageDb *messageDb =
 		    accountDescr.messageDbSet->constAccessMessageDb(
 		        msgData.mId.deliveryTime);
 		if (Q_NULLPTR != messageDb) {

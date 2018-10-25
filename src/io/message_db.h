@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -33,9 +33,9 @@
 #include <QVector>
 
 #include "src/common.h"
-#include "src/datovka_shared/io/sqlite/db.h"
 #include "src/datovka_shared/isds/message_interface.h"
 #include "src/datovka_shared/isds/types.h"
+#include "src/io/sqlite/delayed_access_db.h"
 
 #define INVALID_YEAR "inv"
 #define DB2 "db2"
@@ -49,7 +49,7 @@ enum Sorting {
 /*!
  * @brief Encapsulates message database.
  */
-class MessageDb : public SQLiteDb {
+class MessageDb : public DelayedAccessSQLiteDb {
 
 public:
 	/*!
@@ -289,7 +289,7 @@ public:
 	 * @param[in] dmId  Message id.
 	 * @return Message envelope structure. Returns empty structure if failure.
 	 */
-	const Isds::Envelope getMessageReplyData(qint64 dmId) const;
+	const Isds::Envelope getMessageReplyData(qint64 dmId);
 
 	/*!
 	 * @brief Return message type (sent or received).
@@ -297,7 +297,7 @@ public:
 	 * @param[in] dmId Message id.
 	 * @return Message type value, negative value -1 on error.
 	 */
-	int getMessageType(qint64 dmId) const;
+	int getMessageType(qint64 dmId);
 
 	/*!
 	 * @brief Returns whether message is verified.
@@ -305,7 +305,7 @@ public:
 	 * @param[in] dmId Message identifier.
 	 * @return Return message sign verification status.
 	 */
-	enum MsgVerificationResult isMessageVerified(qint64 dmId) const;
+	enum MsgVerificationResult isMessageVerified(qint64 dmId);
 
 	/*!
 	 * @brief Returns whether message was read locally.
@@ -313,7 +313,7 @@ public:
 	 * @param[in] dmId  Message id.
 	 * @retunrn False if not read or on failure.
 	 */
-	bool messageLocallyRead(qint64 dmId) const;
+	bool messageLocallyRead(qint64 dmId);
 
 	/*!
 	 * @brief Set message read locally status.
@@ -332,7 +332,7 @@ public:
 	 * @return HTML formatted string containing message information.
 	 *         Empty string is returned on error.
 	 */
-	QString descriptionHtml(qint64 dmId, bool verSignature = true) const;
+	QString descriptionHtml(qint64 dmId, bool verSignature = true);
 
 	/*!
 	 * @brief Return message envelope HTML to be used to generate a PDF.
@@ -342,8 +342,7 @@ public:
 	 * @return HTML formatted string generated from message envelope.
 	 *     Empty string is returned on error.
 	 */
-	QString envelopeInfoHtmlToPdf(qint64 dmId,
-	    const QString &dbType) const;
+	QString envelopeInfoHtmlToPdf(qint64 dmId, const QString &dbType);
 
 	/*!
 	 * @brief Return message file list HTML to be used to generate a PDF.
@@ -352,7 +351,7 @@ public:
 	 * @return HTML formatted string generated from message file db.
 	 *     Empty string is returned on error.
 	 */
-	QString fileListHtmlToPdf(qint64 dmId) const;
+	QString fileListHtmlToPdf(qint64 dmId);
 
 	/*!
 	 * @brief Return message delivery info HTML to be used to generate
@@ -362,23 +361,23 @@ public:
 	 * @return HTML formatted string generated from message delivery
 	 *     information. Empty string is returned on error.
 	 */
-	QString deliveryInfoHtmlToPdf(qint64 dmId) const;
+	QString deliveryInfoHtmlToPdf(qint64 dmId);
 
 	/*!
 	 * @brief Return attachments related to given message.
 	 *
-	 * @param[in] msgId  Message identifier.
+	 * @param[in] dmId Message identifier.
 	 * @return List of attachment structure.
 	 */
-	QList<Isds::Document> getMessageAttachments(qint64 msgId) const;
+	QList<Isds::Document> getMessageAttachments(qint64 dmId);
 
 	/*!
 	 * @brief Return list of attachment entries related to given message.
 	 *
-	 * @param[in] msgId  Message identifier.
+	 * @param[in] dmId Message identifier.
 	 * @return List of attachment entries.
 	 */
-	QList<AttachmentEntry> attachEntries(qint64 msgId) const;
+	QList<AttachmentEntry> attachEntries(qint64 dmId);
 
 	/*!
 	 * @brief Insert message envelope into database.
@@ -408,7 +407,7 @@ public:
 	 * @param[in] dmId Message identifier.
 	 * @return Message state or MS_NULL if message does not exist in the database.
 	 */
-	enum Isds::Type::DmState getMessageStatus(qint64 dmId) const;
+	enum Isds::Type::DmState getMessageStatus(qint64 dmId);
 
 	/*!
 	 * @brief Update message envelope delivery information.
@@ -475,7 +474,7 @@ public:
 	 *
 	 * @return Message identifier list.
 	 */
-	QList<qint64> getAllMessageIDsWithoutAttach(void) const;
+	QList<qint64> getAllMessageIDsWithoutAttach(void);
 
 	/*!
 	 * @brief Return all message IDs from database.
@@ -483,7 +482,7 @@ public:
 	 * @param[in] messageType Specifies sent or received messages.
 	 * @return Message identifier list.
 	 */
-	QList<qint64> getAllMessageIDs(enum MessageType messageType) const;
+	QList<qint64> getAllMessageIDs(enum MessageType messageType);
 
 	/*!
 	 * @brief Get base64 encoded raw message data.
@@ -491,7 +490,7 @@ public:
 	 * @param[in] dmId Message identifier.
 	 * @return Empty byte array on error.
 	 */
-	QByteArray getCompleteMessageBase64(qint64 dmId) const;
+	QByteArray getCompleteMessageBase64(qint64 dmId);
 
 	/*!
 	 * @brief Check if complete message is in the database.
@@ -499,7 +498,7 @@ public:
 	 * @param[in] dmId Message identifier.
 	 * @return True if complete message is in the database.
 	 */
-	bool isCompleteMessageInDb(qint64 dmId) const;
+	bool isCompleteMessageInDb(qint64 dmId);
 
 	/*!
 	 * @brief Get message data in DER (raw) format.
@@ -507,7 +506,7 @@ public:
 	 * @param[in] dmId Message identifier.
 	 * @return Empty byte array on error.
 	 */
-	QByteArray getCompleteMessageRaw(qint64 dmId) const;
+	QByteArray getCompleteMessageRaw(qint64 dmId);
 
 	/*!
 	 * @brief Get base64-encoded delivery info from
@@ -516,7 +515,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Empty byte array on error.
 	 */
-	QByteArray getDeliveryInfoBase64(qint64 dmId) const;
+	QByteArray getDeliveryInfoBase64(qint64 dmId);
 
 	/*!
 	 * @brief Insert/update raw (DER) delivery info into
@@ -546,7 +545,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Message hash structure.
 	 */
-	const Isds::Hash getMessageHash(qint64 dmId) const;
+	const Isds::Hash getMessageHash(qint64 dmId);
 
 	/*!
 	 * @brief Delete all message records from db.
@@ -554,7 +553,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return True on success.
 	 */
-	bool msgsDeleteMessageData(qint64 dmId) const;
+	bool msgsDeleteMessageData(qint64 dmId);
 
 	/*!
 	 * @brief Return some message items in order to export correspondence
@@ -564,7 +563,7 @@ public:
 	 * @return String list containing sender, recipient, annotation, ...
 	 *    Empty list is returned on error.
 	 */
-	QStringList getMessageForHtmlExport(qint64 dmId) const;
+	QStringList getMessageForHtmlExport(qint64 dmId);
 
 	/*!
 	 * @brief Return some message items for export correspondence to csv.
@@ -573,7 +572,7 @@ public:
 	 * @return String containing message status, message type, ...
 	 *    Empty list is returned on error.
 	 */
-	QStringList getMessageForCsvExport(qint64 dmId) const;
+	QStringList getMessageForCsvExport(qint64 dmId);
 
 	/*!
 	 * @brief Set the verification result.
@@ -600,7 +599,7 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return Message processing state, -1 on error.
 	 */
-	int getMessageProcessState(qint64 dmId) const;
+	int getMessageProcessState(qint64 dmId);
 
 	/*!
 	 * @brief Returns time stamp in raw (DER) format.
@@ -609,7 +608,7 @@ public:
 	 * @return Qualified time stamp in DER format.
 	 *     Empty byte array on error.
 	 */
-	QByteArray getMessageTimestampRaw(qint64 dmId) const;
+	QByteArray getMessageTimestampRaw(qint64 dmId);
 
 	/*!
 	 * @brief Return some additional filename entries as
@@ -618,17 +617,17 @@ public:
 	 * @param[in] dmId  Message identifier.
 	 * @return FilenameEntry struct.
 	 */
-	FilenameEntry msgsGetAdditionalFilenameEntry(qint64 dmId) const;
+	FilenameEntry msgsGetAdditionalFilenameEntry(qint64 dmId);
 
 	/*!
 	 * @brief Copy message data to account database from source database.
 	 *
-	 * @param[in] dmId  Message identifier.
-	 * @param[in] sourceDbPath  Source db path.
+	 * @param[in] sourceDbPath Source db path.
+	 * @param[in] dmId Message identifier.
 	 * @return True if copy of message data was success.
 	 */
 	bool copyCompleteMsgDataToAccountDb(const QString &sourceDbPath,
-	    qint64 msgId);
+	    qint64 dmId);
 
 	/*!
 	 * @brief Copy all messages correspond with
@@ -654,14 +653,14 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<RcvdEntry> msgsRcvdEntries(void) const;
+	QList<RcvdEntry> msgsRcvdEntries(void);
 
 	/*!
 	 * @brief Return entries for received messages within past 90 days.
 	 *
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<RcvdEntry> msgsRcvdEntriesWithin90Days(void) const;
+	QList<RcvdEntry> msgsRcvdEntriesWithin90Days(void);
 
 	/*!
 	 * @brief Return entries for received messages within given year.
@@ -669,7 +668,7 @@ protected: /* These function are used from within a database container. */
 	 * @param[in] year         Year number.
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<RcvdEntry> msgsRcvdEntriesInYear(const QString &year) const;
+	QList<RcvdEntry> msgsRcvdEntriesInYear(const QString &year);
 
 	/*!
 	 * @brief Return list of years (strings) in database.
@@ -678,8 +677,7 @@ protected: /* These function are used from within a database container. */
 	 * @param[in] sorting Sorting.
 	 * @return List of years.
 	 */
-	QStringList msgsYears(enum MessageType type,
-	    enum Sorting sorting) const;
+	QStringList msgsYears(enum MessageType type, enum Sorting sorting);
 
 	/*!
 	 * @brief Return list of years and number of messages in database.
@@ -689,7 +687,7 @@ protected: /* These function are used from within a database container. */
 	 * @return List of years and counts.
 	 */
 	QList< QPair<QString, int> > msgsYearlyCounts(enum MessageType type,
-	    enum Sorting sorting) const;
+	    enum Sorting sorting);
 
 	/*!
 	 * @brief Return number of unread messages received within past 90
@@ -698,7 +696,7 @@ protected: /* These function are used from within a database container. */
 	 * @param[in] type Whether to obtain sent or received messages.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsUnreadWithin90Days(enum MessageType type) const;
+	int msgsUnreadWithin90Days(enum MessageType type);
 
 	/*!
 	 * @brief Return number of unread received messages in year.
@@ -707,8 +705,7 @@ protected: /* These function are used from within a database container. */
 	 * @param[in] year Year number.
 	 * @return Number of unread messages, -1 on error.
 	 */
-	int msgsUnreadInYear(enum MessageType type,
-	    const QString &year) const;
+	int msgsUnreadInYear(enum MessageType type, const QString &year);
 
 	/*!
 	 * @brief Appends to sent entry list data received from SQL query.
@@ -724,14 +721,14 @@ protected: /* These function are used from within a database container. */
 	 *
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<SntEntry> msgsSntEntries(void) const;
+	QList<SntEntry> msgsSntEntries(void);
 
 	/*!
 	 * @brief Return entries for all sent messages within past 90 days.
 	 *
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<SntEntry> msgsSntEntriesWithin90Days(void) const;
+	QList<SntEntry> msgsSntEntriesWithin90Days(void);
 
 	/*!
 	 * @brief Return entries for sent messages within given year.
@@ -739,7 +736,7 @@ protected: /* These function are used from within a database container. */
 	 * @param[in] year         Year number.
 	 * @return List of entries, empty list on failure.
 	 */
-	QList<SntEntry> msgsSntEntriesInYear(const QString &year) const;
+	QList<SntEntry> msgsSntEntriesInYear(const QString &year);
 
 	/*!
 	 * @brief Set message read locally for all received messages.
@@ -802,7 +799,7 @@ protected: /* These function are used from within a database container. */
 	 *     If no such message is found then a message identifier
 	 *     containing -1 dmId returned.
 	 */
-	MsgId msgsMsgId(qint64 dmId) const;
+	MsgId msgsMsgId(qint64 dmId);
 
 	/*!
 	 * @brief Return contacts from message db.
@@ -810,21 +807,21 @@ protected: /* These function are used from within a database container. */
 	 * @return List of vectors containing recipientId, recipientName,
 	 *     recipentAddress.
 	 */
-	QList<ContactEntry> uniqueContacts(void) const;
+	QList<ContactEntry> uniqueContacts(void);
 
 	/*!
 	 * @brief Return all message ID from database.
 	 *
-	 * @return message id list.
+	 * @return Message id list.
 	 */
-	QList<MsgId> getAllMessageIDsFromDB(void) const;
+	QList<MsgId> getAllMessageIDsFromDB(void);
 
 	/*!
 	 * @brief Get list of all message IDs corresponding with year.
 	 *
 	 * @return Return message ID list.
 	 */
-	QList<qint64> getAllMsgsIDEqualWithYear(const QString &year) const;
+	QList<qint64> getAllMsgsIDEqualWithYear(const QString &year);
 
 	/*!
 	 * @brief Return list of message ids corresponding to given date
@@ -836,7 +833,7 @@ protected: /* These function are used from within a database container. */
 	 * @return List of message ids. Empty list on error.
 	 */
 	QList<MsgId> msgsDateInterval(const QDate &fromDate,
-	    const QDate &toDate, enum MessageDirection msgDirect) const;
+	    const QDate &toDate, enum MessageDirection msgDirect);
 
 	/*!
 	 * @brief Message search according to envelope data.
@@ -850,23 +847,24 @@ protected: /* These function are used from within a database container. */
 	 */
 	QList<SoughtMsg> msgsSearch(const Isds::Envelope &envel,
 	    enum MessageDirection msgDirect, const QString &attachPhrase,
-	    bool logicalAnd) const;
+	    bool logicalAnd);
 
 	/*!
 	 * @brief Get message envelope data from id.
 	 *
-	 * @return message data for message id.
+	 * @paran[in] dmId Message identification number.
+	 * @return Message envelope data.
 	 */
-	SoughtMsg msgsGetMsgDataFromId(const qint64 msgId) const;
+	SoughtMsg msgsGetMsgDataFromId(const qint64 dmId);
 
 	/*!
-	 * @brief Test if imported message is relevent to account db.
+	 * @brief Test if imported message is relevant to account db.
 	 *
 	 * @param[in] dmId  Message identifier.
 	 * @param[in] databoxId  Databox ID where message should be imported.
 	 * @return Message is relevant for import to db or not.
 	 */
-	bool isRelevantMsgForImport(qint64 msgId, const QString databoxId) const;
+	bool isRelevantMsgForImport(qint64 dmId, const QString databoxId);
 
 	/*!
 	 * @brief Open database file.
@@ -949,15 +947,15 @@ private:
 	 * @return Message verification date. Invalid value is returned on
 	 *     error.
 	 */
-	QDateTime msgsVerificationDate(qint64 dmId) const;
+	QDateTime msgsVerificationDate(qint64 dmId);
 
 	/*!
 	 * @brief Read data from supplementary message data table.
 	 *
-	 * @brief msgId  Message identifier.
+	 * @brief dmId Message identifier.
 	 * @return Stored json document data. Returns empty document on error.
 	 */
-	QJsonDocument getMessageCustomData(qint64 msgId) const;
+	QJsonDocument getMessageCustomData(qint64 dmId);
 
 	/*!
 	 * @brief Check whether message signature was valid at given date
@@ -969,7 +967,7 @@ private:
 	 * @return True if date check succeeds.
 	 */
 	bool msgCertValidAtDate(qint64 dmId, const QDateTime &dateTime,
-	    bool ignoreMissingCrlCheck = false) const;
+	    bool ignoreMissingCrlCheck = false);
 
 	/*!
 	 * @brief Add/update message certificate in database.

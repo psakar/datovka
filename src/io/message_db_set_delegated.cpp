@@ -127,7 +127,7 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_msgsRcvdEntriesWithin90Days
 	QList<MessageDb::RcvdEntry> entryList;
 
 	{
-		QSqlQuery query(db0.m_db);
+		QSqlQuery query(db0.accessDb());
 
 		if (!db0.msgsRcvdWithin90DaysQuery(query)) {
 			goto fail;
@@ -137,7 +137,7 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_msgsRcvdEntriesWithin90Days
 	}
 
 	{
-		QSqlQuery query(db1.m_db);
+		QSqlQuery query(db1.accessDb());
 
 		if (!db1.msgsRcvdWithin90DaysQuery(query)) {
 			goto fail;
@@ -550,7 +550,7 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_msgsSntEntriesWithin90Days(
 	QList<MessageDb::SntEntry> entryList;
 
 	{
-		QSqlQuery query(db0.m_db);
+		QSqlQuery query(db0.accessDb());
 
 		if (!db0.msgsSntWithin90DaysQuery(query)) {
 			goto fail;
@@ -560,7 +560,7 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_msgsSntEntriesWithin90Days(
 	}
 
 	{
-		QSqlQuery query(db1.m_db);
+		QSqlQuery query(db1.accessDb());
 
 		if (!db1.msgsSntWithin90DaysQuery(query)) {
 			goto fail;

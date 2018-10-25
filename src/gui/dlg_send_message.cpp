@@ -72,7 +72,7 @@
 #define DMTYPE_COMM "K"
 #define DMTYPE_RESP "O"
 
-const QString &dzPrefix(const MessageDb *messageDb, qint64 dmId)
+const QString &dzPrefix(MessageDb *messageDb, qint64 dmId)
 {
 	const static QString unspecified(QLatin1String("DZ"));
 	const static QString received(QLatin1String("DDZ"));

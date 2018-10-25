@@ -168,7 +168,7 @@ QString DlgCorrespondenceOverview::msgCsvEntry(
 		return QString();
 	}
 
-	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
+	MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
 	    mId.deliveryTime);
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
@@ -272,7 +272,7 @@ QString DlgCorrespondenceOverview::msgHtmlEntry(const QString &userName,
 		return QString();
 	}
 
-	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
+	MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
 	    mId.deliveryTime);
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
