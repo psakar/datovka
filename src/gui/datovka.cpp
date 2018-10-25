@@ -860,6 +860,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 //		Q_ASSERT(0);
 		return;
 	}
+	const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
+	ui->actionCreate_gov_message->setEnabled(!itemSettings.isTestAccount());
 
 	const MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
@@ -877,10 +879,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutChanged()), this,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
-
-		/* Get user name and db location. */
-		const AcntSettings &itemSettings(
-		    (*GlobInstcs::acntMapPtr)[userName]);
 
 		QString dbDir = itemSettings.dbDir();
 		if (dbDir.isEmpty()) {
@@ -4617,7 +4615,12 @@ void MainWindow::createGovMessage(void)
 {
 	debugSlotCall();
 
-	QDialog *govServicesDialog = new DlgGovServices(this);
+	/* Get username of selected account */
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
+	QDialog *govServicesDialog = new DlgGovServices(userName, this);
 	govServicesDialog->exec();
 }
 

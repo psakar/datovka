@@ -38,6 +38,9 @@ class GovServiceListModel : public QAbstractListModel {
 	Q_OBJECT
 
 public:
+	static
+	const int valueRole; /*!< Role number under which to return entry value. */
+
 	/*!
 	 * @brief Model entry.
 	 */

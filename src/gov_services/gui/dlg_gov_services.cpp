@@ -34,12 +34,15 @@
 #include "src/datovka_shared/gov_services/service/gov_szr_ros_vv.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/log/memory_log.h"
+#include "src/global.h"
 #include "src/gov_services/models/gov_form_list_model.h"
 #include "src/gov_services/gui/dlg_gov_services.h"
+#include "src/io/account_db.h"
 #include "ui_dlg_gov_services.h"
 
-DlgGovServices::DlgGovServices(QWidget *parent)
+DlgGovServices::DlgGovServices(const QString &userName, QWidget *parent)
     : QDialog(parent),
+    m_userName(userName),
     m_govServices(),
     m_govServiceModel(new (std::nothrow) GovServiceListModel),
     m_ui(new (std::nothrow) Ui::DlgGovServices)
@@ -55,6 +58,8 @@ DlgGovServices::DlgGovServices(QWidget *parent)
 
 	connect(m_ui->filterLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterServices(QString)));
+	connect(m_ui->govServiceListView, SIGNAL(doubleClicked(QModelIndex)),
+	    this, SLOT(serviceItemDoubleClicked(QModelIndex)));
 }
 
 DlgGovServices::~DlgGovServices(void)
@@ -78,6 +83,17 @@ void DlgGovServices::filterServices(const QString &text)
 		m_ui->filterLine->setStyleSheet(
 		    SortFilterProxyModel::notFoundFilterEditStyle);
 	}
+}
+
+void DlgGovServices::serviceItemDoubleClicked(const QModelIndex &index)
+{
+	debugSlotCall();
+
+	if (!index.isValid()) {
+		return;
+	}
+
+	QString serId = index.sibling(index.row(), 0).data(Qt::UserRole).toString();
 }
 
 /*!
@@ -155,12 +171,27 @@ void DlgGovServices::loadServicesToModel(void) const
 {
 	debugFuncCall();
 
+	m_govServiceModel->clearAll();
+
+	const Isds::DbOwnerInfo dbOwnerInfo(GlobInstcs::accntDbPtr->getOwnerInfo(
+	    AccountDb::keyFromLogin(m_userName)));
+	if (dbOwnerInfo.isNull()) {
+		return;
+	}
+
 	foreach (const QString &key, m_govServices.keys()) {
 		const Gov::Service *cgs = m_govServices.value(key);
 		if (Q_UNLIKELY(cgs == Q_NULLPTR)) {
 			Q_ASSERT(0);
 			continue;
 		}
-		m_govServiceModel->appendService(cgs);
+		/* Enlist only services which can be used. */
+		if (cgs->canSend(dbOwnerInfo.dbType())) {
+			m_govServiceModel->appendService(cgs);
+		} else {
+			logInfo("User '%s' cannot use the e-gov service '%s'.",
+			    m_userName.toUtf8().constData(),
+			    cgs->internalId().toUtf8().constData());
+		}
 	}
 }

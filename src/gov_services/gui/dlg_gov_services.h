@@ -25,6 +25,7 @@
 
 #include <QDialog>
 #include <QMap>
+#include <QModelIndex>
 #include <QString>
 
 #include "src/gov_services/models/gov_service_list_model.h"
@@ -50,7 +51,8 @@ public:
 	 *
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgGovServices(QWidget *parent = Q_NULLPTR);
+	explicit DlgGovServices(const QString &userName,
+	    QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
@@ -63,6 +65,11 @@ private slots:
 	 * @brief Apply filter text on the Gov service list.
 	 */
 	void filterServices(const QString &text);
+
+	/*!
+	 * @brief Any Gov service was double clicked.
+	 */
+	void serviceItemDoubleClicked(const QModelIndex &index);
 
 private:
 
@@ -81,6 +88,7 @@ private:
 	 */
 	void loadServicesToModel(void) const;
 
+	QString m_userName;
 	QMap<QString, const Gov::Service *> m_govServices; /*!< Holds pointers to all available Gov services. */
 	SortFilterProxyModel m_govServiceListProxyModel; /*!< Used for Gov service filtering. */
 	GovServiceListModel *m_govServiceModel; /*!< Gov service model. */
