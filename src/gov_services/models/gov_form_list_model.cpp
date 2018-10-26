@@ -24,14 +24,16 @@
 #include "src/gov_services/models/gov_form_list_model.h"
 
 GovFormListModel::GovFormListModel(QObject *parent)
-    : QAbstractListModel(parent),
+    : TblModel(parent),
     m_service(Q_NULLPTR)
 {
+	/* Fixed column count. */
+	m_columnCount = 2;
 }
 
 GovFormListModel::GovFormListModel(const GovFormListModel &other,
     QObject *parent)
-    : QAbstractListModel(parent),
+    : TblModel(parent),
     m_service(Q_NULLPTR)
 {
 	/* Copy service data. */
@@ -43,6 +45,9 @@ GovFormListModel::GovFormListModel(const GovFormListModel &other,
 			}
 		}
 	}
+
+	/* Fixed column count. */
+	m_columnCount = 2;
 }
 
 GovFormListModel::~GovFormListModel(void)
@@ -56,32 +61,6 @@ int GovFormListModel::rowCount(const QModelIndex &parent) const
 {
 	return ((!parent.isValid()) && (m_service != Q_NULLPTR)) ?
 	    m_service->fields().size() : 0;
-}
-
-/* Property keys used in QML. */
-#define PK_KEY "gsKey"
-#define PK_VAL "gsVal"
-#define PK_DESCR "gsDescr"
-#define PK_PLACEHOLD "gsPlacehold"
-#define PK_MANDATORY "gsMandatory"
-#define PK_USER_INPUT "gsUserInput"
-#define PK_BOX_INPUT "gsBoxInput"
-#define PK_TYPE_DATE "gsTypeDate"
-
-QHash<int, QByteArray> GovFormListModel::roleNames(void) const
-{
-	static QHash<int, QByteArray> roles;
-	if (roles.isEmpty()) {
-		roles[ROLE_GOV_SRVC_KEY] = PK_KEY;
-		roles[ROLE_GOV_SRVC_VAL] = PK_VAL;
-		roles[ROLE_GOV_SRVC_DESCR] = PK_DESCR;
-		roles[ROLE_GOV_SRVC_PLACEHOLD] = PK_PLACEHOLD;
-		roles[ROLE_GOV_SRVC_MANDATORY] = PK_MANDATORY;
-		roles[ROLE_GOV_SRVC_USER_INPUT] = PK_USER_INPUT;
-		roles[ROLE_GOV_SRVC_BOX_INPUT] = PK_BOX_INPUT;
-		roles[ROLE_GOV_SRVC_TYPE_DATE] = PK_TYPE_DATE;
-	}
-	return roles;
 }
 
 QVariant GovFormListModel::data(const QModelIndex &index, int role) const
@@ -100,30 +79,18 @@ QVariant GovFormListModel::data(const QModelIndex &index, int role) const
 	const Gov::FormField &ff(m_service->fields()[row]);
 
 	switch (role) {
-	case ROLE_GOV_SRVC_KEY:
-		return ff.key();
-		break;
-	case ROLE_GOV_SRVC_VAL:
-		return ff.val();
-		break;
-	case ROLE_GOV_SRVC_DESCR:
-		return ff.descr();
-		break;
-	case ROLE_GOV_SRVC_PLACEHOLD:
-		return ff.placeholder();
-		break;
-	case ROLE_GOV_SRVC_MANDATORY:
-		return ff.properties().testFlag(Gov::FormFieldType::PROP_MANDATORY);
-		break;
-	case ROLE_GOV_SRVC_USER_INPUT:
-		return ff.properties().testFlag(Gov::FormFieldType::PROP_USER_INPUT);
-		break;
-	case ROLE_GOV_SRVC_BOX_INPUT:
-		return ff.properties().testFlag(Gov::FormFieldType::PROP_BOX_INPUT);
-		break;
-	case ROLE_GOV_SRVC_TYPE_DATE:
-		return ff.properties().testFlag(Gov::FormFieldType::PROP_TYPE_DATE);
-		break;
+	case Qt::DisplayRole:
+		switch (index.column()) {
+		case LABEL_COL:
+			return ff.key();
+			break;
+		case TEXT_EDIT_COL:
+			return ff.val();
+			break;
+		default:
+			/* Do nothing. */
+			break;
+		}
 	default:
 		/* Do nothing. */
 		break;
@@ -134,7 +101,23 @@ QVariant GovFormListModel::data(const QModelIndex &index, int role) const
 
 Qt::ItemFlags GovFormListModel::flags(const QModelIndex &index) const
 {
-	return QAbstractListModel::flags(index);
+	Qt::ItemFlags defaultFlags = TblModel::flags(index);
+
+	if (index.column() == TEXT_EDIT_COL) {
+
+		int row = index.row();
+		if (Q_UNLIKELY((row < 0) || (row >= m_service->fields().size()))) {
+			Q_ASSERT(0);
+			return defaultFlags;
+		}
+
+		const Gov::FormField &ff(m_service->fields()[row]);
+		if (ff.val().isEmpty()) {
+			defaultFlags |= Qt::ItemIsEditable;
+		}
+	}
+
+	return defaultFlags;
 }
 
 const Gov::Service *GovFormListModel::service(void) const
@@ -153,26 +136,22 @@ Gov::Service *GovFormListModel::setService(Gov::Service *service)
 	return oldService;
 }
 
-void GovFormListModel::setProperty(int index, const QString &property,
-    const QVariant &value)
+bool GovFormListModel::setData(const QModelIndex &index, const QVariant &value,
+    int role)
 {
-	if (Q_UNLIKELY(m_service == Q_NULLPTR)) {
-		Q_ASSERT(0);
-		return;
+	if (!index.isValid()) {
+		return false;
 	}
 
-	if (Q_UNLIKELY((index < 0) || (index >= m_service->fields().size()))) {
-		Q_ASSERT(0);
-		return;
+	int row = index.row();
+
+	if ((index.column() == TEXT_EDIT_COL) || (role == Qt::ItemIsEditable)) {
+		m_service->fields()[row].setVal(value.toString());
+		emit dataChanged(index, index);
+		return true;
 	}
 
-	if (property != PK_VAL) {
-		return;
-	}
-
-	m_service->fields()[index].setVal(value.toString());
-	emit dataChanged(QAbstractListModel::index(index, 0),
-	    QAbstractListModel::index(index, 0));
+	return false;
 }
 
 bool GovFormListModel::haveAllMandatory(void) const

@@ -36,6 +36,7 @@
 #include "src/datovka_shared/log/memory_log.h"
 #include "src/global.h"
 #include "src/gov_services/models/gov_form_list_model.h"
+#include "src/gov_services/gui/dlg_gov_service.h"
 #include "src/gov_services/gui/dlg_gov_services.h"
 #include "src/io/account_db.h"
 #include "ui_dlg_gov_services.h"
@@ -45,6 +46,7 @@ DlgGovServices::DlgGovServices(const QString &userName, QWidget *parent)
     m_userName(userName),
     m_govServices(),
     m_govServiceModel(new (std::nothrow) GovServiceListModel),
+    m_govFormModel(new (std::nothrow) GovFormListModel),
     m_ui(new (std::nothrow) Ui::DlgGovServices)
 {
 	m_ui->setupUi(this);
@@ -94,6 +96,15 @@ void DlgGovServices::serviceItemDoubleClicked(const QModelIndex &index)
 	}
 
 	QString serId = index.sibling(index.row(), 0).data(Qt::UserRole).toString();
+	if (serId.isEmpty()) {
+		return;
+	}
+
+	loadFormToModel(m_userName, serId);
+
+	QDialog *govServiceDialog = new DlgGovService(m_userName,
+	    m_govFormModel, this);
+	govServiceDialog->exec();
 }
 
 /*!
@@ -193,5 +204,36 @@ void DlgGovServices::loadServicesToModel(void) const
 			    m_userName.toUtf8().constData(),
 			    cgs->internalId().toUtf8().constData());
 		}
+	}
+}
+
+void DlgGovServices::loadFormToModel(const QString &userName,
+    const QString &serviceInternalId) const
+{
+	debugFuncCall();
+
+	const Gov::Service *cgs = m_govServices.value(serviceInternalId, Q_NULLPTR);
+	if (Q_UNLIKELY(cgs == Q_NULLPTR)) {
+		logErrorNL("Cannot access gov service '%s'.",
+		    serviceInternalId.toUtf8().constData());
+		Q_ASSERT(0);
+		return;
+	}
+	QScopedPointer<Gov::Service> gs(cgs->createNew());
+	if (Q_UNLIKELY(gs.isNull())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	const Isds::DbOwnerInfo dbOwnerInfo(GlobInstcs::accntDbPtr->getOwnerInfo(
+	    AccountDb::keyFromLogin(userName)));
+	if (dbOwnerInfo.isNull()) {
+		return;
+	}
+	gs->setOwnerInfoFields(dbOwnerInfo);
+
+	Gov::Service *oldService = m_govFormModel->setService(gs.take());
+	if (oldService != Q_NULLPTR) {
+		delete oldService; oldService = Q_NULLPTR;
 	}
 }

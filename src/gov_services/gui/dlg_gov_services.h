@@ -28,6 +28,7 @@
 #include <QModelIndex>
 #include <QString>
 
+#include "src/gov_services/models/gov_form_list_model.h"
 #include "src/gov_services/models/gov_service_list_model.h"
 #include "src/models/sort_filter_proxy_model.h"
 
@@ -84,13 +85,23 @@ private:
 	void clearGovServices(void);
 
 	/*!
-	 * @brief Load Gov services into QML.
+	 * @brief Load Gov services into model.
 	 */
 	void loadServicesToModel(void) const;
 
-	QString m_userName;
+	/*!
+	 * @brief Load Gov form data into model.
+	 *
+	 * @param[in] userName Account login.
+	 * @param[in] serviceInternalId Internal service identifier.
+	 */
+	void loadFormToModel(const QString &userName,
+	    const QString &serviceInternalId) const;
+
+	QString m_userName; /*!< Account user name. */
 	QMap<QString, const Gov::Service *> m_govServices; /*!< Holds pointers to all available Gov services. */
 	SortFilterProxyModel m_govServiceListProxyModel; /*!< Used for Gov service filtering. */
 	GovServiceListModel *m_govServiceModel; /*!< Gov service model. */
+	GovFormListModel *m_govFormModel; /*!< Gov service form model. */
 	Ui::DlgGovServices *m_ui; /*!< UI generated from UI file. */
 };

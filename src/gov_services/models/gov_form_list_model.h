@@ -29,26 +29,22 @@
 
 #include "src/datovka_shared/gov_services/service/gov_service.h"
 #include "src/datovka_shared/gov_services/service/gov_service_form_field.h"
+#include "src/models/table_model.h"
 
 /*!
  * @brief Holds form data for gov services.
  */
-class GovFormListModel : public QAbstractListModel {
+class GovFormListModel : public TblModel {
 	Q_OBJECT
 
 public:
+
 	/*!
-	 * @brief Roles which this model supports.
+	 * @brief Identifies the column index.
 	 */
-	enum Roles {
-		ROLE_GOV_SRVC_KEY = Qt::UserRole,
-		ROLE_GOV_SRVC_VAL,
-		ROLE_GOV_SRVC_DESCR,
-		ROLE_GOV_SRVC_PLACEHOLD,
-		ROLE_GOV_SRVC_MANDATORY,
-		ROLE_GOV_SRVC_USER_INPUT,
-		ROLE_GOV_SRVC_BOX_INPUT,
-		ROLE_GOV_SRVC_TYPE_DATE
+	enum ColumnNumbers {
+		LABEL_COL = 0, /* Label. */
+		TEXT_EDIT_COL = 1, /* Column holds textedit. */
 	};
 
 	/*!
@@ -88,14 +84,6 @@ public:
 	    Q_DECL_OVERRIDE;
 
 	/*!
-	 * @brief Returns the model's role names.
-	 *
-	 * @return Model's role names.
-	 */
-	virtual
-	QHash<int, QByteArray> roleNames(void) const Q_DECL_OVERRIDE;
-
-	/*!
 	 * @brief Return data stored in given location under given role.
 	 *
 	 * @param[in] index Index specifying the item.
@@ -103,7 +91,8 @@ public:
 	 * @return Data from model.
 	 */
 	virtual
-	QVariant data(const QModelIndex &index, int role) const Q_DECL_OVERRIDE;
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole)
+	    const Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Returns item flags for given index.
@@ -133,16 +122,18 @@ public:
 	Gov::Service *setService(Gov::Service *service);
 
 	/*!
-	 * @brief Modify model data.
+	 * @brief Used for changing the check state.
 	 *
-	 * @note See documentation for ListModel.
+	 * @note Emits dataChanged signal.
 	 *
-	 * @param[in] index Row number.
-	 * @param[in] property Property name to be changed.
-	 * @param[in] value Value to be assigned to the property.
+	 * @param[in] index Index specifying the element.
+	 * @param[in] value Value to be set.
+	 * @param[in] role Specifies role of the modified data.
+	 * @return True if check state was changed.
 	 */
-	void setProperty(int index, const QString &property,
-	    const QVariant &value);
+	virtual
+	bool setData(const QModelIndex &index, const QVariant &value,
+	    int role = Qt::EditRole) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Return true if all mandatory data are set.
