@@ -30,6 +30,7 @@
 
 #include "src/gov_services/models/gov_form_list_model.h"
 #include "src/gov_services/models/gov_service_list_model.h"
+#include "src/io/message_db_set.h"
 #include "src/models/sort_filter_proxy_model.h"
 
 namespace Ui {
@@ -50,9 +51,11 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] userName Account login.
+	 * @param[in] dbSet Account db set pointer.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgGovServices(const QString &userName,
+	explicit DlgGovServices(const QString &userName, MessageDbSet *dbSet,
 	    QWidget *parent = Q_NULLPTR);
 
 	/*!
@@ -64,11 +67,15 @@ private slots:
 
 	/*!
 	 * @brief Apply filter text on the Gov service list.
+	 *
+	 * @param[in] text Filter text.
 	 */
 	void filterServices(const QString &text);
 
 	/*!
 	 * @brief Any Gov service was double clicked.
+	 *
+	 * @param[in] index model index of selected service.
 	 */
 	void serviceItemDoubleClicked(const QModelIndex &index);
 
@@ -99,6 +106,7 @@ private:
 	    const QString &serviceInternalId) const;
 
 	QString m_userName; /*!< Account user name. */
+	MessageDbSet *m_dbSet; /*!< Account message database poniter. */
 	QMap<QString, const Gov::Service *> m_govServices; /*!< Holds pointers to all available Gov services. */
 	SortFilterProxyModel m_govServiceListProxyModel; /*!< Used for Gov service filtering. */
 	GovServiceListModel *m_govServiceModel; /*!< Gov service model. */

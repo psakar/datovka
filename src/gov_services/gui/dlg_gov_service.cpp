@@ -25,16 +25,21 @@
 
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/log/memory_log.h"
+#include "src/datovka_shared/utility/strings.h"
+#include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/gov_services/gui/dlg_gov_service.h"
+#include "src/worker/task.h"
 #include "ui_dlg_gov_service.h"
 
 DlgGovService::DlgGovService(const QString &userName,
-    GovFormListModel *govFormModel, QWidget *parent)
+    GovFormListModel *govFormModel, MessageDbSet *dbSet, QWidget *parent)
     : QDialog(parent),
     m_userName(userName),
     m_govFormModel(govFormModel),
-    m_ui(new (std::nothrow) Ui::DlgGovService)
+    m_dbSet(dbSet),
+    m_ui(new (std::nothrow) Ui::DlgGovService),
+    m_transactIds()
 {
 	m_ui->setupUi(this);
 
@@ -102,11 +107,28 @@ void DlgGovService::sendGovRequest(void)
 		return;
 	}
 
+	/* Create Gov message. */
 	const Isds::Message msg(m_govFormModel->service()->dataMessage());
 	if (Q_UNLIKELY(msg.isNull())) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	/* TODO - send request to ISDS */
+	/* Genterate unique identifier. */
+	QStringList taskIdentifiers;
+	const QDateTime currentTime(QDateTime::currentDateTimeUtc());
+	taskIdentifiers.append(m_userName + "_" + currentTime.toString() + "_" +
+	    Utility::generateRandomString(6));
+	m_transactIds = taskIdentifiers.toSet();
+	m_sentMsgResultList.clear();
+
+	/* Send Gov message. */
+	TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
+	    m_userName, m_dbSet, taskIdentifiers.at(0), msg,
+	    m_govFormModel->service()->instituteName(),
+	    m_govFormModel->service()->boxId(), false, Task::PROC_NOTHING);
+	if (task != Q_NULLPTR) {
+		task->setAutoDelete(true);
+		GlobInstcs::workPoolPtr->assignHi(task);
+	}
 }

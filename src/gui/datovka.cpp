@@ -4620,7 +4620,13 @@ void MainWindow::createGovMessage(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
-	QDialog *govServicesDialog = new DlgGovServices(userName, this);
+	MessageDbSet *dbSet = accountDbSet(userName);
+	if (Q_NULLPTR == dbSet) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	QDialog *govServicesDialog = new DlgGovServices(userName, dbSet, this);
 	govServicesDialog->exec();
 }
 

@@ -41,9 +41,11 @@
 #include "src/io/account_db.h"
 #include "ui_dlg_gov_services.h"
 
-DlgGovServices::DlgGovServices(const QString &userName, QWidget *parent)
+DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
+    QWidget *parent)
     : QDialog(parent),
     m_userName(userName),
+    m_dbSet(dbSet),
     m_govServices(),
     m_govServiceModel(new (std::nothrow) GovServiceListModel),
     m_govFormModel(new (std::nothrow) GovFormListModel),
@@ -103,7 +105,7 @@ void DlgGovServices::serviceItemDoubleClicked(const QModelIndex &index)
 	loadFormToModel(m_userName, serId);
 
 	QDialog *govServiceDialog = new DlgGovService(m_userName,
-	    m_govFormModel, this);
+	    m_govFormModel, m_dbSet, this);
 	govServiceDialog->exec();
 }
 

@@ -27,6 +27,7 @@
 #include <QString>
 
 #include "src/gov_services/models/gov_form_list_model.h"
+#include "src/worker/task_send_message.h"
 
 namespace Ui {
 	class DlgGovService;
@@ -44,10 +45,12 @@ public:
 	 *
 	 * @param[in] userName Account user name.
 	 * @param[in] govFormModel Pointer holding Gov form model to be set.
+	 * @param[in] dbSet Account db set pointer.
 	 * @param[in] parent Parent widget.
 	 */
 	explicit DlgGovService(const QString &userName,
-	    GovFormListModel *govFormModel, QWidget *parent = Q_NULLPTR);
+	    GovFormListModel *govFormModel, MessageDbSet *dbSet,
+	    QWidget *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Destructor.
@@ -75,5 +78,10 @@ private:
 
 	QString m_userName; /*!< Account user name. */
 	GovFormListModel *m_govFormModel; /*!< Pointer holding Gov form model. */
+	MessageDbSet *m_dbSet; /*!< Account message database pointer. */
 	Ui::DlgGovService *m_ui; /*!< UI generated from UI file. */
+
+	/* Used to collect sending results. */
+	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */
+	QList<TaskSendMessage::ResultData> m_sentMsgResultList; /*!< Send status list. */
 };
