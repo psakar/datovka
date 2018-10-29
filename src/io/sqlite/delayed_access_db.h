@@ -23,12 +23,14 @@
 
 #pragma once
 
+#include <QObject>
 #include <QSqlDatabase>
 #include <QString>
 
 #include "src/datovka_shared/io/sqlite/db.h"
 
-class DelayedAccessSQLiteDb : public SQLiteDb {
+class DelayedAccessSQLiteDb : public QObject, public SQLiteDb {
+	Q_OBJECT
 
 public:
 	/*!
@@ -44,6 +46,14 @@ public:
 	 * @return File name holding the database.
 	 */
 	QString fileName(void) const;
+
+signals:
+	/*!
+	 * @brief This signal is emitted when the database is actually opened.
+	 *
+	 * @param[in] fileName Name of opened file.
+	 */
+	void opened(const QString &fileName);
 
 protected:
 	/*!
@@ -62,7 +72,7 @@ protected:
 	 * @brief Open of database file.
 	 *
 	 * @note It just allows the opening of the database file. The flags
-	 *     are file name are stored for later opening. Only memory
+	 *     and file name are stored for later opening. Only memory
 	 *     databases are opened immediately.
 	 *
 	 * @param[in] fileName File name.

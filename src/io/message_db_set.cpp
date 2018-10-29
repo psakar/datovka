@@ -36,7 +36,8 @@
 MessageDbSet::MessageDbSet(const QString &locDir, const QString &primaryKey,
     bool testing, enum Organisation organisation,
     const QString &connectionPrefix)
-    : QMap<QString, MessageDb *>(),
+    : QObject(Q_NULLPTR),
+    QMap<QString, MessageDb *>(),
     m_connectionPrefix(connectionPrefix),
     m_primaryKey(primaryKey),
     m_testing(testing),
@@ -51,7 +52,10 @@ MessageDbSet::~MessageDbSet(void)
 	QMap<QString, MessageDb *>::iterator i;
 
 	for (i = this->begin(); i != this->end(); ++i) {
-		delete i.value();
+		MessageDb *db = i.value();
+		db->disconnect(SIGNAL(opened(QString)),
+		    this, SLOT(watchOpened(QString)));
+		delete db;
 	}
 }
 
@@ -843,6 +847,13 @@ QString MessageDbSet::constructDbFileName(const QString &locDir,
 	    key + QString("___") + (testing ? "1" : "0") + DB_SUFFIX;
 }
 
+void MessageDbSet::watchOpened(const QString &fileName)
+{
+	Q_UNUSED(fileName);
+
+	emit opened(m_primaryKey);
+}
+
 MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
     bool create)
 {
@@ -914,6 +925,8 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 		delete db;
 		return Q_NULLPTR;
 	}
+	connect(db, SIGNAL(opened(QString)),
+	    this, SLOT(watchOpened(QString)));
 
 	this->insert(secondaryKey, db);
 	return db;

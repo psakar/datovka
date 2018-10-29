@@ -425,6 +425,10 @@ MainWindow::MainWindow(QWidget *parent)
 	    new TableTabIgnoreFilter(ui->messageList));
 	ui->messageList->setItemDelegate(new TagsDelegate(this));
 
+	/* Handle opening of database files. */
+	connect(GlobInstcs::msgDbsPtr, SIGNAL(opened(QString)),
+	    this, SLOT(refreshAccountList(QString)));
+
 	/* Load configuration file. */
 	loadSettings();
 

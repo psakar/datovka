@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,10 +21,10 @@
  * the two.
  */
 
-#ifndef _MESSAGE_DB_SET_CONTAINER_H_
-#define _MESSAGE_DB_SET_CONTAINER_H_
+#pragma once
 
 #include <QMap>
+#include <QObject>
 #include <QString>
 
 #include "src/io/message_db.h"
@@ -36,10 +36,20 @@
  * TODO -- Should there be a single globally accessible instance?
  *     (Actually no singleton.)
  */
-class DbContainer : private QMap<QString, MessageDbSet *> {
+class DbContainer : public QObject, private QMap<QString, MessageDbSet *> {
+	Q_OBJECT
 
 public:
+	/*!
+	 * @brief Constructor.
+	 *
+	 * @param[in] connectionPrefix Database connection prefix.
+	 */
 	explicit DbContainer(const QString &connectionPrefix = QString());
+
+	/*!
+	 * @brief Destructor.
+	 */
 	~DbContainer(void);
 
 	/*!
@@ -65,6 +75,23 @@ public:
 	 */
 	bool deleteDbSet(MessageDbSet *dbSet);
 
+signals:
+	/*!
+	 * @brief Emitted when a database file is opened.
+	 *
+	 * @param[in] primaryKey Primary key, usually the username.
+	 */
+	void opened(const QString &primaryKey);
+
+private slots:
+	/*!
+	 * @brief This slot must be connected to every database set created
+	 *     inside this container.
+	 *
+	 * @param[in] primaryKey Primary key, usually the username.
+	 */
+	void watchOpened(const QString &primaryKey);
+
 private:
 	/*!
 	 * @brief Database driver name.
@@ -74,5 +101,3 @@ private:
 
 	const QString m_connectionPrefix; /*!< Database connection prefix. */
 };
-
-#endif /* _MESSAGE_DB_SET_CONTAINER_H_ */

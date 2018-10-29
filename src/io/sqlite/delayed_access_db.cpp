@@ -28,7 +28,8 @@
 static const QSqlDatabase nullSqlDatabase;
 
 DelayedAccessSQLiteDb::DelayedAccessSQLiteDb(const QString &connectionName)
-    : SQLiteDb(connectionName),
+    : QObject(Q_NULLPTR),
+    SQLiteDb(connectionName),
     m_fileName(),
     m_flags(SQLiteDb::NO_OPTIONS)
 {
@@ -76,6 +77,7 @@ bool DelayedAccessSQLiteDb::openDb(const QString &fileName,
 		if (ret) {
 			m_fileName = fileName;
 			m_flags = flags;
+			emit opened(m_fileName);
 		} else {
 			m_fileName.clear();
 			m_flags = SQLiteDb::NO_OPTIONS;
@@ -127,6 +129,7 @@ bool DelayedAccessSQLiteDb::_accessDb(void)
 			logErrorNL("Cannot open database '%s'.", cFileName);
 			return false;
 		}
+		emit opened(m_fileName);
 	}
 
 	return true;

@@ -25,6 +25,7 @@
 
 #include <QDateTime>
 #include <QMap>
+#include <QObject>
 #include <QString>
 #include <QStringList>
 
@@ -58,7 +59,8 @@
 /*!
  * Organises database files according to secondary keys.
  */
-class MessageDbSet : private QMap<QString, MessageDb *> {
+class MessageDbSet : public QObject, private QMap<QString, MessageDb *> {
+	Q_OBJECT
 
 public:
 	/*!
@@ -309,6 +311,23 @@ public:
 	QString constructDbFileName(const QString &locDir,
 	    const QString &primaryKey, const QString &secondaryKey,
 	    bool testing, enum Organisation organisation);
+
+signals:
+	/*!
+	 * @brief Emitted when a database file is opened.
+	 *
+	 * @param[in] primaryKey Primary key, usually the username.
+	 */
+	void opened(const QString &primaryKey);
+
+private slots:
+	/*!
+	 * @brief This slot must be connected to every database created inside
+	 *     this container.
+	 *
+	 * @param[in] fileName Database file name.
+	 */
+	void watchOpened(const QString &fileName);
 
 private:
 	/*!
