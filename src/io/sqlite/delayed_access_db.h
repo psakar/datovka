@@ -38,6 +38,13 @@ public:
 	 */
 	explicit DelayedAccessSQLiteDb(const QString &connectionName);
 
+	/*!
+	 * @brief Get file name.
+	 *
+	 * @return File name holding the database.
+	 */
+	QString fileName(void) const;
+
 protected:
 	/*!
 	 * @brief Copy db.

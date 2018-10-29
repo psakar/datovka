@@ -408,7 +408,7 @@ MessageDb *MessageDbSet::constAccessMessageDb(
 	QString secondary = secondaryKey(deliveryTime);
 
 	if (secondary.isNull()) {
-		return 0;
+		return Q_NULLPTR;
 	}
 
 	/* Already opened. */
@@ -416,7 +416,7 @@ MessageDb *MessageDbSet::constAccessMessageDb(
 		return (*this)[secondary];
 	}
 
-	return 0;
+	return Q_NULLPTR;
 }
 
 MessageDb *MessageDbSet::accessMessageDb(const QDateTime &deliveryTime,

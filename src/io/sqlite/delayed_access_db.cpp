@@ -34,6 +34,11 @@ DelayedAccessSQLiteDb::DelayedAccessSQLiteDb(const QString &connectionName)
 {
 }
 
+QString DelayedAccessSQLiteDb::fileName(void) const
+{
+	return m_fileName;
+}
+
 bool DelayedAccessSQLiteDb::copyDb(const QString &newFileName,
     enum OpenFlag flag)
 {
@@ -105,7 +110,8 @@ const QSqlDatabase &DelayedAccessSQLiteDb::accessDb(void)
 bool DelayedAccessSQLiteDb::_accessDb(void)
 {
 	if (Q_UNLIKELY(!isOpen())) {
-		const char *cCName = m_db.connectionName().toUtf8().constData();
+		const QByteArray connName(m_db.connectionName().toUtf8());
+		const char *cCName = connName.constData();
 		if (Q_UNLIKELY(m_fileName.isEmpty())) {
 			logErrorNL(
 			    "Missing file name to unopened database '%s'.",
@@ -113,7 +119,8 @@ bool DelayedAccessSQLiteDb::_accessDb(void)
 			Q_ASSERT(0);
 			return false;
 		}
-		const char *cFileName = m_fileName.toUtf8().constData();
+		const QByteArray filName(m_fileName.toUtf8());
+		const char *cFileName = filName.constData();
 		logInfoNL("Opening connection '%s' to database file '%s'.",
 		    cCName, cFileName);
 		if (Q_UNLIKELY(!SQLiteDb::openDb(m_fileName, m_flags))) {
