@@ -24,6 +24,7 @@
 #pragma once
 
 #include <QDialog>
+#include <QSet>
 #include <QString>
 
 #include "src/gov_services/models/gov_form_list_model.h"
@@ -69,6 +70,25 @@ private slots:
 	 */
 	void haveAllMandatoryFields(void);
 
+	/*!
+	 * @brief Show status after sending Gov message via ISDS interface.
+	 *
+	 * @param[in] userName User name identifying the sender account.
+	 * @param[in] transactId Unique transaction identifier.
+	 * @param[in] result Sending status.
+	 * @param[in] resultDesc Result description string.
+	 * @param[in] dbIDRecipient Recipient data box identifier.
+	 * @param[in] recipientName Recipient data box name.
+	 * @param[in] isPDZ True if message was attempted to send as commercial
+	 *                  message.
+	 * @param[in] dmId Sent message identifier.
+	 * @param[in] processFlags Message processig flags.
+	 */
+	void collectSendMessageStatus(const QString &userName,
+	    const QString &transactId, int result, const QString &resultDesc,
+	    const QString &dbIDRecipient, const QString &recipientName,
+	    bool isPDZ, qint64 dmId, int processFlags);
+
 private:
 
 	/*!
@@ -80,8 +100,5 @@ private:
 	GovFormListModel *m_govFormModel; /*!< Pointer holding Gov form model. */
 	MessageDbSet *m_dbSet; /*!< Account message database pointer. */
 	Ui::DlgGovService *m_ui; /*!< UI generated from UI file. */
-
-	/* Used to collect sending results. */
 	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */
-	QList<TaskSendMessage::ResultData> m_sentMsgResultList; /*!< Send status list. */
 };

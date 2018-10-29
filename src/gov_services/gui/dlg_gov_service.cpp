@@ -29,6 +29,8 @@
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/gov_services/gui/dlg_gov_service.h"
+#include "src/gui/dlg_msg_box_informative.h"
+#include "src/worker/message_emitter.h"
 #include "src/worker/task.h"
 #include "ui_dlg_gov_service.h"
 
@@ -49,31 +51,6 @@ DlgGovService::DlgGovService(const QString &userName,
 DlgGovService::~DlgGovService(void)
 {
 	delete m_ui;
-}
-
-void DlgGovService::initDialog(void)
-{
-	this->setWindowTitle(m_govFormModel->service()->internalId());
-	m_ui->serviceName->setText(m_govFormModel->service()->fullName());
-	m_ui->serviceDbId->setText(QString("%1 -- %2").arg(m_govFormModel->
-	    service()->boxId()).arg(m_govFormModel->service()->instituteName()));
-	m_ui->userName->setText(m_userName);
-
-	m_ui->govFormTableView->setModel(m_govFormModel);
-
-	if (m_ui->govFormTableView->model()->rowCount() == 0) {
-		m_ui->filedsLabel->setText(tr("Service does not require another data."));
-		m_ui->govFormTableView->setEnabled(false);
-	}
-
-	connect(m_ui->sendServiceButton, SIGNAL(clicked()),
-	    this, SLOT(sendGovRequest()));
-	connect(m_ui->cancelButton, SIGNAL(clicked()),
-	    this, SLOT(close()));
-	connect(m_govFormModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)),
-	    this, SLOT(haveAllMandatoryFields()));
-
-	haveAllMandatoryFields();
 }
 
 void DlgGovService::haveAllMandatoryFields(void)
@@ -120,7 +97,6 @@ void DlgGovService::sendGovRequest(void)
 	taskIdentifiers.append(m_userName + "_" + currentTime.toString() + "_" +
 	    Utility::generateRandomString(6));
 	m_transactIds = taskIdentifiers.toSet();
-	m_sentMsgResultList.clear();
 
 	/* Send Gov message. */
 	TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
@@ -131,4 +107,77 @@ void DlgGovService::sendGovRequest(void)
 		task->setAutoDelete(true);
 		GlobInstcs::workPoolPtr->assignHi(task);
 	}
+}
+
+void DlgGovService::collectSendMessageStatus(const QString &userName,
+    const QString &transactId, int result, const QString &resultDesc,
+    const QString &dbIDRecipient, const QString &recipientName,
+    bool isPDZ, qint64 dmId, int processFlags)
+{
+	debugSlotCall();
+
+	Q_UNUSED(userName);
+	Q_UNUSED(isPDZ);
+	Q_UNUSED(processFlags);
+
+	if (m_transactIds.end() == m_transactIds.find(transactId)) {
+		/* Nothing found. */
+		return;
+	}
+
+	if (!m_transactIds.remove(transactId)) {
+		logErrorNL("%s",
+		    "Was not able to remove a transaction identifier from list of unfinished transactions.");
+	}
+
+	if (TaskSendMessage::SM_SUCCESS == result) {
+
+		DlgMsgBox::message(this, QMessageBox::Information,
+		    tr("Message sent"),
+		    "<b>" + tr("Gov request was successfully sent to ISDS.") + "</b>",
+		    tr("Message was sent to <i>%1 (%2)</i> as message number <i>%3</i>.").
+		    arg(recipientName).arg(dbIDRecipient).arg(dmId) + "<br/>",
+		    QString(), QMessageBox::Ok, QMessageBox::Ok);
+
+		this->close(); /* Close dialog. */
+
+	} else {
+
+		DlgMsgBox::message(this, QMessageBox::Information,
+		    tr("Message sent"),
+		    "<b>" + tr("Gov request was NOT successfully sent to ISDS.") + "</b>",
+		    tr("ISDS returns:") + " " + resultDesc,
+		    QString(), QMessageBox::Ok, QMessageBox::Ok);
+	}
+}
+
+void DlgGovService::initDialog(void)
+{
+	this->setWindowTitle(m_govFormModel->service()->internalId());
+	m_ui->serviceName->setText(m_govFormModel->service()->fullName());
+	m_ui->serviceDbId->setText(QString("%1 -- %2").arg(m_govFormModel->
+	    service()->boxId()).arg(m_govFormModel->service()->instituteName()));
+	m_ui->userName->setText(m_userName);
+
+	m_ui->govFormTableView->setModel(m_govFormModel);
+
+	if (m_ui->govFormTableView->model()->rowCount() == 0) {
+		m_ui->filedsLabel->setText(tr("Service does not require another data."));
+		m_ui->govFormTableView->setEnabled(false);
+	}
+
+	connect(m_ui->sendServiceButton, SIGNAL(clicked()),
+	    this, SLOT(sendGovRequest()));
+	connect(m_ui->cancelButton, SIGNAL(clicked()),
+	    this, SLOT(close()));
+	connect(m_govFormModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)),
+	    this, SLOT(haveAllMandatoryFields()));
+
+	connect(GlobInstcs::msgProcEmitterPtr,
+	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
+	        QString, QString, bool, qint64, int)), this,
+	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
+	        QString, QString, bool, qint64, int)));
+
+	haveAllMandatoryFields();
 }
