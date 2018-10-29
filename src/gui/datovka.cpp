@@ -4620,6 +4620,11 @@ void MainWindow::createGovMessage(void)
 	    m_accountModel.userName(currentAccountModelIndex()));
 	Q_ASSERT(!userName.isEmpty());
 
+	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
+	    !connectToIsds(userName)) {
+		return;
+	}
+
 	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);

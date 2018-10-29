@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <QLineEdit>
 #include <QMessageBox>
 
 #include "src/datovka_shared/log/log.h"
@@ -32,6 +33,7 @@
 #include "src/gui/dlg_msg_box_informative.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task.h"
+#include "src/worker/task_send_message.h"
 #include "ui_dlg_gov_service.h"
 
 DlgGovService::DlgGovService(const QString &userName,
@@ -57,6 +59,27 @@ void DlgGovService::haveAllMandatoryFields(void)
 {
 	m_ui->sendServiceButton->setEnabled(
 	    m_govFormModel->service()->haveAllMandatoryFields());
+}
+
+void DlgGovService::onLineEditTextChanged(QString text)
+{
+	QObject* senderObj = sender();
+
+	if (senderObj == Q_NULLPTR) {
+		return;
+	}
+
+	if (senderObj->objectName().isNull()) {
+		return;
+	}
+
+	foreach (const Gov::FormField &field, m_govFormModel->service()->fields()) {
+		if (field.key() == senderObj->objectName()) {
+			m_govFormModel->setKeyValue(field.key(), text);
+		}
+	}
+
+	haveAllMandatoryFields();
 }
 
 void DlgGovService::sendGovRequest(void)
@@ -159,20 +182,28 @@ void DlgGovService::initDialog(void)
 	    service()->boxId()).arg(m_govFormModel->service()->instituteName()));
 	m_ui->userName->setText(m_userName);
 
-	m_ui->govFormTableView->setModel(m_govFormModel);
-
-	if (m_ui->govFormTableView->model()->rowCount() == 0) {
+	if (m_govFormModel->service()->fields().count() == 0) {
 		m_ui->filedsLabel->setText(tr("Service does not require another data."));
-		m_ui->govFormTableView->setEnabled(false);
+	} else {
+		foreach (const Gov::FormField &field,
+		    m_govFormModel->service()->fields()) {
+			QLineEdit *le = new QLineEdit();
+			le->setObjectName(field.key());
+			le->setPlaceholderText(field.placeholder());
+			le->setText(field.val());
+			le->setEnabled(field.val().isEmpty());
+			m_ui->formGovLayout->addRow(field.descr(), le);
+			if (le->isEnabled()) {
+				connect(le, SIGNAL(textChanged(QString)),
+				    this, SLOT(onLineEditTextChanged(QString)));
+			}
+		}
 	}
 
 	connect(m_ui->sendServiceButton, SIGNAL(clicked()),
 	    this, SLOT(sendGovRequest()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()),
 	    this, SLOT(close()));
-	connect(m_govFormModel, SIGNAL(dataChanged(QModelIndex, QModelIndex)),
-	    this, SLOT(haveAllMandatoryFields()));
-
 	connect(GlobInstcs::msgProcEmitterPtr,
 	    SIGNAL(sendMessageFinished(QString, QString, int, QString,
 	        QString, QString, bool, qint64, int)), this,

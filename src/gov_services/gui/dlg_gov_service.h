@@ -28,7 +28,7 @@
 #include <QString>
 
 #include "src/gov_services/models/gov_form_list_model.h"
-#include "src/worker/task_send_message.h"
+#include "src/io/message_db_set.h"
 
 namespace Ui {
 	class DlgGovService;
@@ -61,14 +61,19 @@ public:
 private slots:
 
 	/*!
-	 * @brief Send Gov request to isds.
-	 */
-	void sendGovRequest(void);
-
-	/*!
 	 * @brief Check if all mandatory fields are filled.
 	 */
 	void haveAllMandatoryFields(void);
+
+	/*!
+	 * @brief Is active when line edit text has been changed.
+	 */
+	void onLineEditTextChanged(QString text);
+
+	/*!
+	 * @brief Send Gov request to isds.
+	 */
+	void sendGovRequest(void);
 
 	/*!
 	 * @brief Show status after sending Gov message via ISDS interface.

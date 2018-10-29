@@ -29,23 +29,14 @@
 
 #include "src/datovka_shared/gov_services/service/gov_service.h"
 #include "src/datovka_shared/gov_services/service/gov_service_form_field.h"
-#include "src/models/table_model.h"
 
 /*!
  * @brief Holds form data for gov services.
  */
-class GovFormListModel : public TblModel {
+class GovFormListModel : public QAbstractListModel {
 	Q_OBJECT
 
 public:
-
-	/*!
-	 * @brief Identifies the column index.
-	 */
-	enum ColumnNumbers {
-		LABEL_COL = 0, /* Label. */
-		TEXT_EDIT_COL = 1, /* Column holds textedit. */
-	};
 
 	/*!
 	 * @brief Constructor.
@@ -71,7 +62,7 @@ public:
 	 * @note Deletes held service.
 	 */
 	virtual
-	~GovFormListModel(void);
+	~GovFormListModel(void) Q_DECL_OVERRIDE;
 
 	/*!
 	 * @brief Return number of rows under the given parent.
@@ -95,15 +86,6 @@ public:
 	    const Q_DECL_OVERRIDE;
 
 	/*!
-	 * @brief Returns item flags for given index.
-	 *
-	 * @brief[in] index Index specifying the item.
-	 * @return Item flags.
-	 */
-	virtual
-	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
-
-	/*!
 	 * @brief Returns pointer to currently held service.
 	 *
 	 * @return Pointer to currently associated service.
@@ -122,18 +104,12 @@ public:
 	Gov::Service *setService(Gov::Service *service);
 
 	/*!
-	 * @brief Used for changing the check state.
+	 * @brief Set value for specified key.
 	 *
-	 * @note Emits dataChanged signal.
-	 *
-	 * @param[in] index Index specifying the element.
+	 * @param[in] key Specifying item to be changed.
 	 * @param[in] value Value to be set.
-	 * @param[in] role Specifies role of the modified data.
-	 * @return True if check state was changed.
 	 */
-	virtual
-	bool setData(const QModelIndex &index, const QVariant &value,
-	    int role = Qt::EditRole) Q_DECL_OVERRIDE;
+	void setKeyValue(const QString &key, const QString &value);
 
 	/*!
 	 * @brief Return true if all mandatory data are set.
