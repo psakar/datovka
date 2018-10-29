@@ -61,6 +61,23 @@ QString _yrly_YearToSecondaryKey(const QString &year)
 	}
 }
 
+/*!
+ * @brief Return list of years that match the span from (now-90days) to now.
+ */
+static
+QStringList yearsInPast90Days(void)
+{
+	const QDate currentDate(QDate::currentDate());
+	const QDate dateBefore90Days(currentDate.addDays(-90));
+
+	QStringList years;
+	years.append(currentDate.toString("yyyy"));
+	if (currentDate.year() != dateBefore90Days.year()) {
+		years.append(dateBefore90Days.toString("yyyy"));
+	}
+	return years;
+}
+
 QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 {
 	static const QRegExp re("^" YEARLY_SEC_KEY_RE "$");
@@ -71,11 +88,11 @@ QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 	}
 
 	keys = keys.filter(re);
+	/* Intersection of found and expected years. */
+	keys = keys.toSet().intersect(yearsInPast90Days().toSet()).toList();
 	keys.sort();
-	if (keys.size() > 1) {
-		keys = keys.mid(keys.size() - 2, 2);
-	}
 
+	Q_ASSERT(keys.size() <= 2);
 	return keys;
 }
 
