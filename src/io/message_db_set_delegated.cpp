@@ -281,7 +281,12 @@ QStringList MessageDbSet::_yrly_msgsYears(enum MessageDb::MessageType type,
 			Q_ASSERT(0);
 			return QStringList();
 		}
-		years.unite(db->msgsYears(type, sorting).toSet());
+
+		if (db->isOpen()) {
+			years.unite(db->msgsYears(type, sorting).toSet());
+		} else {
+			years.insert(i.key());
+		}
 	}
 
 	QStringList list(years.toList());
@@ -485,7 +490,11 @@ int MessageDbSet::_sf_msgsUnreadInYear(enum MessageDb::MessageType type,
 		return 0;
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsUnreadInYear(type, year);
+	if (type != MessageDb::TYPE_SENT) {
+		return this->first()->msgsUnreadInYear(type, year);
+	} else {
+		return 0; /* The read state on sent messages is ignored. */
+	}
 }
 
 int MessageDbSet::_yrly_msgsUnreadInYear(enum MessageDb::MessageType type,
@@ -498,7 +507,11 @@ int MessageDbSet::_yrly_msgsUnreadInYear(enum MessageDb::MessageType type,
 		return 0;
 	}
 
-	return db->msgsUnreadInYear(type, year);
+	if (db->isOpen()) {
+		return db->msgsUnreadInYear(type, year);
+	} else {
+		return -2;
+	}
 }
 
 int MessageDbSet::msgsUnreadInYear(enum MessageDb::MessageType type,

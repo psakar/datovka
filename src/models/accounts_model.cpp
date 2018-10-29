@@ -224,13 +224,12 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 	}
 
 	const QString uName(userName(index));
-	if (uName.isEmpty()) {
+	if (Q_UNLIKELY(uName.isEmpty())) {
 		Q_ASSERT(0);
 		return QVariant();
 	}
 	const AcntSettings &accountInfo((*GlobInstcs::acntMapPtr)[uName]);
-	enum NodeType type = internalIdNodeType(index.internalId());
-	QIcon ico;
+	const enum NodeType type = internalIdNodeType(index.internalId());
 
 	switch (role) {
 	case Qt::DisplayRole:
@@ -278,9 +277,9 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 				Q_ASSERT(
 				    cntrs.unreadReceivedGroups.find(label) !=
 				    cntrs.unreadReceivedGroups.constEnd());
-				if (cntrs.unreadReceivedGroups[label] > 0) {
+				if (cntrs.unreadReceivedGroups[label].unread > 0) {
 					label += QString(" (%1)").arg(
-					    cntrs.unreadReceivedGroups[label]);
+					    cntrs.unreadReceivedGroups[label].unread);
 				}
 				return label;
 			}
@@ -305,31 +304,34 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 		break;
 
 	case Qt::DecorationRole:
-		switch (type) {
-		case nodeAccountTop:
-			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-			return ico;
-			break;
-		case nodeRecentReceived:
-		case nodeReceived:
-		case nodeReceivedYear:
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-			return ico;
-			break;
-		case nodeRecentSent:
-		case nodeSent:
-		case nodeSentYear:
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-			return ico;
-			break;
-		default:
-			return QVariant();
-			break;
+		{
+			QIcon ico;
+			switch (type) {
+			case nodeAccountTop:
+				ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
+				break;
+			case nodeRecentReceived:
+			case nodeReceived:
+			case nodeReceivedYear:
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
+				break;
+			case nodeRecentSent:
+			case nodeSent:
+			case nodeSentYear:
+				ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
+				ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
+				return ico;
+				break;
+			default:
+				return QVariant();
+				break;
+			}
 		}
 		break;
 
@@ -369,13 +371,44 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 				Q_ASSERT(
 				    cntrs.unreadReceivedGroups.find(label) !=
 				    cntrs.unreadReceivedGroups.constEnd());
-				if (cntrs.unreadReceivedGroups[label] > 0) {
+				if (cntrs.unreadReceivedGroups[label].unread > 0) {
 					QFont retFont;
 					retFont.setBold(true);
 					return retFont;
 				}
 			}
 			break;
+		default:
+			return QVariant();
+			break;
+		}
+		break;
+
+	case Qt::ForegroundRole:
+		switch (type) {
+		case nodeReceivedYear:
+			{
+				int row = index.row();
+				const AccountCounters &cntrs(m_countersMap[uName]);
+				const QString &label(cntrs.receivedGroups[row]);
+				if (!cntrs.unreadReceivedGroups[label].dbOpened) {
+					return QColor(Qt::darkGray);
+				} else {
+					return QVariant();
+				}
+			}
+			break;
+		case nodeSentYear:
+			{
+				int row = index.row();
+				const AccountCounters &cntrs(m_countersMap[uName]);
+				const QString &label(cntrs.sentGroups[row]);
+				if (!cntrs.unreadSentGroups[label].dbOpened) {
+					return QColor(Qt::darkGray);
+				} else {
+					return QVariant();
+				}
+			}
 		default:
 			return QVariant();
 			break;
@@ -435,10 +468,10 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 				Q_ASSERT(
 				    cntrs.unreadReceivedGroups.find(year) !=
 				    cntrs.unreadReceivedGroups.constEnd());
-				if (cntrs.unreadReceivedGroups[year] > 0) {
+				if (cntrs.unreadReceivedGroups[year].unread > 0) {
 					label += QLatin1String(" - ") +
 					    tr("contains %1 unread")
-					        .arg(cntrs.unreadReceivedGroups[year]);
+					        .arg(cntrs.unreadReceivedGroups[year].unread);
 				}
 				return label;
 			}
@@ -946,7 +979,7 @@ bool AccountModel::updateRecentUnread(const QString &userName,
 
 bool AccountModel::appendYear(const QString &userName,
     enum AccountModel::NodeType nodeType, const QString &year,
-    unsigned unreadMsgs)
+    const YearCounter &yCounter)
 {
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
@@ -960,7 +993,7 @@ bool AccountModel::appendYear(const QString &userName,
 
 	AccountCounters &cntrs(m_countersMap[userName]);
 	QList<QString> *groups = Q_NULLPTR;
-	QMap<QString, unsigned> *unreadGroups = Q_NULLPTR;
+	QMap<QString, YearCounter> *unreadGroups = Q_NULLPTR;
 	QModelIndex childTopIndex;
 
 	if (nodeReceivedYear == nodeType) {
@@ -985,7 +1018,7 @@ bool AccountModel::appendYear(const QString &userName,
 	int rows = groups->size();
 	beginInsertRows(childTopIndex, rows, rows);
 	groups->append(year);
-	(*unreadGroups)[year] = unreadMsgs;
+	(*unreadGroups)[year] = yCounter;
 	endInsertRows();
 
 	return true;
@@ -1039,7 +1072,7 @@ int addedYearPosistion(const QList<QString> &yearList, const QString &addedYear,
 
 bool AccountModel::updateYearNodes(const QString &userName,
     enum AccountModel::NodeType nodeType,
-    const QList< QPair<QString, unsigned> > &yearlyUnreadList,
+    const QList< QPair<QString, YearCounter> > &yearlyUnreadList,
     enum AccountModel::Sorting sorting)
 {
 	if (userName.isEmpty()) {
@@ -1054,7 +1087,7 @@ bool AccountModel::updateYearNodes(const QString &userName,
 
 	AccountCounters &cntrs(m_countersMap[userName]);
 	QList<QString> *groups = Q_NULLPTR;
-	QMap<QString, unsigned> *unreadGroups = Q_NULLPTR;
+	QMap<QString, YearCounter> *unreadGroups = Q_NULLPTR;
 	QModelIndex childTopIndex;
 
 	if (nodeReceivedYear == nodeType) {
@@ -1082,14 +1115,14 @@ bool AccountModel::updateYearNodes(const QString &userName,
 	 */
 	int rows = groups->size();
 	int row = 0;
-	typedef QPair<QString, unsigned> Pair;
+	typedef QPair<QString, YearCounter> Pair;
 	while (row < rows) {
 		bool found = false;
-		unsigned unreadCnt = 0;
+		YearCounter yCounter;
 		foreach (const Pair &pair, yearlyUnreadList) {
 			if (pair.first == groups->at(row)) {
 				found = true;
-				unreadCnt = pair.second;
+				yCounter = pair.second;
 				break;
 			}
 		}
@@ -1103,7 +1136,7 @@ bool AccountModel::updateYearNodes(const QString &userName,
 			--rows;
 		} else {
 			/* Update unread, increment row. */
-			(*unreadGroups)[groups->at(row)] = unreadCnt;
+			(*unreadGroups)[groups->at(row)] = yCounter;
 			QModelIndex childIndex(childTopIndex.child(row, 0));
 			emit dataChanged(childIndex, childIndex);
 
@@ -1132,7 +1165,7 @@ bool AccountModel::updateYearNodes(const QString &userName,
 
 bool AccountModel::updateYear(const QString &userName,
     enum AccountModel::NodeType nodeType, const QString &year,
-    unsigned unreadMsgs)
+    const YearCounter &yCounter)
 {
 	if (userName.isEmpty()) {
 		Q_ASSERT(0);
@@ -1146,7 +1179,7 @@ bool AccountModel::updateYear(const QString &userName,
 
 	AccountCounters &cntrs(m_countersMap[userName]);
 	QList<QString> *groups = Q_NULLPTR;
-	QMap<QString, unsigned> *unreadGroups = Q_NULLPTR;
+	QMap<QString, YearCounter> *unreadGroups = Q_NULLPTR;
 	QModelIndex childIndex; /* Top index of children. */
 
 	if (nodeReceivedYear == nodeType) {
@@ -1181,7 +1214,7 @@ bool AccountModel::updateYear(const QString &userName,
 
 	Q_ASSERT(childIndex.isValid());
 
-	(*unreadGroups)[year] = unreadMsgs;
+	(*unreadGroups)[year] = yCounter;
 	emit dataChanged(childIndex, childIndex);
 
 	return true;

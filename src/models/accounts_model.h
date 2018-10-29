@@ -103,6 +103,23 @@ public:
 	};
 
 	/*!
+	 * @brief Unread message yearly counter.
+	 */
+	class YearCounter {
+	public:
+		YearCounter(void)
+		    : dbOpened(false), unread(0)
+		{ }
+
+		YearCounter(bool o, unsigned u)
+		    : dbOpened(o), unread(u)
+		{ }
+
+		bool dbOpened; /*!< True if underlying database has been opened. */
+		unsigned unread; /*!< Number of unread messages. */
+	};
+
+	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] parent Pointer to parent object.
@@ -361,14 +378,14 @@ public:
 	/*!
 	 * @brief Append year node into account.
 	 *
-	 * @param[in] userName   User name.
-	 * @param[in] nodeType   May be nodeReceivedYear or nodeSentYear.
-	 * @param[in] year       Year string.
-	 * @param[in] unreadMsgs Number of unread messages.
+	 * @param[in] userName User name.
+	 * @param[in] nodeType May be nodeReceivedYear or nodeSentYear.
+	 * @param[in] year Year string.
+	 * @param[in] yCounter Whether database is opened and number of unread messages.
 	 * @return True on success.
 	 */
 	bool appendYear(const QString &userName, enum NodeType nodeType,
-	    const QString &year, unsigned unreadMsgs = 0);
+	    const QString &year, const YearCounter &yCounter);
 
 	/*!
 	 * @brief Update year nodes.
@@ -381,20 +398,20 @@ public:
 	 * @return True on success.
 	 */
 	bool updateYearNodes(const QString &userName, enum NodeType nodeType,
-	    const QList< QPair<QString, unsigned> > &yearlyUnreadList,
+	    const QList< QPair<QString, YearCounter> > &yearlyUnreadList,
 	    enum Sorting sorting);
 
 	/*!
 	 * @brief Update existing year node in account.
 	 *
-	 * @param[in] userName   User name.
-	 * @param[in] nodeType   May be nodeReceivedYear or nodeSentYear.
-	 * @param[in] year       Year string.
-	 * @param[in] unreadMsgs Number of unread messages.
+	 * @param[in] userName User name.
+	 * @param[in] nodeType May be nodeReceivedYear or nodeSentYear.
+	 * @param[in] year Year string.
+	 * @param[in] yCounter Whether database is opened and number of unread messages.
 	 * @return True on success.
 	 */
 	bool updateYear(const QString &userName, enum NodeType nodeType,
-	    const QString &year, unsigned unreadMsgs = 0);
+	    const QString &year, const YearCounter &yCounter);
 
 	/*!
 	 * @brief Delete all year-related nodes in model.
@@ -498,10 +515,10 @@ private:
 
 		unsigned unreadRecentReceived; /*!< Number of unread recent received messages. */
 		unsigned unreadRecentSent; /*!< Number of unread recent sent messages. */
-		QList<QString> receivedGroups; /*!< Group names and numbers of unread messages. */
+		QList<QString> receivedGroups; /*!< Groups of unread messages. */
 		QList<QString> sentGroups; /*!< Groups of unread messages. */
-		QMap<QString, unsigned> unreadReceivedGroups; /*< Number of unread messages. */
-		QMap<QString, unsigned> unreadSentGroups; /*!< Number of unread messages. */
+		QMap<QString, YearCounter> unreadReceivedGroups; /*< Number of unread messages. */
+		QMap<QString, YearCounter> unreadSentGroups; /*!< Number of unread messages. */
 	};
 
 	QMap<QString, AccountCounters> m_countersMap; /*!< Unread counters. */

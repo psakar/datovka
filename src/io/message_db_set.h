@@ -431,7 +431,7 @@ public: /* Database function that have been delegate to the container. */
 	 *
 	 * @param[in] type Whether to obtain sent or received messages.
 	 * @param[in] year Year number.
-	 * @return Number of unread messages, -1 on error.
+	 * @return Number of unread messages, -1 on error, -2 if database is not opened.
 	 */
 	int msgsUnreadInYear(enum MessageDb::MessageType type,
 	    const QString &year) const;

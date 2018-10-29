@@ -4434,12 +4434,13 @@ bool MainWindow::updateExistingAccountModelUnread(const QModelIndex &index)
 	    AccountModel::nodeRecentReceived, unreadMsgs);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
-		//qDebug() << "Received" << yearList.value(j);
 		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_RECEIVED,
 		    yearList.value(j));
+		AccountModel::YearCounter yCounter(unreadMsgs != -2,
+		    (unreadMsgs > 0) ? unreadMsgs : 0);
 		m_accountModel.updateYear(userName,
 		    AccountModel::nodeReceivedYear, yearList.value(j),
-		    unreadMsgs);
+		    yCounter);
 	}
 	/* Sent. */
 	//unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_SENT);
@@ -4447,11 +4448,11 @@ bool MainWindow::updateExistingAccountModelUnread(const QModelIndex &index)
 	    AccountModel::nodeRecentSent, 0);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
-		//qDebug() << "Sent" << yearList.value(j);
-		//unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
-		//    yearList.value(j));
+		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
+		    yearList.value(j));
+		AccountModel::YearCounter yCounter(unreadMsgs != -2, 0);
 		m_accountModel.updateYear(userName, AccountModel::nodeSentYear,
-		    yearList.value(j), 0);
+		    yearList.value(j), yCounter);
 	}
 	return true;
 }
@@ -4486,11 +4487,14 @@ bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 	m_accountModel.updateRecentUnread(userName,
 	    AccountModel::nodeRecentReceived, unreadMsgs);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED, DESCENDING);
-	QList< QPair<QString, unsigned> > yearlyUnreadList;
+	QList< QPair<QString, AccountModel::YearCounter> > yearlyUnreadList;
 	foreach (const QString &year, yearList) {
 		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_RECEIVED,
 		    year);
-		yearlyUnreadList.append(QPair<QString, unsigned>(year, unreadMsgs));
+		AccountModel::YearCounter yCounter(unreadMsgs != -2,
+		    (unreadMsgs > 0) ? unreadMsgs : 0);
+		yearlyUnreadList.append(
+		    QPair<QString, AccountModel::YearCounter>(year, yCounter));
 	}
 	m_accountModel.updateYearNodes(userName, AccountModel::nodeReceivedYear,
 	    yearlyUnreadList, AccountModel::DESCENDING);
@@ -4501,9 +4505,11 @@ bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 	yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 	yearlyUnreadList.clear();
 	foreach (const QString &year, yearList) {
-		//unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
-		//    year);
-		yearlyUnreadList.append(QPair<QString, unsigned>(year, 0));
+		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
+		    year);
+		AccountModel::YearCounter yCounter(unreadMsgs != -2, 0);
+		yearlyUnreadList.append(
+		    QPair<QString, AccountModel::YearCounter>(year, yCounter));
 	}
 	m_accountModel.updateYearNodes(userName, AccountModel::nodeSentYear,
 	    yearlyUnreadList, AccountModel::DESCENDING);
@@ -4552,8 +4558,10 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		foreach (const QString &year, yearList) {
 			unreadMsgs = dbSet->msgsUnreadInYear(
 			    MessageDb::TYPE_RECEIVED, year);
+			AccountModel::YearCounter yCounter(unreadMsgs != -2,
+			    (unreadMsgs > 0) ? unreadMsgs : 0);
 			m_accountModel.appendYear(userName,
-			    AccountModel::nodeReceivedYear, year, unreadMsgs);
+			    AccountModel::nodeReceivedYear, year, yCounter);
 		}
 		/* Sent. */
 		//unreadMsgs = dbSet->msgsUnreadWithin90Days(
@@ -4562,10 +4570,11 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 		    AccountModel::nodeRecentSent, 0);
 		yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 		foreach (const QString &year, yearList) {
-			//unreadMsgs = dbSet->msgsUnreadInYear(
-			//    MessageDb::TYPE_SENT, year);
+			unreadMsgs = dbSet->msgsUnreadInYear(
+			    MessageDb::TYPE_SENT, year);
+			AccountModel::YearCounter yCounter(unreadMsgs != -2, 0);
 			m_accountModel.appendYear(userName,
-			    AccountModel::nodeSentYear, year, 0);
+			    AccountModel::nodeSentYear, year, yCounter);
 		}
 	}
 
