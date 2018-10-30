@@ -111,6 +111,11 @@ private:
 	 */
 	void initDialog(void);
 
+	/*!
+	 * @brief Generate form UI from form model.
+	 */
+	void generateFormLayoutUi(void);
+
 	QString m_userName; /*!< Account user name. */
 	GovFormListModel *m_govFormModel; /*!< Pointer holding Gov form model. */
 	MessageDbSet *m_dbSet; /*!< Account message database pointer. */

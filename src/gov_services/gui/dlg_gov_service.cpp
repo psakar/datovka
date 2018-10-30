@@ -222,33 +222,7 @@ void DlgGovService::initDialog(void)
 	if (m_govFormModel->service()->fields().count() == 0) {
 		m_ui->filedsLabel->setText(tr("Service does not require another data."));
 	} else {
-		foreach (const Gov::FormField &field,
-		    m_govFormModel->service()->fields()) {
-			if (field.properties() & Gov::FormFieldType::PROP_TYPE_DATE
-			    && field.val().isEmpty()) {
-				/* Input required date format. Show calendar. */
-				QCalendarWidget *cw = new QCalendarWidget();
-				cw->setObjectName(field.key());
-				cw->setMaximumDate(QDate::currentDate());
-				cw->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
-				cw->setHorizontalHeaderFormat(QCalendarWidget::NoHorizontalHeader);
-				m_ui->formGovLayout->addRow(field.placeholder(), cw);
-				connect(cw, SIGNAL(activated(QDate)),
-				    this, SLOT(onDateChanged(QDate)));
-			} else {
-				/* Input required string format. Show LineEdit. */
-				QLineEdit *le = new QLineEdit();
-				le->setObjectName(field.key());
-				le->setPlaceholderText(field.placeholder());
-				le->setText(field.val());
-				le->setEnabled(field.val().isEmpty());
-				m_ui->formGovLayout->addRow(field.descr(), le);
-				if (le->isEnabled()) {
-					connect(le, SIGNAL(textChanged(QString)),
-					    this, SLOT(onLineEditTextChanged(QString)));
-				}
-			}
-		}
+		generateFormLayoutUi();
 	}
 
 	/* Connect signal section. */
@@ -266,4 +240,34 @@ void DlgGovService::initDialog(void)
 
 	/* Check if service has all mandatory fileds. */
 	haveAllMandatoryFields();
+}
+
+void DlgGovService::generateFormLayoutUi(void)
+{
+	foreach (const Gov::FormField &field, m_govFormModel->service()->fields()) {
+		if (field.properties() & Gov::FormFieldType::PROP_TYPE_DATE
+		    && field.val().isEmpty()) {
+			/* Input required date format. Show calendar. */
+			QCalendarWidget *cw = new QCalendarWidget();
+			cw->setObjectName(field.key());
+			cw->setMaximumDate(QDate::currentDate());
+			cw->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
+			cw->setHorizontalHeaderFormat(QCalendarWidget::NoHorizontalHeader);
+			m_ui->formGovLayout->addRow(field.placeholder(), cw);
+			connect(cw, SIGNAL(activated(QDate)),
+			    this, SLOT(onDateChanged(QDate)));
+		} else {
+			/* Input required string format. Show LineEdit. */
+			QLineEdit *le = new QLineEdit();
+			le->setObjectName(field.key());
+			le->setPlaceholderText(field.placeholder());
+			le->setText(field.val());
+			le->setEnabled(field.val().isEmpty());
+			m_ui->formGovLayout->addRow(field.descr(), le);
+			if (le->isEnabled()) {
+				connect(le, SIGNAL(textChanged(QString)),
+				    this, SLOT(onLineEditTextChanged(QString)));
+			}
+		}
+	}
 }
