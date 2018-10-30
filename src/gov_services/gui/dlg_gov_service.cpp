@@ -224,7 +224,8 @@ void DlgGovService::initDialog(void)
 	} else {
 		foreach (const Gov::FormField &field,
 		    m_govFormModel->service()->fields()) {
-			if (field.properties() & Gov::FormFieldType::PROP_TYPE_DATE) {
+			if (field.properties() & Gov::FormFieldType::PROP_TYPE_DATE
+			    && field.val().isEmpty()) {
 				/* Input required date format. Show calendar. */
 				QCalendarWidget *cw = new QCalendarWidget();
 				cw->setObjectName(field.key());
