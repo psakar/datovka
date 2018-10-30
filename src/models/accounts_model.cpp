@@ -977,53 +977,6 @@ bool AccountModel::updateRecentUnread(const QString &userName,
 	return true;
 }
 
-bool AccountModel::appendYear(const QString &userName,
-    enum AccountModel::NodeType nodeType, const QString &year,
-    const YearCounter &yCounter)
-{
-	if (userName.isEmpty()) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	QModelIndex topIndex(topAcntIndex(userName));
-	if (!topIndex.isValid()) {
-		return false;
-	}
-
-	AccountCounters &cntrs(m_countersMap[userName]);
-	QList<QString> *groups = Q_NULLPTR;
-	QMap<QString, YearCounter> *unreadGroups = Q_NULLPTR;
-	QModelIndex childTopIndex;
-
-	if (nodeReceivedYear == nodeType) {
-		groups = &cntrs.receivedGroups;
-		unreadGroups = &cntrs.unreadReceivedGroups;
-		/* Get received node. */
-		childTopIndex = topIndex.child(2, 0).child(0, 0);
-	} else if (nodeSentYear == nodeType) {
-		groups = &cntrs.sentGroups;
-		unreadGroups = &cntrs.unreadSentGroups;
-		/* Get sent node. */
-		childTopIndex = topIndex.child(2, 0).child(1, 0);
-	} else {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	Q_ASSERT(Q_NULLPTR != groups);
-	Q_ASSERT(Q_NULLPTR != unreadGroups);
-	Q_ASSERT(childTopIndex.isValid());
-
-	int rows = groups->size();
-	beginInsertRows(childTopIndex, rows, rows);
-	groups->append(year);
-	(*unreadGroups)[year] = yCounter;
-	endInsertRows();
-
-	return true;
-}
-
 /*!
  * @brief Get position of the newly inserted year element.
  *

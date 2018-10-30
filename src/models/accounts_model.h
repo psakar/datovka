@@ -376,18 +376,6 @@ public:
 	    enum NodeType nodeType, unsigned unreadMsgs = 0);
 
 	/*!
-	 * @brief Append year node into account.
-	 *
-	 * @param[in] userName User name.
-	 * @param[in] nodeType May be nodeReceivedYear or nodeSentYear.
-	 * @param[in] year Year string.
-	 * @param[in] yCounter Whether database is opened and number of unread messages.
-	 * @return True on success.
-	 */
-	bool appendYear(const QString &userName, enum NodeType nodeType,
-	    const QString &year, const YearCounter &yCounter);
-
-	/*!
 	 * @brief Update year nodes.
 	 *
 	 * @param[in] userName         User name.
