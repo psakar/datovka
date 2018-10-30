@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>427</width>
-    <height>147</height>
+    <height>170</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -85,6 +85,28 @@
    </item>
    <item>
     <layout class="QFormLayout" name="formGovLayout"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="invalidValueLabel">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string notr="true"/>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

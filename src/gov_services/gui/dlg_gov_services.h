@@ -77,7 +77,7 @@ private slots:
 	 *
 	 * @param[in] index model index of selected service.
 	 */
-	void serviceItemDoubleClicked(const QModelIndex &index);
+	void onServiceActivated(const QModelIndex &index);
 
 private:
 

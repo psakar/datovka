@@ -71,7 +71,17 @@ private slots:
 	void onLineEditTextChanged(QString text);
 
 	/*!
-	 * @brief Send Gov request to isds.
+	 * @brief Is active when some form field has invalid value.
+	 */
+	void onValidityNotification(QString text);
+
+	/*!
+	 * @brief Is active when date has been changed in the calendar widget.
+	 */
+	void onDateChanged(QDate date);
+
+	/*!
+	 * @brief Send Gov request/message to isds.
 	 */
 	void sendGovRequest(void);
 

@@ -21,8 +21,10 @@
  * the two.
  */
 
+#include <QCalendarWidget>
 #include <QLineEdit>
 
+#include "src/datovka_shared/gov_services/service/gov_service_form_field.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/log/memory_log.h"
 #include "src/datovka_shared/utility/strings.h"
@@ -56,8 +58,10 @@ DlgGovService::~DlgGovService(void)
 
 void DlgGovService::haveAllMandatoryFields(void)
 {
+	m_ui->invalidValueLabel->clear();
+	m_ui->invalidValueLabel->setEnabled(false);
 	m_ui->sendServiceButton->setEnabled(
-	    m_govFormModel->service()->haveAllMandatoryFields());
+	    m_govFormModel->haveAllMandatory());
 }
 
 void DlgGovService::onLineEditTextChanged(QString text)
@@ -79,6 +83,31 @@ void DlgGovService::onLineEditTextChanged(QString text)
 	haveAllMandatoryFields();
 }
 
+void DlgGovService::onValidityNotification(QString text)
+{
+	m_ui->invalidValueLabel->setEnabled(true);
+	m_ui->invalidValueLabel->setText(text);
+}
+
+void DlgGovService::onDateChanged(QDate date)
+{
+	/* Get pointer to sender. */
+	QObject *senderObj = sender();
+	if (senderObj == Q_NULLPTR || senderObj->objectName().isNull()) {
+		return;
+	}
+
+	/* Set text value to the service form model. */
+	foreach (const Gov::FormField &field, m_govFormModel->service()->fields()) {
+		if (field.key() == senderObj->objectName()) {
+			m_govFormModel->setKeyValue(field.key(), date.toString("yyyy-MM-dd"));
+		}
+	}
+
+	/* Check if service has all mandatory fileds. */
+	haveAllMandatoryFields();
+}
+
 void DlgGovService::sendGovRequest(void)
 {
 	debugSlotCall();
@@ -88,19 +117,16 @@ void DlgGovService::sendGovRequest(void)
 	service.append("\n");
 	service.append(tr("Recipient: %1").arg(m_govFormModel->service()->instituteName()));
 
-	/* Show send message box. */
-	int ret = DlgMsgBox::message(this, QMessageBox::Question,
-	    tr("Send e-gov request"),
-	    tr("Do you want to send the e-gov request to data box '%1'?").arg(m_govFormModel->service()->boxId()),
-	    service, QString(),
-	    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-	if (ret == QMessageBox::No) {
+	/* Check if service has all mandatory fields. */
+	if (!m_govFormModel->haveAllMandatory()) {
+		logErrorNL("The e-gov service '%s' is missing some mandatory data.",
+		    m_govFormModel->service()->internalId().toUtf8().constData());
 		return;
 	}
 
-	/* Set message content according to model data. */
-	if (!m_govFormModel->service()->haveAllMandatoryFields()) {
-		logErrorNL("The e-gov service '%s' is missing some mandatory data.",
+	/* Check if form has all fields valid. */
+	if (!m_govFormModel->haveAllValid()) {
+		logWarningNL("The e-gov service '%s' has some mandatory data invalid.",
 		    m_govFormModel->service()->internalId().toUtf8().constData());
 		return;
 	}
@@ -109,6 +135,16 @@ void DlgGovService::sendGovRequest(void)
 	const Isds::Message msg(m_govFormModel->service()->dataMessage());
 	if (Q_UNLIKELY(msg.isNull())) {
 		Q_ASSERT(0);
+		return;
+	}
+
+	/* Show send message box. */
+	int ret = DlgMsgBox::message(this, QMessageBox::Question,
+	    tr("Send e-gov request"),
+	    tr("Do you want to send the e-gov request to data box '%1'?").arg(m_govFormModel->service()->boxId()),
+	    service, QString(),
+	    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+	if (ret == QMessageBox::No) {
 		return;
 	}
 
@@ -178,21 +214,38 @@ void DlgGovService::initDialog(void)
 	    service()->boxId()).arg(m_govFormModel->service()->instituteName()));
 	m_ui->userName->setText(m_userName);
 
-	/* Generate form layout from the model. */
+	/* Set properties for error label. */
+	m_ui->invalidValueLabel->setStyleSheet("QLabel { color: red }");
+	m_ui->invalidValueLabel->setEnabled(false);
+
+	/* Generate form layout derived form the form model. */
 	if (m_govFormModel->service()->fields().count() == 0) {
 		m_ui->filedsLabel->setText(tr("Service does not require another data."));
 	} else {
 		foreach (const Gov::FormField &field,
 		    m_govFormModel->service()->fields()) {
-			QLineEdit *le = new QLineEdit();
-			le->setObjectName(field.key());
-			le->setPlaceholderText(field.placeholder());
-			le->setText(field.val());
-			le->setEnabled(field.val().isEmpty());
-			m_ui->formGovLayout->addRow(field.descr(), le);
-			if (le->isEnabled()) {
-				connect(le, SIGNAL(textChanged(QString)),
-				    this, SLOT(onLineEditTextChanged(QString)));
+			if (field.properties() & Gov::FormFieldType::PROP_TYPE_DATE) {
+				/* Input required date format. Show calendar. */
+				QCalendarWidget *cw = new QCalendarWidget();
+				cw->setObjectName(field.key());
+				cw->setMaximumDate(QDate::currentDate());
+				cw->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
+				cw->setHorizontalHeaderFormat(QCalendarWidget::NoHorizontalHeader);
+				m_ui->formGovLayout->addRow(field.placeholder(), cw);
+				connect(cw, SIGNAL(activated(QDate)),
+				    this, SLOT(onDateChanged(QDate)));
+			} else {
+				/* Input required string format. Show LineEdit. */
+				QLineEdit *le = new QLineEdit();
+				le->setObjectName(field.key());
+				le->setPlaceholderText(field.placeholder());
+				le->setText(field.val());
+				le->setEnabled(field.val().isEmpty());
+				m_ui->formGovLayout->addRow(field.descr(), le);
+				if (le->isEnabled()) {
+					connect(le, SIGNAL(textChanged(QString)),
+					    this, SLOT(onLineEditTextChanged(QString)));
+				}
 			}
 		}
 	}
@@ -207,6 +260,8 @@ void DlgGovService::initDialog(void)
 	        QString, QString, bool, qint64, int)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64, int)));
+	connect(m_govFormModel, SIGNAL(validityNotification(QString)),
+	    this, SLOT(onValidityNotification(QString)));
 
 	/* Check if service has all mandatory fileds. */
 	haveAllMandatoryFields();
