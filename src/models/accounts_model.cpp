@@ -24,6 +24,7 @@
 #include <QFont>
 #include <QIcon>
 #include <QMimeData>
+#include <QRegularExpression>
 
 #include "src/common.h"
 #include "src/datovka_shared/log/log.h"
@@ -989,11 +990,13 @@ static
 int addedYearPosistion(const QList<QString> &yearList, const QString &addedYear,
     enum AccountModel::Sorting sorting)
 {
-	int pos;
+	static QRegularExpression yearRe("^[0-9][0-9][0-9][0-9]$");
 
 	if (yearList.isEmpty()) {
 		return 0;
 	}
+
+	bool addedIsYear = yearRe.match(addedYear).hasMatch();
 
 	switch (sorting) {
 	case AccountModel::UNSORTED:
@@ -1001,17 +1004,29 @@ int addedYearPosistion(const QList<QString> &yearList, const QString &addedYear,
 		return yearList.size();
 		break;
 	case AccountModel::ASCENDING:
-		for (pos = 0; pos < yearList.size(); ++pos) {
-			if (addedYear < yearList.at(pos)) {
-				return pos;
+		for (int pos = 0; pos < yearList.size(); ++pos) {
+			const QString &yearEntry(yearList.at(pos));
+			bool entryIsYear = yearRe.match(yearEntry).hasMatch();
+			if (addedIsYear == entryIsYear) {
+				if (addedYear < yearEntry) {
+					return pos;
+				}
+			} else if (addedIsYear) {
+				return pos; /* Years first. */
 			}
 		}
 		return yearList.size();
 		break;
 	case AccountModel::DESCENDING:
-		for (pos = 0; pos < yearList.size(); ++pos) {
-			if (addedYear > yearList.at(pos)) {
-				return pos;
+		for (int pos = 0; pos < yearList.size(); ++pos) {
+			const QString &yearEntry(yearList.at(pos));
+			bool entryIsYear = yearRe.match(yearEntry).hasMatch();
+			if (addedIsYear == entryIsYear) {
+				if (addedYear > yearEntry) {
+					return pos;
+				}
+			} else if (addedIsYear) {
+				return pos; /* Years first. */
 			}
 		}
 		return yearList.size();
@@ -1028,13 +1043,8 @@ bool AccountModel::updateYearNodes(const QString &userName,
     const QList< QPair<QString, YearCounter> > &yearlyUnreadList,
     enum AccountModel::Sorting sorting)
 {
-	if (userName.isEmpty()) {
+	if (Q_UNLIKELY(userName.isEmpty())) {
 		Q_ASSERT(0);
-		return false;
-	}
-
-	QModelIndex topIndex(topAcntIndex(userName));
-	if (!topIndex.isValid()) {
 		return false;
 	}
 
@@ -1043,21 +1053,27 @@ bool AccountModel::updateYearNodes(const QString &userName,
 	QMap<QString, YearCounter> *unreadGroups = Q_NULLPTR;
 	QModelIndex childTopIndex;
 
-	if (nodeReceivedYear == nodeType) {
-		groups = &cntrs.receivedGroups;
-		unreadGroups = &cntrs.unreadReceivedGroups;
-		/* Get received node. */
-		childTopIndex = topIndex.child(2, 0).child(0, 0);
-	} else if (nodeSentYear == nodeType) {
-		groups = &cntrs.sentGroups;
-		unreadGroups = &cntrs.unreadSentGroups;
-		/* Get sent node. */
-		childTopIndex = topIndex.child(2, 0).child(1, 0);
-	} else {
-		Q_ASSERT(0);
-		return false;
-	}
+	{
+		QModelIndex topIndex(topAcntIndex(userName));
+		if (!topIndex.isValid()) {
+			return false;
+		}
 
+		if (nodeReceivedYear == nodeType) {
+			groups = &cntrs.receivedGroups;
+			unreadGroups = &cntrs.unreadReceivedGroups;
+			/* Get received node. */
+			childTopIndex = topIndex.child(2, 0).child(0, 0);
+		} else if (nodeSentYear == nodeType) {
+			groups = &cntrs.sentGroups;
+			unreadGroups = &cntrs.unreadSentGroups;
+			/* Get sent node. */
+			childTopIndex = topIndex.child(2, 0).child(1, 0);
+		} else {
+			Q_ASSERT(0);
+			return false;
+		}
+	}
 	Q_ASSERT(Q_NULLPTR != groups);
 	Q_ASSERT(Q_NULLPTR != unreadGroups);
 	Q_ASSERT(childTopIndex.isValid());
@@ -1102,7 +1118,7 @@ bool AccountModel::updateYearNodes(const QString &userName,
 		if (!groups->contains(pair.first)) {
 			int newRow = addedYearPosistion(*groups, pair.first,
 			    sorting);
-			if (newRow < 0) {
+			if (Q_UNLIKELY(newRow < 0)) {
 				Q_ASSERT(0);
 				return false;
 			}
