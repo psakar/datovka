@@ -22,7 +22,6 @@
  */
 
 #include <QLineEdit>
-#include <QMessageBox>
 
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/log/memory_log.h"
@@ -63,22 +62,20 @@ void DlgGovService::haveAllMandatoryFields(void)
 
 void DlgGovService::onLineEditTextChanged(QString text)
 {
-	QObject* senderObj = sender();
-
-	if (senderObj == Q_NULLPTR) {
+	/* Get pointer to sender. */
+	QObject *senderObj = sender();
+	if (senderObj == Q_NULLPTR || senderObj->objectName().isNull()) {
 		return;
 	}
 
-	if (senderObj->objectName().isNull()) {
-		return;
-	}
-
+	/* Set text value to the service form model. */
 	foreach (const Gov::FormField &field, m_govFormModel->service()->fields()) {
 		if (field.key() == senderObj->objectName()) {
 			m_govFormModel->setKeyValue(field.key(), text);
 		}
 	}
 
+	/* Check if service has all mandatory fileds. */
 	haveAllMandatoryFields();
 }
 
@@ -86,17 +83,18 @@ void DlgGovService::sendGovRequest(void)
 {
 	debugSlotCall();
 
-	QString service = "\n\n";
-	service.append(tr("Request: %1").arg(m_govFormModel->service()->fullName()));
+	/* Prepare send message box content. */
+	QString service(tr("Request: %1").arg(m_govFormModel->service()->fullName()));
 	service.append("\n");
 	service.append(tr("Recipient: %1").arg(m_govFormModel->service()->instituteName()));
 
-	QMessageBox::StandardButton reply = QMessageBox::question(this,
+	/* Show send message box. */
+	int ret = DlgMsgBox::message(this, QMessageBox::Question,
 	    tr("Send e-gov request"),
-	    tr("Do you want to send the e-gov request to data box '%1'?").arg(m_govFormModel->service()->boxId()) +
-	    service,
+	    tr("Do you want to send the e-gov request to data box '%1'?").arg(m_govFormModel->service()->boxId()),
+	    service, QString(),
 	    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-	if (reply == QMessageBox::No) {
+	if (ret == QMessageBox::No) {
 		return;
 	}
 
@@ -115,15 +113,14 @@ void DlgGovService::sendGovRequest(void)
 	}
 
 	/* Genterate unique identifier. */
-	QStringList taskIdentifiers;
 	const QDateTime currentTime(QDateTime::currentDateTimeUtc());
-	taskIdentifiers.append(m_userName + "_" + currentTime.toString() + "_" +
+	QString taskIdentifier(m_userName + "_" + currentTime.toString() + "_" +
 	    Utility::generateRandomString(6));
-	m_transactIds = taskIdentifiers.toSet();
+	m_transactIds.insert(taskIdentifier);
 
 	/* Send Gov message. */
 	TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
-	    m_userName, m_dbSet, taskIdentifiers.at(0), msg,
+	    m_userName, m_dbSet, taskIdentifier, msg,
 	    m_govFormModel->service()->instituteName(),
 	    m_govFormModel->service()->boxId(), false, Task::PROC_NOTHING);
 	if (task != Q_NULLPTR) {
@@ -143,30 +140,28 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 	Q_UNUSED(isPDZ);
 	Q_UNUSED(processFlags);
 
+	/* Nothing found. */
 	if (m_transactIds.end() == m_transactIds.find(transactId)) {
-		/* Nothing found. */
 		return;
 	}
 
+	/* Remove transaction. */
 	if (!m_transactIds.remove(transactId)) {
 		logErrorNL("%s",
 		    "Was not able to remove a transaction identifier from list of unfinished transactions.");
 	}
 
+	/* Show sent result dialog. */
 	if (TaskSendMessage::SM_SUCCESS == result) {
-
 		DlgMsgBox::message(this, QMessageBox::Information,
 		    tr("Message sent"),
 		    "<b>" + tr("Gov request was successfully sent to ISDS.") + "</b>",
 		    tr("Message was sent to <i>%1 (%2)</i> as message number <i>%3</i>.").
 		    arg(recipientName).arg(dbIDRecipient).arg(dmId) + "<br/>",
 		    QString(), QMessageBox::Ok, QMessageBox::Ok);
-
-		this->close(); /* Close dialog. */
-
+		this->close();
 	} else {
-
-		DlgMsgBox::message(this, QMessageBox::Information,
+		DlgMsgBox::message(this, QMessageBox::Warning,
 		    tr("Message sent"),
 		    "<b>" + tr("Gov request was NOT successfully sent to ISDS.") + "</b>",
 		    tr("ISDS returns:") + " " + resultDesc,
@@ -176,12 +171,14 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 
 void DlgGovService::initDialog(void)
 {
+	/* Set window title and labels. */
 	this->setWindowTitle(m_govFormModel->service()->internalId());
 	m_ui->serviceName->setText(m_govFormModel->service()->fullName());
 	m_ui->serviceDbId->setText(QString("%1 -- %2").arg(m_govFormModel->
 	    service()->boxId()).arg(m_govFormModel->service()->instituteName()));
 	m_ui->userName->setText(m_userName);
 
+	/* Generate form layout from the model. */
 	if (m_govFormModel->service()->fields().count() == 0) {
 		m_ui->filedsLabel->setText(tr("Service does not require another data."));
 	} else {
@@ -200,6 +197,7 @@ void DlgGovService::initDialog(void)
 		}
 	}
 
+	/* Connect signal section. */
 	connect(m_ui->sendServiceButton, SIGNAL(clicked()),
 	    this, SLOT(sendGovRequest()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()),
@@ -210,5 +208,6 @@ void DlgGovService::initDialog(void)
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64, int)));
 
+	/* Check if service has all mandatory fileds. */
 	haveAllMandatoryFields();
 }

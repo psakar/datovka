@@ -100,10 +100,10 @@ private:
 	 * @brief Load Gov form data into model.
 	 *
 	 * @param[in] userName Account login.
-	 * @param[in] serviceInternalId Internal service identifier.
+	 * @param[in] serviceId Internal service identifier.
 	 */
 	void loadFormToModel(const QString &userName,
-	    const QString &serviceInternalId) const;
+	    const QString &serviceId) const;
 
 	QString m_userName; /*!< Account user name. */
 	MessageDbSet *m_dbSet; /*!< Account message database poniter. */
