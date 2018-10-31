@@ -64,7 +64,7 @@ DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
 	/* Connect signal section. */
 	connect(m_ui->filterLine, SIGNAL(textChanged(QString)),
 	    this, SLOT(filterServices(QString)));
-	connect(m_ui->govServiceListView, SIGNAL(doubleClicked(QModelIndex)),
+	connect(m_ui->govServiceListView, SIGNAL(activated(QModelIndex)),
 	    this, SLOT(onServiceActivated(QModelIndex)));
 }
 
