@@ -4457,7 +4457,8 @@ bool MainWindow::updateExistingAccountModelUnread(const QModelIndex &index)
 	return true;
 }
 
-bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
+bool MainWindow::regenerateAccountModelYears(const QModelIndex &index,
+    bool prohibitYearRemoval)
 {
 	debugFuncCall();
 
@@ -4493,7 +4494,7 @@ bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 		yearlyUnreadList.append(CounterPair(year, yCounter));
 	}
 	m_accountModel.updateYearNodes(userName, AccountModel::nodeReceivedYear,
-	    yearlyUnreadList, AccountModel::DESCENDING);
+	    yearlyUnreadList, AccountModel::DESCENDING, prohibitYearRemoval);
 
 	/* Sent. */
 	//unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_SENT);
@@ -4508,7 +4509,7 @@ bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 		yearlyUnreadList.append(CounterPair(year, yCounter));
 	}
 	m_accountModel.updateYearNodes(userName, AccountModel::nodeSentYear,
-	    yearlyUnreadList, AccountModel::DESCENDING);
+	    yearlyUnreadList, AccountModel::DESCENDING, prohibitYearRemoval);
 
 	return true;
 }
@@ -5347,7 +5348,10 @@ void MainWindow::refreshAccountList(const QString &userName)
 	/* Redraw views' content. */
 	const QModelIndex topAcntIdx(m_accountModel.topAcntIndex(userName));
 	if (topAcntIdx.isValid()) {
-		regenerateAccountModelYears(topAcntIdx);
+		bool prohibitYearRemoval =
+		    (nodeType == AccountModel::nodeReceivedYear) ||
+		    (nodeType == AccountModel::nodeSentYear);
+		regenerateAccountModelYears(topAcntIdx, prohibitYearRemoval);
 	}
 
 	/*

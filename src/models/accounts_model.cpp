@@ -1041,7 +1041,7 @@ int addedYearPosistion(const QList<QString> &yearList, const QString &addedYear,
 bool AccountModel::updateYearNodes(const QString &userName,
     enum AccountModel::NodeType nodeType,
     const QList< QPair<QString, YearCounter> > &yearlyUnreadList,
-    enum AccountModel::Sorting sorting)
+    enum AccountModel::Sorting sorting, bool prohibitYearRemoval)
 {
 	if (Q_UNLIKELY(userName.isEmpty())) {
 		Q_ASSERT(0);
@@ -1082,35 +1082,32 @@ bool AccountModel::updateYearNodes(const QString &userName,
 	 * Delete model elements that don't exist in new list or update
 	 * existing entries.
 	 */
-	int rows = groups->size();
-	int row = 0;
+	int row = groups->size() - 1;
 	typedef QPair<QString, YearCounter> Pair;
-	while (row < rows) {
+	while (row >= 0) { /* In reverse order. */
 		bool found = false;
 		YearCounter yCounter;
+		const QString &groupName(groups->at(row));
 		foreach (const Pair &pair, yearlyUnreadList) {
-			if (pair.first == groups->at(row)) {
+			if (pair.first == groupName) {
 				found = true;
 				yCounter = pair.second;
 				break;
 			}
 		}
-		if (!found) {
+		if (!prohibitYearRemoval && !found) {
 			/* Remove row, don't increment row. */
 			beginRemoveRows(childTopIndex, row, row);
-			unreadGroups->remove(groups->at(row));
+			unreadGroups->remove(groupName);
 			groups->removeAt(row);
 			endRemoveRows();
-
-			--rows;
 		} else {
 			/* Update unread, increment row. */
-			(*unreadGroups)[groups->at(row)] = yCounter;
+			(*unreadGroups)[groupName] = yCounter;
 			QModelIndex childIndex(childTopIndex.child(row, 0));
 			emit dataChanged(childIndex, childIndex);
-
-			++row;
 		}
+		--row;
 	}
 
 	/* Add missing elements. */

@@ -378,16 +378,17 @@ public:
 	/*!
 	 * @brief Update year nodes.
 	 *
-	 * @param[in] userName         User name.
-	 * @param[in] nodeType         May be nodeReceivedYear or nodeSentYear.
+	 * @param[in] userName User name.
+	 * @param[in] nodeType May be nodeReceivedYear or nodeSentYear.
 	 * @param[in] yearlyUnreadList List of paired years and unread messages
 	 *                             numbers.
-	 * @param[in] sorting          Sorting.
+	 * @param[in] sorting Sorting.
+	 * @param[in] prohibitYearRemoval Set to true if year nodes should not be removed.
 	 * @return True on success.
 	 */
 	bool updateYearNodes(const QString &userName, enum NodeType nodeType,
 	    const QList< QPair<QString, YearCounter> > &yearlyUnreadList,
-	    enum Sorting sorting);
+	    enum Sorting sorting, bool prohibitYearRemoval = false);
 
 	/*!
 	 * @brief Update existing year node in account.
