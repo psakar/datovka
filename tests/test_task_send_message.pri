@@ -42,6 +42,7 @@ SOURCES += \
 	$${top_srcdir}src/io/isds_sessions.cpp \
 	$${top_srcdir}src/io/message_db.cpp \
 	$${top_srcdir}src/io/message_db_set.cpp \
+	$${top_srcdir}src/io/sqlite/delayed_access_db.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
 	$${top_srcdir}src/isds/account_conversion.cpp \
 	$${top_srcdir}src/isds/box_conversion.cpp \
@@ -95,6 +96,7 @@ HEADERS += \
 	$${top_srcdir}src/io/isds_sessions.h \
 	$${top_srcdir}src/io/message_db.h \
 	$${top_srcdir}src/io/message_db_set.h \
+	$${top_srcdir}src/io/sqlite/delayed_access_db.h \
 	$${top_srcdir}src/io/tag_db.h \
 	$${top_srcdir}src/isds/account_conversion.h \
 	$${top_srcdir}src/isds/box_conversion.h \
