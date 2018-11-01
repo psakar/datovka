@@ -260,6 +260,7 @@ void DlgGovService::generateFormLayoutUi(void)
 
 			label->setText(field.placeholder());
 			calendar->setMaximumDate(QDate::currentDate());
+			calendar->setGridVisible(true);
 			calendar->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
 			calendar->setHorizontalHeaderFormat(QCalendarWidget::NoHorizontalHeader);
 
