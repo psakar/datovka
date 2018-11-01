@@ -925,6 +925,13 @@ MessageDb *MessageDbSet::_accessMessageDb(const QString &secondaryKey,
 		delete db;
 		return Q_NULLPTR;
 	}
+	if (create) {
+		if (!db->accessDb().isValid()) {
+			delete db;
+			return Q_NULLPTR;
+		}
+	}
+
 	connect(db, SIGNAL(opened(QString)),
 	    this, SLOT(watchOpened(QString)));
 

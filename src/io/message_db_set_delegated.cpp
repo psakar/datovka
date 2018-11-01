@@ -26,7 +26,6 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
-#include "src/datovka_shared/log/log.h"
 #include "src/io/message_db_set.h"
 
 bool MessageDbSet::vacuum(void)

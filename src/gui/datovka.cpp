@@ -4518,8 +4518,6 @@ bool MainWindow::regenerateAllAccountModelYears(void)
 {
 	debugFuncCall();
 
-	QModelIndex topIndex;
-
 	m_accountModel.removeAllYearNodes();
 
 	for (int i = 0; i < m_accountModel.rowCount(); ++i) {
