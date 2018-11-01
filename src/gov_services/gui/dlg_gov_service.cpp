@@ -244,6 +244,8 @@ void DlgGovService::initDialog(void)
 
 void DlgGovService::generateFormLayoutUi(void)
 {
+	int formLine = 0;
+
 	foreach (const Gov::FormField &field, m_govFormModel->service()->fields()) {
 		if (field.properties() & Gov::FormFieldType::PROP_TYPE_DATE
 		    && field.val().isEmpty()) {
@@ -258,16 +260,23 @@ void DlgGovService::generateFormLayoutUi(void)
 			    this, SLOT(onDateChanged(QDate)));
 		} else {
 			/* Input required string format. Show LineEdit. */
-			QLineEdit *le = new QLineEdit();
-			le->setObjectName(field.key());
-			le->setPlaceholderText(field.placeholder());
-			le->setText(field.val());
-			le->setEnabled(field.val().isEmpty());
-			m_ui->formGovLayout->addRow(field.descr(), le);
-			if (le->isEnabled()) {
-				connect(le, SIGNAL(textChanged(QString)),
-				    this, SLOT(onLineEditTextChanged(QString)));
-			}
+			QLabel *label = new QLabel(this);
+			label->setObjectName(field.key() + QStringLiteral("Label"));
+			m_ui->formGovLayout->setWidget(formLine, QFormLayout::LabelRole, label);
+
+			QLineEdit *lineEdit = new QLineEdit(this);
+			lineEdit->setObjectName(field.key());
+			m_ui->formGovLayout->setWidget(formLine, QFormLayout::FieldRole, lineEdit);
+
+			label->setText(field.descr());
+			lineEdit->setPlaceholderText(field.placeholder());
+			lineEdit->setText(field.val());
+			lineEdit->setEnabled(field.val().isEmpty());
+
+			connect(lineEdit, SIGNAL(textChanged(QString)),
+			    this, SLOT(onLineEditTextChanged(QString)));
 		}
+
+		++formLine;
 	}
 }
