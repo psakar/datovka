@@ -504,7 +504,7 @@ QString MessageDbSet::yearFromDateTime(const QDateTime &time)
 	if (time.isValid()) {
 		return time.toString("yyyy");
 	} else {
-		return QLatin1String(YEARLY_SEC_KEY_INVALID);
+		return YEARLY_SEC_KEY_INVALID;
 	}
 }
 
@@ -640,7 +640,7 @@ bool fileNameMatchesYearly(const QString &fileName, const QString &primaryKey,
 	QRegExp re("^" + primaryKey + "_" YEARLY_SEC_KEY_RE
 	    "___" + (testing ? "1" : "0") + DB_SUFFIX "$");
 
-	QString invFileName(primaryKey + "_" YEARLY_SEC_KEY_INVALID
+	QString invFileName(primaryKey + "_" + YEARLY_SEC_KEY_INVALID +
 	    "___" + (testing ? "1" : "0") + DB_SUFFIX);
 
 	return (re.indexIn(fileName) > -1) || (fileName == invFileName);
@@ -707,10 +707,10 @@ static
 QString fileNameSecondaryKeyYearly(const QString &fileName)
 {
 	static const QRegExp reInv(QString("^") + PRIMARY_KEY_RE
-	    "_" YEARLY_SEC_KEY_INVALID "___" "[01]" DB_SUFFIX "$");
+	    "_" + YEARLY_SEC_KEY_INVALID + "___" "[01]" DB_SUFFIX "$");
 
 	if (reInv.indexIn(fileName) > -1) {
-		return QLatin1String(YEARLY_SEC_KEY_INVALID);
+		return YEARLY_SEC_KEY_INVALID;
 	}
 
 	static const QRegExp reValid(QString("^") + PRIMARY_KEY_RE

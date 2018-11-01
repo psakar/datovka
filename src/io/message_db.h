@@ -37,7 +37,6 @@
 #include "src/datovka_shared/isds/types.h"
 #include "src/io/sqlite/delayed_access_db.h"
 
-#define INVALID_YEAR "inv"
 #define DB2 "db2"
 
 enum Sorting {
@@ -52,6 +51,11 @@ enum Sorting {
 class MessageDb : public DelayedAccessSQLiteDb {
 
 public:
+	/*!
+	 * @brief Name of invalid year.
+	 */
+	static const QString invalidYearName;
+
 	/*!
 	 * @brief Used to distinguish between sent and received messages in db.
 	 *

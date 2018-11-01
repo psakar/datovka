@@ -29,6 +29,7 @@
 #include "src/common.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/global.h"
+#include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 
 /*
@@ -459,7 +460,7 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 				    m_countersMap[uName]);
 				Q_ASSERT(row < cntrs.receivedGroups.size());
 				const QString &year(cntrs.receivedGroups[row]);
-				if (year == "inv") {
+				if (year == MessageDb::invalidYearName) {
 					return tr("invalid received messages");
 				}
 				QString label(
@@ -486,7 +487,7 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 				const AccountCounters &cntrs(
 				    m_countersMap[uName]);
 				Q_ASSERT(row < cntrs.sentGroups.size());
-				if (cntrs.sentGroups[row] == "inv") {
+				if (cntrs.sentGroups[row] == MessageDb::invalidYearName) {
 					return tr("invalid sent messages");
 				}
 				return tr("messages sent in year %1")

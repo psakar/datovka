@@ -284,7 +284,14 @@ QStringList MessageDbSet::_yrly_msgsYears(enum MessageDb::MessageType type,
 		if (db->isOpen()) {
 			years.unite(db->msgsYears(type, sorting).toSet());
 		} else {
-			years.insert(i.key());
+			/*
+			 * Here we are cheating. We expect that there are no
+			 * invalid messages amongs the received ones.
+			 */
+			if ((type == MessageDb::TYPE_SENT) ||
+			    (i.key() != MessageDb::invalidYearName)) {
+				years.insert(i.key());
+			}
 		}
 	}
 
@@ -301,9 +308,9 @@ QStringList MessageDbSet::_yrly_msgsYears(enum MessageDb::MessageType type,
 		}
 		/* Keep invalid year always last. */
 		if ((reversed.size() > 1) &&
-		    (reversed.first() == INVALID_YEAR)) {
+		    (reversed.first() == MessageDb::invalidYearName)) {
 			reversed.removeFirst();
-			reversed.append(INVALID_YEAR);
+			reversed.append(MessageDb::invalidYearName);
 		}
 		return reversed;
 	}
@@ -383,9 +390,9 @@ QList< QPair<QString, int> > MessageDbSet::_yrly_msgsYearlyCounts(
 		}
 		/* Keep invalid year always last. */
 		if ((reversed.size() > 1) &&
-		    (reversed.first() == INVALID_YEAR)) {
+		    (reversed.first() == MessageDb::invalidYearName)) {
 			reversed.removeFirst();
-			reversed.append(INVALID_YEAR);
+			reversed.append(MessageDb::invalidYearName);
 		}
 		list = reversed;
 	}

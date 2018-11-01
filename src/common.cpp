@@ -135,7 +135,7 @@ bool isValidDatabaseFileName(QString inDbFileName,
 		// get year from filename
 		if (fileNameParts[1].isEmpty()) {
 			dbYear = "";
-		} else if (fileNameParts[1] == "inv") {
+		} else if (fileNameParts[1] == "inv") { /* FIXME -- The "inv" here must be removed. */
 			dbYear = fileNameParts[1];
 		} else if (fileNameParts[1].length() == 4) {
 			dbYear = fileNameParts[1];

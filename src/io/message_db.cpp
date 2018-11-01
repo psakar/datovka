@@ -56,6 +56,9 @@
 #include "src/isds/type_description.h"
 #include "src/settings/preferences.h"
 
+#define INVALID_YEAR "inv"
+const QString MessageDb::invalidYearName(INVALID_YEAR);
+
 /* Attachment size is computed from actual data. */
 static
 const QVector<QString> fileItemIdsNoSize = {"id", "dmEncodedContent",
@@ -2666,7 +2669,7 @@ QList<qint64> MessageDb::getAllMsgsIDEqualWithYear(const QString &year)
 	QList<qint64> msgList;
 	QString queryStr;
 
-	if (year == "inv") {
+	if (year == MessageDb::invalidYearName) {
 		queryStr = "SELECT dmID FROM messages WHERE "
 		    "ifnull(dmDeliveryTime, '') = ''";
 	} else {
@@ -2713,7 +2716,7 @@ bool MessageDb::copyRelevantMsgsToNewDb(const QString &newDbFileName,
 	}
 
 	// copy message data from messages table into new db.
-	if (year == "inv") {
+	if (year == MessageDb::invalidYearName) {
 		queryStr = "INSERT INTO " DB2 ".messages SELECT * FROM messages "
 		    "WHERE ifnull(dmDeliveryTime, '') = ''";
 	} else {
