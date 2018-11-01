@@ -79,7 +79,7 @@ void DlgGovService::onLineEditTextChanged(QString text)
 		}
 	}
 
-	/* Check if service has all mandatory fileds. */
+	/* Check if service has all mandatory fields. */
 	haveAllMandatoryFields();
 }
 
@@ -104,7 +104,7 @@ void DlgGovService::onDateChanged(QDate date)
 		}
 	}
 
-	/* Check if service has all mandatory fileds. */
+	/* Check if service has all mandatory fields. */
 	haveAllMandatoryFields();
 }
 
@@ -148,7 +148,7 @@ void DlgGovService::sendGovRequest(void)
 		return;
 	}
 
-	/* Genterate unique identifier. */
+	/* Generate unique identifier. */
 	const QDateTime currentTime(QDateTime::currentDateTimeUtc());
 	QString taskIdentifier(m_userName + "_" + currentTime.toString() + "_" +
 	    Utility::generateRandomString(6));
@@ -238,7 +238,7 @@ void DlgGovService::initDialog(void)
 	connect(m_govFormModel, SIGNAL(validityNotification(QString)),
 	    this, SLOT(onValidityNotification(QString)));
 
-	/* Check if service has all mandatory fileds. */
+	/* Check if service has all mandatory fields. */
 	haveAllMandatoryFields();
 }
 
@@ -247,23 +247,26 @@ void DlgGovService::generateFormLayoutUi(void)
 	int formLine = 0;
 
 	foreach (const Gov::FormField &field, m_govFormModel->service()->fields()) {
-		if (field.properties() & Gov::FormFieldType::PROP_TYPE_DATE
-		    && field.val().isEmpty()) {
-			/* Input required date format. Show calendar. */
-			QCalendarWidget *cw = new QCalendarWidget();
-			cw->setObjectName(field.key());
-			cw->setMaximumDate(QDate::currentDate());
-			cw->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
-			cw->setHorizontalHeaderFormat(QCalendarWidget::NoHorizontalHeader);
-			m_ui->formGovLayout->addRow(field.placeholder(), cw);
-			connect(cw, SIGNAL(activated(QDate)),
+		QLabel *label = new QLabel(this);
+		label->setObjectName(field.key() + QStringLiteral("Label"));
+		m_ui->formGovLayout->setWidget(formLine, QFormLayout::LabelRole, label);
+
+		if ((field.properties() & Gov::FormFieldType::PROP_TYPE_DATE) &&
+		    field.val().isEmpty()) {
+			/* Date input required. Show calendar. */
+			QCalendarWidget *calendar = new QCalendarWidget(this);
+			calendar->setObjectName(field.key());
+			m_ui->formGovLayout->setWidget(formLine, QFormLayout::FieldRole, calendar);
+
+			label->setText(field.placeholder());
+			calendar->setMaximumDate(QDate::currentDate());
+			calendar->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
+			calendar->setHorizontalHeaderFormat(QCalendarWidget::NoHorizontalHeader);
+
+			connect(calendar, SIGNAL(activated(QDate)),
 			    this, SLOT(onDateChanged(QDate)));
 		} else {
-			/* Input required string format. Show LineEdit. */
-			QLabel *label = new QLabel(this);
-			label->setObjectName(field.key() + QStringLiteral("Label"));
-			m_ui->formGovLayout->setWidget(formLine, QFormLayout::LabelRole, label);
-
+			/* Text input required. Show line edit. */
 			QLineEdit *lineEdit = new QLineEdit(this);
 			lineEdit->setObjectName(field.key());
 			m_ui->formGovLayout->setWidget(formLine, QFormLayout::FieldRole, lineEdit);
