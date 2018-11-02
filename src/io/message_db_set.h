@@ -312,6 +312,20 @@ public:
 	    const QString &primaryKey, const QString &secondaryKey,
 	    bool testing, enum Organisation organisation);
 
+	/*!
+	 * @brief Check database filename validity.
+	 *
+	 * @param[in]  fileName Database filename.
+	 * @param[out] dbUserName Username.
+	 * @paran[out] dbYear Year entry if exists, null string else.
+	 * @paran[out] dbTestingFlag True when account is testing, false else.
+	 * @paran[out] errMsg Error message which can be displayed to the user.
+	 * @return True if database filename is correct.
+	 */
+	static
+	bool isValidDbFileName(const QString &fileName, QString &dbUserName,
+	    QString &dbYear, bool &dbTestingFlag, QString &errMsg);
+
 signals:
 	/*!
 	 * @brief Emitted when a database file is opened.

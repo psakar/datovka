@@ -847,6 +847,85 @@ QString MessageDbSet::constructDbFileName(const QString &locDir,
 	    key + QString("___") + (testing ? "1" : "0") + DB_SUFFIX;
 }
 
+bool MessageDbSet::isValidDbFileName(const QString &fileName,
+    QString &dbUserName, QString &dbYear, bool &dbTestingFlag, QString &errMsg)
+{
+	QStringList fileNameParts;
+	bool ret = false;
+	dbUserName.clear();
+	dbYear.clear();
+	errMsg.clear();
+
+	if (fileName.contains("___")) {
+		// get username from filename
+		fileNameParts = fileName.split("_");
+		if (fileNameParts.isEmpty() || fileNameParts.count() <= 1) {
+			errMsg = tr(
+			    "File '%1' does not contain a valid database filename.")
+			        .arg(fileName);
+			return ret;
+		}
+		if (fileNameParts[0].isEmpty() ||
+		    (fileNameParts[0].length() != 6)) {
+			errMsg = tr(
+			    "File '%1' does not contain a valid username in the database filename.")
+			        .arg(fileName);
+			return ret;
+		}
+		dbUserName = fileNameParts[0];
+
+		// get year from filename
+		if (fileNameParts[1].isEmpty()) {
+			dbYear.clear();
+		} else if (fileNameParts[1] == MessageDb::invalidYearName) {
+			dbYear = fileNameParts[1];
+		} else if (fileNameParts[1].length() == 4) {
+			dbYear = fileNameParts[1];
+		} else {
+			errMsg = tr(
+			    "File '%1' does not contain a valid year in the database filename.")
+			        .arg(fileName);
+			dbYear.clear();
+			return ret;
+		}
+
+		// get testing flag from filename
+		fileNameParts = fileName.split(".");
+		if (fileNameParts.isEmpty()) {
+			errMsg = tr(
+			    "File '%1' does not contain a valid database filename.")
+			        .arg(fileName);
+			return ret;
+		}
+		fileNameParts = fileNameParts[0].split("___");
+		if (fileNameParts.isEmpty()) {
+			errMsg = tr(
+			    "File '%1' does not contain a valid database filename.")
+			        .arg(fileName);
+			return ret;
+		}
+
+		if (fileNameParts[1] == "1") {
+			dbTestingFlag = true;
+		} else if (fileNameParts[1] == "0") {
+			dbTestingFlag = false;
+		} else {
+			errMsg = tr(
+			    "File '%1' does not contain a valid account type flag or filename has wrong format.")
+			        .arg(fileName);
+			dbTestingFlag = false;
+			return ret;
+		}
+	} else {
+		errMsg = tr(
+		    "File '%1' does not contain a valid message database or filename has wrong format.")
+		        .arg(fileName);
+		return ret;
+	}
+
+	return true;
+}
+
 void MessageDbSet::watchOpened(const QString &fileName)
 {
 	Q_UNUSED(fileName);

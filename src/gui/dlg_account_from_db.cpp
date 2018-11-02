@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -24,8 +24,8 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "src/common.h"
 #include "src/datovka_shared/log/log.h"
+#include "src/io/message_db_set.h"
 #include "src/global.h"
 #include "src/gui/dlg_account_from_db.h"
 #include "src/settings/account.h"
@@ -154,7 +154,7 @@ QStringList createAccountsFromDatabaseFiles(AccountModel &accountModel,
 		QString errMsg;
 
 		/* Split and check the database file name. */
-		if (!isValidDatabaseFileName(dbFileName, dbUserName,
+		if (!MessageDbSet::isValidDbFileName(dbFileName, dbUserName,
 		    dbYearFlag, dbTestingFlag, errMsg)) {
 			QMessageBox::warning(parent,
 			    DlgCreateAccountFromDb::tr("Create account: %1")
