@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -23,10 +23,10 @@
 
 #include <QThread>
 
-#include "src/common.h"
 #include "src/datovka_shared/isds/types.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/global.h"
+#include "src/io/message_db_set.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_import_message.h"
 
@@ -153,7 +153,7 @@ enum TaskImportMessage::Result TaskImportMessage::importMessages(
 		dbFileName = file.fileName();
 
 		/* parse and check the import database file name */
-		if (!isValidDatabaseFileName(dbFileName, dbUserName,
+		if (!MessageDbSet::isValidDbFileName(dbFileName, dbUserName,
 		    dbYearFlag, dbTestingFlag, resultDesc)) {
 			resultDescList.append(resultDesc);
 			continue;
