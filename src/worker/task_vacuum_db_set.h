@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2016 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,15 +21,17 @@
  * the two.
  */
 
-#ifndef _TASK_VACUUM_DB_SET_H_
-#define _TASK_VACUUM_DB_SET_H_
+#pragma once
 
+#include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 #include <QString>
 
 #include "src/io/message_db_set.h"
 #include "src/worker/task.h"
 
 class TaskVacuumDbSet : public Task {
+	Q_DECLARE_TR_FUNCTIONS(TaskVacuumDbSet)
+
 public:
 	/*!
 	 * @brief Constructor.
@@ -85,5 +87,3 @@ private:
 
 	MessageDbSet *m_dbSet; /*!< Pointer to database container. */
 };
-
-#endif /* _TASK_VACUUM_DB_SET_H_ */

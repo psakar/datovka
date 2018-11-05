@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -22,7 +22,6 @@
  */
 
 #include <QtGlobal> /* QT_VERSION */
-#include <QObject>
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
 #include <QStorageInfo>
 #else /* < Qt-5.4 */
@@ -45,7 +44,7 @@ TaskVacuumDbSet::TaskVacuumDbSet(MessageDbSet *dbSet)
 
 void TaskVacuumDbSet::run(void)
 {
-	if (0 == m_dbSet) {
+	if (Q_UNLIKELY(Q_NULLPTR == m_dbSet)) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -67,7 +66,7 @@ void TaskVacuumDbSet::run(void)
 
 QString TaskVacuumDbSet::storagePlace(MessageDbSet *dbSet)
 {
-	Q_ASSERT(0 != dbSet);
+	Q_ASSERT(Q_NULLPTR != dbSet);
 
 	QString place;
 
@@ -139,7 +138,7 @@ bool TaskVacuumDbSet::haveStorageSpace(const QString &storagePlace,
 
 bool TaskVacuumDbSet::vacuumDbSet(MessageDbSet *dbSet, QString &error)
 {
-	Q_ASSERT(0 != dbSet);
+	Q_ASSERT(Q_NULLPTR != dbSet);
 
 	qint64 maxDbSize = dbSet->underlyingFileSize(MessageDbSet::SC_LARGEST);
 	if (maxDbSize <= 0) {
@@ -152,19 +151,19 @@ bool TaskVacuumDbSet::vacuumDbSet(MessageDbSet *dbSet, QString &error)
 
 	const QString dbDir(storagePlace(dbSet));
 	if (dbDir.isEmpty()) {
-		error = QObject::tr("Could not determine database directory");
+		error = tr("Could not determine database directory");
 		return false;
 	}
 
 	/* Test for available space. */
 	if (!haveStorageSpace(dbDir, maxDbSize)) {
-		error = QObject::tr("Not enough space on device where '%1' resides.").arg(dbDir);
+		error = tr("Not enough space on device where '%1' resides.").arg(dbDir);
 		return false;
 	}
 
 	bool ret = dbSet->vacuum();
 	if (!ret) {
-		error = QObject::tr("Calling vacuum on database set failed.");
+		error = tr("Calling vacuum on database set failed.");
 	}
 
 	return ret;

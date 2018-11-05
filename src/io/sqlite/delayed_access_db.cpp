@@ -40,6 +40,42 @@ QString DelayedAccessSQLiteDb::fileName(void) const
 	return m_fileName;
 }
 
+bool DelayedAccessSQLiteDb::beginTransaction(void)
+{
+	if (Q_UNLIKELY(!_accessDb())) {
+		return false;
+	}
+
+	return SQLiteDb::beginTransaction();
+}
+
+bool DelayedAccessSQLiteDb::savePoint(const QString &savePointName)
+{
+	if (Q_UNLIKELY(!_accessDb())) {
+		return false;
+	}
+
+	return SQLiteDb::savePoint(savePointName);
+}
+
+bool DelayedAccessSQLiteDb::checkDb(bool quick)
+{
+	if (Q_UNLIKELY(!_accessDb())) {
+		return false;
+	}
+
+	return SQLiteDb::checkDb(quick);
+}
+
+bool DelayedAccessSQLiteDb::vacuum(void)
+{
+	if (Q_UNLIKELY(!_accessDb())) {
+		return false;
+	}
+
+	return SQLiteDb::vacuum();
+}
+
 bool DelayedAccessSQLiteDb::copyDb(const QString &newFileName,
     enum OpenFlag flag)
 {

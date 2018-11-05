@@ -440,8 +440,7 @@ MessageDbSet::Organisation MessageDbSet::organisation(void) const
 	return m_organisation;
 }
 
-qint64 MessageDbSet::underlyingFileSize(
-    enum MessageDbSet::SizeComputation sc) const
+qint64 MessageDbSet::underlyingFileSize(enum SizeComputation sc) const
 {
 	qint64 dbSize = 0;
 

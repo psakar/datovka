@@ -47,6 +47,29 @@ public:
 	 */
 	QString fileName(void) const;
 
+	/*!
+	 * @brief Begin a transaction.
+	 *
+	 * @return True on success.
+	 */
+	bool beginTransaction(void);
+
+	/*!
+	 * @brief Begin named transaction.
+	 *
+	 * @param[in] savePointName Name of the save point.
+	 * @return True on success.
+	 */
+	bool savePoint(const QString &savePointName);
+
+	/*
+	 * The following methods need not to be overridden because they are
+	 * called after transactions have been started.
+	 */
+	using SQLiteDb::commitTransaction;
+	using SQLiteDb::releaseSavePoint;
+	using SQLiteDb::rollbackTransaction;
+
 signals:
 	/*!
 	 * @brief This signal is emitted when the database is actually opened.
@@ -56,6 +79,20 @@ signals:
 	void opened(const QString &fileName);
 
 protected:
+	/*!
+	 * @brief Perform a database integrity check.
+	 *
+	 * @return False if check fails.
+	 */
+	bool checkDb(bool quick);
+
+	/*!
+	 * @brief Performs database clean-up (VACUUM).
+	 *
+	 * @return False on error.
+	 */
+	bool vacuum(void);
+
 	/*!
 	 * @brief Copy db.
 	 *
