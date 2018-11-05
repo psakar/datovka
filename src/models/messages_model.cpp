@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -409,7 +409,7 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 	}
 }
 
-void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
+void DbMsgsTblModel::assignData(const QList<MessageDb::RcvdEntry> &entryList,
     int appendedColsNum)
 {
 	if (Q_UNLIKELY(m_columnCount != MAX_COLNUM)) {
@@ -420,6 +420,8 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 		Q_ASSERT(0);
 		return;
 	}
+
+	removeRows(0, rowCount());
 
 	/* Set column count if the model is empty. */
 	if (rowCount() == 0) {
@@ -464,7 +466,7 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::RcvdEntry> &entryList,
 	endInsertRows();
 }
 
-void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
+void DbMsgsTblModel::assignData(const QList<MessageDb::SntEntry> &entryList,
     int appendedColsNum)
 {
 	if (Q_UNLIKELY(m_columnCount != MAX_COLNUM)) {
@@ -475,6 +477,8 @@ void DbMsgsTblModel::appendData(const QList<MessageDb::SntEntry> &entryList,
 		Q_ASSERT(0);
 		return;
 	}
+
+	removeRows(0, rowCount());
 
 	/* Set column count if the model is empty. */
 	if (rowCount() == 0) {
