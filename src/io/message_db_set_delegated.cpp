@@ -21,6 +21,7 @@
  * the two.
  */
 
+#include <climits> /* INT_MIN */
 #include <QRegExp>
 #include <QSet>
 #include <QSqlError>
@@ -1263,6 +1264,51 @@ QList<MessageDb::MsgId> MessageDbSet::_sf_msgsDateInterval(
 	return this->first()->msgsDateInterval(fromDate, toDate, msgDirect);
 }
 
+/*!
+ * @brief Converts the secondary key to a year integer.
+ *
+ * @param[in]  key Secondary key.
+ * @param[out] ok Set to true if secondary key contains a year in the format "yyyy".
+ * @return Return year value,
+ *     INT_MIN when key does not contain a year in specified format.
+ */
+static
+int secondaryKeyToYear(const QString &key, bool *ok)
+{
+	static const QRegExp re(YEARLY_SEC_KEY_RE);
+
+	if (re.exactMatch(key)) {
+		return key.toInt(ok);
+	} else {
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return INT_MIN;
+	}
+}
+
+/*!
+ * @brief Check whether secondary key (year) lies within specified boundaries.
+ *
+ * @param[in] key Secondary key containing a year value.
+ * @param[in] fromDate Start date.
+ * @param[in] toDate Stop date.
+ * @return True if secondary key contains a year that lies within the specified
+ *     dates.
+ */
+static
+bool secondaryKeyWithinLimits(const QString &key, const QDate &fromDate,
+    const QDate &toDate)
+{
+	bool iOk = false;
+	int year = secondaryKeyToYear(key, &iOk);
+	if (!iOk) {
+		return false;
+	}
+
+	return (fromDate.year() <= year) && (year <= toDate.year());
+}
+
 QList<MessageDb::MsgId> MessageDbSet::_yrly_msgsDateInterval(
     const QDate &fromDate, const QDate &toDate,
     enum MessageDirection msgDirect) const
@@ -1271,6 +1317,11 @@ QList<MessageDb::MsgId> MessageDbSet::_yrly_msgsDateInterval(
 
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
+		if (!secondaryKeyWithinLimits(i.key(), fromDate, toDate)) {
+			/* Skip the access of non-related databases. */
+			continue;
+		}
+
 		MessageDb *db = i.value();
 		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
