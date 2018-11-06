@@ -1149,4 +1149,11 @@ private:
 	 * @brief Sets action icons.
 	 */
 	void setMenuActionIcons(void);
+
+	/*!
+	 * @brief Enable Gov service action in the menu based on account type.
+	 *
+	 * @param[in] userName Account user name.
+	 */
+	void enableCreateGovServiceAction(const QString &userName);
 };

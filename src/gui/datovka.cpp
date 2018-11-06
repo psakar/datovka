@@ -860,8 +860,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 //		Q_ASSERT(0);
 		return;
 	}
-	const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
-	ui->actionCreate_gov_message->setEnabled(!itemSettings.isTestAccount());
+
+	enableCreateGovServiceAction(userName);
 
 	const MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
@@ -879,6 +879,10 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->messageList->model()->disconnect(
 		    SIGNAL(layoutChanged()), this,
 		    SLOT(messageItemRestoreSelectionAfterLayoutChange()));
+
+		/* Get user name and db location. */
+		const AcntSettings &itemSettings(
+		    (*GlobInstcs::acntMapPtr)[userName]);
 
 		QString dbDir = itemSettings.dbDir();
 		if (dbDir.isEmpty()) {
@@ -3969,7 +3973,7 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 			ui->actionSync_all_accounts->setEnabled(true);
 			ui->actionGet_messages->setEnabled(true);
 			ui->actionSend_message->setEnabled(true);
-			ui->actionCreate_gov_message->setEnabled(true);
+			enableCreateGovServiceAction(userName);
 			ui->actionFind_databox->setEnabled(true);
 			ui->actionMsgAdvancedSearch->setEnabled(true);
 			ui->actionImport_ZFO_file_into_database->
@@ -8530,4 +8534,10 @@ void MainWindow::dockMenuActionTriggerred(QAction *action)
 	}
 	widget->raise();
 	widget->activateWindow();
+}
+
+void MainWindow::enableCreateGovServiceAction(const QString &userName)
+{
+	const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
+	ui->actionCreate_gov_message->setEnabled(!itemSettings.isTestAccount());
 }
