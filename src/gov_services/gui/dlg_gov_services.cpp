@@ -63,7 +63,7 @@ DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
 
 	/* Connect signal section. */
 	connect(m_ui->filterLine, SIGNAL(textChanged(QString)),
-	    this, SLOT(filterServices(QString)));
+	    this, SLOT(onFilterServices(QString)));
 	connect(m_ui->govServiceListView, SIGNAL(activated(QModelIndex)),
 	    this, SLOT(onServiceActivated(QModelIndex)));
 }
@@ -74,7 +74,7 @@ DlgGovServices::~DlgGovServices(void)
 	delete m_ui;
 }
 
-void DlgGovServices::filterServices(const QString &text)
+void DlgGovServices::onFilterServices(const QString &text)
 {
 	m_govServiceListProxyModel.setFilterRegExp(QRegExp(text,
 	    Qt::CaseInsensitive, QRegExp::FixedString));

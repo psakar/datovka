@@ -37,10 +37,6 @@ namespace Ui {
 	class DlgGovServices;
 }
 
-namespace Gov {
-	class Service; /* Forward declaration. */
-}
-
 /*!
  * @brief Encapsulated gov services dialogue.
  */
@@ -70,7 +66,7 @@ private slots:
 	 *
 	 * @param[in] text Filter text.
 	 */
-	void filterServices(const QString &text);
+	void onFilterServices(const QString &text);
 
 	/*!
 	 * @brief Any Gov service was double clicked.
@@ -106,7 +102,7 @@ private:
 	    const QString &serviceId) const;
 
 	QString m_userName; /*!< Account user name. */
-	MessageDbSet *m_dbSet; /*!< Account message database poniter. */
+	MessageDbSet *m_dbSet; /*!< Holds pointer to message database. */
 	QMap<QString, const Gov::Service *> m_govServices; /*!< Holds pointers to all available Gov services. */
 	SortFilterProxyModel m_govServiceListProxyModel; /*!< Used for Gov service filtering. */
 	GovServiceListModel *m_govServiceModel; /*!< Gov service model. */

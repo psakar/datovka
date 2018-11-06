@@ -108,7 +108,7 @@ void DlgGovService::onDateChanged(QDate date)
 	haveAllMandatoryFields();
 }
 
-void DlgGovService::sendGovRequest(void)
+void DlgGovService::onSendGovRequest(void)
 {
 	debugSlotCall();
 
@@ -172,7 +172,6 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 {
 	debugSlotCall();
 
-	Q_UNUSED(userName);
 	Q_UNUSED(isPDZ);
 	Q_UNUSED(processFlags);
 
@@ -190,7 +189,7 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 	/* Show sent result dialog. */
 	if (TaskSendMessage::SM_SUCCESS == result) {
 		DlgMsgBox::message(this, QMessageBox::Information,
-		    tr("Message sent"),
+		    tr("Message sent: %1").arg(userName),
 		    "<b>" + tr("Gov request was successfully sent to ISDS.") + "</b>",
 		    tr("Message was sent to <i>%1 (%2)</i> as message number <i>%3</i>.").
 		    arg(recipientName).arg(dbIDRecipient).arg(dmId) + "<br/>",
@@ -198,7 +197,7 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 		this->close();
 	} else {
 		DlgMsgBox::message(this, QMessageBox::Warning,
-		    tr("Message sent"),
+		    tr("Message sent: %1").arg(userName),
 		    "<b>" + tr("Gov request was NOT successfully sent to ISDS.") + "</b>",
 		    tr("ISDS returns:") + " " + resultDesc,
 		    QString(), QMessageBox::Ok, QMessageBox::Ok);
@@ -227,7 +226,7 @@ void DlgGovService::initDialog(void)
 
 	/* Connect signal section. */
 	connect(m_ui->sendServiceButton, SIGNAL(clicked()),
-	    this, SLOT(sendGovRequest()));
+	    this, SLOT(onSendGovRequest()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()),
 	    this, SLOT(close()));
 	connect(GlobInstcs::msgProcEmitterPtr,

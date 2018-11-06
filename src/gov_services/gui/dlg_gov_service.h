@@ -23,6 +23,7 @@
 
 #pragma once
 
+#include <QDate>
 #include <QDialog>
 #include <QSet>
 #include <QString>
@@ -46,7 +47,7 @@ public:
 	 *
 	 * @param[in] userName Account user name.
 	 * @param[in] govFormModel Pointer holding Gov form model to be set.
-	 * @param[in] dbSet Account db set pointer.
+	 * @param[in] dbSet Pointer holding account db set.
 	 * @param[in] parent Parent widget.
 	 */
 	explicit DlgGovService(const QString &userName,
@@ -83,7 +84,7 @@ private slots:
 	/*!
 	 * @brief Send Gov request/message to isds.
 	 */
-	void sendGovRequest(void);
+	void onSendGovRequest(void);
 
 	/*!
 	 * @brief Show status after sending Gov message via ISDS interface.
@@ -107,18 +108,18 @@ private slots:
 private:
 
 	/*!
-	 * @brief Init service dialogue.
+	 * @brief Init Gov service dialogue.
 	 */
 	void initDialog(void);
 
 	/*!
-	 * @brief Generate form UI from form model.
+	 * @brief Generate form UI layout from model.
 	 */
 	void generateFormLayoutUi(void);
 
 	QString m_userName; /*!< Account user name. */
 	GovFormListModel *m_govFormModel; /*!< Pointer holding Gov form model. */
-	MessageDbSet *m_dbSet; /*!< Account message database pointer. */
+	MessageDbSet *m_dbSet; /*!< Pointer holding account db set. */
 	Ui::DlgGovService *m_ui; /*!< UI generated from UI file. */
 	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */
 };
