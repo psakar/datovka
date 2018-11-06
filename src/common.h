@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -189,19 +189,6 @@ void finishEmailMessage(QString &message, const QString &boundary);
  * @return Decoded string.
  */
 QString fromBase64(const QString &base64);
-
-/*!
- * @brief Check valid database filename.
- *
- * @param[in] inDbFileName   Input database file name.
- * @param[out] dbUserName    Username entry.
- * @paran[out] dbYear        Year entry if exists or NULL.
- * @paran[out] dbTestingFlag True if account is testing or false
- * @paran[out] errMsg        Error message to user
- * @return true if database filename is correct
- */
-bool isValidDatabaseFileName(QString inDbFileName, QString &dbUserName,
-    QString &dbYear, bool &dbTestingFlag, QString &errMsg);
 
 /*!
  * @brief Converts string to base64.

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _ACCOUNTS_MODEL_H_
-#define _ACCOUNTS_MODEL_H_
+#pragma once
 
 #include <QAbstractItemModel>
 #include <QList>
@@ -101,6 +100,23 @@ public:
 		UNSORTED = 0,
 		ASCENDING,
 		DESCENDING
+	};
+
+	/*!
+	 * @brief Unread message yearly counter.
+	 */
+	class YearCounter {
+	public:
+		YearCounter(void)
+		    : dbOpened(false), unread(0)
+		{ }
+
+		YearCounter(bool o, unsigned u)
+		    : dbOpened(o), unread(u)
+		{ }
+
+		bool dbOpened; /*!< True if underlying database has been opened. */
+		unsigned unread; /*!< Number of unread messages. */
 	};
 
 	/*!
@@ -294,7 +310,8 @@ public:
 	 *         -1 if account could not be added,
 	 *          0 if account was added.
 	 */
-	int addAccount(const AcntSettings &acntSettings, QModelIndex *idx = 0);
+	int addAccount(const AcntSettings &acntSettings,
+	    QModelIndex *idx = Q_NULLPTR);
 
 	/*!
 	 * @brief Delete account.
@@ -359,42 +376,31 @@ public:
 	    enum NodeType nodeType, unsigned unreadMsgs = 0);
 
 	/*!
-	 * @brief Append year node into account.
-	 *
-	 * @param[in] userName   User name.
-	 * @param[in] nodeType   May be nodeReceivedYear or nodeSentYear.
-	 * @param[in] year       Year string.
-	 * @param[in] unreadMsgs Number of unread messages.
-	 * @return True on success.
-	 */
-	bool appendYear(const QString &userName, enum NodeType nodeType,
-	    const QString &year, unsigned unreadMsgs = 0);
-
-	/*!
 	 * @brief Update year nodes.
 	 *
-	 * @param[in] userName         User name.
-	 * @param[in] nodeType         May be nodeReceivedYear or nodeSentYear.
+	 * @param[in] userName User name.
+	 * @param[in] nodeType May be nodeReceivedYear or nodeSentYear.
 	 * @param[in] yearlyUnreadList List of paired years and unread messages
 	 *                             numbers.
-	 * @param[in] sorting          Sorting.
+	 * @param[in] sorting Sorting.
+	 * @param[in] prohibitYearRemoval Set to true if year nodes should not be removed.
 	 * @return True on success.
 	 */
 	bool updateYearNodes(const QString &userName, enum NodeType nodeType,
-	    const QList< QPair<QString, unsigned> > &yearlyUnreadList,
-	    enum Sorting sorting);
+	    const QList< QPair<QString, YearCounter> > &yearlyUnreadList,
+	    enum Sorting sorting, bool prohibitYearRemoval = false);
 
 	/*!
 	 * @brief Update existing year node in account.
 	 *
-	 * @param[in] userName   User name.
-	 * @param[in] nodeType   May be nodeReceivedYear or nodeSentYear.
-	 * @param[in] year       Year string.
-	 * @param[in] unreadMsgs Number of unread messages.
+	 * @param[in] userName User name.
+	 * @param[in] nodeType May be nodeReceivedYear or nodeSentYear.
+	 * @param[in] year Year string.
+	 * @param[in] yCounter Whether database is opened and number of unread messages.
 	 * @return True on success.
 	 */
 	bool updateYear(const QString &userName, enum NodeType nodeType,
-	    const QString &year, unsigned unreadMsgs = 0);
+	    const QString &year, const YearCounter &yCounter);
 
 	/*!
 	 * @brief Delete all year-related nodes in model.
@@ -457,15 +463,6 @@ private:
 	 */
 	int topAcntRow(const QString &userName) const;
 
-	/*!
-	 * @brief Determines node type by traversing node structure.
-	 *
-	 * @param[in] index Data index.
-	 * @return Node type related to the supplied index.
-	 */
-	static
-	enum NodeType nodeTypeTraversed(const QModelIndex &index);
-
 	/*
 	 * Model indexes hold a value that is effectively the index into this
 	 * list. This value serves for accessing model data. Therefore, the
@@ -507,13 +504,11 @@ private:
 
 		unsigned unreadRecentReceived; /*!< Number of unread recent received messages. */
 		unsigned unreadRecentSent; /*!< Number of unread recent sent messages. */
-		QList<QString> receivedGroups; /*!< Group names and numbers of unread messages. */
+		QList<QString> receivedGroups; /*!< Groups of unread messages. */
 		QList<QString> sentGroups; /*!< Groups of unread messages. */
-		QMap<QString, unsigned> unreadReceivedGroups; /*< Number of unread messages. */
-		QMap<QString, unsigned> unreadSentGroups; /*!< Number of unread messages. */
+		QMap<QString, YearCounter> unreadReceivedGroups; /*< Number of unread messages. */
+		QMap<QString, YearCounter> unreadSentGroups; /*!< Number of unread messages. */
 	};
 
 	QMap<QString, AccountCounters> m_countersMap; /*!< Unread counters. */
 };
-
-#endif /* _ACCOUNTS_MODEL_H_ */

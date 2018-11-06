@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -27,7 +27,8 @@
 #include "src/io/message_db_set_container.h"
 
 DbContainer::DbContainer(const QString &connectionPrefix)
-    : QMap<QString, MessageDbSet *>(),
+    : QObject(Q_NULLPTR),
+    QMap<QString, MessageDbSet *>(),
     m_connectionPrefix(connectionPrefix)
 {
 }
@@ -37,7 +38,11 @@ DbContainer::~DbContainer(void)
 	QMap<QString, MessageDbSet *>::iterator i;
 
 	for (i = this->begin(); i != this->end(); ++i) {
-		delete i.value();
+		MessageDbSet *dbSet = i.value();
+		/* No need to call disconnect here. */
+		//dbSet->disconnect(SLOT(opened(QString)),
+		//    this, SIGNAL(watchOpened(QString)));
+		delete dbSet;
 	}
 }
 
@@ -58,6 +63,9 @@ MessageDbSet *DbContainer::accessDbSet(const QString &locDir,
 	if (Q_NULLPTR == dbSet) {
 		return Q_NULLPTR;
 	}
+
+	connect(dbSet, SIGNAL(opened(QString)),
+	    this, SLOT(watchOpened(QString)));
 
 	this->insert(primaryKey, dbSet);
 	return dbSet;
@@ -87,10 +95,18 @@ bool DbContainer::deleteDbSet(MessageDbSet *dbSet)
 	/* Delete files. */
 	dbSet->deleteLocation();
 
+	dbSet->disconnect(SLOT(opened(QString)),
+	    this, SIGNAL(watchOpened(QString)));
+
 	/* Close database. */
 	delete dbSet;
 
 	return true;
+}
+
+void DbContainer::watchOpened(const QString &primaryKey)
+{
+	emit opened(primaryKey);
 }
 
 const QString DbContainer::dbDriverType("QSQLITE");

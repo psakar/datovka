@@ -29,6 +29,10 @@
 #include "src/datovka_shared/log/log.h"
 #include "src/settings/account.h"
 
+/* Null objects - for convenience. */
+static const QByteArray nullByteArray;
+static const QString nullString;
+
 namespace CredNames {
 	const QString creds(QLatin1String("credentials"));
 
@@ -52,13 +56,6 @@ namespace CredNames {
 	const QString lstZfoPath(QLatin1String("last_export_zfo_path"));
 }
 
-/* The following are not stored into the configuration file. */
-/* Only set on new accounts. */
-#define _CREATED_FROM_SCRATCH "_created_from_cratch"
-#define _PKEY_PASSPHRASE "_pkey_passphrase"
-#define _OTP_CODE "_otp_code"
-#define _PWD_EXPIR_DLG_SHOWN "_pwd_expir_dlg_shown"
-
 /*!
  * @brief Login method names as stored in configuration file.
  */
@@ -68,38 +65,6 @@ namespace MethodNames {
 	static const QString uNamePwdCrt(QLatin1String("user_certificate"));
 	static const QString uNamePwdHotp(QLatin1String("hotp"));
 	static const QString uNamePwdTotp(QLatin1String("totp"));
-}
-
-/*!
- * @brief Converts integer to login method identifier.
- *
- * @param[in] num Integer number.
- * @return Identifier value.
- */
-static
-enum AcntSettings::LogInMethod methodIntToEnum(int num)
-{
-	switch (num) {
-	case AcntSettings::LIM_UNAME_PWD:
-		return AcntSettings::LIM_UNAME_PWD;
-		break;
-	case AcntSettings::LIM_UNAME_CRT:
-		return AcntSettings::LIM_UNAME_CRT;
-		break;
-	case AcntSettings::LIM_UNAME_PWD_CRT:
-		return AcntSettings::LIM_UNAME_PWD_CRT;
-		break;
-	case AcntSettings::LIM_UNAME_PWD_HOTP:
-		return AcntSettings::LIM_UNAME_PWD_HOTP;
-		break;
-	case AcntSettings::LIM_UNAME_PWD_TOTP:
-		return AcntSettings::LIM_UNAME_PWD_TOTP;
-		break;
-	case AcntSettings::LIM_UNKNOWN:
-	default:
-		return AcntSettings::LIM_UNKNOWN;
-		break;
-	}
 }
 
 /*!
@@ -161,258 +126,715 @@ const QString &methodEnumToStr(enum AcntSettings::LogInMethod val)
 	}
 }
 
+/*!
+ * @brief PIMPL AcntSettings class.
+ */
+class AcntSettingsPrivate {
+	//Q_DISABLE_COPY(AcntSettingsPrivate)
+public:
+	AcntSettingsPrivate(void)
+	    : m_accountName(), m_userName(),
+	    m_loginMethod(AcntSettings::LIM_UNKNOWN), m_password(), m_pwdAlg(),
+	    m_pwdSalt(), m_pwdIv(), m_pwdCode(), m_isTestAccount(false),
+	    m_rememberPwd(false), m_dbDir(), m_syncWithAll(false), m_p12File(),
+	    m_lastMsg(-1), m_lastAttachSavePath(), m_lastAttachAddPath(),
+	    m_lastCorrespPath(), m_lastZFOExportPath(),
+	    _m_createdFromScratch(false), _m_passphrase(), _m_otp(),
+	    _m_pwdExpirDlgShown(false)
+	{ }
+
+	AcntSettingsPrivate &operator=(const AcntSettingsPrivate &other) Q_DECL_NOTHROW
+	{
+		m_accountName = other.m_accountName;
+		m_userName = other.m_userName;
+		m_loginMethod = other.m_loginMethod;
+		m_password = other.m_password;
+		m_pwdAlg = other.m_pwdAlg;
+		m_pwdSalt = other.m_pwdSalt;
+		m_pwdIv = other.m_pwdIv;
+		m_pwdCode = other.m_pwdCode;
+		m_isTestAccount = other.m_isTestAccount;
+		m_rememberPwd = other.m_rememberPwd;
+		m_dbDir = other.m_dbDir;
+		m_syncWithAll = other.m_syncWithAll;
+		m_p12File = other.m_p12File;
+
+		m_lastMsg = other.m_lastMsg;
+		m_lastAttachSavePath = other.m_lastAttachSavePath;
+		m_lastAttachAddPath = other.m_lastAttachAddPath;
+		m_lastCorrespPath = other.m_lastCorrespPath;
+		m_lastZFOExportPath = other.m_lastZFOExportPath;
+
+		_m_createdFromScratch = other._m_createdFromScratch;
+		_m_passphrase = other._m_passphrase;
+		_m_otp = other._m_otp;
+		_m_pwdExpirDlgShown = other._m_pwdExpirDlgShown;
+
+		return *this;
+	}
+
+	bool operator==(const AcntSettingsPrivate &other) const
+	{
+		return (m_accountName == other.m_accountName) &&
+		    (m_userName == other.m_userName) &&
+		    (m_loginMethod == other.m_loginMethod) &&
+		    (m_password == other.m_password) &&
+		    (m_pwdAlg == other.m_pwdAlg) &&
+		    (m_pwdSalt == other.m_pwdSalt) &&
+		    (m_pwdIv == other.m_pwdIv) &&
+		    (m_pwdCode == other.m_pwdCode) &&
+		    (m_isTestAccount == other.m_isTestAccount) &&
+		    (m_rememberPwd == other.m_rememberPwd) &&
+		    (m_dbDir == other.m_dbDir) &&
+		    (m_syncWithAll == other.m_syncWithAll) &&
+		    (m_p12File == other.m_p12File) &&
+
+		    (m_lastMsg == other.m_lastMsg) &&
+		    (m_lastAttachSavePath == other.m_lastAttachSavePath) &&
+		    (m_lastAttachAddPath == other.m_lastAttachAddPath) &&
+		    (m_lastCorrespPath == other.m_lastCorrespPath) &&
+		    (m_lastZFOExportPath == other.m_lastZFOExportPath) &&
+
+		    (_m_createdFromScratch == other._m_createdFromScratch) &&
+		    (_m_passphrase == other._m_passphrase) &&
+		    (_m_otp == other._m_otp) &&
+		    (_m_pwdExpirDlgShown == other._m_pwdExpirDlgShown);
+	}
+
+	QString m_accountName;
+	QString m_userName;
+	enum AcntSettings::LogInMethod m_loginMethod;
+	QString m_password;
+	QString m_pwdAlg;
+	QByteArray m_pwdSalt;
+	QByteArray m_pwdIv;
+	QByteArray m_pwdCode;
+	bool m_isTestAccount;
+	bool m_rememberPwd;
+	QString m_dbDir;
+	bool m_syncWithAll;
+	QString m_p12File;
+
+	qint64 m_lastMsg;
+	QString m_lastAttachSavePath;
+	QString m_lastAttachAddPath;
+	QString m_lastCorrespPath;
+	QString m_lastZFOExportPath;
+
+	/* The following are not stored into the configuration file. */
+	bool _m_createdFromScratch; /* Only set on new accounts. */
+	QString _m_passphrase;
+	QString _m_otp;
+	bool _m_pwdExpirDlgShown;
+};
+
 AcntSettings::AcntSettings(void)
-    : QMap<QString, QVariant>()
+    : d_ptr(Q_NULLPTR)
 {
 }
 
-AcntSettings::AcntSettings(const QMap<QString, QVariant> &map)
-    : QMap<QString, QVariant>(map)
+AcntSettings::AcntSettings(const AcntSettings &other)
+    : d_ptr((other.d_func() != Q_NULLPTR) ? (new (std::nothrow) AcntSettingsPrivate) : Q_NULLPTR)
 {
+	Q_D(AcntSettings);
+	if (d == Q_NULLPTR) {
+		return;
+	}
+
+	*d = *other.d_func();
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+AcntSettings::AcntSettings(AcntSettings &&other) Q_DECL_NOEXCEPT
+    : d_ptr(other.d_ptr.take()) //d_ptr(std::move(other.d_ptr))
+{
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+AcntSettings::~AcntSettings(void)
+{
+}
+
+/*!
+ * @brief Ensures private account settings presence.
+ *
+ * @note Returns if private account settings could not be allocated.
+ */
+#define ensureAcntSettingsPrivate(_x_) \
+	do { \
+		if (Q_UNLIKELY(d_ptr == Q_NULLPTR)) { \
+			AcntSettingsPrivate *p = new (std::nothrow) AcntSettingsPrivate; \
+			if (Q_UNLIKELY(p == Q_NULLPTR)) { \
+				Q_ASSERT(0); \
+				return _x_; \
+			} \
+			d_ptr.reset(p); \
+		} \
+	} while (0)
+
+AcntSettings &AcntSettings::operator=(const AcntSettings &other) Q_DECL_NOTHROW
+{
+	if (other.d_func() == Q_NULLPTR) {
+		d_ptr.reset(Q_NULLPTR);
+		return *this;
+	}
+	ensureAcntSettingsPrivate(*this);
+	Q_D(AcntSettings);
+
+	*d = *other.d_func();
+
+	return *this;
+}
+
+#ifdef Q_COMPILER_RVALUE_REFS
+AcntSettings &AcntSettings::operator=(AcntSettings &&other) Q_DECL_NOTHROW
+{
+	swap(*this, other);
+	return *this;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+bool AcntSettings::operator==(const AcntSettings &other) const
+{
+	Q_D(const AcntSettings);
+	if ((d == Q_NULLPTR) && ((other.d_func() == Q_NULLPTR))) {
+		return true;
+	} else if ((d == Q_NULLPTR) || ((other.d_func() == Q_NULLPTR))) {
+		return false;
+	}
+
+	return *d == *other.d_func();
+}
+
+bool AcntSettings::operator!=(const AcntSettings &other) const
+{
+	return !operator==(other);
+}
+
+bool AcntSettings::isNull(void) const
+{
+	Q_D(const AcntSettings);
+	return d == Q_NULLPTR;
+}
+
+void AcntSettings::clear(void)
+{
+	d_ptr.reset(Q_NULLPTR);
 }
 
 bool AcntSettings::isValid(void) const
 {
-	return !m_parentType::isEmpty() &&
+	return !isNull() &&
 	    !accountName().isEmpty() && !userName().isEmpty();
 }
 
-QString AcntSettings::accountName(void) const
+const QString &AcntSettings::accountName(void) const
 {
-	return m_parentType::operator[](CredNames::acntName).toString();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_accountName;
 }
 
-void AcntSettings::setAccountName(const QString &name)
+void AcntSettings::setAccountName(const QString &an)
 {
-	m_parentType::operator[](CredNames::acntName) = name;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_accountName = an;
 }
 
-QString AcntSettings::userName(void) const
+#ifdef Q_COMPILER_RVALUE_REFS
+void  AcntSettings::setAccountName(QString &&an)
 {
-	return m_parentType::operator[](CredNames::userName).toString();
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_accountName = an;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &AcntSettings::userName(void) const
+{
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_userName;
 }
 
-void AcntSettings::setUserName(const QString &userName)
+void AcntSettings::setUserName(const QString &un)
 {
-	m_parentType::operator[](CredNames::userName) = userName;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_userName = un;
 }
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setUserName(QString &&un)
+{
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_userName = un;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 enum AcntSettings::LogInMethod AcntSettings::loginMethod(void) const
 {
-	return methodIntToEnum(
-	    m_parentType::value(CredNames::lMethod, LIM_UNKNOWN).toInt());
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return LIM_UNKNOWN;
+	}
+
+	return d->m_loginMethod;
 }
 
 void AcntSettings::setLoginMethod(enum LogInMethod method)
 {
-	if (method != LIM_UNKNOWN) {
-		m_parentType::insert(CredNames::lMethod, method);
-	} else {
-		m_parentType::remove(CredNames::lMethod);
-	}
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_loginMethod = method;
 }
 
-QString AcntSettings::password(void) const
+const QString &AcntSettings::password(void) const
 {
-	return m_parentType::operator[](CredNames::pwd).toString();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_password;
 }
 
 void AcntSettings::setPassword(const QString &pwd)
 {
-	m_parentType::operator[](CredNames::pwd) = pwd;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_password = pwd;
 }
 
-QString AcntSettings::pwdAlg(void) const
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setPassword(QString &&pwd)
 {
-	return m_parentType::operator[](CredNames::pwdAlg).toString();
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_password = pwd;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &AcntSettings::pwdAlg(void) const
+{
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_pwdAlg;
 }
 
 void AcntSettings::setPwdAlg(const QString &pwdAlg)
 {
-	m_parentType::operator[](CredNames::pwdAlg) = pwdAlg;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_pwdAlg = pwdAlg;
 }
 
-QByteArray AcntSettings::pwdSalt(void) const
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setPwdAlg(QString &&pwdAlg)
 {
-	return m_parentType::operator[](CredNames::pwdSalt).toByteArray();
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_pwdAlg = pwdAlg;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QByteArray &AcntSettings::pwdSalt(void) const
+{
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullByteArray;
+	}
+
+	return d->m_pwdSalt;
 }
 
 void AcntSettings::setPwdSalt(const QByteArray &pwdSalt)
 {
-	m_parentType::operator[](CredNames::pwdSalt) = pwdSalt;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_pwdSalt = pwdSalt;
 }
 
-QByteArray AcntSettings::pwdIv(void) const
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setPwdSalt(QByteArray &&pwdSalt)
 {
-	return m_parentType::operator[](CredNames::pwdIv).toByteArray();
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_pwdSalt = pwdSalt;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QByteArray &AcntSettings::pwdIv(void) const
+{
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullByteArray;
+	}
+
+	return d->m_pwdIv;
 }
 
 void AcntSettings::setPwdIv(const QByteArray &pwdIv)
 {
-	m_parentType::operator[](CredNames::pwdIv) = pwdIv;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_pwdIv = pwdIv;
 }
 
-QByteArray AcntSettings::pwdCode(void) const
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setPwdIv(QByteArray &&pwdIv)
 {
-	return m_parentType::operator[](CredNames::pwdCode).toByteArray();
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_pwdIv = pwdIv;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QByteArray &AcntSettings::pwdCode(void) const
+{
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullByteArray;
+	}
+
+	return d->m_pwdCode;
 }
 
 void AcntSettings::setPwdCode(const QByteArray &pwdCode)
 {
-	m_parentType::operator[](CredNames::pwdCode) = pwdCode;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_pwdCode = pwdCode;
 }
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setPwdCode(QByteArray &&pwdCode)
+{
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_pwdCode = pwdCode;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 bool AcntSettings::isTestAccount(void) const
 {
-	return m_parentType::operator[](CredNames::testAcnt).toBool();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+
+	return d->m_isTestAccount;
 }
 
 void AcntSettings::setTestAccount(bool isTesting)
 {
-	m_parentType::operator[](CredNames::testAcnt) = isTesting;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_isTestAccount = isTesting;
 }
 
 bool AcntSettings::rememberPwd(void) const
 {
-	return m_parentType::operator[](CredNames::rememberPwd).toBool();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+
+	return d->m_rememberPwd;
 }
 
 void AcntSettings::setRememberPwd(bool remember)
 {
-	m_parentType::operator[](CredNames::rememberPwd) = remember;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_rememberPwd = remember;
 }
 
-QString AcntSettings::dbDir(void) const
+const QString &AcntSettings::dbDir(void) const
 {
-	return m_parentType::operator[](CredNames::dbDir).toString();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_dbDir;
 }
 
 void AcntSettings::setDbDir(const QString &path, const QString &confDir)
 {
-	if (path == confDir) {
-		/* Default path is empty. */
-		m_parentType::operator[](CredNames::dbDir) = QString();
-	} else {
-		m_parentType::operator[](CredNames::dbDir) = path;
-	}
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_dbDir = (path == confDir) ? QString() : path; /* Default path is empty. */
 }
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setDbDir(QString &&path, const QString &confDir)
+{
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_dbDir = (path == confDir) ? QString() : path; /* Default path is empty. */
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 bool AcntSettings::syncWithAll(void) const
 {
-	return m_parentType::operator[](CredNames::syncWithAll).toBool();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+
+	return d->m_syncWithAll;
 }
 
 void AcntSettings::setSyncWithAll(bool sync)
 {
-	m_parentType::operator[](CredNames::syncWithAll) = sync;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_syncWithAll = sync;
 }
 
-QString AcntSettings::p12File(void) const
+const QString &AcntSettings::p12File(void) const
 {
-	return m_parentType::operator[](CredNames::p12File).toString();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_p12File;
 }
 
 void AcntSettings::setP12File(const QString &p12)
 {
-	m_parentType::operator[](CredNames::p12File) = p12;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_p12File = p12;
 }
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setP12File(QString &&p12)
+{
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_p12File = p12;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 qint64 AcntSettings::lastMsg(void) const
 {
-	return m_parentType::value(CredNames::lstMsgId, -1).toLongLong();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return -1;
+	}
+
+	return d->m_lastMsg;
 }
 
 void AcntSettings::setLastMsg(qint64 dmId)
 {
-	m_parentType::insert(CredNames::lstMsgId, dmId);
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_lastMsg = dmId;
 }
 
-QString AcntSettings::lastAttachSavePath(void) const
+const QString &AcntSettings::lastAttachSavePath(void) const
 {
-	return m_parentType::operator[](CredNames::lstSaveAtchPath).toString();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_lastAttachSavePath;
 }
 
 void AcntSettings::setLastAttachSavePath(const QString &path)
 {
-	m_parentType::operator[](CredNames::lstSaveAtchPath) = path;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_lastAttachSavePath = path;
 }
 
-QString AcntSettings::lastAttachAddPath(void) const
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setLastAttachSavePath(QString &&path)
 {
-	return m_parentType::operator[](CredNames::lstAddAtchPath).toString();
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_lastAttachSavePath = path;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &AcntSettings::lastAttachAddPath(void) const
+{
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_lastAttachAddPath;
 }
 
 void AcntSettings::setLastAttachAddPath(const QString &path)
 {
-	m_parentType::operator[](CredNames::lstAddAtchPath) = path;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_lastAttachAddPath = path;
 }
 
-QString AcntSettings::lastCorrespPath(void) const
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setLastAttachAddPath(QString &&path)
 {
-	return m_parentType::operator[](CredNames::lstCorrspPath).toString();
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_lastAttachAddPath = path;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &AcntSettings::lastCorrespPath(void) const
+{
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_lastCorrespPath;
 }
 
 void AcntSettings::setLastCorrespPath(const QString &path)
 {
-	m_parentType::operator[](CredNames::lstCorrspPath) = path;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_lastCorrespPath = path;
 }
 
-QString AcntSettings::lastZFOExportPath(void) const
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setLastCorrespPath(QString &&path)
 {
-	return m_parentType::operator[](CredNames::lstZfoPath).toString();
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_lastCorrespPath = path;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &AcntSettings::lastZFOExportPath(void) const
+{
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->m_lastZFOExportPath;
 }
 
 void AcntSettings::setLastZFOExportPath(const QString &path)
 {
-	m_parentType::operator[](CredNames::lstZfoPath) = path;
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_lastZFOExportPath = path;
 }
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::setLastZFOExportPath(QString &&path)
+{
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->m_lastZFOExportPath = path;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 bool AcntSettings::_createdFromScratch(void) const
 {
-	return m_parentType::value(_CREATED_FROM_SCRATCH, false).toBool();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+
+	return d->_m_createdFromScratch;
 }
 
 void AcntSettings::_setCreatedFromScratch(bool fromScratch)
 {
-	m_parentType::insert(_CREATED_FROM_SCRATCH, fromScratch);
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->_m_createdFromScratch = fromScratch;
 }
 
-QString AcntSettings::_passphrase(void) const
+const QString &AcntSettings::_passphrase(void) const
 {
-	return m_parentType::value(_PKEY_PASSPHRASE, QString()).toString();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->_m_passphrase;
 }
 
 void AcntSettings::_setPassphrase(const QString &passphrase)
 {
-	if (!passphrase.isNull()) {
-		m_parentType::insert(_PKEY_PASSPHRASE, passphrase);
-	} else {
-		m_parentType::remove(_PKEY_PASSPHRASE);
-	}
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->_m_passphrase = passphrase;
 }
 
-QString AcntSettings::_otp(void) const
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::_setPassphrase(QString &&passphrase)
 {
-	return m_parentType::value(_OTP_CODE, QString()).toString();
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->_m_passphrase = passphrase;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
+
+const QString &AcntSettings::_otp(void) const
+{
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return nullString;
+	}
+
+	return d->_m_otp;
 }
 
 void AcntSettings::_setOtp(const QString &otpCode)
 {
-	if (!otpCode.isNull()) {
-		m_parentType::insert(_OTP_CODE, otpCode);
-	} else {
-		m_parentType::remove(_OTP_CODE);
-	}
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->_m_otp = otpCode;
 }
+
+#ifdef Q_COMPILER_RVALUE_REFS
+void AcntSettings::_setOtp(QString &&otpCode)
+{
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->_m_otp = otpCode;
+}
+#endif /* Q_COMPILER_RVALUE_REFS */
 
 bool AcntSettings::_pwdExpirDlgShown(void) const
 {
-	return m_parentType::value(_PWD_EXPIR_DLG_SHOWN, false).toBool();
+	Q_D(const AcntSettings);
+	if (Q_UNLIKELY(d == Q_NULLPTR)) {
+		return false;
+	}
+
+	return d->_m_pwdExpirDlgShown;
 }
 
 void AcntSettings::_setPwdExpirDlgShown(bool pwdExpirDlgShown)
 {
-	m_parentType::insert(_PWD_EXPIR_DLG_SHOWN, pwdExpirDlgShown);
+	ensureAcntSettingsPrivate();
+	Q_D(AcntSettings);
+	d->_m_pwdExpirDlgShown = pwdExpirDlgShown;
 }
 
 /*!
@@ -685,4 +1107,10 @@ bool AcntSettings::credentialsLessThan(const QString &s1, const QString &s2)
 	}
 
 	return (a1 != a2) ? (a1 < a2) : (n1 < n2);
+}
+
+void swap(AcntSettings &first, AcntSettings &second) Q_DECL_NOTHROW
+{
+	using std::swap;
+	swap(first.d_ptr, second.d_ptr);
 }

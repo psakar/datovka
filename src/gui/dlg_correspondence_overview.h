@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -77,7 +77,7 @@ private slots:
 	 *
 	 * @param[in] text Displayed text.
 	 */
-	void reftectOverviewTypeChange(const QString &text);
+	void reflectOverviewTypeChange(const QString &text);
 
 	/*!
 	 * @brief Check message type selection and enable/disable acceptance
@@ -88,7 +88,7 @@ private slots:
 	/*!
 	 * @brief Obtains lists of messages according to calendar selection.
 	 */
-	void reftectCalendarChange(void);
+	void reflectCalendarChange(void);
 
 private:
 	/*!

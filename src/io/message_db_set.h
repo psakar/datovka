@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -25,6 +25,7 @@
 
 #include <QDateTime>
 #include <QMap>
+#include <QObject>
 #include <QString>
 #include <QStringList>
 
@@ -34,7 +35,7 @@
 #define PRIMARY_KEY_RE "[^_]+"
 #define SINGLE_FILE_SEC_KEY ""
 #define YEARLY_SEC_KEY_RE "[0-9][0-9][0-9][0-9]"
-#define YEARLY_SEC_KEY_INVALID INVALID_YEAR
+#define YEARLY_SEC_KEY_INVALID MessageDb::invalidYearName
 
 /*
  * Flags used when creating new database file.
@@ -58,7 +59,8 @@
 /*!
  * Organises database files according to secondary keys.
  */
-class MessageDbSet : private QMap<QString, MessageDb *> {
+class MessageDbSet : public QObject, private QMap<QString, MessageDb *> {
+	Q_OBJECT
 
 public:
 	/*!
@@ -310,6 +312,37 @@ public:
 	    const QString &primaryKey, const QString &secondaryKey,
 	    bool testing, enum Organisation organisation);
 
+	/*!
+	 * @brief Check database filename validity.
+	 *
+	 * @param[in]  fileName Database filename.
+	 * @param[out] dbUserName Username.
+	 * @paran[out] dbYear Year entry if exists, null string else.
+	 * @paran[out] dbTestingFlag True when account is testing, false else.
+	 * @paran[out] errMsg Error message which can be displayed to the user.
+	 * @return True if database filename is correct.
+	 */
+	static
+	bool isValidDbFileName(const QString &fileName, QString &dbUserName,
+	    QString &dbYear, bool &dbTestingFlag, QString &errMsg);
+
+signals:
+	/*!
+	 * @brief Emitted when a database file is opened.
+	 *
+	 * @param[in] primaryKey Primary key, usually the username.
+	 */
+	void opened(const QString &primaryKey);
+
+private slots:
+	/*!
+	 * @brief This slot must be connected to every database created inside
+	 *     this container.
+	 *
+	 * @param[in] fileName Database file name.
+	 */
+	void watchOpened(const QString &fileName);
+
 private:
 	/*!
 	 * @brief Creates a database set.
@@ -329,7 +362,7 @@ private:
 	 *
 	 * @param[in] secondaryKey Secondary key.
 	 * @param[in] create       Whether to create the file.
-	 * @return Message database or zero pointer on error.
+	 * @return Message database or Q_NULLPTR on error.
 	 */
 	MessageDb *_accessMessageDb(const QString &secondaryKey, bool create);
 
@@ -412,7 +445,7 @@ public: /* Database function that have been delegate to the container. */
 	 *
 	 * @param[in] type Whether to obtain sent or received messages.
 	 * @param[in] year Year number.
-	 * @return Number of unread messages, -1 on error.
+	 * @return Number of unread messages, -1 on error, -2 if database is not opened.
 	 */
 	int msgsUnreadInYear(enum MessageDb::MessageType type,
 	    const QString &year) const;

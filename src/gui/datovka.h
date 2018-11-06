@@ -927,13 +927,21 @@ private:
 	 * @brief Partially regenerates account model according to the database
 	 *     content.
 	 *
+	 * @note The prohibitYearRemoval is a hack to prevent a nasty cascade
+	 *     of actions resulting in undefined behaviour when removing
+	 *     a freshly selected year node.
+	 * @todo Remove the prohibitYearRemoval parameter. An extensive rewrite
+	 *     of the main window logic may be required.
+	 *
 	 * @param[in] index Index identifying account.
+	 * @param[in] prohibitYearRemoval Set to true if year nodes should not be removed.
 	 * @return True on success.
 	 *
 	 * @note This function adds/removes nodes and does not set the
 	 *     currentIndex back to its original position.
 	 */
-	bool regenerateAccountModelYears(const QModelIndex &index);
+	bool regenerateAccountModelYears(const QModelIndex &index,
+	    bool prohibitYearRemoval = false);
 
 	/*!
 	 * @brief Regenerates account model according to the database content.

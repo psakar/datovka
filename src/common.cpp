@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -105,78 +105,6 @@ void finishEmailMessage(QString &message, const QString &boundary)
 QString fromBase64(const QString &base64)
 {
 	return QString::fromUtf8(QByteArray::fromBase64(base64.toUtf8()));
-}
-
-bool isValidDatabaseFileName(QString inDbFileName,
-    QString &dbUserName, QString &dbYear, bool &dbTestingFlag, QString &errMsg)
-{
-	QStringList fileNameParts;
-	bool ret = false;
-	errMsg = "";
-	dbUserName = "";
-	dbYear = "";
-
-	if (inDbFileName.contains("___")) {
-		// get username from filename
-		fileNameParts = inDbFileName.split("_");
-		if (fileNameParts.isEmpty() || fileNameParts.count() <= 1) {
-			errMsg = QObject::tr("File '%1' does not contain a valid "
-			    "database filename.").arg(inDbFileName);
-			return ret;
-		}
-		if (fileNameParts[0].isEmpty() ||
-		    fileNameParts[0].length() != 6) {
-			errMsg = QObject::tr("File '%1' does not contain a valid "
-			    "username in the database filename.").arg(inDbFileName);
-			return ret;
-		}
-		dbUserName = fileNameParts[0];
-
-		// get year from filename
-		if (fileNameParts[1].isEmpty()) {
-			dbYear = "";
-		} else if (fileNameParts[1] == "inv") {
-			dbYear = fileNameParts[1];
-		} else if (fileNameParts[1].length() == 4) {
-			dbYear = fileNameParts[1];
-		} else {
-			errMsg = QObject::tr("File '%1' does not contain valid "
-			    "year in the database filename.").arg(inDbFileName);
-			dbYear = "";
-			return ret;
-		}
-
-		// get testing flag from filename
-		fileNameParts = inDbFileName.split(".");
-		if (fileNameParts.isEmpty()) {
-			errMsg = QObject::tr("File '%1' does not contain valid "
-			    "database filename.").arg(inDbFileName);
-			return ret;
-		}
-		fileNameParts = fileNameParts[0].split("___");
-		if (fileNameParts.isEmpty()) {
-			errMsg = QObject::tr("File '%1' does not contain "
-			    "valid database filename.").arg(inDbFileName);
-			return ret;
-		}
-
-		if (fileNameParts[1] == "1") {
-			dbTestingFlag = true;
-		} else if (fileNameParts[1] == "0") {
-			dbTestingFlag = false;
-		} else {
-			errMsg = QObject::tr("File '%1' does not contain a valid "
-			    "account type flag or filename has wrong format.").arg(inDbFileName);
-			dbTestingFlag = false;
-			return ret;
-		}
-	} else {
-		errMsg = QObject::tr("File '%1' does not contain a valid message "
-		    "database or filename has wrong format.").arg(inDbFileName);
-		return ret;
-	}
-
-	return true;
 }
 
 QString toBase64(const QString &plain)

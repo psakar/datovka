@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -135,21 +135,21 @@ public:
 	    int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 
 	/*!
-	 * @brief Appends received entry data into the model.
+	 * @brief Set received entry data into the model.
 	 *
 	 * @param[in] entryList List of entries to append into the model.
 	 * @param[in] appendedColsNum Number of added empty columns.
 	 */
-	void appendData(const QList<MessageDb::RcvdEntry> &entryList,
+	void assignData(const QList<MessageDb::RcvdEntry> &entryList,
 	    int appendedColsNum);
 
 	/*!
-	 * @brief Appends sent entry data into the model.
+	 * @brief Set sent entry data into the model.
 	 *
 	 * @param[in] entryList List of entries to append into the model.
 	 * @param[in] appendedColsNum Number of added empty columns.
 	 */
-	void appendData(const QList<MessageDb::SntEntry> &entryList,
+	void assignData(const QList<MessageDb::SntEntry> &entryList,
 	    int appendedColsNum);
 
 	/*!

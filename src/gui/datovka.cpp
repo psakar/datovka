@@ -425,8 +425,28 @@ MainWindow::MainWindow(QWidget *parent)
 	    new TableTabIgnoreFilter(ui->messageList));
 	ui->messageList->setItemDelegate(new TagsDelegate(this));
 
+#if 1
+	/*
+	 * If the 'opened' signal is connected before loadSettings() is called
+	 * then an unnecessary series of model updates is called into action.
+	 * However, the code must still be able to handle such order of action.
+	 * So don't remove this comment or the code inside the following block
+	 * which has been disabled using the preprocessor conditional because
+	 * it may be used for testing.
+	 */
+
 	/* Load configuration file. */
 	loadSettings();
+
+	/* Handle opening of database files on demand. */
+	connect(GlobInstcs::msgDbsPtr, SIGNAL(opened(QString)),
+	    this, SLOT(refreshAccountList(QString)));
+#else
+	connect(GlobInstcs::msgDbsPtr, SIGNAL(opened(QString)),
+	    this, SLOT(refreshAccountList(QString)));
+
+	loadSettings();
+#endif
 
 	/* Set toolbar buttons style from settings */
 	ui->toolBar->setToolButtonStyle(
@@ -911,7 +931,6 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 	QApplication::processEvents();
 
-	m_messageTableModel.removeRows(0, m_messageTableModel.rowCount());
 	m_messageListProxyModel.setSourceModel(&m_messageTableModel); /* TODO */
 	m_messageListProxyModel.setSortRole(ROLE_MSGS_DB_PROXYSORT); /* TODO */
 	ui->messageList->setModel(&m_messageListProxyModel); /* TODO */
@@ -923,7 +942,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		ui->actionDelete_message_from_db->setEnabled(false);
 		break;
 	case AccountModel::nodeRecentReceived:
-		m_messageTableModel.appendData(
+		m_messageTableModel.assignData(
 		    dbSet->msgsRcvdEntriesWithin90Days(),
 		    m_msgTblAppendedCols.size());
 		m_messageTableModel.setHeader(m_msgTblAppendedCols);
@@ -933,7 +952,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeRecentSent:
-		m_messageTableModel.appendData(
+		m_messageTableModel.assignData(
 		    dbSet->msgsSntEntriesWithin90Days(),
 		    m_msgTblAppendedCols.size());
 		m_messageTableModel.setHeader(m_msgTblAppendedCols);
@@ -957,7 +976,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_RECEIVED);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		m_messageTableModel.appendData(dbSet->msgsEntriesRcvd(),
+		m_messageTableModel.assignData(dbSet->msgsEntriesRcvd(),
 		    m_msgTblAppendedCols.size());
 		m_messageTableModel.setHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
@@ -974,14 +993,14 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    MessageDb::TYPE_SENT);
 		ui->actionDelete_message_from_db->setEnabled(false);
 #else /* !DISABLE_ALL_TABLE */
-		m_messageTableModel.appendData(dbSet->msgsSntEntries(),
+		m_messageTableModel.assignData(dbSet->msgsSntEntries(),
 		    m_msgTblAppendedCols.size());
 		m_messageTableModel.setHeader(m_msgTblAppendedCols);
 		ui->actionDelete_message_from_db->setEnabled(true);
 #endif /* DISABLE_ALL_TABLE */
 		break;
 	case AccountModel::nodeReceivedYear:
-		m_messageTableModel.appendData(
+		m_messageTableModel.assignData(
 		    dbSet->msgsRcvdEntriesInYear(
 		        current.data(ROLE_PLAIN_DISPLAY).toString()),
 		    m_msgTblAppendedCols.size());
@@ -992,7 +1011,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		    this, SLOT(messageItemClicked(QModelIndex)));
 		break;
 	case AccountModel::nodeSentYear:
-		m_messageTableModel.appendData(
+		m_messageTableModel.assignData(
 		    dbSet->msgsSntEntriesInYear(
 		        current.data(ROLE_PLAIN_DISPLAY).toString()),
 		    m_msgTblAppendedCols.size());
@@ -4430,12 +4449,13 @@ bool MainWindow::updateExistingAccountModelUnread(const QModelIndex &index)
 	    AccountModel::nodeRecentReceived, unreadMsgs);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
-		//qDebug() << "Received" << yearList.value(j);
 		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_RECEIVED,
 		    yearList.value(j));
+		AccountModel::YearCounter yCounter(unreadMsgs != -2,
+		    (unreadMsgs > 0) ? unreadMsgs : 0);
 		m_accountModel.updateYear(userName,
 		    AccountModel::nodeReceivedYear, yearList.value(j),
-		    unreadMsgs);
+		    yCounter);
 	}
 	/* Sent. */
 	//unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_SENT);
@@ -4443,53 +4463,54 @@ bool MainWindow::updateExistingAccountModelUnread(const QModelIndex &index)
 	    AccountModel::nodeRecentSent, 0);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 	for (int j = 0; j < yearList.size(); ++j) {
-		//qDebug() << "Sent" << yearList.value(j);
-		//unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
-		//    yearList.value(j));
+		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
+		    yearList.value(j));
+		AccountModel::YearCounter yCounter(unreadMsgs != -2, 0);
 		m_accountModel.updateYear(userName, AccountModel::nodeSentYear,
-		    yearList.value(j), 0);
+		    yearList.value(j), yCounter);
 	}
 	return true;
 }
 
-
-/* ========================================================================= */
-/*
- * Partially regenerates account model according to the database
- *     content.
- */
-bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
-/* ========================================================================= */
+bool MainWindow::regenerateAccountModelYears(const QModelIndex &index,
+    bool prohibitYearRemoval)
 {
 	debugFuncCall();
 
-	QList<QString> yearList;
-	int unreadMsgs;
-
-	Q_ASSERT(index.isValid());
+	if (Q_UNLIKELY(!index.isValid())) {
+		Q_ASSERT(0);
+		return false;
+	}
 
 	/* Get database id. */
 	const QString userName(m_accountModel.userName(index));
 	Q_ASSERT(!userName.isEmpty());
 	MessageDbSet *dbSet = accountDbSet(userName);
-	if (Q_NULLPTR == dbSet) {
+	if (Q_UNLIKELY(Q_NULLPTR == dbSet)) {
 		Q_ASSERT(0);
 		return false;
 	}
+
+	QStringList yearList;
+	int unreadMsgs;
+	typedef QPair<QString, AccountModel::YearCounter> CounterPair;
+	QList<CounterPair> yearlyUnreadList;
 
 	/* Received. */
 	unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_RECEIVED);
 	m_accountModel.updateRecentUnread(userName,
 	    AccountModel::nodeRecentReceived, unreadMsgs);
 	yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED, DESCENDING);
-	QList< QPair<QString, unsigned> > yearlyUnreadList;
 	foreach (const QString &year, yearList) {
 		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_RECEIVED,
 		    year);
-		yearlyUnreadList.append(QPair<QString, unsigned>(year, unreadMsgs));
+		AccountModel::YearCounter yCounter(unreadMsgs != -2,
+		    (unreadMsgs > 0) ? unreadMsgs : 0);
+		yearlyUnreadList.append(CounterPair(year, yCounter));
 	}
 	m_accountModel.updateYearNodes(userName, AccountModel::nodeReceivedYear,
-	    yearlyUnreadList, AccountModel::DESCENDING);
+	    yearlyUnreadList, AccountModel::DESCENDING, prohibitYearRemoval);
+
 	/* Sent. */
 	//unreadMsgs = dbSet->msgsUnreadWithin90Days(MessageDb::TYPE_SENT);
 	m_accountModel.updateRecentUnread(userName,
@@ -4497,77 +4518,29 @@ bool MainWindow::regenerateAccountModelYears(const QModelIndex &index)
 	yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
 	yearlyUnreadList.clear();
 	foreach (const QString &year, yearList) {
-		//unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
-		//    year);
-		yearlyUnreadList.append(QPair<QString, unsigned>(year, 0));
+		unreadMsgs = dbSet->msgsUnreadInYear(MessageDb::TYPE_SENT,
+		    year);
+		AccountModel::YearCounter yCounter(unreadMsgs != -2, 0);
+		yearlyUnreadList.append(CounterPair(year, yCounter));
 	}
 	m_accountModel.updateYearNodes(userName, AccountModel::nodeSentYear,
-	    yearlyUnreadList, AccountModel::DESCENDING);
+	    yearlyUnreadList, AccountModel::DESCENDING, prohibitYearRemoval);
+
 	return true;
 }
 
-
-/* ========================================================================= */
-/*
- * Regenerates account model according to the database content.
- */
 bool MainWindow::regenerateAllAccountModelYears(void)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
-	QModelIndex topIndex;
-	QList<QString> yearList;
-	int unreadMsgs;
-
 	m_accountModel.removeAllYearNodes();
 
-	//qDebug() << "Generating years";
-
 	for (int i = 0; i < m_accountModel.rowCount(); ++i) {
-		/* Get database ID. */
-		topIndex = m_accountModel.index(i, 0);
-		Q_ASSERT(topIndex.isValid());
-		const QString userName(m_accountModel.userName(topIndex));
-		Q_ASSERT(!userName.isEmpty());
-		MessageDbSet *dbSet = accountDbSet(userName);
-		if (Q_NULLPTR == dbSet) {
-			/*
-			 * Skip creation of leaves when no database is present.
-			 */
-			continue;
-		}
-
-		/* Received. */
-		unreadMsgs = dbSet->msgsUnreadWithin90Days(
-		    MessageDb::TYPE_RECEIVED);
-		m_accountModel.updateRecentUnread(userName,
-		    AccountModel::nodeRecentReceived, unreadMsgs);
-		yearList = dbSet->msgsYears(MessageDb::TYPE_RECEIVED,
-		    DESCENDING);
-		foreach (const QString &year, yearList) {
-			unreadMsgs = dbSet->msgsUnreadInYear(
-			    MessageDb::TYPE_RECEIVED, year);
-			m_accountModel.appendYear(userName,
-			    AccountModel::nodeReceivedYear, year, unreadMsgs);
-		}
-		/* Sent. */
-		//unreadMsgs = dbSet->msgsUnreadWithin90Days(
-		//    MessageDb::TYPE_SENT);
-		m_accountModel.updateRecentUnread(userName,
-		    AccountModel::nodeRecentSent, 0);
-		yearList = dbSet->msgsYears(MessageDb::TYPE_SENT, DESCENDING);
-		foreach (const QString &year, yearList) {
-			//unreadMsgs = dbSet->msgsUnreadInYear(
-			//    MessageDb::TYPE_SENT, year);
-			m_accountModel.appendYear(userName,
-			    AccountModel::nodeSentYear, year, 0);
-		}
+		regenerateAccountModelYears(m_accountModel.index(i, 0));
 	}
 
 	return true;
 }
-
 
 /* ========================================================================= */
 /*!
@@ -5388,7 +5361,10 @@ void MainWindow::refreshAccountList(const QString &userName)
 	/* Redraw views' content. */
 	const QModelIndex topAcntIdx(m_accountModel.topAcntIndex(userName));
 	if (topAcntIdx.isValid()) {
-		regenerateAccountModelYears(topAcntIdx);
+		bool prohibitYearRemoval =
+		    (nodeType == AccountModel::nodeReceivedYear) ||
+		    (nodeType == AccountModel::nodeSentYear);
+		regenerateAccountModelYears(topAcntIdx, prohibitYearRemoval);
 	}
 
 	/*

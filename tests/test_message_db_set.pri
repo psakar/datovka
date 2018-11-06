@@ -32,6 +32,7 @@ SOURCES += \
 	$${top_srcdir}src/io/filesystem.cpp \
 	$${top_srcdir}src/io/message_db.cpp \
 	$${top_srcdir}src/io/message_db_set.cpp \
+	$${top_srcdir}src/io/sqlite/delayed_access_db.cpp \
 	$${top_srcdir}src/io/tag_db.cpp \
 	$${top_srcdir}src/isds/type_description.cpp \
 	$${top_srcdir}src/models/messages_model.cpp \
@@ -62,6 +63,7 @@ HEADERS += \
 	$${top_srcdir}src/io/filesystem.h \
 	$${top_srcdir}src/io/message_db.h \
 	$${top_srcdir}src/io/message_db_set.h \
+	$${top_srcdir}src/io/sqlite/delayed_access_db.h \
 	$${top_srcdir}src/io/tag_db.h \
 	$${top_srcdir}src/isds/type_description.h \
 	$${top_srcdir}src/models/messages_model.h \

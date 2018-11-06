@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -21,12 +21,12 @@
  * the two.
  */
 
+#include <climits> /* INT_MIN */
 #include <QRegExp>
 #include <QSet>
 #include <QSqlError>
 #include <QSqlQuery>
 
-#include "src/datovka_shared/log/log.h"
 #include "src/io/message_db_set.h"
 
 bool MessageDbSet::vacuum(void)
@@ -34,7 +34,7 @@ bool MessageDbSet::vacuum(void)
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return false;
 		}
@@ -61,6 +61,23 @@ QString _yrly_YearToSecondaryKey(const QString &year)
 	}
 }
 
+/*!
+ * @brief Return list of years that match the span from (now-90days) to now.
+ */
+static
+QStringList yearsInPast90Days(void)
+{
+	const QDate currentDate(QDate::currentDate());
+	const QDate dateBefore90Days(currentDate.addDays(-90));
+
+	QStringList years;
+	years.append(currentDate.toString("yyyy"));
+	if (currentDate.year() != dateBefore90Days.year()) {
+		years.append(dateBefore90Days.toString("yyyy"));
+	}
+	return years;
+}
+
 QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 {
 	static const QRegExp re("^" YEARLY_SEC_KEY_RE "$");
@@ -71,11 +88,11 @@ QStringList MessageDbSet::_yrly_secKeysIn90Days(void) const
 	}
 
 	keys = keys.filter(re);
+	/* Intersection of found and expected years. */
+	keys = keys.toSet().intersect(yearsInPast90Days().toSet()).toList();
 	keys.sort();
-	if (keys.size() > 1) {
-		keys = keys.mid(keys.size() - 2, 2);
-	}
 
+	Q_ASSERT(keys.size() <= 2);
 	return keys;
 }
 
@@ -127,7 +144,7 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_msgsRcvdEntriesWithin90Days
 	QList<MessageDb::RcvdEntry> entryList;
 
 	{
-		QSqlQuery query(db0.m_db);
+		QSqlQuery query(db0.accessDb());
 
 		if (!db0.msgsRcvdWithin90DaysQuery(query)) {
 			goto fail;
@@ -137,7 +154,7 @@ QList<MessageDb::RcvdEntry> MessageDbSet::_yrly_2dbs_msgsRcvdEntriesWithin90Days
 	}
 
 	{
-		QSqlQuery query(db1.m_db);
+		QSqlQuery query(db1.accessDb());
 
 		if (!db1.msgsRcvdWithin90DaysQuery(query)) {
 			goto fail;
@@ -260,11 +277,23 @@ QStringList MessageDbSet::_yrly_msgsYears(enum MessageDb::MessageType type,
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return QStringList();
 		}
-		years.unite(db->msgsYears(type, sorting).toSet());
+
+		if (db->isOpen()) {
+			years.unite(db->msgsYears(type, sorting).toSet());
+		} else {
+			/*
+			 * Here we are cheating. We expect that there are no
+			 * invalid messages amongs the received ones.
+			 */
+			if ((type == MessageDb::TYPE_SENT) ||
+			    (i.key() != MessageDb::invalidYearName)) {
+				years.insert(i.key());
+			}
+		}
 	}
 
 	QStringList list(years.toList());
@@ -280,9 +309,9 @@ QStringList MessageDbSet::_yrly_msgsYears(enum MessageDb::MessageType type,
 		}
 		/* Keep invalid year always last. */
 		if ((reversed.size() > 1) &&
-		    (reversed.first() == INVALID_YEAR)) {
+		    (reversed.first() == MessageDb::invalidYearName)) {
 			reversed.removeFirst();
-			reversed.append(INVALID_YEAR);
+			reversed.append(MessageDb::invalidYearName);
 		}
 		return reversed;
 	}
@@ -331,7 +360,7 @@ QList< QPair<QString, int> > MessageDbSet::_yrly_msgsYearlyCounts(
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return QList< QPair<QString, int> >();
 		}
@@ -362,9 +391,9 @@ QList< QPair<QString, int> > MessageDbSet::_yrly_msgsYearlyCounts(
 		}
 		/* Keep invalid year always last. */
 		if ((reversed.size() > 1) &&
-		    (reversed.first() == INVALID_YEAR)) {
+		    (reversed.first() == MessageDb::invalidYearName)) {
 			reversed.removeFirst();
-			reversed.append(INVALID_YEAR);
+			reversed.append(MessageDb::invalidYearName);
 		}
 		list = reversed;
 	}
@@ -414,8 +443,8 @@ int MessageDbSet::_yrly_msgsUnreadWithin90Days(
 		return 0;
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
-		MessageDb *db = this->value(secKeys[0], NULL);
-		if (NULL == db) {
+		MessageDb *db = this->value(secKeys[0], Q_NULLPTR);
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return -1;
 		}
@@ -424,9 +453,9 @@ int MessageDbSet::_yrly_msgsUnreadWithin90Days(
 		Q_ASSERT(secKeys.size() == 2);
 		/* The models need to be attached. */
 
-		MessageDb *db0 = this->value(secKeys[0], NULL);
-		MessageDb *db1 = this->value(secKeys[1], NULL);
-		if ((NULL == db0) || (NULL == db1)) {
+		MessageDb *db0 = this->value(secKeys[0], Q_NULLPTR);
+		MessageDb *db1 = this->value(secKeys[1], Q_NULLPTR);
+		if (Q_UNLIKELY((Q_NULLPTR == db0) || (Q_NULLPTR == db1))) {
 			Q_ASSERT(0);
 			return -1;
 		}
@@ -468,7 +497,11 @@ int MessageDbSet::_sf_msgsUnreadInYear(enum MessageDb::MessageType type,
 		return 0;
 	}
 	Q_ASSERT(this->size() == 1);
-	return this->first()->msgsUnreadInYear(type, year);
+	if (type != MessageDb::TYPE_SENT) {
+		return this->first()->msgsUnreadInYear(type, year);
+	} else {
+		return 0; /* The read state on sent messages is ignored. */
+	}
 }
 
 int MessageDbSet::_yrly_msgsUnreadInYear(enum MessageDb::MessageType type,
@@ -476,12 +509,16 @@ int MessageDbSet::_yrly_msgsUnreadInYear(enum MessageDb::MessageType type,
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
-	MessageDb *db = this->value(secondaryKey, NULL);
-	if (NULL == db) {
+	MessageDb *db = this->value(secondaryKey, Q_NULLPTR);
+	if (Q_UNLIKELY(Q_NULLPTR == db)) {
 		return 0;
 	}
 
-	return db->msgsUnreadInYear(type, year);
+	if (db->isOpen()) {
+		return db->msgsUnreadInYear(type, year);
+	} else {
+		return -2;
+	}
 }
 
 int MessageDbSet::msgsUnreadInYear(enum MessageDb::MessageType type,
@@ -550,7 +587,7 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_msgsSntEntriesWithin90Days(
 	QList<MessageDb::SntEntry> entryList;
 
 	{
-		QSqlQuery query(db0.m_db);
+		QSqlQuery query(db0.accessDb());
 
 		if (!db0.msgsSntWithin90DaysQuery(query)) {
 			goto fail;
@@ -560,7 +597,7 @@ QList<MessageDb::SntEntry> MessageDbSet::_yrly_2dbs_msgsSntEntriesWithin90Days(
 	}
 
 	{
-		QSqlQuery query(db1.m_db);
+		QSqlQuery query(db1.accessDb());
 
 		if (!db1.msgsSntWithin90DaysQuery(query)) {
 			goto fail;
@@ -677,7 +714,7 @@ bool MessageDbSet::_yrly_smsgdtSetAllReceivedLocallyRead(bool read)
 	     i != this->end(); ++i)
 	{
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return false;
 		}
@@ -720,8 +757,8 @@ bool MessageDbSet::_yrly_smsgdtSetReceivedYearLocallyRead(const QString &year,
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
-	MessageDb *db = this->value(secondaryKey, NULL);
-	if (NULL == db) {
+	MessageDb *db = this->value(secondaryKey, Q_NULLPTR);
+	if (Q_UNLIKELY(Q_NULLPTR == db)) {
 		return false;
 	}
 
@@ -763,8 +800,8 @@ bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 		return false;
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
-		MessageDb *db = this->value(secKeys[0], NULL);
-		if (NULL == db) {
+		MessageDb *db = this->value(secKeys[0], Q_NULLPTR);
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return false;
 		}
@@ -775,8 +812,8 @@ bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedLocallyRead(bool read)
 
 		bool ret = true;
 		foreach (const QString &secKey, secKeys) {
-			MessageDb *db = this->value(secKey, NULL);
-			if (NULL == db) {
+			MessageDb *db = this->value(secKey, Q_NULLPTR);
+			if (Q_UNLIKELY(Q_NULLPTR == db)) {
 				Q_ASSERT(0);
 				return false;
 			}
@@ -828,7 +865,7 @@ bool MessageDbSet::_yrly_msgSetAllReceivedProcessState(
 	     i != this->end(); ++i)
 	{
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return false;
 		}
@@ -871,8 +908,8 @@ bool MessageDbSet::_yrly_smsgdtSetReceivedYearProcessState(const QString &year,
 {
 	QString secondaryKey = _yrly_YearToSecondaryKey(year);
 
-	MessageDb *db = this->value(secondaryKey, NULL);
-	if (NULL == db) {
+	MessageDb *db = this->value(secondaryKey, Q_NULLPTR);
+	if (Q_UNLIKELY(Q_NULLPTR == db)) {
 		return false;
 	}
 
@@ -916,8 +953,8 @@ bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedProcessState(
 		return false;
 	} else if (secKeys.size() == 1) {
 		/* Query only one database. */
-		MessageDb *db = this->value(secKeys[0], NULL);
-		if (NULL == db) {
+		MessageDb *db = this->value(secKeys[0], Q_NULLPTR);
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return false;
 		}
@@ -928,8 +965,8 @@ bool MessageDbSet::_yrly_smsgdtSetWithin90DaysReceivedProcessState(
 
 		bool ret = true;
 		foreach (const QString &secKey, secKeys) {
-			MessageDb *db = this->value(secKey, NULL);
-			if (NULL == db) {
+			MessageDb *db = this->value(secKey, Q_NULLPTR);
+			if (Q_UNLIKELY(Q_NULLPTR == db)) {
 				Q_ASSERT(0);
 				return false;
 			}
@@ -1047,7 +1084,7 @@ QList<MessageDb::ContactEntry> MessageDbSet::_yrly_uniqueContacts(void) const
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return QList<MessageDb::ContactEntry>();
 		}
@@ -1097,7 +1134,7 @@ QList<MessageDb::MsgId> MessageDbSet::_yrly_getAllMessageIDsFromDB(void) const
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return QList<MessageDb::MsgId>();
 		}
@@ -1227,6 +1264,51 @@ QList<MessageDb::MsgId> MessageDbSet::_sf_msgsDateInterval(
 	return this->first()->msgsDateInterval(fromDate, toDate, msgDirect);
 }
 
+/*!
+ * @brief Converts the secondary key to a year integer.
+ *
+ * @param[in]  key Secondary key.
+ * @param[out] ok Set to true if secondary key contains a year in the format "yyyy".
+ * @return Return year value,
+ *     INT_MIN when key does not contain a year in specified format.
+ */
+static
+int secondaryKeyToYear(const QString &key, bool *ok)
+{
+	static const QRegExp re(YEARLY_SEC_KEY_RE);
+
+	if (re.exactMatch(key)) {
+		return key.toInt(ok);
+	} else {
+		if (ok != Q_NULLPTR) {
+			*ok = false;
+		}
+		return INT_MIN;
+	}
+}
+
+/*!
+ * @brief Check whether secondary key (year) lies within specified boundaries.
+ *
+ * @param[in] key Secondary key containing a year value.
+ * @param[in] fromDate Start date.
+ * @param[in] toDate Stop date.
+ * @return True if secondary key contains a year that lies within the specified
+ *     dates.
+ */
+static
+bool secondaryKeyWithinLimits(const QString &key, const QDate &fromDate,
+    const QDate &toDate)
+{
+	bool iOk = false;
+	int year = secondaryKeyToYear(key, &iOk);
+	if (!iOk) {
+		return false;
+	}
+
+	return (fromDate.year() <= year) && (year <= toDate.year());
+}
+
 QList<MessageDb::MsgId> MessageDbSet::_yrly_msgsDateInterval(
     const QDate &fromDate, const QDate &toDate,
     enum MessageDirection msgDirect) const
@@ -1235,8 +1317,13 @@ QList<MessageDb::MsgId> MessageDbSet::_yrly_msgsDateInterval(
 
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
+		if (!secondaryKeyWithinLimits(i.key(), fromDate, toDate)) {
+			/* Skip the access of non-related databases. */
+			continue;
+		}
+
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return QList<MessageDb::MsgId>();
 		}
@@ -1287,7 +1374,7 @@ QList<MessageDb::SoughtMsg> MessageDbSet::_yrly_msgsSearch(
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return QList<MessageDb::SoughtMsg>();
 		}
@@ -1338,7 +1425,7 @@ MessageDb::SoughtMsg MessageDbSet::_yrly_msgsGetMsgDataFromId(
 	for (QMap<QString, MessageDb *>::const_iterator i = this->begin();
 	     i != this->end(); ++i) {
 		MessageDb *db = i.value();
-		if (NULL == db) {
+		if (Q_UNLIKELY(Q_NULLPTR == db)) {
 			Q_ASSERT(0);
 			return MessageDb::SoughtMsg();
 		}

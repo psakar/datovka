@@ -42,8 +42,7 @@ QString Exports::attachmentSavePathWithFileName(const MessageDbSet &dbSet,
 	Q_ASSERT(!userName.isEmpty());
 	Q_ASSERT(msgId.dmId >= 0);
 
-	const MessageDb *messageDb =
-	    dbSet.constAccessMessageDb(msgId.deliveryTime);
+	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
 	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
 		return QString();
@@ -82,8 +81,7 @@ enum Exports::ExportError Exports::exportAs(QWidget *parent,
 	bool ret = false;
 	QString msgID = QString::number(msgId.dmId);
 
-	const MessageDb *messageDb =
-	    dbSet.constAccessMessageDb(msgId.deliveryTime);
+	MessageDb *messageDb = dbSet.constAccessMessageDb(msgId.deliveryTime);
 
 	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);

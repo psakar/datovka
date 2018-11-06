@@ -71,13 +71,13 @@ DlgCorrespondenceOverview::DlgCorrespondenceOverview(const MessageDbSet &dbSet,
 	m_ui->outputFormatComboBox->addItem(HTML_LITERAL);
 
 	connect(m_ui->outputFormatComboBox, SIGNAL(currentIndexChanged(QString)),
-	    this, SLOT(reftectOverviewTypeChange(QString)));
+	    this, SLOT(reflectOverviewTypeChange(QString)));
 
 	connect(m_ui->fromCalendarWidget, SIGNAL(clicked(QDate)),
-	    this, SLOT(reftectCalendarChange()));
+	    this, SLOT(reflectCalendarChange()));
 
 	connect(m_ui->toCalendarWidget, SIGNAL(clicked(QDate)),
-	    this, SLOT(reftectCalendarChange()));
+	    this, SLOT(reflectCalendarChange()));
 
 	connect(m_ui->sentCheckBox, SIGNAL(stateChanged(int)),
 	    this, SLOT(checkMsgTypeSelection()));
@@ -101,7 +101,7 @@ void DlgCorrespondenceOverview::exportData(const MessageDbSet &dbSet,
     const QString &dbId, const QString &userName, TagDb &tagDb,
     QString &exportCorrespondDir, QWidget *parent)
 {
-	if (userName.isEmpty()) {
+	if (Q_UNLIKELY(userName.isEmpty())) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -114,7 +114,7 @@ void DlgCorrespondenceOverview::exportData(const MessageDbSet &dbSet,
 	dlg.exportChosenData(userName, exportCorrespondDir);
 }
 
-void DlgCorrespondenceOverview::reftectOverviewTypeChange(const QString &text)
+void DlgCorrespondenceOverview::reflectOverviewTypeChange(const QString &text)
 {
 	m_ui->groupBox->setEnabled(text == HTML_LITERAL);
 }
@@ -124,7 +124,7 @@ void DlgCorrespondenceOverview::checkMsgTypeSelection(void)
 	updateOkButtonActivity();
 }
 
-void DlgCorrespondenceOverview::reftectCalendarChange(void)
+void DlgCorrespondenceOverview::reflectCalendarChange(void)
 {
 	m_ui->toCalendarWidget->setMinimumDate(
 	    m_ui->fromCalendarWidget->selectedDate());
@@ -163,12 +163,12 @@ void DlgCorrespondenceOverview::updateExportedMsgList(const QDate &fromDate,
 QString DlgCorrespondenceOverview::msgCsvEntry(
     const MessageDb::MsgId &mId) const
 {
-	if (!mId.isValid()) {
+	if (Q_UNLIKELY(!mId.isValid())) {
 		Q_ASSERT(0);
 		return QString();
 	}
 
-	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
+	MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
 	    mId.deliveryTime);
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
@@ -238,7 +238,7 @@ static
 QString tagHtmlEntry(TagDb &tagDb, const QString &userName, qint64 msgId,
     bool useColours)
 {
-	if (userName.isEmpty() || (msgId < 0)) {
+	if (Q_UNLIKELY(userName.isEmpty() || (msgId < 0))) {
 		Q_ASSERT(0);
 		return QString();
 	}
@@ -267,12 +267,12 @@ QString tagHtmlEntry(TagDb &tagDb, const QString &userName, qint64 msgId,
 QString DlgCorrespondenceOverview::msgHtmlEntry(const QString &userName,
     const MessageDb::MsgId &mId) const
 {
-	if (!mId.isValid()) {
+	if (Q_UNLIKELY(!mId.isValid())) {
 		Q_ASSERT(0);
 		return QString();
 	}
 
-	const MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
+	MessageDb *messageDb = m_messDbSet.constAccessMessageDb(
 	    mId.deliveryTime);
 	Q_ASSERT(Q_NULLPTR != messageDb);
 
@@ -325,7 +325,7 @@ bool DlgCorrespondenceOverview::writeCsvOverview(const QString &fileName) const
 	qDebug("Files are going be be exported to CSV file '%s'.",
 	    fileName.toUtf8().constData());
 
-	if (fileName.isEmpty()) {
+	if (Q_UNLIKELY(fileName.isEmpty())) {
 		Q_ASSERT(0);
 		return false;
 	}
@@ -378,7 +378,7 @@ bool DlgCorrespondenceOverview::writeHtmlOverview(const QString &userName,
 	qDebug("Files are going be be exported to HTML file '%s'.",
 	    fileName.toUtf8().constData());
 
-	if (fileName.isEmpty()) {
+	if (Q_UNLIKELY(fileName.isEmpty())) {
 		Q_ASSERT(0);
 		return false;
 	}
