@@ -1,3 +1,9 @@
+4.12.0
+ * When using message databases split according to delivery time then only
+   those files containing recently delivered messages are accessed when the
+   application is started. Other message database files are accessed when they
+   are needed.
+
 4.11.1 / 2018-10-23
  * Added scripts for signing the Windows and macOS executables and software
    packages.
