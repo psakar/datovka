@@ -425,12 +425,28 @@ MainWindow::MainWindow(QWidget *parent)
 	    new TableTabIgnoreFilter(ui->messageList));
 	ui->messageList->setItemDelegate(new TagsDelegate(this));
 
-	/* Handle opening of database files. */
-	connect(GlobInstcs::msgDbsPtr, SIGNAL(opened(QString)),
-	    this, SLOT(refreshAccountList(QString)));
+#if 1
+	/*
+	 * If the 'opened' signal is connected before loadSettings() is called
+	 * then an unnecessary series of model updates is called into action.
+	 * However, the code must still be able to handle such order of action.
+	 * So don't remove this comment or the code inside the following block
+	 * which has been disabled using the preprocessor conditional because
+	 * it may be used for testing.
+	 */
 
 	/* Load configuration file. */
 	loadSettings();
+
+	/* Handle opening of database files on demand. */
+	connect(GlobInstcs::msgDbsPtr, SIGNAL(opened(QString)),
+	    this, SLOT(refreshAccountList(QString)));
+#else
+	connect(GlobInstcs::msgDbsPtr, SIGNAL(opened(QString)),
+	    this, SLOT(refreshAccountList(QString)));
+
+	loadSettings();
+#endif
 
 	/* Set toolbar buttons style from settings */
 	ui->toolBar->setToolButtonStyle(
