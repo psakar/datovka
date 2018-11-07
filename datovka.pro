@@ -355,7 +355,6 @@ SOURCES += \
     src/global.cpp \
     src/gov_services/gui/dlg_gov_service.cpp \
     src/gov_services/gui/dlg_gov_services.cpp \
-    src/gov_services/models/gov_form_list_model.cpp \
     src/gov_services/models/gov_service_list_model.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
@@ -534,7 +533,6 @@ HEADERS += \
     src/global.h \
     src/gov_services/gui/dlg_gov_service.h \
     src/gov_services/gui/dlg_gov_services.h \
-    src/gov_services/models/gov_form_list_model.h \
     src/gov_services/models/gov_service_list_model.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \

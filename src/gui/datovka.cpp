@@ -4635,8 +4635,7 @@ void MainWindow::createGovMessage(void)
 		return;
 	}
 
-	QDialog *govServicesDialog = new DlgGovServices(userName, dbSet, this);
-	govServicesDialog->exec();
+	DlgGovServices::showGovServices(userName, dbSet, this);
 }
 
 void MainWindow::createAndSendMessageReply(void)

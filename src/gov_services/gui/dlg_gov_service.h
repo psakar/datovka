@@ -28,7 +28,8 @@
 #include <QSet>
 #include <QString>
 
-#include "src/gov_services/models/gov_form_list_model.h"
+#include "src/datovka_shared/gov_services/service/gov_service.h"
+#include "src/datovka_shared/isds/message_interface.h"
 #include "src/io/message_db_set.h"
 
 namespace Ui {
@@ -41,23 +42,39 @@ namespace Ui {
 class DlgGovService : public QDialog {
 	Q_OBJECT
 
-public:
+private:
+
 	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account user name.
-	 * @param[in] govFormModel Pointer holding Gov form model to be set.
+	 * @param[in] gs Pointer holding Gov service.
 	 * @param[in] dbSet Pointer holding account db set.
 	 * @param[in] parent Parent widget.
 	 */
 	explicit DlgGovService(const QString &userName,
-	    GovFormListModel *govFormModel, MessageDbSet *dbSet,
+	    Gov::Service *gs, MessageDbSet *dbSet,
 	    QWidget *parent = Q_NULLPTR);
+
+public:
 
 	/*!
 	 * @brief Destructor.
 	 */
 	~DlgGovService(void);
+
+	/*!
+	 * @brief Open Gov service form dialogue.
+	 *
+	 * @param[in] userName Account user name.
+	 * @param[in] gs Pointer holding Gov service.
+	 * @param[in] dbSet Pointer holding account db set.
+	 * @param[in] parent Parent widget.
+	 */
+	static
+	void openGovServiceForm(const QString &userName,
+	    Gov::Service *gs, MessageDbSet *dbSet,
+	    QWidget *parent = Q_NULLPTR);
 
 private slots:
 
@@ -68,23 +85,22 @@ private slots:
 
 	/*!
 	 * @brief Is active when line edit text has been changed.
+	 *
+	 * @param[in] text Text from textedit.
 	 */
 	void onLineEditTextChanged(QString text);
 
 	/*!
-	 * @brief Is active when some form field has invalid value.
-	 */
-	void onValidityNotification(QString text);
-
-	/*!
 	 * @brief Is active when date has been changed in the calendar widget.
+	 *
+	 * @param[in] date Date.
 	 */
 	void onDateChanged(QDate date);
 
 	/*!
-	 * @brief Send Gov request/message to isds.
+	 * @brief Create Gov message and send to isds.
 	 */
-	void onSendGovRequest(void);
+	void onCreateAndSendMsg(void);
 
 	/*!
 	 * @brief Show status after sending Gov message via ISDS interface.
@@ -113,12 +129,26 @@ private:
 	void initDialog(void);
 
 	/*!
-	 * @brief Generate form UI layout from model.
+	 * @brief Generate form UI layout from service fields.
 	 */
 	void generateFormLayoutUi(void);
 
+	/*!
+	 * @brief Is active when some form field has invalid value.
+	 *
+	 * @param[in] errText Error text.
+	 */
+	void showValidityNotification(const QString &errText);
+
+	/*!
+	 * @brief Send Gov message to isds.
+	 *
+	 * @param[in] msg Message structure.
+	 */
+	void sendGovMessage(const Isds::Message &msg);
+
 	QString m_userName; /*!< Account user name. */
-	GovFormListModel *m_govFormModel; /*!< Pointer holding Gov form model. */
+	Gov::Service *m_gs; /*!< Pointer holding Gov service. */
 	MessageDbSet *m_dbSet; /*!< Pointer holding account db set. */
 	Ui::DlgGovService *m_ui; /*!< UI generated from UI file. */
 	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */

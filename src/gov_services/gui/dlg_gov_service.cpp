@@ -38,10 +38,10 @@
 #include "ui_dlg_gov_service.h"
 
 DlgGovService::DlgGovService(const QString &userName,
-    GovFormListModel *govFormModel, MessageDbSet *dbSet, QWidget *parent)
+    Gov::Service *gs, MessageDbSet *dbSet, QWidget *parent)
     : QDialog(parent),
     m_userName(userName),
-    m_govFormModel(govFormModel),
+    m_gs(gs),
     m_dbSet(dbSet),
     m_ui(new (std::nothrow) Ui::DlgGovService),
     m_transactIds()
@@ -53,7 +53,15 @@ DlgGovService::DlgGovService(const QString &userName,
 
 DlgGovService::~DlgGovService(void)
 {
+	delete m_gs; m_gs = Q_NULLPTR;
 	delete m_ui;
+}
+
+void DlgGovService::openGovServiceForm(const QString &userName,
+    Gov::Service *gs, MessageDbSet *dbSet, QWidget *parent)
+{
+	DlgGovService govServiceDialog(userName, gs, dbSet, parent);
+	govServiceDialog.exec();
 }
 
 void DlgGovService::haveAllMandatoryFields(void)
@@ -61,7 +69,7 @@ void DlgGovService::haveAllMandatoryFields(void)
 	m_ui->invalidValueLabel->clear();
 	m_ui->invalidValueLabel->setEnabled(false);
 	m_ui->sendServiceButton->setEnabled(
-	    m_govFormModel->haveAllMandatory());
+	    m_gs->haveAllMandatoryFields());
 }
 
 void DlgGovService::onLineEditTextChanged(QString text)
@@ -72,21 +80,15 @@ void DlgGovService::onLineEditTextChanged(QString text)
 		return;
 	}
 
-	/* Set text value to the service form model. */
-	foreach (const Gov::FormField &field, m_govFormModel->service()->fields()) {
+	/* Set text value to the service field. */
+	foreach (const Gov::FormField &field, m_gs->fields()) {
 		if (field.key() == senderObj->objectName()) {
-			m_govFormModel->setKeyValue(field.key(), text);
+			m_gs->setFieldVal(field.key(), text);
 		}
 	}
 
 	/* Check if service has all mandatory fields. */
 	haveAllMandatoryFields();
-}
-
-void DlgGovService::onValidityNotification(QString text)
-{
-	m_ui->invalidValueLabel->setEnabled(true);
-	m_ui->invalidValueLabel->setText(text);
 }
 
 void DlgGovService::onDateChanged(QDate date)
@@ -97,10 +99,10 @@ void DlgGovService::onDateChanged(QDate date)
 		return;
 	}
 
-	/* Set text value to the service form model. */
-	foreach (const Gov::FormField &field, m_govFormModel->service()->fields()) {
+	/* Set text value to the service field. */
+	foreach (const Gov::FormField &field, m_gs->fields()) {
 		if (field.key() == senderObj->objectName()) {
-			m_govFormModel->setKeyValue(field.key(), date.toString("yyyy-MM-dd"));
+			m_gs->setFieldVal(field.key(), date.toString("yyyy-MM-dd"));
 		}
 	}
 
@@ -108,61 +110,36 @@ void DlgGovService::onDateChanged(QDate date)
 	haveAllMandatoryFields();
 }
 
-void DlgGovService::onSendGovRequest(void)
+void DlgGovService::onCreateAndSendMsg(void)
 {
 	debugSlotCall();
 
-	/* Prepare send message box content. */
-	QString service(tr("Request: %1").arg(m_govFormModel->service()->fullName()));
-	service.append("\n");
-	service.append(tr("Recipient: %1").arg(m_govFormModel->service()->instituteName()));
+	QString errDescr;
 
 	/* Check if service has all mandatory fields. */
-	if (!m_govFormModel->haveAllMandatory()) {
+	if (!m_gs->haveAllMandatoryFields()) {
 		logErrorNL("The e-gov service '%s' is missing some mandatory data.",
-		    m_govFormModel->service()->internalId().toUtf8().constData());
+		    m_gs->internalId().toUtf8().constData());
 		return;
 	}
 
 	/* Check if form has all fields valid. */
-	if (!m_govFormModel->haveAllValid()) {
+	if (!m_gs->haveAllValidFields(&errDescr)) {
 		logWarningNL("The e-gov service '%s' has some mandatory data invalid.",
-		    m_govFormModel->service()->internalId().toUtf8().constData());
+		    m_gs->internalId().toUtf8().constData());
+		showValidityNotification(errDescr);
 		return;
 	}
 
 	/* Create Gov message. */
-	const Isds::Message msg(m_govFormModel->service()->dataMessage());
+	const Isds::Message msg(m_gs->dataMessage());
 	if (Q_UNLIKELY(msg.isNull())) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	/* Show send message box. */
-	int ret = DlgMsgBox::message(this, QMessageBox::Question,
-	    tr("Send e-gov request"),
-	    tr("Do you want to send the e-gov request to data box '%1'?").arg(m_govFormModel->service()->boxId()),
-	    service, QString(),
-	    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-	if (ret == QMessageBox::No) {
-		return;
-	}
-
-	/* Generate unique identifier. */
-	const QDateTime currentTime(QDateTime::currentDateTimeUtc());
-	QString taskIdentifier(m_userName + "_" + currentTime.toString() + "_" +
-	    Utility::generateRandomString(6));
-	m_transactIds.insert(taskIdentifier);
-
 	/* Send Gov message. */
-	TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
-	    m_userName, m_dbSet, taskIdentifier, msg,
-	    m_govFormModel->service()->instituteName(),
-	    m_govFormModel->service()->boxId(), false, Task::PROC_NOTHING);
-	if (task != Q_NULLPTR) {
-		task->setAutoDelete(true);
-		GlobInstcs::workPoolPtr->assignHi(task);
-	}
+	sendGovMessage(msg);
 }
 
 void DlgGovService::collectSendMessageStatus(const QString &userName,
@@ -207,18 +184,17 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 void DlgGovService::initDialog(void)
 {
 	/* Set window title and labels. */
-	this->setWindowTitle(m_govFormModel->service()->internalId());
-	m_ui->serviceName->setText(m_govFormModel->service()->fullName());
-	m_ui->serviceDbId->setText(QString("%1 -- %2").arg(m_govFormModel->
-	    service()->boxId()).arg(m_govFormModel->service()->instituteName()));
+	this->setWindowTitle(m_gs->internalId());
+	m_ui->serviceName->setText(m_gs->fullName());
+	m_ui->serviceDbId->setText(QString("%1 -- %2").arg(m_gs->boxId()).arg(m_gs->instituteName()));
 	m_ui->userName->setText(m_userName);
 
 	/* Set properties for error label. */
 	m_ui->invalidValueLabel->setStyleSheet("QLabel { color: red }");
 	m_ui->invalidValueLabel->setEnabled(false);
 
-	/* Generate form layout derived form the form model. */
-	if (m_govFormModel->service()->fields().count() == 0) {
+	/* Generate form layout from service fileds. */
+	if (m_gs->fields().count() == 0) {
 		m_ui->filedsLabel->setText(tr("Service does not require another data."));
 	} else {
 		generateFormLayoutUi();
@@ -226,7 +202,7 @@ void DlgGovService::initDialog(void)
 
 	/* Connect signal section. */
 	connect(m_ui->sendServiceButton, SIGNAL(clicked()),
-	    this, SLOT(onSendGovRequest()));
+	    this, SLOT(onCreateAndSendMsg()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()),
 	    this, SLOT(close()));
 	connect(GlobInstcs::msgProcEmitterPtr,
@@ -234,8 +210,6 @@ void DlgGovService::initDialog(void)
 	        QString, QString, bool, qint64, int)), this,
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64, int)));
-	connect(m_govFormModel, SIGNAL(validityNotification(QString)),
-	    this, SLOT(onValidityNotification(QString)));
 
 	/* Check if service has all mandatory fields. */
 	haveAllMandatoryFields();
@@ -245,7 +219,7 @@ void DlgGovService::generateFormLayoutUi(void)
 {
 	int formLine = 0;
 
-	foreach (const Gov::FormField &field, m_govFormModel->service()->fields()) {
+	foreach (const Gov::FormField &field, m_gs->fields()) {
 		QLabel *label = new QLabel(this);
 		label->setObjectName(field.key() + QStringLiteral("Label"));
 		m_ui->formGovLayout->setWidget(formLine, QFormLayout::LabelRole, label);
@@ -281,5 +255,46 @@ void DlgGovService::generateFormLayoutUi(void)
 		}
 
 		++formLine;
+	}
+}
+
+void DlgGovService::showValidityNotification(const QString &errText)
+{
+	m_ui->invalidValueLabel->setEnabled(true);
+	m_ui->invalidValueLabel->setText(errText);
+}
+
+void DlgGovService::sendGovMessage(const Isds::Message &msg)
+{
+	debugFuncCall();
+
+	QString service(tr("Request: %1").arg(m_gs->fullName()));
+	service.append("\n");
+	service.append(tr("Recipient: %1").arg(m_gs->instituteName()));
+
+	/* Show send message box. */
+	int ret = DlgMsgBox::message(this, QMessageBox::Question,
+	    tr("Send e-gov request"),
+	    tr("Do you want to send the e-gov request to data box '%1'?").arg(m_gs->boxId()),
+	    service, QString(),
+	    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+	if (ret == QMessageBox::No) {
+		return;
+	}
+
+	/* Generate unique identifier. */
+	const QDateTime currentTime(QDateTime::currentDateTimeUtc());
+	QString taskIdentifier(m_userName + "_" + currentTime.toString() + "_" +
+	    Utility::generateRandomString(6));
+	m_transactIds.insert(taskIdentifier);
+
+	/* Send Gov message to isds. */
+	TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
+	    m_userName, m_dbSet, taskIdentifier, msg,
+	    m_gs->instituteName(),
+	    m_gs->boxId(), false, Task::PROC_NOTHING);
+	if (task != Q_NULLPTR) {
+		task->setAutoDelete(true);
+		GlobInstcs::workPoolPtr->assignHi(task);
 	}
 }

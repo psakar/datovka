@@ -37,7 +37,6 @@
 #include "src/global.h"
 #include "src/gov_services/gui/dlg_gov_service.h"
 #include "src/gov_services/gui/dlg_gov_services.h"
-#include "src/gov_services/models/gov_form_list_model.h"
 #include "src/io/account_db.h"
 #include "ui_dlg_gov_services.h"
 
@@ -48,7 +47,6 @@ DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
     m_dbSet(dbSet),
     m_govServices(),
     m_govServiceModel(new (std::nothrow) GovServiceListModel),
-    m_govFormModel(new (std::nothrow) GovFormListModel),
     m_ui(new (std::nothrow) Ui::DlgGovServices)
 {
 	m_ui->setupUi(this);
@@ -71,7 +69,16 @@ DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
 DlgGovServices::~DlgGovServices(void)
 {
 	clearGovServices();
+	delete m_govServiceModel; m_govServiceModel = Q_NULLPTR;
 	delete m_ui;
+}
+
+void DlgGovServices::showGovServices(const QString &userName,
+    MessageDbSet *dbSet, QWidget *parent)
+{
+	DlgGovServices *govServicesDialog =
+	    new DlgGovServices(userName, dbSet, parent);
+	govServicesDialog->exec();
 }
 
 void DlgGovServices::onFilterServices(const QString &text)
@@ -99,19 +106,38 @@ void DlgGovServices::onServiceActivated(const QModelIndex &index)
 		return;
 	}
 
-	/* Get service id. */
+	/* Get service id from index. */
 	QString serId = index.sibling(index.row(), 0).data(Qt::UserRole).toString();
 	if (serId.isEmpty()) {
 		return;
 	}
 
-	/* Load and set form model. */
-	loadFormToModel(m_userName, serId);
+	/* Get current Gov service. */
+	const Gov::Service *cgs = m_govServices.value(serId, Q_NULLPTR);
+	if (Q_UNLIKELY(cgs == Q_NULLPTR)) {
+		logErrorNL("Cannot access gov service '%s'.",
+		    serId.toUtf8().constData());
+		Q_ASSERT(0);
+		return;
+	}
 
-	/* Open service send dialog. */
-	QDialog *govServiceDialog = new DlgGovService(m_userName,
-	    m_govFormModel, m_dbSet, this);
-	govServiceDialog->exec();
+	/* Create new copy of service. */
+	QScopedPointer<Gov::Service> gs(cgs->createNew());
+	if (Q_UNLIKELY(gs.isNull())) {
+		Q_ASSERT(0);
+		return;
+	}
+
+	/* Fill some form items from account info. */
+	const Isds::DbOwnerInfo dbOwnerInfo(GlobInstcs::accntDbPtr->getOwnerInfo(
+	    AccountDb::keyFromLogin(m_userName)));
+	if (dbOwnerInfo.isNull()) {
+		return;
+	}
+	gs->setOwnerInfoFields(dbOwnerInfo);
+
+	/* Open service form dialog. */
+	DlgGovService::openGovServiceForm(m_userName, gs.take(), m_dbSet, this);
 }
 
 /*!
@@ -212,41 +238,5 @@ void DlgGovServices::loadServicesToModel(void) const
 			    m_userName.toUtf8().constData(),
 			    cgs->internalId().toUtf8().constData());
 		}
-	}
-}
-
-void DlgGovServices::loadFormToModel(const QString &userName,
-    const QString &serviceId) const
-{
-	debugFuncCall();
-
-	/* Get current Gov service. */
-	const Gov::Service *cgs = m_govServices.value(serviceId, Q_NULLPTR);
-	if (Q_UNLIKELY(cgs == Q_NULLPTR)) {
-		logErrorNL("Cannot access gov service '%s'.",
-		    serviceId.toUtf8().constData());
-		Q_ASSERT(0);
-		return;
-	}
-
-	/* Create new copy of service for using in form dialog. */
-	QScopedPointer<Gov::Service> gs(cgs->createNew());
-	if (Q_UNLIKELY(gs.isNull())) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	/* Fill some form items from account info and set to new service. */
-	const Isds::DbOwnerInfo dbOwnerInfo(GlobInstcs::accntDbPtr->getOwnerInfo(
-	    AccountDb::keyFromLogin(userName)));
-	if (dbOwnerInfo.isNull()) {
-		return;
-	}
-	gs->setOwnerInfoFields(dbOwnerInfo);
-
-	/* Set new service to form model and delete old service. */
-	Gov::Service *oldService = m_govFormModel->setService(gs.take());
-	if (oldService != Q_NULLPTR) {
-		delete oldService; oldService = Q_NULLPTR;
 	}
 }
