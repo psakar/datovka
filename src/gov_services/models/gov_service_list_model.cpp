@@ -23,9 +23,6 @@
 
 #include "src/gov_services/models/gov_service_list_model.h"
 #include "src/datovka_shared/gov_services/service/gov_service.h"
-#include "src/global.h"
-
-const int GovServiceListModel::valueRole = Qt::UserRole;
 
 GovServiceListModel::Entry::Entry(const Entry &sme)
     : m_srvcInternId(sme.m_srvcInternId),
@@ -91,7 +88,7 @@ QVariant GovServiceListModel::data(const QModelIndex &index, int role) const
 	case Qt::AccessibleTextRole:
 		return QString("%1\nDS: %2 -- %3").arg(e.srvcFullName()).arg(e.srvcBoxId()).arg(e.instName());
 		break;
-	case valueRole:
+	case Qt::UserRole:
 		return e.srvcInternId();
 		break;
 	default:
