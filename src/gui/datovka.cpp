@@ -1178,8 +1178,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 
 		menu->addAction(ui->actionGet_messages);
 		menu->addAction(ui->actionSend_message);
-		menu->addSeparator();
-		menu->addAction(ui->actionCreate_gov_message);
+		menu->addAction(ui->actionSend_egov_request);
 		menu->addSeparator();
 		if (received) {
 			QMenu *submenu = menu->addMenu(tr("Mark"));
@@ -4029,8 +4028,8 @@ void MainWindow::connectTopMenuBarSlots(void)
 	connect(ui->actionSend_message, SIGNAL(triggered()),
 	    this, SLOT(createAndSendMessage()));
 	    /* Separator. */
-	connect(ui->actionCreate_gov_message, SIGNAL(triggered()),
-	    this, SLOT(createGovMessage()));
+	connect(ui->actionSend_egov_request, SIGNAL(triggered()),
+	    this, SLOT(createGovRequest()));
 	    /* Separator. */
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()),
 	    this, SLOT(accountMarkReceivedRead()));
@@ -4205,7 +4204,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	//ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
 	ui->actionSend_message->setEnabled(false);
-	ui->actionCreate_gov_message->setEnabled(false);
+	ui->actionSend_egov_request->setEnabled(false);
 	ui->actionReply->setEnabled(false);
 	ui->actionAuthenticate_message->setEnabled(false);
 	//ui->actionMsgAdvancedSearch->setEnabled(false);
@@ -4276,7 +4275,7 @@ void MainWindow::activeAccountMenuAndButtons(bool action) const
 	ui->actionSync_all_accounts->setEnabled(action);
 	ui->actionGet_messages->setEnabled(action);
 	ui->actionSend_message->setEnabled(action);
-	ui->actionCreate_gov_message->setEnabled(action);
+	ui->actionSend_egov_request->setEnabled(action);
 	ui->actionDelete_account->setEnabled(action);
 	ui->actionFind_databox->setEnabled(action);
 	ui->actionMsgAdvancedSearch->setEnabled(action);
@@ -4615,7 +4614,7 @@ void MainWindow::createAndSendMessage(void)
 	showSendMessageDialog(DlgSendMessage::ACT_NEW);
 }
 
-void MainWindow::createGovMessage(void)
+void MainWindow::createGovRequest(void)
 {
 	debugSlotCall();
 
@@ -8015,9 +8014,10 @@ void MainWindow::setMenuActionIcons(void)
 	    /* Separator. */
 	{
 		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "present_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "present_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionCreate_gov_message->setIcon(ico);
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionSend_egov_request->setIcon(ico);
 	}
 	    /* Separator. */
 	{
@@ -8538,5 +8538,5 @@ void MainWindow::dockMenuActionTriggerred(QAction *action)
 void MainWindow::enableCreateGovServiceAction(const QString &userName)
 {
 	const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
-	ui->actionCreate_gov_message->setEnabled(!itemSettings.isTestAccount());
+	ui->actionSend_egov_request->setEnabled(!itemSettings.isTestAccount());
 }
