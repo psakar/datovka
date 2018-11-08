@@ -1056,43 +1056,34 @@ int DlgSendMessage::notifyOfPDZ(int pdzCnt)
 
 bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 {
-	int aSize = m_attachModel.totalAttachmentSize();
+	qint64 aSize = m_attachModel.totalAttachmentSize();
 
-	m_ui->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
+	m_ui->attachmentSizeInfo->setStyleSheet("QLabel { color: red }");
 
 	if (m_attachModel.rowCount() > MAX_ATTACHMENT_FILES) {
-		m_ui->attachmentSizeInfo->
-		     setStyleSheet("QLabel { color: red }");
-		m_ui->attachmentSizeInfo->setText(tr(
-		    "Warning: The permitted amount (%1) of attachments has been exceeded.")
-		        .arg(QString::number(MAX_ATTACHMENT_FILES)));
+		m_ui->attachmentSizeInfo->setText(tr("Warning: The permitted amount (%1) of attachments has been exceeded.")
+		    .arg(QString::number(MAX_ATTACHMENT_FILES)));
 		return false;
 	}
 
-
-	if (aSize > 0) {
-		if (aSize >= 1024) {
-			m_ui->attachmentSizeInfo->setText(
-			    tr("Total size of attachments is ~%1 KB").
-			    arg(aSize/1024));
-			if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
-				m_ui->attachmentSizeInfo->
-				     setStyleSheet("QLabel { color: red }");
-				m_ui->attachmentSizeInfo->setText(
-				    tr("Warning: Total size of attachments is larger than %1 MB!")
-				    .arg(QString::number(
-				        MAX_ATTACHMENT_SIZE_MB)));
-				return false;
-			}
-		} else {
-			m_ui->attachmentSizeInfo->setText(tr(
-			    "Total size of attachments is ~%1 B").arg(aSize));
-		}
-	} else {
-		m_ui->attachmentSizeInfo->setText(
-		    tr("Total size of attachments is %1 B").arg(aSize));
+	if (aSize >= MAX_OVM_ATTACHMENT_SIZE_BYTES) {
+		m_ui->attachmentSizeInfo->setText(tr("Warning: Total size of attachments is larger than %1 MB!")
+		    .arg(QString::number(MAX_OVM_ATTACHMENT_SIZE_MB)));
+		return false;
 	}
 
+	if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
+		m_ui->attachmentSizeInfo->setText(tr("Warning: Total size of attachments is larger than %1 MB! Most of databoxes cannot receive a message larger than %1 MB. However some OVM databoxes can receive message up to %2 MB.")
+		    .arg(QString::number(MAX_ATTACHMENT_SIZE_MB)).arg(QString::number(MAX_OVM_ATTACHMENT_SIZE_MB)));
+		return true;
+	}
+
+	m_ui->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
+	if (aSize >= 1024) {
+		m_ui->attachmentSizeInfo->setText(tr("Total size of attachments is ~%1 KB").arg(aSize/1024));
+	} else {
+		m_ui->attachmentSizeInfo->setText(tr("Total size of attachments is ~%1 B").arg(aSize));
+	}
 	return true;
 }
 

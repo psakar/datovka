@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>590</width>
-    <height>800</height>
+    <height>832</height>
    </rect>
   </property>
   <property name="font">
@@ -748,26 +748,29 @@ necessary digital signatures.</string>
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="attachmentSizeInfo">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="font">
+      <font>
+       <weight>50</weight>
+       <bold>false</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Attachment size is larger than 50 MB. Message cannot be sent!</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <item>
-      <widget class="QLabel" name="attachmentSizeInfo">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="font">
-        <font>
-         <weight>50</weight>
-         <bold>false</bold>
-        </font>
-       </property>
-       <property name="text">
-        <string>Attachment size is larger than 20 MB. Message cannot be sent!</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
