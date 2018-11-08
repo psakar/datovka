@@ -861,7 +861,7 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		return;
 	}
 
-	enableCreateGovServiceAction(userName);
+	enableSendEGovRequestAction(true, userName);
 
 	const MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
@@ -3949,13 +3949,7 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	ui->hSplitterMessageInfo->setSizes(sizes);
 }
 
-
-/* ========================================================================= */
-/*
- * Set default account from settings.
- */
 void MainWindow::setDefaultAccount(const QSettings &settings)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -3967,22 +3961,12 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 			ui->accountList->setCurrentIndex(
 			    acntTopIdx.child(0, 0));
 			accountItemCurrentChanged(acntTopIdx.child(0, 0));
-			ui->menuDatabox->setEnabled(true);
-			ui->actionDelete_account->setEnabled(true);
-			ui->actionSync_all_accounts->setEnabled(true);
-			ui->actionGet_messages->setEnabled(true);
-			ui->actionSend_message->setEnabled(true);
-			enableCreateGovServiceAction(userName);
-			ui->actionFind_databox->setEnabled(true);
-			ui->actionMsgAdvancedSearch->setEnabled(true);
-			ui->actionImport_ZFO_file_into_database->
-			    setEnabled(true);
+			activateAccountMenuActions(true, userName);
 		}
 	} else {
 		defaultUiMainWindowSettings();
 	}
 }
-
 
 /* ========================================================================= */
 /*
@@ -4262,26 +4246,21 @@ void MainWindow::setAttachmentActionVisibility(int numSelected) const
 	ui->actionOpen_attachment->setEnabled(numSelected == 1);
 }
 
-/* ========================================================================= */
-/*
- *  Active/Inactive account menu and buttons in the mainwindow.
- */
-void MainWindow::activeAccountMenuAndButtons(bool action) const
-/* ========================================================================= */
+void MainWindow::activateAccountMenuActions(bool enable,
+    const QString &username)
 {
-	ui->menuDatabox->setEnabled(action);
-	ui->actionAccount_properties->setEnabled(action);
-	ui->actionChange_password->setEnabled(action);
-	ui->actionSync_all_accounts->setEnabled(action);
-	ui->actionGet_messages->setEnabled(action);
-	ui->actionSend_message->setEnabled(action);
-	ui->actionSend_egov_request->setEnabled(action);
-	ui->actionDelete_account->setEnabled(action);
-	ui->actionFind_databox->setEnabled(action);
-	ui->actionMsgAdvancedSearch->setEnabled(action);
-	ui->actionImport_ZFO_file_into_database->setEnabled(action);
+	ui->menuDatabox->setEnabled(enable);
+	ui->actionAccount_properties->setEnabled(enable);
+	ui->actionChange_password->setEnabled(enable);
+	ui->actionSync_all_accounts->setEnabled(enable);
+	ui->actionGet_messages->setEnabled(enable);
+	ui->actionSend_message->setEnabled(enable);
+	enableSendEGovRequestAction(enable, username);
+	ui->actionDelete_account->setEnabled(enable);
+	ui->actionFind_databox->setEnabled(enable);
+	ui->actionMsgAdvancedSearch->setEnabled(enable);
+	ui->actionImport_ZFO_file_into_database->setEnabled(enable);
 }
-
 
 /* ========================================================================= */
 /*
@@ -4808,7 +4787,8 @@ void MainWindow::showAddNewAccountDialog(void)
 	getAccountUserDataboxInfo(newAcntSettings);
 
 	if (ui->accountList->model()->rowCount() > 0) {
-		activeAccountMenuAndButtons(true);
+		activateAccountMenuActions(true,
+		    m_accountModel.userName(currentAccountModelIndex()));
 		saveSettings();
 	}
 }
@@ -5445,7 +5425,8 @@ void MainWindow::showImportDatabaseDialog(void)
 		saveSettings();
 	}
 
-	activeAccountMenuAndButtons(true);
+	activateAccountMenuActions(true,
+	    m_accountModel.userName(currentAccountModelIndex()));
 	ui->accountList->expandAll();
 }
 
@@ -8535,8 +8516,14 @@ void MainWindow::dockMenuActionTriggerred(QAction *action)
 	widget->activateWindow();
 }
 
-void MainWindow::enableCreateGovServiceAction(const QString &userName)
+void MainWindow::enableSendEGovRequestAction(bool enable,
+    const QString &userName)
 {
-	const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
-	ui->actionSend_egov_request->setEnabled(!itemSettings.isTestAccount());
+	if (enable && !userName.isEmpty()) {
+		const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
+		ui->actionSend_egov_request->setEnabled(
+		    !itemSettings.isTestAccount());
+	} else {
+		ui->actionSend_egov_request->setEnabled(false);
+	}
 }
