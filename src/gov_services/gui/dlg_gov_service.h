@@ -28,9 +28,12 @@
 #include <QSet>
 #include <QString>
 
-#include "src/datovka_shared/gov_services/service/gov_service.h"
 #include "src/datovka_shared/isds/message_interface.h"
 #include "src/io/message_db_set.h"
+
+namespace Gov {
+	class Service; /* Forward declaration. */
+}
 
 namespace Ui {
 	class DlgGovService;
@@ -110,7 +113,7 @@ private slots:
 	 * @param[in] isPDZ True if message was attempted to send as commercial
 	 *                  message.
 	 * @param[in] dmId Sent message identifier.
-	 * @param[in] processFlags Message processig flags.
+	 * @param[in] processFlags Message processing flags.
 	 */
 	void collectSendMessageStatus(const QString &userName,
 	    const QString &transactId, int result, const QString &resultDesc,

@@ -316,6 +316,7 @@ SOURCES += \
     src/datovka_shared/gov_services/service/gov_mv_zr_vp.cpp \
     src/datovka_shared/gov_services/service/gov_service_form_field.cpp \
     src/datovka_shared/gov_services/service/gov_service.cpp \
+    src/datovka_shared/gov_services/service/gov_services_all.cpp \
     src/datovka_shared/gov_services/service/gov_szr_rob_vu.cpp \
     src/datovka_shared/gov_services/service/gov_szr_rob_vvu.cpp \
     src/datovka_shared/gov_services/service/gov_szr_ros_vv.cpp \
@@ -492,6 +493,7 @@ HEADERS += \
     src/datovka_shared/gov_services/service/gov_mv_zr_vp.h \
     src/datovka_shared/gov_services/service/gov_service_form_field.h \
     src/datovka_shared/gov_services/service/gov_service.h \
+    src/datovka_shared/gov_services/service/gov_services_all.h \
     src/datovka_shared/gov_services/service/gov_szr_rob_vu.h \
     src/datovka_shared/gov_services/service/gov_szr_rob_vvu.h \
     src/datovka_shared/gov_services/service/gov_szr_ros_vv.h \

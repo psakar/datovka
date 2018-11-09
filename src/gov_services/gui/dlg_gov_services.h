@@ -32,6 +32,10 @@
 #include "src/io/message_db_set.h"
 #include "src/models/sort_filter_proxy_model.h"
 
+namespace Gov {
+	class Service; /* Forward declaration. */
+}
+
 namespace Ui {
 	class DlgGovServices;
 }
@@ -87,16 +91,6 @@ private slots:
 	void onServiceActivated(const QModelIndex &index);
 
 private:
-	/*!
-	 * @brief Initialise all e-gov services and insert to map.
-	 */
-	void initGovServices(void);
-
-	/*!
-	 * @brief Remove all e-gov services from map and delete their objects.
-	 */
-	void clearGovServices(void);
-
 	/*!
 	 * @brief Load e-gov services into model.
 	 */

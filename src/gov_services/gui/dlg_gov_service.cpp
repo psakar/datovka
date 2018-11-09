@@ -25,6 +25,7 @@
 #include <QLineEdit>
 
 #include "src/datovka_shared/gov_services/service/gov_service_form_field.h"
+#include "src/datovka_shared/gov_services/service/gov_service.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/log/memory_log.h"
 #include "src/datovka_shared/utility/strings.h"

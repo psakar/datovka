@@ -21,17 +21,8 @@
  * the two.
  */
 
-#include "src/datovka_shared/gov_services/service/gov_mv_crr_vbh.h"
-#include "src/datovka_shared/gov_services/service/gov_mv_ir_vp.h"
-#include "src/datovka_shared/gov_services/service/gov_mv_rt_vt.h"
-#include "src/datovka_shared/gov_services/service/gov_mv_rtpo_vt.h"
-#include "src/datovka_shared/gov_services/service/gov_mv_skd_vp.h"
-#include "src/datovka_shared/gov_services/service/gov_mv_vr_vp.h"
-#include "src/datovka_shared/gov_services/service/gov_mv_zr_vp.h"
 #include "src/datovka_shared/gov_services/service/gov_service.h"
-#include "src/datovka_shared/gov_services/service/gov_szr_rob_vu.h"
-#include "src/datovka_shared/gov_services/service/gov_szr_rob_vvu.h"
-#include "src/datovka_shared/gov_services/service/gov_szr_ros_vv.h"
+#include "src/datovka_shared/gov_services/service/gov_services_all.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/log/memory_log.h"
 #include "src/global.h"
@@ -51,10 +42,10 @@ DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
 {
 	m_ui->setupUi(this);
 
-	/* Init Gov services. */
-	initGovServices();
+	/* Init e-gov services. */
+	m_govServices = Gov::allServiceMap();
 
-	/* Load and set Gov model into listview. */
+	/* Load and set e-gov model into listview. */
 	loadServicesToModel();
 	m_govServiceListProxyModel.setSourceModel(&m_govServiceModel);
 	m_ui->govServiceListView->setModel(&m_govServiceListProxyModel);
@@ -68,7 +59,7 @@ DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
 
 DlgGovServices::~DlgGovServices(void)
 {
-	clearGovServices();
+	Gov::clearServiceMap(m_govServices);
 	delete m_ui;
 }
 
@@ -112,7 +103,7 @@ void DlgGovServices::onServiceActivated(const QModelIndex &index)
 		return;
 	}
 
-	/* Get current Gov service. */
+	/* Get current e-gov service. */
 	const Gov::Service *cgs = m_govServices.value(serId, Q_NULLPTR);
 	if (Q_UNLIKELY(cgs == Q_NULLPTR)) {
 		logErrorNL("Cannot access e-gov service '%s'.",
@@ -138,77 +129,6 @@ void DlgGovServices::onServiceActivated(const QModelIndex &index)
 
 	/* Open service form dialog. */
 	DlgGovService::openGovServiceForm(m_userName, gs.take(), m_dbSet, this);
-}
-
-/*!
- * @brief Add a newly allocated service into the service container.
- *
- * @note The service object is freed when it cannot be added into the container.
- *
- * @param[in] map Service container.
- * @param[in] gs Newly allocated service object.
- */
-static
-void insertService(QMap<QString, const Gov::Service *> &map,
-    Gov::Service *gs)
-{
-	if (Q_UNLIKELY(gs == Q_NULLPTR)) {
-		return;
-	}
-
-	const QString &key(gs->internalId());
-	if (!map.contains(key)) {
-		map.insert(key, gs);
-	} else {
-		logError("Key '%s' already exists in e-gov service container.",
-		    key.toUtf8().constData());
-		delete gs;
-	}
-}
-
-void DlgGovServices::initGovServices(void)
-{
-	debugFuncCall();
-
-	clearGovServices();
-
-	/* Výpis bodového hodnocení z Centrálního registru řidičů */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcMvCrrVbh);
-
-	/* Výpis z insolvenčního rejstříku */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcMvIrVp);
-
-	/* Výpis z Rejstříku trestů */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcMvRtVt);
-
-	/* Výpis z Rejstříku trestů právnických osob */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcMvRtpoVt);
-
-	/* Výpis ze seznamu kvalifikovaných dodavatelů */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcMvSkdVp);
-
-	/* Výpis z veřejného rejstříku */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcMvVrVp);
-
-	/* Výpis z živnostenského rejstříku */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcMvZrVp);
-
-	/* Výpis z Registru obyvatel */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcSzrRobVu);
-
-	/* Výpis o využití údajů z registru obyvatel */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcSzrRobVvu);
-
-	/* Veřejný výpis z registru osob */
-	insertService(m_govServices, new (std::nothrow) Gov::SrvcSzrRosVv);
-}
-
-void DlgGovServices::clearGovServices(void)
-{
-	foreach (const Gov::Service *gs, m_govServices.values()) {
-		delete const_cast<Gov::Service *>(gs);
-	}
-	m_govServices.clear();
 }
 
 void DlgGovServices::loadServicesToModel(void)
