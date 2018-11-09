@@ -45,14 +45,24 @@ DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
 	/* Init e-gov services. */
 	m_govServices = Gov::allServiceMap();
 
-	/* Load and set e-gov model into listview. */
+	/* Load and set e-gov model into list view. */
 	loadServicesToModel();
+
+	/* Show notification that this data box cannot send any requests. */
+	m_ui->label->setVisible(m_govServiceModel.rowCount() != 0);
+	m_ui->cannotSendLabel->setVisible(m_govServiceModel.rowCount() == 0);
+
 	m_govServiceListProxyModel.setSourceModel(&m_govServiceModel);
 	m_ui->govServiceListView->setModel(&m_govServiceListProxyModel);
+	m_ui->govServiceListView->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_ui->govServiceListView->setSelectionBehavior(QAbstractItemView::SelectItems);
+
+	m_ui->filterLine->setToolTip(tr("Enter sought expression"));
+	m_ui->filterLine->setClearButtonEnabled(true);
 
 	/* Connect signal section. */
 	connect(m_ui->filterLine, SIGNAL(textChanged(QString)),
-	    this, SLOT(onFilterServices(QString)));
+	    this, SLOT(filterServices(QString)));
 	connect(m_ui->govServiceListView, SIGNAL(activated(QModelIndex)),
 	    this, SLOT(onServiceActivated(QModelIndex)));
 }
@@ -71,7 +81,7 @@ void DlgGovServices::showGovServices(const QString &userName,
 	govServicesDialog->exec();
 }
 
-void DlgGovServices::onFilterServices(const QString &text)
+void DlgGovServices::filterServices(const QString &text)
 {
 	m_govServiceListProxyModel.setFilterRegExp(QRegExp(text,
 	    Qt::CaseInsensitive, QRegExp::FixedString));
@@ -140,7 +150,7 @@ void DlgGovServices::loadServicesToModel(void)
 	/* Get account info. */
 	const Isds::DbOwnerInfo dbOwnerInfo(GlobInstcs::accntDbPtr->getOwnerInfo(
 	    AccountDb::keyFromLogin(m_userName)));
-	if (dbOwnerInfo.isNull()) {
+	if (Q_UNLIKELY(dbOwnerInfo.isNull())) {
 		return;
 	}
 

@@ -77,11 +77,11 @@ public:
 
 private slots:
 	/*!
-	 * @brief Apply filter text on the e-gov service list.
+	 * @brief Apply filter text in the e-gov service list.
 	 *
 	 * @param[in] text Filter text.
 	 */
-	void onFilterServices(const QString &text);
+	void filterServices(const QString &text);
 
 	/*!
 	 * @brief Any e-gov service was double clicked.

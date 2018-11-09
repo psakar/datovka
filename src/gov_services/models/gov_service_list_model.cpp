@@ -85,8 +85,10 @@ QVariant GovServiceListModel::data(const QModelIndex &index, int role) const
 
 	switch (role) {
 	case Qt::DisplayRole:
+		/* \u2001 is an Unicode code of an em quad character. */
+		return tr("%1\n\u2001data box: %2 - %3").arg(e.srvcFullName()).arg(e.srvcBoxId()).arg(e.instName());
 	case Qt::AccessibleTextRole:
-		return QString("%1\nDS: %2 -- %3").arg(e.srvcFullName()).arg(e.srvcBoxId()).arg(e.instName());
+		return tr("Send request %1 into the data box %2 %3.").arg(e.srvcFullName()).arg(e.srvcBoxId()).arg(e.instName());
 		break;
 	case ROLE_INTERN_ID:
 		return e.srvcInternId();
