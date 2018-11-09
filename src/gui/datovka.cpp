@@ -2445,13 +2445,8 @@ void MainWindow::collectSendMessageStatus(const QString &userName,
 	}
 }
 
-/* ========================================================================= */
-/*
- * Set tablewidget when message download worker is done.
- */
 void MainWindow::postDownloadSelectedMessageAttachments(
     const QString &userName, qint64 dmId)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -2460,27 +2455,18 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 
 	const QString currentUserName(
 	    m_accountModel.userName(currentAccountModelIndex()));
-	if (currentUserName.isEmpty()) {
+	const QModelIndex msgIdIdx = ui->messageList->currentIndex();
+
+	if (currentUserName.isEmpty() || !msgIdIdx.isValid()) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	/* Do nothing if account was changed. */
-	if (userName != currentUserName) {
-		return;
-	}
+	/* Get message ID from model index. */
+	qint64 currentDmId = msgIdIdx.data().toLongLong();
 
-	QModelIndex msgIdIdx;
-	/* Find corresponding message in model. */
-	for (int row = 0; row < m_messageTableModel.rowCount(); ++row) {
-		QModelIndex index = m_messageTableModel.index(row, 0);
-		if (index.data().toLongLong() == dmId) {
-			msgIdIdx = index;
-			break;
-		}
-	}
-
-	if (!msgIdIdx.isValid()) {
+	/* Do nothing if account or message was changed. */
+	if (userName != currentUserName || dmId != currentDmId) {
 		return;
 	}
 
@@ -2505,7 +2491,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	 */
 
 	/* Disconnect model from slot if model already set. */
-	if (0 != ui->messageAttachmentList->selectionModel()) {
+	if (Q_NULLPTR != ui->messageAttachmentList->selectionModel()) {
 		/* New model hasn't been set yet. */
 		ui->messageAttachmentList->selectionModel()->disconnect(
 		    SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
@@ -2514,15 +2500,14 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		        QItemSelection)));
 	}
 
-	MessageDbSet *dbSet = accountDbSet(
-	    m_accountModel.userName(currentAccountModelIndex()));
+	MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		Q_ASSERT(0);
 		return;
 	}
 	QDateTime deliveryTime = msgDeliveryTime(msgIdIdx);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	if (0 == messageDb) {
+	if (Q_NULLPTR == messageDb) {
 		Q_ASSERT(0);
 		return;
 	}
