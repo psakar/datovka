@@ -37,7 +37,7 @@ namespace Ui {
 }
 
 /*!
- * @brief Encapsulated gov services dialogue.
+ * @brief Encapsulated e-gov service list dialogue.
  */
 class DlgGovServices : public QDialog {
 	Q_OBJECT
@@ -54,14 +54,14 @@ private:
 	    QWidget *parent = Q_NULLPTR);
 
 public:
-
 	/*!
 	 * @brief Destructor.
 	 */
+	virtual
 	~DlgGovServices(void);
 
 	/*!
-	 * @brief Open dialogue and show Gov services.
+	 * @brief Open dialogue and show e-gov services.
 	 *
 	 * @param[in] userName Account login.
 	 * @param[in] dbSet Account db set pointer.
@@ -72,42 +72,41 @@ public:
 	    QWidget *parent = Q_NULLPTR);
 
 private slots:
-
 	/*!
-	 * @brief Apply filter text on the Gov service list.
+	 * @brief Apply filter text on the e-gov service list.
 	 *
 	 * @param[in] text Filter text.
 	 */
 	void onFilterServices(const QString &text);
 
 	/*!
-	 * @brief Any Gov service was double clicked.
+	 * @brief Any e-gov service was double clicked.
 	 *
 	 * @param[in] index model index of selected service.
 	 */
 	void onServiceActivated(const QModelIndex &index);
 
 private:
-
 	/*!
-	 * @brief Init all Gov services and insert to map.
+	 * @brief Initialise all e-gov services and insert to map.
 	 */
 	void initGovServices(void);
 
 	/*!
-	 * @brief Remove all Gov services from map and delete their objects.
+	 * @brief Remove all e-gov services from map and delete their objects.
 	 */
 	void clearGovServices(void);
 
 	/*!
-	 * @brief Load Gov services into model.
+	 * @brief Load e-gov services into model.
 	 */
-	void loadServicesToModel(void) const;
+	void loadServicesToModel(void);
+
+	Ui::DlgGovServices *m_ui; /*!< UI generated from UI file. */
 
 	QString m_userName; /*!< Account user name. */
 	MessageDbSet *m_dbSet; /*!< Holds pointer to message database. */
-	QMap<QString, const Gov::Service *> m_govServices; /*!< Holds pointers to all available Gov services. */
-	SortFilterProxyModel m_govServiceListProxyModel; /*!< Used for Gov service filtering. */
-	GovServiceListModel *m_govServiceModel; /*!< Gov service model. */
-	Ui::DlgGovServices *m_ui; /*!< UI generated from UI file. */
+	QMap<QString, const Gov::Service *> m_govServices; /*!< Holds pointers to all available e-gov services. */
+	SortFilterProxyModel m_govServiceListProxyModel; /*!< Used for e-gov service filtering. */
+	GovServiceListModel m_govServiceModel; /*!< E-gov service model. */
 };

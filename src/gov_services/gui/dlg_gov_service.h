@@ -37,47 +37,43 @@ namespace Ui {
 }
 
 /*!
- * @brief Encapsulated Gov service dialogue.
+ * @brief Encapsulated e-gov service dialogue.
  */
 class DlgGovService : public QDialog {
 	Q_OBJECT
 
 private:
-
 	/*!
 	 * @brief Constructor.
 	 *
 	 * @param[in] userName Account user name.
-	 * @param[in] gs Pointer holding Gov service.
+	 * @param[in] gs Pointer holding e-gov service.
 	 * @param[in] dbSet Pointer holding account db set.
 	 * @param[in] parent Parent widget.
 	 */
-	explicit DlgGovService(const QString &userName,
-	    Gov::Service *gs, MessageDbSet *dbSet,
-	    QWidget *parent = Q_NULLPTR);
+	explicit DlgGovService(const QString &userName, Gov::Service *gs,
+	    MessageDbSet *dbSet, QWidget *parent = Q_NULLPTR);
 
 public:
-
 	/*!
 	 * @brief Destructor.
 	 */
+	virtual
 	~DlgGovService(void);
 
 	/*!
-	 * @brief Open Gov service form dialogue.
+	 * @brief Open e-gov service form dialogue.
 	 *
 	 * @param[in] userName Account user name.
-	 * @param[in] gs Pointer holding Gov service.
+	 * @param[in] gs Pointer holding e-gov service.
 	 * @param[in] dbSet Pointer holding account db set.
 	 * @param[in] parent Parent widget.
 	 */
 	static
-	void openGovServiceForm(const QString &userName,
-	    Gov::Service *gs, MessageDbSet *dbSet,
-	    QWidget *parent = Q_NULLPTR);
+	void openGovServiceForm(const QString &userName, Gov::Service *gs,
+	    MessageDbSet *dbSet, QWidget *parent = Q_NULLPTR);
 
 private slots:
-
 	/*!
 	 * @brief Check if all mandatory fields are filled.
 	 */
@@ -86,7 +82,7 @@ private slots:
 	/*!
 	 * @brief Is active when line edit text has been changed.
 	 *
-	 * @param[in] text Text from textedit.
+	 * @param[in] text Text from text edit.
 	 */
 	void onLineEditTextChanged(QString text);
 
@@ -98,12 +94,12 @@ private slots:
 	void onDateChanged(QDate date);
 
 	/*!
-	 * @brief Create Gov message and send to isds.
+	 * @brief Create e-gov message and send to ISDS.
 	 */
 	void onCreateAndSendMsg(void);
 
 	/*!
-	 * @brief Show status after sending Gov message via ISDS interface.
+	 * @brief Show status after sending e-gov message via ISDS interface.
 	 *
 	 * @param[in] userName User name identifying the sender account.
 	 * @param[in] transactId Unique transaction identifier.
@@ -122,9 +118,8 @@ private slots:
 	    bool isPDZ, qint64 dmId, int processFlags);
 
 private:
-
 	/*!
-	 * @brief Init Gov service dialogue.
+	 * @brief Initialise e-gov service dialogue.
 	 */
 	void initDialog(void);
 
@@ -141,15 +136,16 @@ private:
 	void showValidityNotification(const QString &errText);
 
 	/*!
-	 * @brief Send Gov message to isds.
+	 * @brief Send e-gov message to ISDS.
 	 *
 	 * @param[in] msg Message structure.
 	 */
 	void sendGovMessage(const Isds::Message &msg);
 
-	QString m_userName; /*!< Account user name. */
-	Gov::Service *m_gs; /*!< Pointer holding Gov service. */
-	MessageDbSet *m_dbSet; /*!< Pointer holding account db set. */
 	Ui::DlgGovService *m_ui; /*!< UI generated from UI file. */
+
+	QString m_userName; /*!< Account user name. */
+	Gov::Service *m_gs; /*!< Pointer holding e-gov service. */
+	MessageDbSet *m_dbSet; /*!< Pointer holding account db set. */
 	QSet<QString> m_transactIds; /*!< Temporary transaction identifiers. */
 };

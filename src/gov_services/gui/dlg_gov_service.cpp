@@ -37,13 +37,13 @@
 #include "src/worker/task_send_message.h"
 #include "ui_dlg_gov_service.h"
 
-DlgGovService::DlgGovService(const QString &userName,
-    Gov::Service *gs, MessageDbSet *dbSet, QWidget *parent)
+DlgGovService::DlgGovService(const QString &userName, Gov::Service *gs,
+    MessageDbSet *dbSet, QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgGovService),
     m_userName(userName),
     m_gs(gs),
     m_dbSet(dbSet),
-    m_ui(new (std::nothrow) Ui::DlgGovService),
     m_transactIds()
 {
 	m_ui->setupUi(this);
@@ -68,8 +68,7 @@ void DlgGovService::haveAllMandatoryFields(void)
 {
 	m_ui->invalidValueLabel->clear();
 	m_ui->invalidValueLabel->setEnabled(false);
-	m_ui->sendServiceButton->setEnabled(
-	    m_gs->haveAllMandatoryFields());
+	m_ui->sendServiceButton->setEnabled(m_gs->haveAllMandatoryFields());
 }
 
 void DlgGovService::onLineEditTextChanged(QString text)

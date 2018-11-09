@@ -43,11 +43,11 @@
 DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
     QWidget *parent)
     : QDialog(parent),
+    m_ui(new (std::nothrow) Ui::DlgGovServices),
     m_userName(userName),
     m_dbSet(dbSet),
     m_govServices(),
-    m_govServiceModel(new (std::nothrow) GovServiceListModel),
-    m_ui(new (std::nothrow) Ui::DlgGovServices)
+    m_govServiceModel()
 {
 	m_ui->setupUi(this);
 
@@ -56,7 +56,7 @@ DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
 
 	/* Load and set Gov model into listview. */
 	loadServicesToModel();
-	m_govServiceListProxyModel.setSourceModel(m_govServiceModel);
+	m_govServiceListProxyModel.setSourceModel(&m_govServiceModel);
 	m_ui->govServiceListView->setModel(&m_govServiceListProxyModel);
 
 	/* Connect signal section. */
@@ -69,7 +69,6 @@ DlgGovServices::DlgGovServices(const QString &userName, MessageDbSet *dbSet,
 DlgGovServices::~DlgGovServices(void)
 {
 	clearGovServices();
-	delete m_govServiceModel; m_govServiceModel = Q_NULLPTR;
 	delete m_ui;
 }
 
@@ -211,11 +210,11 @@ void DlgGovServices::clearGovServices(void)
 	m_govServices.clear();
 }
 
-void DlgGovServices::loadServicesToModel(void) const
+void DlgGovServices::loadServicesToModel(void)
 {
 	debugFuncCall();
 
-	m_govServiceModel->clearAll();
+	m_govServiceModel.clearAll();
 
 	/* Get account info. */
 	const Isds::DbOwnerInfo dbOwnerInfo(GlobInstcs::accntDbPtr->getOwnerInfo(
@@ -232,7 +231,7 @@ void DlgGovServices::loadServicesToModel(void) const
 		}
 		/* Enlist only services which can be used. */
 		if (cgs->canSend(dbOwnerInfo.dbType())) {
-			m_govServiceModel->appendService(cgs);
+			m_govServiceModel.appendService(cgs);
 		} else {
 			logInfo("User '%s' cannot use the e-gov service '%s'.",
 			    m_userName.toUtf8().constData(),
