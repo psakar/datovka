@@ -2457,7 +2457,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	    m_accountModel.userName(currentAccountModelIndex()));
 	const QModelIndex msgIdIdx = ui->messageList->currentIndex();
 
-	if (currentUserName.isEmpty() || !msgIdIdx.isValid()) {
+	if (Q_UNLIKELY(currentUserName.isEmpty() || !msgIdIdx.isValid())) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -2501,13 +2501,13 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	}
 
 	MessageDbSet *dbSet = accountDbSet(userName);
-	if (Q_NULLPTR == dbSet) {
+	if (Q_UNLIKELY(Q_NULLPTR == dbSet)) {
 		Q_ASSERT(0);
 		return;
 	}
 	QDateTime deliveryTime = msgDeliveryTime(msgIdIdx);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
-	if (Q_NULLPTR == messageDb) {
+	if (Q_UNLIKELY(Q_NULLPTR == messageDb)) {
 		Q_ASSERT(0);
 		return;
 	}
@@ -2547,7 +2547,6 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	    SLOT(attachmentItemsSelectionChanged(QItemSelection,
 	        QItemSelection)));
 }
-
 
 /* ========================================================================= */
 /*
