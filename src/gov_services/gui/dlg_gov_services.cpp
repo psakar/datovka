@@ -106,15 +106,16 @@ void DlgGovServices::onServiceActivated(const QModelIndex &index)
 	}
 
 	/* Get service id from index. */
-	QString serId = index.sibling(index.row(), 0).data(Qt::UserRole).toString();
-	if (serId.isEmpty()) {
+	const QString serId(index.sibling(index.row(), 0)
+	    .data(GovServiceListModel::ROLE_INTERN_ID).toString());
+	if (Q_UNLIKELY(serId.isEmpty())) {
 		return;
 	}
 
 	/* Get current Gov service. */
 	const Gov::Service *cgs = m_govServices.value(serId, Q_NULLPTR);
 	if (Q_UNLIKELY(cgs == Q_NULLPTR)) {
-		logErrorNL("Cannot access gov service '%s'.",
+		logErrorNL("Cannot access e-gov service '%s'.",
 		    serId.toUtf8().constData());
 		Q_ASSERT(0);
 		return;
@@ -159,7 +160,7 @@ void insertService(QMap<QString, const Gov::Service *> &map,
 	if (!map.contains(key)) {
 		map.insert(key, gs);
 	} else {
-		logError("Key '%s' already exists in gov service container.",
+		logError("Key '%s' already exists in e-gov service container.",
 		    key.toUtf8().constData());
 		delete gs;
 	}

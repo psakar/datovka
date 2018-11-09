@@ -40,7 +40,6 @@ class GovServiceListModel : public QAbstractListModel {
 	Q_OBJECT
 
 public:
-
 	/*!
 	 * @brief Model entry.
 	 */
@@ -61,6 +60,14 @@ public:
 		QString m_instName; /*!< Gov institute name. */
 		QString m_srvcBoxId; /*!< Gov institute databox ID */
 	};
+
+	/*!
+	 * @brief Additional roles which this model supports.
+	 */
+	enum Roles {
+		ROLE_INTERN_ID = Qt::UserRole /*!< Internal service identifier. */
+	};
+	Q_ENUM(Roles)
 
 	/*!
 	 * @brief Constructor.

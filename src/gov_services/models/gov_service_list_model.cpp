@@ -88,7 +88,7 @@ QVariant GovServiceListModel::data(const QModelIndex &index, int role) const
 	case Qt::AccessibleTextRole:
 		return QString("%1\nDS: %2 -- %3").arg(e.srvcFullName()).arg(e.srvcBoxId()).arg(e.instName());
 		break;
-	case Qt::UserRole:
+	case ROLE_INTERN_ID:
 		return e.srvcInternId();
 		break;
 	default:
