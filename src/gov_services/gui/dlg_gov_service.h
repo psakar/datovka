@@ -73,7 +73,7 @@ public:
 	 * @param[in] parent Parent widget.
 	 */
 	static
-	void openGovServiceForm(const QString &userName, Gov::Service *gs,
+	void openForm(const QString &userName, Gov::Service *gs,
 	    MessageDbSet *dbSet, QWidget *parent = Q_NULLPTR);
 
 private slots:
@@ -83,23 +83,23 @@ private slots:
 	void haveAllMandatoryFields(void);
 
 	/*!
-	 * @brief Is active when line edit text has been changed.
+	 * @brief Activated when line edit text has been changed.
 	 *
-	 * @param[in] text Text from text edit.
+	 * @param[in] text New text.
 	 */
-	void onLineEditTextChanged(QString text);
+	void lineEditTextChanged(const QString &text);
 
 	/*!
-	 * @brief Is active when date has been changed in the calendar widget.
+	 * @brief Activated when calendar date has been changed.
 	 *
-	 * @param[in] date Date.
+	 * @param[in] date New date.
 	 */
-	void onDateChanged(QDate date);
+	void calendarDateChanged(const QDate &date);
 
 	/*!
-	 * @brief Create e-gov message and send to ISDS.
+	 * @brief Create data message with e-gov request send to ISDS.
 	 */
-	void onCreateAndSendMsg(void);
+	void createAndSendMsg(void);
 
 	/*!
 	 * @brief Show status after sending e-gov message via ISDS interface.
@@ -124,7 +124,7 @@ private:
 	/*!
 	 * @brief Initialise e-gov service dialogue.
 	 */
-	void initDialog(void);
+	void initDialogue(void);
 
 	/*!
 	 * @brief Generate form UI layout from service fields.

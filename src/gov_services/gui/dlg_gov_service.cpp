@@ -49,7 +49,7 @@ DlgGovService::DlgGovService(const QString &userName, Gov::Service *gs,
 {
 	m_ui->setupUi(this);
 
-	initDialog();
+	initDialogue();
 }
 
 DlgGovService::~DlgGovService(void)
@@ -58,11 +58,11 @@ DlgGovService::~DlgGovService(void)
 	delete m_ui;
 }
 
-void DlgGovService::openGovServiceForm(const QString &userName,
+void DlgGovService::openForm(const QString &userName,
     Gov::Service *gs, MessageDbSet *dbSet, QWidget *parent)
 {
-	DlgGovService govServiceDialog(userName, gs, dbSet, parent);
-	govServiceDialog.exec();
+	DlgGovService dlg(userName, gs, dbSet, parent);
+	dlg.exec();
 }
 
 void DlgGovService::haveAllMandatoryFields(void)
@@ -72,11 +72,11 @@ void DlgGovService::haveAllMandatoryFields(void)
 	m_ui->sendServiceButton->setEnabled(m_gs->haveAllMandatoryFields());
 }
 
-void DlgGovService::onLineEditTextChanged(QString text)
+void DlgGovService::lineEditTextChanged(const QString &text)
 {
 	/* Get pointer to sender. */
-	QObject *senderObj = sender();
-	if (senderObj == Q_NULLPTR || senderObj->objectName().isNull()) {
+	const QObject *senderObj = QObject::sender();
+	if (Q_UNLIKELY(senderObj == Q_NULLPTR || senderObj->objectName().isNull())) {
 		return;
 	}
 
@@ -87,30 +87,30 @@ void DlgGovService::onLineEditTextChanged(QString text)
 		}
 	}
 
-	/* Check if service has all mandatory fields. */
+	/* Check if request has all mandatory fields. */
 	haveAllMandatoryFields();
 }
 
-void DlgGovService::onDateChanged(QDate date)
+void DlgGovService::calendarDateChanged(const QDate &date)
 {
 	/* Get pointer to sender. */
-	QObject *senderObj = sender();
-	if (senderObj == Q_NULLPTR || senderObj->objectName().isNull()) {
+	const QObject *senderObj = QObject::sender();
+	if (Q_UNLIKELY(senderObj == Q_NULLPTR || senderObj->objectName().isNull())) {
 		return;
 	}
 
 	/* Set text value to the service field. */
 	foreach (const Gov::FormField &field, m_gs->fields()) {
 		if (field.key() == senderObj->objectName()) {
-			m_gs->setFieldVal(field.key(), date.toString("yyyy-MM-dd"));
+			m_gs->setFieldVal(field.key(), date.toString(GOV_DATE_FORMAT));
 		}
 	}
 
-	/* Check if service has all mandatory fields. */
+	/* Check if request has all mandatory fields. */
 	haveAllMandatoryFields();
 }
 
-void DlgGovService::onCreateAndSendMsg(void)
+void DlgGovService::createAndSendMsg(void)
 {
 	debugSlotCall();
 
@@ -118,27 +118,29 @@ void DlgGovService::onCreateAndSendMsg(void)
 
 	/* Check if service has all mandatory fields. */
 	if (!m_gs->haveAllMandatoryFields()) {
-		logErrorNL("The e-gov service '%s' is missing some mandatory data.",
+		logErrorNL(
+		    "The e-gov request '%s' is missing some mandatory data.",
 		    m_gs->internalId().toUtf8().constData());
 		return;
 	}
 
 	/* Check if form has all fields valid. */
 	if (!m_gs->haveAllValidFields(&errDescr)) {
-		logWarningNL("The e-gov service '%s' has some mandatory data invalid.",
+		logWarningNL(
+		    "The e-gov request '%s' contains some invalid mandatory data.",
 		    m_gs->internalId().toUtf8().constData());
 		showValidityNotification(errDescr);
 		return;
 	}
 
-	/* Create Gov message. */
+	/* Create data message containing e-gov request. */
 	const Isds::Message msg(m_gs->dataMessage());
 	if (Q_UNLIKELY(msg.isNull())) {
 		Q_ASSERT(0);
 		return;
 	}
 
-	/* Send Gov message. */
+	/* Send e-gov request. */
 	sendGovMessage(msg);
 }
 
@@ -153,21 +155,21 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 	Q_UNUSED(processFlags);
 
 	/* Nothing found. */
-	if (m_transactIds.end() == m_transactIds.find(transactId)) {
+	if (Q_UNLIKELY(m_transactIds.end() == m_transactIds.find(transactId))) {
 		return;
 	}
 
 	/* Remove transaction. */
 	if (!m_transactIds.remove(transactId)) {
 		logErrorNL("%s",
-		    "Was not able to remove a transaction identifier from list of unfinished transactions.");
+		    "Unable to remove a transaction identifier from list of unfinished transactions.");
 	}
 
-	/* Show sent result dialog. */
+	/* Show sent result dialogue. */
 	if (TaskSendMessage::SM_SUCCESS == result) {
 		DlgMsgBox::message(this, QMessageBox::Information,
 		    tr("Message sent: %1").arg(userName),
-		    "<b>" + tr("Gov request was successfully sent to ISDS.") + "</b>",
+		    "<b>" + tr("E-gov request was successfully sent.") + "</b>",
 		    tr("Message was sent to <i>%1 (%2)</i> as message number <i>%3</i>.").
 		    arg(recipientName).arg(dbIDRecipient).arg(dmId) + "<br/>",
 		    QString(), QMessageBox::Ok, QMessageBox::Ok);
@@ -175,34 +177,35 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 	} else {
 		DlgMsgBox::message(this, QMessageBox::Warning,
 		    tr("Message sent: %1").arg(userName),
-		    "<b>" + tr("Gov request was NOT successfully sent to ISDS.") + "</b>",
+		    "<b>" + tr("E-gov request could NOT be sent.") + "</b>",
 		    tr("ISDS returns:") + " " + resultDesc,
 		    QString(), QMessageBox::Ok, QMessageBox::Ok);
 	}
 }
 
-void DlgGovService::initDialog(void)
+void DlgGovService::initDialogue(void)
 {
 	/* Set window title and labels. */
 	this->setWindowTitle(m_gs->internalId());
-	m_ui->serviceName->setText(m_gs->fullName());
-	m_ui->serviceDbId->setText(QString("%1 -- %2").arg(m_gs->boxId()).arg(m_gs->instituteName()));
-	m_ui->userName->setText(m_userName);
+	m_ui->requestNameLabel->setText(m_gs->fullName());
+	m_ui->boxIdLabel->setText(
+	    QString("%1 -- %2").arg(m_gs->boxId()).arg(m_gs->instituteName()));
+	m_ui->userNameLabel->setText(m_userName);
 
 	/* Set properties for error label. */
 	m_ui->invalidValueLabel->setStyleSheet("QLabel { color: red }");
 	m_ui->invalidValueLabel->setEnabled(false);
 
-	/* Generate form layout from service fileds. */
+	/* Generate form layout from service fields. */
 	if (m_gs->fields().count() == 0) {
-		m_ui->filedsLabel->setText(tr("Service does not require another data."));
+		m_ui->promptLabel->setText(tr("No user data needed."));
 	} else {
 		generateFormLayoutUi();
 	}
 
 	/* Connect signal section. */
 	connect(m_ui->sendServiceButton, SIGNAL(clicked()),
-	    this, SLOT(onCreateAndSendMsg()));
+	    this, SLOT(createAndSendMsg()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()),
 	    this, SLOT(close()));
 	connect(GlobInstcs::msgProcEmitterPtr,
@@ -211,7 +214,7 @@ void DlgGovService::initDialog(void)
 	    SLOT(collectSendMessageStatus(QString, QString, int, QString,
 	        QString, QString, bool, qint64, int)));
 
-	/* Check if service has all mandatory fields. */
+	/* Check if request has all mandatory fields. */
 	haveAllMandatoryFields();
 }
 
@@ -238,7 +241,7 @@ void DlgGovService::generateFormLayoutUi(void)
 			calendar->setHorizontalHeaderFormat(QCalendarWidget::NoHorizontalHeader);
 
 			connect(calendar, SIGNAL(activated(QDate)),
-			    this, SLOT(onDateChanged(QDate)));
+			    this, SLOT(calendarDateChanged(QDate)));
 		} else {
 			/* Text input required. Show line edit. */
 			QLineEdit *lineEdit = new QLineEdit(this);
@@ -251,7 +254,7 @@ void DlgGovService::generateFormLayoutUi(void)
 			lineEdit->setEnabled(field.val().isEmpty());
 
 			connect(lineEdit, SIGNAL(textChanged(QString)),
-			    this, SLOT(onLineEditTextChanged(QString)));
+			    this, SLOT(lineEditTextChanged(QString)));
 		}
 
 		++formLine;
@@ -288,7 +291,7 @@ void DlgGovService::sendGovMessage(const Isds::Message &msg)
 	    Utility::generateRandomString(6));
 	m_transactIds.insert(taskIdentifier);
 
-	/* Send Gov message to isds. */
+	/* Send data message with e-gov request to ISDS. */
 	TaskSendMessage *task = new (std::nothrow) TaskSendMessage(
 	    m_userName, m_dbSet, taskIdentifier, msg,
 	    m_gs->instituteName(),

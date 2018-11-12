@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>332</width>
-    <height>178</height>
+    <width>480</width>
+    <height>180</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,14 +27,14 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <item row="0" column="1">
-      <widget class="QLabel" name="userName">
+      <widget class="QLabel" name="userNameLabel">
        <property name="text">
         <string>TextLabel</string>
        </property>
       </widget>
      </item>
      <item row="2" column="1">
-      <widget class="QLabel" name="serviceDbId">
+      <widget class="QLabel" name="boxIdLabel">
        <property name="font">
         <font>
          <weight>50</weight>
@@ -47,21 +47,21 @@
       </widget>
      </item>
      <item row="0" column="0">
-      <widget class="QLabel" name="label1">
+      <widget class="QLabel" name="accountLabel">
        <property name="text">
         <string>Account:</string>
        </property>
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QLabel" name="label3">
+      <widget class="QLabel" name="boxLabel">
        <property name="text">
-        <string>DS:</string>
+        <string>Target data box:</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QLabel" name="serviceName">
+      <widget class="QLabel" name="requestNameLabel">
        <property name="font">
         <font>
          <weight>75</weight>
@@ -74,7 +74,7 @@
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="label2">
+      <widget class="QLabel" name="requestLabel">
        <property name="text">
         <string>Request:</string>
        </property>
@@ -90,9 +90,12 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="filedsLabel">
+    <widget class="QLabel" name="promptLabel">
      <property name="text">
-      <string>Service requires filing of these fields:</string>
+      <string>The service requires these fields to be filled in:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
      </property>
     </widget>
    </item>

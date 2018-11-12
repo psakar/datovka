@@ -277,7 +277,7 @@ void DlgGovServices::onServiceActivated(const QModelIndex &index)
 	gs->setOwnerInfoFields(dbOwnerInfo);
 
 	/* Open service form dialogue. */
-	DlgGovService::openGovServiceForm(m_userName, gs.take(), m_dbSet, this);
+	DlgGovService::openForm(m_userName, gs.take(), m_dbSet, this);
 }
 
 void DlgGovServices::pingIsdsServer(void) const
