@@ -355,6 +355,11 @@ void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
 
 void DlgSendMessage::pingIsdsServer(void) const
 {
+	if (Q_UNLIKELY(m_userName.isEmpty())) {
+		Q_ASSERT(0);
+		return;
+	}
+
 	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
 	if (Q_UNLIKELY(task == Q_NULLPTR)) {
 		return;

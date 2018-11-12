@@ -4593,47 +4593,6 @@ void MainWindow::createAndSendMessage(void)
 	showSendMessageDialog(DlgSendMessage::ACT_NEW);
 }
 
-void MainWindow::createGovRequest(void)
-{
-	debugSlotCall();
-
-	/* Get username of selected account */
-	const QString userName(
-	    m_accountModel.userName(currentAccountModelIndex()));
-	Q_ASSERT(!userName.isEmpty());
-
-	if (!GlobInstcs::isdsSessionsPtr->isConnectedToIsds(userName) &&
-	    !connectToIsds(userName)) {
-		return;
-	}
-
-	MessageDbSet *dbSet = accountDbSet(userName);
-	if (Q_NULLPTR == dbSet) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	DlgGovServices::showGovServices(userName, dbSet, this);
-}
-
-void MainWindow::createAndSendMessageReply(void)
-{
-	debugSlotCall();
-	showSendMessageDialog(DlgSendMessage::ACT_REPLY);
-}
-
-void MainWindow::createAndSendMessageWithZfos(void)
-{
-	debugSlotCall();
-	showSendMessageDialog(DlgSendMessage::ACT_FORWARD);
-}
-
-void MainWindow::createAndSendMessageFromTmpl(void)
-{
-	debugSlotCall();
-	showSendMessageDialog(DlgSendMessage::ACT_NEW_FROM_TMP);
-}
-
 /*!
  * @brief Return list of available usernames and associated database sets.
  *
@@ -4675,6 +4634,39 @@ QList<Task::AccountDescr> messageDbListForAllAccounts(MainWindow *mainWindow,
 	}
 
 	return messageDbList;
+}
+
+void MainWindow::createGovRequest(void)
+{
+	debugSlotCall();
+
+	/* Get username of selected account */
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
+	/* The dialogue window checks whether the account is connected. */
+	DlgGovServices::sendRequest(
+	    messageDbListForAllAccounts(this, m_accountModel, ui->accountList, false),
+	    userName, this, this);
+}
+
+void MainWindow::createAndSendMessageReply(void)
+{
+	debugSlotCall();
+	showSendMessageDialog(DlgSendMessage::ACT_REPLY);
+}
+
+void MainWindow::createAndSendMessageWithZfos(void)
+{
+	debugSlotCall();
+	showSendMessageDialog(DlgSendMessage::ACT_FORWARD);
+}
+
+void MainWindow::createAndSendMessageFromTmpl(void)
+{
+	debugSlotCall();
+	showSendMessageDialog(DlgSendMessage::ACT_NEW_FROM_TMP);
 }
 
 void MainWindow::showSendMessageDialog(int action,
