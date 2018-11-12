@@ -97,7 +97,7 @@ private slots:
 	 *
 	 * @param[in] date New date.
 	 */
-	void calendarDateChanged(const QDate &date);
+	void calendarDateChanged(void);
 
 	/*!
 	 * @brief Create data message with e-gov request send to ISDS.

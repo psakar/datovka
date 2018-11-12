@@ -110,7 +110,7 @@ void DlgGovService::lineEditTextChanged(const QString &text)
 	haveAllMandatoryFields();
 }
 
-void DlgGovService::calendarDateChanged(const QDate &date)
+void DlgGovService::calendarDateChanged(void)
 {
 	/* Get pointer to sender. */
 	const QObject *senderObj = QObject::sender();
@@ -121,7 +121,15 @@ void DlgGovService::calendarDateChanged(const QDate &date)
 	/* Set text value to the service field. */
 	foreach (const Gov::FormField &field, m_gs->fields()) {
 		if (field.key() == senderObj->objectName()) {
-			m_gs->setFieldVal(field.key(), date.toString(GOV_DATE_FORMAT));
+			const QCalendarWidget *calendar =
+			    qobject_cast<const QCalendarWidget *>(senderObj);
+			if (Q_UNLIKELY(calendar == Q_NULLPTR)) {
+				Q_ASSERT(0);
+				continue;
+			}
+
+			m_gs->setFieldVal(field.key(),
+			    calendar->selectedDate().toString(GOV_DATE_FORMAT));
 		}
 	}
 
@@ -259,8 +267,8 @@ void DlgGovService::generateFormLayoutUi(void)
 			calendar->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
 			calendar->setHorizontalHeaderFormat(QCalendarWidget::NoHorizontalHeader);
 
-			connect(calendar, SIGNAL(activated(QDate)),
-			    this, SLOT(calendarDateChanged(QDate)));
+			connect(calendar, SIGNAL(selectionChanged()),
+			    this, SLOT(calendarDateChanged()));
 		} else {
 			/* Text input required. Show line edit. */
 			QLineEdit *lineEdit = new QLineEdit(this);
