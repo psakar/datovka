@@ -382,6 +382,7 @@ SOURCES += \
     src/gui/dlg_view_log.cpp \
     src/gui/dlg_view_zfo.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
+    src/gui/helper.cpp \
     src/initialisation.cpp \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
@@ -561,6 +562,7 @@ HEADERS += \
     src/gui/dlg_view_log.h \
     src/gui/dlg_view_zfo.h \
     src/gui/dlg_yes_no_checkbox.h \
+    src/gui/helper.h \
     src/initialisation.h \
     src/io/account_db.h \
     src/io/db_tables.h \

@@ -25,14 +25,12 @@
 #include "src/datovka_shared/gov_services/service/gov_services_all.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/log/memory_log.h"
-#include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/gov_services/gui/dlg_gov_service.h"
 #include "src/gov_services/gui/dlg_gov_services.h"
 #include "src/gui/datovka.h"
+#include "src/gui/helper.h"
 #include "src/io/account_db.h"
-#include "src/io/isds_sessions.h"
-#include "src/worker/task_keep_alive.h"
 #include "ui_dlg_gov_services.h"
 
 DlgGovServices::DlgGovServices(
@@ -119,81 +117,6 @@ void DlgGovServices::sendRequest(
 	dlg.exec();
 }
 
-/*!
- * @brief Checks whether the related account has an active connection to ISDS.
- *
- * @param[in] keepAliveTimer Keep-alive timer.
- * @param[in] mw Pointer to main window.
- * @param[in] userName User name identifying the account.
- * @return True if active connection is present.
- */
-static
-bool isLoggedIn(QTimer &keepAliveTimer, MainWindow *const mw,
-    const QString &userName)
-{
-	if (Q_UNLIKELY(userName.isEmpty())) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	bool loggedIn = false;
-	keepAliveTimer.stop();
-	{
-		TaskKeepAlive *task =
-		    new (std::nothrow) TaskKeepAlive(userName);
-		if (Q_UNLIKELY(task == Q_NULLPTR)) {
-			return false;
-		}
-		task->setAutoDelete(false);
-		GlobInstcs::workPoolPtr->runSingle(task);
-
-		loggedIn = task->m_isAlive;
-
-		delete task;
-	}
-	if (!loggedIn) {
-		if (Q_NULLPTR != mw) {
-			loggedIn = mw->connectToIsds(userName);
-		}
-	}
-	keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
-
-	/* Check the presence of session. */
-	if (!GlobInstcs::isdsSessionsPtr->holdsSession(userName)) {
-		logErrorNL("%s", "Missing ISDS session.");
-		loggedIn = false;
-	}
-
-	return loggedIn;
-}
-
-/*!
- * @brief Find database set relate to account.
- *
- * @param[in] acntDescrs Account descriptors.
- * @param[in] userName User name identifying the account.
- * @return Pointer related to specified account, Q_NULLPTR on error.
- */
-static
-MessageDbSet *getDbSet(const QList<Task::AccountDescr> &acntDescrs,
-    const QString &userName)
-{
-	if (Q_UNLIKELY(userName.isEmpty())) {
-		Q_ASSERT(0);
-		return Q_NULLPTR;
-	}
-
-	MessageDbSet *dbSet = Q_NULLPTR;
-	foreach (const Task::AccountDescr &acnt, acntDescrs) {
-		if (acnt.userName == userName) {
-			dbSet = acnt.messageDbSet;
-			break;
-		}
-	}
-
-	return dbSet;
-}
-
 void DlgGovServices::setAccountInfo(int fromComboIdx)
 {
 	debugSlotCall();
@@ -211,9 +134,10 @@ void DlgGovServices::setAccountInfo(int fromComboIdx)
 	/* Show notification that this data box cannot send any requests. */
 	m_ui->cannotSendLabel->setVisible(m_govServiceModel.rowCount() == 0);
 
-	m_isLoggedIn = isLoggedIn(m_keepAliveTimer, m_mw, m_userName);
+	m_isLoggedIn = GuiHelper::isLoggedIn(m_keepAliveTimer, m_mw,
+	    m_userName);
 
-	m_dbSet = getDbSet(m_messageDbSetList, m_userName);
+	m_dbSet = GuiHelper::getDbSet(m_messageDbSetList, m_userName);
 	if (Q_UNLIKELY(Q_NULLPTR == m_dbSet)) {
 		Q_ASSERT(0);
 		return;
@@ -267,17 +191,7 @@ void DlgGovServices::onServiceActivated(const QModelIndex &index)
 
 void DlgGovServices::pingIsdsServer(void) const
 {
-	if (Q_UNLIKELY(m_userName.isEmpty())) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
-	if (Q_UNLIKELY(task == Q_NULLPTR)) {
-		return;
-	}
-	task->setAutoDelete(true);
-	GlobInstcs::workPoolPtr->assignHi(task);
+	GuiHelper::pingIsdsServer(m_userName);
 }
 
 void DlgGovServices::loadServicesToModel(void)
