@@ -249,6 +249,9 @@ void DlgGovService::generateFormLayoutUi(void)
 {
 	int formLine = 0;
 
+	QWidget *prevWid = Q_NULLPTR;
+	QWidget *curWid = Q_NULLPTR;
+
 	foreach (const Gov::FormField &ff, m_gs->fields()) {
 		QLabel *label = new QLabel(this);
 		label->setObjectName(ff.key() + QStringLiteral("Label"));
@@ -260,6 +263,7 @@ void DlgGovService::generateFormLayoutUi(void)
 			QCalendarWidget *calendar = new QCalendarWidget(this);
 			calendar->setObjectName(ff.key());
 			m_ui->formGovLayout->setWidget(formLine, QFormLayout::FieldRole, calendar);
+			curWid = calendar;
 
 			label->setText(ff.placeholder());
 			calendar->setMaximumDate(QDate::currentDate());
@@ -290,6 +294,7 @@ void DlgGovService::generateFormLayoutUi(void)
 			QLineEdit *lineEdit = new QLineEdit(this);
 			lineEdit->setObjectName(ff.key());
 			m_ui->formGovLayout->setWidget(formLine, QFormLayout::FieldRole, lineEdit);
+			curWid = lineEdit;
 
 			label->setText(ff.descr());
 			lineEdit->setPlaceholderText(ff.placeholder());
@@ -301,8 +306,21 @@ void DlgGovService::generateFormLayoutUi(void)
 			    this, SLOT(lineEditTextChanged(QString)));
 		}
 
+		/* Set tab order. */
+		if (prevWid != Q_NULLPTR) {
+			Q_ASSERT(curWid != Q_NULLPTR);
+			QWidget::setTabOrder(prevWid, curWid);
+		}
+		prevWid = curWid;
+		curWid = Q_NULLPTR;
+
 		++formLine;
 	}
+
+	if (prevWid != Q_NULLPTR) {
+		QWidget::setTabOrder(prevWid, m_ui->sendButton);
+	}
+	QWidget::setTabOrder(m_ui->sendButton, m_ui->cancelButton);
 }
 
 void DlgGovService::showValidityNotification(const QString &errText)

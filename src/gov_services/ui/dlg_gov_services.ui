@@ -99,6 +99,7 @@
  </widget>
  <tabstops>
   <tabstop>govServiceListView</tabstop>
+  <tabstop>fromComboBox</tabstop>
   <tabstop>filterLine</tabstop>
  </tabstops>
  <resources/>
