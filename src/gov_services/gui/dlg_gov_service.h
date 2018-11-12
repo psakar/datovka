@@ -49,6 +49,9 @@ private:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @note The dialogue takes the ownership of the service `gs` and
+	 *     deletes it when destroyed.
+	 *
 	 * @param[in] userName Account user name.
 	 * @param[in] gs Pointer holding e-gov service.
 	 * @param[in] dbSet Pointer holding account db set.
@@ -68,12 +71,12 @@ public:
 	 * @brief Open e-gov service form dialogue.
 	 *
 	 * @param[in] userName Account user name.
-	 * @param[in] gs Pointer holding e-gov service.
+	 * @param[in] cgs Pointer holding e-gov service.
 	 * @param[in] dbSet Pointer holding account db set.
 	 * @param[in] parent Parent widget.
 	 */
 	static
-	void openForm(const QString &userName, Gov::Service *gs,
+	void openForm(const QString &userName, const Gov::Service *cgs,
 	    MessageDbSet *dbSet, QWidget *parent = Q_NULLPTR);
 
 private slots:

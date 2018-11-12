@@ -33,6 +33,7 @@
 #include "src/global.h"
 #include "src/gov_services/gui/dlg_gov_service.h"
 #include "src/gui/dlg_msg_box_informative.h"
+#include "src/io/account_db.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
@@ -59,8 +60,26 @@ DlgGovService::~DlgGovService(void)
 }
 
 void DlgGovService::openForm(const QString &userName,
-    Gov::Service *gs, MessageDbSet *dbSet, QWidget *parent)
+    const Gov::Service *cgs, MessageDbSet *dbSet, QWidget *parent)
 {
+	if (Q_UNLIKELY(userName.isEmpty() || (cgs == Q_NULLPTR) ||
+	        (dbSet == Q_NULLPTR))) {
+		return;
+	}
+
+	const Isds::DbOwnerInfo dbOwnerInfo(GlobInstcs::accntDbPtr->getOwnerInfo(
+	    AccountDb::keyFromLogin(userName)));
+	if (Q_UNLIKELY(dbOwnerInfo.isNull())) {
+		return;
+	}
+
+	Gov::Service *gs = cgs->createNew();
+	if (Q_UNLIKELY(gs == Q_NULLPTR)) {
+		return;
+	}
+	/* Fill form data from account info. */
+	gs->setOwnerInfoFields(dbOwnerInfo);
+
 	DlgGovService dlg(userName, gs, dbSet, parent);
 	dlg.exec();
 }

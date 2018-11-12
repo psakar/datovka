@@ -261,23 +261,8 @@ void DlgGovServices::onServiceActivated(const QModelIndex &index)
 		return;
 	}
 
-	/* Create new copy of service. */
-	QScopedPointer<Gov::Service> gs(cgs->createNew());
-	if (Q_UNLIKELY(gs.isNull())) {
-		Q_ASSERT(0);
-		return;
-	}
-
-	/* Fill some form items from account info. */
-	const Isds::DbOwnerInfo dbOwnerInfo(GlobInstcs::accntDbPtr->getOwnerInfo(
-	    AccountDb::keyFromLogin(m_userName)));
-	if (dbOwnerInfo.isNull()) {
-		return;
-	}
-	gs->setOwnerInfoFields(dbOwnerInfo);
-
 	/* Open service form dialogue. */
-	DlgGovService::openForm(m_userName, gs.take(), m_dbSet, this);
+	DlgGovService::openForm(m_userName, cgs, m_dbSet, this);
 }
 
 void DlgGovServices::pingIsdsServer(void) const
