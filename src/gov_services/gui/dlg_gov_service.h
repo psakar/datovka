@@ -81,11 +81,6 @@ public:
 
 private slots:
 	/*!
-	 * @brief Check if all mandatory fields are filled.
-	 */
-	void haveAllMandatoryFields(void);
-
-	/*!
 	 * @brief Activated when line edit text has been changed.
 	 *
 	 * @param[in] text New text.
@@ -128,6 +123,12 @@ private:
 	 * @brief Initialise e-gov service dialogue.
 	 */
 	void initDialogue(void);
+
+	/*!
+	 * @brief Check whether all mandatory fields are filled. Activate
+	 *     send button.
+	 */
+	void updateSendReadiness(void);
 
 	/*!
 	 * @brief Generate form UI layout from service fields.

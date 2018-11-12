@@ -84,13 +84,6 @@ void DlgGovService::openForm(const QString &userName,
 	dlg.exec();
 }
 
-void DlgGovService::haveAllMandatoryFields(void)
-{
-	m_ui->invalidValueLabel->clear();
-	m_ui->invalidValueLabel->setEnabled(false);
-	m_ui->sendServiceButton->setEnabled(m_gs->haveAllMandatoryFields());
-}
-
 void DlgGovService::lineEditTextChanged(const QString &text)
 {
 	/* Get pointer to sender. */
@@ -107,7 +100,7 @@ void DlgGovService::lineEditTextChanged(const QString &text)
 	}
 
 	/* Check if request has all mandatory fields. */
-	haveAllMandatoryFields();
+	updateSendReadiness();
 }
 
 void DlgGovService::calendarDateChanged(void)
@@ -134,7 +127,7 @@ void DlgGovService::calendarDateChanged(void)
 	}
 
 	/* Check if request has all mandatory fields. */
-	haveAllMandatoryFields();
+	updateSendReadiness();
 }
 
 void DlgGovService::createAndSendMsg(void)
@@ -231,7 +224,7 @@ void DlgGovService::initDialogue(void)
 	}
 
 	/* Connect signal section. */
-	connect(m_ui->sendServiceButton, SIGNAL(clicked()),
+	connect(m_ui->sendButton, SIGNAL(clicked()),
 	    this, SLOT(createAndSendMsg()));
 	connect(m_ui->cancelButton, SIGNAL(clicked()),
 	    this, SLOT(close()));
@@ -242,43 +235,67 @@ void DlgGovService::initDialogue(void)
 	        QString, QString, bool, qint64, int)));
 
 	/* Check if request has all mandatory fields. */
-	haveAllMandatoryFields();
+	updateSendReadiness();
+}
+
+void DlgGovService::updateSendReadiness(void)
+{
+	m_ui->invalidValueLabel->clear();
+	m_ui->invalidValueLabel->setEnabled(false);
+	m_ui->sendButton->setEnabled(m_gs->haveAllMandatoryFields());
 }
 
 void DlgGovService::generateFormLayoutUi(void)
 {
 	int formLine = 0;
 
-	foreach (const Gov::FormField &field, m_gs->fields()) {
+	foreach (const Gov::FormField &ff, m_gs->fields()) {
 		QLabel *label = new QLabel(this);
-		label->setObjectName(field.key() + QStringLiteral("Label"));
+		label->setObjectName(ff.key() + QStringLiteral("Label"));
 		m_ui->formGovLayout->setWidget(formLine, QFormLayout::LabelRole, label);
 
-		if ((field.properties() & Gov::FormFieldType::PROP_TYPE_DATE) &&
-		    (field.properties() & Gov::FormFieldType::PROP_USER_INPUT)) {
+		if ((ff.properties() & Gov::FormFieldType::PROP_TYPE_DATE) &&
+		    (ff.properties() & Gov::FormFieldType::PROP_USER_INPUT)) {
 			/* Date input required. Show calendar. */
 			QCalendarWidget *calendar = new QCalendarWidget(this);
-			calendar->setObjectName(field.key());
+			calendar->setObjectName(ff.key());
 			m_ui->formGovLayout->setWidget(formLine, QFormLayout::FieldRole, calendar);
 
-			label->setText(field.placeholder());
+			label->setText(ff.placeholder());
 			calendar->setMaximumDate(QDate::currentDate());
 			calendar->setGridVisible(true);
-			calendar->setVerticalHeaderFormat(QCalendarWidget::NoVerticalHeader);
-			calendar->setHorizontalHeaderFormat(QCalendarWidget::NoHorizontalHeader);
+			calendar->setHorizontalHeaderFormat(QCalendarWidget::ShortDayNames);
+			calendar->setVerticalHeaderFormat(QCalendarWidget::ISOWeekNumbers);
+			calendar->setSelectionMode(QCalendarWidget::SingleSelection);
+
+			if (ff.val().isEmpty()) {
+				/*
+				 * It is not possible to create the calendar without an
+				 * already selected date. Therefore we directly set
+				 * the selection into the underlying e-gov request
+				 * container.
+				 */
+				m_gs->setFieldVal(ff.key(),
+				    calendar->selectedDate().toString(GOV_DATE_FORMAT));
+			} else {
+				/* Set calendar. */
+				calendar->setSelectedDate(
+				    QDate::fromString(ff.val(), GOV_DATE_FORMAT));
+			}
 
 			connect(calendar, SIGNAL(selectionChanged()),
 			    this, SLOT(calendarDateChanged()));
 		} else {
 			/* Text input required. Show line edit. */
 			QLineEdit *lineEdit = new QLineEdit(this);
-			lineEdit->setObjectName(field.key());
+			lineEdit->setObjectName(ff.key());
 			m_ui->formGovLayout->setWidget(formLine, QFormLayout::FieldRole, lineEdit);
 
-			label->setText(field.descr());
-			lineEdit->setPlaceholderText(field.placeholder());
-			lineEdit->setText(field.val());
-			    field.properties() & Gov::FormFieldType::PROP_USER_INPUT);
+			label->setText(ff.descr());
+			lineEdit->setPlaceholderText(ff.placeholder());
+			lineEdit->setText(ff.val());
+			lineEdit->setEnabled(
+			    ff.properties() & Gov::FormFieldType::PROP_USER_INPUT);
 
 			connect(lineEdit, SIGNAL(textChanged(QString)),
 			    this, SLOT(lineEditTextChanged(QString)));
