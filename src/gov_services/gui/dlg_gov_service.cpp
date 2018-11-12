@@ -247,7 +247,7 @@ void DlgGovService::generateFormLayoutUi(void)
 		m_ui->formGovLayout->setWidget(formLine, QFormLayout::LabelRole, label);
 
 		if ((field.properties() & Gov::FormFieldType::PROP_TYPE_DATE) &&
-		    field.val().isEmpty()) {
+		    (field.properties() & Gov::FormFieldType::PROP_USER_INPUT)) {
 			/* Date input required. Show calendar. */
 			QCalendarWidget *calendar = new QCalendarWidget(this);
 			calendar->setObjectName(field.key());
@@ -270,7 +270,7 @@ void DlgGovService::generateFormLayoutUi(void)
 			label->setText(field.descr());
 			lineEdit->setPlaceholderText(field.placeholder());
 			lineEdit->setText(field.val());
-			lineEdit->setEnabled(field.val().isEmpty());
+			    field.properties() & Gov::FormFieldType::PROP_USER_INPUT);
 
 			connect(lineEdit, SIGNAL(textChanged(QString)),
 			    this, SLOT(lineEditTextChanged(QString)));
