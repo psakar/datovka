@@ -2455,15 +2455,15 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 
 	const QString currentUserName(
 	    m_accountModel.userName(currentAccountModelIndex()));
-	const QModelIndex msgIdIdx = ui->messageList->currentIndex();
+	const QModelIndex currentMsgIdx = ui->messageList->currentIndex();
 
-	if (Q_UNLIKELY(currentUserName.isEmpty() || !msgIdIdx.isValid())) {
+	if (Q_UNLIKELY(currentUserName.isEmpty() || !currentMsgIdx.isValid())) {
 		Q_ASSERT(0);
 		return;
 	}
 
 	/* Get message ID from model index. */
-	qint64 currentDmId = msgIdIdx.data().toLongLong();
+	qint64 currentDmId = currentMsgIdx.data().toLongLong();
 
 	/* Do nothing if account or message was changed. */
 	if (userName != currentUserName || dmId != currentDmId) {
@@ -2505,7 +2505,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 		Q_ASSERT(0);
 		return;
 	}
-	QDateTime deliveryTime = msgDeliveryTime(msgIdIdx);
+	QDateTime deliveryTime = msgDeliveryTime(currentMsgIdx);
 	MessageDb *messageDb = dbSet->accessMessageDb(deliveryTime, false);
 	if (Q_UNLIKELY(Q_NULLPTR == messageDb)) {
 		Q_ASSERT(0);
