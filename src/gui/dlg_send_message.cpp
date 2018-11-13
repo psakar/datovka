@@ -664,8 +664,7 @@ void DlgSendMessage::initContent(enum Action action,
 
 	connect(&m_keepAliveTimer, SIGNAL(timeout()), this, SLOT(pingIsdsServer()));
 
-	m_ui->attachmentSizeInfo->setText(
-	    tr("Total size of attachments is %1 B").arg(0));
+	calculateAndShowTotalAttachSize();
 
 	if (Isds::str2DbType(m_dbType) > Isds::Type::BT_OVM_REQ) {
 		m_ui->dmAllowSubstDelivery->setEnabled(false);
@@ -1058,23 +1057,37 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 {
 	qint64 aSize = m_attachModel.totalAttachmentSize();
 
+	if (m_attachModel.rowCount() == 0) {
+		Q_ASSERT(aSize == 0);
+		m_ui->attachmentSizeInfo->setEnabled(false);
+		m_ui->attachmentSizeInfo->setStyleSheet(QString());
+		m_ui->attachmentSizeInfo->setText(
+		    tr("Total size of attachments is %1 B").arg(0));
+		return false;
+	} else {
+		m_ui->attachmentSizeInfo->setEnabled(true);
+	}
+
 	m_ui->attachmentSizeInfo->setStyleSheet("QLabel { color: red }");
 
 	if (m_attachModel.rowCount() > MAX_ATTACHMENT_FILES) {
-		m_ui->attachmentSizeInfo->setText(tr("Warning: The permitted amount (%1) of attachments has been exceeded.")
-		    .arg(QString::number(MAX_ATTACHMENT_FILES)));
+		m_ui->attachmentSizeInfo->setText(
+		    tr("The permitted amount (%1) of attachments has been exceeded.")
+		        .arg(MAX_ATTACHMENT_FILES));
 		return false;
 	}
 
 	if (aSize >= MAX_OVM_ATTACHMENT_SIZE_BYTES) {
-		m_ui->attachmentSizeInfo->setText(tr("Warning: Total size of attachments is larger than %1 MB!")
-		    .arg(QString::number(MAX_OVM_ATTACHMENT_SIZE_MB)));
+		m_ui->attachmentSizeInfo->setText(
+		    tr("Total size of attachments is larger than %1 MB.")
+		        .arg(MAX_OVM_ATTACHMENT_SIZE_MB));
 		return false;
 	}
 
 	if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
-		m_ui->attachmentSizeInfo->setText(tr("Warning: Total size of attachments is larger than %1 MB! Most of databoxes cannot receive a message larger than %1 MB. However some OVM databoxes can receive message up to %2 MB.")
-		    .arg(QString::number(MAX_ATTACHMENT_SIZE_MB)).arg(QString::number(MAX_OVM_ATTACHMENT_SIZE_MB)));
+		m_ui->attachmentSizeInfo->setText(
+		    tr("Total size of attachments is larger than %1 MB. Most of the data boxes cannot receive messages larger than %1 MB. However some OVM data boxes can receive message up to %2 MB.")
+		        .arg(MAX_ATTACHMENT_SIZE_MB).arg(MAX_OVM_ATTACHMENT_SIZE_MB));
 		return true;
 	}
 
