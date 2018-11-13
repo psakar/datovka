@@ -67,7 +67,11 @@ public:
 	enum Roles {
 		ROLE_INTERN_ID = Qt::UserRole /*!< Internal service identifier. */
 	};
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 5, 0))
 	Q_ENUM(Roles)
+#else /* < Qt-5.5 */
+	Q_ENUMS(Roles)
+#endif /* >= Qt-5.5 */
 
 	/*!
 	 * @brief Constructor.
