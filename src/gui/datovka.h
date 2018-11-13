@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -381,6 +381,11 @@ private slots:
 	 * @brief Create and send a new message form selected account.
 	 */
 	void createAndSendMessage(void);
+
+	/*!
+	 * @brief Create and send an e-gov request.
+	 */
+	void createGovRequest(void);
 
 	/*!
 	 * @brief Create reply from the selected message.
@@ -834,9 +839,13 @@ private:
 	    const QString &composeSerialised = QString());
 
 	/*!
-	 * @brief Active/Inactive account menu and buttons in the mainwindow.
+	 * @brief Activate/deactivate account menu actions.
+	 *
+	 * @param[in] enable True if actions should be enabled.
+	 * @param[in] username Username of the selected account. Use empty
+	 *                     string if no account is selected.
 	 */
-	void activeAccountMenuAndButtons(bool action) const;
+	void activateAccountMenuActions(bool enable, const QString &username);
 
 	/*!
 	 * @brief Load and apply settings from configuration file.
@@ -1144,4 +1153,13 @@ private:
 	 * @brief Sets action icons.
 	 */
 	void setMenuActionIcons(void);
+
+	/*!
+	 * @brief Enable e-gov service action in the menu based on account type.
+	 *    Testing account cannot use e-gov services.
+	 *
+	 * @param[in] enable true if should be enabled.
+	 * @param[in] userName Account user name.
+	 */
+	void enableSendEGovRequestAction(bool enable, const QString &userName);
 };

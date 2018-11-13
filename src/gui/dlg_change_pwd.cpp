@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -29,10 +29,10 @@
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/gui/dlg_change_pwd.h"
+#include "src/gui/helper.h"
 #include "src/io/isds_sessions.h"
 #include "src/settings/accounts.h"
 #include "src/worker/task_change_pwd.h"
-#include "src/worker/task_keep_alive.h"
 #include "ui_dlg_change_pwd.h"
 
 #define PWD_MIN_LENGTH 8 /* Minimal password length is 8 characters. */
@@ -247,12 +247,7 @@ void DlgChangePwd::checkInputFields(void)
 
 void DlgChangePwd::pingIsdsServer(void)
 {
-	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
-	if (Q_UNLIKELY(task == Q_NULLPTR)) {
-		return;
-	}
-	task->setAutoDelete(true);
-	GlobInstcs::workPoolPtr->assignHi(task);
+	GuiHelper::pingIsdsServer(m_userName);
 }
 
 void DlgChangePwd::sendSmsCode(void)

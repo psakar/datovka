@@ -306,6 +306,20 @@ SOURCES += \
     src/datovka_shared/crypto/crypto_pwd.c \
     src/datovka_shared/crypto/crypto_trusted_certs.c \
     src/datovka_shared/crypto/crypto_wrapped.cpp \
+    src/datovka_shared/gov_services/helper.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_crr_vbh.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_ir_vp.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_rt_vt.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_rtpo_vt.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_skd_vp.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_vr_vp.cpp \
+    src/datovka_shared/gov_services/service/gov_mv_zr_vp.cpp \
+    src/datovka_shared/gov_services/service/gov_service_form_field.cpp \
+    src/datovka_shared/gov_services/service/gov_service.cpp \
+    src/datovka_shared/gov_services/service/gov_services_all.cpp \
+    src/datovka_shared/gov_services/service/gov_szr_rob_vu.cpp \
+    src/datovka_shared/gov_services/service/gov_szr_rob_vvu.cpp \
+    src/datovka_shared/gov_services/service/gov_szr_ros_vv.cpp \
     src/datovka_shared/graphics/graphics.cpp \
     src/datovka_shared/io/records_management_db.cpp \
     src/datovka_shared/io/sqlite/db.cpp \
@@ -340,6 +354,9 @@ SOURCES += \
     src/delegates/tags_delegate.cpp \
     src/dimensions/dimensions.cpp \
     src/global.cpp \
+    src/gov_services/gui/dlg_gov_service.cpp \
+    src/gov_services/gui/dlg_gov_services.cpp \
+    src/gov_services/models/gov_service_list_model.cpp \
     src/gui/datovka.cpp \
     src/gui/dlg_about.cpp \
     src/gui/dlg_account_from_db.cpp \
@@ -365,6 +382,7 @@ SOURCES += \
     src/gui/dlg_view_log.cpp \
     src/gui/dlg_view_zfo.cpp \
     src/gui/dlg_yes_no_checkbox.cpp \
+    src/gui/helper.cpp \
     src/initialisation.cpp \
     src/io/account_db.cpp \
     src/io/db_tables.cpp \
@@ -466,6 +484,20 @@ HEADERS += \
     src/datovka_shared/crypto/crypto_pwd.h \
     src/datovka_shared/crypto/crypto_trusted_certs.h \
     src/datovka_shared/crypto/crypto_wrapped.h \
+    src/datovka_shared/gov_services/helper.h \
+    src/datovka_shared/gov_services/service/gov_mv_crr_vbh.h \
+    src/datovka_shared/gov_services/service/gov_mv_ir_vp.h \
+    src/datovka_shared/gov_services/service/gov_mv_rt_vt.h \
+    src/datovka_shared/gov_services/service/gov_mv_rtpo_vt.h \
+    src/datovka_shared/gov_services/service/gov_mv_skd_vp.h \
+    src/datovka_shared/gov_services/service/gov_mv_vr_vp.h \
+    src/datovka_shared/gov_services/service/gov_mv_zr_vp.h \
+    src/datovka_shared/gov_services/service/gov_service_form_field.h \
+    src/datovka_shared/gov_services/service/gov_service.h \
+    src/datovka_shared/gov_services/service/gov_services_all.h \
+    src/datovka_shared/gov_services/service/gov_szr_rob_vu.h \
+    src/datovka_shared/gov_services/service/gov_szr_rob_vvu.h \
+    src/datovka_shared/gov_services/service/gov_szr_ros_vv.h \
     src/datovka_shared/graphics/graphics.h \
     src/datovka_shared/io/records_management_db.h \
     src/datovka_shared/io/sqlite/db.h \
@@ -502,6 +534,9 @@ HEADERS += \
     src/delegates/tags_delegate.h \
     src/dimensions/dimensions.h \
     src/global.h \
+    src/gov_services/gui/dlg_gov_service.h \
+    src/gov_services/gui/dlg_gov_services.h \
+    src/gov_services/models/gov_service_list_model.h \
     src/gui/datovka.h \
     src/gui/dlg_about.h \
     src/gui/dlg_account_from_db.h \
@@ -527,6 +562,7 @@ HEADERS += \
     src/gui/dlg_view_log.h \
     src/gui/dlg_view_zfo.h \
     src/gui/dlg_yes_no_checkbox.h \
+    src/gui/helper.h \
     src/initialisation.h \
     src/io/account_db.h \
     src/io/db_tables.h \
@@ -611,6 +647,8 @@ HEADERS += \
     src/worker/task_verify_message.h
 
 FORMS += \
+    src/gov_services/ui/dlg_gov_service.ui \
+    src/gov_services/ui/dlg_gov_services.ui \
     src/gui/ui/datovka.ui \
     src/gui/ui/dlg_about.ui \
     src/gui/ui/dlg_account_from_db.ui \

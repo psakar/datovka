@@ -381,6 +381,7 @@ sent reply on this message</string>
     </property>
     <addaction name="actionGet_messages"/>
     <addaction name="actionSend_message"/>
+    <addaction name="actionSend_egov_request"/>
     <addaction name="separator"/>
     <addaction name="actionMark_all_as_read"/>
     <addaction name="separator"/>
@@ -1257,6 +1258,21 @@ sent reply on this message</string>
    </property>
    <property name="toolTip">
     <string>View log content</string>
+   </property>
+   <property name="menuRole">
+    <enum>QAction::NoRole</enum>
+   </property>
+  </action>
+  <action name="actionSend_egov_request">
+   <property name="icon">
+    <iconset resource="../../../res/resources.qrc">
+     <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
+   </property>
+   <property name="text">
+    <string>Send e-gov request</string>
+   </property>
+   <property name="toolTip">
+    <string>Create and send an e-gov request</string>
    </property>
    <property name="menuRole">
     <enum>QAction::NoRole</enum>

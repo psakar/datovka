@@ -45,6 +45,7 @@
 #include "src/gui/dlg_msg_box_informative.h"
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
+#include "src/gui/helper.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
@@ -57,7 +58,6 @@
 #include "src/views/table_tab_ignore_filter.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task_download_credit_info.h"
-#include "src/worker/task_keep_alive.h"
 #include "src/worker/task_send_message.h"
 #include "src/worker/task_search_owner.h"
 #include "src/worker/task_search_owner_fulltext.h"
@@ -355,87 +355,7 @@ void DlgSendMessage::openSelectedAttachment(const QModelIndex &index)
 
 void DlgSendMessage::pingIsdsServer(void) const
 {
-	TaskKeepAlive *task = new (std::nothrow) TaskKeepAlive(m_userName);
-	if (Q_UNLIKELY(task == Q_NULLPTR)) {
-		return;
-	}
-	task->setAutoDelete(true);
-	GlobInstcs::workPoolPtr->assignHi(task);
-}
-
-/*!
- * @brief Checks whether the related account has an active connection to ISDS.
- *
- * @param[in] keepAliveTimer Keep-alive timer.
- * @param[in] mw Pointer to main window.
- * @param[in] userName User name identifying the account.
- * @return True if active connection is present.
- */
-static
-bool isLoggedIn(QTimer &keepAliveTimer, MainWindow *const mw,
-    const QString &userName)
-{
-	if (Q_UNLIKELY(userName.isEmpty())) {
-		Q_ASSERT(0);
-		return false;
-	}
-
-	bool loggedIn = false;
-	keepAliveTimer.stop();
-	{
-		TaskKeepAlive *task =
-		    new (std::nothrow) TaskKeepAlive(userName);
-		if (Q_UNLIKELY(task == Q_NULLPTR)) {
-			return false;
-		}
-		task->setAutoDelete(false);
-		GlobInstcs::workPoolPtr->runSingle(task);
-
-		loggedIn = task->m_isAlive;
-
-		delete task;
-	}
-	if (!loggedIn) {
-		if (Q_NULLPTR != mw) {
-			loggedIn = mw->connectToIsds(userName);
-		}
-	}
-	keepAliveTimer.start(DLG_ISDS_KEEPALIVE_MS);
-
-	/* Check the presence of session. */
-	if (!GlobInstcs::isdsSessionsPtr->holdsSession(userName)) {
-		logErrorNL("%s", "Missing ISDS session.");
-		loggedIn = false;
-	}
-
-	return loggedIn;
-}
-
-/*!
- * @brief Find database set relate to account.
- *
- * @param[in] acntDescrs Account descriptors.
- * @param[in] userName User name identifying the account.
- * @return Pointer related to specified account, Q_NULLPTR on error.
- */
-static
-MessageDbSet *getDbSet(const QList<Task::AccountDescr> &acntDescrs,
-    const QString &userName)
-{
-	if (Q_UNLIKELY(userName.isEmpty())) {
-		Q_ASSERT(0);
-		return Q_NULLPTR;
-	}
-
-	MessageDbSet *dbSet = Q_NULLPTR;
-	foreach (const Task::AccountDescr &acnt, acntDescrs) {
-		if (acnt.userName == userName) {
-			dbSet = acnt.messageDbSet;
-			break;
-		}
-	}
-
-	return dbSet;
+	GuiHelper::pingIsdsServer(m_userName);
 }
 
 void DlgSendMessage::setAccountInfo(int fromComboIdx)
@@ -456,9 +376,10 @@ void DlgSendMessage::setAccountInfo(int fromComboIdx)
 		m_userName = userName;
 	}
 
-	m_isLoggedIn = isLoggedIn(m_keepAliveTimer, m_mw, m_userName);
+	m_isLoggedIn = GuiHelper::isLoggedIn(m_keepAliveTimer, m_mw,
+	    m_userName);
 
-	m_dbSet = getDbSet(m_messageDbSetList, m_userName);
+	m_dbSet = GuiHelper::getDbSet(m_messageDbSetList, m_userName);
 	if (Q_UNLIKELY(Q_NULLPTR == m_dbSet)) {
 		Q_ASSERT(0);
 		return;

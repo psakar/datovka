@@ -56,6 +56,7 @@
 #include "src/delegates/tags_delegate.h"
 #include "src/dimensions/dimensions.h"
 #include "src/global.h"
+#include "src/gov_services/gui/dlg_gov_services.h"
 #include "src/gui/dlg_about.h"
 #include "src/gui/dlg_change_pwd.h"
 #include "src/gui/dlg_account_from_db.h"
@@ -860,6 +861,8 @@ void MainWindow::accountItemCurrentChanged(const QModelIndex &current,
 		return;
 	}
 
+	enableSendEGovRequestAction(true, userName);
+
 	const MessageDbSet *dbSet = accountDbSet(userName);
 	if (Q_NULLPTR == dbSet) {
 		/* May occur on deleting last account. */
@@ -1175,6 +1178,7 @@ void MainWindow::accountItemRightClicked(const QPoint &point)
 
 		menu->addAction(ui->actionGet_messages);
 		menu->addAction(ui->actionSend_message);
+		menu->addAction(ui->actionSend_egov_request);
 		menu->addSeparator();
 		if (received) {
 			QMenu *submenu = menu->addMenu(tr("Mark"));
@@ -3945,13 +3949,7 @@ void MainWindow::loadWindowGeometry(const QSettings &settings)
 	ui->hSplitterMessageInfo->setSizes(sizes);
 }
 
-
-/* ========================================================================= */
-/*
- * Set default account from settings.
- */
 void MainWindow::setDefaultAccount(const QSettings &settings)
-/* ========================================================================= */
 {
 	debugFuncCall();
 
@@ -3963,21 +3961,12 @@ void MainWindow::setDefaultAccount(const QSettings &settings)
 			ui->accountList->setCurrentIndex(
 			    acntTopIdx.child(0, 0));
 			accountItemCurrentChanged(acntTopIdx.child(0, 0));
-			ui->menuDatabox->setEnabled(true);
-			ui->actionDelete_account->setEnabled(true);
-			ui->actionSync_all_accounts->setEnabled(true);
-			ui->actionGet_messages->setEnabled(true);
-			ui->actionSend_message->setEnabled(true);
-			ui->actionFind_databox->setEnabled(true);
-			ui->actionMsgAdvancedSearch->setEnabled(true);
-			ui->actionImport_ZFO_file_into_database->
-			    setEnabled(true);
+			activateAccountMenuActions(true, userName);
 		}
 	} else {
 		defaultUiMainWindowSettings();
 	}
 }
-
 
 /* ========================================================================= */
 /*
@@ -4022,6 +4011,9 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    this, SLOT(synchroniseSelectedAccount()));
 	connect(ui->actionSend_message, SIGNAL(triggered()),
 	    this, SLOT(createAndSendMessage()));
+	    /* Separator. */
+	connect(ui->actionSend_egov_request, SIGNAL(triggered()),
+	    this, SLOT(createGovRequest()));
 	    /* Separator. */
 	connect(ui->actionMark_all_as_read, SIGNAL(triggered()),
 	    this, SLOT(accountMarkReceivedRead()));
@@ -4196,6 +4188,7 @@ void MainWindow::defaultUiMainWindowSettings(void) const
 	//ui->actionSync_all_accounts->setEnabled(false);
 	ui->actionGet_messages->setEnabled(false);
 	ui->actionSend_message->setEnabled(false);
+	ui->actionSend_egov_request->setEnabled(false);
 	ui->actionReply->setEnabled(false);
 	ui->actionAuthenticate_message->setEnabled(false);
 	//ui->actionMsgAdvancedSearch->setEnabled(false);
@@ -4253,25 +4246,21 @@ void MainWindow::setAttachmentActionVisibility(int numSelected) const
 	ui->actionOpen_attachment->setEnabled(numSelected == 1);
 }
 
-/* ========================================================================= */
-/*
- *  Active/Inactive account menu and buttons in the mainwindow.
- */
-void MainWindow::activeAccountMenuAndButtons(bool action) const
-/* ========================================================================= */
+void MainWindow::activateAccountMenuActions(bool enable,
+    const QString &username)
 {
-	ui->menuDatabox->setEnabled(action);
-	ui->actionAccount_properties->setEnabled(action);
-	ui->actionChange_password->setEnabled(action);
-	ui->actionSync_all_accounts->setEnabled(action);
-	ui->actionGet_messages->setEnabled(action);
-	ui->actionSend_message->setEnabled(action);
-	ui->actionDelete_account->setEnabled(action);
-	ui->actionFind_databox->setEnabled(action);
-	ui->actionMsgAdvancedSearch->setEnabled(action);
-	ui->actionImport_ZFO_file_into_database->setEnabled(action);
+	ui->menuDatabox->setEnabled(enable);
+	ui->actionAccount_properties->setEnabled(enable);
+	ui->actionChange_password->setEnabled(enable);
+	ui->actionSync_all_accounts->setEnabled(enable);
+	ui->actionGet_messages->setEnabled(enable);
+	ui->actionSend_message->setEnabled(enable);
+	enableSendEGovRequestAction(enable, username);
+	ui->actionDelete_account->setEnabled(enable);
+	ui->actionFind_databox->setEnabled(enable);
+	ui->actionMsgAdvancedSearch->setEnabled(enable);
+	ui->actionImport_ZFO_file_into_database->setEnabled(enable);
 }
-
 
 /* ========================================================================= */
 /*
@@ -4604,24 +4593,6 @@ void MainWindow::createAndSendMessage(void)
 	showSendMessageDialog(DlgSendMessage::ACT_NEW);
 }
 
-void MainWindow::createAndSendMessageReply(void)
-{
-	debugSlotCall();
-	showSendMessageDialog(DlgSendMessage::ACT_REPLY);
-}
-
-void MainWindow::createAndSendMessageWithZfos(void)
-{
-	debugSlotCall();
-	showSendMessageDialog(DlgSendMessage::ACT_FORWARD);
-}
-
-void MainWindow::createAndSendMessageFromTmpl(void)
-{
-	debugSlotCall();
-	showSendMessageDialog(DlgSendMessage::ACT_NEW_FROM_TMP);
-}
-
 /*!
  * @brief Return list of available usernames and associated database sets.
  *
@@ -4663,6 +4634,39 @@ QList<Task::AccountDescr> messageDbListForAllAccounts(MainWindow *mainWindow,
 	}
 
 	return messageDbList;
+}
+
+void MainWindow::createGovRequest(void)
+{
+	debugSlotCall();
+
+	/* Get username of selected account */
+	const QString userName(
+	    m_accountModel.userName(currentAccountModelIndex()));
+	Q_ASSERT(!userName.isEmpty());
+
+	/* The dialogue window checks whether the account is connected. */
+	DlgGovServices::sendRequest(
+	    messageDbListForAllAccounts(this, m_accountModel, ui->accountList, false),
+	    userName, this, this);
+}
+
+void MainWindow::createAndSendMessageReply(void)
+{
+	debugSlotCall();
+	showSendMessageDialog(DlgSendMessage::ACT_REPLY);
+}
+
+void MainWindow::createAndSendMessageWithZfos(void)
+{
+	debugSlotCall();
+	showSendMessageDialog(DlgSendMessage::ACT_FORWARD);
+}
+
+void MainWindow::createAndSendMessageFromTmpl(void)
+{
+	debugSlotCall();
+	showSendMessageDialog(DlgSendMessage::ACT_NEW_FROM_TMP);
 }
 
 void MainWindow::showSendMessageDialog(int action,
@@ -4775,7 +4779,8 @@ void MainWindow::showAddNewAccountDialog(void)
 	getAccountUserDataboxInfo(newAcntSettings);
 
 	if (ui->accountList->model()->rowCount() > 0) {
-		activeAccountMenuAndButtons(true);
+		activateAccountMenuActions(true,
+		    m_accountModel.userName(currentAccountModelIndex()));
 		saveSettings();
 	}
 }
@@ -5412,7 +5417,8 @@ void MainWindow::showImportDatabaseDialog(void)
 		saveSettings();
 	}
 
-	activeAccountMenuAndButtons(true);
+	activateAccountMenuActions(true,
+	    m_accountModel.userName(currentAccountModelIndex()));
 	ui->accountList->expandAll();
 }
 
@@ -7977,6 +7983,14 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSend_message->setIcon(ico);
+	}	
+	    /* Separator. */
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ui->actionSend_egov_request->setIcon(ico);
 	}
 	    /* Separator. */
 	{
@@ -8492,4 +8506,16 @@ void MainWindow::dockMenuActionTriggerred(QAction *action)
 	}
 	widget->raise();
 	widget->activateWindow();
+}
+
+void MainWindow::enableSendEGovRequestAction(bool enable,
+    const QString &userName)
+{
+	if (enable && !userName.isEmpty()) {
+		const AcntSettings &itemSettings((*GlobInstcs::acntMapPtr)[userName]);
+		ui->actionSend_egov_request->setEnabled(
+		    !itemSettings.isTestAccount());
+	} else {
+		ui->actionSend_egov_request->setEnabled(false);
+	}
 }
