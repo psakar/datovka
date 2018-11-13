@@ -8,6 +8,8 @@ URL: https://www.datovka.cz/
 #Source0: https://secure.nic.cz/files/datove_schranky/%%{version}/datovka-%%{version}.tar.xz
 Source0: datovka_%{version}.orig.tar.xz
 
+BuildRequires: gcc
+BuildRequires: gcc-c++
 BuildRequires: desktop-file-utils
 BuildRequires: libisds-devel >= 0.10.8
 BuildRequires: openssl-devel
