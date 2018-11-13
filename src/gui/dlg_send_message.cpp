@@ -1062,7 +1062,7 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 		m_ui->attachmentSizeInfo->setEnabled(false);
 		m_ui->attachmentSizeInfo->setStyleSheet(QString());
 		m_ui->attachmentSizeInfo->setText(
-		    tr("Total size of attachments is %1 B").arg(0));
+		    tr("Total size of attachments is %1 B.").arg(0));
 		return false;
 	} else {
 		m_ui->attachmentSizeInfo->setEnabled(true);
@@ -1086,16 +1086,16 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 
 	if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
 		m_ui->attachmentSizeInfo->setText(
-		    tr("Total size of attachments is larger than %1 MB. Most of the data boxes cannot receive messages larger than %1 MB. However some OVM data boxes can receive message up to %2 MB.")
+		    tr("Total size of attachments is larger than %1 MB. Most of the data boxes cannot receive messages larger than %1 MB. However, some OVM data boxes can receive message up to %2 MB.")
 		        .arg(MAX_ATTACHMENT_SIZE_MB).arg(MAX_OVM_ATTACHMENT_SIZE_MB));
 		return true;
 	}
 
 	m_ui->attachmentSizeInfo->setStyleSheet("QLabel { color: black }");
 	if (aSize >= 1024) {
-		m_ui->attachmentSizeInfo->setText(tr("Total size of attachments is ~%1 KB").arg(aSize/1024));
+		m_ui->attachmentSizeInfo->setText(tr("Total size of attachments is ~%1 KB.").arg(aSize/1024));
 	} else {
-		m_ui->attachmentSizeInfo->setText(tr("Total size of attachments is ~%1 B").arg(aSize));
+		m_ui->attachmentSizeInfo->setText(tr("Total size of attachments is ~%1 B.").arg(aSize));
 	}
 	return true;
 }
