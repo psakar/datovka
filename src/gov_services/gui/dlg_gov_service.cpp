@@ -34,6 +34,7 @@
 #include "src/gov_services/gui/dlg_gov_service.h"
 #include "src/gui/dlg_msg_box_informative.h"
 #include "src/io/account_db.h"
+#include "src/settings/accounts.h"
 #include "src/worker/message_emitter.h"
 #include "src/worker/task.h"
 #include "src/worker/task_send_message.h"
@@ -207,10 +208,12 @@ void DlgGovService::initDialogue(void)
 {
 	/* Set window title and labels. */
 	this->setWindowTitle(m_gs->internalId());
+	m_ui->accountNameLabel->setText(
+	    ((*GlobInstcs::acntMapPtr)[m_userName]).accountName() +
+	    QLatin1String(" (") + m_userName + QLatin1String(")"));
 	m_ui->requestNameLabel->setText(m_gs->fullName());
 	m_ui->boxIdLabel->setText(
 	    QString("%1 -- %2").arg(m_gs->boxId()).arg(m_gs->instituteName()));
-	m_ui->userNameLabel->setText(m_userName);
 
 	/* Set properties for error label. */
 	m_ui->invalidValueLabel->setStyleSheet("QLabel { color: red }");

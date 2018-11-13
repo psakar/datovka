@@ -27,7 +27,7 @@
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
      <item row="0" column="1">
-      <widget class="QLabel" name="userNameLabel">
+      <widget class="QLabel" name="accountNameLabel">
        <property name="text">
         <string>TextLabel</string>
        </property>
