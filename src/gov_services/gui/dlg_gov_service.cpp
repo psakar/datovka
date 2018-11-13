@@ -172,6 +172,7 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 {
 	debugSlotCall();
 
+	Q_UNUSED(userName);
 	Q_UNUSED(isPDZ);
 	Q_UNUSED(processFlags);
 
@@ -189,7 +190,7 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 	/* Show sent result dialogue. */
 	if (TaskSendMessage::SM_SUCCESS == result) {
 		DlgMsgBox::message(this, QMessageBox::Information,
-		    tr("Message sent: %1").arg(userName),
+		    tr("Message sent"),
 		    "<b>" + tr("E-gov request was successfully sent.") + "</b>",
 		    tr("Message was sent to <i>%1 (%2)</i> as message number <i>%3</i>.").
 		    arg(recipientName).arg(dbIDRecipient).arg(dmId) + "<br/>",
@@ -197,7 +198,7 @@ void DlgGovService::collectSendMessageStatus(const QString &userName,
 		this->close();
 	} else {
 		DlgMsgBox::message(this, QMessageBox::Warning,
-		    tr("Message sent: %1").arg(userName),
+		    tr("Message not sent"),
 		    "<b>" + tr("E-gov request could NOT be sent.") + "</b>",
 		    tr("ISDS returns:") + " " + resultDesc,
 		    QString(), QMessageBox::Ok, QMessageBox::Ok);

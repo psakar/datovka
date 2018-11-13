@@ -11,11 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Government Service</string>
-  </property>
-  <property name="windowIcon">
-   <iconset resource="../../../res/resources.qrc">
-    <normaloff>:/icons/3party/present_16.png</normaloff>:/icons/3party/present_16.png</iconset>
+   <string>E-Government Request</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -29,7 +25,7 @@
      <item row="0" column="1">
       <widget class="QLabel" name="accountNameLabel">
        <property name="text">
-        <string>TextLabel</string>
+        <string>n/a</string>
        </property>
       </widget>
      </item>
@@ -42,7 +38,7 @@
         </font>
        </property>
        <property name="text">
-        <string>TextLabel</string>
+        <string>n/a</string>
        </property>
       </widget>
      </item>
@@ -69,7 +65,7 @@
         </font>
        </property>
        <property name="text">
-        <string>TextLabel</string>
+        <string>n/a</string>
        </property>
       </widget>
      </item>
@@ -167,8 +163,6 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../../res/resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

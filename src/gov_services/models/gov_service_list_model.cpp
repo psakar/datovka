@@ -21,6 +21,8 @@
  * the two.
  */
 
+#include <QStringBuilder>
+
 #include "src/gov_services/models/gov_service_list_model.h"
 #include "src/datovka_shared/gov_services/service/gov_service.h"
 
@@ -86,7 +88,7 @@ QVariant GovServiceListModel::data(const QModelIndex &index, int role) const
 	switch (role) {
 	case Qt::DisplayRole:
 		/* \u2001 is an Unicode code of an em quad character. */
-		return tr("%1\n\u2001data box: %2 - %3").arg(e.srvcFullName()).arg(e.srvcBoxId()).arg(e.instName());
+		return e.srvcFullName() % QString("\n\u2001") + tr("data box: %1 - %2").arg(e.srvcBoxId()).arg(e.instName());
 	case Qt::AccessibleTextRole:
 		return tr("Send request %1 into the data box %2 %3.").arg(e.srvcFullName()).arg(e.srvcBoxId()).arg(e.instName());
 		break;
