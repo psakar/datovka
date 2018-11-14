@@ -759,7 +759,7 @@ necessary digital signatures.</string>
       </font>
      </property>
      <property name="text">
-      <string>Attachment size is larger than 50 MB. Message cannot be sent!</string>
+      <string>Attachment size is larger than 50 MB. Message cannot be sent.</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

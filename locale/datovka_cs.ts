@@ -3891,22 +3891,22 @@ získat všechny nezbytné digitální podpisy.</translation>
         <translation>Ihned nahrát odeslanou zprávu do spisové služby</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="764"/>
-        <source>Attachment size is larger than 20 MB. Message cannot be sent!</source>
-        <translation>Velikost příloh je větší než 20 MB. Zprávu nebude možné odeslat!</translation>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="762"/>
+        <source>Attachment size is larger than 50 MB. Message cannot be sent.</source>
+        <translation>Velikost příloh je větší než 50 MB. Zprávu nebude možné odeslat.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="796"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="799"/>
         <source>Send message</source>
         <translation>Odeslat zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="799"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="802"/>
         <source>Send</source>
         <translation>Odeslat</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="812"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="815"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
@@ -3916,27 +3916,7 @@ získat všechny nezbytné digitální podpisy.</translation>
         <translation>Zadejte Vaše referenční číslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1066"/>
-        <source>Warning: The permitted amount (%1) of attachments has been exceeded.</source>
-        <translation>Upozornění: Povolený počet (%1) příloh byl překročen.</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1076"/>
-        <source>Total size of attachments is ~%1 KB</source>
-        <translation>Celková velikost příloh je ~%1 KB</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1082"/>
-        <source>Warning: Total size of attachments is larger than %1 MB!</source>
-        <translation>Upozornění: Celková velikost příloh přesahuje %1 MB!</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1088"/>
-        <source>Total size of attachments is ~%1 B</source>
-        <translation>Celková velikost příloh je ~%1 B</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1034"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1033"/>
         <source>Message contains non-OVM recipients.</source>
         <translation>Zpráva obsahuje více ne-OVM příjemců.</translation>
     </message>
@@ -3951,22 +3931,22 @@ získat všechny nezbytné digitální podpisy.</translation>
         <translation>Vložte ID datové schránky (7 znaků):</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1102"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1106"/>
         <source>Wrong data box ID</source>
         <translation>Špatné ID datové schránky</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1103"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1107"/>
         <source>Wrong data box ID &apos;%1&apos;!</source>
         <translation>Špatné ID datové schránky &apos;%1&apos;!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1018"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1017"/>
         <source>Empty file</source>
         <translation>Prázdný soubor</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1019"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1018"/>
         <source>Cannot add empty file &apos;%1&apos; to attachments.</source>
         <translation>Nelze vložit prázdný soubor &quot;%1&quot; do příloh.</translation>
     </message>
@@ -3996,82 +3976,97 @@ získat všechny nezbytné digitální podpisy.</translation>
         <translation>Zpráva nebyla odeslána všem příjemcům.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1003"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1002"/>
         <source>Non-existent file</source>
         <translation>Soubor neexistuje</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1004"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1003"/>
         <source>Cannot add non-existent file &apos;%1&apos; to attachments.</source>
         <translation>Nelze přidat neexistující soubor &apos;%1&apos; do příloh.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1008"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1007"/>
         <source>File not readable</source>
         <translation>Soubor nelze číst</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1009"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1008"/>
         <source>Cannot add file &apos;%1&apos; without readable permissions to attachments.</source>
         <translation>Nelze přidat soubor &apos;%1&apos;, pro který nemáte oprávnění ke čtení, do příloh.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1013"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1012"/>
         <source>File already present</source>
         <translation>Soubor již existuje</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1035"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1034"/>
         <source>Your message contains %1 non-OVM recipients therefore this message will be sent as a commercial messages (PDZ) for these recipients.</source>
         <translation>Vaše zpráva obsahuje %1 ne-OVM příjemců, proto bude zpráva těmto příjemcům odeslaná v režimu placená poštovní datová zpráva (PDZ).</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1042"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1041"/>
         <source>Message contains non-OVM recipient.</source>
         <translation>Zpráva obsahuje ne-OVM příjemce.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1043"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1042"/>
         <source>Your message contains non-OVM recipient therefore this message will be sent as a commercial message (PDZ) for this recipient.</source>
         <translation>Vaše zpráva obsahuje jednoho ne-OVM příjemce, proto bude zpráva tomuto příjemci odeslaná v režimu placená poštovní datová zpráva (PDZ).</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1050"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1049"/>
         <source>Your remaining credit is </source>
         <translation>Váš zbývající kredit je </translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1180"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1065"/>
+        <source>Total size of attachments is %1 B.</source>
+        <translation>Celková velikost příloh je %1 B.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1096"/>
+        <source>Total size of attachments is ~%1 KB.</source>
+        <translation>Celková velikost příloh je ~%1 KB.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1098"/>
+        <source>Total size of attachments is ~%1 B.</source>
+        <translation>Celková velikost příloh je ~%1 B.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1184"/>
         <source>Wrong Recipient</source>
         <translation>Chybný příjemce</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1187"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1191"/>
         <source>Recipient Search Failed</source>
         <translation>Chyba vyhledávání příjemce</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1188"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1192"/>
         <source>Information about recipient data box could not be obtained.</source>
         <translation>Nebylo možné získat informace o datové schránce příjemce.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1190"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1194"/>
         <source>Do you still want to add the box &apos;%1&apos; into the recipient list?</source>
         <translation>Chcete stále přidat schránku &apos;%1&apos; do seznamu příjemců?</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1191"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1195"/>
         <source>Enable commercial messages (PDZ).</source>
         <translation>Zapnout poštovní datové zprávy (PDZ).</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1193"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1197"/>
         <source>Obtained ISDS error</source>
         <translation>Obdržená chyba ISDS</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1493"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1497"/>
         <source>It has not been possible to send a message to the ISDS server.</source>
         <translation>Nebylo možné odeslat zprávu na server ISDS.</translation>
     </message>
@@ -4091,84 +4086,93 @@ získat všechny nezbytné digitální podpisy.</translation>
         <translation>Chcete zavřít formulář pro odesílání zpráv a zahodit vyplněné údaje?</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1492"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1496"/>
         <source>Send message error</source>
         <translation>Chyba při odesílání zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="668"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1093"/>
-        <source>Total size of attachments is %1 B</source>
-        <translation>Celková velikost příloh je %1 B</translation>
-    </message>
-    <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1014"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1013"/>
         <source>Cannot add file &apos;%1&apos; because the file is already present in the attachments.</source>
         <translation>Nelze přidat soubor &apos;%1&apos;, protože tento je již v přílohách obsažen.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1141"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1142"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1075"/>
+        <source>The permitted number of (%1) attachments has been exceeded.</source>
+        <translation>Povolený počet (%1) příloh byl překročen.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1082"/>
+        <source>Total size of attachments exceeds %1 MB.</source>
+        <translation>Celková velikost příloh přesahuje %1 MB.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1089"/>
+        <source>Total size of attachments exceeds %1 MB. Most of the data boxes cannot receive messages larger than %1 MB. However, some OVM data boxes can receive message up to %2 MB.</source>
+        <translation>Celková velikost příloh přesahuje %1 MB. Většina datových schránek nemůže přijímat zprávy větší než %1 MB. Nicméně některé datové schránky typu OVM mohou přijímat zprávy až do %2 MB.</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1145"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1146"/>
         <source>Unknown</source>
         <translation>Neznámý</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1154"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1158"/>
         <source>Data box is not active</source>
         <translation>Datová schránka není aktivní</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1155"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1159"/>
         <source>Recipient with data box ID &apos;%1&apos; does not have active data box.</source>
         <translation>Příjemce s datovou schránkou &apos;%1&apos; nemá tuto schránku aktivní.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1157"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1161"/>
         <source>The message cannot be delivered.</source>
         <translation>Zprávu nelze dodat.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1169"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1173"/>
         <source>Cannot send to data box</source>
         <translation>Nelze odeslat do datové schránky</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1170"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1174"/>
         <source>Cannot send message to recipient with data box ID &apos;%1&apos;.</source>
         <translation>Nelze odeslat zprávu příjemci s datovou schránkou &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1172"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1176"/>
         <source>You won&apos;t be able as user &apos;%1&apos; to send messages into data box &apos;%2&apos;.</source>
         <translation>Jako uživatel &apos;%1&apos; nebudete moct odeslat zprávu do schránky &apos;%2&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1181"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1185"/>
         <source>Recipient with data box ID &apos;%1&apos; does not exist.</source>
         <translation>Příjemce s datovou schránkou &apos;%1&apos; neexistuje.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1438"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1442"/>
         <source>An error occurred while loading attachments into message.</source>
         <translation>Nastala chyba v průběhu vkládání příloh do zprávy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1444"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1448"/>
         <source>An error occurred during message envelope creation.</source>
         <translation>Nastala chyba v průběhu vytváření obálky zprávy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1491"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1495"/>
         <source>The message will be discarded.</source>
         <translation>Zpráva bude zahozena.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1040"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1039"/>
         <source>Do you want to send all messages?</source>
         <translation>Chcete opravdu odeslat tuto zprávu všem příjemcům?</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1047"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1046"/>
         <source>Do you want to send message?</source>
         <translation>Chcete opravdu odeslat zprávu tomuto příjemci?</translation>
     </message>

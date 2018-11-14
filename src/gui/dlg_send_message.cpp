@@ -1072,21 +1072,21 @@ bool DlgSendMessage::calculateAndShowTotalAttachSize(void)
 
 	if (m_attachModel.rowCount() > MAX_ATTACHMENT_FILES) {
 		m_ui->attachmentSizeInfo->setText(
-		    tr("The permitted amount (%1) of attachments has been exceeded.")
+		    tr("The permitted number of (%1) attachments has been exceeded.")
 		        .arg(MAX_ATTACHMENT_FILES));
 		return false;
 	}
 
 	if (aSize >= MAX_OVM_ATTACHMENT_SIZE_BYTES) {
 		m_ui->attachmentSizeInfo->setText(
-		    tr("Total size of attachments is larger than %1 MB.")
+		    tr("Total size of attachments exceeds %1 MB.")
 		        .arg(MAX_OVM_ATTACHMENT_SIZE_MB));
 		return false;
 	}
 
 	if (aSize >= MAX_ATTACHMENT_SIZE_BYTES) {
 		m_ui->attachmentSizeInfo->setText(
-		    tr("Total size of attachments is larger than %1 MB. Most of the data boxes cannot receive messages larger than %1 MB. However, some OVM data boxes can receive message up to %2 MB.")
+		    tr("Total size of attachments exceeds %1 MB. Most of the data boxes cannot receive messages larger than %1 MB. However, some OVM data boxes can receive message up to %2 MB.")
 		        .arg(MAX_ATTACHMENT_SIZE_MB).arg(MAX_OVM_ATTACHMENT_SIZE_MB));
 		return true;
 	}
