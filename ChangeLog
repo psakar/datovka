@@ -8,6 +8,9 @@
  * Raised the maximal attachment size limit to 50 MB. The user is still
    notified when exceeding 20 MB. The limit has been raised for some special
    OVM data boxes from 1st November 2018.
+ * Fixed a problem in which the content of a wrong message was displayed when
+   message selection was changed when another message was being synchronised in
+   background.
 
 4.11.1 / 2018-10-23
  * Added scripts for signing the Windows and macOS executables and software
