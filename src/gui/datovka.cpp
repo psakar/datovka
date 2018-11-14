@@ -2450,15 +2450,18 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 {
 	debugFuncCall();
 
-	showStatusTextWithTimeout(tr("Message \"%1\" "
-	    " was downloaded from server.").arg(dmId));
+	showStatusTextWithTimeout(
+	    tr("Message '%1' was downloaded from server.").arg(dmId));
 
 	const QString currentUserName(
 	    m_accountModel.userName(currentAccountModelIndex()));
-	const QModelIndex currentMsgIdx = ui->messageList->currentIndex();
+	const QModelIndex currentMsgIdx(ui->messageList->currentIndex());
 
 	if (Q_UNLIKELY(currentUserName.isEmpty() || !currentMsgIdx.isValid())) {
-		Q_ASSERT(0);
+		/*
+		 * Current index may be empty when the account is changed and
+		 * the message list looses focus.
+		 */
 		return;
 	}
 
@@ -2466,7 +2469,7 @@ void MainWindow::postDownloadSelectedMessageAttachments(
 	qint64 currentDmId = currentMsgIdx.data().toLongLong();
 
 	/* Do nothing if account or message was changed. */
-	if (userName != currentUserName || dmId != currentDmId) {
+	if ((userName != currentUserName) || (dmId != currentDmId)) {
 		return;
 	}
 
