@@ -241,8 +241,11 @@ void DlgCreateAccount::addCertificateFile(void)
 		m_ui->addCertButton->setText(certFileName);
 		{
 			QIcon ico;
-			ico.addFile(ICON_3PARTY_PATH + QString("key_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(ICON_3PARTY_PATH + QString("key_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
 			m_ui->addCertButton->setIcon(ico);
 		}
 		m_ui->addCertButton->setToolTip(QString());
@@ -346,8 +349,11 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 		if (fileInfo.exists() && fileInfo.isFile() &&
 		    fileInfo.isReadable()) {
 			QIcon ico;
-			ico.addFile(ICON_3PARTY_PATH + QString("key_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(ICON_3PARTY_PATH + QString("key_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
 			m_ui->addCertButton->setIcon(ico);
 		} else {
 			QIcon ico;

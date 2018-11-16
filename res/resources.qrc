@@ -9,6 +9,7 @@
         <file>icons/16x16/datovka-message-download.png</file>
         <file>icons/16x16/datovka-message-reply.png</file>
         <file>icons/16x16/datovka-message-signature.png</file>
+        <file>icons/16x16/datovka-stock-key.png</file>
         <file>icons/16x16/datovka-message-upload.png</file>
         <file>icons/16x16/datovka-message-verify.png</file>
         <file>icons/16x16/datovka-message.png</file>
@@ -32,6 +33,7 @@
         <file>icons/24x24/datovka-message-download.png</file>
         <file>icons/24x24/datovka-message-reply.png</file>
         <file>icons/24x24/datovka-message-signature.png</file>
+        <file>icons/24x24/datovka-stock-key.png</file>
         <file>icons/24x24/datovka-message-upload.png</file>
         <file>icons/24x24/datovka-message-verify.png</file>
         <file>icons/24x24/datovka-message.png</file>
@@ -57,6 +59,7 @@
         <file>icons/32x32/datovka-message-download.png</file>
         <file>icons/32x32/datovka-message-reply.png</file>
         <file>icons/32x32/datovka-message-signature.png</file>
+        <file>icons/32x32/datovka-stock-key.png</file>
         <file>icons/32x32/datovka-message-upload.png</file>
         <file>icons/32x32/datovka-message-verify.png</file>
         <file>icons/32x32/datovka-ok.png</file>
@@ -78,6 +81,7 @@
         <file>icons/48x48/datovka-message-download.png</file>
         <file>icons/48x48/datovka-message-reply.png</file>
         <file>icons/48x48/datovka-message-signature.png</file>
+        <file>icons/48x48/datovka-stock-key.png</file>
         <file>icons/48x48/datovka-message-upload.png</file>
         <file>icons/48x48/datovka-message-verify.png</file>
         <file>icons/48x48/datovka-ok.png</file>
@@ -91,6 +95,7 @@
         <file>icons/64x64/datovka-message-download.png</file>
         <file>icons/64x64/datovka-message-reply.png</file>
         <file>icons/64x64/datovka-message-signature.png</file>
+        <file>icons/64x64/datovka-stock-key.png</file>
         <file>icons/64x64/datovka-message-upload.png</file>
         <file>icons/64x64/datovka-message-verify.png</file>
         <file>icons/64x64/datovka-ok.png</file>
@@ -121,7 +126,6 @@
         <file>icons/3party/help_16.png</file>
         <file>icons/3party/home_16.png</file>
         <file>icons/3party/info_16.png</file>
-        <file>icons/3party/key_16.png</file>
         <file>icons/3party/label_16.png</file>
         <file>icons/3party/left_16.png</file>
         <file>icons/3party/letter_16.png</file>
@@ -162,7 +166,6 @@
         <file>icons/3party/letter_32.png</file>
         <file>icons/3party/left_32.png</file>
         <file>icons/3party/label_32.png</file>
-        <file>icons/3party/key_32.png</file>
         <file>icons/3party/info_32.png</file>
         <file>icons/3party/home_32.png</file>
         <file>icons/3party/help_32.png</file>
