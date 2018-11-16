@@ -442,7 +442,7 @@ sent reply on this message</string>
     <addaction name="actionFind_databox"/>
     <addaction name="separator"/>
     <addaction name="actionAuthenticate_message_file"/>
-    <addaction name="actionView_message_from_ZPO_file"/>
+    <addaction name="actionView_message_file"/>
     <addaction name="actionExport_correspondence_overview"/>
     <addaction name="actionCheck_message_timestamp_expiration"/>
     <addaction name="separator"/>
@@ -791,7 +791,7 @@ sent reply on this message</string>
      <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>
    </property>
    <property name="text">
-    <string>Authenticate message file</string>
+    <string>Authenticate message from ZFO file</string>
    </property>
    <property name="toolTip">
     <string>Verify message authenticity</string>
@@ -800,7 +800,7 @@ sent reply on this message</string>
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionView_message_from_ZPO_file">
+  <action name="actionView_message_file">
    <property name="icon">
     <iconset resource="../../../res/resources.qrc">
      <normaloff>:/icons/16x16/datovka.png</normaloff>:/icons/16x16/datovka.png</iconset>

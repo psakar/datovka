@@ -4087,7 +4087,7 @@ void MainWindow::connectTopMenuBarSlots(void)
 	    /* Separator. */
 	connect(ui->actionAuthenticate_message_file, SIGNAL(triggered()),
 	    this, SLOT(authenticateMessageFile()));
-	connect(ui->actionView_message_from_ZPO_file, SIGNAL(triggered()),
+	connect(ui->actionView_message_file, SIGNAL(triggered()),
 	    this, SLOT(showViewMessageFromZFODialog()));
 	connect(ui->actionExport_correspondence_overview, SIGNAL(triggered()),
 	    this, SLOT(showExportCorrespondenceOverviewDialog()));
@@ -8082,7 +8082,10 @@ void MainWindow::setMenuActionIcons(void)
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionAuthenticate_message->setIcon(ico);
 	}
 	    /* Separator. */
@@ -8140,15 +8143,18 @@ void MainWindow::setMenuActionIcons(void)
 	    /* Separator. */
 	{
 		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "key_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "key_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionAuthenticate_message_file->setIcon(ico);
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "monitor_16.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "monitor_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionView_message_from_ZPO_file->setIcon(ico);
+		ui->actionView_message_file->setIcon(ico);
 	}
 	{
 		QIcon ico;
