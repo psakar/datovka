@@ -30,6 +30,8 @@
 #define ICON_16x16_PATH ":/icons/16x16/"
 #define ICON_24x24_PATH ":/icons/24x24/"
 #define ICON_32x32_PATH ":/icons/32x32/"
+#define ICON_48x48_PATH ":/icons/48x48/"
+#define ICON_64x64_PATH ":/icons/64x64/"
 #define ICON_128x128_PATH ":/icons/128x128/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
 

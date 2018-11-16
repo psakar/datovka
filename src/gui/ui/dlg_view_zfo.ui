@@ -51,9 +51,13 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QPushButton" name="signaturePushButton">
+      <widget class="QPushButton" name="signatureDetailsButton">
        <property name="text">
-        <string>Verify Signature</string>
+        <string>Signature details</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../res/resources.qrc">
+         <normaloff>:/icons/24x24/datovka.png</normaloff>:/icons/24x24/datovka.png</iconset>
        </property>
       </widget>
      </item>
@@ -94,9 +98,11 @@
  <tabstops>
   <tabstop>envelopeTextEdit</tabstop>
   <tabstop>attachmentTable</tabstop>
-  <tabstop>signaturePushButton</tabstop>
+  <tabstop>signatureDetailsButton</tabstop>
  </tabstops>
- <resources/>
+ <resources>
+  <include location="../../../res/resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>
