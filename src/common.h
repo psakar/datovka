@@ -33,6 +33,7 @@
 #define ICON_48x48_PATH ":/icons/48x48/"
 #define ICON_64x64_PATH ":/icons/64x64/"
 #define ICON_128x128_PATH ":/icons/128x128/"
+#define ICON_256x256_PATH ":/icons/256x256/"
 #define ICON_3PARTY_PATH ":/icons/3party/"
 
 #define ID_ISDS_SYS_DATABOX "aaaaaaa"

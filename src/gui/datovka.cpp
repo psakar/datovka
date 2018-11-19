@@ -7717,6 +7717,18 @@ void MainWindow::setUpUi(void)
 	ui->setupUi(this);
 	setUpTabOrder();
 
+	{
+		QIcon ico;
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_128x128_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_256x256_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
+		setWindowIcon(ico);
+	}
+
 	/* Set default line height for table views/widgets. */
 	ui->accountList->setNarrowedLineHeight();
 	ui->messageList->setNarrowedLineHeight();
