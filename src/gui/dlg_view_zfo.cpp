@@ -364,7 +364,11 @@ bool DlgViewZfo::envelopeHeaderDescriptionHtml(QString &html,
 
 	html += strongAccountInfoLine(tr("ID"), envelope.dmID());
 	html += strongAccountInfoLine(tr("Subject"), envelope.dmAnnotation());
-	html += strongAccountInfoLine(tr("Message type"), QString(envelope.dmType()));
+	{
+		const QString typeStr(envelope.dmType());
+		html += strongAccountInfoLine(tr("Message type"),
+		    typeStr + QStringLiteral(" - ") + Isds::Description::descrDmTypeChar(typeStr));
+	}
 
 	html += "<br/>";
 
