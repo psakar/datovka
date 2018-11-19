@@ -23,6 +23,8 @@
         <file>icons/16x16/macos_window.png</file>
         <file>icons/16x16/readcol.png</file>
         <file>icons/16x16/red.png</file>
+        <file>icons/16x16/save_all.png</file>
+        <file>icons/16x16/save.png</file>
         <file>icons/16x16/yellow.png</file>
         <file>icons/24x24/attachment.png</file>
         <file>icons/24x24/blue.png</file>
@@ -47,7 +49,8 @@
         <file>icons/24x24/macos_window.png</file>
         <file>icons/24x24/readcol.png</file>
         <file>icons/24x24/red.png</file>
-        <file>icons/24x24/save-all.png</file>
+        <file>icons/24x24/save_all.png</file>
+        <file>icons/24x24/save.png</file>
         <file>icons/24x24/yellow.png</file>
         <file>icons/32x32/attachment.png</file>
         <file>icons/32x32/blue.png</file>
@@ -72,6 +75,8 @@
         <file>icons/32x32/macos_window.png</file>
         <file>icons/32x32/readcol.png</file>
         <file>icons/32x32/red.png</file>
+        <file>icons/32x32/save_all.png</file>
+        <file>icons/32x32/save.png</file>
         <file>icons/32x32/yellow.png</file>
         <file>icons/48x48/attachment.png</file>
         <file>icons/48x48/blue.png</file>
@@ -96,6 +101,8 @@
         <file>icons/48x48/macos_window.png</file>
         <file>icons/48x48/readcol.png</file>
         <file>icons/48x48/red.png</file>
+        <file>icons/48x48/save_all.png</file>
+        <file>icons/48x48/save.png</file>
         <file>icons/48x48/yellow.png</file>
         <file>icons/64x64/attachment.png</file>
         <file>icons/64x64/blue.png</file>
@@ -120,6 +127,8 @@
         <file>icons/64x64/macos_window.png</file>
         <file>icons/64x64/readcol.png</file>
         <file>icons/64x64/red.png</file>
+        <file>icons/64x64/save_all.png</file>
+        <file>icons/64x64/save.png</file>
         <file>icons/64x64/yellow.png</file>
         <file>icons/128x128/datovka.png</file>
         <file>icons/128x128/cznic.png</file>
@@ -156,7 +165,6 @@
         <file>icons/3party/present_16.png</file>
         <file>icons/3party/print_16.png</file>
         <file>icons/3party/right_16.png</file>
-        <file>icons/3party/save_16.png</file>
         <file>icons/3party/search_16.png</file>
         <file>icons/3party/shield_16.png</file>
         <file>icons/3party/statistics_16.png</file>
@@ -177,7 +185,6 @@
         <file>icons/3party/stop_32.png</file>
         <file>icons/3party/statistics_32.png</file>
         <file>icons/3party/shield_32.png</file>
-        <file>icons/3party/save_32.png</file>
         <file>icons/3party/right_32.png</file>
         <file>icons/3party/print_32.png</file>
         <file>icons/3party/present_32.png</file>

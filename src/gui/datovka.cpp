@@ -8149,13 +8149,20 @@ void MainWindow::setMenuActionIcons(void)
 	    /* Separator. */
 	{
 		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "save-all.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSave_all_attachments->setIcon(ico);
 	}
 	{
 		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSave_selected_attachments->setIcon(ico);
 	}
 	{
@@ -8197,8 +8204,11 @@ void MainWindow::setMenuActionIcons(void)
 	}
 	{
 		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_16x16_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_32x32_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionExport_correspondence_overview->setIcon(ico);
 	}
 	{
