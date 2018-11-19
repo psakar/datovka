@@ -41,35 +41,35 @@ static const QString strAlreadyPresent("ALREADY_PRESENT");
 static const QString strLimitExceeded("LIMIT_EXCEEDED");
 static const QString strUnspecified("UNSPECIFIED");
 
-ErrorEntry::ErrorEntry(void)
+RecMgmt::ErrorEntry::ErrorEntry(void)
     : m_code(ERR_NO_ERROR),
     m_description()
 {
 }
 
-ErrorEntry::ErrorEntry(enum Code code, const QString &description)
+RecMgmt::ErrorEntry::ErrorEntry(enum Code code, const QString &description)
     : m_code(code),
     m_description(description)
 {
 }
 
-ErrorEntry::ErrorEntry(const ErrorEntry &ee)
-    : m_code(ee.m_code),
-    m_description(ee.m_description)
+RecMgmt::ErrorEntry::ErrorEntry(const ErrorEntry &other)
+    : m_code(other.m_code),
+    m_description(other.m_description)
 {
 }
 
-enum ErrorEntry::Code ErrorEntry::code(void) const
+enum RecMgmt::ErrorEntry::Code RecMgmt::ErrorEntry::code(void) const
 {
 	return m_code;
 }
 
-const QString &ErrorEntry::description(void) const
+const QString &RecMgmt::ErrorEntry::description(void) const
 {
 	return m_description;
 }
 
-bool ErrorEntry::fromJsonVal(const QJsonValue *jsonVal)
+bool RecMgmt::ErrorEntry::fromJsonVal(const QJsonValue *jsonVal)
 {
 	if (jsonVal == Q_NULLPTR) {
 		Q_ASSERT(0);
@@ -107,7 +107,7 @@ bool ErrorEntry::fromJsonVal(const QJsonValue *jsonVal)
 	return true;
 }
 
-bool ErrorEntry::toJsonVal(QJsonValue *jsonVal) const
+bool RecMgmt::ErrorEntry::toJsonVal(QJsonValue *jsonVal) const
 {
 	if (jsonVal == Q_NULLPTR) {
 		Q_ASSERT(0);
@@ -126,7 +126,7 @@ bool ErrorEntry::toJsonVal(QJsonValue *jsonVal) const
 	return true;
 }
 
-QString ErrorEntry::trVerbose(void) const
+QString RecMgmt::ErrorEntry::trVerbose(void) const
 {
 	QString retStr(codeToString(m_code) + QLatin1String(" ("));
 	QString explanation;
@@ -166,7 +166,7 @@ QString ErrorEntry::trVerbose(void) const
 	return retStr;
 }
 
-const QString &ErrorEntry::codeToString(enum Code code)
+const QString &RecMgmt::ErrorEntry::codeToString(enum Code code)
 {
 	switch (code) {
 	case ERR_NO_ERROR:
@@ -201,18 +201,19 @@ const QString &ErrorEntry::codeToString(enum Code code)
 	}
 }
 
-enum ErrorEntry::Code ErrorEntry::stringToCode(const QString &str, bool *ok)
+enum RecMgmt::ErrorEntry::Code RecMgmt::ErrorEntry::stringToCode(
+    const QString &str, bool *ok)
 {
 	if (str == strNoError) {
 		if (ok != Q_NULLPTR) {
 			*ok = true;
 		}
-		return ErrorEntry::ERR_NO_ERROR;
+		return ERR_NO_ERROR;
 	} else if (str == strMalformedRequest) {
 		if (ok != Q_NULLPTR) {
 			*ok = true;
 		}
-		return ErrorEntry::ERR_MALFORMED_REQUEST;
+		return ERR_MALFORMED_REQUEST;
 	} else if (str == strMissingIdentifier) {
 		if (ok != Q_NULLPTR) {
 			*ok = true;
@@ -227,26 +228,26 @@ enum ErrorEntry::Code ErrorEntry::stringToCode(const QString &str, bool *ok)
 		if (ok != Q_NULLPTR) {
 			*ok = true;
 		}
-		return ErrorEntry::ERR_UNSUPPORTED_FILE_FORMAT;
+		return ERR_UNSUPPORTED_FILE_FORMAT;
 	} else if (str == strAlreadyPresent) {
 		if (ok != Q_NULLPTR) {
 			*ok = true;
 		}
-		return ErrorEntry::ERR_ALREADY_PRESENT;
+		return ERR_ALREADY_PRESENT;
 	} else if (str == strLimitExceeded) {
 		if (ok != Q_NULLPTR) {
 			*ok = true;
 		}
-		return ErrorEntry::ERR_LIMIT_EXCEEDED;
+		return ERR_LIMIT_EXCEEDED;
 	} else if (str == strUnspecified) {
 		if (ok != Q_NULLPTR) {
 			*ok = true;
 		}
-		return ErrorEntry::ERR_UNSPECIFIED;
+		return ERR_UNSPECIFIED;
 	} else {
 		if (ok != Q_NULLPTR) {
 			*ok = false;
 		}
-		return ErrorEntry::ERR_UNSPECIFIED;
+		return ERR_UNSPECIFIED;
 	}
 }

@@ -35,49 +35,50 @@ const QString keyName("name");
 static
 const QString keyTokenName("token_name");
 
-ServiceInfoResp::ServiceInfoResp(void)
+RecMgmt::ServiceInfoResp::ServiceInfoResp(void)
     : m_logoSvg(),
     m_name(),
     m_tokenName()
 {
 }
 
-ServiceInfoResp::ServiceInfoResp(const QByteArray &logoSvg, const QString &name,
-    const QString &tokenName)
+RecMgmt::ServiceInfoResp::ServiceInfoResp(const QByteArray &logoSvg,
+    const QString &name, const QString &tokenName)
     : m_logoSvg(logoSvg),
     m_name(name),
     m_tokenName(tokenName)
 {
 }
 
-ServiceInfoResp::ServiceInfoResp(const ServiceInfoResp &sir)
-    : m_logoSvg(sir.m_logoSvg),
-    m_name(sir.m_name),
-    m_tokenName(sir.m_tokenName)
+RecMgmt::ServiceInfoResp::ServiceInfoResp(const ServiceInfoResp &other)
+    : m_logoSvg(other.m_logoSvg),
+    m_name(other.m_name),
+    m_tokenName(other.m_tokenName)
 {
 }
 
-const QByteArray &ServiceInfoResp::logoSvg(void) const
+const QByteArray &RecMgmt::ServiceInfoResp::logoSvg(void) const
 {
 	return m_logoSvg;
 }
 
-const QString &ServiceInfoResp::name(void) const
+const QString &RecMgmt::ServiceInfoResp::name(void) const
 {
 	return m_name;
 }
 
-const QString &ServiceInfoResp::tokenName(void) const
+const QString &RecMgmt::ServiceInfoResp::tokenName(void) const
 {
 	return m_tokenName;
 }
 
-bool ServiceInfoResp::isValid(void) const
+bool RecMgmt::ServiceInfoResp::isValid(void) const
 {
 	return !m_logoSvg.isNull() && !m_name.isNull() && !m_tokenName.isNull();
 }
 
-ServiceInfoResp ServiceInfoResp::fromJson(const QByteArray &json, bool *ok)
+RecMgmt::ServiceInfoResp RecMgmt::ServiceInfoResp::fromJson(
+    const QByteArray &json, bool *ok)
 {
 	QJsonObject jsonObj;
 	if (!JsonHelper::readRootObject(json, jsonObj)) {
@@ -122,7 +123,7 @@ ServiceInfoResp ServiceInfoResp::fromJson(const QByteArray &json, bool *ok)
 	return sir;
 }
 
-QByteArray ServiceInfoResp::toJson(void) const
+QByteArray RecMgmt::ServiceInfoResp::toJson(void) const
 {
 	QJsonObject jsonObj;
 	jsonObj.insert(keyLogoSvg, !m_logoSvg.isNull() ?

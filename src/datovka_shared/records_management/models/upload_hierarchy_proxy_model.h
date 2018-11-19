@@ -25,52 +25,56 @@
 
 #include <QSortFilterProxyModel>
 
-/*!
- * @brief Enables filtering according to metadata.
- */
-class UploadHierarchyProxyModel : public QSortFilterProxyModel {
-	Q_OBJECT
-public:
-	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] parent Parent object.
-	 */
-	explicit UploadHierarchyProxyModel(QObject *parent = Q_NULLPTR);
-
-protected:
-	/*!
-	 * @brief Returns true if the item in the row indicated by the
-	 *     given source row and source parent should be included in the
-	 *     model; otherwise returns false.
-	 *
-	 * @param[in] sourceRow    Row number.
-	 * @param[in] sourceParent Parent index.
-	 * @return Whether the row indicated should be included in the model.
-	 */
-	virtual
-	bool filterAcceptsRow(int sourceRow,
-	    const QModelIndex &sourceParent) const Q_DECL_OVERRIDE;
+namespace RecMgmt {
 
 	/*!
-	 * @brief Returns true if the value of the item referred to by the
-	 *     given left index is less than the value of the item referred to
-	 *     by the given right index, otherwise returns false.
-	 *
-	 * @param[in] sourceLeft  Left index.
-	 * @param[in] sourceRight Right index.
-	 * @return Whether the left index precedes the right index.
+	 * @brief Enables filtering according to metadata.
 	 */
-	virtual
-	bool lessThan(const QModelIndex &sourceLeft,
-	    const QModelIndex &sourceRight) const Q_DECL_OVERRIDE;
+	class UploadHierarchyProxyModel : public QSortFilterProxyModel {
+		Q_OBJECT
+	public:
+		/*!
+		 * @brief Constructor.
+		 *
+		 * @param[in] parent Parent object.
+		 */
+		explicit UploadHierarchyProxyModel(QObject *parent = Q_NULLPTR);
 
-private:
-	/*!
-	 * @brief Returns true if the item should be included in the model.
-	 *
-	 * @param[in] sourceIdx Source index.
-	 * @return Whether the item meets the criteria.
-	 */
-	bool filterAcceptsItem(const QModelIndex &sourceIdx) const;
-};
+	protected:
+		/*!
+		 * @brief Returns true if the item in the row indicated by the
+		 *     given source row and source parent should be included in the
+		 *     model; otherwise returns false.
+		 *
+		 * @param[in] sourceRow    Row number.
+		 * @param[in] sourceParent Parent index.
+		 * @return Whether the row indicated should be included in the model.
+		 */
+		virtual
+		bool filterAcceptsRow(int sourceRow,
+		    const QModelIndex &sourceParent) const Q_DECL_OVERRIDE;
+
+		/*!
+		 * @brief Returns true if the value of the item referred to by the
+		 *     given left index is less than the value of the item referred to
+		 *     by the given right index, otherwise returns false.
+		 *
+		 * @param[in] sourceLeft  Left index.
+		 * @param[in] sourceRight Right index.
+		 * @return Whether the left index precedes the right index.
+		 */
+		virtual
+		bool lessThan(const QModelIndex &sourceLeft,
+		    const QModelIndex &sourceRight) const Q_DECL_OVERRIDE;
+
+	private:
+		/*!
+		 * @brief Returns true if the item should be included in the model.
+		 *
+		 * @param[in] sourceIdx Source index.
+		 * @return Whether the item meets the criteria.
+		 */
+		bool filterAcceptsItem(const QModelIndex &sourceIdx) const;
+	};
+
+}

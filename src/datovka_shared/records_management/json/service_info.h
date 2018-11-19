@@ -26,83 +26,88 @@
 #include <QByteArray>
 #include <QString>
 
-/*!
- * @brief Encapsulates the service_info response.
- */
-class ServiceInfoResp {
-private:
-	/*!
-	 * @brief Constructor. Creates an invalid structure.
-	 */
-	ServiceInfoResp(void);
+namespace RecMgmt {
 
 	/*!
-	 * @brief Constructor.
-	 *
-	 * @param[in] logoSvg SVG logo stored as raw data.
-	 * @param[in] name Service provider name.
-	 * @param[in] tokenMame Security token name.
+	 * @brief Encapsulates the service_info response.
 	 */
-	ServiceInfoResp(const QByteArray &logoSvg, const QString &name,
-	    const QString &tokenName);
+	class ServiceInfoResp {
+	private:
+		/*!
+		 * @brief Constructor. Creates an invalid structure.
+		 */
+		ServiceInfoResp(void);
 
-public:
-	/*!
-	 * @brief Copy constructor.
-	 *
-	 * @param[in] sir Service info response.
-	 */
-	ServiceInfoResp(const ServiceInfoResp &sir);
+		/*!
+		 * @brief Constructor.
+		 *
+		 * @param[in] logoSvg SVG logo stored as raw data.
+		 * @param[in] name Service provider name.
+		 * @param[in] tokenMame Security token name.
+		 */
+		ServiceInfoResp(const QByteArray &logoSvg, const QString &name,
+		    const QString &tokenName);
 
-	/*!
-	 * @brief Return raw SVG data.
-	 *
-	 * @return Stored raw SVG data.
-	 */
-	const QByteArray &logoSvg(void) const;
+	public:
+		/*!
+		 * @brief Copy constructor.
+		 *
+		 * @param[in] other Service info response.
+		 */
+		ServiceInfoResp(const ServiceInfoResp &other);
 
-	/*!
-	 * @brief Return service provider name.
-	 *
-	 * @return Stored name.
-	 */
-	const QString &name(void) const;
+		/*!
+		 * @brief Return raw SVG data.
+		 *
+		 * @return Stored raw SVG data.
+		 */
+		const QByteArray &logoSvg(void) const;
 
-	/*!
-	 * @brief Return security token name.
-	 *
-	 * @return Stored token name.
-	 */
-	const QString &tokenName(void) const;
+		/*!
+		 * @brief Return service provider name.
+		 *
+		 * @return Stored name.
+		 */
+		const QString &name(void) const;
 
-	/*!
-	 * @brief Check whether content is valid.
-	 *
-	 * @return True if content is valid.
-	 */
-	bool isValid(void) const;
+		/*!
+		 * @brief Return security token name.
+		 *
+		 * @return Stored token name.
+		 */
+		const QString &tokenName(void) const;
 
-	/*!
-	 * @brief Creates a service info structure from supplied JSON document.
-	 *
-	 * @param[in]  json JSON document.
-	 * @param[out] ok Set to true on success.
-	 * @return Invalid structure on error a valid structure else.
-	 */
-	static
-	ServiceInfoResp fromJson(const QByteArray &json, bool *ok = Q_NULLPTR);
+		/*!
+		 * @brief Check whether content is valid.
+		 *
+		 * @return True if content is valid.
+		 */
+		bool isValid(void) const;
 
-	/*!
-	 * @brief Converts service info structure into a JSON document.
-	 *
-	 * @note Unspecified values are stores as null into the JSON document.
-	 *
-	 * @return JSON document containing stored data.
-	 */
-	QByteArray toJson(void) const;
+		/*!
+		 * @brief Creates a service info structure from supplied JSON document.
+		 *
+		 * @param[in]  json JSON document.
+		 * @param[out] ok Set to true on success.
+		 * @return Invalid structure on error a valid structure else.
+		 */
+		static
+		ServiceInfoResp fromJson(const QByteArray &json,
+		    bool *ok = Q_NULLPTR);
 
-private:
-	QByteArray m_logoSvg; /*!< Raw SVG data. */
-	QString m_name; /*!< Service provider name. */
-	QString m_tokenName; /*!< Obtained token identifier. */
-};
+		/*!
+		 * @brief Converts service info structure into a JSON document.
+		 *
+		 * @note Unspecified values are stores as null into the JSON document.
+		 *
+		 * @return JSON document containing stored data.
+		 */
+		QByteArray toJson(void) const;
+
+	private:
+		QByteArray m_logoSvg; /*!< Raw SVG data. */
+		QString m_name; /*!< Service provider name. */
+		QString m_tokenName; /*!< Obtained token identifier. */
+	};
+
+}

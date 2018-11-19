@@ -46,7 +46,7 @@ DlgRecordsManagementUpload::DlgRecordsManagementUpload(const QString &urlStr,
     m_ui(new (std::nothrow) Ui::DlgRecordsManagementUpload),
     m_url(urlStr),
     m_token(tokenStr),
-    m_rmc(RecordsManagementConnection::ignoreSslErrorsDflt, this),
+    m_rmc(RecMgmt::Connection::ignoreSslErrorsDflt, this),
     m_uploadModel(),
     m_uploadProxyModel(),
     m_selectedUploadIds()
@@ -125,16 +125,17 @@ void DlgRecordsManagementUpload::callUploadHierarchy(void)
 	QByteArray response;
 
 	/* Clear model. */
-	m_uploadModel.setHierarchy(UploadHierarchyResp());
+	m_uploadModel.setHierarchy(RecMgmt::UploadHierarchyResp());
 
 	m_rmc.setConnection(m_url, m_token);
 
-	if (m_rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_HIERARCHY,
+	if (m_rmc.communicate(RecMgmt::Connection::SRVC_UPLOAD_HIERARCHY,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
-			UploadHierarchyResp uhRes(
-			    UploadHierarchyResp::fromJson(response, &ok));
+			RecMgmt::UploadHierarchyResp uhRes(
+			    RecMgmt::UploadHierarchyResp::fromJson(response,
+			        &ok));
 			if (!ok || !uhRes.isValid()) {
 				QMessageBox::critical(this,
 				    tr("Communication Error"),
@@ -232,8 +233,8 @@ void DlgRecordsManagementUpload::loadRecordsManagementPixmap(int width)
  * @return True if response could be processed and location has been saved.
  */
 static
-bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
-    QWidget *parent = Q_NULLPTR)
+bool processUploadFileResponse(const RecMgmt::UploadFileResp &ufRes,
+    qint64 dmId, QWidget *parent = Q_NULLPTR)
 {
 	if (ufRes.id().isEmpty()) {
 		QString errorMessage(
@@ -277,11 +278,11 @@ bool processUploadFileResponse(const UploadFileResp &ufRes, qint64 dmId,
 	return false;
 }
 
-bool DlgRecordsManagementUpload::uploadFile(RecordsManagementConnection &rmc,
+bool DlgRecordsManagementUpload::uploadFile(RecMgmt::Connection &rmc,
     qint64 dmId, const QStringList &uploadIds, const QString &msgFileName,
     const QByteArray &msgData, QWidget *parent)
 {
-	UploadFileReq ufReq(uploadIds, msgFileName, msgData);
+	RecMgmt::UploadFileReq ufReq(uploadIds, msgFileName, msgData);
 	if (!ufReq.isValid()) {
 		Q_ASSERT(0);
 		return false;
@@ -292,7 +293,7 @@ bool DlgRecordsManagementUpload::uploadFile(RecordsManagementConnection &rmc,
 	DlgRecordsManagementUploadProgress progressDlg(dmId, parent);
 	progressDlg.show();
 
-	bool res = rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_FILE,
+	bool res = rmc.communicate(RecMgmt::Connection::SRVC_UPLOAD_FILE,
 	    ufReq.toJson(), response, &progressDlg);
 
 	progressDlg.hide();
@@ -300,8 +301,8 @@ bool DlgRecordsManagementUpload::uploadFile(RecordsManagementConnection &rmc,
 	if (res) {
 		if (!response.isEmpty()) {
 			bool ok = false;
-			UploadFileResp ufRes(
-			    UploadFileResp::fromJson(response, &ok));
+			RecMgmt::UploadFileResp ufRes(
+			    RecMgmt::UploadFileResp::fromJson(response, &ok));
 			if (!ok || !ufRes.isValid()) {
 				QMessageBox::critical(parent,
 				    tr("Communication Error"),

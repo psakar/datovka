@@ -52,41 +52,42 @@ const QString keyLimit("limit");
 static
 const QString keyError("error");
 
-StoredFilesReq::StoredFilesReq(void)
+RecMgmt::StoredFilesReq::StoredFilesReq(void)
     : m_dmIds(),
     m_diIds()
 {
 }
 
-StoredFilesReq::StoredFilesReq(const QList<qint64> &dmIds,
+RecMgmt::StoredFilesReq::StoredFilesReq(const QList<qint64> &dmIds,
     const QList<qint64> &diIds)
     : m_dmIds(dmIds),
     m_diIds(diIds)
 {
 }
 
-StoredFilesReq::StoredFilesReq(const StoredFilesReq &sfr)
-    : m_dmIds(sfr.m_dmIds),
-    m_diIds(sfr.m_diIds)
+RecMgmt::StoredFilesReq::StoredFilesReq(const StoredFilesReq &other)
+    : m_dmIds(other.m_dmIds),
+    m_diIds(other.m_diIds)
 {
 }
 
-const QList<qint64> &StoredFilesReq::dmIds(void) const
+const QList<qint64> &RecMgmt::StoredFilesReq::dmIds(void) const
 {
 	return m_dmIds;
 }
 
-const QList<qint64> &StoredFilesReq::diIds(void) const
+const QList<qint64> &RecMgmt::StoredFilesReq::diIds(void) const
 {
 	return m_diIds;
 }
 
-bool StoredFilesReq::isValid(void) const
+bool RecMgmt::StoredFilesReq::isValid(void) const
 {
 	return !m_dmIds.isEmpty() || !m_diIds.isEmpty();
 }
 
-StoredFilesReq StoredFilesReq::fromJson(const QByteArray &json, bool *ok)
+RecMgmt::StoredFilesReq RecMgmt::StoredFilesReq::fromJson(
+    const QByteArray &json, bool *ok)
 {
 	QJsonObject jsonObj;
 	if (!JsonHelper::readRootObject(json, jsonObj)) {
@@ -158,7 +159,7 @@ QStringList createStrIdList(const QList<qint64> &idList)
 	return strList;
 }
 
-QByteArray StoredFilesReq::toJson(void) const
+QByteArray RecMgmt::StoredFilesReq::toJson(void) const
 {
 	QJsonObject jsonObj;
 	jsonObj.insert(keyDmIds,
@@ -169,35 +170,35 @@ QByteArray StoredFilesReq::toJson(void) const
 	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
 }
 
-DmEntry::DmEntry(void)
+RecMgmt::DmEntry::DmEntry(void)
     : m_dmId(-1),
     m_locations()
 {
 }
 
-DmEntry::DmEntry(qint64 dmId, const QStringList &locations)
+RecMgmt::DmEntry::DmEntry(qint64 dmId, const QStringList &locations)
     : m_dmId(dmId),
     m_locations(locations)
 {
 }
 
-DmEntry::DmEntry(const DmEntry &me)
-    : m_dmId(me.m_dmId),
-    m_locations(me.m_locations)
+RecMgmt::DmEntry::DmEntry(const DmEntry &other)
+    : m_dmId(other.m_dmId),
+    m_locations(other.m_locations)
 {
 }
 
-qint64 DmEntry::dmId(void) const
+qint64 RecMgmt::DmEntry::dmId(void) const
 {
 	return m_dmId;
 }
 
-const QStringList &DmEntry::locations(void) const
+const QStringList &RecMgmt::DmEntry::locations(void) const
 {
 	return m_locations;
 }
 
-bool DmEntry::isValid(void) const
+bool RecMgmt::DmEntry::isValid(void) const
 {
 	return m_dmId >= 0;
 }
@@ -230,7 +231,7 @@ bool fromJsonValue(const QJsonValue *jsonVal, const QString &idKey,
 	locations.clear();
 
 	QString idStr;
-	if (!JsonHelper::readString(jsonObj, idKey, idStr, false)) {
+	if (!RecMgmt::JsonHelper::readString(jsonObj, idKey, idStr, false)) {
 		return false;
 	}
 	bool ok = false;
@@ -242,15 +243,15 @@ bool fromJsonValue(const QJsonValue *jsonVal, const QString &idKey,
 		return false;
 	}
 
-	if (!JsonHelper::readStringList(jsonObj, keyLocations, locations,
-	        false)) {
+	if (!RecMgmt::JsonHelper::readStringList(jsonObj, keyLocations,
+	        locations, false)) {
 		return false;
 	}
 
 	return true;
 }
 
-bool DmEntry::fromJsonVal(const QJsonValue *jsonVal)
+bool RecMgmt::DmEntry::fromJsonVal(const QJsonValue *jsonVal)
 {
 	qint64 id = -1;
 	QStringList locations;
@@ -288,45 +289,45 @@ bool toJsonValue(QJsonValue *jsonVal, const QString &idKey,
 	return true;
 }
 
-bool DmEntry::toJsonVal(QJsonValue *jsonVal) const
+bool RecMgmt::DmEntry::toJsonVal(QJsonValue *jsonVal) const
 {
 	return toJsonValue(jsonVal, keyDmId, m_dmId, m_locations);
 }
 
-DiEntry::DiEntry(void)
+RecMgmt::DiEntry::DiEntry(void)
     : m_diId(-1),
     m_locations()
 {
 }
 
-DiEntry::DiEntry(qint64 diId, const QStringList &locations)
+RecMgmt::DiEntry::DiEntry(qint64 diId, const QStringList &locations)
     : m_diId(diId),
     m_locations(locations)
 {
 }
 
-DiEntry::DiEntry(const DiEntry &ie)
-    : m_diId(ie.m_diId),
-    m_locations(ie.m_locations)
+RecMgmt::DiEntry::DiEntry(const DiEntry &other)
+    : m_diId(other.m_diId),
+    m_locations(other.m_locations)
 {
 }
 
-qint64 DiEntry::diId(void) const
+qint64 RecMgmt::DiEntry::diId(void) const
 {
 	return m_diId;
 }
 
-const QStringList &DiEntry::locations(void) const
+const QStringList &RecMgmt::DiEntry::locations(void) const
 {
 	return m_locations;
 }
 
-bool DiEntry::isValid(void) const
+bool RecMgmt::DiEntry::isValid(void) const
 {
 	return m_diId >= 0;
 }
 
-bool DiEntry::fromJsonVal(const QJsonValue *jsonVal)
+bool RecMgmt::DiEntry::fromJsonVal(const QJsonValue *jsonVal)
 {
 	qint64 id = -1;
 	QStringList locations;
@@ -339,12 +340,12 @@ bool DiEntry::fromJsonVal(const QJsonValue *jsonVal)
 	return true;
 }
 
-bool DiEntry::toJsonVal(QJsonValue *jsonVal) const
+bool RecMgmt::DiEntry::toJsonVal(QJsonValue *jsonVal) const
 {
 	return toJsonValue(jsonVal, keyDiId, m_diId, m_locations);
 }
 
-StoredFilesResp::StoredFilesResp(void)
+RecMgmt::StoredFilesResp::StoredFilesResp(void)
     : m_dms(),
     m_dis(),
     m_limit(-1),
@@ -352,8 +353,8 @@ StoredFilesResp::StoredFilesResp(void)
 {
 }
 
-StoredFilesResp::StoredFilesResp(const QList<DmEntry> &dms, const QList<DiEntry> &dis,
-    int limit, const ErrorEntry &error)
+RecMgmt::StoredFilesResp::StoredFilesResp(const QList<DmEntry> &dms,
+    const QList<DiEntry> &dis, int limit, const ErrorEntry &error)
     : m_dms(dms),
     m_dis(dis),
     m_limit(limit),
@@ -361,35 +362,35 @@ StoredFilesResp::StoredFilesResp(const QList<DmEntry> &dms, const QList<DiEntry>
 {
 }
 
-StoredFilesResp::StoredFilesResp(const StoredFilesResp &sfr)
-    : m_dms(sfr.m_dms),
-    m_dis(sfr.m_dis),
-    m_limit(sfr.m_limit),
-    m_error(sfr.m_error)
+RecMgmt::StoredFilesResp::StoredFilesResp(const StoredFilesResp &other)
+    : m_dms(other.m_dms),
+    m_dis(other.m_dis),
+    m_limit(other.m_limit),
+    m_error(other.m_error)
 {
 }
 
-const QList<DmEntry> &StoredFilesResp::dms(void) const
+const QList<RecMgmt::DmEntry> &RecMgmt::StoredFilesResp::dms(void) const
 {
 	return m_dms;
 }
 
-const QList<DiEntry> &StoredFilesResp::dis(void) const
+const QList<RecMgmt::DiEntry> &RecMgmt::StoredFilesResp::dis(void) const
 {
 	return m_dis;
 }
 
-int StoredFilesResp::limit(void) const
+int RecMgmt::StoredFilesResp::limit(void) const
 {
 	return m_limit;
 }
 
-const ErrorEntry &StoredFilesResp::error(void) const
+const RecMgmt::ErrorEntry &RecMgmt::StoredFilesResp::error(void) const
 {
 	return m_error;
 }
 
-bool StoredFilesResp::isValid(void) const
+bool RecMgmt::StoredFilesResp::isValid(void) const
 {
 	return (m_limit > 0) &&
 	    ((!m_dms.isEmpty() || !m_dis.isEmpty()) ||
@@ -411,7 +412,7 @@ bool readArrayofObjects(const QJsonObject &jsonObj, const QString &idKey,
     QList<T> &list)
 {
 	QJsonValue jsonVal;
-	if (!JsonHelper::readValue(jsonObj, idKey, jsonVal)) {
+	if (!RecMgmt::JsonHelper::readValue(jsonObj, idKey, jsonVal)) {
 		return false;
 	}
 	if (!jsonVal.isArray()) {
@@ -427,7 +428,8 @@ bool readArrayofObjects(const QJsonObject &jsonObj, const QString &idKey,
 	return true;
 }
 
-StoredFilesResp StoredFilesResp::fromJson(const QByteArray &json, bool *ok)
+RecMgmt::StoredFilesResp RecMgmt::StoredFilesResp::fromJson(
+    const QByteArray &json, bool *ok)
 {
 	QJsonObject jsonObj;
 	if (!JsonHelper::readRootObject(json, jsonObj)) {
@@ -487,7 +489,7 @@ StoredFilesResp StoredFilesResp::fromJson(const QByteArray &json, bool *ok)
 	return sfr;
 }
 
-QByteArray StoredFilesResp::toJson(void) const
+QByteArray RecMgmt::StoredFilesResp::toJson(void) const
 {
 	QJsonObject jsonObj;
 	{
