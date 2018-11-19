@@ -31,10 +31,6 @@
   <property name="windowTitle">
    <string>Proxy Settings</string>
   </property>
-  <property name="windowIcon">
-   <iconset resource="../../../res/resources.qrc">
-    <normaloff>:/icons/3party/globe_16.png</normaloff>:/icons/3party/globe_16.png</iconset>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QLabel" name="mainLabel">

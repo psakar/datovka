@@ -63,7 +63,7 @@ DlgViewZfo::DlgViewZfo(const Isds::Message &message, enum Isds::LoadType zfoType
 		    "<h3>" + tr("Error parsing content") + "</h3><br/>" +
 		    errMsg);
 		m_ui->envelopeTextEdit->setReadOnly(true);
-		m_ui->signaturePushButton->setEnabled(false);
+		m_ui->signatureDetailsButton->setEnabled(false);
 		return;
 	}
 
@@ -133,8 +133,11 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 		}
 		{
 			QIcon ico;
-			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "save_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_16x16_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_24x24_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_32x32_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_48x48_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico.addFile(QStringLiteral(ICON_64x64_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
 			menu->addAction(ico, tr("Save attachment"), this,
 			    SLOT(saveSelectedAttachmentsToFile()))->
 			        setEnabled(indexes.size() == 1);
@@ -274,7 +277,14 @@ void DlgViewZfo::setUpDialogue(void)
 	}
 
 	/* Signature details. */
-	connect(m_ui->signaturePushButton, SIGNAL(clicked()), this,
+	QIcon ico;
+	ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
+	ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
+	m_ui->signatureDetailsButton->setIcon(ico);
+	connect(m_ui->signatureDetailsButton, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetailsDlg()));
 }
 

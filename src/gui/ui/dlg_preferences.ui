@@ -19,10 +19,6 @@
   <property name="windowTitle">
    <string>Datovka - Preferences</string>
   </property>
-  <property name="windowIcon">
-   <iconset resource="../../../res/resources.qrc">
-    <normaloff>:/icons/3party/gear_16.png</normaloff>:/icons/3party/gear_16.png</iconset>
-  </property>
   <property name="locale">
    <locale language="English" country="UnitedKingdom"/>
   </property>

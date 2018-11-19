@@ -8,6 +8,8 @@
         <file>icons/16x16/datovka-error.png</file>
         <file>icons/16x16/datovka-message-download.png</file>
         <file>icons/16x16/datovka-message-reply.png</file>
+        <file>icons/16x16/datovka-message-signature.png</file>
+        <file>icons/16x16/datovka-stock-key.png</file>
         <file>icons/16x16/datovka-message-upload.png</file>
         <file>icons/16x16/datovka-message-verify.png</file>
         <file>icons/16x16/datovka-message.png</file>
@@ -21,6 +23,8 @@
         <file>icons/16x16/macos_window.png</file>
         <file>icons/16x16/readcol.png</file>
         <file>icons/16x16/red.png</file>
+        <file>icons/16x16/save_all.png</file>
+        <file>icons/16x16/save.png</file>
         <file>icons/16x16/yellow.png</file>
         <file>icons/24x24/attachment.png</file>
         <file>icons/24x24/blue.png</file>
@@ -30,6 +34,8 @@
         <file>icons/24x24/datovka-error.png</file>
         <file>icons/24x24/datovka-message-download.png</file>
         <file>icons/24x24/datovka-message-reply.png</file>
+        <file>icons/24x24/datovka-message-signature.png</file>
+        <file>icons/24x24/datovka-stock-key.png</file>
         <file>icons/24x24/datovka-message-upload.png</file>
         <file>icons/24x24/datovka-message-verify.png</file>
         <file>icons/24x24/datovka-message.png</file>
@@ -43,7 +49,8 @@
         <file>icons/24x24/macos_window.png</file>
         <file>icons/24x24/readcol.png</file>
         <file>icons/24x24/red.png</file>
-        <file>icons/24x24/save-all.png</file>
+        <file>icons/24x24/save_all.png</file>
+        <file>icons/24x24/save.png</file>
         <file>icons/24x24/yellow.png</file>
         <file>icons/32x32/attachment.png</file>
         <file>icons/32x32/blue.png</file>
@@ -54,6 +61,8 @@
         <file>icons/32x32/datovka-message.png</file>
         <file>icons/32x32/datovka-message-download.png</file>
         <file>icons/32x32/datovka-message-reply.png</file>
+        <file>icons/32x32/datovka-message-signature.png</file>
+        <file>icons/32x32/datovka-stock-key.png</file>
         <file>icons/32x32/datovka-message-upload.png</file>
         <file>icons/32x32/datovka-message-verify.png</file>
         <file>icons/32x32/datovka-ok.png</file>
@@ -66,7 +75,11 @@
         <file>icons/32x32/macos_window.png</file>
         <file>icons/32x32/readcol.png</file>
         <file>icons/32x32/red.png</file>
+        <file>icons/32x32/save_all.png</file>
+        <file>icons/32x32/save.png</file>
         <file>icons/32x32/yellow.png</file>
+        <file>icons/48x48/attachment.png</file>
+        <file>icons/48x48/blue.png</file>
         <file>icons/48x48/datovka.png</file>
         <file>icons/48x48/datovka-account-sync.png</file>
         <file>icons/48x48/datovka-all-accounts-sync.png</file>
@@ -74,11 +87,25 @@
         <file>icons/48x48/datovka-message.png</file>
         <file>icons/48x48/datovka-message-download.png</file>
         <file>icons/48x48/datovka-message-reply.png</file>
+        <file>icons/48x48/datovka-message-signature.png</file>
+        <file>icons/48x48/datovka-stock-key.png</file>
         <file>icons/48x48/datovka-message-upload.png</file>
         <file>icons/48x48/datovka-message-verify.png</file>
         <file>icons/48x48/datovka-ok.png</file>
         <file>icons/48x48/datovka-stock-keyring.png</file>
-        <file>icons/48x48/datovka-question.png</file>
+        <file>icons/48x48/flag.png</file>
+        <file>icons/48x48/green.png</file>
+        <file>icons/48x48/grey.png</file>
+        <file>icons/48x48/hand.png</file>
+        <file>icons/48x48/hand_grey.png</file>
+        <file>icons/48x48/macos_window.png</file>
+        <file>icons/48x48/readcol.png</file>
+        <file>icons/48x48/red.png</file>
+        <file>icons/48x48/save_all.png</file>
+        <file>icons/48x48/save.png</file>
+        <file>icons/48x48/yellow.png</file>
+        <file>icons/64x64/attachment.png</file>
+        <file>icons/64x64/blue.png</file>
         <file>icons/64x64/datovka.png</file>
         <file>icons/64x64/datovka-account-sync.png</file>
         <file>icons/64x64/datovka-all-accounts-sync.png</file>
@@ -86,10 +113,23 @@
         <file>icons/64x64/datovka-message.png</file>
         <file>icons/64x64/datovka-message-download.png</file>
         <file>icons/64x64/datovka-message-reply.png</file>
+        <file>icons/64x64/datovka-message-signature.png</file>
+        <file>icons/64x64/datovka-stock-key.png</file>
         <file>icons/64x64/datovka-message-upload.png</file>
         <file>icons/64x64/datovka-message-verify.png</file>
         <file>icons/64x64/datovka-ok.png</file>
         <file>icons/64x64/datovka-stock-keyring.png</file>
+        <file>icons/64x64/flag.png</file>
+        <file>icons/64x64/green.png</file>
+        <file>icons/64x64/grey.png</file>
+        <file>icons/64x64/hand.png</file>
+        <file>icons/64x64/hand_grey.png</file>
+        <file>icons/64x64/macos_window.png</file>
+        <file>icons/64x64/readcol.png</file>
+        <file>icons/64x64/red.png</file>
+        <file>icons/64x64/save_all.png</file>
+        <file>icons/64x64/save.png</file>
+        <file>icons/64x64/yellow.png</file>
         <file>icons/128x128/datovka.png</file>
         <file>icons/128x128/cznic.png</file>
         <file>icons/128x128/logo.png</file>
@@ -116,7 +156,6 @@
         <file>icons/3party/help_16.png</file>
         <file>icons/3party/home_16.png</file>
         <file>icons/3party/info_16.png</file>
-        <file>icons/3party/key_16.png</file>
         <file>icons/3party/label_16.png</file>
         <file>icons/3party/left_16.png</file>
         <file>icons/3party/letter_16.png</file>
@@ -126,7 +165,6 @@
         <file>icons/3party/present_16.png</file>
         <file>icons/3party/print_16.png</file>
         <file>icons/3party/right_16.png</file>
-        <file>icons/3party/save_16.png</file>
         <file>icons/3party/search_16.png</file>
         <file>icons/3party/shield_16.png</file>
         <file>icons/3party/statistics_16.png</file>
@@ -147,7 +185,6 @@
         <file>icons/3party/stop_32.png</file>
         <file>icons/3party/statistics_32.png</file>
         <file>icons/3party/shield_32.png</file>
-        <file>icons/3party/save_32.png</file>
         <file>icons/3party/right_32.png</file>
         <file>icons/3party/print_32.png</file>
         <file>icons/3party/present_32.png</file>
@@ -157,7 +194,6 @@
         <file>icons/3party/letter_32.png</file>
         <file>icons/3party/left_32.png</file>
         <file>icons/3party/label_32.png</file>
-        <file>icons/3party/key_32.png</file>
         <file>icons/3party/info_32.png</file>
         <file>icons/3party/home_32.png</file>
         <file>icons/3party/help_32.png</file>
