@@ -11,6 +11,7 @@
  * Fixed a problem in which the content of a wrong message was displayed when
    message selection was changed when another message was being synchronised in
    background.
+ * Added some icons in higher resolution.
 
 4.11.1 / 2018-10-23
  * Added scripts for signing the Windows and macOS executables and software
