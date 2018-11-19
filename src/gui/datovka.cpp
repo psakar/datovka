@@ -7904,6 +7904,8 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSync_all_accounts->setIcon(ico);
 	}
 	    /* Separator. */
@@ -7936,16 +7938,16 @@ void MainWindow::setMenuActionIcons(void)
 	    /* Separator. */
 	{
 		QIcon ico;
-		ico.addFile(QStringLiteral(":/icons/3party/briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(":/icons/3party/briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionRecords_management_settings->setIcon(ico);
 		ui->actionUpdate_records_management_information->setIcon(ico);
 	}
 	    /* Separator. */
 	{
 		QIcon ico;
-		ico.addFile(QStringLiteral(":/icons/3party/gear_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(":/icons/3party/gear_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "gear_16.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "gear_32.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionPreferences->setIcon(ico);
 	}
 	/* actionQuit -- connected in ui file. */
@@ -7962,6 +7964,8 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionGet_messages->setIcon(ico);
 	}
 	{
@@ -7969,14 +7973,18 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSend_message->setIcon(ico);
-	}	
+	}
 	    /* Separator. */
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionSend_egov_request->setIcon(ico);
 	}
 	    /* Separator. */
@@ -7985,6 +7993,8 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionMark_all_as_read->setIcon(ico);
 	}
 	    /* Separator. */
@@ -8049,6 +8059,8 @@ void MainWindow::setMenuActionIcons(void)
 		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionDownload_message_signed->setIcon(ico);
 	}
 	{
@@ -8060,13 +8072,19 @@ void MainWindow::setMenuActionIcons(void)
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionForward_message->setIcon(ico);
 	}
 	{
 		QIcon ico;
 		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
 		ui->actionCreate_message_from_template->setIcon(ico);
 	}
 	    /* Separator. */
@@ -8442,6 +8460,8 @@ void MainWindow::dockMenuPopulate(void)
 		winIco.addFile(QStringLiteral(ICON_16x16_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
 		winIco.addFile(QStringLiteral(ICON_24x24_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
 		winIco.addFile(QStringLiteral(ICON_32x32_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
+		winIco.addFile(QStringLiteral(ICON_48x48_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
+		winIco.addFile(QStringLiteral(ICON_64x64_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
 	}
 
 	mui_dockMenu.clear();

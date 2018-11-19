@@ -87,6 +87,7 @@
         <file>icons/48x48/datovka-ok.png</file>
         <file>icons/48x48/datovka-stock-keyring.png</file>
         <file>icons/48x48/datovka-question.png</file>
+        <file>icons/48x48/macos_window.png</file>
         <file>icons/64x64/datovka.png</file>
         <file>icons/64x64/datovka-account-sync.png</file>
         <file>icons/64x64/datovka-all-accounts-sync.png</file>
@@ -100,6 +101,7 @@
         <file>icons/64x64/datovka-message-verify.png</file>
         <file>icons/64x64/datovka-ok.png</file>
         <file>icons/64x64/datovka-stock-keyring.png</file>
+        <file>icons/64x64/macos_window.png</file>
         <file>icons/128x128/datovka.png</file>
         <file>icons/128x128/cznic.png</file>
         <file>icons/128x128/logo.png</file>
