@@ -73,6 +73,8 @@
         <file>icons/32x32/readcol.png</file>
         <file>icons/32x32/red.png</file>
         <file>icons/32x32/yellow.png</file>
+        <file>icons/48x48/attachment.png</file>
+        <file>icons/48x48/blue.png</file>
         <file>icons/48x48/datovka.png</file>
         <file>icons/48x48/datovka-account-sync.png</file>
         <file>icons/48x48/datovka-all-accounts-sync.png</file>
@@ -86,8 +88,17 @@
         <file>icons/48x48/datovka-message-verify.png</file>
         <file>icons/48x48/datovka-ok.png</file>
         <file>icons/48x48/datovka-stock-keyring.png</file>
-        <file>icons/48x48/datovka-question.png</file>
+        <file>icons/48x48/flag.png</file>
+        <file>icons/48x48/green.png</file>
+        <file>icons/48x48/grey.png</file>
+        <file>icons/48x48/hand.png</file>
+        <file>icons/48x48/hand_grey.png</file>
         <file>icons/48x48/macos_window.png</file>
+        <file>icons/48x48/readcol.png</file>
+        <file>icons/48x48/red.png</file>
+        <file>icons/48x48/yellow.png</file>
+        <file>icons/64x64/attachment.png</file>
+        <file>icons/64x64/blue.png</file>
         <file>icons/64x64/datovka.png</file>
         <file>icons/64x64/datovka-account-sync.png</file>
         <file>icons/64x64/datovka-all-accounts-sync.png</file>
@@ -101,7 +112,15 @@
         <file>icons/64x64/datovka-message-verify.png</file>
         <file>icons/64x64/datovka-ok.png</file>
         <file>icons/64x64/datovka-stock-keyring.png</file>
+        <file>icons/64x64/flag.png</file>
+        <file>icons/64x64/green.png</file>
+        <file>icons/64x64/grey.png</file>
+        <file>icons/64x64/hand.png</file>
+        <file>icons/64x64/hand_grey.png</file>
         <file>icons/64x64/macos_window.png</file>
+        <file>icons/64x64/readcol.png</file>
+        <file>icons/64x64/red.png</file>
+        <file>icons/64x64/yellow.png</file>
         <file>icons/128x128/datovka.png</file>
         <file>icons/128x128/cznic.png</file>
         <file>icons/128x128/logo.png</file>
