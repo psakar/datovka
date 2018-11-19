@@ -29,63 +29,63 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="423"/>
+        <location filename="../src/models/accounts_model.cpp" line="427"/>
         <source>account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="428"/>
+        <location filename="../src/models/accounts_model.cpp" line="432"/>
         <source>recently received messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="435"/>
-        <location filename="../src/models/accounts_model.cpp" line="475"/>
+        <location filename="../src/models/accounts_model.cpp" line="439"/>
+        <location filename="../src/models/accounts_model.cpp" line="479"/>
         <source>contains %1 unread</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="442"/>
+        <location filename="../src/models/accounts_model.cpp" line="446"/>
         <source>recently sent messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="445"/>
+        <location filename="../src/models/accounts_model.cpp" line="449"/>
         <source>all messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="448"/>
+        <location filename="../src/models/accounts_model.cpp" line="452"/>
         <source>all received messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="451"/>
+        <location filename="../src/models/accounts_model.cpp" line="455"/>
         <source>all sent messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="464"/>
+        <location filename="../src/models/accounts_model.cpp" line="468"/>
         <source>invalid received messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="467"/>
+        <location filename="../src/models/accounts_model.cpp" line="471"/>
         <source>messages received in year %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="491"/>
+        <location filename="../src/models/accounts_model.cpp" line="495"/>
         <source>invalid sent messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="493"/>
+        <location filename="../src/models/accounts_model.cpp" line="497"/>
         <source>messages sent in year %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="548"/>
+        <location filename="../src/models/accounts_model.cpp" line="552"/>
         <source>Accounts</source>
         <translation type="unfinished"></translation>
     </message>
@@ -394,62 +394,62 @@
 <context>
     <name>DbMsgsTblModel</name>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="212"/>
+        <location filename="../src/models/messages_model.cpp" line="226"/>
         <source>message identifier</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="230"/>
+        <location filename="../src/models/messages_model.cpp" line="244"/>
         <source>personal delivery</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="232"/>
+        <location filename="../src/models/messages_model.cpp" line="246"/>
         <source>not a personal delivery</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="245"/>
+        <location filename="../src/models/messages_model.cpp" line="259"/>
         <source>marked as read</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="247"/>
+        <location filename="../src/models/messages_model.cpp" line="261"/>
         <source>marked as unread</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="252"/>
+        <location filename="../src/models/messages_model.cpp" line="266"/>
         <source>attachments downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="254"/>
+        <location filename="../src/models/messages_model.cpp" line="268"/>
         <source>attachments not downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="265"/>
+        <location filename="../src/models/messages_model.cpp" line="279"/>
         <source>unsettled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="268"/>
+        <location filename="../src/models/messages_model.cpp" line="282"/>
         <source>in progress</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="271"/>
+        <location filename="../src/models/messages_model.cpp" line="285"/>
         <source>settled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="627"/>
+        <location filename="../src/models/messages_model.cpp" line="649"/>
         <source>Attachments downloaded</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="631"/>
+        <location filename="../src/models/messages_model.cpp" line="653"/>
         <source>Processing state</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1087,79 +1087,79 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="30"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="26"/>
         <source>This changes the password on the ISDS server. Please enter your current and the new password below:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="51"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="47"/>
         <source>Data-box ID:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="68"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="64"/>
         <source>Current password:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="82"/>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="93"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="78"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="89"/>
         <source>The password must be at least 8 characters long and
 must contain at least one digit and one capital letter.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="86"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="82"/>
         <source>New password:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="104"/>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="116"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="100"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="112"/>
         <source>Repeat the password. The password must be
 at least 8 characters long and must contain
 at least one digit and one capital letter.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="109"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="105"/>
         <source>Repeat new password:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="157"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="153"/>
         <source>Generate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="166"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="162"/>
         <source>Username:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="190"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="186"/>
         <source>Note: Remember your new password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="206"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="202"/>
         <location filename="../src/gui/dlg_change_pwd.cpp" line="79"/>
         <location filename="../src/gui/dlg_change_pwd.cpp" line="301"/>
         <source>Enter SMS code:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="213"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="209"/>
         <source>Enter SMS or security code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="220"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="216"/>
         <source>Send SMS security code.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="223"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="219"/>
         <source>Send SMS code</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1169,7 +1169,7 @@ at least one digit and one capital letter.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="150"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="146"/>
         <location filename="../src/gui/dlg_change_pwd.cpp" line="206"/>
         <source>Show</source>
         <translation type="unfinished"></translation>
@@ -1278,12 +1278,12 @@ at least one digit and one capital letter.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_contacts.ui" line="24"/>
+        <location filename="../src/gui/ui/dlg_contacts.ui" line="20"/>
         <source>Select recipients from the list of current contacts (collected from existing messages):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_contacts.ui" line="33"/>
+        <location filename="../src/gui/ui/dlg_contacts.ui" line="29"/>
         <source>Filter:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1579,27 +1579,27 @@ at least one digit and one capital letter.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="273"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="276"/>
         <source>Update account %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="277"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="280"/>
         <source>Enter password for account %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="285"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="288"/>
         <source>Set certificate for account %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="294"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="297"/>
         <source>Enter password/certificate for account %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="373"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="379"/>
         <source>Hide</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1629,7 +1629,7 @@ at least one digit and one capital letter.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="357"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="363"/>
         <source>File does not exists or cannot be read.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1639,34 +1639,34 @@ at least one digit and one capital letter.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="36"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="32"/>
         <source>Please enter credentials for your data box.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="68"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="64"/>
         <source>Enter a descriptive name for your account.
 This name serves for easier account identification in the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="129"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="125"/>
         <source>Select authorisation method for logging in to the databox.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="152"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="148"/>
         <source>Enter your password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="162"/>
-        <location filename="../src/gui/dlg_create_account.cpp" line="368"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="158"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="374"/>
         <source>View</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="184"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="180"/>
         <source>If no PIN is configured then the password will be saved
 in a readable format in the configuration file which is
 usually located in your home directory. Do not use this
@@ -1680,70 +1680,70 @@ the stored password in decrypted form.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="219"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="215"/>
         <source>Select a certificate.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="253"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="249"/>
         <source>If selected, the account will be included into
 the synchronisation process of all accounts.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="257"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="253"/>
         <source>Synchronise this account together with all accounts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="83"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="79"/>
         <source>Username:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="61"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="57"/>
         <source>Account title:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="90"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="86"/>
         <source>Enter the login name for this account.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="110"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="106"/>
         <source>If the credentials you entered are for a test account,
 select this option. For normal account
 (created at a Czech Point) leave this unchecked.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="115"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="111"/>
         <source>This is a test account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="122"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="118"/>
         <source>Login method:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="143"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="139"/>
         <source>Password:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="196"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="192"/>
         <source>Remember password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="203"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="199"/>
         <source>Certificate file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="222"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="218"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2015,24 +2015,24 @@ The current search settings will thus probably yield no result.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="26"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="22"/>
         <source>Current account:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="33"/>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="71"/>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="215"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="29"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="67"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="211"/>
         <source>n/a</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="64"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="60"/>
         <source>Use full-text search similar to the ISDS client portal.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="86"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="82"/>
         <source>Your account is not of type OVM (i.e. non-OVM). Sending of post data messages
 from your account is activated. This means that you can only search for accounts
 of the type OVM and accounts that have the the receiving of post data messages
@@ -2041,53 +2041,53 @@ contain all otherwise matching databoxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="93"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="89"/>
         <source>Note: Your search results will be limited. See tooltip for more information.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="113"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="109"/>
         <source>Databox type:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="123"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="119"/>
         <source>Search in fileds:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="140"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="136"/>
         <source>Text:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="150"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="146"/>
         <source>ID:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="160"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="156"/>
         <source>IČ:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="170"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="166"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="480"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="180"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="176"/>
         <source>Postal code:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="195"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="191"/>
         <source>Search</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="235"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="231"/>
         <source>Filter:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2632,46 +2632,46 @@ into your local database.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="46"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="42"/>
         <source>Downloading</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="70"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="66"/>
         <source>Message downloading</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="88"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="84"/>
         <source>When allowed, the application will automatically download
 messages on background without blocking the user interface.
 Download period can be selected below.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="93"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="89"/>
         <source>Automatically synchronise all in background</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="108"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="104"/>
         <source>Check every</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="121"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="117"/>
         <source>Sets a time interval for automatic synchronisation
 of all accounts on background.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="144"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="261"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="140"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="257"/>
         <source>minutes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="172"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="168"/>
         <source>When accessing the data boxes, only envelopes of messages are downloaded at first.
 You can then download the whole message, including any attachments, manually.
 When this option is turned on, the application will perform automatic downloading
@@ -2680,33 +2680,33 @@ on slower internet connections.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="179"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="175"/>
         <source>Automatically download whole messages (may be slow)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="192"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="188"/>
         <source>When allowed, the application will automatically synchronise accounts
 and will also download new messages on background at startup.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="196"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="192"/>
         <source>Automatically synchronize all accounts on startup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="212"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="208"/>
         <source>Connection settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="226"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="222"/>
         <source>Timeout for message downloading is set on</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="239"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="235"/>
         <source>Allows to set a timeout interval for network connection.
 If you have a slow network connection or you cannot
 download complete messages, here you can increase
@@ -2714,44 +2714,44 @@ the connection timeout.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="309"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="305"/>
         <source>Mark message as read settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="326"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="322"/>
         <source>Automatically mark message as read after</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="339"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="335"/>
         <source>Allows to set a timeout interval for
 automatic marking of messages as read.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="362"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="358"/>
         <source>seconds</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="410"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="406"/>
         <source>New versions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="422"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="418"/>
         <source>When this option is active, the application will automatically
 check for new application versions on startup.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="426"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="422"/>
         <source>Check for new application versions on startup</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="445"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="441"/>
         <source>When this option is active, the application will send information about
 the application version and related data as part of the new version request.
 These data contain the application version, versions of libraries, information
@@ -2762,28 +2762,28 @@ The data are used solely for statistical purposes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="454"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="450"/>
         <source>Send version info alongside the request</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="481"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="477"/>
         <source>Security</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="493"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="489"/>
         <source>Storage options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="506"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="502"/>
         <source>It migth be possible for a person with access to the configuration directory to modify data in the application databases with a malicious intent or to steal you data-box login credentials. Using the checkboxes below, you can influence which data the application stores on the disk.
 Note: Password storing can be adjusted on a per-account basis in the credentials dialogue.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="523"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="519"/>
         <source>When allowed, messages are stored in database files. Such storage
 might be compromised by an attacker and the content of messages
 might be modified.
@@ -2793,12 +2793,12 @@ may not be available.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="531"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="527"/>
         <source>Allow storing of messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="547"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="543"/>
         <source>The application stores some additional data outside the message
 database. These contain information about the data boxes allowing
 for notification about expiring passwords etc. These data might also
@@ -2806,64 +2806,64 @@ be changed by an attacker, but with a relative low impact.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="553"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="549"/>
         <source>Allow storing of additional data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="572"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="568"/>
         <source>Signing certificate validity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="589"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="585"/>
         <source>Check against current date (safer)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="612"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="608"/>
         <source>Check against the date of download</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="632"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="628"/>
         <source>Check certificate revocation list (CRL).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="635"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="631"/>
         <source>Check certificate revocation list (CRL)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="654"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="650"/>
         <source>Message time stamps expiring within the selected numer
 of days will be included into the expiration notification summary.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="658"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="654"/>
         <source>Message time stamp expiration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="752"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="748"/>
         <source>When PIN (master password) is set then the application cannot be started without entering a valid PIN value. The PIN is also used to protect the stored account passwords. If an attacker gains the access to the application configuration he cannot easily recover the stored passwords as they are encrypted using the PIN value. The PIN does not protect any stored messages.
 Note: If you forget the PIN then you&apos;ll loose all stored passwords. Other stored data won&apos;t be affected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1096"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1092"/>
         <source>Select a new path for attachment saving.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1156"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1152"/>
         <source>Select a new path for adding attachment files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1303"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1299"/>
         <source>Specifies the format of file names for attachment files
 and other exported files. When saving attachment
 files, the default value is %f (i.e. saved file name will
@@ -2871,54 +2871,54 @@ match the original file name including its suffix).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1329"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1325"/>
         <source>Message filename:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1369"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1365"/>
         <source>Acceptance info filename:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1382"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1378"/>
         <source>Attachment filename:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1678"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1674"/>
         <source>message subject (separated by &apos;-&apos;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1692"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1688"/>
         <source>data-box ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1720"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1716"/>
         <source>attachment filename (including suffix)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1762"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1758"/>
         <source>sender name (separated by &apos;-&apos;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1867"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1863"/>
         <source>Note: Illegal characters in the resulting filenames will be replaced.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="584"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="580"/>
         <source>Validity of the signing certificate will be checked against
 the current date. This provides the highest protection against
 compromised certificates.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="605"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="601"/>
         <source>The validity of the signing certificate is checked against
 the message download date. This allows a long-term storing
 of messages without generating false alarms about invalid
@@ -2927,137 +2927,137 @@ download dates in the application databases.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="670"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="666"/>
         <source>Check for time stamps expiring within</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="683"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="679"/>
         <source>Allows to set an interval specifying how many days before
 a timestamp expiration a message will be included in
 signature check results.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="710"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="706"/>
         <source>days</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="836"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="832"/>
         <source>Navigation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="848"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="844"/>
         <source>When account is opened, select</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="864"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="860"/>
         <source>Newest message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="884"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="880"/>
         <source>Last displayed message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="860"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="856"/>
         <source>After an account is selected,
 select the newest message.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="739"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="735"/>
         <source>PIN settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="771"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="767"/>
         <source>Set PIN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="784"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="780"/>
         <source>Change PIN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="797"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="793"/>
         <source>Clear PIN</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="880"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="876"/>
         <source>After an account is selected,
 select the last displayed message for this account.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="897"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="893"/>
         <source>After an account is selected,
 no particular message will be selected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="901"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="897"/>
         <source>Nothing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="928"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="924"/>
         <source>Interface</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="940"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="936"/>
         <source>Style of toolbar buttons</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="952"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="948"/>
         <source>Only icons will be displayed in the toolbar.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="955"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="951"/>
         <source>Only display the icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="968"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="964"/>
         <source>Icons and text beside them will be displayed in the toolbar.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="971"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="967"/>
         <source>The text appears beside the icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="984"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="980"/>
         <source>Icons and text under them will be displayed in the toolbar.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="987"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="983"/>
         <source>The text appears under the icon</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1004"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1000"/>
         <source>Note: Toolbar settings will not be applied until you restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1028"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1024"/>
         <source>Directories</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1043"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1039"/>
         <source>When allowed, the application will use the following
 directories as paths for loading and saving files for
 all accounts. Per-account path remembering will
@@ -3065,164 +3065,164 @@ be disabled.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1049"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1045"/>
         <source>Use global path settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1067"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1063"/>
         <source>Path for attachment saving is currently set to:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1099"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1159"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1095"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1155"/>
         <source>Change</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1127"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1123"/>
         <source>Path for adding files as attachments is currently set to:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1198"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1194"/>
         <source>Saving</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1210"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1206"/>
         <source>These actions will be performed when saving all message attachments.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1213"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1209"/>
         <source>When saving all attachments also</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1230"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1226"/>
         <source>When saving all attachments also save
 signed message as ZFO to the same path.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1234"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1230"/>
         <source>Save signed message to ZFO</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1247"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1243"/>
         <source>When saving all attachments also save
 message envelope as PDF to the same path.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1251"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1247"/>
         <source>Save message envelope to PDF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1264"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1260"/>
         <source>When saving all attachments also save
 signed acceptance info as ZFO to the same path.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1268"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1264"/>
         <source>Save signed acceptance info to ZFO</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1281"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1277"/>
         <source>When saving all attachments also save
 acceptance info as PDF to the same path.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1285"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1281"/>
         <source>Save acceptance info to PDF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1309"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1305"/>
         <source>File name format of saved/exported files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1506"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1502"/>
         <source>acceptance year (YYYY)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1520"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1516"/>
         <source>acceptance month (MM)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1534"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1530"/>
         <source>acceptance day (DD)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1548"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1544"/>
         <source>acceptance minute (mm)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1562"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1558"/>
         <source>acceptance hour (hh)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1604"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1600"/>
         <source>account name (separated by &apos;-&apos;)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1664"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1660"/>
         <source>message ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1748"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1744"/>
         <source>user ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1796"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1792"/>
         <source>Example:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1824"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1820"/>
         <source>means</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1889"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1885"/>
         <source>Saves acceptance info for every attachment file separately.
 The acceptance info file name has to contain the original
 attachment file name (parameter %f is required).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1894"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1890"/>
         <source>Save acceptance info for every attachment file. Format:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1933"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1929"/>
         <source>Language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1945"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1941"/>
         <source>Application language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1968"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1964"/>
         <source>Note: Language settings will not be applied until you restart the application.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3247,101 +3247,101 @@ attachment file name (parameter %f is required).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="45"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="41"/>
         <source>The HTTPS protocol is used when accessing the ISDS server while HTTP is used to download the certificate revocation list and information about new application versions.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="64"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="60"/>
         <source>HTTPS proxy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="76"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="79"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="290"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="293"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="72"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="75"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="286"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="289"/>
         <source>No proxy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="92"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="95"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="306"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="309"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="88"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="91"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="302"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="305"/>
         <source>Automatic proxy detection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="125"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="128"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="339"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="342"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="121"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="124"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="335"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="338"/>
         <source>Manual proxy settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="143"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="357"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="139"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="353"/>
         <source>Proxy hostname:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="156"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="370"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="152"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="366"/>
         <source>Enter your proxy hostname</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="169"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="383"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="165"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="379"/>
         <source>Port:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="188"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="414"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="184"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="410"/>
         <source>Enter port</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="210"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="213"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="206"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="209"/>
         <source>Show HTTPS proxy authentication</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="436"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="439"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="432"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="435"/>
         <source>Show HTTP proxy authentication</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="229"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="455"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="225"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="451"/>
         <source>Username:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="236"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="462"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="232"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="458"/>
         <source>Enter your username</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="249"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="475"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="245"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="471"/>
         <source>Password:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="256"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="482"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="252"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="478"/>
         <source>Enter your password</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="278"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="274"/>
         <source>HTTP proxy</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3777,253 +3777,253 @@ to upload the message &apos;%1&apos; into.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="42"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="38"/>
         <source>Please fill in at least the &lt;b&gt;subject&lt;/b&gt;, &lt;b&gt;one recipient&lt;/b&gt; and &lt;b&gt;one attachment&lt;/b&gt;:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="67"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="63"/>
         <source>Account:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="93"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="89"/>
         <source>Sender:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="116"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="112"/>
         <source>Subject:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="132"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="128"/>
         <source>Enter subject of the message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="150"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="146"/>
         <source>This is a PDZ prepaid reply. It means that PDZ is paid by recipient.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="167"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="163"/>
         <source>Show optional fields</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="204"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="200"/>
         <source>Mandate:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="216"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="212"/>
         <source>Number of law</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="223"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="219"/>
         <source>/</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="230"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="226"/>
         <source>Year of law</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="237"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="233"/>
         <source>§</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="244"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="240"/>
         <source>Section of law</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="251"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="247"/>
         <source>paragraph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="258"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="254"/>
         <source>Paragraph of the corresponding section of the law</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="265"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="261"/>
         <source>letter</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="272"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="268"/>
         <source>Letter of the paragraph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="281"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="277"/>
         <location filename="../src/gui/dlg_send_message.cpp" line="298"/>
         <source>Our reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="295"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="291"/>
         <source>Our file mark:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="309"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="305"/>
         <source>Your reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="450"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="446"/>
         <source>Find and add a recipient from ISDS server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="471"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="467"/>
         <source>Allows to enter a data box identifier manually</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="288"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="316"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="284"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="312"/>
         <source>Enter reference number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="302"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="330"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="298"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="326"/>
         <source>Enter file mark</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="323"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="319"/>
         <source>Your file mark:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="337"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="333"/>
         <source>To hands:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="346"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="342"/>
         <source>Enter name of person</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="353"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="349"/>
         <source>Personal delivery:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="360"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="356"/>
         <source>Enable personal delivery</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="390"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="386"/>
         <source>Recipients:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="403"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="399"/>
         <source>Add recipient from contacts selected from existing messages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="406"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="627"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="402"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="623"/>
         <source>Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="426"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="422"/>
         <source>Remove selected recipient from the list</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="429"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="650"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="425"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="646"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="453"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="449"/>
         <source>Find</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="474"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="470"/>
         <source>Enter Box ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="519"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="515"/>
         <source>Even if the recipient did not read this message,
 the message is considered to be accepted after
 (currently) 10 days. This is acceptance through fiction.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="524"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="520"/>
         <source>Allow acceptance through fiction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="540"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="543"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="536"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="539"/>
         <source>Include sender identification</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="562"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="558"/>
         <source>You will pay the transfer charges of the reply message.
 This is useful when the recipient does not have sending
 of postal data messages active.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="567"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="563"/>
         <source>Pay transfer charges for reply</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="583"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="586"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="579"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="582"/>
         <source>Use offered payment of transfer charges by recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="611"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="607"/>
         <source>Attachments:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="624"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="620"/>
         <source>Add a new file to the attachments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="647"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="643"/>
         <source>Remove the selected file from attachments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="677"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="673"/>
         <source>Open selected file in associated application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="680"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="676"/>
         <source>Open</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="725"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="721"/>
         <source>The complete sent message is going to be downloaded together with
 all necessary digital signatures immediately after it has been successfully
 accepted by the ISDS system.
@@ -4033,12 +4033,12 @@ of any delivered message.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="733"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="729"/>
         <source>Immediately download sent message content</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="740"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="736"/>
         <source>Before uploading the newly sent message into the records management service
 the application needs to download the newly sent message from
 the ISDS server. This is because the application needs to acquire all
@@ -4046,27 +4046,27 @@ necessary digital signatures.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="746"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="742"/>
         <source>Immediately upload sent message into records management service</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="762"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="758"/>
         <source>Attachment size is larger than 50 MB. Message cannot be sent.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="799"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="795"/>
         <source>Send message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="802"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="798"/>
         <source>Send</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="815"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="811"/>
         <source>Cancel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4133,132 +4133,132 @@ necessary digital signatures.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="207"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="208"/>
         <source>Message signature is not present.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="221"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="225"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="332"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="571"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="226"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="234"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="341"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="584"/>
         <source>Valid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="349"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="391"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="362"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="404"/>
         <source>Certificate revocation check is turned off!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="366"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="379"/>
         <source>Trusted certificates were found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="370"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="383"/>
         <source>Signing algorithm supported</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="375"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="388"/>
         <source>Trusted parent certificate found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="379"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="392"/>
         <source>Certificate time validity is ok</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="387"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="400"/>
         <source>Certificate was not revoked</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="396"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="409"/>
         <source>Certificate signature verified</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="408"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="421"/>
         <source>Version</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="410"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="473"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="423"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="486"/>
         <source>Serial number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="415"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="428"/>
         <source>Signature algorithm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="418"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="591"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="431"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="608"/>
         <source>Issuer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="423"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="461"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="593"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="436"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="474"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="610"/>
         <source>Organisation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="430"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="467"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="601"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="443"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="480"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="618"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="436"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="479"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="605"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="449"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="492"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="622"/>
         <source>Country</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="440"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="611"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="453"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="628"/>
         <source>Validity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="449"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="612"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="462"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="629"/>
         <source>Valid from</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="452"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="615"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="465"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="632"/>
         <source>Valid to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="457"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="470"/>
         <source>Subject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="562"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="575"/>
         <source>Time stamp not present.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="584"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="601"/>
         <source>Time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="598"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="615"/>
         <source>Organisational unit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4435,67 +4435,67 @@ necessary digital signatures.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="138"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="141"/>
         <source>Save attachment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="141"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="144"/>
         <source>Save attachments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="353"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="363"/>
         <source>Identification</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="355"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="365"/>
         <source>ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="356"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="366"/>
         <source>Subject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="357"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="367"/>
         <source>Message type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="362"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="372"/>
         <source>Sender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="363"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="373"/>
         <source>Sender Databox ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="364"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="374"/>
         <source>Sender Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="368"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="378"/>
         <source>Recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="369"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="379"/>
         <source>Recipient Databox ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="327"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="337"/>
         <source>Events</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="370"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="380"/>
         <source>Recipient Address</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4515,67 +4515,67 @@ necessary digital signatures.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="372"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="392"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="382"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="402"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="374"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="384"/>
         <source>Delivery time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="379"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="389"/>
         <source>Acceptance time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="299"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="309"/>
         <source>Attachments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="400"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="410"/>
         <source>Signature</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="404"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="412"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="428"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="414"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="422"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="438"/>
         <source>Valid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="406"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="414"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="428"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="416"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="424"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="438"/>
         <source>Invalid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="407"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="417"/>
         <source>Message signature and content do not correspond!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="409"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="419"/>
         <source>Message signature</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="418"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="428"/>
         <source>Certificate revocation check is turned off!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="421"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="431"/>
         <source>Signing certificate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="433"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="443"/>
         <source>Time stamp</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4586,7 +4586,7 @@ necessary digital signatures.</source>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_view_zfo.ui" line="56"/>
-        <source>Verify Signature</source>
+        <source>Signature details</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4971,12 +4971,12 @@ necessary digital signatures.</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7878"/>
+        <location filename="../src/gui/datovka.cpp" line="7896"/>
         <source>Search: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7750"/>
+        <location filename="../src/gui/datovka.cpp" line="7762"/>
         <source>Mode: offline</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5360,13 +5360,13 @@ Change password now?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8410"/>
+        <location filename="../src/gui/datovka.cpp" line="8468"/>
         <source>Import of messages to account %1 finished</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3697"/>
-        <location filename="../src/gui/datovka.cpp" line="7727"/>
+        <location filename="../src/gui/datovka.cpp" line="7739"/>
         <source>Datovka - Free client for Datové schránky</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5387,12 +5387,12 @@ Change password now?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7887"/>
+        <location filename="../src/gui/datovka.cpp" line="7905"/>
         <source>Enter sought expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7779"/>
+        <location filename="../src/gui/datovka.cpp" line="7795"/>
         <source>In Progress</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5819,7 +5819,7 @@ Enter password to unlock certificate file:</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="7570"/>
         <location filename="../src/gui/datovka.cpp" line="7621"/>
-        <location filename="../src/gui/datovka.cpp" line="8274"/>
+        <location filename="../src/gui/datovka.cpp" line="8332"/>
         <source>Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5834,22 +5834,22 @@ Enter password to unlock certificate file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8420"/>
+        <location filename="../src/gui/datovka.cpp" line="8478"/>
         <source>Messages import result</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8421"/>
+        <location filename="../src/gui/datovka.cpp" line="8479"/>
         <source>Import of messages into account &apos;%1&apos; finished with result:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8424"/>
+        <location filename="../src/gui/datovka.cpp" line="8482"/>
         <source>Imported messages: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8425"/>
+        <location filename="../src/gui/datovka.cpp" line="8483"/>
         <source>Non-imported messages: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5864,62 +5864,62 @@ Enter password to unlock certificate file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8234"/>
+        <location filename="../src/gui/datovka.cpp" line="8292"/>
         <source>Vacuum cannot be performed on databases in memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8237"/>
+        <location filename="../src/gui/datovka.cpp" line="8295"/>
         <source>Database operation error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8238"/>
+        <location filename="../src/gui/datovka.cpp" line="8296"/>
         <source>Database clean-up cannot be performed on database in memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8239"/>
+        <location filename="../src/gui/datovka.cpp" line="8297"/>
         <source>Cannot call VACUUM on database in memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8268"/>
+        <location filename="../src/gui/datovka.cpp" line="8326"/>
         <source>Clean message database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8269"/>
+        <location filename="../src/gui/datovka.cpp" line="8327"/>
         <source>Performs a message database clean-up for the selected account. This action will block the entire application. The action may take several minutes to be completed. Furthermore, it requires more than %1 of free disk space to successfully proceed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8281"/>
+        <location filename="../src/gui/datovka.cpp" line="8339"/>
         <source>Performing database clean-up.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8290"/>
+        <location filename="../src/gui/datovka.cpp" line="8348"/>
         <source>Database clean-up finished.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8295"/>
+        <location filename="../src/gui/datovka.cpp" line="8353"/>
         <source>Database clean-up successful</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8296"/>
+        <location filename="../src/gui/datovka.cpp" line="8354"/>
         <source>The database clean-up has finished successfully.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8300"/>
+        <location filename="../src/gui/datovka.cpp" line="8358"/>
         <source>Database clean-up failure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8301"/>
+        <location filename="../src/gui/datovka.cpp" line="8359"/>
         <source>The database clean-up failed with error message: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6020,7 +6020,7 @@ Enter password to unlock certificate file:</source>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="7435"/>
-        <location filename="../src/gui/datovka.cpp" line="8423"/>
+        <location filename="../src/gui/datovka.cpp" line="8481"/>
         <source>Total of messages in database: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6100,7 +6100,7 @@ Enter password to unlock certificate file:</source>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3699"/>
-        <location filename="../src/gui/datovka.cpp" line="7729"/>
+        <location filename="../src/gui/datovka.cpp" line="7741"/>
         <source>Portable version</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6404,12 +6404,12 @@ Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7740"/>
+        <location filename="../src/gui/datovka.cpp" line="7752"/>
         <source>Welcome...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7744"/>
+        <location filename="../src/gui/datovka.cpp" line="7756"/>
         <source>Storage: disk | disk</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6446,6 +6446,11 @@ Try again.</source>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="506"/>
         <source>Sync all accounts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/datovka.ui" line="794"/>
+        <source>Authenticate message from ZFO file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6514,12 +6519,12 @@ sent reply on this message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7772"/>
+        <location filename="../src/gui/datovka.cpp" line="7786"/>
         <source>Unsettled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7786"/>
+        <location filename="../src/gui/datovka.cpp" line="7804"/>
         <source>Settled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6657,11 +6662,6 @@ sent reply on this message</source>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="782"/>
         <source>Find data box</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/gui/ui/datovka.ui" line="794"/>
-        <source>Authenticate message file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

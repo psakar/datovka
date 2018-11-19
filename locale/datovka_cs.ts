@@ -4,7 +4,7 @@
 <context>
     <name>AccountModel</name>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="548"/>
+        <location filename="../src/models/accounts_model.cpp" line="552"/>
         <source>Accounts</source>
         <translation>Účty</translation>
     </message>
@@ -34,58 +34,58 @@
         <translation>Odeslané</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="423"/>
+        <location filename="../src/models/accounts_model.cpp" line="427"/>
         <source>account</source>
         <translation>účet</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="428"/>
+        <location filename="../src/models/accounts_model.cpp" line="432"/>
         <source>recently received messages</source>
         <translation>nedávno přijaté zprávy</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="435"/>
-        <location filename="../src/models/accounts_model.cpp" line="475"/>
+        <location filename="../src/models/accounts_model.cpp" line="439"/>
+        <location filename="../src/models/accounts_model.cpp" line="479"/>
         <source>contains %1 unread</source>
         <translation>obsahuje %1 nepřečtených</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="442"/>
+        <location filename="../src/models/accounts_model.cpp" line="446"/>
         <source>recently sent messages</source>
         <translation>nedávno odeslané zprávy</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="445"/>
+        <location filename="../src/models/accounts_model.cpp" line="449"/>
         <source>all messages</source>
         <translation>všechny zprávy</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="448"/>
+        <location filename="../src/models/accounts_model.cpp" line="452"/>
         <source>all received messages</source>
         <translation>všechny přijaté zprávy</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="451"/>
+        <location filename="../src/models/accounts_model.cpp" line="455"/>
         <source>all sent messages</source>
         <translation>všechny odeslané zprávy</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="464"/>
+        <location filename="../src/models/accounts_model.cpp" line="468"/>
         <source>invalid received messages</source>
         <translation>nevalidní přijaté zprávy</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="467"/>
+        <location filename="../src/models/accounts_model.cpp" line="471"/>
         <source>messages received in year %1</source>
         <translation>zprávy přijaté v roce %1</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="491"/>
+        <location filename="../src/models/accounts_model.cpp" line="495"/>
         <source>invalid sent messages</source>
         <translation>nevalidní odeslané zprávy</translation>
     </message>
     <message>
-        <location filename="../src/models/accounts_model.cpp" line="493"/>
+        <location filename="../src/models/accounts_model.cpp" line="497"/>
         <source>messages sent in year %1</source>
         <translation>zprávy odeslané v roce %1</translation>
     </message>
@@ -394,62 +394,62 @@
 <context>
     <name>DbMsgsTblModel</name>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="212"/>
+        <location filename="../src/models/messages_model.cpp" line="226"/>
         <source>message identifier</source>
         <translation>identifikátor zprávy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="230"/>
+        <location filename="../src/models/messages_model.cpp" line="244"/>
         <source>personal delivery</source>
         <translation>zpráva určena do vlastních rukou</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="232"/>
+        <location filename="../src/models/messages_model.cpp" line="246"/>
         <source>not a personal delivery</source>
         <translation>zpráva není určena do vlastních rukou</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="245"/>
+        <location filename="../src/models/messages_model.cpp" line="259"/>
         <source>marked as read</source>
         <translation>označeno jako přečtené</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="247"/>
+        <location filename="../src/models/messages_model.cpp" line="261"/>
         <source>marked as unread</source>
         <translation>označeno jako nepřečtené</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="252"/>
+        <location filename="../src/models/messages_model.cpp" line="266"/>
         <source>attachments downloaded</source>
         <translation>přílohy staženy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="254"/>
+        <location filename="../src/models/messages_model.cpp" line="268"/>
         <source>attachments not downloaded</source>
         <translation>přílohy nestaženy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="265"/>
+        <location filename="../src/models/messages_model.cpp" line="279"/>
         <source>unsettled</source>
         <translation>nevyřízeno</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="268"/>
+        <location filename="../src/models/messages_model.cpp" line="282"/>
         <source>in progress</source>
         <translation>vyřizuje se</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="271"/>
+        <location filename="../src/models/messages_model.cpp" line="285"/>
         <source>settled</source>
         <translation>vyřízeno</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="627"/>
+        <location filename="../src/models/messages_model.cpp" line="649"/>
         <source>Attachments downloaded</source>
         <translation>Přílohy staženy</translation>
     </message>
     <message>
-        <location filename="../src/models/messages_model.cpp" line="631"/>
+        <location filename="../src/models/messages_model.cpp" line="653"/>
         <source>Processing state</source>
         <translation>Stav vyřizování</translation>
     </message>
@@ -1099,36 +1099,36 @@
         <translation>Změnit heslo</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="30"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="26"/>
         <source>This changes the password on the ISDS server. Please enter your current and the new password below:</source>
         <translation>Zde se mění heslo na serveru ISDS. Níže prosím zadejte stávající a nové heslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="51"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="47"/>
         <source>Data-box ID:</source>
         <translation>ID datové schránky:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="68"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="64"/>
         <source>Current password:</source>
         <translation>Stávající heslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="82"/>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="93"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="78"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="89"/>
         <source>The password must be at least 8 characters long and
 must contain at least one digit and one capital letter.</source>
         <translation>Heslo musí mít nejméně 8 znaků a musí obsahovat
 alespoň jednu číslici a jedno velké písmeno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="86"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="82"/>
         <source>New password:</source>
         <translation>Nové heslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="104"/>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="116"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="100"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="112"/>
         <source>Repeat the password. The password must be
 at least 8 characters long and must contain
 at least one digit and one capital letter.</source>
@@ -1137,44 +1137,44 @@ znaků a musí obsahovat alespoň
 jednu číslici a jedno velké písmeno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="109"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="105"/>
         <source>Repeat new password:</source>
         <translation>Nové heslo znovu:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="157"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="153"/>
         <source>Generate</source>
         <translation>Generovat</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="166"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="162"/>
         <source>Username:</source>
         <translation>Uživatelské jméno:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="190"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="186"/>
         <source>Note: Remember your new password.</source>
         <translation>Poznámka: Zapamatujte si Vaše nové heslo.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="206"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="202"/>
         <location filename="../src/gui/dlg_change_pwd.cpp" line="79"/>
         <location filename="../src/gui/dlg_change_pwd.cpp" line="301"/>
         <source>Enter SMS code:</source>
         <translation>Zadejte SMS kód:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="213"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="209"/>
         <source>Enter SMS or security code</source>
         <translation>Zadejte SMS nebo bezpečnostní kód</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="220"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="216"/>
         <source>Send SMS security code.</source>
         <translation>Zaslat bezpečnostní SMS kód.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="223"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="219"/>
         <source>Send SMS code</source>
         <translation>Zaslat SMS kód</translation>
     </message>
@@ -1184,7 +1184,7 @@ jednu číslici a jedno velké písmeno.</translation>
         <translation>Skrýt</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="150"/>
+        <location filename="../src/gui/ui/dlg_change_pwd.ui" line="146"/>
         <location filename="../src/gui/dlg_change_pwd.cpp" line="206"/>
         <source>Show</source>
         <translation>Ukázat</translation>
@@ -1293,12 +1293,12 @@ jednu číslici a jedno velké písmeno.</translation>
         <translation>Přidat příjemce</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_contacts.ui" line="24"/>
+        <location filename="../src/gui/ui/dlg_contacts.ui" line="20"/>
         <source>Select recipients from the list of current contacts (collected from existing messages):</source>
         <translation>Vyberte příjemce ze seznamu kontaktů (vytvořeno z existujících zpráv):</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_contacts.ui" line="33"/>
+        <location filename="../src/gui/ui/dlg_contacts.ui" line="29"/>
         <source>Filter:</source>
         <translation>Filtr:</translation>
     </message>
@@ -1594,27 +1594,27 @@ jednu číslici a jedno velké písmeno.</translation>
         <translation>Certifikát + heslo</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="273"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="276"/>
         <source>Update account %1</source>
         <translation>Aktualizovat účet %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="277"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="280"/>
         <source>Enter password for account %1</source>
         <translation>Zadejte heslo pro účet %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="285"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="288"/>
         <source>Set certificate for account %1</source>
         <translation>Nastavit certifikát pro účet %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="294"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="297"/>
         <source>Enter password/certificate for account %1</source>
         <translation>Zadejte heslo/certifikát pro účet %1</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="373"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="379"/>
         <source>Hide</source>
         <translation>Skrýt</translation>
     </message>
@@ -1644,7 +1644,7 @@ jednu číslici a jedno velké písmeno.</translation>
         <translation>Soubory certifikátů (*.p12 *.pem)</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_create_account.cpp" line="357"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="363"/>
         <source>File does not exists or cannot be read.</source>
         <translation>Soubor neexistuje, nebo jej nelze přečíst.</translation>
     </message>
@@ -1654,24 +1654,24 @@ jednu číslici a jedno velké písmeno.</translation>
         <translation>Vytvořit nový účet</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="36"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="32"/>
         <source>Please enter credentials for your data box.</source>
         <translation>Prosím, zadejte přihlašovací údaje pro přístup k Vaší datové schránce.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="83"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="79"/>
         <source>Username:</source>
         <translation>Uživatelské jméno:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="68"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="64"/>
         <source>Enter a descriptive name for your account.
 This name serves for easier account identification in the application.</source>
         <translation>Zadejte název pro svůj účet.
 Toto jméno slouží ke snažší identifikaci účtu v aplikaci.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="110"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="106"/>
         <source>If the credentials you entered are for a test account,
 select this option. For normal account
 (created at a Czech Point) leave this unchecked.</source>
@@ -1680,33 +1680,33 @@ vyberte tuto možnost.V případě normálního účtu
 (založeného na Czech Pointu) ponechte nastavení odškrtnuté.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="115"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="111"/>
         <source>This is a test account</source>
         <translation>Tento účet je testovací</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="122"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="118"/>
         <source>Login method:</source>
         <translation>Způsob přihlášení:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="129"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="125"/>
         <source>Select authorisation method for logging in to the databox.</source>
         <translation>Vyberte metodu pro přihlášení do datové schránky.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="152"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="148"/>
         <source>Enter your password.</source>
         <translation>Zadejte Vaše heslo.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="162"/>
-        <location filename="../src/gui/dlg_create_account.cpp" line="368"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="158"/>
+        <location filename="../src/gui/dlg_create_account.cpp" line="374"/>
         <source>View</source>
         <translation>Zobrazit</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="184"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="180"/>
         <source>If no PIN is configured then the password will be saved
 in a readable format in the configuration file which is
 usually located in your home directory. Do not use this
@@ -1728,49 +1728,49 @@ zapomenete, pak neexistuje jednoduchý způsob, jak obdržet
 uložené heslo v dešifrované podobě.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="219"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="215"/>
         <source>Select a certificate.</source>
         <translation>Vyberte certifikát pro přihlášení.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="253"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="249"/>
         <source>If selected, the account will be included into
 the synchronisation process of all accounts.</source>
         <translation>Účet bude zahrnut do hromadné synchronizace
 všech účtů, pokud je tato volba nastavena.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="257"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="253"/>
         <source>Synchronise this account together with all accounts</source>
         <translation>Synchronizovat tento účet společně se všemi účty</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="143"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="139"/>
         <source>Password:</source>
         <translation>Heslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="61"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="57"/>
         <source>Account title:</source>
         <translation>Pojmenování účtu:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="90"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="86"/>
         <source>Enter the login name for this account.</source>
         <translation>Zadejte přihlašovací jméno k tomuto účtu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="196"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="192"/>
         <source>Remember password</source>
         <translation>Pamatovat si heslo</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="203"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="199"/>
         <source>Certificate file:</source>
         <translation>Certifikát:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_create_account.ui" line="222"/>
+        <location filename="../src/gui/ui/dlg_create_account.ui" line="218"/>
         <source>Add</source>
         <translation>Přidat</translation>
     </message>
@@ -2053,24 +2053,24 @@ Vyhledávání s aktuálními parametry tak pravděpodobně nevrátí žádné v
         <translation>Vyhledat příjemce</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="26"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="22"/>
         <source>Current account:</source>
         <translation>Aktuální účet:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="33"/>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="71"/>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="215"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="29"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="67"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="211"/>
         <source>n/a</source>
         <translation>n/a</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="64"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="60"/>
         <source>Use full-text search similar to the ISDS client portal.</source>
         <translation>Použít fulltextové vyhledávání podobné vyhledávání na portálu ISDS.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="86"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="82"/>
         <source>Your account is not of type OVM (i.e. non-OVM). Sending of post data messages
 from your account is activated. This means that you can only search for accounts
 of the type OVM and accounts that have the the receiving of post data messages
@@ -2083,53 +2083,53 @@ omezení nemusí výsledek tohoto vyhledávání obsahovat všechny jinak odpov�
 datové zprávy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="93"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="89"/>
         <source>Note: Your search results will be limited. See tooltip for more information.</source>
         <translation>Poznámka: Výsledky vyhledávání budou omezeny. Více najdete v tooltipu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="113"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="109"/>
         <source>Databox type:</source>
         <translation>Typ datové schránky:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="123"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="119"/>
         <source>Search in fileds:</source>
         <translation>Vyhledávat v položkách:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="140"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="136"/>
         <source>Text:</source>
         <translation>Text:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="150"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="146"/>
         <source>ID:</source>
         <translation>ID schránky:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="160"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="156"/>
         <source>IČ:</source>
         <translation>IČ:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="170"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="166"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="480"/>
         <source>Name:</source>
         <translation>Jméno:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="180"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="176"/>
         <source>Postal code:</source>
         <translation>Směrovací číslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="195"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="191"/>
         <source>Search</source>
         <translation>Vyhledat</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_ds_search.ui" line="235"/>
+        <location filename="../src/gui/ui/dlg_ds_search.ui" line="231"/>
         <source>Filter:</source>
         <translation>Filtr:</translation>
     </message>
@@ -2671,17 +2671,17 @@ zanést neplatná data.</translation>
         <translation>Datovka - nastavení</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="46"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="42"/>
         <source>Downloading</source>
         <translation>Stahování</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="70"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="66"/>
         <source>Message downloading</source>
         <translation>Stahování zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="88"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="84"/>
         <source>When allowed, the application will automatically download
 messages on background without blocking the user interface.
 Download period can be selected below.</source>
@@ -2690,30 +2690,30 @@ nové zprávy na pozadí bez blokování uživatelského rozhraní.
 Periodu stahování můžete nastavit níže.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="93"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="89"/>
         <source>Automatically synchronise all in background</source>
         <translation>Automaticky provádět hromadnou synchronizaci na pozadí</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="108"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="104"/>
         <source>Check every</source>
         <translation>Kontrolovat každých</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="121"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="117"/>
         <source>Sets a time interval for automatic synchronisation
 of all accounts on background.</source>
         <translation>Nastavuje interval pro periodickou automatickou
 synchronizaci všech účtů na pozadí aplikace.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="144"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="261"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="140"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="257"/>
         <source>minutes</source>
         <translation>minut</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="172"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="168"/>
         <source>When accessing the data boxes, only envelopes of messages are downloaded at first.
 You can then download the whole message, including any attachments, manually.
 When this option is turned on, the application will perform automatic downloading
@@ -2725,34 +2725,34 @@ aplikace automaticky stáhne kompletní zprávy. Jedinou nevýhodou tohoto pří
 je delší doba stahování při pomalejším internetovém připojení.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="179"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="175"/>
         <source>Automatically download whole messages (may be slow)</source>
         <translation>Automaticky stahovat kompletní zprávy (může být pomalé)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="192"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="188"/>
         <source>When allowed, the application will automatically synchronise accounts
 and will also download new messages on background at startup.</source>
         <translation>Pokud povolíte tuto možnost, aplikace bude automaticky synchronizovat
 účty a stahovat nové zprávy na pozadí po spuštění aplikace.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="196"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="192"/>
         <source>Automatically synchronize all accounts on startup</source>
         <translation>Automaticky synchronizovat všechny účty po spuštění aplikace</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="212"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="208"/>
         <source>Connection settings</source>
         <translation>Nastavení připojení</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="226"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="222"/>
         <source>Timeout for message downloading is set on</source>
         <translation>Časový limit pro stahování zpráv je nastaven na</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="239"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="235"/>
         <source>Allows to set a timeout interval for network connection.
 If you have a slow network connection or you cannot
 download complete messages, here you can increase
@@ -2763,46 +2763,46 @@ stáhnou kompletní zprávy, zde můžete zvýšit časový limit pro
 udržení spojení.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="309"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="305"/>
         <source>Mark message as read settings</source>
         <translation>Nastavení označování přečtených zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="326"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="322"/>
         <source>Automatically mark message as read after</source>
         <translation>Automaticky označit zprávu jako lokálně přečtenou za</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="339"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="335"/>
         <source>Allows to set a timeout interval for
 automatic marking of messages as read.</source>
         <translation>Umožňuje nastavit časový interval pro
 automatické označování zpráv jako přečtené.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="362"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="358"/>
         <source>seconds</source>
         <translation>sekund</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="410"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="406"/>
         <source>New versions</source>
         <translation>Nové verze</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="422"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="418"/>
         <source>When this option is active, the application will automatically
 check for new application versions on startup.</source>
         <translation>Pokud je tato volba aktivní, aplikace bude automaticky
 zjišťovat nové verze programu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="426"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="422"/>
         <source>Check for new application versions on startup</source>
         <translation>Po spuštění kontrolovat nové verze aplikace</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="445"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="441"/>
         <source>When this option is active, the application will send information about
 the application version and related data as part of the new version request.
 These data contain the application version, versions of libraries, information
@@ -2818,29 +2818,29 @@ Neposílají se žádná osobní data.
 Odeslaná data jsou použita pouze pro statistické účely.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="454"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="450"/>
         <source>Send version info alongside the request</source>
         <translation>Posílat informaci o stávající verzi s dotazem</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="481"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="477"/>
         <source>Security</source>
         <translation>Bezpečnost</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="493"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="489"/>
         <source>Storage options</source>
         <translation>Volba uložení dat</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="506"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="502"/>
         <source>It migth be possible for a person with access to the configuration directory to modify data in the application databases with a malicious intent or to steal you data-box login credentials. Using the checkboxes below, you can influence which data the application stores on the disk.
 Note: Password storing can be adjusted on a per-account basis in the credentials dialogue.</source>
         <translation>Osoby, které mají přístup do konfiguračního adresáře, mohou zlomyslně modifikovat data v databázi, nebo odcizit přihlašovací údaje k datovým schránkám. Pomocí následujících voleb můžete zvolit, jaká data se budou ukládat na disk.
 Poznámka: Ukládání hesla se dá nastavit pro jednotlivé účty v nastavení účtu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="523"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="519"/>
         <source>When allowed, messages are stored in database files. Such storage
 might be compromised by an attacker and the content of messages
 might be modified.
@@ -2854,12 +2854,12 @@ Pokud tuto možnost vypnete, zprávy se budou při každém spuštění aplikace
 nově stahovat. V tomto případě nemusí být k dispozici zprávy starší 90 dní.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="531"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="527"/>
         <source>Allow storing of messages</source>
         <translation>Povolit ukládání zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="547"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="543"/>
         <source>The application stores some additional data outside the message
 database. These contain information about the data boxes allowing
 for notification about expiring passwords etc. These data might also
@@ -2870,89 +2870,89 @@ Tato data by mohla být rovněž změněna případným útočníkem, ale s rela
 malým dopadem.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="553"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="549"/>
         <source>Allow storing of additional data</source>
         <translation>Povolit ukládání ostatních dat</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="572"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="568"/>
         <source>Signing certificate validity</source>
         <translation>Platnost podepisujícího certifikátu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="589"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="585"/>
         <source>Check against current date (safer)</source>
         <translation>Kontrolovat proti aktuálnímu datu (bezpečnější)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="612"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="608"/>
         <source>Check against the date of download</source>
         <translation>Kontrolovat proti datu stažení zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="632"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="628"/>
         <source>Check certificate revocation list (CRL).</source>
         <translation>Kontrolovat seznam zneplatněných certifikátů.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="635"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="631"/>
         <source>Check certificate revocation list (CRL)</source>
         <translation>Kontrolovat seznam zneplatněných certifikátů</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="654"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="650"/>
         <source>Message time stamps expiring within the selected numer
 of days will be included into the expiration notification summary.</source>
         <translation>Časová razítka zpráv expirujících v průběhu zvoleného počtu
 dnů budou zahrnuta do upozornění o expiraci.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="658"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="654"/>
         <source>Message time stamp expiration</source>
         <translation>Expirace časových razítek zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1329"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1325"/>
         <source>Message filename:</source>
         <translation>Jméno souboru zprávy:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1369"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1365"/>
         <source>Acceptance info filename:</source>
         <translation>Jméno souboru doručenky:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1382"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1378"/>
         <source>Attachment filename:</source>
         <translation>Jméno souboru přílohy:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1678"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1674"/>
         <source>message subject (separated by &apos;-&apos;)</source>
         <translation>předmět zprávy (oddělen &quot;-&quot;)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1692"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1688"/>
         <source>data-box ID</source>
         <translation>ID schránky</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1720"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1716"/>
         <source>attachment filename (including suffix)</source>
         <translation>jméno souboru přílohy (včetně přípony)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1762"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1758"/>
         <source>sender name (separated by &apos;-&apos;)</source>
         <translation>jméno odesílatele (oddělené &quot;-&quot;)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1867"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1863"/>
         <source>Note: Illegal characters in the resulting filenames will be replaced.</source>
         <translation>Poznámka: Nepovolené znaky ve výsledných názvech souborů budou nahrazeny.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="584"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="580"/>
         <source>Validity of the signing certificate will be checked against
 the current date. This provides the highest protection against
 compromised certificates.</source>
@@ -2961,7 +2961,7 @@ datu. Toto nastavení poskytuje maximální ochranu proti
 kompromitovaným certifikátům.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="605"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="601"/>
         <source>The validity of the signing certificate is checked against
 the message download date. This allows a long-term storing
 of messages without generating false alarms about invalid
@@ -2974,12 +2974,12 @@ je méně bezpečná, protože útočník by mohl upravit časy stažení
 zpráv v databázi aplikace.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="670"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="666"/>
         <source>Check for time stamps expiring within</source>
         <translation>Zjišťovat časová razítka expirující do</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="683"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="679"/>
         <source>Allows to set an interval specifying how many days before
 a timestamp expiration a message will be included in
 signature check results.</source>
@@ -2988,115 +2988,115 @@ před vypršením platnosti časového razítka bude zpráva zahrnuta
 do výsledku kontroly.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="710"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="706"/>
         <source>days</source>
         <translation>dnů</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="836"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="832"/>
         <source>Navigation</source>
         <translation>Navigace</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="848"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="844"/>
         <source>When account is opened, select</source>
         <translation>Když je vybrán účet, označit</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="864"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="860"/>
         <source>Newest message</source>
         <translation>Nejnovější zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="884"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="880"/>
         <source>Last displayed message</source>
         <translation>Poslední zobrazenou zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="860"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="856"/>
         <source>After an account is selected,
 select the newest message.</source>
         <translation>Po vybrání účtu bude zvolena
 nejnovější zpráva.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="752"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="748"/>
         <source>When PIN (master password) is set then the application cannot be started without entering a valid PIN value. The PIN is also used to protect the stored account passwords. If an attacker gains the access to the application configuration he cannot easily recover the stored passwords as they are encrypted using the PIN value. The PIN does not protect any stored messages.
 Note: If you forget the PIN then you&apos;ll loose all stored passwords. Other stored data won&apos;t be affected.</source>
         <translation>Pokud je nastaven PIN (hlavní heslo), tak aplikace nemůže být spuštěna bez zadání platného PINu. PIN je také použit k ochraně uložených hesel jednotlivých účtů. Pokud útočník získá přístup ke konfiguraci aplikace, tak nemůže jednoduše zjistit uložená hesla, protože ta jsou zašifrována pomocí PINu. PIN není použit k ochraně uložených zpráv.
 Poznámka: Jestliže zapomenete PIN, pak přijdete o uložená hesla. Ostatní uložená data nebudou ztrátou postižena.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="880"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="876"/>
         <source>After an account is selected,
 select the last displayed message for this account.</source>
         <translation>Po vybrání účtu bude zvolena
 poslední zbrazená zpráva daného účtu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="897"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="893"/>
         <source>After an account is selected,
 no particular message will be selected.</source>
         <translation>Po vybrání účtu nebude zvolena
 žádná konkrétní zpráva.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="901"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="897"/>
         <source>Nothing</source>
         <translation>Nic</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="928"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="924"/>
         <source>Interface</source>
         <translation>Rozhraní</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="940"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="936"/>
         <source>Style of toolbar buttons</source>
         <translation>Vzhled tlačítek v panelu nástrojů</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="952"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="948"/>
         <source>Only icons will be displayed in the toolbar.</source>
         <translation>Pouze ikony budou zobrazeny v nástrojovém panelu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="955"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="951"/>
         <source>Only display the icon</source>
         <translation>Zobrazovat pouze ikony</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="968"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="964"/>
         <source>Icons and text beside them will be displayed in the toolbar.</source>
         <translation>Ikony a popisky vedle nich budou zobrazeny v nástrojovém panelu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="971"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="967"/>
         <source>The text appears beside the icon</source>
         <translation>Zobrazovat text za ikonou</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="984"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="980"/>
         <source>Icons and text under them will be displayed in the toolbar.</source>
         <translation>Ikony a popisky pod nimi budou zobrazeny v nástrojovém panelu.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="987"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="983"/>
         <source>The text appears under the icon</source>
         <translation>Zobrazovat text pod ikonou</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1004"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1000"/>
         <source>Note: Toolbar settings will not be applied until you restart the application.</source>
         <translation>Poznámka: Nastavení panelu nástrojů nebude změněno dokud nerestartujete aplikaci.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1028"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1024"/>
         <source>Directories</source>
         <translation>Adresáře</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1043"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1039"/>
         <source>When allowed, the application will use the following
 directories as paths for loading and saving files for
 all accounts. Per-account path remembering will
@@ -3106,121 +3106,121 @@ adresáře k ukládání a otevírání zpráv pro všechny účty.
 Pamatování cest pro jednotlivé účty bude vypnuto.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1049"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1045"/>
         <source>Use global path settings</source>
         <translation>Používat nastavené globální cesty</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1067"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1063"/>
         <source>Path for attachment saving is currently set to:</source>
         <translation>Cesta pro ukládání příloh je aktuálně nastavena na:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1099"/>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1159"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1095"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1155"/>
         <source>Change</source>
         <translation>Změnit</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1127"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1123"/>
         <source>Path for adding files as attachments is currently set to:</source>
         <translation>Cesta pro přidávání příloh je aktuálně nastavena na:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1096"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1092"/>
         <source>Select a new path for attachment saving.</source>
         <translation>Vyberte novou cestu pro ukládání příloh.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="739"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="735"/>
         <source>PIN settings</source>
         <translation>Nastavení PINu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="771"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="767"/>
         <source>Set PIN</source>
         <translation>Nastavit PIN</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="784"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="780"/>
         <source>Change PIN</source>
         <translation>Změnit PIN</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="797"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="793"/>
         <source>Clear PIN</source>
         <translation>Zrušit PIN</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1156"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1152"/>
         <source>Select a new path for adding attachment files.</source>
         <translation>Vyberte novou cestu pro vkládání příloh.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1198"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1194"/>
         <source>Saving</source>
         <translation>Ukládání</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1210"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1206"/>
         <source>These actions will be performed when saving all message attachments.</source>
         <translation>Tyto akce budou prováděny současně s ukládáním všech příloh.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1213"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1209"/>
         <source>When saving all attachments also</source>
         <translation>Při ukládání všech příloh také</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1230"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1226"/>
         <source>When saving all attachments also save
 signed message as ZFO to the same path.</source>
         <translation>Uložit také podepsanou zprávu jako ZFO
 soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1234"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1230"/>
         <source>Save signed message to ZFO</source>
         <translation>Ulož podepsanou zprávu jako ZFO</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1247"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1243"/>
         <source>When saving all attachments also save
 message envelope as PDF to the same path.</source>
         <translation>Uložit také obálku zprávy jako PDF
 soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1251"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1247"/>
         <source>Save message envelope to PDF</source>
         <translation>Ulož obálku zprávy jako PDF</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1264"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1260"/>
         <source>When saving all attachments also save
 signed acceptance info as ZFO to the same path.</source>
         <translation>Uložit také podepsanou doručenku jako ZFO
 soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1268"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1264"/>
         <source>Save signed acceptance info to ZFO</source>
         <translation>Ulož podepsanou doručenku jako ZFO</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1281"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1277"/>
         <source>When saving all attachments also save
 acceptance info as PDF to the same path.</source>
         <translation>Uložit také informace o doručení jako PDF
 soubor do cesty, kam se ukládají přílohy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1285"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1281"/>
         <source>Save acceptance info to PDF</source>
         <translation>Ulož doručenku jako PDF</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1303"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1299"/>
         <source>Specifies the format of file names for attachment files
 and other exported files. When saving attachment
 files, the default value is %f (i.e. saved file name will
@@ -3231,62 +3231,62 @@ jméno ukládáného souboru bude odpovídat původnímu jmému
 přílohy včetně přípony).</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1309"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1305"/>
         <source>File name format of saved/exported files</source>
         <translation>Formát jména ukládaných/exportovaných souborů</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1506"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1502"/>
         <source>acceptance year (YYYY)</source>
         <translation>rok doručení (YYYY)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1520"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1516"/>
         <source>acceptance month (MM)</source>
         <translation>měsíc doručení (MM)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1534"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1530"/>
         <source>acceptance day (DD)</source>
         <translation>den doručení (DD)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1548"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1544"/>
         <source>acceptance minute (mm)</source>
         <translation>minuta doručení (mm)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1562"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1558"/>
         <source>acceptance hour (hh)</source>
         <translation>hodina doručení (hh)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1604"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1600"/>
         <source>account name (separated by &apos;-&apos;)</source>
         <translation>pojmenování účtu (odděleno &quot;-&quot;)</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1664"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1660"/>
         <source>message ID</source>
         <translation>ID zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1748"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1744"/>
         <source>user ID</source>
         <translation>ID uživatele</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1796"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1792"/>
         <source>Example:</source>
         <translation>Příklad:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1824"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1820"/>
         <source>means</source>
         <translation>znamená</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1889"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1885"/>
         <source>Saves acceptance info for every attachment file separately.
 The acceptance info file name has to contain the original
 attachment file name (parameter %f is required).</source>
@@ -3295,22 +3295,22 @@ Název souboru doručenky musí obsahovat původní
 název přílohy (je vyžadován parametr %f).</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1894"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1890"/>
         <source>Save acceptance info for every attachment file. Format:</source>
         <translation>Uložit doručenku pro každý soubor přílohy. Formát:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1933"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1929"/>
         <source>Language</source>
         <translation>Jazyk</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1945"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1941"/>
         <source>Application language</source>
         <translation>Jazyk aplikace</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_preferences.ui" line="1968"/>
+        <location filename="../src/gui/ui/dlg_preferences.ui" line="1964"/>
         <source>Note: Language settings will not be applied until you restart the application.</source>
         <translation>Poznámka: Nastavení jazyka nebude změněno dokud nerestartujete aplikaci.</translation>
     </message>
@@ -3335,101 +3335,101 @@ název přílohy (je vyžadován parametr %f).</translation>
         <translation>Nastavení proxy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="45"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="41"/>
         <source>The HTTPS protocol is used when accessing the ISDS server while HTTP is used to download the certificate revocation list and information about new application versions.</source>
         <translation>Protokol HTTPS je využíván k přístupu na server ISDS. Protokol HTTP je použit ke stažení seznamu zneplatněných certifikátů a informací o nových verzích aplikace.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="64"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="60"/>
         <source>HTTPS proxy</source>
         <translation>HTTPS proxy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="76"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="79"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="290"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="293"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="72"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="75"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="286"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="289"/>
         <source>No proxy</source>
         <translation>Bez proxy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="92"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="95"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="306"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="309"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="88"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="91"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="302"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="305"/>
         <source>Automatic proxy detection</source>
         <translation>Automatická detekce proxy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="125"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="128"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="339"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="342"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="121"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="124"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="335"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="338"/>
         <source>Manual proxy settings</source>
         <translation>Ruční nastavení proxy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="143"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="357"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="139"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="353"/>
         <source>Proxy hostname:</source>
         <translation>Jméno počítače proxy:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="156"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="370"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="152"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="366"/>
         <source>Enter your proxy hostname</source>
         <translation>Zadejte název vašeho proxy hostitele</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="169"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="383"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="165"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="379"/>
         <source>Port:</source>
         <translation>Port:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="188"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="414"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="184"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="410"/>
         <source>Enter port</source>
         <translation>Zadejte číslo portu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="210"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="213"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="206"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="209"/>
         <source>Show HTTPS proxy authentication</source>
         <translation>Zobrazit přihlašovací údaje HTTPS proxy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="436"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="439"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="432"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="435"/>
         <source>Show HTTP proxy authentication</source>
         <translation>Zobrazit přihlašovací údaje HTTP proxy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="229"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="455"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="225"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="451"/>
         <source>Username:</source>
         <translation>Uživatelské jméno:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="236"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="462"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="232"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="458"/>
         <source>Enter your username</source>
         <translation>Zadejte své uživatelské jméno</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="249"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="475"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="245"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="471"/>
         <source>Password:</source>
         <translation>Heslo:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="256"/>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="482"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="252"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="478"/>
         <source>Enter your password</source>
         <translation>Zadejte heslo</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_proxysets.ui" line="278"/>
+        <location filename="../src/gui/ui/dlg_proxysets.ui" line="274"/>
         <source>HTTP proxy</source>
         <translation>HTTP proxy</translation>
     </message>
@@ -3606,192 +3606,192 @@ zprávu &apos;%1&apos;.</translation>
         <translation>Vytvořit a poslat zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="42"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="38"/>
         <source>Please fill in at least the &lt;b&gt;subject&lt;/b&gt;, &lt;b&gt;one recipient&lt;/b&gt; and &lt;b&gt;one attachment&lt;/b&gt;:</source>
         <translation>Prosím, vyplňte ve formuláři &lt;b&gt;předmět&lt;/b&gt;, &lt;b&gt;alespoň jednoho příjemce&lt;/b&gt; a &lt;b&gt;alespoň jednu přílohu&lt;/b&gt;:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="67"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="63"/>
         <source>Account:</source>
         <translation>Účet:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="93"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="89"/>
         <source>Sender:</source>
         <translation>Odesílatel:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="116"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="112"/>
         <source>Subject:</source>
         <translation>Předmět:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="132"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="128"/>
         <source>Enter subject of the message</source>
         <translation>Zadejte smysluplný předmět Vaší zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="150"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="146"/>
         <source>This is a PDZ prepaid reply. It means that PDZ is paid by recipient.</source>
         <translation>Toto je předplacená odpověď na PDZ. To znamená, že odpověď hradí příjemce.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="167"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="163"/>
         <source>Show optional fields</source>
         <translation>Zobrazit nepovinné položky</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="204"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="200"/>
         <source>Mandate:</source>
         <translation>Pověření:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="216"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="212"/>
         <source>Number of law</source>
         <translation>Číslo zákona</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="223"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="219"/>
         <source>/</source>
         <translation>/</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="230"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="226"/>
         <source>Year of law</source>
         <translation>Rok vydání zákona</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="237"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="233"/>
         <source>§</source>
         <translation>§</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="244"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="240"/>
         <source>Section of law</source>
         <translation>Paragraf zákona</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="251"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="247"/>
         <source>paragraph</source>
         <translation>odstavec</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="258"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="254"/>
         <source>Paragraph of the corresponding section of the law</source>
         <translation>Odstavec odpovídajícího paragrafu zákona</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="265"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="261"/>
         <source>letter</source>
         <translation>písmeno</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="272"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="268"/>
         <source>Letter of the paragraph</source>
         <translation>Písmeno odstavce</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="281"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="277"/>
         <location filename="../src/gui/dlg_send_message.cpp" line="298"/>
         <source>Our reference number:</source>
         <translation>Naše číslo jednací:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="450"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="446"/>
         <source>Find and add a recipient from ISDS server</source>
         <translation>Najít a přidat příjemce ze serveru ISDS</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="471"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="467"/>
         <source>Allows to enter a data box identifier manually</source>
         <translation>Umožňuje ruční vložení identifikátoru datové schránky</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="295"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="291"/>
         <source>Our file mark:</source>
         <translation>Naše spisová značka:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="309"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="305"/>
         <source>Your reference number:</source>
         <translation>Vaše číslo jednací:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="288"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="316"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="284"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="312"/>
         <source>Enter reference number</source>
         <translation>Zadejte jednací číslo</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="302"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="330"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="298"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="326"/>
         <source>Enter file mark</source>
         <translation>Zadejte spisovou značku</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="323"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="319"/>
         <source>Your file mark:</source>
         <translation>Vaše spisová značka:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="337"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="333"/>
         <source>To hands:</source>
         <translation>K rukám:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="346"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="342"/>
         <source>Enter name of person</source>
         <translation>Zadejte jméno osoby</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="353"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="349"/>
         <source>Personal delivery:</source>
         <translation>Do vlastních rukou:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="360"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="356"/>
         <source>Enable personal delivery</source>
         <translation>Povolit doručení do vlastních rukou</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="390"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="386"/>
         <source>Recipients:</source>
         <translation>Příjemci:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="403"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="399"/>
         <source>Add recipient from contacts selected from existing messages</source>
         <translation>Přidat příjemce z kontaktů existujících zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="406"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="627"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="402"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="623"/>
         <source>Add</source>
         <translation>Přidat</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="426"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="422"/>
         <source>Remove selected recipient from the list</source>
         <translation>Odstranit vybrané příjemce ze seznamu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="429"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="650"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="425"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="646"/>
         <source>Remove</source>
         <translation>Odstranit</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="453"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="449"/>
         <source>Find</source>
         <translation>Najít</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="474"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="470"/>
         <source>Enter Box ID</source>
         <translation>Vložit ID schránky</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="519"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="515"/>
         <source>Even if the recipient did not read this message,
 the message is considered to be accepted after
 (currently) 10 days. This is acceptance through fiction.</source>
@@ -3800,18 +3800,18 @@ bude zpráva považována za doručenou
 (aktuálně) po 10 dnech. Toto je doručení fikcí.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="524"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="520"/>
         <source>Allow acceptance through fiction</source>
         <translation>Povolit doručení fikcí</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="540"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="543"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="536"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="539"/>
         <source>Include sender identification</source>
         <translation>Přidat identifikaci odesílatele</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="562"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="558"/>
         <source>You will pay the transfer charges of the reply message.
 This is useful when the recipient does not have sending
 of postal data messages active.</source>
@@ -3820,43 +3820,43 @@ Tato možnost je užitečná, pokud adresátova schránka
 neumožňuje zasílání poštovních datových zpráv.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="567"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="563"/>
         <source>Pay transfer charges for reply</source>
         <translation>Zaplatit zasílací poplatky za odpověď</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="583"/>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="586"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="579"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="582"/>
         <source>Use offered payment of transfer charges by recipient</source>
         <translation>Využít nabízenou platbu za zasílací poplatky příjemcem</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="611"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="607"/>
         <source>Attachments:</source>
         <translation>Přílohy:</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="624"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="620"/>
         <source>Add a new file to the attachments</source>
         <translation>Přidat nový soubor do příloh</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="647"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="643"/>
         <source>Remove the selected file from attachments</source>
         <translation>Odstranit vybraný soubor z příloh</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="677"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="673"/>
         <source>Open selected file in associated application</source>
         <translation>Otevřít vybraný soubor v externí aplikaci</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="680"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="676"/>
         <source>Open</source>
         <translation>Otevřít</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="725"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="721"/>
         <source>The complete sent message is going to be downloaded together with
 all necessary digital signatures immediately after it has been successfully
 accepted by the ISDS system.
@@ -3871,12 +3871,12 @@ Stažení obsahu odeslané zprávy nezpůsobí doručení žádné dodané
 zprávy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="733"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="729"/>
         <source>Immediately download sent message content</source>
         <translation>Ihned stáhnout obsah odeslané zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="740"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="736"/>
         <source>Before uploading the newly sent message into the records management service
 the application needs to download the newly sent message from
 the ISDS server. This is because the application needs to acquire all
@@ -3886,27 +3886,27 @@ stáhnout nově odeslanou zprávu ze serveru ISDS, protože aplikace potřebuje
 získat všechny nezbytné digitální podpisy.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="746"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="742"/>
         <source>Immediately upload sent message into records management service</source>
         <translation>Ihned nahrát odeslanou zprávu do spisové služby</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="762"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="758"/>
         <source>Attachment size is larger than 50 MB. Message cannot be sent.</source>
         <translation>Velikost příloh je větší než 50 MB. Zprávu nebude možné odeslat.</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="799"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="795"/>
         <source>Send message</source>
         <translation>Odeslat zprávu</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="802"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="798"/>
         <source>Send</source>
         <translation>Odeslat</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/dlg_send_message.ui" line="815"/>
+        <location filename="../src/gui/ui/dlg_send_message.ui" line="811"/>
         <source>Cancel</source>
         <translation>Zrušit</translation>
     </message>
@@ -4234,132 +4234,132 @@ získat všechny nezbytné digitální podpisy.</translation>
         <translation>Informace není dostupná</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="207"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="208"/>
         <source>Message signature is not present.</source>
         <translation>Podpis zprávy není přítomný.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="221"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="225"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="332"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="571"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="226"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="234"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="341"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="584"/>
         <source>Valid</source>
         <translation>Platný</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="349"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="391"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="362"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="404"/>
         <source>Certificate revocation check is turned off!</source>
         <translation>Kontrola zneplatnění certifikátu je vypnutá!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="366"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="379"/>
         <source>Trusted certificates were found</source>
         <translation>Důvěryhodné certifikáty nalezeny</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="370"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="383"/>
         <source>Signing algorithm supported</source>
         <translation>Podepisující algoritmus je podporován</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="375"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="388"/>
         <source>Trusted parent certificate found</source>
         <translation>Důvěryhodný rodičovský certifikát nalezen</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="379"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="392"/>
         <source>Certificate time validity is ok</source>
         <translation>Časová platnost certifikátu je v pořádku</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="387"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="400"/>
         <source>Certificate was not revoked</source>
         <translation>Certifikát nebyl revokován</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="396"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="409"/>
         <source>Certificate signature verified</source>
         <translation>Podpis certifikátu ověřen</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="408"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="421"/>
         <source>Version</source>
         <translation>Verze</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="410"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="473"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="423"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="486"/>
         <source>Serial number</source>
         <translation>Sériové číslo</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="415"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="428"/>
         <source>Signature algorithm</source>
         <translation>Algoritmus podpisu</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="418"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="591"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="431"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="608"/>
         <source>Issuer</source>
         <translation>Vydal</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="423"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="461"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="593"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="436"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="474"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="610"/>
         <source>Organisation</source>
         <translation>Organizace</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="430"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="467"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="601"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="443"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="480"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="618"/>
         <source>Name</source>
         <translation>Jméno</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="436"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="479"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="605"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="449"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="492"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="622"/>
         <source>Country</source>
         <translation>Země</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="440"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="611"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="453"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="628"/>
         <source>Validity</source>
         <translation>Platnost</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="449"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="612"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="462"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="629"/>
         <source>Valid from</source>
         <translation>Platnost od</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="452"/>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="615"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="465"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="632"/>
         <source>Valid to</source>
         <translation>Platnost do</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="457"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="470"/>
         <source>Subject</source>
         <translation>Předmět</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="562"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="575"/>
         <source>Time stamp not present.</source>
         <translation>Časové razítko není přítomno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="584"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="601"/>
         <source>Time</source>
         <translation>Čas</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_signature_detail.cpp" line="598"/>
+        <location filename="../src/gui/dlg_signature_detail.cpp" line="615"/>
         <source>Organisational unit</source>
         <translation>Organizační jednotka</translation>
     </message>
@@ -4551,132 +4551,132 @@ získat všechny nezbytné digitální podpisy.</translation>
         <translation>Otevřít přílohu</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="138"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="141"/>
         <source>Save attachment</source>
         <translation>Uložit přílohu</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="141"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="144"/>
         <source>Save attachments</source>
         <translation>Uložit všechny přílohy</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="353"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="363"/>
         <source>Identification</source>
         <translation>Identifikace</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="355"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="365"/>
         <source>ID</source>
         <translation>ID</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="356"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="366"/>
         <source>Subject</source>
         <translation>Předmět</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="357"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="367"/>
         <source>Message type</source>
         <translation>Typ zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="362"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="372"/>
         <source>Sender</source>
         <translation>Odesílatel</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="363"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="373"/>
         <source>Sender Databox ID</source>
         <translation>ID datové schránky odesílatele</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="364"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="374"/>
         <source>Sender Address</source>
         <translation>Adresa odesílatele</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="368"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="378"/>
         <source>Recipient</source>
         <translation>Příjemce</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="369"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="379"/>
         <source>Recipient Databox ID</source>
         <translation>ID datové schránky příjemce</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="327"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="337"/>
         <source>Events</source>
         <translation>Události</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="370"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="380"/>
         <source>Recipient Address</source>
         <translation>Adresa</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="372"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="392"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="382"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="402"/>
         <source>Status</source>
         <translation>Stav</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="374"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="384"/>
         <source>Delivery time</source>
         <translation>Čas dodání</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="379"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="389"/>
         <source>Acceptance time</source>
         <translation>Čas doručení</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="299"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="309"/>
         <source>Attachments</source>
         <translation>Přílohy</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="400"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="410"/>
         <source>Signature</source>
         <translation>Podpis</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="404"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="412"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="428"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="414"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="422"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="438"/>
         <source>Valid</source>
         <translation>Platný</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="406"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="414"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="428"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="416"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="424"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="438"/>
         <source>Invalid</source>
         <translation>Neplatný</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="407"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="417"/>
         <source>Message signature and content do not correspond!</source>
         <translation>Podpis zprávy a její obsah si neodpovídají!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="409"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="419"/>
         <source>Message signature</source>
         <translation>Podpis zprávy</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="418"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="428"/>
         <source>Certificate revocation check is turned off!</source>
         <translation>Kontrola zneplatnění certifikátu je vypnutá!</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="421"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="431"/>
         <source>Signing certificate</source>
         <translation>Podepisující certifikát</translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="433"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="443"/>
         <source>Time stamp</source>
         <translation>Časové razítko</translation>
     </message>
@@ -4687,8 +4687,8 @@ získat všechny nezbytné digitální podpisy.</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_view_zfo.ui" line="56"/>
-        <source>Verify Signature</source>
-        <translation>Ověřit podpis</translation>
+        <source>Signature details</source>
+        <translation>Detail podpisu</translation>
     </message>
 </context>
 <context>
@@ -5072,12 +5072,12 @@ získat všechny nezbytné digitální podpisy.</translation>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7878"/>
+        <location filename="../src/gui/datovka.cpp" line="7896"/>
         <source>Search: </source>
         <translation>Vyhledat: </translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7750"/>
+        <location filename="../src/gui/datovka.cpp" line="7762"/>
         <source>Mode: offline</source>
         <translation>Režim: nepřipojeno (offline)</translation>
     </message>
@@ -5196,7 +5196,7 @@ získat všechny nezbytné digitální podpisy.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3697"/>
-        <location filename="../src/gui/datovka.cpp" line="7727"/>
+        <location filename="../src/gui/datovka.cpp" line="7739"/>
         <source>Datovka - Free client for Datové schránky</source>
         <translation>Datovka - Svobodný klient pro Datové schránky</translation>
     </message>
@@ -5596,17 +5596,17 @@ Změnit heslo nyní?</translation>
         <translation>Výsledek rozdělení databáze</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7887"/>
+        <location filename="../src/gui/datovka.cpp" line="7905"/>
         <source>Enter sought expression</source>
         <translation>Zadete hledaný výraz</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8410"/>
+        <location filename="../src/gui/datovka.cpp" line="8468"/>
         <source>Import of messages to account %1 finished</source>
         <translation>Import zpráv na účet %1 skončil</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7779"/>
+        <location filename="../src/gui/datovka.cpp" line="7795"/>
         <source>In Progress</source>
         <translation>Vyřizuje se</translation>
     </message>
@@ -5787,7 +5787,7 @@ Změnit heslo nyní?</translation>
     <message>
         <location filename="../src/gui/datovka.cpp" line="7570"/>
         <location filename="../src/gui/datovka.cpp" line="7621"/>
-        <location filename="../src/gui/datovka.cpp" line="8274"/>
+        <location filename="../src/gui/datovka.cpp" line="8332"/>
         <source>Do you want to continue?</source>
         <translation>Chcete pokračovat?</translation>
     </message>
@@ -5802,22 +5802,22 @@ Změnit heslo nyní?</translation>
         <translation>DB soubor (*.db)</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8420"/>
+        <location filename="../src/gui/datovka.cpp" line="8478"/>
         <source>Messages import result</source>
         <translation>Výsledek importu zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8421"/>
+        <location filename="../src/gui/datovka.cpp" line="8479"/>
         <source>Import of messages into account &apos;%1&apos; finished with result:</source>
         <translation>Import zpráv do účtu &apos;%1&apos; skončil s tímto výsledkem:</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8424"/>
+        <location filename="../src/gui/datovka.cpp" line="8482"/>
         <source>Imported messages: %1</source>
         <translation>Importováno zpráv: &apos;%1&apos;</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8425"/>
+        <location filename="../src/gui/datovka.cpp" line="8483"/>
         <source>Non-imported messages: %1</source>
         <translation>Ignorováno zpráv: &apos;%1&apos;</translation>
     </message>
@@ -5852,62 +5852,62 @@ Změnit heslo nyní?</translation>
         <translation>Rozdělení databáze zpráv pro účet &apos;%1&apos; nebylo úspěšné. Prosím, restartujte aplikaci pro načtení původní databáze.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8234"/>
+        <location filename="../src/gui/datovka.cpp" line="8292"/>
         <source>Vacuum cannot be performed on databases in memory.</source>
         <translation>Vakuum nelze aplikovat na databáze v paměti.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8237"/>
+        <location filename="../src/gui/datovka.cpp" line="8295"/>
         <source>Database operation error</source>
         <translation>Chyba funkce databáze</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8238"/>
+        <location filename="../src/gui/datovka.cpp" line="8296"/>
         <source>Database clean-up cannot be performed on database in memory.</source>
         <translation>Pročištění databáze nelze provést s databází v paměti.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8239"/>
+        <location filename="../src/gui/datovka.cpp" line="8297"/>
         <source>Cannot call VACUUM on database in memory.</source>
         <translation>Nelze volat VACUUM na databázi v paměti.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8268"/>
+        <location filename="../src/gui/datovka.cpp" line="8326"/>
         <source>Clean message database</source>
         <translation>Pročisti databázi zpráv</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8269"/>
+        <location filename="../src/gui/datovka.cpp" line="8327"/>
         <source>Performs a message database clean-up for the selected account. This action will block the entire application. The action may take several minutes to be completed. Furthermore, it requires more than %1 of free disk space to successfully proceed.</source>
         <translation>Provede pročištění databáze zpráv ve zvoleném účtu. Tato akce zablokuje celou aplikaci. Dokončení akce může trvat několik minut. Akce navíc k úspěšnému dokončení vyžaduje více jak %1 volného místa na disku.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8281"/>
+        <location filename="../src/gui/datovka.cpp" line="8339"/>
         <source>Performing database clean-up.</source>
         <translation>Provádím pročišťování databáze.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8290"/>
+        <location filename="../src/gui/datovka.cpp" line="8348"/>
         <source>Database clean-up finished.</source>
         <translation>Počištění databáze dokončeno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8295"/>
+        <location filename="../src/gui/datovka.cpp" line="8353"/>
         <source>Database clean-up successful</source>
         <translation>Pročištění úspěšně dokončeno</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8296"/>
+        <location filename="../src/gui/datovka.cpp" line="8354"/>
         <source>The database clean-up has finished successfully.</source>
         <translation>Pročištění databáze bylo úspěšně dokončeno.</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8300"/>
+        <location filename="../src/gui/datovka.cpp" line="8358"/>
         <source>Database clean-up failure</source>
         <translation>Pročištění selhalo</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8301"/>
+        <location filename="../src/gui/datovka.cpp" line="8359"/>
         <source>The database clean-up failed with error message: %1</source>
         <translation>Pročišťování databáze selhalo s chybovým hlášením: %1</translation>
     </message>
@@ -6316,7 +6316,7 @@ Zadejte heslo pro odemčení souboru certifikátu:</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3699"/>
-        <location filename="../src/gui/datovka.cpp" line="7729"/>
+        <location filename="../src/gui/datovka.cpp" line="7741"/>
         <source>Portable version</source>
         <translation>Přenosná verze</translation>
     </message>
@@ -6435,7 +6435,7 @@ Zkuste to znova.</translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="7435"/>
-        <location filename="../src/gui/datovka.cpp" line="8423"/>
+        <location filename="../src/gui/datovka.cpp" line="8481"/>
         <source>Total of messages in database: %1</source>
         <translation>Celkem zpráv v databázi: %1</translation>
     </message>
@@ -6509,12 +6509,12 @@ Zkuste to znova.</translation>
         <translation>nebyl vytvořen!</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7740"/>
+        <location filename="../src/gui/datovka.cpp" line="7752"/>
         <source>Welcome...</source>
         <translation>Vítejte...</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7744"/>
+        <location filename="../src/gui/datovka.cpp" line="7756"/>
         <source>Storage: disk | disk</source>
         <translation>Úložiště: disk | disk</translation>
     </message>
@@ -6602,12 +6602,12 @@ Zpráva je buď ve stavu nevyřízeno, vyřizuje se
 nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7772"/>
+        <location filename="../src/gui/datovka.cpp" line="7786"/>
         <source>Unsettled</source>
         <translation>Nevyřízeno</translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7786"/>
+        <location filename="../src/gui/datovka.cpp" line="7804"/>
         <source>Settled</source>
         <translation>Vyřízeno</translation>
     </message>
@@ -6709,11 +6709,6 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
         <translation>Vyhledat datovou schránku</translation>
     </message>
     <message>
-        <location filename="../src/gui/ui/datovka.ui" line="794"/>
-        <source>Authenticate message file</source>
-        <translation>Ověřit zprávu ze souboru ZFO</translation>
-    </message>
-    <message>
         <location filename="../src/gui/ui/datovka.ui" line="809"/>
         <source>View message from ZFO file</source>
         <translation>Zobrazit zprávu ze souboru ZFO</translation>
@@ -6782,6 +6777,11 @@ nebo vyřízeno (bylo na zprávu odpovězeno)</translation>
         <location filename="../src/gui/ui/datovka.ui" line="782"/>
         <source>Find data box</source>
         <translation>Najít datovou schránku</translation>
+    </message>
+    <message>
+        <location filename="../src/gui/ui/datovka.ui" line="794"/>
+        <source>Authenticate message from ZFO file</source>
+        <translation>Ověřit zprávu ze souboru ZFO</translation>
     </message>
     <message>
         <location filename="../src/gui/ui/datovka.ui" line="797"/>
