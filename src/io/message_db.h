@@ -23,10 +23,10 @@
 
 #pragma once
 
+#include <QCoreApplication> /* Q_DECLARE_TR_FUNCTIONS */
 #include <QDateTime>
 #include <QJsonDocument>
 #include <QList>
-#include <QObject>
 #include <QPair>
 #include <QStringList>
 #include <QString>
@@ -49,6 +49,7 @@ enum Sorting {
  * @brief Encapsulates message database.
  */
 class MessageDb : public DelayedAccessSQLiteDb {
+	Q_DECLARE_TR_FUNCTIONS(MessageDb)
 
 public:
 	/*!
