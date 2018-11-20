@@ -103,7 +103,7 @@ MainWindow::MainWindow(const QString &baseUrl, const QString &token,
 
 	/* Add CA certificate. */
 	if (!caCertPath.isEmpty()) {
-		RecordsManagementConnection::addTrustedCertificate(caCertPath);
+		RecMgmt::Connection::addTrustedCertificate(caCertPath);
 	}
 }
 
@@ -132,13 +132,14 @@ void MainWindow::callSrvcServiceInfo(void)
 	ui_textEdit->clear();
 
 	QByteArray response;
-	if (m_rmc.communicate(RecordsManagementConnection::SRVC_SERVICE_INFO,
+	if (m_rmc.communicate(RecMgmt::Connection::SRVC_SERVICE_INFO,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
-			ServiceInfoResp siRes(
-			    ServiceInfoResp::fromJson(response, &ok));
-			ui_textEdit->append(JsonHelper::toIndentedString(response));
+			RecMgmt::ServiceInfoResp siRes(
+			    RecMgmt::ServiceInfoResp::fromJson(response, &ok));
+			ui_textEdit->append(
+			    RecMgmt::JsonHelper::toIndentedString(response));
 			if (!ok || !siRes.isValid()) {
 				QMessageBox::critical(this,
 				    tr("Communication Error"),
@@ -166,16 +167,17 @@ void MainWindow::callSrvcServiceInfo(void)
 void MainWindow::callSrvcUploadHierarchy(void)
 {
 	ui_textEdit->clear();
-	m_uploadModel.setHierarchy(UploadHierarchyResp());
+	m_uploadModel.setHierarchy(RecMgmt::UploadHierarchyResp());
 
 	if (ui_baseUrlLine->text().isEmpty()) {
 		/* No service URL available. */
 		QMessageBox::warning(this, tr("No URL Available"),
 		    tr("Using dummy response."));
 		bool ok = false;
-		UploadHierarchyResp uhRes(
-		    UploadHierarchyResp::fromJson(uhResDoc, &ok));
-		ui_textEdit->append(JsonHelper::toIndentedString(uhResDoc));
+		RecMgmt::UploadHierarchyResp uhRes(
+		    RecMgmt::UploadHierarchyResp::fromJson(uhResDoc, &ok));
+		ui_textEdit->append(
+		    RecMgmt::JsonHelper::toIndentedString(uhResDoc));
 		if (!ok || !uhRes.isValid()) {
 			QMessageBox::critical(this, tr("Communication Error"),
 			    tr("Invalid dummy response."));
@@ -188,13 +190,14 @@ void MainWindow::callSrvcUploadHierarchy(void)
 	}
 
 	QByteArray response;
-	if (m_rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_HIERARCHY,
+	if (m_rmc.communicate(RecMgmt::Connection::SRVC_UPLOAD_HIERARCHY,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
-			UploadHierarchyResp uhRes(
-			    UploadHierarchyResp::fromJson(response, &ok));
-			ui_textEdit->append(JsonHelper::toIndentedString(response));
+			RecMgmt::UploadHierarchyResp uhRes(
+			    RecMgmt::UploadHierarchyResp::fromJson(response, &ok));
+			ui_textEdit->append(
+			    RecMgmt::JsonHelper::toIndentedString(response));
 			if (!ok || !uhRes.isValid()) {
 				QMessageBox::critical(this,
 				    tr("Communication Error"),
@@ -282,7 +285,7 @@ void MainWindow::callSrvcUploadFile(void)
 		return;
 	}
 
-	UploadFileReq ufreq(idList, fileName, fileContent);
+	RecMgmt::UploadFileReq ufreq(idList, fileName, fileContent);
 	if (!ufreq.isValid()) {
 		ui_textEdit->append(QStringLiteral("Could not create upload file request."));
 		return;
@@ -291,13 +294,14 @@ void MainWindow::callSrvcUploadFile(void)
 	ui_textEdit->append(ufreq.toJson());
 
 	QByteArray response;
-	if (m_rmc.communicate(RecordsManagementConnection::SRVC_UPLOAD_FILE,
+	if (m_rmc.communicate(RecMgmt::Connection::SRVC_UPLOAD_FILE,
 	        ufreq.toJson(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
-			UploadFileResp ufRes(
-			    UploadFileResp::fromJson(response, &ok));
-			ui_textEdit->append(JsonHelper::toIndentedString(response));
+			RecMgmt::UploadFileResp ufRes(
+			    RecMgmt::UploadFileResp::fromJson(response, &ok));
+			ui_textEdit->append(
+			    RecMgmt::JsonHelper::toIndentedString(response));
 			if (!ok || !ufRes.isValid()) {
 				QMessageBox::critical(this,
 				    tr("Communication Error"),
@@ -329,7 +333,7 @@ void MainWindow::callSrvcStoredFiles(void)
 		return;
 	}
 
-	StoredFilesReq sfreq(ids.dmIds, ids.diIds);
+	RecMgmt::StoredFilesReq sfreq(ids.dmIds, ids.diIds);
 	if (!sfreq.isValid()) {
 		ui_textEdit->append(
 		    QStringLiteral("Could not create stored files request."));
@@ -339,13 +343,14 @@ void MainWindow::callSrvcStoredFiles(void)
 	ui_textEdit->append(sfreq.toJson());
 
 	QByteArray response;
-	if (m_rmc.communicate(RecordsManagementConnection::SRVC_STORED_FILES,
+	if (m_rmc.communicate(RecMgmt::Connection::SRVC_STORED_FILES,
 	        sfreq.toJson(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
-			StoredFilesResp sfRes(
-			    StoredFilesResp::fromJson(response, &ok));
-			ui_textEdit->append(JsonHelper::toIndentedString(response));
+			RecMgmt::StoredFilesResp sfRes(
+			    RecMgmt::StoredFilesResp::fromJson(response, &ok));
+			ui_textEdit->append(
+			    RecMgmt::JsonHelper::toIndentedString(response));
 			if (!ok || !sfRes.isValid()) {
 				QMessageBox::critical(this,
 				    tr("Communication Error"),

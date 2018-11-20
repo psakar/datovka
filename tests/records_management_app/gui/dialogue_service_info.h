@@ -38,9 +38,10 @@ public:
 	/*!
 	 * @brief Dialogue constructor.
 	 */
-	explicit DialogueServiceInfo(const ServiceInfoResp &sir,
+	explicit DialogueServiceInfo(const RecMgmt::ServiceInfoResp &sir,
 	    QWidget *parent = Q_NULLPTR);
 
+	virtual
 	~DialogueServiceInfo(void);
 
 private:
