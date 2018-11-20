@@ -32,6 +32,49 @@
 
 namespace RecMgmt {
 
+#if 0
+	/*!
+	 * @brief An connection timeout handler prototype.
+	 *
+	 * @note There is a problem in Qt with multiple inheritance from
+	 *    QObject classes. E.g. we cannot use this class to directly derive
+	 *    dialogues from it. This class serves as an illustration how a
+	 *    progress handler (callback) object could look like. See
+	 *    https://stackoverflow.com/a/2998374 on pure virtual slots
+	 *    https://stackoverflow.com/a/8578921 on QObject multiple inheritance
+	 */
+	class ProgressHandler : protected QObject {
+		Q_OBJECT
+
+	signals:
+		/*!
+		 * @brief When this signal is emitted then the network
+		 *     communication is directly aborted.
+		 */
+		void callAbort(void);
+
+	public slots:
+		/*!
+		 * @brief This slot is connected to the network reply object and
+		 *     handles the ingoing communication.
+		 */
+		void onDownloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+
+		/*!
+		 * @brief This slot is connected to the network reply object and
+		 *     handles the outgoing communication.
+		 */
+		void onUploadProgress(qint64 bytesSent, qint64 bytesTotal);
+
+		/*!
+		 * @brief This slot is connected to the internal timer object
+		 *     and should watch the progress of the data transfer. It
+		 *     should be able to emit the callAbort() signal.
+		 */
+		void onTimeout(void);
+	};
+#endif
+
 	/*!
 	 * @brief Encapsulates connection to records management service.
 	 */
@@ -133,17 +176,19 @@ namespace RecMgmt {
 		 * @brief Blocks until all data are sent and received or until
 		 *     timed out.
 		 *
-		 * @note The reply is aborted when it times out. In this case
-		 *     the reply is not deleted.
+		 * @note The reply is aborted when it times out and no callback
+		 *      object is specified. In this case the reply is not deleted.
 		 *
 		 * @param[in,out] reply Communication context.
 		 * @param[in]     timeOut Communication timeout.
+		 * @param[in,out] cbObj Callback object to be connected to the
+		 *                      internal timer object.
 		 * @return True if all data have been received,
 		 *     false if communication timed out.
 		 */
 		static
 		bool waitReplyFinished(QNetworkReply *reply,
-		    unsigned int timeOut);
+		    unsigned int timeOut, QObject *cbObj);
 
 		/*!
 		 * @brief Process reply data.

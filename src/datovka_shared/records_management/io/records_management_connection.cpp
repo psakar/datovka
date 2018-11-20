@@ -124,7 +124,7 @@ bool RecMgmt::Connection::communicate(enum ServiceId srvcId,
 		    cbObj, SLOT(onUploadProgress(qint64, qint64)));
 	}
 
-	bool retVal = waitReplyFinished(reply, m_timeOut);
+	bool retVal = waitReplyFinished(reply, m_timeOut, cbObj);
 
 	if (cbObj != Q_NULLPTR) {
 		cbObj->disconnect(SIGNAL(callAbort()), reply, SLOT(abort()));
@@ -296,7 +296,7 @@ QNetworkReply *RecMgmt::Connection::sendRequest(const QNetworkRequest &request,
 }
 
 bool RecMgmt::Connection::waitReplyFinished(QNetworkReply *reply,
-    unsigned int timeOut)
+    unsigned int timeOut, QObject *cbObj)
 {
 	if (Q_UNLIKELY(reply == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -307,23 +307,43 @@ bool RecMgmt::Connection::waitReplyFinished(QNetworkReply *reply,
 	QTimer timer;
 	timer.setSingleShot(true);
 	QEventLoop eventLoop;
+	if (cbObj != Q_NULLPTR) {
+		connect(&timer, SIGNAL(timeout()), cbObj, SLOT(onTimeout()));
+	}
 	connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
 	connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-	timer.start(timeOut);
-	eventLoop.exec();
 
-	if (timer.isActive()) {
+	do {
+		timer.start(timeOut);
+		eventLoop.exec();
+
+		/*
+		 * Repeat if a callback object is present and while
+		 * communication has not been stopped.
+		 * Exit if no callback object is specified.
+		 */
+	} while ((cbObj != Q_NULLPTR) && reply->isRunning());
+
+	if (cbObj != Q_NULLPTR) {
+		timer.disconnect(SIGNAL(timeout()), cbObj, SLOT(onTimeout()));
+	}
+	timer.disconnect(SIGNAL(timeout()), &eventLoop, SLOT(quit()));
+	reply->disconnect(SIGNAL(finished()), &eventLoop, SLOT(quit()));
+
+	if (reply->isFinished()) {
 		timer.stop();
-		return true;
 	} else {
 		/* Timeout expired. */
-		disconnect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
 		logErrorNL("%s",
 		    "Connection timed out. Check your internet connection.");
 		reply->abort();
 	}
 
-	return false;
+	/*
+	 * The value QNetworkReply::OperationCanceledError means cancelled via
+	 * abort() or close().
+	 */
+	return reply->error() == QNetworkReply::NoError;
 }
 
 bool RecMgmt::Connection::processReply(QNetworkReply *reply,
