@@ -69,7 +69,7 @@ QList<qint64> readIdentifiers(const QString &str, QChar sep, bool *ok)
 	}
 
 	QStringList strIds(str.split(sep));
-	QList<qint64> ids(createIdList(strIds, Q_NULLPTR));
+	QList<qint64> ids(RecMgmt::createIdList(strIds, Q_NULLPTR));
 	if (ids.size() != strIds.size()) {
 		if (ok != Q_NULLPTR) {
 			*ok = false;

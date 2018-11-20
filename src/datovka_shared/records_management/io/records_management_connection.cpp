@@ -30,13 +30,13 @@
 #include "src/datovka_shared/records_management/io/records_management_connection.h"
 
 /* Must be set to false for production releases. */
-const bool RecordsManagementConnection::ignoreSslErrorsDflt = false;
+const bool RecMgmt::Connection::ignoreSslErrorsDflt = false;
 
 /*!
  * @brief Converts service identifier onto service name.
  */
 static
-const QString &serviceName(enum RecordsManagementConnection::ServiceId srvcId)
+const QString &serviceName(enum RecMgmt::Connection::ServiceId srvcId)
 {
 	static const QString SrvServiceInfo(QStringLiteral("service_info"));
 	static const QString SrvUploadHierarchy(QStringLiteral("upload_hierarchy"));
@@ -45,16 +45,16 @@ const QString &serviceName(enum RecordsManagementConnection::ServiceId srvcId)
 	static const QString InvalidService;
 
 	switch (srvcId) {
-	case RecordsManagementConnection::SRVC_SERVICE_INFO:
+	case RecMgmt::Connection::SRVC_SERVICE_INFO:
 		return SrvServiceInfo;
 		break;
-	case RecordsManagementConnection::SRVC_UPLOAD_HIERARCHY:
+	case RecMgmt::Connection::SRVC_UPLOAD_HIERARCHY:
 		return SrvUploadHierarchy;
 		break;
-	case RecordsManagementConnection::SRVC_UPLOAD_FILE:
+	case RecMgmt::Connection::SRVC_UPLOAD_FILE:
 		return SrvUploadFile;
 		break;
-	case RecordsManagementConnection::SRVC_STORED_FILES:
+	case RecMgmt::Connection::SRVC_STORED_FILES:
 		return SrvStoredFiles;
 		break;
 	default:
@@ -68,8 +68,7 @@ const QString &serviceName(enum RecordsManagementConnection::ServiceId srvcId)
  * @brief Create URL from base URL and from service identifier.
  */
 static
-QUrl constructUrl(QString baseUrl,
-    enum RecordsManagementConnection::ServiceId srvcId)
+QUrl constructUrl(QString baseUrl, enum RecMgmt::Connection::ServiceId srvcId)
 {
 	const QString &srvcName(serviceName(srvcId));
 
@@ -83,7 +82,7 @@ QUrl constructUrl(QString baseUrl,
 	return QUrl(baseUrl + srvcName);
 }
 
-RecordsManagementConnection::RecordsManagementConnection(bool ignoreSslErrors,
+RecMgmt::Connection::Connection(bool ignoreSslErrors,
     QObject *parent)
     : QObject(parent),
     m_baseUrlStr(),
@@ -97,14 +96,14 @@ RecordsManagementConnection::RecordsManagementConnection(bool ignoreSslErrors,
 	    this, SLOT(handleSslErrors(QNetworkReply *, const QList<QSslError>)));
 }
 
-void RecordsManagementConnection::setConnection(const QString &baseUrl,
+void RecMgmt::Connection::setConnection(const QString &baseUrl,
     const QString &token)
 {
 	m_baseUrlStr = baseUrl;
 	m_tokenStr = token;
 }
 
-bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
+bool RecMgmt::Connection::communicate(enum ServiceId srvcId,
     const QByteArray &requestData, QByteArray &replyData, QObject *cbObj)
 {
 	debugFuncCall();
@@ -125,7 +124,7 @@ bool RecordsManagementConnection::communicate(enum ServiceId srvcId,
 		    cbObj, SLOT(onUploadProgress(qint64, qint64)));
 	}
 
-	bool retVal = waitReplyFinished(reply, m_timeOut);
+	bool retVal = waitReplyFinished(reply, m_timeOut, cbObj);
 
 	if (cbObj != Q_NULLPTR) {
 		cbObj->disconnect(SIGNAL(callAbort()), reply, SLOT(abort()));
@@ -180,7 +179,7 @@ bool readAndAddCert(const QByteArray &certData, QSsl::EncodingFormat fmt)
 	return true;
 }
 
-bool RecordsManagementConnection::addTrustedCertificate(const QString &filePath)
+bool RecMgmt::Connection::addTrustedCertificate(const QString &filePath)
 {
 	QByteArray certData;
 
@@ -218,7 +217,7 @@ bool RecordsManagementConnection::addTrustedCertificate(const QString &filePath)
 	return false;
 }
 
-void RecordsManagementConnection::handleSslErrors(QNetworkReply *reply,
+void RecMgmt::Connection::handleSslErrors(QNetworkReply *reply,
     const QList<QSslError> &errors)
 {
 	Q_UNUSED(reply);
@@ -246,8 +245,7 @@ void RecordsManagementConnection::handleSslErrors(QNetworkReply *reply,
 	}
 }
 
-QNetworkRequest RecordsManagementConnection::createRequest(
-    enum ServiceId srvcId) const
+QNetworkRequest RecMgmt::Connection::createRequest(enum ServiceId srvcId) const
 {
 	debugFuncCall();
 
@@ -265,8 +263,8 @@ QNetworkRequest RecordsManagementConnection::createRequest(
 	return request;
 }
 
-QNetworkReply *RecordsManagementConnection::sendRequest(
-    const QNetworkRequest &request, const QByteArray &data)
+QNetworkReply *RecMgmt::Connection::sendRequest(const QNetworkRequest &request,
+    const QByteArray &data)
 {
 	debugFuncCall();
 
@@ -297,8 +295,8 @@ QNetworkReply *RecordsManagementConnection::sendRequest(
 	return reply;
 }
 
-bool RecordsManagementConnection::waitReplyFinished(QNetworkReply *reply,
-    unsigned int timeOut)
+bool RecMgmt::Connection::waitReplyFinished(QNetworkReply *reply,
+    unsigned int timeOut, QObject *cbObj)
 {
 	if (Q_UNLIKELY(reply == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -309,26 +307,46 @@ bool RecordsManagementConnection::waitReplyFinished(QNetworkReply *reply,
 	QTimer timer;
 	timer.setSingleShot(true);
 	QEventLoop eventLoop;
+	if (cbObj != Q_NULLPTR) {
+		connect(&timer, SIGNAL(timeout()), cbObj, SLOT(onTimeout()));
+	}
 	connect(&timer, SIGNAL(timeout()), &eventLoop, SLOT(quit()));
 	connect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-	timer.start(timeOut);
-	eventLoop.exec();
 
-	if (timer.isActive()) {
+	do {
+		timer.start(timeOut);
+		eventLoop.exec();
+
+		/*
+		 * Repeat if a callback object is present and while
+		 * communication has not been stopped.
+		 * Exit if no callback object is specified.
+		 */
+	} while ((cbObj != Q_NULLPTR) && reply->isRunning());
+
+	if (cbObj != Q_NULLPTR) {
+		timer.disconnect(SIGNAL(timeout()), cbObj, SLOT(onTimeout()));
+	}
+	timer.disconnect(SIGNAL(timeout()), &eventLoop, SLOT(quit()));
+	reply->disconnect(SIGNAL(finished()), &eventLoop, SLOT(quit()));
+
+	if (reply->isFinished()) {
 		timer.stop();
-		return true;
 	} else {
 		/* Timeout expired. */
-		disconnect(reply, SIGNAL(finished()), &eventLoop, SLOT(quit()));
 		logErrorNL("%s",
 		    "Connection timed out. Check your internet connection.");
 		reply->abort();
 	}
 
-	return false;
+	/*
+	 * The value QNetworkReply::OperationCanceledError means cancelled via
+	 * abort() or close().
+	 */
+	return reply->error() == QNetworkReply::NoError;
 }
 
-bool RecordsManagementConnection::processReply(QNetworkReply *reply,
+bool RecMgmt::Connection::processReply(QNetworkReply *reply,
     QByteArray &replyData)
 {
 	debugFuncCall();

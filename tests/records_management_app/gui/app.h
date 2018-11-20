@@ -76,7 +76,7 @@ private:
 	void initialiseActions(void);
 
 	UploadHierarchyModel m_uploadModel;
-	UploadHierarchyProxyModel m_uploadProxyModel;
+	RecMgmt::UploadHierarchyProxyModel m_uploadProxyModel;
 
-	RecordsManagementConnection m_rmc; /*!< Connection to records management service. */
+	RecMgmt::Connection m_rmc; /*!< Connection to records management service. */
 };

@@ -26,7 +26,7 @@
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/conversion.h"
 
-QList<qint64> createIdList(const QStringList &strList, bool *ok)
+QList<qint64> RecMgmt::createIdList(const QStringList &strList, bool *ok)
 {
 	QList<qint64> idList;
 	bool iOk = false;

@@ -39,7 +39,7 @@ const QString keyMetadata("metadata");
 static
 const QString keySub("sub");
 
-UploadHierarchyResp::NodeEntry::NodeEntry(void)
+RecMgmt::UploadHierarchyResp::NodeEntry::NodeEntry(void)
     : m_super(Q_NULLPTR),
     m_name(),
     m_id(),
@@ -48,33 +48,36 @@ UploadHierarchyResp::NodeEntry::NodeEntry(void)
 {
 }
 
-const UploadHierarchyResp::NodeEntry *UploadHierarchyResp::NodeEntry::super(void) const
+const RecMgmt::UploadHierarchyResp::NodeEntry *
+    RecMgmt::UploadHierarchyResp::NodeEntry::super(void) const
 {
 	return m_super;
 }
 
-const QString &UploadHierarchyResp::NodeEntry::name(void) const
+const QString &RecMgmt::UploadHierarchyResp::NodeEntry::name(void) const
 {
 	return m_name;
 }
 
-const QString &UploadHierarchyResp::NodeEntry::id(void) const
+const QString &RecMgmt::UploadHierarchyResp::NodeEntry::id(void) const
 {
 	return m_id;
 }
 
-const QStringList &UploadHierarchyResp::NodeEntry::metadata(void) const
+const QStringList &RecMgmt::UploadHierarchyResp::NodeEntry::metadata(void) const
 {
 	return m_metadata;
 }
 
-const QList<UploadHierarchyResp::NodeEntry *> &UploadHierarchyResp::NodeEntry::sub(void) const
+const QList<RecMgmt::UploadHierarchyResp::NodeEntry *> &
+    RecMgmt::UploadHierarchyResp::NodeEntry::sub(void) const
 {
 	return m_sub;
 }
 
-UploadHierarchyResp::NodeEntry *UploadHierarchyResp::NodeEntry::copyRecursive(
-    const NodeEntry *root)
+RecMgmt::UploadHierarchyResp::NodeEntry *
+    RecMgmt::UploadHierarchyResp::NodeEntry::copyRecursive(
+        const NodeEntry *root)
 {
 	if (root == Q_NULLPTR) {
 		Q_ASSERT(0);
@@ -109,7 +112,7 @@ UploadHierarchyResp::NodeEntry *UploadHierarchyResp::NodeEntry::copyRecursive(
 	return newRoot;
 }
 
-void UploadHierarchyResp::NodeEntry::deleteRecursive(NodeEntry *root)
+void RecMgmt::UploadHierarchyResp::NodeEntry::deleteRecursive(NodeEntry *root)
 {
 	if (root == Q_NULLPTR) {
 		return;
@@ -122,8 +125,9 @@ void UploadHierarchyResp::NodeEntry::deleteRecursive(NodeEntry *root)
 	delete root;
 }
 
-UploadHierarchyResp::NodeEntry *UploadHierarchyResp::NodeEntry::fromJsonRecursive(
-    const QJsonObject *jsonObj, bool &ok, bool acceptNullName)
+RecMgmt::UploadHierarchyResp::NodeEntry *
+    RecMgmt::UploadHierarchyResp::NodeEntry::fromJsonRecursive(
+        const QJsonObject *jsonObj, bool &ok, bool acceptNullName)
 {
 	if (jsonObj == Q_NULLPTR) {
 		Q_ASSERT(0);
@@ -256,8 +260,8 @@ QJsonObject jsonHierarchyNode(const QString &name, const QString &id,
 	return jsonObj;
 }
 
-bool UploadHierarchyResp::NodeEntry::toJsonRecursive(QJsonObject *jsonObj,
-    const QList<NodeEntry *> &uhrList)
+bool RecMgmt::UploadHierarchyResp::NodeEntry::toJsonRecursive(
+    QJsonObject *jsonObj, const QList<NodeEntry *> &uhrList)
 {
 	if (jsonObj == Q_NULLPTR) {
 		Q_ASSERT(0);
@@ -282,36 +286,38 @@ bool UploadHierarchyResp::NodeEntry::toJsonRecursive(QJsonObject *jsonObj,
 	return true;
 }
 
-UploadHierarchyResp::UploadHierarchyResp(void)
+RecMgmt::UploadHierarchyResp::UploadHierarchyResp(void)
     : m_root(Q_NULLPTR)
 {
 }
 
-UploadHierarchyResp::UploadHierarchyResp(const UploadHierarchyResp &uhr)
+RecMgmt::UploadHierarchyResp::UploadHierarchyResp(
+    const UploadHierarchyResp &other)
     : m_root(Q_NULLPTR)
 {
-	if (uhr.m_root != Q_NULLPTR) {
-		m_root = NodeEntry::copyRecursive(uhr.m_root);
+	if (other.m_root != Q_NULLPTR) {
+		m_root = NodeEntry::copyRecursive(other.m_root);
 	}
 }
 
-UploadHierarchyResp::~UploadHierarchyResp(void)
+RecMgmt::UploadHierarchyResp::~UploadHierarchyResp(void)
 {
 	NodeEntry::deleteRecursive(m_root);
 }
 
-const UploadHierarchyResp::NodeEntry *UploadHierarchyResp::root(void) const
+const RecMgmt::UploadHierarchyResp::NodeEntry *
+    RecMgmt::UploadHierarchyResp::root(void) const
 {
 	return m_root;
 }
 
-bool UploadHierarchyResp::isValid(void) const
+bool RecMgmt::UploadHierarchyResp::isValid(void) const
 {
 	return m_root != Q_NULLPTR;
 }
 
-UploadHierarchyResp UploadHierarchyResp::fromJson(const QByteArray &json,
-    bool *ok)
+RecMgmt::UploadHierarchyResp RecMgmt::UploadHierarchyResp::fromJson(
+    const QByteArray &json, bool *ok)
 {
 	QJsonObject jsonObj;
 	if (!JsonHelper::readRootObject(json, jsonObj)) {
@@ -332,7 +338,7 @@ UploadHierarchyResp UploadHierarchyResp::fromJson(const QByteArray &json,
 	return intOk ? uhr : UploadHierarchyResp();
 }
 
-QByteArray UploadHierarchyResp::toJson(void) const
+QByteArray RecMgmt::UploadHierarchyResp::toJson(void) const
 {
 	if (m_root == Q_NULLPTR) {
 		Q_ASSERT(0);
@@ -350,7 +356,7 @@ QByteArray UploadHierarchyResp::toJson(void) const
 	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
 }
 
-UploadHierarchyResp &UploadHierarchyResp::operator=(
+RecMgmt::UploadHierarchyResp &RecMgmt::UploadHierarchyResp::operator=(
     const UploadHierarchyResp &other) Q_DECL_NOTHROW
 {
 	NodeEntry *tmpRoot = Q_NULLPTR;

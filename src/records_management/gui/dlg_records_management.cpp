@@ -50,7 +50,7 @@ DlgRecordsManagement::DlgRecordsManagement(const QString &urlStr,
     const QString &tokenStr, QWidget *parent)
     : QDialog(parent),
     m_ui(new (std::nothrow) Ui::DlgRecordsManagement),
-    m_rmc(RecordsManagementConnection::ignoreSslErrorsDflt, this),
+    m_rmc(RecMgmt::Connection::ignoreSslErrorsDflt, this),
     m_logoSvg()
 {
 	m_ui->setupUi(this);
@@ -148,12 +148,12 @@ void DlgRecordsManagement::callServiceInfo(void)
 	m_rmc.setConnection(m_ui->urlLine->text().trimmed(),
 	    m_ui->tokenLine->text().trimmed());
 
-	if (m_rmc.communicate(RecordsManagementConnection::SRVC_SERVICE_INFO,
+	if (m_rmc.communicate(RecMgmt::Connection::SRVC_SERVICE_INFO,
 	        QByteArray(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
-			ServiceInfoResp siRes(
-			    ServiceInfoResp::fromJson(response, &ok));
+			RecMgmt::ServiceInfoResp siRes(
+			    RecMgmt::ServiceInfoResp::fromJson(response, &ok));
 			if (!ok || !siRes.isValid()) {
 				QMessageBox::critical(this,
 				    tr("Communication Error"),

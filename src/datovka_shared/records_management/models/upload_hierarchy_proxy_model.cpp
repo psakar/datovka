@@ -24,12 +24,12 @@
 #include "src/datovka_shared/localisation/localisation.h"
 #include "src/datovka_shared/records_management/models/upload_hierarchy_proxy_model.h"
 
-UploadHierarchyProxyModel::UploadHierarchyProxyModel(QObject *parent)
+RecMgmt::UploadHierarchyProxyModel::UploadHierarchyProxyModel(QObject *parent)
     : QSortFilterProxyModel(parent)
 {
 }
 
-bool UploadHierarchyProxyModel::filterAcceptsRow(int sourceRow,
+bool RecMgmt::UploadHierarchyProxyModel::filterAcceptsRow(int sourceRow,
     const QModelIndex &sourceParent) const
 {
 	/*
@@ -46,7 +46,7 @@ bool UploadHierarchyProxyModel::filterAcceptsRow(int sourceRow,
 	return filterAcceptsItem(sourceIndex);
 }
 
-bool UploadHierarchyProxyModel::lessThan(const QModelIndex &sourceLeft,
+bool RecMgmt::UploadHierarchyProxyModel::lessThan(const QModelIndex &sourceLeft,
     const QModelIndex &sourceRight) const
 {
 	QVariant leftData(sourceModel()->data(sourceLeft, sortRole()));
@@ -61,7 +61,7 @@ bool UploadHierarchyProxyModel::lessThan(const QModelIndex &sourceLeft,
 	}
 }
 
-bool UploadHierarchyProxyModel::filterAcceptsItem(
+bool RecMgmt::UploadHierarchyProxyModel::filterAcceptsItem(
     const QModelIndex &sourceIdx) const
 {
 	if (!sourceIdx.isValid()) {

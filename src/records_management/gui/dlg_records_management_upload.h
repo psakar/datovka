@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_RECORDS_MANAGEMENT_UPLOAD_H_
-#define _DLG_RECORDS_MANAGEMENT_UPLOAD_H_
+#pragma once
 
 #include <QByteArray>
 #include <QDialog>
@@ -60,6 +59,7 @@ public:
 	/*!
 	 * @brief Destructor.
 	 */
+	virtual
 	~DlgRecordsManagementUpload(void);
 
 	/*!
@@ -122,7 +122,7 @@ private:
 	 * @return True on success.
 	 */
 	static
-	bool uploadFile(RecordsManagementConnection &rmc, qint64 dmId,
+	bool uploadFile(RecMgmt::Connection &rmc, qint64 dmId,
 	    const QStringList &uploadIds, const QString &msgFileName,
 	    const QByteArray &msgData, QWidget *parent = Q_NULLPTR);
 
@@ -131,12 +131,10 @@ private:
 	const QString m_url; /*!< Service URL. */
 	const QString m_token; /*!< Service token. */
 
-	RecordsManagementConnection m_rmc; /*!< Connection to records management service. */
+	RecMgmt::Connection m_rmc; /*!< Connection to records management service. */
 
 	UploadHierarchyModel m_uploadModel; /*!< Upload hierarchy model. */
-	UploadHierarchyProxyModel m_uploadProxyModel; /*!< Used for filtering. */
+	RecMgmt::UploadHierarchyProxyModel m_uploadProxyModel; /*!< Used for filtering. */
 
 	QStringList m_selectedUploadIds; /*!< Upload location identifiers. */
 };
-
-#endif /* _DLG_RECORDS_MANAGEMENT_UPLOAD_H_ */

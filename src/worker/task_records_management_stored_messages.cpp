@@ -143,12 +143,12 @@ QList<qint64> obtainHeldDmIds(const QList<qint64> &exludedDmIds)
  * @return True if response contains requested entries.
  */
 static
-bool receivedRequestedContent(const StoredFilesResp &sfRes,
+bool receivedRequestedContent(const RecMgmt::StoredFilesResp &sfRes,
     const QList<qint64> &sentDmIds)
 {
 	QSet<qint64> sentDmIdSet(sentDmIds.toSet());
 
-	foreach (const DmEntry &entry, sfRes.dms()) {
+	foreach (const RecMgmt::DmEntry &entry, sfRes.dms()) {
 		if (!sentDmIdSet.remove(entry.dmId())) {
 			logErrorNL(
 			    "Obtained response for message '%" PRId64 "'that has not been requested.",
@@ -174,7 +174,8 @@ bool receivedRequestedContent(const StoredFilesResp &sfRes,
  * @return True on success, false on error.
  */
 static
-bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
+bool storeStoredFilesResponseContent(const RecMgmt::StoredFilesResp &sfRes,
+    bool clear)
 {
 	/* Process only messages. */
 
@@ -186,7 +187,7 @@ bool storeStoredFilesResponseContent(const StoredFilesResp &sfRes, bool clear)
 		return false;
 	}
 
-	foreach (const DmEntry &entry, sfRes.dms()) {
+	foreach (const RecMgmt::DmEntry &entry, sfRes.dms()) {
 		if (entry.locations().isEmpty()) {
 			/* Not held within the records management service. */
 			if (clear) {
@@ -227,8 +228,9 @@ fail:
  * @return Number of processed responses, negative value on error.
  */
 static
-int processStoredFilesResponse(bool clear, const StoredFilesResp &sfRes,
-    const QList<qint64> &sentDmIds, int &limit)
+int processStoredFilesResponse(bool clear,
+    const RecMgmt::StoredFilesResp &sfRes, const QList<qint64> &sentDmIds,
+    int &limit)
 {
 	/* Limit should always be received. */
 	if (sfRes.limit() <= 0) {
@@ -238,9 +240,9 @@ int processStoredFilesResponse(bool clear, const StoredFilesResp &sfRes,
 	limit = sfRes.limit();
 
 	switch (sfRes.error().code()) {
-	case ErrorEntry::ERR_NO_ERROR:
+	case RecMgmt::ErrorEntry::ERR_NO_ERROR:
 		break;
-	case ErrorEntry::ERR_LIMIT_EXCEEDED:
+	case RecMgmt::ErrorEntry::ERR_LIMIT_EXCEEDED:
 		return 0; /* Nothing was processed. Should ask again. */
 		break;
 	default:
@@ -272,7 +274,7 @@ int processStoredFilesResponse(bool clear, const StoredFilesResp &sfRes,
  * @return Number of processed responses, negative value on error.
  */
 static
-int callStoredFiles(bool clear, RecordsManagementConnection &rmc,
+int callStoredFiles(bool clear, RecMgmt::Connection &rmc,
     const QList<qint64> &dmIds, int &limit)
 {
 	if (dmIds.isEmpty()) {
@@ -280,7 +282,7 @@ int callStoredFiles(bool clear, RecordsManagementConnection &rmc,
 		return -1;
 	}
 
-	StoredFilesReq sfReq(dmIds, QList<qint64>());
+	RecMgmt::StoredFilesReq sfReq(dmIds, QList<qint64>());
 	if (!sfReq.isValid()) {
 		logErrorNL("%s", "Could not create stored_files request.");
 		return -1;
@@ -288,11 +290,12 @@ int callStoredFiles(bool clear, RecordsManagementConnection &rmc,
 
 	QByteArray response;
 
-	if (rmc.communicate(RecordsManagementConnection::SRVC_STORED_FILES,
+	if (rmc.communicate(RecMgmt::Connection::SRVC_STORED_FILES,
 	        sfReq.toJson(), response)) {
 		if (!response.isEmpty()) {
 			bool ok = false;
-			StoredFilesResp sfRes(StoredFilesResp::fromJson(response, &ok));
+			RecMgmt::StoredFilesResp sfRes(
+			    RecMgmt::StoredFilesResp::fromJson(response, &ok));
 			if (!ok || !sfRes.isValid()) {
 				logErrorNL("%s",
 				    "Communication error. Received invalid response to stored_files service.");
@@ -333,8 +336,7 @@ enum TaskRecordsManagementStoredMessages::Result updateMessages(
 		return TaskRecordsManagementStoredMessages::DS_DSM_SUCCESS;
 	}
 
-	RecordsManagementConnection rmc(
-	    RecordsManagementConnection::ignoreSslErrorsDflt);
+	RecMgmt::Connection rmc(RecMgmt::Connection::ignoreSslErrorsDflt);
 	rmc.setConnection(urlStr, tokenStr);
 
 	int pos = 0; /* Position. */

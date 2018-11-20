@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014-2017 CZ.NIC
+ * Copyright (C) 2014-2018 CZ.NIC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #include "tests/records_management_app/gui/dialogue_service_info.h"
 #include "ui_dialogue_service_info.h"
 
-DialogueServiceInfo::DialogueServiceInfo(const ServiceInfoResp &sir,
+DialogueServiceInfo::DialogueServiceInfo(const RecMgmt::ServiceInfoResp &sir,
     QWidget *parent)
     : QDialog(parent),
     m_ui(new Ui::DialogueServiceInfo)

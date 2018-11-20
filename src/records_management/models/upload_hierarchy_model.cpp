@@ -47,8 +47,8 @@ QModelIndex UploadHierarchyModel::index(int row, int column,
 			internalId = (quintptr)m_hierarchy.root()->sub().at(row);
 		}
 	} else {
-		const UploadHierarchyResp::NodeEntry *entry =
-		    (UploadHierarchyResp::NodeEntry *)parent.internalId();
+		const RecMgmt::UploadHierarchyResp::NodeEntry *entry =
+		    (RecMgmt::UploadHierarchyResp::NodeEntry *)parent.internalId();
 		internalId = (quintptr)entry->sub().at(row);
 	}
 
@@ -61,9 +61,9 @@ QModelIndex UploadHierarchyModel::parent(const QModelIndex &index) const
 		return QModelIndex();
 	}
 
-	const UploadHierarchyResp::NodeEntry *iEntry =
-	    (UploadHierarchyResp::NodeEntry *)index.internalId();
-	const UploadHierarchyResp::NodeEntry *pEntry = iEntry->super();
+	const RecMgmt::UploadHierarchyResp::NodeEntry *iEntry =
+	    (RecMgmt::UploadHierarchyResp::NodeEntry *)index.internalId();
+	const RecMgmt::UploadHierarchyResp::NodeEntry *pEntry = iEntry->super();
 
 	if ((pEntry != Q_NULLPTR) &&
 	    ((pEntry != m_hierarchy.root()) || showRootName())) {
@@ -71,7 +71,7 @@ QModelIndex UploadHierarchyModel::parent(const QModelIndex &index) const
 			/* Root node is shown and parent is root. */
 			return createIndex(0, 0, (quintptr)pEntry);
 		} else {
-			const UploadHierarchyResp::NodeEntry *ppEntry =
+			const RecMgmt::UploadHierarchyResp::NodeEntry *ppEntry =
 			    pEntry->super();
 			int row = 0;
 			/* Find position of parent. */
@@ -107,8 +107,8 @@ int UploadHierarchyModel::rowCount(const QModelIndex &parent) const
 			return m_hierarchy.root()->sub().size();
 		}
 	} else {
-		const UploadHierarchyResp::NodeEntry *entry =
-		    (UploadHierarchyResp::NodeEntry *)parent.internalId();
+		const RecMgmt::UploadHierarchyResp::NodeEntry *entry =
+		    (RecMgmt::UploadHierarchyResp::NodeEntry *)parent.internalId();
 		return entry->sub().size();
 	}
 }
@@ -130,8 +130,8 @@ QVariant UploadHierarchyModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	const UploadHierarchyResp::NodeEntry *entry =
-	    (UploadHierarchyResp::NodeEntry *)index.internalId();
+	const RecMgmt::UploadHierarchyResp::NodeEntry *entry =
+	    (RecMgmt::UploadHierarchyResp::NodeEntry *)index.internalId();
 	if (entry == Q_NULLPTR) {
 		Q_ASSERT(0);
 		return QVariant();
@@ -179,8 +179,8 @@ Qt::ItemFlags UploadHierarchyModel::flags(const QModelIndex &index) const
 	Qt::ItemFlags flags =
 	    QAbstractItemModel::flags(index) & ~Qt::ItemIsEditable;
 
-	const UploadHierarchyResp::NodeEntry *entry =
-	    (UploadHierarchyResp::NodeEntry *)index.internalId();
+	const RecMgmt::UploadHierarchyResp::NodeEntry *entry =
+	    (RecMgmt::UploadHierarchyResp::NodeEntry *)index.internalId();
 	if (!isSelectable(entry)) {
 		flags &= ~Qt::ItemIsSelectable;
 	}
@@ -188,7 +188,7 @@ Qt::ItemFlags UploadHierarchyModel::flags(const QModelIndex &index) const
 	return flags;
 }
 
-void UploadHierarchyModel::setHierarchy(const UploadHierarchyResp &uhr)
+void UploadHierarchyModel::setHierarchy(const RecMgmt::UploadHierarchyResp &uhr)
 {
 	beginResetModel();
 	m_hierarchy = uhr;
@@ -201,7 +201,7 @@ bool UploadHierarchyModel::showRootName(void) const
 }
 
 QStringList UploadHierarchyModel::filterData(
-    const UploadHierarchyResp::NodeEntry *entry)
+    const RecMgmt::UploadHierarchyResp::NodeEntry *entry)
 {
 	if (Q_UNLIKELY(entry == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -212,7 +212,7 @@ QStringList UploadHierarchyModel::filterData(
 }
 
 QStringList UploadHierarchyModel::filterDataRecursive(
-    const UploadHierarchyResp::NodeEntry *entry, bool takeSuper)
+    const RecMgmt::UploadHierarchyResp::NodeEntry *entry, bool takeSuper)
 {
 	if (Q_UNLIKELY(entry == Q_NULLPTR)) {
 		Q_ASSERT(0);
@@ -220,7 +220,7 @@ QStringList UploadHierarchyModel::filterDataRecursive(
 	}
 
 	QStringList res(filterData(entry));
-	foreach (const UploadHierarchyResp::NodeEntry *sub, entry->sub()) {
+	foreach (const RecMgmt::UploadHierarchyResp::NodeEntry *sub, entry->sub()) {
 		res += filterDataRecursive(sub, false);
 	}
 	if (takeSuper) {
@@ -230,7 +230,7 @@ QStringList UploadHierarchyModel::filterDataRecursive(
 		 * filter) of a node which matches the entered filter are
 		 * going to be also displayed.
 		 */
-		const UploadHierarchyResp::NodeEntry *sup = entry->super();
+		const RecMgmt::UploadHierarchyResp::NodeEntry *sup = entry->super();
 		if (Q_UNLIKELY(sup == Q_NULLPTR)) {
 			return res;
 		}

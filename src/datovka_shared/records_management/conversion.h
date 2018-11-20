@@ -26,11 +26,15 @@
 #include <QList>
 #include <QStringList>
 
-/*!
- * @brief Convert list of strings into list of qint64.
- *
- * @param[in] strList String list.
- * @param[out] ok Set to true if all entries are successfully converted.
- * @return List if qint64.
- */
-QList<qint64> createIdList(const QStringList &strList, bool *ok);
+namespace RecMgmt {
+
+	/*!
+	 * @brief Convert list of strings into list of qint64.
+	 *
+	 * @param[in] strList String list.
+	 * @param[out] ok Set to true if all entries are successfully converted.
+	 * @return List if qint64.
+	 */
+	QList<qint64> createIdList(const QStringList &strList, bool *ok);
+
+}

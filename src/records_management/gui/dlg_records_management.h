@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _DLG_RECORDS_MANAGEMENT_H_
-#define _DLG_RECORDS_MANAGEMENT_H_
+#pragma once
 
 #include <QByteArray>
 #include <QDialog>
@@ -55,6 +54,7 @@ public:
 	/*!
 	 * @brief Destructor.
 	 */
+	virtual
 	~DlgRecordsManagement(void);
 
 	/*!
@@ -109,8 +109,6 @@ private:
 
 	Ui::DlgRecordsManagement *m_ui; /*!< UI generated from UI file. */
 
-	RecordsManagementConnection m_rmc; /*!< Connection to records management service. */
+	RecMgmt::Connection m_rmc; /*!< Connection to records management service. */
 	QByteArray m_logoSvg; /*!< Raw SVG data. */
 };
-
-#endif /* _DLG_RECORDS_MANAGEMENT_H_ */

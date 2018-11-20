@@ -44,44 +44,44 @@ const QString keyError("error");
 static
 const QString keyLocations("locations");
 
-UploadFileReq::UploadFileReq(void)
+RecMgmt::UploadFileReq::UploadFileReq(void)
     : m_ids(),
     m_fileName(),
     m_fileContent()
 {
 }
 
-UploadFileReq::UploadFileReq(const QStringList &ids, const QString &fileName,
-    const QByteArray &fileContent)
+RecMgmt::UploadFileReq::UploadFileReq(const QStringList &ids,
+    const QString &fileName, const QByteArray &fileContent)
     : m_ids(ids),
     m_fileName(fileName),
     m_fileContent(fileContent)
 {
 }
 
-UploadFileReq::UploadFileReq(const UploadFileReq &ufr)
-    : m_ids(ufr.m_ids),
-    m_fileName(ufr.m_fileName),
-    m_fileContent(ufr.m_fileContent)
+RecMgmt::UploadFileReq::UploadFileReq(const UploadFileReq &other)
+    : m_ids(other.m_ids),
+    m_fileName(other.m_fileName),
+    m_fileContent(other.m_fileContent)
 {
 }
 
-const QStringList &UploadFileReq::ids(void) const
+const QStringList &RecMgmt::UploadFileReq::ids(void) const
 {
 	return m_ids;
 }
 
-const QString &UploadFileReq::fileName(void) const
+const QString &RecMgmt::UploadFileReq::fileName(void) const
 {
 	return m_fileName;
 }
 
-const QByteArray &UploadFileReq::fileContent(void) const
+const QByteArray &RecMgmt::UploadFileReq::fileContent(void) const
 {
 	return m_fileContent;
 }
 
-bool UploadFileReq::isValid(void) const
+bool RecMgmt::UploadFileReq::isValid(void) const
 {
 	bool valid = !m_ids.isEmpty() && !m_fileName.isEmpty() &&
 	    !m_fileContent.isEmpty();
@@ -98,7 +98,8 @@ bool UploadFileReq::isValid(void) const
 	return true;
 }
 
-UploadFileReq UploadFileReq::fromJson(const QByteArray &json, bool *ok)
+RecMgmt::UploadFileReq RecMgmt::UploadFileReq::fromJson(const QByteArray &json,
+    bool *ok)
 {
 	QJsonObject jsonObj;
 	if (!JsonHelper::readRootObject(json, jsonObj)) {
@@ -143,7 +144,7 @@ UploadFileReq UploadFileReq::fromJson(const QByteArray &json, bool *ok)
 	return ufr;
 }
 
-QByteArray UploadFileReq::toJson(void) const
+QByteArray RecMgmt::UploadFileReq::toJson(void) const
 {
 	QJsonObject jsonObj;
 	jsonObj.insert(keyIds, QJsonArray::fromStringList(m_ids));
@@ -155,50 +156,51 @@ QByteArray UploadFileReq::toJson(void) const
 	return QJsonDocument(jsonObj).toJson(QJsonDocument::Indented);
 }
 
-UploadFileResp::UploadFileResp(void)
+RecMgmt::UploadFileResp::UploadFileResp(void)
     : m_id(),
     m_error(),
     m_locations()
 {
 }
 
-UploadFileResp::UploadFileResp(const QString &id, const ErrorEntry &error,
-    const QStringList &locations)
+RecMgmt::UploadFileResp::UploadFileResp(const QString &id,
+    const ErrorEntry &error, const QStringList &locations)
     : m_id(id),
     m_error(error),
     m_locations(locations)
 {
 }
 
-UploadFileResp::UploadFileResp(const UploadFileResp &ufr)
-    : m_id(ufr.m_id),
-    m_error(ufr.m_error),
-    m_locations(ufr.m_locations)
+RecMgmt::UploadFileResp::UploadFileResp(const UploadFileResp &other)
+    : m_id(other.m_id),
+    m_error(other.m_error),
+    m_locations(other.m_locations)
 {
 }
 
-const QString &UploadFileResp::id(void) const
+const QString &RecMgmt::UploadFileResp::id(void) const
 {
 	return m_id;
 }
 
-const ErrorEntry &UploadFileResp::error(void) const
+const RecMgmt::ErrorEntry &RecMgmt::UploadFileResp::error(void) const
 {
 	return m_error;
 }
 
-const QStringList &UploadFileResp::locations(void) const
+const QStringList &RecMgmt::UploadFileResp::locations(void) const
 {
 	return m_locations;
 }
 
-bool UploadFileResp::isValid(void) const
+bool RecMgmt::UploadFileResp::isValid(void) const
 {
 	return (!m_id.isEmpty() && !m_locations.isEmpty()) ||
 	    (m_error.code() != ErrorEntry::ERR_NO_ERROR);
 }
 
-UploadFileResp UploadFileResp::fromJson(const QByteArray &json, bool *ok)
+RecMgmt::UploadFileResp RecMgmt::UploadFileResp::fromJson(
+    const QByteArray &json, bool *ok)
 {
 	QJsonObject jsonObj;
 	if (!JsonHelper::readRootObject(json, jsonObj)) {
@@ -247,7 +249,7 @@ UploadFileResp UploadFileResp::fromJson(const QByteArray &json, bool *ok)
 	return ufr;
 }
 
-QByteArray UploadFileResp::toJson(void) const
+QByteArray RecMgmt::UploadFileResp::toJson(void) const
 {
 	QJsonObject jsonObj;
 	jsonObj.insert(keyId, !m_id.isNull() ? m_id : QJsonValue());

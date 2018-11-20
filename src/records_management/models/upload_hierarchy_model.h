@@ -21,8 +21,7 @@
  * the two.
  */
 
-#ifndef _UPLOAD_HIERARCHY_MODEL_H_
-#define _UPLOAD_HIERARCHY_MODEL_H_
+#pragma once
 
 #include <QAbstractItemModel>
 
@@ -126,7 +125,7 @@ public:
 	 *
 	 * @param[in] uhr Upload hierarchy response structure.
 	 */
-	void setHierarchy(const UploadHierarchyResp &uhr);
+	void setHierarchy(const RecMgmt::UploadHierarchyResp &uhr);
 
 private:
 	/*!
@@ -144,7 +143,8 @@ private:
 	 * @return List of strings.
 	 */
 	static
-	QStringList filterData(const UploadHierarchyResp::NodeEntry *entry);
+	QStringList filterData(
+	    const RecMgmt::UploadHierarchyResp::NodeEntry *entry);
 
 	/*!
 	 * @brief Returns list of all (meta)data (including children).
@@ -156,9 +156,8 @@ private:
 	 */
 	static
 	QStringList filterDataRecursive(
-	    const UploadHierarchyResp::NodeEntry *entry, bool takeSuper);
+	    const RecMgmt::UploadHierarchyResp::NodeEntry *entry,
+	    bool takeSuper);
 
-	UploadHierarchyResp m_hierarchy; /*!< Upload hierarchy structure. */
+	RecMgmt::UploadHierarchyResp m_hierarchy; /*!< Upload hierarchy structure. */
 };
-
-#endif /* _UPLOAD_HIERARCHY_MODEL_H_ */

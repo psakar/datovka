@@ -21,6 +21,8 @@
  * the two.
  */
 
+#include <QMessageBox>
+
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/global.h"
@@ -41,7 +43,9 @@
 DlgRecordsManagementUploadProgress::DlgRecordsManagementUploadProgress(
     qint64 dmId, QWidget *parent)
     : QDialog(parent),
-    m_ui(new (std::nothrow) Ui::DlgRecordsManagementProgress)
+    m_ui(new (std::nothrow) Ui::DlgRecordsManagementProgress),
+    m_bytesReceived(0),
+    m_bytesSent(0)
 {
 	m_ui->setupUi(this);
 	setWindowTitle(tr("Records Management Upload Progress"));
@@ -69,6 +73,8 @@ DlgRecordsManagementUploadProgress::~DlgRecordsManagementUploadProgress(void)
 void DlgRecordsManagementUploadProgress::onDownloadProgress(
     qint64 bytesReceived, qint64 bytesTotal)
 {
+	m_bytesReceived = bytesReceived;
+
 	if (bytesTotal <= 0) {
 		/* Undetermined progress bar. */
 		m_ui->taskProgress->setRange(0, 0);
@@ -81,6 +87,8 @@ void DlgRecordsManagementUploadProgress::onDownloadProgress(
 void DlgRecordsManagementUploadProgress::onUploadProgress(
     qint64 bytesSent, qint64 bytesTotal)
 {
+	m_bytesSent = bytesSent;
+
 	if (bytesTotal <= 0) {
 		/* Undetermined progress bar. */
 		m_ui->taskProgress->setRange(0, 0);
@@ -88,6 +96,26 @@ void DlgRecordsManagementUploadProgress::onUploadProgress(
 		m_ui->taskProgress->setRange(PROGRESS_MIN, PROGRESS_MAX);
 		m_ui->taskProgress->setValue(PROGRESS_MIN + ((UPLOAD_SHARE * bytesSent) / bytesTotal));
 	}
+}
+
+void DlgRecordsManagementUploadProgress::onTimeout(void)
+{
+	static qint64 lastReceived = 0;
+	static qint64 lastSent = 0;
+
+	if ((lastReceived == m_bytesReceived) && (lastSent == m_bytesSent)) {
+		/* Timeout received but data did not change. */
+		QMessageBox::StandardButton reply = QMessageBox::question(this,
+		    tr("Communication timeout"),
+		    tr("There have been no data transferred in the past time. Do you wan to abort the data transfer?"),
+		    QMessageBox::Abort | QMessageBox::Ignore, QMessageBox::Ignore);
+		if (reply == QMessageBox::Abort) {
+			emitAbort();
+		}
+	}
+
+	lastReceived = m_bytesReceived;
+	lastSent = m_bytesSent;
 }
 
 void DlgRecordsManagementUploadProgress::emitAbort(void)

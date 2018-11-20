@@ -29,7 +29,8 @@
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/records_management/json/helper.h"
 
-bool JsonHelper::readRootObject(const QByteArray &json, QJsonObject &jsonObj)
+bool RecMgmt::JsonHelper::readRootObject(const QByteArray &json,
+    QJsonObject &jsonObj)
 {
 	QJsonDocument jsonDoc;
 	{
@@ -56,8 +57,8 @@ bool JsonHelper::readRootObject(const QByteArray &json, QJsonObject &jsonObj)
 	return true;
 }
 
-bool JsonHelper::readValue(const QJsonObject &jsonObj, const QString &key,
-    QJsonValue &jsonVal)
+bool RecMgmt::JsonHelper::readValue(const QJsonObject &jsonObj,
+    const QString &key, QJsonValue &jsonVal)
 {
 	if (jsonObj.isEmpty() || key.isEmpty()) {
 		logErrorNL("%s", "JSON object or sought key is empty.");
@@ -74,8 +75,8 @@ bool JsonHelper::readValue(const QJsonObject &jsonObj, const QString &key,
 	return true;
 }
 
-bool JsonHelper::readInt(const QJsonObject &jsonObj, const QString &key,
-    int &val, bool acceptNull)
+bool RecMgmt::JsonHelper::readInt(const QJsonObject &jsonObj,
+    const QString &key, int &val, bool acceptNull)
 {
 	QJsonValue jsonVal;
 	if (!readValue(jsonObj, key, jsonVal)) {
@@ -96,8 +97,8 @@ bool JsonHelper::readInt(const QJsonObject &jsonObj, const QString &key,
 	return true;
 }
 
-bool JsonHelper::readString(const QJsonObject &jsonObj, const QString &key,
-    QString &val, bool acceptNull)
+bool RecMgmt::JsonHelper::readString(const QJsonObject &jsonObj,
+    const QString &key, QString &val, bool acceptNull)
 {
 	QJsonValue jsonVal;
 	if (!readValue(jsonObj, key, jsonVal)) {
@@ -117,8 +118,8 @@ bool JsonHelper::readString(const QJsonObject &jsonObj, const QString &key,
 	return true;
 }
 
-bool JsonHelper::readArray(const QJsonObject &jsonObj, const QString &key,
-    QJsonArray &arr, bool acceptNull)
+bool RecMgmt::JsonHelper::readArray(const QJsonObject &jsonObj,
+    const QString &key, QJsonArray &arr, bool acceptNull)
 {
 	QJsonValue jsonVal;
 	if (!readValue(jsonObj, key, jsonVal)) {
@@ -138,8 +139,8 @@ bool JsonHelper::readArray(const QJsonObject &jsonObj, const QString &key,
 	return true;
 }
 
-bool JsonHelper::readStringList(const QJsonObject &jsonObj, const QString &key,
-    QStringList &val, bool acceptNull)
+bool RecMgmt::JsonHelper::readStringList(const QJsonObject &jsonObj,
+    const QString &key, QStringList &val, bool acceptNull)
 {
 	QJsonArray jsonArr;
 	if (!readArray(jsonObj, key, jsonArr, acceptNull)) {
@@ -165,7 +166,7 @@ bool JsonHelper::readStringList(const QJsonObject &jsonObj, const QString &key,
 	return true;
 }
 
-QString JsonHelper::toIndentedString(const QByteArray &json)
+QString RecMgmt::JsonHelper::toIndentedString(const QByteArray &json)
 {
 	if (json.isEmpty()) {
 		return QString();

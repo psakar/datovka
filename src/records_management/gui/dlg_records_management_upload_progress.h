@@ -58,6 +58,8 @@ public slots:
 
 	void onUploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
+	void onTimeout(void);
+
 private slots:
 	void emitAbort(void);
 
@@ -70,4 +72,7 @@ private:
 	void loadRecordsManagementPixmap(int width);
 
 	Ui::DlgRecordsManagementProgress *m_ui; /*!< UI generated from UI file. */
+
+	qint64 m_bytesReceived; /*!< Needed for timeout check. */
+	qint64 m_bytesSent; /*!< Needed for timeout check. */
 };
