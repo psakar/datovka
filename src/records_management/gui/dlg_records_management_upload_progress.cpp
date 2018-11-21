@@ -107,7 +107,7 @@ void DlgRecordsManagementUploadProgress::onTimeout(void)
 		/* Timeout received but data did not change. */
 		QMessageBox::StandardButton reply = QMessageBox::question(this,
 		    tr("Communication timeout"),
-		    tr("There have been no data transferred in the past time. Do you wan to abort the data transfer?"),
+		    tr("No data have been transferred during the most recent time period. There may be a problem with the data transfer. Do you wan to abort the transfer?"),
 		    QMessageBox::Abort | QMessageBox::Ignore, QMessageBox::Ignore);
 		if (reply == QMessageBox::Abort) {
 			emitAbort();

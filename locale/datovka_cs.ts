@@ -3549,23 +3549,23 @@ to upload the message &apos;%1&apos; into.</source>
 zprávu &apos;%1&apos;.</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="140"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="148"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="204"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="307"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="316"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="141"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="149"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="205"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="308"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="317"/>
         <source>Communication Error</source>
         <translation>Chyba komunikace</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="141"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="308"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="142"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="309"/>
         <source>Received invalid response.</source>
         <translation>Obdržena neplatná odezva.</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="149"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="317"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="150"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="318"/>
         <source>Received empty response.</source>
         <translation>Obdržena prázdná odezva.</translation>
     </message>
@@ -3573,14 +3573,24 @@ zprávu &apos;%1&apos;.</translation>
 <context>
     <name>DlgRecordsManagementUploadProgress</name>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload_progress.cpp" line="47"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload_progress.cpp" line="51"/>
         <source>Records Management Upload Progress</source>
         <translation>Průběh nahrávání do spisové služby</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload_progress.cpp" line="50"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload_progress.cpp" line="54"/>
         <source>Sending message &apos;%1&apos; into records management service.</source>
         <translation>Odesílání zprávy &apos;%1&apos; do spisové služby.</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload_progress.cpp" line="109"/>
+        <source>Communication timeout</source>
+        <translation>Vypršel čas na komunikaci</translation>
+    </message>
+    <message>
+        <location filename="../src/records_management/gui/dlg_records_management_upload_progress.cpp" line="110"/>
+        <source>No data have been transferred during the most recent time period. There may be a problem with the data transfer. Do you wan to abort the transfer?</source>
+        <translation>Během posledního časového intervalu nebyla přenesena žádná data. Je možné, že nastal problém s přenosem. Chcete přenos ukončit?</translation>
     </message>
 </context>
 <context>
@@ -8088,32 +8098,32 @@ do původního umístění
         <translation>Ke zprávě &apos;%1&apos; chybí data doručenky, která jsou potřeba pro export do PDF.</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="240"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="241"/>
         <source>Message &apos;%1&apos; could not be uploaded.</source>
         <translation>Zpráva &apos;%1&apos; nemohla být nahrána.</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="243"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="244"/>
         <source>Received error</source>
         <translation>Obdržená chyba</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="248"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="249"/>
         <source>File Upload Error</source>
         <translation>Chyba při nahrávání souboru</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="253"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="254"/>
         <source>Successful File Upload</source>
         <translation>Úspěšné nahrání souboru</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="254"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="255"/>
         <source>Message &apos;%1&apos; was successfully uploaded into the records management service.</source>
         <translation>Zpráva &apos;%1&apos; byla úspěšně nahrána do spisové služby.</translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="256"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="257"/>
         <source>It can be now found in the records management service in these locations:</source>
         <translation>Ve spisové službě ji můžete nyní nalézt v těchto místech:</translation>
     </message>
