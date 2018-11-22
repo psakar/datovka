@@ -15,6 +15,9 @@
  * Added message type explanation into view ZFO dialogue.
  * The user is asked whether to abort a message upload into the records
    management service when the connection timeout expires.
+ * Speeded up the creation of icons inside the account and message model. The
+   icons are now cached in a separate container rather than created every time
+   they are requested.
 
 4.11.1 / 2018-10-23
  * Added scripts for signing the Windows and macOS executables and software
