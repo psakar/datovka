@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -33,6 +33,7 @@
 #include "src/gui/dlg_import_zfo.h"
 #include "src/gui/dlg_signature_detail.h"
 #include "src/gui/dlg_view_zfo.h"
+#include "src/gui/icon_container.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
 #include "src/isds/type_description.h"
@@ -123,21 +124,13 @@ void DlgViewZfo::attachmentItemRightClicked(const QPoint &point)
 	        AttachmentTblModel::FNAME_COL));
 
 	if (index.isValid()) {
+		menu->addAction(
+		    IconContainer::construcIcon(IconContainer::ICON_FOLDER),
+		    tr("Open attachment"),
+		    this, SLOT(openSelectedAttachment()))->setEnabled(indexes.size() == 1);
 		{
-			QIcon ico;
-			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-			menu->addAction(ico, tr("Open attachment"), this,
-			    SLOT(openSelectedAttachment()))->
-			        setEnabled(indexes.size() == 1);
-		}
-		{
-			QIcon ico;
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_48x48_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_64x64_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
+			const QIcon ico(
+			    IconContainer::construcIcon(IconContainer::ICON_SAVE));
 			menu->addAction(ico, tr("Save attachment"), this,
 			    SLOT(saveSelectedAttachmentsToFile()))->
 			        setEnabled(indexes.size() == 1);
@@ -277,13 +270,8 @@ void DlgViewZfo::setUpDialogue(void)
 	}
 
 	/* Signature details. */
-	QIcon ico;
-	ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-	m_ui->signatureDetailsButton->setIcon(ico);
+	m_ui->signatureDetailsButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE_SIGNATURE));
 	connect(m_ui->signatureDetailsButton, SIGNAL(clicked()), this,
 	    SLOT(showSignatureDetailsDlg()));
 }

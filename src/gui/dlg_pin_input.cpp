@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -23,9 +23,9 @@
 
 #include <QPixmap>
 
-#include "src/common.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/gui/dlg_pin_input.h"
+#include "src/gui/icon_container.h"
 #include "ui_dlg_pin_input.h"
 
 /*!

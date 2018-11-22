@@ -22,13 +22,12 @@
  */
 
 #include <QFont>
-#include <QIcon>
 #include <QMimeData>
 #include <QRegularExpression>
 
-#include "src/common.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/global.h"
+#include "src/gui/icon_container.h"
 #include "src/io/message_db.h"
 #include "src/models/accounts_model.h"
 
@@ -79,6 +78,8 @@
  */
 #define internalIdUserNameIndex(intId) \
 	(((unsigned) (intId)) >> TYPE_BITS)
+
+static IconContainer inconContainer; /* Local icon container. */
 
 AccountModel::AccountModel(QObject *parent)
     : QAbstractItemModel(parent),
@@ -307,32 +308,19 @@ QVariant AccountModel::data(const QModelIndex &index, int role) const
 
 	case Qt::DecorationRole:
 		{
-			QIcon ico;
 			switch (type) {
 			case nodeAccountTop:
-				ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
+				return inconContainer.icon(IconContainer::ICON_LETTER);
 				break;
 			case nodeRecentReceived:
 			case nodeReceived:
 			case nodeReceivedYear:
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
+				return inconContainer.icon(IconContainer::ICON_DATOVKA_MESSAGE_DOWNLOAD);
 				break;
 			case nodeRecentSent:
 			case nodeSent:
 			case nodeSentYear:
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
+				return inconContainer.icon(IconContainer::ICON_DATOVKA_MESSAGE_REPLY);
 				break;
 			default:
 				return QVariant();

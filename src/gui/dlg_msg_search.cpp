@@ -24,6 +24,7 @@
 #include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/gui/dlg_msg_search.h"
+#include "src/gui/icon_container.h"
 #include "src/io/message_db.h"
 #include "src/io/tag_db.h"
 #include "src/settings/accounts.h"
@@ -363,12 +364,8 @@ void DlgMsgSearch::initSearchWindow(const QString &username)
 	m_ui->tooManyFields->setStyleSheet("QLabel { color: red }");
 	m_ui->tooManyFields->hide();
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->searchPushButton->setIcon(ico);
-	}
+	m_ui->searchPushButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_SEARCH));
 
 	m_ui->resultsTableWidget->setColumnCount(7);
 	m_ui->resultsTableWidget->setHorizontalHeaderItem(COL_USER_NAME, new QTableWidgetItem(tr("Account")));

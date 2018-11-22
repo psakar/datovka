@@ -28,6 +28,7 @@
 #include "src/datovka_shared/worker/pool.h"
 #include "src/global.h"
 #include "src/gui/dlg_ds_search.h"
+#include "src/gui/icon_container.h"
 #include "src/io/isds_sessions.h"
 #include "src/views/table_home_end_filter.h"
 #include "src/views/table_space_selection_filter.h"
@@ -84,12 +85,8 @@ DlgDsSearch::DlgDsSearch(const QString &userName, const QString &dbType,
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->searchPushButton->setIcon(ico);
-	}
+	m_ui->searchPushButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_SEARCH));
 
 	/* Set default line height for table views/widgets. */
 	m_ui->contactTableView->setNarrowedLineHeight();

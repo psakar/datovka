@@ -23,13 +23,13 @@
 
 #include <QFont>
 
-#include "src/common.h"
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/isds/type_conversion.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/delegates/tag_item.h"
 #include "src/global.h"
+#include "src/gui/icon_container.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/message_db.h"
@@ -43,18 +43,17 @@
  */
 #define MSG_ID_WIDTH 48
 
+static IconContainer inconContainer; /* Local icon container. */
+
 /*!
  * @brief Construct the default records management icon.
  *
  * @return Icon object.
  */
-static
+static inline
 QIcon defaultRMIcon(void)
 {
-	QIcon ico;
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-	return ico;
+	return IconContainer::construcIcon(IconContainer::ICON_UP);
 }
 
 DbMsgsTblModel::DbMsgsTblModel(enum DbMsgsTblModel::Type type, QObject *parent)
@@ -104,13 +103,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		case PERSDELIV_COL:
 			/* Show icon for 'personal delivery'. */
 			if (_data(index).toBool()) {
-				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "hand.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
+				return inconContainer.icon(IconContainer::ICON_HAND);
 			} else {
 				return QVariant(); /* No icon. */
 			}
@@ -118,58 +111,22 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		case READLOC_COL:
 			/* Show icon for 'read locally'. */
 			if (_data(index).toBool()) {
-				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
+				return inconContainer.icon(IconContainer::ICON_GREY_BALL);
 			} else {
-				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "green.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "green.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "green.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "green.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "green.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
+				return inconContainer.icon(IconContainer::ICON_GREEN_BALL);
 			}
 			break;
 		case PROCSNG_COL:
 			/* Show icon for 'process status'. */
 			switch (_data(index).toInt()) {
 			case UNSETTLED:
-				{
-					QIcon ico;
-					ico.addFile(QStringLiteral(ICON_16x16_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_24x24_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_32x32_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_48x48_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_64x64_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-					return ico;
-				}
+				return inconContainer.icon(IconContainer::ICON_RED_BALL);
 				break;
 			case IN_PROGRESS:
-				{
-					QIcon ico;
-					ico.addFile(QStringLiteral(ICON_16x16_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_24x24_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_32x32_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_48x48_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_64x64_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-					return ico;
-				}
+				return inconContainer.icon(IconContainer::ICON_YELLOW_BALL);
 				break;
 			case SETTLED:
-				{
-					QIcon ico;
-					ico.addFile(QStringLiteral(ICON_16x16_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_24x24_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_32x32_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_48x48_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-					ico.addFile(QStringLiteral(ICON_64x64_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-					return ico;
-				}
+				return inconContainer.icon(IconContainer::ICON_GREY_BALL);
 				break;
 			default:
 				Q_ASSERT(0);
@@ -180,13 +137,7 @@ QVariant DbMsgsTblModel::data(const QModelIndex &index, int role) const
 		case ATTDOWN_COL:
 			/* Show icon for 'is downloaded'. */
 			if (_data(index).toBool()) {
-				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
+				return inconContainer.icon(IconContainer::ICON_ATTACHMENT);
 			} else {
 				return QVariant(); /* No icon. */
 			}
@@ -361,48 +312,16 @@ QVariant DbMsgsTblModel::headerData(int section, Qt::Orientation orientation,
 	case Qt::DecorationRole:
 		switch (section) {
 		case PERSDELIV_COL: /* 'personal delivery' */
-			{
-				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "hand_grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
-			}
+			return inconContainer.icon(IconContainer::ICON_HAND_GREY);
 			break;
 		case READLOC_COL: /* 'read locally' */
-			{
-				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "readcol.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
-			}
+			return inconContainer.icon(IconContainer::ICON_READCOL);
 			break;
 		case ATTDOWN_COL: /* 'is downloaded' */
-			{
-				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "attachment.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
-			}
+			return inconContainer.icon(IconContainer::ICON_ATTACHMENT);
 			break;
 		case PROCSNG_COL: /* 'process status' */
-			{
-				QIcon ico;
-				ico.addFile(QStringLiteral(ICON_16x16_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_24x24_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_32x32_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_48x48_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
-				ico.addFile(QStringLiteral(ICON_64x64_PATH "flag.png"), QSize(), QIcon::Normal, QIcon::Off);
-				return ico;
-			}
+			return inconContainer.icon(IconContainer::ICON_FLAG);
 			break;
 		default:
 			return _headerData(section, orientation, role);

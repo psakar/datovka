@@ -46,6 +46,7 @@
 #include "src/gui/dlg_send_message.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
 #include "src/gui/helper.h"
+#include "src/gui/icon_container.h"
 #include "src/model_interaction/attachment_interaction.h"
 #include "src/io/account_db.h"
 #include "src/io/dbs.h"
@@ -1502,39 +1503,25 @@ finish:
 void DlgSendMessage::setIcons(void)
 {
 	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		const QIcon ico(
+		    IconContainer::construcIcon(IconContainer::ICON_PLUS));
 		m_ui->addRecipButton->setIcon(ico);
 		m_ui->addAttachButton->setIcon(ico);
 	}
 
 	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		const QIcon ico(
+		    IconContainer::construcIcon(IconContainer::ICON_DELETE));
 		m_ui->removeRecipButton->setIcon(ico);
 		m_ui->removeAttachButton->setIcon(ico);
 	}
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->findRecipButton->setIcon(ico);
-	}
+	m_ui->findRecipButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_SEARCH));
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->enterBoxIdButton->setIcon(ico);
-	}
+	m_ui->enterBoxIdButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_PENCIL));
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->openAttachButton->setIcon(ico);
-	}
+	m_ui->openAttachButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_FOLDER));
 }
