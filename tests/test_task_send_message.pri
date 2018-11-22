@@ -35,6 +35,7 @@ SOURCES += \
 	$${top_srcdir}src/delegates/tag_item.cpp \
 	$${top_srcdir}src/dimensions/dimensions.cpp \
 	$${top_srcdir}src/global.cpp \
+	$${top_srcdir}src/gui/icon_container.cpp \
 	$${top_srcdir}src/io/account_db.cpp \
 	$${top_srcdir}src/io/db_tables.cpp \
 	$${top_srcdir}src/io/dbs.cpp \
@@ -89,6 +90,7 @@ HEADERS += \
 	$${top_srcdir}src/delegates/tag_item.h \
 	$${top_srcdir}src/dimensions/dimensions.h \
 	$${top_srcdir}src/global.h \
+	$${top_srcdir}src/gui/icon_container.h \
 	$${top_srcdir}src/io/account_db.h \
 	$${top_srcdir}src/io/db_tables.h \
 	$${top_srcdir}src/io/dbs.h \
