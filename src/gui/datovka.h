@@ -34,7 +34,6 @@
 #include <QMenu>
 #include <QNetworkReply>
 
-#include "src/common.h"
 #include "src/io/account_db.h"
 #include "src/io/exports.h"
 #include "src/io/message_db.h"

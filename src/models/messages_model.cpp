@@ -23,7 +23,6 @@
 
 #include <QFont>
 
-#include "src/common.h"
 #include "src/datovka_shared/graphics/graphics.h"
 #include "src/datovka_shared/io/records_management_db.h"
 #include "src/datovka_shared/isds/type_conversion.h"
@@ -51,7 +50,7 @@ static IconContainer inconContainer; /* Local icon contaimer. */
  *
  * @return Icon object.
  */
-static
+static inline
 QIcon defaultRMIcon(void)
 {
 	return IconContainer::construcIcon(IconContainer::ICON_UP);

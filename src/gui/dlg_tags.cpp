@@ -25,9 +25,9 @@
 #include <QMessageBox>
 #include <QString>
 
-#include "src/common.h"
 #include "src/gui/dlg_tag.h"
 #include "src/gui/dlg_tags.h"
+#include "src/gui/icon_container.h"
 #include "src/io/tag_db.h"
 #include "ui_dlg_tags.h"
 
@@ -411,45 +411,21 @@ void DlgTags::selectAllAssingedTagsFromMsgs(void)
 
 void DlgTags::setIcons(void)
 {
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->addTagButton->setIcon(ico);
-	}
+	m_ui->addTagButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_PLUS));
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->deleteTagButton->setIcon(ico);
-	}
+	m_ui->deleteTagButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DELETE));
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "pencil_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->updateTagButton->setIcon(ico);
-	}
+	m_ui->updateTagButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_PENCIL));
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "right_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "right_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->assignButton->setIcon(ico);
-	}
+	m_ui->assignButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_RIGHT));
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "left_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "left_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->removeButton->setIcon(ico);
-	}
+	m_ui->removeButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_LEFT));
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "left_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "left_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->removeAllButton->setIcon(ico);
-	}
+	m_ui->removeAllButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_LEFT));
 }

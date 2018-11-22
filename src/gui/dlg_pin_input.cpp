@@ -23,9 +23,9 @@
 
 #include <QPixmap>
 
-#include "src/common.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/gui/dlg_pin_input.h"
+#include "src/gui/icon_container.h"
 #include "ui_dlg_pin_input.h"
 
 /*!

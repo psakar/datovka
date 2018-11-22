@@ -26,6 +26,8 @@
 #include <QIcon>
 #include <QVector>
 
+#define ICON_128x128_PATH ":/icons/128x128/" /* Used in PIN dialogue. */
+
 /*!
  * @brief Container holding icons used in the application. Its purpose is to
  *     provide icons without the need to build them every time they are needed.
@@ -35,17 +37,56 @@ class IconContainer {
 public:
 	enum Icon {
 		ICON_DATOVKA = 0,
+		ICON_DATOVKA_ACCOUNT_SYNC,
+		ICON_DATOVKA_ALL_ACCOUNTS_SYNC,
+		ICON_DATOVKA_ERROR,
+		ICON_DATOVKA_MESSAGE,
+		ICON_DATOVKA_MESSAGE_DOWNLOAD,
+		ICON_DATOVKA_MESSAGE_REPLY,
+		ICON_DATOVKA_MESSAGE_SIGNATURE,
+		ICON_DATOVKA_MESSAGE_UPLOAD,
+		ICON_DATOVKA_MESSAGE_VERIFY,
+		ICON_DATOVKA_OK,
+		ICON_DATOVKA_STOCK_KEY,
 		ICON_ATTACHMENT,
 		ICON_FLAG,
 		ICON_HAND,
 		ICON_HAND_GREY,
+		ICON_MACOS_WINDOW,
 		ICON_READCOL,
+		ICON_SAVE,
+		ICON_SAVE_ALL,
 		ICON_GREY_BALL,
 		ICON_YELLOW_BALL,
 		ICON_RED_BALL,
 		ICON_GREEN_BALL,
 		/* 3rd party icons below */
+		ICON_ADDRESS,
+		ICON_BRIEFCASE,
+		ICON_BRIEFCASE_GREY,
+		ICON_CLIPBOARD,
+		ICON_DELETE,
+		ICON_DOWN,
+		ICON_FOLDER,
+		ICON_GEAR,
+		ICON_GLOBE,
+		ICON_HELP,
+		ICON_HOME,
+		ICON_INFO,
+		ICON_LABEL,
+		ICON_LEFT,
+		ICON_LETTER,
+		ICON_MONITOR,
+		ICON_PENCIL,
+		ICON_PLUS,
+		ICON_RIGHT,
+		ICON_SEARCH,
+		ICON_SHIELD,
+		ICON_STATISTICS,
+		ICON_TRASH,
 		ICON_UP,
+		ICON_USER,
+		ICON_WARNING,
 
 		MAX_ICONNUM /* Maximal number of icons (convenience value). */
 	};

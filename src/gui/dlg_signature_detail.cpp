@@ -30,6 +30,7 @@
 #include "src/datovka_shared/log/log.h"
 #include "src/global.h"
 #include "src/gui/dlg_signature_detail.h"
+#include "src/gui/icon_container.h"
 #include "src/io/message_db.h"
 #include "src/settings/preferences.h"
 #include "ui_dlg_signature_detail.h"
@@ -203,8 +204,7 @@ void DlgSignatureDetail::validateMessageSignature(void)
 	QString resStr;
 
 	if (m_msgDER.isEmpty()) {
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico = IconContainer::construcIcon(IconContainer::ICON_WARNING);
 		resStr = tr("Message signature is not present.");
 	} else {
 		bool verified = false;
@@ -218,19 +218,13 @@ void DlgSignatureDetail::validateMessageSignature(void)
 		}
 
 		if (!verified) {
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico = IconContainer::construcIcon(
+			    IconContainer::ICON_DATOVKA_ERROR);
 			resStr = "<b>" + tr("Valid") + ": </b>";
 			resStr += NO;
 		} else {
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico = IconContainer::construcIcon(
+			    IconContainer::ICON_DATOVKA_OK);
 			resStr = "<b>" + tr("Valid") + ": </b>";
 			resStr += YES;
 		}
@@ -342,18 +336,12 @@ void DlgSignatureDetail::validateSigningCertificate(void)
 
 	QIcon ico;
 	if (!signingCertValid(m_msgDER, cvo)) {
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico = IconContainer::construcIcon(
+		    IconContainer::ICON_DATOVKA_ERROR);
 		resStr += NO;
 	} else {
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico = IconContainer::construcIcon(
+		    IconContainer::ICON_DATOVKA_OK);
 		resStr += YES;
 	}
 
@@ -570,8 +558,7 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 	QDateTime tst;
 
 	if (m_tstDER.isEmpty()) {
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		ico = IconContainer::construcIcon(IconContainer::ICON_WARNING);
 		resStr = tr("Time stamp not present.");
 	} else {
 		time_t utc_time = 0;
@@ -583,18 +570,12 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 		}
 		resStr = "<b>" + tr("Valid") + ": </b>";
 		if (1 != ret) {
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-error.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico = IconContainer::construcIcon(
+			    IconContainer::ICON_DATOVKA_ERROR);
 			resStr += NO;
 		} else {
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
+			ico = IconContainer::construcIcon(
+			    IconContainer::ICON_DATOVKA_OK);
 			resStr += YES;
 		}
 
@@ -646,9 +627,8 @@ void DlgSignatureDetail::validateMessageTimestamp(void)
 
 void DlgSignatureDetail::setIcons(void)
 {
-	QIcon ico;
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-	ico.addFile(QStringLiteral(ICON_3PARTY_PATH "warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+	const QIcon ico(
+	    IconContainer::construcIcon(IconContainer::ICON_WARNING));
 	m_ui->tImage->setIcon(ico);
 	m_ui->cImage->setIcon(ico);
 	m_ui->mSignatureImage->setIcon(ico);

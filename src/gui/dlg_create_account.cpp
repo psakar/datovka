@@ -24,12 +24,12 @@
 #include <QFileDialog>
 #include <QFileInfo>
 
-#include "src/common.h"
 #include "src/datovka_shared/log/log.h"
 #include "src/datovka_shared/settings/pin.h"
 #include "src/global.h"
 #include "src/gui/dlg_create_account.h"
 #include "src/gui/dlg_pin_input.h"
+#include "src/gui/icon_container.h"
 #include "ui_dlg_create_account.h"
 
 /*!
@@ -60,12 +60,8 @@ DlgCreateAccount::DlgCreateAccount(const AcntSettings &accountInfo,
 	m_ui->setupUi(this);
 	/* Tab order is defined in UI file. */
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_ui->addCertButton->setIcon(ico);
-	}
+	m_ui->addCertButton->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_PLUS));
 
 	m_ui->loginMethodComboBox->addItem(tr("Password"));
 	m_ui->loginMethodComboBox->addItem(tr("Certificate"));
@@ -239,15 +235,8 @@ void DlgCreateAccount::addCertificateFile(void)
 	    tr("Certificate Files (*.p12 *.pem)")));
 	if (!certFileName.isEmpty()) {
 		m_ui->addCertButton->setText(certFileName);
-		{
-			QIcon ico;
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			m_ui->addCertButton->setIcon(ico);
-		}
+		m_ui->addCertButton->setIcon(IconContainer::construcIcon(
+		    IconContainer::ICON_DATOVKA_STOCK_KEY));
 		m_ui->addCertButton->setToolTip(QString());
 		m_certPath = certFileName;
 		checkInputFields();
@@ -348,18 +337,11 @@ void DlgCreateAccount::setContent(const AcntSettings &acntData)
 		QFileInfo fileInfo(acntData.p12File());
 		if (fileInfo.exists() && fileInfo.isFile() &&
 		    fileInfo.isReadable()) {
-			QIcon ico;
-			ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-stock-key.png"), QSize(), QIcon::Normal, QIcon::Off);
-			m_ui->addCertButton->setIcon(ico);
+			m_ui->addCertButton->setIcon(IconContainer::construcIcon(
+			    IconContainer::ICON_DATOVKA_STOCK_KEY));
 		} else {
-			QIcon ico;
-			ico.addFile(ICON_3PARTY_PATH + QString("warning_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-			ico.addFile(ICON_3PARTY_PATH + QString("warning_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-			m_ui->addCertButton->setIcon(ico);
+			m_ui->addCertButton->setIcon(IconContainer::construcIcon(
+			    IconContainer::ICON_WARNING));
 			m_ui->addCertButton->setToolTip(tr("File does not exists or cannot be read."));
 		}
 		m_certPath = QDir::toNativeSeparators(acntData.p12File());

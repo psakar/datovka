@@ -44,7 +44,6 @@
 
 #include "datovka.h"
 #include "src/about.h"
-#include "src/common.h"
 #include "src/crypto/crypto_funcs.h"
 #include "src/datovka_shared/isds/message_interface.h"
 #include "src/datovka_shared/isds/type_conversion.h"
@@ -77,6 +76,7 @@
 #include "src/gui/dlg_timestamp_expir.h"
 #include "src/gui/dlg_yes_no_checkbox.h"
 #include "src/gui/dlg_tags.h"
+#include "src/gui/icon_container.h"
 #include "src/io/db_tables.h"
 #include "src/io/dbs.h"
 #include "src/io/filesystem.h"
@@ -338,14 +338,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 	setUpUi();
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_grey_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_grey_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
-		    QString(), ico,
-		    tr("Uploaded to records management service")));
-	}
+	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(QString(),
+	    IconContainer::construcIcon(IconContainer::ICON_BRIEFCASE_GREY),
+	    tr("Uploaded to records management service")));
 	m_msgTblAppendedCols.append(DbMsgsTblModel::AppendedCol(
 	    tr("Tags"), QIcon(), tr("User-assigned tags")));
 
@@ -1545,13 +1540,8 @@ void MainWindow::messageItemRightClicked(const QPoint &point)
 		submenu->addAction(tr("As Settled"), this,
 		    SLOT(messageItemsSelectedMarkSettled()));
 	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "label_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "label_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		menu->addAction(ico, ui->actionTag_settings->text(),
-		    this, SLOT(addOrDeleteMsgTags()));
-	}
+	menu->addAction(IconContainer::construcIcon(IconContainer::ICON_LABEL),
+	    ui->actionTag_settings->text(), this, SLOT(addOrDeleteMsgTags()));
 
 	menu->addSeparator();
 
@@ -7717,17 +7707,7 @@ void MainWindow::setUpUi(void)
 	ui->setupUi(this);
 	setUpTabOrder();
 
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_128x128_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_256x256_PATH "datovka.png"), QSize(), QIcon::Normal, QIcon::Off);
-		setWindowIcon(ico);
-	}
+	setWindowIcon(IconContainer::construcIcon(IconContainer::ICON_DATOVKA));
 
 	/* Set default line height for table views/widgets. */
 	ui->accountList->setNarrowedLineHeight();
@@ -7776,33 +7756,15 @@ void MainWindow::setUpUi(void)
 
 	/* Message state combo box. */
 	ui->messageStateCombo->setInsertPolicy(QComboBox::InsertAtBottom);
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "red.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->messageStateCombo->addItem(ico, tr("Unsettled"));
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "yellow.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->messageStateCombo->addItem(ico, tr("In Progress"));
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "grey.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->messageStateCombo->addItem(ico, tr("Settled"));
-	}
+	ui->messageStateCombo->addItem(
+	    IconContainer::construcIcon(IconContainer::ICON_RED_BALL),
+	    tr("Unsettled"));
+	ui->messageStateCombo->addItem(
+	    IconContainer::construcIcon(IconContainer::ICON_YELLOW_BALL),
+	    tr("In Progress"));
+	ui->messageStateCombo->addItem(
+	    IconContainer::construcIcon(IconContainer::ICON_GREY_BALL),
+	    tr("Settled"));
 
 	/* Override tool button sizes. */
 	ui->signatureDetails->setVerticalSizeHintOrigin(ui->messageStateCombo);
@@ -7917,226 +7879,91 @@ void MainWindow::setMenuActionIcons(void)
 	 */
 
 	/* File menu. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-all-accounts-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionSync_all_accounts->setIcon(ico);
-	}
+	ui->actionSync_all_accounts->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_ALL_ACCOUNTS_SYNC));
+	    /* Separator. */
+	ui->actionAdd_account->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_PLUS));
+	ui->actionDelete_account->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DELETE));
+	    /* Separator. */
+	ui->actionImport_database_directory->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_ADDRESS));
+	    /* Separator. */
+	ui->actionProxy_settings->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_GLOBE));
 	    /* Separator. */
 	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "plus_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionAdd_account->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionDelete_account->setIcon(ico);
-	}
-	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "address_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "address_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionImport_database_directory->setIcon(ico);
-	}
-	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "globe_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "globe_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionProxy_settings->setIcon(ico);
-	}
-	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		const QIcon ico(
+		    IconContainer::construcIcon(IconContainer::ICON_BRIEFCASE));
 		ui->actionRecords_management_settings->setIcon(ico);
 		ui->actionUpdate_records_management_information->setIcon(ico);
 	}
 	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "gear_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "gear_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionPreferences->setIcon(ico);
-	}
+	ui->actionPreferences->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_GEAR));
 	/* actionQuit -- connected in ui file. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionQuit->setIcon(ico);
-	}
+	ui->actionQuit->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DELETE));
 
 	/* Data box menu. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-account-sync.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionGet_messages->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionSend_message->setIcon(ico);
-	}
+	ui->actionGet_messages->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_ACCOUNT_SYNC));
+	ui->actionSend_message->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE));
+	    /* Separator. */
+	ui->actionSend_egov_request->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE_UPLOAD));
+	    /* Separator. */
+	ui->actionMark_all_as_read->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_OK));
+	    /* Separator. */
+	ui->actionChange_password->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_USER));
+	    /* Separator. */
+	ui->actionAccount_properties->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_LETTER));
+	    /* Separator. */
+	ui->actionMove_account_up->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_UP));
+	ui->actionMove_account_down->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DOWN));
+	    /* Separator. */
+	ui->actionChange_data_directory->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_FOLDER));
 	    /* Separator. */
 	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-upload.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionSend_egov_request->setIcon(ico);
-	}
-	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-ok.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionMark_all_as_read->setIcon(ico);
-	}
-	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "user_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "user_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionChange_password->setIcon(ico);
-	}
-	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "letter_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionAccount_properties->setIcon(ico);
-	}
-	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "up_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionMove_account_up->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "down_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "down_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionMove_account_down->setIcon(ico);
-	}
-	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionChange_data_directory->setIcon(ico);
-	}
-	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "clipboard_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "clipboard_32.png"), QSize(), QIcon::Normal, QIcon::Off);
+		const QIcon ico(
+		    IconContainer::construcIcon(IconContainer::ICON_CLIPBOARD));
 		ui->actionImport_messages_from_database->setIcon(ico);
 		ui->actionImport_ZFO_file_into_database->setIcon(ico);
 	}
 	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "trash_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "trash_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionVacuum_message_database->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "statistics_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "statistics_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionSplit_database_by_years->setIcon(ico);
-	}
+	ui->actionVacuum_message_database->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_TRASH));
+	ui->actionSplit_database_by_years->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_STATISTICS));
 
 	/* Message menu. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-download.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionDownload_message_signed->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-reply.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionReply->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionForward_message->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionCreate_message_from_template->setIcon(ico);
-	}
+	ui->actionDownload_message_signed->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE_DOWNLOAD));
+	ui->actionReply->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE_REPLY));
+	ui->actionForward_message->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE));
+	ui->actionCreate_message_from_template->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE));
 	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-signature.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionSignature_detail->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionAuthenticate_message->setIcon(ico);
-	}
+	ui->actionSignature_detail->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE_SIGNATURE));
+	ui->actionAuthenticate_message->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE_VERIFY));
 	    /* Separator. */
 	ui->actionOpen_message_externally->isEnabled();
 	ui->actionOpen_delivery_info_externally->isEnabled();
 	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "briefcase_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionSend_to_records_management->setIcon(ico);
-	}
+	ui->actionSend_to_records_management->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_BRIEFCASE));
 	    /* Separator. */
 	ui->actionExport_as_ZFO->isEnabled();
 	ui->actionExport_delivery_info_as_ZFO->isEnabled();
@@ -8147,110 +7974,42 @@ void MainWindow::setMenuActionIcons(void)
 	ui->actionEmail_ZFOs->isEnabled();
 	ui->actionEmail_all_attachments->isEnabled();
 	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "save_all.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionSave_all_attachments->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionSave_selected_attachments->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "folder_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionOpen_attachment->setIcon(ico);
-	}
+	ui->actionSave_all_attachments->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_SAVE_ALL));
+	ui->actionSave_selected_attachments->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_SAVE));
+	ui->actionOpen_attachment->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_FOLDER));
 	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "delete_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionDelete_message_from_db->setIcon(ico);
-	}
+	ui->actionDelete_message_from_db->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DELETE));
 
 	/* Tools menu. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionFind_databox->setIcon(ico);
-	}
+	ui->actionFind_databox->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_SEARCH));
 	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "datovka-message-verify.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionAuthenticate_message_file->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "monitor_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "monitor_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionView_message_file->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_16x16_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_24x24_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_32x32_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_48x48_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_64x64_PATH "save.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionExport_correspondence_overview->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "shield_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "shield_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionCheck_message_timestamp_expiration->setIcon(ico);
-	}
+	ui->actionAuthenticate_message_file->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_DATOVKA_MESSAGE_VERIFY));
+	ui->actionView_message_file->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_MONITOR));
+	ui->actionExport_correspondence_overview->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_SAVE));
+	ui->actionCheck_message_timestamp_expiration->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_SHIELD));
 	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "search_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionMsgAdvancedSearch->setIcon(ico);
-	}
+	ui->actionMsgAdvancedSearch->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_SEARCH));
 	    /* Separator. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "label_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "label_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionTag_settings->setIcon(ico);
-	}
+	ui->actionTag_settings->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_LABEL));
 
 	/* Help. */
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "info_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "info_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionAbout_Datovka->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "home_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "home_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionHomepage->setIcon(ico);
-	}
-	{
-		QIcon ico;
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "help_16.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ico.addFile(QStringLiteral(ICON_3PARTY_PATH "help_32.png"), QSize(), QIcon::Normal, QIcon::Off);
-		ui->actionHelp->setIcon(ico);
-	}
+	ui->actionAbout_Datovka->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_INFO));
+	ui->actionHomepage->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_HOME));
+	ui->actionHelp->setIcon(
+	    IconContainer::construcIcon(IconContainer::ICON_HELP));
 
 	/* Actions that are not shown in the top menu. */
 	ui->actionEmail_selected_attachments->isEnabled();
@@ -8486,14 +8245,8 @@ void MainWindow::showImportMessageResults(const QString &userName,
 
 void MainWindow::dockMenuPopulate(void)
 {
-	static QIcon winIco;
-	if (winIco.isNull()) {
-		winIco.addFile(QStringLiteral(ICON_16x16_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
-		winIco.addFile(QStringLiteral(ICON_24x24_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
-		winIco.addFile(QStringLiteral(ICON_32x32_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
-		winIco.addFile(QStringLiteral(ICON_48x48_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
-		winIco.addFile(QStringLiteral(ICON_64x64_PATH "macos_window.png"), QSize(), QIcon::Normal, QIcon::Off);
-	}
+	static const QIcon winIco(
+	    IconContainer::construcIcon(IconContainer::ICON_MACOS_WINDOW));
 
 	mui_dockMenu.clear();
 	QAction *action;
