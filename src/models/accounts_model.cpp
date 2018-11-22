@@ -79,7 +79,7 @@
 #define internalIdUserNameIndex(intId) \
 	(((unsigned) (intId)) >> TYPE_BITS)
 
-static IconContainer inconContainer; /* Local icon contaimer. */
+static IconContainer inconContainer; /* Local icon container. */
 
 AccountModel::AccountModel(QObject *parent)
     : QAbstractItemModel(parent),

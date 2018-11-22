@@ -43,7 +43,7 @@
  */
 #define MSG_ID_WIDTH 48
 
-static IconContainer inconContainer; /* Local icon contaimer. */
+static IconContainer inconContainer; /* Local icon container. */
 
 /*!
  * @brief Construct the default records management icon.
