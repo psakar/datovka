@@ -7714,6 +7714,11 @@ void MainWindow::setUpUi(void)
 	ui->messageList->setNarrowedLineHeight();
 	ui->messageAttachmentList->setNarrowedLineHeight();
 
+	/* Header content alignment. */
+	ui->accountList->header()->setDefaultAlignment(Qt::AlignLeft);
+	ui->messageList->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+	ui->messageAttachmentList->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
+
 	/* Window title. */
 	setWindowTitle(
 	    tr("Datovka - Free client for Datov\303\251 schr\303\241nky"));

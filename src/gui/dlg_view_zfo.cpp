@@ -56,6 +56,7 @@ DlgViewZfo::DlgViewZfo(const Isds::Message &message, enum Isds::LoadType zfoType
 
 	/* Set default line height for table views/widgets. */
 	m_ui->attachmentTable->setNarrowedLineHeight();
+	m_ui->attachmentTable->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 
 	if (m_message.isNull()) {
 		/* Just show error message. */

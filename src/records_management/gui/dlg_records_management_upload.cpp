@@ -66,6 +66,7 @@ DlgRecordsManagementUpload::DlgRecordsManagementUpload(const QString &urlStr,
 	    this, SLOT(filterHierarchy(QString)));
 
 	m_ui->uploadView->setNarrowedLineHeight();
+	m_ui->uploadView->header()->setDefaultAlignment(Qt::AlignLeft);
 
 	m_ui->uploadView->setModel(&m_uploadProxyModel);
 	m_uploadProxyModel.setSourceModel(&m_uploadModel);
