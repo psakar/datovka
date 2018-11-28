@@ -56,6 +56,7 @@ DlgMsgSearch::DlgMsgSearch(const QList<Task::AccountDescr> &messageDbSetList,
 
 	/* Set default line height for table views/widgets. */
 	m_ui->resultsTableWidget->setNarrowedLineHeight();
+	m_ui->resultsTableWidget->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 
 	initSearchWindow(userName);
 }

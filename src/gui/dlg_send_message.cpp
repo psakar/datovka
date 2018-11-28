@@ -130,10 +130,12 @@ DlgSendMessage::DlgSendMessage(
 
 	/* Set default line height for table views/widgets. */
 	m_ui->recipTableView->setNarrowedLineHeight();
+	m_ui->recipTableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 	m_ui->recipTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
 	m_ui->attachTableView->setNarrowedLineHeight();
+	m_ui->attachTableView->horizontalHeader()->setDefaultAlignment(Qt::AlignLeft);
 	m_ui->attachTableView->setSelectionBehavior(
 	    QAbstractItemView::SelectRows);
 
