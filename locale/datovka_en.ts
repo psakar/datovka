@@ -1268,7 +1268,7 @@ at least one digit and one capital letter.</source>
 <context>
     <name>DlgContacts</name>
     <message>
-        <location filename="../src/gui/dlg_contacts.cpp" line="77"/>
+        <location filename="../src/gui/dlg_contacts.cpp" line="78"/>
         <source>Enter sought expression</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1833,179 +1833,179 @@ select this option. For normal account
 <context>
     <name>DlgDsSearch</name>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="99"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="116"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="100"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="117"/>
         <source>All</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="99"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="100"/>
         <source>All types</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="102"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="103"/>
         <source>OVM</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="105"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="106"/>
         <source>PO</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="108"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="109"/>
         <source>PFO</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="111"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="112"/>
         <source>FO</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="116"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="117"/>
         <source>Search in all fields</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="119"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="120"/>
         <source>Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="119"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="120"/>
         <source>Search in address data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="122"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="123"/>
         <source>IC</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="122"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="123"/>
         <source>Identification number</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="125"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="126"/>
         <source>ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="125"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="126"/>
         <source>Box identifier</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="183"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="184"/>
         <source>Enter sought expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="271"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="272"/>
         <source>This is a special ID for a ISDS system data box. You can&apos;t use this ID for message delivery. Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="341"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="342"/>
         <source>Full-text data box search. Enter phrase for finding and set optional restrictions:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="357"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="358"/>
         <source>Enter the ID, IČ or at least three letters from the name of the data box you look for:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="410"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="422"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="411"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="423"/>
         <source>Your account is of type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="412"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="413"/>
         <source>You have also Post Data Messages activated.
 This means you can only search for accounts of type OVM and accounts that have Post Data Messages delivery activated.
 Because of this limitation the results of your current search might not contain all otherwise matching databoxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="420"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="421"/>
         <source>commercial messages are enabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="424"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="425"/>
         <source>This means you can only search for accounts of type OVM.
 The current search settings will thus probably yield no result.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="428"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="429"/>
         <source>commercial messages are disabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="485"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="486"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="487"/>
         <source>Enter last name or last name at birth of the FO.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="817"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="818"/>
         <source>Total found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="694"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="800"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="695"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="801"/>
         <source>It was not possible find any data box because</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="102"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="103"/>
         <source>Public authority</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="105"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="106"/>
         <source>Legal person</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="108"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="109"/>
         <source>Self-employed person</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="111"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="112"/>
         <source>Natural person</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="703"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="808"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="704"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="809"/>
         <source>It was not possible find any data box because an error occurred during the search process!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="747"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="748"/>
         <source>Displayed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="463"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="470"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="464"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="471"/>
         <source>Subject Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="464"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="465"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="471"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="466"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="472"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="473"/>
         <source>Enter name of subject</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2072,7 +2072,7 @@ contain all otherwise matching databoxes.</source>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_ds_search.ui" line="166"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="477"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="478"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2092,28 +2092,28 @@ contain all otherwise matching databoxes.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="478"/>
         <location filename="../src/gui/dlg_ds_search.cpp" line="479"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="480"/>
         <source>Enter last name of the PFO or company name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="484"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="485"/>
         <source>Last Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="270"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="687"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="693"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="794"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="799"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="271"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="688"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="694"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="795"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="800"/>
         <source>Search result</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="702"/>
-        <location filename="../src/gui/dlg_ds_search.cpp" line="807"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="703"/>
+        <location filename="../src/gui/dlg_ds_search.cpp" line="808"/>
         <source>Search error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2360,42 +2360,42 @@ into your local database.</source>
 <context>
     <name>DlgMsgSearch</name>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="338"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="339"/>
         <source>Here it is possible to search for messages according to supplied criteria. You can search for messages in the selected account or in all accounts. Double clicking on a found message will change focus of the selected message in the main application window. Note: You can view additional information when hovering the mouse cursor over the message ID.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="371"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="372"/>
         <source>Account</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="372"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="373"/>
         <source>Message ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="373"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="374"/>
         <source>Subject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="374"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="375"/>
         <source>Sender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="375"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="376"/>
         <source>Recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="376"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="377"/>
         <source>Delivery Year</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_msg_search.cpp" line="377"/>
+        <location filename="../src/gui/dlg_msg_search.cpp" line="378"/>
         <source>Message Type</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3459,23 +3459,23 @@ to upload the message &apos;%1&apos; into.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="141"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="149"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="205"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="308"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="317"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="142"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="150"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="206"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="309"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="318"/>
         <source>Communication Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="142"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="309"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="143"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="310"/>
         <source>Received invalid response.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="150"/>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="318"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="151"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="319"/>
         <source>Received empty response.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3506,278 +3506,278 @@ to upload the message &apos;%1&apos; into.</source>
 <context>
     <name>DlgSendMessage</name>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="306"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="308"/>
         <source>Enter reference number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1034"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1036"/>
         <source>Message contains non-OVM recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="214"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="216"/>
         <source>Data box ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="215"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="217"/>
         <source>Enter data box ID (7 characters):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1107"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1109"/>
         <source>Wrong data box ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1108"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1110"/>
         <source>Wrong data box ID &apos;%1&apos;!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1018"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1020"/>
         <source>Empty file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1019"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1021"/>
         <source>Cannot add empty file &apos;%1&apos; to attachments.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="483"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="485"/>
         <source>Message was successfully sent to &lt;i&gt;%1 (%2)&lt;/i&gt; as PDZ with number &lt;i&gt;%3&lt;/i&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="491"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="493"/>
         <source>Message was successfully sent to &lt;i&gt;%1 (%2)&lt;/i&gt; as message number &lt;i&gt;%3&lt;/i&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="500"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="502"/>
         <source>Message was NOT sent to &lt;i&gt;%1 (%2)&lt;/i&gt;. Server says: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="512"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="514"/>
         <source>Message was successfully sent to all recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="520"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="522"/>
         <source>Message was NOT sent to all recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1003"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1005"/>
         <source>Non-existent file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1004"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1006"/>
         <source>Cannot add non-existent file &apos;%1&apos; to attachments.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1008"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1010"/>
         <source>File not readable</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1009"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1011"/>
         <source>Cannot add file &apos;%1&apos; without readable permissions to attachments.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1013"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1015"/>
         <source>File already present</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1035"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1037"/>
         <source>Your message contains %1 non-OVM recipients therefore this message will be sent as a commercial messages (PDZ) for these recipients.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1042"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1044"/>
         <source>Message contains non-OVM recipient.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1043"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1045"/>
         <source>Your message contains non-OVM recipient therefore this message will be sent as a commercial message (PDZ) for this recipient.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1050"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1052"/>
         <source>Your remaining credit is </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1066"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1068"/>
         <source>Total size of attachments is %1 B.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1097"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1099"/>
         <source>Total size of attachments is ~%1 KB.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1099"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1101"/>
         <source>Total size of attachments is ~%1 B.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1185"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1187"/>
         <source>Wrong Recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1192"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1194"/>
         <source>Recipient Search Failed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1193"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1195"/>
         <source>Information about recipient data box could not be obtained.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1195"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1197"/>
         <source>Do you still want to add the box &apos;%1&apos; into the recipient list?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1196"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1198"/>
         <source>Enable commercial messages (PDZ).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1198"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1200"/>
         <source>Obtained ISDS error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1498"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1500"/>
         <source>It has not been possible to send a message to the ISDS server.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="517"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="519"/>
         <source>Do you want to close the Send message form?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1014"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1016"/>
         <source>Cannot add file &apos;%1&apos; because the file is already present in the attachments.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1076"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1078"/>
         <source>The permitted number of (%1) attachments has been exceeded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1083"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1085"/>
         <source>Total size of attachments exceeds %1 MB.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1090"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1092"/>
         <source>Total size of attachments exceeds %1 MB. Most of the data boxes cannot receive messages larger than %1 MB. However, some OVM data boxes can receive message up to %2 MB.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1146"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1147"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1148"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1149"/>
         <source>Unknown</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1159"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1161"/>
         <source>Data box is not active</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1160"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1162"/>
         <source>Recipient with data box ID &apos;%1&apos; does not have active data box.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1162"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1164"/>
         <source>The message cannot be delivered.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1174"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1176"/>
         <source>Cannot send to data box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1175"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1177"/>
         <source>Cannot send message to recipient with data box ID &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1177"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1179"/>
         <source>You won&apos;t be able as user &apos;%1&apos; to send messages into data box &apos;%2&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1186"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1188"/>
         <source>Recipient with data box ID &apos;%1&apos; does not exist.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1497"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1499"/>
         <source>Send message error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1443"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1445"/>
         <source>An error occurred while loading attachments into message.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1449"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1451"/>
         <source>An error occurred during message envelope creation.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1496"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1498"/>
         <source>The message will be discarded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="511"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="513"/>
         <source>Message sent</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="519"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="521"/>
         <source>Message sending error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1040"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1042"/>
         <source>Do you want to send all messages?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="416"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="418"/>
         <source>sending of PDZ: enabled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="417"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="419"/>
         <source>remaining credit: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="420"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="422"/>
         <source>sending of PDZ: disabled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3873,7 +3873,7 @@ to upload the message &apos;%1&apos; into.</source>
     </message>
     <message>
         <location filename="../src/gui/ui/dlg_send_message.ui" line="277"/>
-        <location filename="../src/gui/dlg_send_message.cpp" line="299"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="301"/>
         <source>Our reference number:</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4081,7 +4081,7 @@ necessary digital signatures.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_send_message.cpp" line="1047"/>
+        <location filename="../src/gui/dlg_send_message.cpp" line="1049"/>
         <source>Do you want to send message?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4440,152 +4440,152 @@ necessary digital signatures.</source>
 <context>
     <name>DlgViewZfo</name>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="129"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="130"/>
         <source>Open attachment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="134"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="135"/>
         <source>Save attachment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="137"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="138"/>
         <source>Save attachments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="351"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="352"/>
         <source>Identification</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="353"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="354"/>
         <source>ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="354"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="355"/>
         <source>Subject</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="357"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="358"/>
         <source>Message type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="364"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="365"/>
         <source>Sender</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="365"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="366"/>
         <source>Sender Databox ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="366"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="367"/>
         <source>Sender Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="370"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="371"/>
         <source>Recipient</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="371"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="372"/>
         <source>Recipient Databox ID</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="325"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="326"/>
         <source>Events</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="372"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="373"/>
         <source>Recipient Address</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="64"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="65"/>
         <source>Error parsing content</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="93"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="94"/>
         <source>Cannot parse the content of file &apos;%1&apos;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="108"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="109"/>
         <source>Cannot parse the content of message.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="374"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="394"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="375"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="395"/>
         <source>Status</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="376"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="377"/>
         <source>Delivery time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="381"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="382"/>
         <source>Acceptance time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="297"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="298"/>
         <source>Attachments</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="402"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="403"/>
         <source>Signature</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="406"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="414"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="430"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="407"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="415"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="431"/>
         <source>Valid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="408"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="416"/>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="430"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="409"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="417"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="431"/>
         <source>Invalid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="409"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="410"/>
         <source>Message signature and content do not correspond!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="411"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="412"/>
         <source>Message signature</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="420"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="421"/>
         <source>Certificate revocation check is turned off!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="423"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="424"/>
         <source>Signing certificate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/dlg_view_zfo.cpp" line="435"/>
+        <location filename="../src/gui/dlg_view_zfo.cpp" line="436"/>
         <source>Time stamp</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4981,12 +4981,12 @@ necessary digital signatures.</source>
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7858"/>
+        <location filename="../src/gui/datovka.cpp" line="7863"/>
         <source>Search: </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7742"/>
+        <location filename="../src/gui/datovka.cpp" line="7747"/>
         <source>Mode: offline</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5370,13 +5370,13 @@ Change password now?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8227"/>
+        <location filename="../src/gui/datovka.cpp" line="8232"/>
         <source>Import of messages to account %1 finished</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3687"/>
-        <location filename="../src/gui/datovka.cpp" line="7719"/>
+        <location filename="../src/gui/datovka.cpp" line="7724"/>
         <source>Datovka - Free client for Datové schránky</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5397,12 +5397,12 @@ Change password now?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7867"/>
+        <location filename="../src/gui/datovka.cpp" line="7872"/>
         <source>Enter sought expression</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7764"/>
+        <location filename="../src/gui/datovka.cpp" line="7769"/>
         <source>In Progress</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5829,7 +5829,7 @@ Enter password to unlock certificate file:</source>
     <message>
         <location filename="../src/gui/datovka.cpp" line="7560"/>
         <location filename="../src/gui/datovka.cpp" line="7611"/>
-        <location filename="../src/gui/datovka.cpp" line="8091"/>
+        <location filename="../src/gui/datovka.cpp" line="8096"/>
         <source>Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5844,22 +5844,22 @@ Enter password to unlock certificate file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8237"/>
+        <location filename="../src/gui/datovka.cpp" line="8242"/>
         <source>Messages import result</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8238"/>
+        <location filename="../src/gui/datovka.cpp" line="8243"/>
         <source>Import of messages into account &apos;%1&apos; finished with result:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8241"/>
+        <location filename="../src/gui/datovka.cpp" line="8246"/>
         <source>Imported messages: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8242"/>
+        <location filename="../src/gui/datovka.cpp" line="8247"/>
         <source>Non-imported messages: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5874,62 +5874,62 @@ Enter password to unlock certificate file:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8051"/>
+        <location filename="../src/gui/datovka.cpp" line="8056"/>
         <source>Vacuum cannot be performed on databases in memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8054"/>
+        <location filename="../src/gui/datovka.cpp" line="8059"/>
         <source>Database operation error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8055"/>
+        <location filename="../src/gui/datovka.cpp" line="8060"/>
         <source>Database clean-up cannot be performed on database in memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8056"/>
+        <location filename="../src/gui/datovka.cpp" line="8061"/>
         <source>Cannot call VACUUM on database in memory.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8085"/>
+        <location filename="../src/gui/datovka.cpp" line="8090"/>
         <source>Clean message database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8086"/>
+        <location filename="../src/gui/datovka.cpp" line="8091"/>
         <source>Performs a message database clean-up for the selected account. This action will block the entire application. The action may take several minutes to be completed. Furthermore, it requires more than %1 of free disk space to successfully proceed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8098"/>
+        <location filename="../src/gui/datovka.cpp" line="8103"/>
         <source>Performing database clean-up.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8107"/>
+        <location filename="../src/gui/datovka.cpp" line="8112"/>
         <source>Database clean-up finished.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8112"/>
+        <location filename="../src/gui/datovka.cpp" line="8117"/>
         <source>Database clean-up successful</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8113"/>
+        <location filename="../src/gui/datovka.cpp" line="8118"/>
         <source>The database clean-up has finished successfully.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8117"/>
+        <location filename="../src/gui/datovka.cpp" line="8122"/>
         <source>Database clean-up failure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="8118"/>
+        <location filename="../src/gui/datovka.cpp" line="8123"/>
         <source>The database clean-up failed with error message: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6030,7 +6030,7 @@ Enter password to unlock certificate file:</source>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="7425"/>
-        <location filename="../src/gui/datovka.cpp" line="8240"/>
+        <location filename="../src/gui/datovka.cpp" line="8245"/>
         <source>Total of messages in database: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6110,7 +6110,7 @@ Enter password to unlock certificate file:</source>
     </message>
     <message>
         <location filename="../src/gui/datovka.cpp" line="3689"/>
-        <location filename="../src/gui/datovka.cpp" line="7721"/>
+        <location filename="../src/gui/datovka.cpp" line="7726"/>
         <source>Portable version</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6414,12 +6414,12 @@ Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7732"/>
+        <location filename="../src/gui/datovka.cpp" line="7737"/>
         <source>Welcome...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7736"/>
+        <location filename="../src/gui/datovka.cpp" line="7741"/>
         <source>Storage: disk | disk</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6529,12 +6529,12 @@ sent reply on this message</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7761"/>
+        <location filename="../src/gui/datovka.cpp" line="7766"/>
         <source>Unsettled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/gui/datovka.cpp" line="7767"/>
+        <location filename="../src/gui/datovka.cpp" line="7772"/>
         <source>Settled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7980,32 +7980,32 @@ to origin path
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="241"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="242"/>
         <source>Message &apos;%1&apos; could not be uploaded.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="244"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="245"/>
         <source>Received error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="249"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="250"/>
         <source>File Upload Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="254"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="255"/>
         <source>Successful File Upload</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="255"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="256"/>
         <source>Message &apos;%1&apos; was successfully uploaded into the records management service.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="257"/>
+        <location filename="../src/records_management/gui/dlg_records_management_upload.cpp" line="258"/>
         <source>It can be now found in the records management service in these locations:</source>
         <translation type="unfinished"></translation>
     </message>

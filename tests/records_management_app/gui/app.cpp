@@ -85,6 +85,7 @@ MainWindow::MainWindow(const QString &baseUrl, const QString &token,
 	connect(ui_treeView->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 	    this, SLOT(uploadHierarchySelectionChanged(QItemSelection, QItemSelection)));
 
+	ui_treeView->header()->setDefaultAlignment(Qt::AlignLeft);
 	ui_treeView->sortByColumn(0, Qt::AscendingOrder);
 	ui_treeView->setSortingEnabled(true);
 
