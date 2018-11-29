@@ -69,9 +69,12 @@ public:
 	/*!
 	 * @brief Constructor.
 	 *
+	 * @param[in] highlightUnlistedSuff If true then files with unsupported
+	 *                                  suffixes will be highlighted.
 	 * @param[in] parent Parent object.
 	 */
-	explicit AttachmentTblModel(QObject *parent = Q_NULLPTR);
+	explicit AttachmentTblModel(bool highlightUnlistedSuff = false,
+	    QObject *parent = Q_NULLPTR);
 
 	/*!
 	 * @brief Returns the data stored under the given role.
@@ -257,4 +260,6 @@ private:
 	 */
 	QStringList accessibleFiles(const QString &tmpDirPath,
 	    const QModelIndexList &indexes) const;
+
+	const bool m_highlightUnlistedSuff; /*!< Highlight entries with unsupported file suffix. */
 };

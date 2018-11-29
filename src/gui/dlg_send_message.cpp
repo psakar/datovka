@@ -118,7 +118,7 @@ DlgSendMessage::DlgSendMessage(
     m_dmSenderRefNumber(),
     m_dbSet(Q_NULLPTR),
     m_recipTableModel(this),
-    m_attachModel(this),
+    m_attachModel(true, this),
     m_transactIds(),
     m_sentMsgResultList(),
     m_mw(mw)
