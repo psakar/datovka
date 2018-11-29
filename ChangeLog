@@ -18,6 +18,8 @@
  * Speeded up the creation of icons inside the account and message model. The
    icons are now cached in a separate container rather than created every time
    they are requested.
+ * Table and tree view header content is left aligned to match the view
+   content alignment.
 
 4.11.1 / 2018-10-23
  * Added scripts for signing the Windows and macOS executables and software
