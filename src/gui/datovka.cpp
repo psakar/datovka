@@ -305,7 +305,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_accountModel(this),
     m_messageTableModel(DbMsgsTblModel::RCVD_MODEL, this),
     m_messageListProxyModel(this),
-    m_attachmentModel(this),
+    m_attachmentModel(false, this),
     m_messageMarker(this),
     m_lastSelectedMessageId(-1),
     m_lastStoredMessageId(-1),

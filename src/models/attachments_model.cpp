@@ -22,6 +22,7 @@
  */
 
 #include <algorithm> /* std::sort */
+#include <QColor>
 #include <QDir>
 #include <QMimeData>
 #include <QMimeDatabase>
@@ -36,10 +37,12 @@
 #include "src/io/message_db.h"
 #include "src/models/attachments_model.h"
 
-#define LOCAL_DATABASE_STR QLatin1String("local database")
+#define LOCAL_DATABASE_STR QStringLiteral("local database")
 
-AttachmentTblModel::AttachmentTblModel(QObject *parent)
-    : TblModel(parent)
+AttachmentTblModel::AttachmentTblModel(bool highlightUnlistedSuff,
+    QObject *parent)
+    : TblModel(parent),
+    m_highlightUnlistedSuff(highlightUnlistedSuff)
 {
 	/* Fixed column count. */
 	m_columnCount = MAX_COL;
@@ -114,6 +117,57 @@ fail:
 	return QByteArray();
 }
 
+/*!
+ * @brief Return lower-case file suffix.
+ */
+#define fileSuffix(fileName) \
+	QFileInfo(fileName).suffix().toLower()
+
+/*!
+ * @brief Check whether file name has allowed suffix.
+ *
+ * @param[in] fileName File name string.
+ * @return True if file has suffix mentioned in Operation Rules of ISDS.
+ */
+static
+bool fileHasAllowedSuffix(const QString &fileName)
+{
+	if (Q_UNLIKELY(fileName.isEmpty())) {
+		Q_ASSERT(0);
+		return false;
+	}
+
+	const QString suff(fileSuffix(fileName));
+	if (suff.isEmpty()) {
+		return false;
+	}
+	return Isds::Document::allowedFileSuffixes().contains(suff);
+}
+
+/*!
+ * @brief Generate a description why the file does not meet the suffix
+ *     restrictions.
+ *
+ * @param[in] fileName File name string.
+ * @return Null string if suffix is allowed.
+ */
+static
+QString suffixNotification(const QString &fileName)
+{
+	if (!fileHasAllowedSuffix(fileName)) {
+		QString message(fileSuffix(fileName).isEmpty() ?
+		    AttachmentTblModel::tr(
+		        "The file name '%1' contains no suffix.").arg(fileName) :
+		    AttachmentTblModel::tr(
+		        "The suffix of file '%1' does not match the list of suffixes listed in the Operating Rules of ISDS.").arg(fileName));
+		message += QStringLiteral("\n") +
+		    AttachmentTblModel::tr(
+		        "It may happen that the server will reject sending this message.");
+		return message;
+	}
+	return QString();
+}
+
 QVariant AttachmentTblModel::data(const QModelIndex &index, int role) const
 {
 	switch (role) {
@@ -181,18 +235,53 @@ QVariant AttachmentTblModel::data(const QModelIndex &index, int role) const
 			break;
 		}
 		break;
+	case Qt::ToolTipRole:
+		if (m_highlightUnlistedSuff) {
+			const QString notif(suffixNotification(
+			    _data(index.row(), FNAME_COL, Qt::DisplayRole).toString()));
+			if (!notif.isEmpty()) {
+				return notif;
+			}
+		}
+		return QVariant();
+		break;
+	case Qt::ForegroundRole:
+		if (m_highlightUnlistedSuff &&
+		    !fileHasAllowedSuffix(_data(index.row(), FNAME_COL, Qt::DisplayRole).toString())) {
+			return QColor(Qt::darkRed);
+		} else {
+			return QVariant();
+		}
+		break;
 	case Qt::AccessibleTextRole:
 		switch (index.column()) {
 		case FNAME_COL:
+			{
+				const QString fileName(data(index).toString());
+				QString message(
+				    headerData(index.column(), Qt::Horizontal).toString() +
+				    QStringLiteral(" ") + fileName);
+				if (m_highlightUnlistedSuff) {
+					if (m_highlightUnlistedSuff) {
+						const QString notif(suffixNotification(
+						    _data(index.row(), FNAME_COL, Qt::DisplayRole).toString()));
+						if (!notif.isEmpty()) {
+							message += QStringLiteral(" ") + notif;
+						}
+					}
+				}
+				return message;
+			}
+			break;
 		case MIME_COL:
 		case FPATH_COL:
 			return headerData(index.column(), Qt::Horizontal).toString() +
-			    QLatin1String(" ") + data(index).toString();
+			    QStringLiteral(" ") + data(index).toString();
 			break;
 		case BINARY_SIZE_COL:
 			return headerData(index.column(), Qt::Horizontal).toString() +
-			    QLatin1String(" ") + data(index).toString() +
-			    QLatin1String(" ") + tr("bytes");
+			    QStringLiteral(" ") + data(index).toString() +
+			    QStringLiteral(" ") + tr("bytes");
 			break;
 		default:
 			return QVariant();

@@ -28,6 +28,7 @@
 #include <QByteArray>
 #include <QList>
 #include <QScopedPointer>
+#include <QSet>
 #include <QString>
 
 #include "src/datovka_shared/isds/types.h"
@@ -138,7 +139,7 @@ namespace Isds {
 		void setDescr(QString &&descr);
 #endif /* Q_COMPILER_RVALUE_REFS */
 
-		/* Converts even type to string. */
+		/* Converts event type to string. */
 		static
 		const QString &type2string(enum Type::Event type);
 
@@ -473,6 +474,17 @@ namespace Isds {
 #ifdef Q_COMPILER_RVALUE_REFS
 		void setFormat(QString &&f);
 #endif /* Q_COMPILER_RVALUE_REFS */
+
+		/*!
+		 * @note For a list of allowed file suffixes see
+		 *     pril_2/WS_manipulace_s_datovymi_zpravami.pdf
+		 *     section 3.
+		 *
+		 * @return A set of allowed file suffixes in lower case
+		 *     (eg. odp, pdf, ...).
+		 */
+		static
+		const QSet<QString> &allowedFileSuffixes(void);
 
 	private:
 		QScopedPointer<DocumentPrivate> d_ptr; // std::unique_ptr ?

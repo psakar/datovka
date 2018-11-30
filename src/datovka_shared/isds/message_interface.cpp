@@ -1985,6 +1985,32 @@ void Isds::Document::setFormat(QString &&f)
 }
 #endif /* Q_COMPILER_RVALUE_REFS */
 
+const QSet<QString> &Isds::Document::allowedFileSuffixes(void)
+{
+	/* Suffixes listed in pril_2/WS_manipulace_s_datovymi_zpravami.pdf. */
+	static const QSet<QString> listedSuffixes(QSet<QString>() <<
+	    "cer" << "crt" <<
+	    "der" << "doc" << "docx" << "dbf" << "dgn" << "dwg" <<
+	    "edi" <<
+	    "fo" <<
+	    "gfs" << "gif" << "gml" <<
+	    "html" << "htm" <<
+	    "isdoc" << "isdocx" <<
+	    "jfif" << "jpeg" << "jpg" <<
+	    "mpeg" << "mpeg1" << "mpeg2" << "mpg" << "mp2" << "mp3" <<
+	    "odp" << "ods" << "odt" <<
+	    "pdf" << "pk7" << "png" << "ppt" << "pptx" << "prj" << "p7b" << "p7c" << "p7f" <<  "p7m" << "p7s" <<
+	    "qix" <<
+	    "rtf" <<
+	    "sbn" << "sbx" << "shp" << "shx" <<
+	    "tiff" << "tif" << "tst" << "tsr" << "txt" <<
+	    "wav" <<
+	    "xls" << "xlsx" << "xml" << "xsd" <<
+	    "zfo");
+
+	return listedSuffixes;
+}
+
 void Isds::swap(Document &first, Document &second) Q_DECL_NOTHROW
 {
 	using std::swap;
