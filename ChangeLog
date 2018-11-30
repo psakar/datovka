@@ -20,6 +20,8 @@
    they are requested.
  * Table and tree view header content is left aligned to match the view
    content alignment.
+ * When composing a message, highlighting entries in attachment list which
+   contain suffixes which are not listed in the Operating Rules of ISDS.
 
 4.11.1 / 2018-10-23
  * Added scripts for signing the Windows and macOS executables and software
