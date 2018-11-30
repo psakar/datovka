@@ -148,27 +148,42 @@
 <context>
     <name>AttachmentTblModel</name>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="176"/>
+        <location filename="../src/models/attachments_model.cpp" line="159"/>
+        <source>The file name &apos;%1&apos; contains no suffix.</source>
+        <translation>Název souboru &apos;%1&apos; neobsahuje příponu.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/attachments_model.cpp" line="161"/>
+        <source>The suffix of file &apos;%1&apos; does not match the list of suffixes listed in the Operating Rules of ISDS.</source>
+        <translation>Přípona souboru &apos;%1&apos; neodpovídá seznamu přípon uvedeném v Provozním řádu ISDS.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/attachments_model.cpp" line="164"/>
+        <source>It may happen that the server will reject sending this message.</source>
+        <translation>Může se stát, že server odmítne odeslat tuto zprávu.</translation>
+    </message>
+    <message>
+        <location filename="../src/models/attachments_model.cpp" line="230"/>
         <source>local database</source>
         <translation>místní databáze</translation>
     </message>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="195"/>
+        <location filename="../src/models/attachments_model.cpp" line="284"/>
         <source>bytes</source>
         <translation>bajtů</translation>
     </message>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="393"/>
+        <location filename="../src/models/attachments_model.cpp" line="482"/>
         <source>File size</source>
         <translation>Velikost souboru</translation>
     </message>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="395"/>
+        <location filename="../src/models/attachments_model.cpp" line="484"/>
         <source>File path</source>
         <translation>Cesta k souboru</translation>
     </message>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="590"/>
+        <location filename="../src/models/attachments_model.cpp" line="679"/>
         <source>unknown</source>
         <translation>neznámý</translation>
     </message>

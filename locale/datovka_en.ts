@@ -148,27 +148,42 @@
 <context>
     <name>AttachmentTblModel</name>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="176"/>
+        <location filename="../src/models/attachments_model.cpp" line="159"/>
+        <source>The file name &apos;%1&apos; contains no suffix.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/attachments_model.cpp" line="161"/>
+        <source>The suffix of file &apos;%1&apos; does not match the list of suffixes listed in the Operating Rules of ISDS.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/attachments_model.cpp" line="164"/>
+        <source>It may happen that the server will reject sending this message.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/models/attachments_model.cpp" line="230"/>
         <source>local database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="195"/>
+        <location filename="../src/models/attachments_model.cpp" line="284"/>
         <source>bytes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="393"/>
+        <location filename="../src/models/attachments_model.cpp" line="482"/>
         <source>File size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="395"/>
+        <location filename="../src/models/attachments_model.cpp" line="484"/>
         <source>File path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/models/attachments_model.cpp" line="590"/>
+        <location filename="../src/models/attachments_model.cpp" line="679"/>
         <source>unknown</source>
         <translation type="unfinished"></translation>
     </message>
