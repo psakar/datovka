@@ -56,7 +56,7 @@
 #include <openssl/pem.h>
 #include <openssl/x509v3.h>
 #include <openssl/err.h>
-#include <openssl/cms.h>
+#include "cms.h"
 #include <openssl/rand.h>
 #include "cms_lcl.h"
 

@@ -24,7 +24,7 @@
 #include <assert.h>
 #include <ctype.h> /* isdigit(3) */
 #include <openssl/bio.h>
-#include <openssl/cms.h>
+#include "cms/cms.h"
 #include <openssl/err.h>
 #include <openssl/evp.h> /* OpenSSL_add_all_algorithms() */
 #include <openssl/pem.h>

@@ -56,7 +56,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/err.h>
-#include <openssl/cms.h>
+#include "cms.h"
 #include "cms_lcl.h"
 
 static int cms_copy_content(BIO *out, BIO *in, unsigned int flags)
