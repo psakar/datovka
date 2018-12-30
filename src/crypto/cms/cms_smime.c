@@ -51,7 +51,8 @@
  * ====================================================================
  */
 
-#include "cryptlib.h"
+//#include "cryptlib.h"
+#include <openssl/crypto.h>
 #include <openssl/asn1t.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
