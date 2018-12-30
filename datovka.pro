@@ -302,6 +302,19 @@ SOURCES += \
     src/crypto/crypto.c \
     src/crypto/crypto_threads.cpp \
     src/crypto/crypto_version.cpp \
+    src/crypto/cms/cms_lib.c \
+    src/crypto/cms/cms_asn1.c \
+    src/crypto/cms/cms_att.c \
+    src/crypto/cms/cms_io.c \
+    src/crypto/cms/cms_smime.c \
+    src/crypto/cms/cms_err.c \
+    src/crypto/cms/cms_sd.c \
+    src/crypto/cms/cms_dd.c \
+    src/crypto/cms/cms_cd.c \
+    src/crypto/cms/cms_env.c \
+    src/crypto/cms/cms_enc.c \
+    src/crypto/cms/cms_ess.c \
+    src/crypto/cms/cms_pwri.c \
     src/datovka_shared/crypto/crypto_pin.c \
     src/datovka_shared/crypto/crypto_pwd.c \
     src/datovka_shared/crypto/crypto_trusted_certs.c \
@@ -478,6 +491,7 @@ HEADERS += \
     src/cli/cmd_tokeniser.h \
     src/common.h \
     src/crypto/crypto.h \
+    src/crypto/cms/cms.h \
     src/crypto/crypto_funcs.h \
     src/crypto/crypto_threads.h \
     src/crypto/crypto_version.h \
