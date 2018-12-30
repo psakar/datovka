@@ -60,6 +60,7 @@
 #include "cms.h"
 #include <openssl/rand.h>
 #include "cms_lcl.h"
+#include <string.h>
 
 /* CMS EncryptedData Utilities */
 
