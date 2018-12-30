@@ -59,7 +59,7 @@
 #include <openssl/err.h>
 #include "cms.h"
 #include "cms_lcl.h"
-#include "asn1_locl.h"
+//#include "asn1_locl.h"
 
 /* CMS SignedData Utilities */
 
